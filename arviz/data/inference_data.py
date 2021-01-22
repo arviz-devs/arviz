@@ -197,8 +197,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         for group in self._groups_all
                     ]
                 )
-                formatted_html_template = HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
-                    elements
+                formatted_html_template = (
+                    HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
+                        elements
+                    )
                 )
                 css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
                 html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
@@ -421,7 +423,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
 
-                    if group in ("predictions", "predictions_constant_data",):
+                    if group in (
+                        "predictions",
+                        "predictions_constant_data",
+                    ):
                         dims_key = "pred_dims"
                     else:
                         dims_key = "dims"
@@ -865,7 +870,12 @@ class InferenceData(Mapping[str, xr.Dataset]):
             return out
 
     def stack(
-        self, dimensions=None, groups=None, filter_groups=None, inplace=False, **kwargs,
+        self,
+        dimensions=None,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        **kwargs,
     ):
         """Perform an xarray stacking on all groups.
 
