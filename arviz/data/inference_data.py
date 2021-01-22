@@ -614,6 +614,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """Check zarr"""
         try:
             import zarr
+
             assert version.parse(zarr.__version__) >= version.parse("2.5.0")
         except (ImportError, AssertionError) as err:
             raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
@@ -628,7 +629,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         groups = self.groups()
 
-        if not groups::
+        if not groups:
             raise TypeError("No valid groups found!")
 
         for group in groups:
@@ -661,6 +662,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         try:
             import zarr
+
             assert version.parse(zarr.__version__) >= version.parse("2.5.0")
         except (ImportError, AssertionError) as err:
             raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
