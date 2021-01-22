@@ -1,9 +1,9 @@
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
 import uuid
 import warnings
 from collections import OrderedDict, defaultdict
-from collections.abc import Sequence
+from collections.abc import Sequence, MutableMapping
 from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
@@ -601,9 +601,6 @@ class InferenceData(Mapping[str, xr.Dataset]):
         store: zarr.storage i.e MutableMapping or str, optional
             Zarr storage class or path to desired DirectoryStore.
 
-        overwrite: bool, optional,
-            If True, delete any pre-existing data in store at path before creating the groups.
-
         Returns
         -------
         zarr.hierarchy.group
@@ -614,8 +611,12 @@ class InferenceData(Mapping[str, xr.Dataset]):
         https://zarr.readthedocs.io/
         """
 
-        import zarr
-        from collections.abc import MutableMapping
+        """Check zarr"""
+        try:
+            import zarr
+            assert version.parse(zarr.__version__) >= version.parse("2.5.0")
+        except (ImportError, AssertionError) as err:
+            raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
 
         # Check store type and create store if necessary
         if store is None:
@@ -626,14 +627,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise TypeError(f"No valid store found: {store}")
 
         groups = self.groups()
-        if "observed_data" in groups:
-            groups.remove("observed_data")
-        if "constant_data" in groups:
-            groups.remove("constant_data")
-        if "predictions_constant_data" in groups:
-            groups.remove("predictions_constant_data")
 
-        if len(groups) == 0:
+        if not groups::
             raise TypeError("No valid groups found!")
 
         for group in groups:
@@ -664,8 +659,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         https://zarr.readthedocs.io/
         """
-        import zarr
-        from collections.abc import MutableMapping
+        try:
+            import zarr
+            assert version.parse(zarr.__version__) >= version.parse("2.5.0")
+        except (ImportError, AssertionError) as err:
+            raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
 
         # Check store type and create store if necessary
         if isinstance(store, str):
@@ -676,7 +674,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise TypeError(f"No valid store found: {store}")
 
         groups = {}
-        g = zarr.open(store, mode="r")
+        zarr_handle = zarr.open(store, mode="r")
 
         # Open each group via xarray method
         for key_group, _ in g.groups():

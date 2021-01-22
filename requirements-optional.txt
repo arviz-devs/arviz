@@ -2,4 +2,4 @@ numba
 bokeh>=1.4.0
 ujson
 dask
-zarr
+zarr>=2.5.0
