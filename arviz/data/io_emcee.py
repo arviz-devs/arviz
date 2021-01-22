@@ -253,6 +253,10 @@ def from_emcee(
 ):
     """Convert emcee data into an InferenceData object.
 
+    For a usage example read the
+    :ref:`Creating InferenceData section on from_emcee <creating_InferenceData>`
+
+
     Parameters
     ----------
     sampler : emcee.EnsembleSampler

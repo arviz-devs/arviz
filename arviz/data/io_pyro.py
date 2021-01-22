@@ -298,7 +298,8 @@ def from_pyro(
     """Convert Pyro data into an InferenceData object.
 
     For a usage example read the
-    :ref:`Cookbook section on from_pyro <cookbook>`
+    :ref:`Creating InferenceData section on from_pyro <creating_InferenceData>`
+
 
     Parameters
     ----------

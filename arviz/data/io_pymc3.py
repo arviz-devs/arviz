@@ -513,7 +513,7 @@ def from_pymc3(
     All three of them are optional arguments, but at least one of ``trace``,
     ``prior`` and ``posterior_predictive`` must be present.
     For a usage example read the
-    :ref:`Cookbook section on from_pymc3 <cookbook>`
+    :ref:`Creating InferenceData section on from_pymc3 <creating_InferenceData>`
 
     Parameters
     ----------

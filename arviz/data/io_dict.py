@@ -313,7 +313,7 @@ def from_dict(
     """Convert Dictionary data into an InferenceData object.
 
     For a usage example read the
-    :ref:`Cookbook section on from_dict <cookbook>`
+    :ref:`Creating InferenceData section on from_dict <creating_InferenceData>`
 
     Parameters
     ----------
