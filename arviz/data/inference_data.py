@@ -27,10 +27,6 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
-from ..rcparams import rcParams
-from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
-from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
-
 
 if sys.version_info[:2] >= (3, 9):
     # As of 3.9, collections.abc types support generic parameters themselves.
@@ -50,6 +46,10 @@ except ImportError:
     import json  # type: ignore
 
 from packaging import version
+
+from ..rcparams import rcParams
+from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
+from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 
 SUPPORTED_GROUPS = [
     "posterior",
