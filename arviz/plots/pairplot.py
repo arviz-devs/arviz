@@ -235,7 +235,7 @@ def plot_pair(
     numvars = len(flat_var_names)
 
     if numvars < 2:
-        raise Exception("Number of variables to be plotted must be 2 or greater.")
+        raise ValueError("Number of variables to be plotted must be 2 or greater.")
 
     pairplot_kwargs = dict(
         ax=ax,

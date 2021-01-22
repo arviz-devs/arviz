@@ -116,7 +116,7 @@ def plot_parallel(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )
     if len(var_names) < 2:
-        raise ValueError("This plot needs at least two variables")
+        raise ValueError("Number of variables to be plotted must be 2 or greater.")
     if norm_method is not None:
         if norm_method == "normal":
             mean = np.mean(_posterior, axis=1)
