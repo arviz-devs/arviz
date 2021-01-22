@@ -589,12 +589,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         return dfs
 
     def to_zarr(self, store=None):
-        """
-        Convert InferenceData to a :class:`zarr.hierarchy.group` using the same groups names
-        as in InferenceData.
+        """Convert InferenceData to a :class:`zarr.hierarchy.group`.
 
-        Data groups ("observed_data", "constant_data", "predictions_constant_data") are
-        skipped.
+        The zarr storage is using the same group names as the InferenceData.
 
         Raises TypeError if no valid store is found.
 
@@ -612,9 +609,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         https://zarr.readthedocs.io/
         """
-
-        # Check zarr
-        try:
+        try:  # Check zarr
             import zarr
 
             assert version.parse(zarr.__version__) >= version.parse("2.5.0")
@@ -642,7 +637,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
     @staticmethod
     def from_zarr(store) -> "InferenceData":
-        """Initialize object from a zarr store .
+        """Initialize object from a zarr store.
 
         Expects that the zarr store will have groups, each of which can be loaded by xarray.
         By default, the datasets of the InferenceData object will be lazily loaded instead
