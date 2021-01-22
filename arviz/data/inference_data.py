@@ -679,7 +679,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         zarr_handle = zarr.open(store, mode="r")
 
         # Open each group via xarray method
-        for key_group, _ in g.groups():
+        for key_group, _ in zarr_handle.groups():
             with xr.open_zarr(store=store, group=key_group) as data:
                 if rcParams["data.load"] == "eager":
                     groups[key_group] = data.load()
