@@ -608,16 +608,21 @@ class InferenceData(Mapping[str, xr.Dataset]):
         -------
         zarr.hierarchy.group
             A zarr hierarchy group containing the InferenceData.
+
+        References
+        ----------
+        https://zarr.readthedocs.io/
         """
+
         import zarr
         from collections.abc import MutableMapping
 
         # Check store type and create store if necessary
         if store is None:
-            store = zarr.storage.MemoryStore()
-        elif type(store) == str:
+            store = zarr.storage.TempStore(suffix="arviz")
+        elif isinstance(store, str):
             store = zarr.storage.DirectoryStore(path=store)
-        elif type(store) != MutableMapping:
+        elif not isinstance(store, MutableMapping):
             raise TypeError(f"No valid store found: {store}")
 
         groups = self.groups()
@@ -633,7 +638,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         for group in groups:
             # Create zarr group in store with same group name
-            getattr(self, group).to_zarr(store=store, group=group)
+            getattr(self, group).to_zarr(store=store, group=group, mode="w")
 
         return zarr.open(store)  # Open store to get overarching group
 
@@ -648,34 +653,39 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        store: zarr.storage i.e MutableMapping or zarr.hierarchy.Group or str.
+        store: MutableMapping or zarr.hierarchy.Group or str.
             Zarr storage class or path to desired Store.
 
         Returns
         -------
         InferenceData object
+        
+        References
+        ----------
+        https://zarr.readthedocs.io/
         """
         import zarr
         from collections.abc import MutableMapping
 
         # Check store type and create store if necessary
-        if store is None:
-            store = zarr.storage.MemoryStore()
-        elif type(store) == str:
+        if isinstance(store, str):
             store = zarr.storage.DirectoryStore(path=store)
-        elif type(store) == zarr.hierarchy.Group:
+        elif isinstance(store, zarr.hierarchy.Group):
             store = store.store
-        elif type(store) != MutableMapping:
+        elif not isinstance(store, MutableMapping):
             raise TypeError(f"No valid store found: {store}")
 
         groups = {}
         g = zarr.open(store, mode="r")
+
+        # Open each group via xarray method
         for key_group, _ in g.groups():
-            with xr.open_zarr(store, group=key_group) as data:
+            with xr.open_zarr(store=store, group=key_group) as data:
                 if rcParams["data.load"] == "eager":
                     groups[key_group] = data.load()
                 else:
                     groups[key_group] = data
+
         return InferenceData(**groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
