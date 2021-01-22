@@ -31,7 +31,6 @@ from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
 from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 
-from packaging import version
 
 if sys.version_info[:2] >= (3, 9):
     # As of 3.9, collections.abc types support generic parameters themselves.
@@ -50,6 +49,7 @@ except ImportError:
     # https://github.com/python/mypy/issues/1153
     import json  # type: ignore
 
+from packaging import version
 
 SUPPORTED_GROUPS = [
     "posterior",
