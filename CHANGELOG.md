@@ -2,6 +2,8 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Added `to_zarr` method to InferenceData
+* Added `from_zarr` method to InferenceData
 
 ### Maintenance and fixes
 * Fixed ovelapping titles and repeating warnings on circular traceplot ([1517](https://github.com/arviz-devs/arviz/pull/1517))

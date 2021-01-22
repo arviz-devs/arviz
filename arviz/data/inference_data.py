@@ -586,7 +586,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             (dfs,) = dfs.values()
         return dfs
 
-    def to_zarr(self, store=None, overwrite=False):
+    def to_zarr(self, store=None):
         """
         Convert InferenceData to a :class:`zarr.hierarchy.group` using the same groups names
         as in InferenceData.
@@ -659,7 +659,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Returns
         -------
         InferenceData object
-        
+
         References
         ----------
         https://zarr.readthedocs.io/
