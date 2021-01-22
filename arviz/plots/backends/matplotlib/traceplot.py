@@ -319,11 +319,11 @@ def plot_trace(
             if value[0].dtype.kind == "i" and idy == 0:
                 xticks = get_bins(value)
                 ax.set_xticks(xticks[:-1])
+            y = 1 / textsize
             if not idy:
                 ax.set_yticks([])
-                y = 0.13 if selection else 0.12
-            else:
-                y = 1 / textsize
+                if circular:
+                    y = 0.13 if selection else 0.12
             ax.set_title(
                 make_label(var_name, selection), fontsize=titlesize, wrap=True, y=textsize * y
             )
