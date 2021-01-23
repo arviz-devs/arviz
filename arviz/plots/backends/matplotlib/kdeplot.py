@@ -2,6 +2,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import _pylab_helpers
+import matplotlib.ticker as mticker
 
 
 from ...plot_utils import _scale_fig_size
@@ -101,6 +102,8 @@ def plot_kde(
                     f"{-np.pi/4:.2f}",
                 ]
 
+                ticks_loc = ax.get_xticks()
+                ax.xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
                 ax.set_xticklabels(labels)
 
             x = np.linspace(-np.pi, np.pi, len(density))
