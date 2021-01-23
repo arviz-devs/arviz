@@ -17,12 +17,10 @@ from typing import Optional
 
 import matplotlib
 import matplotlib.pyplot as plt
-from bokeh.io import export_png
-from bokeh.layouts import gridplot
 from matplotlib import image
-from numpy import ndarray
 
 from arviz.rcparams import rc_context
+from arviz import rcParams
 
 matplotlib.use("Agg")
 
@@ -32,43 +30,32 @@ MPL_RST_TEMPLATE = """
 
 {docstring}
 
-.. image:: {img_file}
-
-**Python source code:** :download:`[download source: {fname}]<{fname}>`
-
 **API documentation:** {api_name}
 
-.. literalinclude:: {fname}
-    :lines: {end_line}-
+.. tabbed:: Matplotlib
+
+    .. image:: {img_file}
+
+    **Python source code:** :download:`[download source: {fname}]<{fname}>`
+
+    .. literalinclude:: {fname}
+        :lines: {end_line}-
+
 """
 
 BOKEH_RST_TEMPLATE = """
-.. _{sphinx_tag}:
+.. tabbed:: Bokeh
 
-{docstring}
+    .. bokeh-plot:: {absfname}
+        :source-position: none
 
-.. bokeh-plot:: {absfname}
-    :source-position: none
+    **Python source code:** :download:`[download source: {fname}]<{fname}>`
 
-**Python source code:** :download:`[download source: {fname}]<{fname}>`
-
-**API documentation:** {api_name}
-
-.. literalinclude:: {fname}
-    :lines: {end_line}-
+    .. literalinclude:: {fname}
+        :lines: {end_line}-
 """
 
 RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
-
-BOKEH_EXPORT_CODE = """\n
-if isinstance(ax, ndarray):
-    if len(ax.shape) == 1:
-        export_png(gridplot([ax.tolist()]), filename="{pngfilename}")
-    else:
-        export_png(gridplot(ax.tolist()), filename="{pngfilename}")
-else:
-    export_png(ax, filename="{pngfilename}")
-"""
 
 INDEX_TEMPLATE = """
 
@@ -162,13 +149,13 @@ Example gallery
 CONTENTS_ENTRY_TEMPLATE = (
     ".. raw:: html\n\n"
     "    <div class='figure align-center'>\n"
-    "    <a href=./{0}/{1}>\n"
-    "    <img src=../_static/{2}>\n"
+    "    <a href=./{htmlfilename}>\n"
+    "    <img src=../_static/{thumbfilename}>\n"
     "    <span class='figure-label'>\n"
-    "    <p>{3}</p>\n"
+    "    <p>{sphinx_tag}</p>\n"
     "    </span>\n"
     '    <span class="gallery-figure-title">\n'
-    "      <p>{4}</p>\n"
+    "      <p>{title}</p>\n"
     "    </span>\n"
     "    </a>\n"
     "    </div>\n\n"
@@ -195,7 +182,7 @@ def create_thumbnail(infile, thumbfile, width=275, height=275, cx=0.5, cy=0.5, b
     thumb[:, :border, :3] = thumb[:, -border:, :3] = 0
 
     dpi = 100
-    fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi)
+    fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi, constrained_layout=True)
 
     ax = fig.add_axes([0, 0, 1, 1], aspect="auto", frameon=False, xticks=[], yticks=[])
     ax.imshow(thumb, aspect="auto", resample=True, interpolation="bilinear")
@@ -213,7 +200,7 @@ class ExampleGenerator:
 
     _title: Optional[str]
 
-    def __init__(self, filename, target_dir, backend, thumb_dir):
+    def __init__(self, filename, target_dir, backend, thumb_dir, target_dir_orig):
         self.filename = filename
         self.target_dir = target_dir
         self.thumb_dir = thumb_dir
@@ -224,7 +211,7 @@ class ExampleGenerator:
         with open(filename, "r") as fid:
             self.filetext = fid.read()
 
-        outfilename = op.join(target_dir, self.rstfilename)
+        outfilename = op.join(target_dir_orig, self.rstfilename)
 
         # Only actually run it if the output RST file doesn't
         # exist or it was modified less recently than the example
@@ -254,16 +241,20 @@ class ExampleGenerator:
         return op.splitext(self.fname)[0]
 
     @property
+    def basename(self) -> str:
+        return self.modulename.split("_", 1)[1]
+
+    @property
     def pyfilename(self):
         return self.modulename + ".py"
 
     @property
     def rstfilename(self):
-        return self.modulename + ".rst"
+        return self.basename + ".rst"
 
     @property
     def htmlfilename(self):
-        return self.modulename + ".html"
+        return self.basename + ".html"
 
     @property
     def pngfilename(self):
@@ -272,7 +263,7 @@ class ExampleGenerator:
 
     @property
     def thumbfilename(self):
-        pngfile = self.modulename + "_thumb.png"
+        pngfile = self.basename + "_thumb.png"
         return pngfile
 
     @property
@@ -361,12 +352,12 @@ class ExampleGenerator:
         # pylint: disable=exec-used
         print("running {0}".format(self.filename))
 
-        thumbfile = op.join(self.thumb_dir, self.thumbfilename)
-        cx, cy = self.thumbloc
-        pngfile = op.join(self.target_dir, self.pngfilename)
         plt.close("all")
         if self.backend == "matplotlib":
-            my_globals = {"pl": plt, "plt": plt}
+            thumbfile = op.join(self.thumb_dir, self.thumbfilename)
+            cx, cy = self.thumbloc
+            pngfile = op.join(self.target_dir, self.pngfilename)
+            my_globals = {"plt": plt}
             with open(self.filename, "r") as fp:
                 code_text = fp.read()
                 code_text = re.sub(r"(plt\.show\S+)", "", code_text)
@@ -375,26 +366,24 @@ class ExampleGenerator:
             fig = plt.gcf()
             fig.canvas.draw()
             fig.savefig(pngfile, dpi=75)
+            create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
 
         elif self.backend == "bokeh":
-            pngfile = thumbfile
             with open(self.filename, "r") as fp:
                 code_text = fp.read()
-                code_text += BOKEH_EXPORT_CODE.format(pngfilename=thumbfile)
                 with rc_context(rc={"plot.bokeh.show": False}):
-                    exec(
-                        code_text,
-                        {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot},
-                    )
-
-        create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
+                    exec(code_text)
 
     def toctree_entry(self):
-        return "   ./%s\n\n" % op.join(self.backend, op.splitext(self.htmlfilename)[0])
+        return "   ./%s\n\n" % op.join(op.splitext(self.htmlfilename)[0])
 
     def contents_entry(self) -> str:
         return CONTENTS_ENTRY_TEMPLATE.format(
-            self.backend, self.htmlfilename, self.thumbfilename, self.sphinxtag, self.title
+            backend=self.backend,
+            htmlfilename=self.htmlfilename,
+            thumbfilename=self.thumbfilename,
+            sphinx_tag=self.sphinxtag,
+            title=self.title,
         )
 
 
@@ -405,15 +394,24 @@ def main(app):
     target_dir_orig = op.join(app.builder.srcdir, "examples")
 
     backends = ("matplotlib", "bokeh")
-    backend_titles = ("Matplotlib", "Bokeh")
+    backend_prefixes = ("mpl", "bokeh")
     toctrees_contents = ""
-    for backend_i, backend in enumerate(backends):
+    thumb_dir = op.join(app.builder.srcdir, "example_thumbs")
+
+    if not op.exists(static_dir):
+        os.makedirs(static_dir)
+
+    if not op.exists(thumb_dir):
+        os.makedirs(thumb_dir)
+
+    path_dict = {}
+    for backend in backends:
         target_dir = op.join(target_dir_orig, backend)
         image_dir = op.join(target_dir, "_images")
-        thumb_dir = op.join(app.builder.srcdir, "example_thumbs")
         source_dir = op.abspath(op.join(app.builder.srcdir, "..", "..", "examples", backend))
-        if not op.exists(static_dir):
-            os.makedirs(static_dir)
+
+        if not op.exists(source_dir):
+            os.makedirs(source_dir)
 
         if not op.exists(target_dir):
             os.makedirs(target_dir)
@@ -421,42 +419,55 @@ def main(app):
         if not op.exists(image_dir):
             os.makedirs(image_dir)
 
-        if not op.exists(thumb_dir):
-            os.makedirs(thumb_dir)
+        path_dict[backend] = {
+            "source_dir": source_dir,
+            "target_dir": target_dir,
+            "image_dir": image_dir,
+        }
 
-        if not op.exists(source_dir):
-            os.makedirs(source_dir)
+    toctrees_contents = ""
+    toctree = "\n\n.. toctree::\n   :hidden:\n\n"
+    contents = "\n\n"
 
-        title = backend_titles[backend_i]
-        toctree = ("\n\n{title}\n{underline}\n" "\n\n" ".. toctree::\n" "   :hidden:\n\n").format(
-            title=title, underline="-" * len(title)
-        )
-        contents = "\n\n"
+    # Write individual example files
+    files = sorted(glob.glob(op.join(path_dict["matplotlib"]["source_dir"], "*.py")))
+    for filename in files:
+        base_filename = op.split(filename)[1].split("_", 1)[1]
+        example_contents = ""
+        for backend, prefix in zip(backends, backend_prefixes):
+            source_dir = path_dict[backend]["source_dir"]
+            target_dir = path_dict[backend]["target_dir"]
+            expected_filename = op.join(source_dir, f"{prefix}_{base_filename}")
 
-        # Write individual example files
-        files = sorted(glob.glob(op.join(source_dir, "*.py")))
-        for filename in files:
+            if not op.exists(expected_filename):
+                if backend == "matplotlib":
+                    raise ValueError("All examples must have a matplotlib counterpart.")
+                continue
 
-            ex = ExampleGenerator(filename, target_dir, backend, thumb_dir)
+            ex = ExampleGenerator(
+                expected_filename, target_dir, backend, thumb_dir, target_dir_orig
+            )
 
-            shutil.copyfile(filename, op.join(target_dir, ex.pyfilename))
+            shutil.copyfile(expected_filename, op.join(target_dir, ex.pyfilename))
             output = RST_TEMPLATES[backend].format(
                 sphinx_tag=ex.sphinxtag,
                 docstring=ex.docstring,
                 end_line=ex.end_line,
-                fname=ex.pyfilename,
+                fname=op.join(backend, ex.pyfilename),
                 absfname=op.join(target_dir, ex.pyfilename),
-                img_file=ex.pngfilename,
+                img_file=op.join(backend, ex.pngfilename),
                 api_name=ex.apiname,
             )
-            with open(op.join(target_dir, ex.rstfilename), "w") as f:
-                f.write(output)
+            example_contents += output
 
-            toctree += ex.toctree_entry()
-            contents += ex.contents_entry()
+        with open(op.join(target_dir_orig, ex.rstfilename), "w") as f:
+            f.write(example_contents)
 
-        toctrees_contents += "\n".join((toctree, contents))
-        toctrees_contents += """.. raw:: html\n\n    <div style="clear: both"></div>"""
+        toctree += ex.toctree_entry()
+        contents += ex.contents_entry()
+
+    toctrees_contents += "\n".join((toctree, contents))
+    toctrees_contents += """.. raw:: html\n\n    <div style="clear: both"></div>"""
 
     # write index file
     index_file = op.join(target_dir, "..", "index.rst")
