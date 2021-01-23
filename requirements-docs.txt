@@ -7,4 +7,4 @@ pydata_sphinx_theme
 selenium
 myst-parser
 myst-nb
-sphinx-notfound-page
+sphinx-panels

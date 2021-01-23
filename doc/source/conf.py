@@ -59,7 +59,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
     "myst_nb",
-    'notfound.extension',
+    "sphinx_panels"
 ]
 
 # ipython directive configuration
@@ -83,6 +83,7 @@ templates_path = ["../_templates"]
 # MyST related params
 jupyter_execute_notebooks = "off"
 myst_heading_anchors = 3
+panels_add_bootstrap_css = False
 
 
 # The base toctree document.
@@ -154,9 +155,6 @@ html_static_path = ["_static", thumb_directory]
 html_additional_pages = {
     '404': '404.html',
 }
-# configure notfound extension to not add any prefix to the urls
-notfound_urls_prefix = "/arviz/"
-
 
 # -- Options for HTMLHelp output ------------------------------------------
 
