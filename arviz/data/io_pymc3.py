@@ -172,7 +172,11 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             if hasattr(obs, "observations"):
                 observations[obs.name] = obs.observations
             elif hasattr(obs, "data") and self.density_dist_obs:
+                givens = getattr(obs, "givens", {})
+                givens = {} if givens is None else givens
                 for key, val in obs.data.items():
+                    if key in givens:
+                        continue
                     multi_observations[key] = val.eval() if hasattr(val, "eval") else val
         return observations, multi_observations
 
