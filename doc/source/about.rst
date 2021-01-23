@@ -30,8 +30,7 @@ License
 Contributors
 ============
 
-See the :ref:`Contributing
-page <contributing_docs>`
+See the :ref:`Contributing page <contributing_docs>`
 
 Project governance
 ==================

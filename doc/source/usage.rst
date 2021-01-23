@@ -18,7 +18,7 @@ We welcome `contributions <https://github.com/arviz-devs/arviz/blob/master/CONTR
 QuickStart
 ##########
 If new to the library the best place to start is the
-:ref:`quickstart <quickstart>`_
+:ref:`quickstart <quickstart>`
 
 
 Example Gallery
