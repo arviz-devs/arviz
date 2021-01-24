@@ -3,6 +3,7 @@
 import os
 import shutil
 from collections import namedtuple
+from collections.abc import MutableMapping
 from copy import deepcopy
 from html import escape
 from typing import Dict
@@ -11,6 +12,7 @@ from urllib.parse import urlunsplit
 import numpy as np
 import pytest
 import xarray as xr
+import zarr
 from xarray.core.options import OPTIONS
 from xarray.testing import assert_identical
 
@@ -1271,7 +1273,8 @@ class TestDataZarr:
             dims={"theta": ["school"], "eta": ["school"]},
         )
 
-    def test_io_method(self, data, eight_schools_params):
+    @pytest.mark.parametrize("store", [0, 1, 2])
+    def test_io_method(self, data, eight_schools_params, store):
         # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
@@ -1293,19 +1296,36 @@ class TestDataZarr:
         data_directory = os.path.join(here, "..", "saved_models")
         filepath = os.path.join(data_directory, "zarr")
         assert not os.path.exists(filepath)
+
         # InferenceData method
-        inference_data.to_zarr(store=filepath)
-        # assert file has been saved correctly
-        assert os.path.exists(filepath)
-        assert os.path.getsize(filepath) > 0
-        inference_data2 = InferenceData.from_zarr(filepath)
+        if store == 0:
+            # Tempdir
+            store = inference_data.to_zarr(store=None)
+            assert isinstance(store, MutableMapping)
+        elif store == 1:
+            inference_data.to_zarr(store=filepath)
+            # assert file has been saved correctly
+            assert os.path.exists(filepath)
+            assert os.path.getsize(filepath) > 0
+        elif store == 2:
+            store = zarr.storage.DirectoryStore(filepath)
+            inference_data.to_zarr(store=store)
+            # assert file has been saved correctly
+            assert os.path.exists(filepath)
+            assert os.path.getsize(filepath) > 0
+
+        if isinstance(store, MutableMapping):
+            inference_data2 = InferenceData.from_zarr(store)
+        else:
+            inference_data2 = InferenceData.from_zarr(filepath)
 
         # Everything in dict still available in inference_data2 ?
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
 
         # Remove created folder structure
-        shutil.rmtree(filepath)
+        if os.path.exists(filepath):
+            shutil.rmtree(filepath)
         assert not os.path.exists(filepath)
 
 
