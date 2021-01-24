@@ -375,7 +375,7 @@ class ExampleGenerator:
                     exec(code_text)
 
     def toctree_entry(self):
-        return "   ./%s\n\n" % op.join(op.splitext(self.htmlfilename)[0])
+        return "   ./{}\n\n".format(op.join(op.splitext(self.htmlfilename)[0]))
 
     def contents_entry(self) -> str:
         return CONTENTS_ENTRY_TEMPLATE.format(
@@ -425,7 +425,6 @@ def main(app):
             "image_dir": image_dir,
         }
 
-    toctrees_contents = ""
     toctree = "\n\n.. toctree::\n   :hidden:\n\n"
     contents = "\n\n"
 
@@ -466,7 +465,7 @@ def main(app):
         toctree += ex.toctree_entry()
         contents += ex.contents_entry()
 
-    toctrees_contents += "\n".join((toctree, contents))
+    toctrees_contents = "\n".join((toctree, contents))
     toctrees_contents += """.. raw:: html\n\n    <div style="clear: both"></div>"""
 
     # write index file
