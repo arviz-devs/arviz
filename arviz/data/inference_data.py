@@ -1,14 +1,14 @@
 # pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
+import sys
 import uuid
 import warnings
 from collections import OrderedDict, defaultdict
-from collections.abc import Sequence, MutableMapping
+from collections.abc import MutableMapping, Sequence
 from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
-import sys
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -26,7 +26,6 @@ from typing import (
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
-
 from packaging import version
 
 from ..rcparams import rcParams
@@ -197,10 +196,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         for group in self._groups_all
                     ]
                 )
-                formatted_html_template = (    # pylint: disable=possibly-unused-variable
-                    HtmlTemplate.html_template.format(
-                        elements
-                    )
+                formatted_html_template = (  # pylint: disable=possibly-unused-variable
+                    HtmlTemplate.html_template.format(elements)
                 )
                 css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
                 html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
@@ -594,11 +591,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
         return dfs
 
     def to_zarr(self, store=None):
-        """Convert InferenceData to a :class:`zarr.hierarchy.group`.
+        """Convert InferenceData to a :class:`zarr.hierarchy.Group`.
 
         The zarr storage is using the same group names as the InferenceData.
 
-        Raises TypeError if no valid store is found.
+        Raises
+        ------
+        TypeError
+            If no valid store is found.
 
         Parameters
         ----------
@@ -642,7 +642,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
     @staticmethod
     def from_zarr(store) -> "InferenceData":
-        """Initialize object from a zarr store.
+        """Initialize object from a zarr store or path.
 
         Expects that the zarr store will have groups, each of which can be loaded by xarray.
         By default, the datasets of the InferenceData object will be lazily loaded instead

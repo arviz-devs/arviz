@@ -1,6 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
 import os
+import shutil
 from collections import namedtuple
 from copy import deepcopy
 from html import escape
@@ -1243,6 +1244,68 @@ class TestDataNetCDF:
         inference_data.to_netcdf(filepath)
         assert os.path.exists(filepath)
         os.remove(filepath)
+        assert not os.path.exists(filepath)
+
+
+class TestDataZarr:
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            # fake 8-school output
+            obj = {}
+            for key, shape in {"mu": [], "tau": [], "eta": [8], "theta": [8]}.items():
+                obj[key] = np.random.randn(chains, draws, *shape)
+
+        return Data
+
+    def get_inference_data(self, data, eight_schools_params):
+        return from_dict(
+            posterior=data.obj,
+            posterior_predictive=data.obj,
+            sample_stats=data.obj,
+            prior=data.obj,
+            prior_predictive=data.obj,
+            sample_stats_prior=data.obj,
+            observed_data=eight_schools_params,
+            coords={"school": np.arange(8)},
+            dims={"theta": ["school"], "eta": ["school"]},
+        )
+
+    def test_io_method(self, data, eight_schools_params):
+        # create InferenceData and check it has been properly created
+        inference_data = self.get_inference_data(  # pylint: disable=W0612
+            data, eight_schools_params
+        )
+        test_dict = {
+            "posterior": ["eta", "theta", "mu", "tau"],
+            "posterior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats": ["eta", "theta", "mu", "tau"],
+            "prior": ["eta", "theta", "mu", "tau"],
+            "prior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats_prior": ["eta", "theta", "mu", "tau"],
+            "observed_data": ["J", "y", "sigma"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
+        # check filename does not exist and use to_zarr method
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "..", "saved_models")
+        filepath = os.path.join(data_directory, "zarr")
+        assert not os.path.exists(filepath)
+        # InferenceData method
+        inference_data.to_zarr(store=filepath)
+        # assert file has been saved correctly
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath) > 0
+        inference_data2 = InferenceData.from_zarr(filepath)
+
+        # Everything in dict still available in inference_data2 ?
+        fails = check_multiple_attrs(test_dict, inference_data2)
+        assert not fails
+
+        # Remove created folder structure
+        shutil.rmtree(filepath)
         assert not os.path.exists(filepath)
 
 
