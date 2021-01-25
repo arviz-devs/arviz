@@ -14,7 +14,7 @@ pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
     (importlib.util.find_spec("zarr") is None) and not running_on_ci(),
     reason="test requires zarr which is not installed",
 )
-import zarr
+import zarr  # pylint: disable=wrong-import-position
 
 
 class TestDataZarr:
