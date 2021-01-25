@@ -9,7 +9,13 @@ import zarr
 
 from arviz import InferenceData, from_dict
 
-from ..helpers import chains, check_multiple_attrs, draws, eight_schools_params, running_on_ci
+from ..helpers import (  # pylint: disable=unused-import
+    chains,
+    check_multiple_attrs,
+    draws,
+    eight_schools_params,
+    running_on_ci,
+)
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
     (importlib.util.find_spec("zarr") is None) and not running_on_ci(),
