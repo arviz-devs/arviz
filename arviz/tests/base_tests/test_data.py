@@ -1,5 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
+import importlib
 import os
 import shutil
 from collections import namedtuple
@@ -40,6 +41,7 @@ from ..helpers import (  # pylint: disable=unused-import
     draws,
     eight_schools_params,
     models,
+    running_on_ci,
 )
 
 
@@ -1249,6 +1251,10 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
 
 
+@pytest.mark.skipif(
+    (importlib.util.find_spec("zarr") is None) and not running_on_ci(),
+    reason="test requires zarr which is not installed",
+)
 class TestDataZarr:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
