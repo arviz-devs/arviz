@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import importlib
 import os
 import shutil
