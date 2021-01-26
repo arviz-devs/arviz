@@ -6,7 +6,7 @@ from collections.abc import MutableMapping
 
 import numpy as np
 import pytest
-import zarr
+
 
 from arviz import InferenceData, from_dict
 
@@ -19,9 +19,11 @@ from ..helpers import (  # pylint: disable=unused-import
 )
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    importlib.util.find_spec("zarr") is None and running_on_ci(),
+    importlib.util.find_spec("zarr") is None and not running_on_ci(),
     reason="test requires zarr which is not installed",
 )
+
+import zarr  # pylint: disable=wrong-import-position
 
 
 class TestDataZarr:
