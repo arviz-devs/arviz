@@ -38,7 +38,6 @@ from ..helpers import (  # pylint: disable=unused-import
     draws,
     eight_schools_params,
     models,
-    running_on_ci,
 )
 
 
