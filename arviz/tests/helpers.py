@@ -361,6 +361,7 @@ def pyro_noncentered_schools(data, draws, chains):
     # This block lets the posterior be pickled
     posterior.sampler = None
     posterior.kernel.potential_fn = None
+    posterior.potential_fn = None
     return posterior
 
 
