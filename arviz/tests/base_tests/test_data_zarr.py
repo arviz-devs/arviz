@@ -23,7 +23,7 @@ pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
     reason="test requires zarr which is not installed",
 )
 
-import zarr  # pylint: disable=wrong-import-position
+import zarr  # pylint: disable=wrong-import-position, wrong-import-order
 
 
 class TestDataZarr:
