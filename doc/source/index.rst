@@ -101,90 +101,90 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
       <div class="container">
         <div class="row">
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_pair.html">
+            <a href="examples/plot_pair.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_pair_thumb.png">
+                <img src="_static/plot_pair_thumb.png">
             </div>
             </a>
             </div>
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_forest.html">
+            <a href="examples/plot_forest.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_forest_thumb.png">
+                <img src="_static/plot_forest_thumb.png">
             </div>
             </a>
             </div>
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_density.html">
+            <a href="examples/plot_density.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_density_thumb.png">
+                <img src="_static/plot_density_thumb.png">
             </div>
             </a>
             </div>
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_energy.html">
+            <a href="examples/plot_energy.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_energy_thumb.png">
-            </div>
-            </a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-            <a href="examples/matplotlib/mpl_plot_posterior.html">
-            <div class="img-thumbnail">
-                <img src="_static/mpl_plot_posterior_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/matplotlib/mpl_plot_kde_2d.html">
-            <div class="img-thumbnail">
-                <img src="_static/mpl_plot_kde_2d_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/matplotlib/mpl_plot_forest_ridge.html">
-            <div class="img-thumbnail">
-                <img src="_static/mpl_plot_forest_ridge_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/matplotlib/mpl_plot_parallel.html">
-            <div class="img-thumbnail">
-                <img src="_static/mpl_plot_parallel_thumb.png">
+                <img src="_static/plot_energy_thumb.png">
             </div>
             </a>
             </div>
         </div>
         <div class="row">
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_trace.html">
+            <a href="examples/plot_posterior.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_trace_thumb.png">
+                <img src="_static/plot_posterior_thumb.png">
             </div>
             </a>
             </div>
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_joint.html">
+            <a href="examples/plot_kde_2d.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_joint_thumb.png">
+                <img src="_static/plot_kde_2d_thumb.png">
             </div>
             </a>
             </div>
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_ppc.html">
+            <a href="examples/plot_forest_ridge.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_ppc_thumb.png">
+                <img src="_static/plot_forest_ridge_thumb.png">
             </div>
             </a>
             </div>
             <div class="col">
-            <a href="examples/matplotlib/mpl_plot_autocorr.html">
+            <a href="examples/plot_parallel.html">
             <div class="img-thumbnail">
-                <img src="_static/mpl_plot_autocorr_thumb.png">
+                <img src="_static/plot_parallel_thumb.png">
+            </div>
+            </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+            <a href="examples/plot_trace.html">
+            <div class="img-thumbnail">
+                <img src="_static/plot_trace_thumb.png">
+            </div>
+            </a>
+            </div>
+            <div class="col">
+            <a href="examples/plot_joint.html">
+            <div class="img-thumbnail">
+                <img src="_static/plot_joint_thumb.png">
+            </div>
+            </a>
+            </div>
+            <div class="col">
+            <a href="examples/plot_ppc.html">
+            <div class="img-thumbnail">
+                <img src="_static/plot_ppc_thumb.png">
+            </div>
+            </a>
+            </div>
+            <div class="col">
+            <a href="examples/plot_autocorr.html">
+            <div class="img-thumbnail">
+                <img src="_static/plot_autocorr_thumb.png">
             </div>
             </a>
             </div>
