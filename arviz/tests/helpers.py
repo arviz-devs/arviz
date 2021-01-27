@@ -361,7 +361,6 @@ def pyro_noncentered_schools(data, draws, chains):
     # This block lets the posterior be pickled
     posterior.sampler = None
     posterior.kernel.potential_fn = None
-    posterior.potential_fn = None
     return posterior
 
 
@@ -397,6 +396,7 @@ def numpyro_schools_model(data, draws, chains):
     mcmc.sampler._init_fn = None  # pylint: disable=protected-access
     mcmc.sampler._postprocess_fn = None  # pylint: disable=protected-access
     mcmc.sampler._potential_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._potential_fn_gen = None  # pylint: disable=protected-access
     mcmc._cache = {}  # pylint: disable=protected-access
     return mcmc
 
@@ -589,8 +589,11 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
             with gzip.open(path, "wb") as buff:
-                _log.info("Generating and caching %s", fname)
-                pickle.dump(func(eight_schools_data, draws, chains), buff)
+                try:
+                    _log.info("Generating and caching %s", fname)
+                    pickle.dump(func(eight_schools_data, draws, chains), buff)
+                except AttributeError as err:
+                    raise AttributeError(f"Failed chaching {library_name}") from err
 
         with gzip.open(path, "rb") as buff:
             _log.info("Loading %s from cache", fname)
