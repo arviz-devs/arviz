@@ -258,7 +258,7 @@ Voting for first election is restricted to establish stable governance, and to d
 Core Contributors are those who have provided consistent and meaningful contributions to ArviZ.
 These can be, but are not limited to, code contributions, community contributions, tutorial
 development etc. Core Contributors will be given the ability to manage the ArviZ GitHub
-repository, including code merges to master. This does not necessarily mean Core Contributors
+repository, including code merges to main. This does not necessarily mean Core Contributors
 must submit code, but more so signifies trust with the project as a whole.
 
 #### Core Contributor Responsibilities

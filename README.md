@@ -1,7 +1,7 @@
 <img src="https://arviz-devs.github.io/arviz/_static/logo.png" height=100></img>
 
-[![Azure Build Status](https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master)](https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master)
-[![codecov](https://codecov.io/gh/arviz-devs/arviz/branch/master/graph/badge.svg)](https://codecov.io/gh/arviz-devs/arviz)
+[![Azure Build Status](https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=main)](https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=main)
+[![codecov](https://codecov.io/gh/arviz-devs/arviz/branch/main/graph/badge.svg)](https://codecov.io/gh/arviz-devs/arviz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/arviz-devs/community)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01143/status.svg)](https://doi.org/10.21105/joss.01143) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2540945.svg)](https://doi.org/10.5281/zenodo.2540945)
@@ -39,7 +39,7 @@ conda install -c conda-forge arviz
 ```
 
 ### Development
-The latest development version can be installed from the master branch using pip:
+The latest development version can be installed from the main branch using pip:
 
 ```
 pip install git+git://github.com/arviz-devs/arviz.git
@@ -179,12 +179,12 @@ Here is the citation in BibTeX format
 
 ## Contributions
 ArviZ is a community project and welcomes contributions.
-Additional information can be found in the [Contributing Readme](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md)
+Additional information can be found in the [Contributing Readme](https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md)
 
 
 ## Code of Conduct
 ArviZ wishes to maintain a positive community. Additional details
-can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md)
+can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/main/CODE_OF_CONDUCT.md)
 
 ## Donations
 ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate [here](https://numfocus.org/donate-to-arviz).

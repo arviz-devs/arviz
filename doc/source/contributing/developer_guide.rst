@@ -45,7 +45,7 @@ Documentation
 
 Docstring style
 ---------------
-See the corresponding section in the `contributing guide <https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#docstring-formatting-and-type-hints>`_
+See the corresponding section in the `contributing guide <https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md#docstring-formatting-and-type-hints>`_
 
 Hyperlinks
 ----------
@@ -88,7 +88,7 @@ using::
   :meth:`mpl:matplotlib.axes.Axes.plot`
 
 The `intersphinx_mappings`
-defined for ArviZ can be seen in `conf.py <https://github.com/arviz-devs/arviz/blob/master/doc/conf.py>`_.
+defined for ArviZ can be seen in `conf.py <https://github.com/arviz-devs/arviz/blob/main/doc/conf.py>`_.
 Moreover, the intersphinx key is optional. Thus, the pattern to get sphinx to generate links is::
 
   :type_id:`(intersphinx_key:)object_id`

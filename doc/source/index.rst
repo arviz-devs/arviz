@@ -49,7 +49,7 @@ For the latest (unstable) version
 
     pip install git+https://github.com/arviz-devs/arviz
 
-**Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
+**Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
 
 ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
 `PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
@@ -196,7 +196,7 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
     </div>
 
 
-.. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master
-   :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master
-.. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/master/graph/badge.svg
+.. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=main
+   :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=main
+.. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/main/graph/badge.svg
   :target: https://codecov.io/gh/arviz-devs/arviz

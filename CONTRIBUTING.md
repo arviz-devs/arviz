@@ -106,7 +106,7 @@ please consider adding inline documentation examples.
    $ git checkout -b my-feature
    ```
 
-   Always use a ``feature`` branch. It's good practice to never routinely work on the ``master`` branch of any repository.
+   Always use a ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
 
 4. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
 
@@ -134,7 +134,7 @@ install these extra dependencies, Docker can be used. See: [Building documentati
    After committing, it is a good idea to sync with the base repository in case there have been any changes:
    ```bash
    $ git fetch upstream
-   $ git rebase upstream/master
+   $ git rebase upstream/main
    ```
 
    Then push the changes to your GitHub account with:
@@ -293,4 +293,4 @@ To run the **benchmark tests** do the following:
     $ cd arviz
     $ asv run
 
-**This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)**
+**This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/main/CONTRIBUTING.md)**

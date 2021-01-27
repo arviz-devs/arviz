@@ -85,7 +85,7 @@ jupyter_execute_notebooks = "off"
 myst_heading_anchors = 3
 
 
-# The master toctree document.
+# The base toctree document.
 master_doc = "index"
 
 # General information about the project.
@@ -97,7 +97,7 @@ author = "ArviZ devs"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
-if branch_name == "master":
+if branch_name == "main":
     version = "dev"
 else:
     # The short X.Y version.

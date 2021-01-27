@@ -6,7 +6,7 @@
 trigger:
   branches:
     include:
-    - master
+    - main
   tags:
     include:
     - '*'
@@ -14,7 +14,7 @@ trigger:
 pr:
   branches:
     include:
-    - master
+    - main
 
 jobs:
   - template: .azure-pipelines/azure-pipelines-base.yml

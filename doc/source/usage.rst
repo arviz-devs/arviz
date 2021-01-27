@@ -12,7 +12,7 @@ There are a couple avenues for help on ArviZ usage
 Documentation
 ==============
 ArviZ has multiple styles of documentation.
-We welcome `contributions <https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md>`_
+We welcome `contributions <https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md>`_
 
 
 QuickStart
@@ -25,7 +25,7 @@ Example Gallery
 ###############
 The gallery provides high level overviews of each of the plots. The code to generate the figures
 can be copied from your browser,
-or found in the `Github repository <https://github.com/arviz-devs/arviz/tree/master/examples>`_
+or found in the `Github repository <https://github.com/arviz-devs/arviz/tree/main/examples>`_
 
 
 Method Documentation
