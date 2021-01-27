@@ -8,6 +8,7 @@
 ### Deprecation
 
 ### Documentation
+* Use tabs in ArviZ example gallery ([1521](https://github.com/arviz-devs/arviz/pull/1521))
 
 ## v0.11.0 (2021 Dec 17)
 ### New features
