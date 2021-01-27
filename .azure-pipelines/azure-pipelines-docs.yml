@@ -53,7 +53,6 @@ jobs:
       # install emcee
       python -m pip install emcee
       python -m pip install .
-      conda install -y geckodriver firefox --channel conda-forge
     displayName: 'Install requirements'
 
   - script: |
