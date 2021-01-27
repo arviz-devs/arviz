@@ -3,7 +3,7 @@ jobs:
   dependsOn:
     - BaseTests
     - ExternalTests
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Reason'], 'PullRequest')))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Reason'], 'PullRequest')))
   pool:
     vmImage: 'ubuntu-latest'
   variables:
@@ -55,11 +55,11 @@ jobs:
       python -m pip install .
       conda install -y geckodriver firefox --channel conda-forge
     displayName: 'Install requirements'
-    
+
   - script: |
       python -m pip freeze
     displayName: 'Print packages'
-    
+
   - script: |
       python -msphinx -M clean doc/source doc/build
       sphinx-build doc/source doc/build -b html
@@ -69,7 +69,7 @@ jobs:
     inputs:
       pathtoPublish: 'doc/build'
       artifactName: 'arviz_doc_build'
-    condition: or(eq(variables['Build.SourceBranchName'], 'master'), or(contains(variables['PRTitle'], '[doc]'), contains(variables['PRTitle'], '[docs]'), contains(variables['PRTitle'], '[viz]'), contains(variables['PRTitle'], '[plot]')))
+    condition: or(eq(variables['Build.SourceBranchName'], 'main'), or(contains(variables['PRTitle'], '[doc]'), contains(variables['PRTitle'], '[docs]'), contains(variables['PRTitle'], '[viz]'), contains(variables['PRTitle'], '[plot]')))
     displayName: 'Upload docs'
 
   - script: |
@@ -80,5 +80,5 @@ jobs:
 
   - script: |
       ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
     displayName: 'Deploy docs'

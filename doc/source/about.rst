@@ -24,7 +24,7 @@ License
 =======
 
 `Apache License, Version
-2.0 <https://github.com/arviz-devs/arviz/blob/master/LICENSE>`__
+2.0 <https://github.com/arviz-devs/arviz/blob/main/LICENSE>`__
 
 
 Contributors
@@ -35,8 +35,8 @@ See the :ref:`Contributing page <contributing_docs>`
 Project governance
 ==================
 
-Both the project `code of conduct <https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md>`_
-and its `governance <https://github.com/arviz-devs/arviz/blob/master/GOVERNANCE.md>`_ can be found
+Both the project `code of conduct <https://github.com/arviz-devs/arviz/blob/main/CODE_OF_CONDUCT.md>`_
+and its `governance <https://github.com/arviz-devs/arviz/blob/main/GOVERNANCE.md>`_ can be found
 at GitHub.
 
 
