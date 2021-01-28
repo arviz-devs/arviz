@@ -519,10 +519,10 @@ class VarHandler:
                     selection_list.append(selection)
                     if not selection:
                         var_name = self.var_name
-                    elif len(selection_list)==len(datum_list):
-                        var_name = self.var_name + ':'
+                    elif len(selection_list) == len(datum_list):
+                        var_name = self.var_name + ":"
                     else:
-                        var_name = ''
+                        var_name = ""
                     label = make_label(var_name, selection, position="beside")
                     if label not in label_dict:
                         label_dict[label] = OrderedDict()
