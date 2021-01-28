@@ -572,9 +572,16 @@ class VarHandler:
                     skip_dims=skip_dims,
                     reverse_selections=True,
                 )
-                for _, selection, values in datum_iter:
+                datum_list = list(datum_iter)
+                for _, selection, values in datum_list:
                     selection_list.append(selection)
-                    label = make_label(self.var_name, selection, position="beside")
+                    if not selection:
+                        var_name = self.var_name
+                    elif len(selection_list)==len(datum_list):
+                        var_name = self.var_name + ':'
+                    else:
+                        var_name = ''
+                    label = make_label(var_name, selection, position="beside")
                     if label not in label_dict:
                         label_dict[label] = OrderedDict()
                     if name not in label_dict[label]:
