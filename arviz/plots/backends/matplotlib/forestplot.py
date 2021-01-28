@@ -529,7 +529,7 @@ class VarHandler:
                     if name not in label_dict[label]:
                         label_dict[label][name] = []
                     label_dict[label][name].append(values)
-                    
+
         y = self.y_start
         for idx, (label, model_data) in enumerate(label_dict.items()):
             for model_name, value_list in model_data.items():
