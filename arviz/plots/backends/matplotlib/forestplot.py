@@ -519,7 +519,7 @@ class VarHandler:
                     selection_list.append(selection)
                     if not selection:
                         var_name = self.var_name
-                    elif len(selection_list) == len(datum_list):
+                    elif not len(selection_list) % len(datum_list):
                         var_name = self.var_name + ":"
                     else:
                         var_name = ""
