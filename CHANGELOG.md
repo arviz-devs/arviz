@@ -5,6 +5,8 @@
 
 ### Maintenance and fixes
 * Fixed ovelapping titles and repeating warnings on circular traceplot ([1517](https://github.com/arviz-devs/arviz/pull/1517))
+* Removed repetitive variable names from forest plots of multivariate variables ([1527](https://github.com/arviz-devs/arviz/pull/1527))
+
 ### Deprecation
 
 ### Documentation
