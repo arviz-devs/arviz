@@ -132,12 +132,11 @@ class NumPyroConverter:
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from NumPyro posterior."""
-        # match PyMC3 stat names
         rename_key = {
             "potential_energy": "lp",
             "adapt_state.step_size": "step_size",
-            "num_steps": "tree_size",
-            "accept_prob": "mean_tree_accept",
+            "num_steps": "n_steps",
+            "accept_prob": "acceptance_rate",
         }
         data = {}
         for stat, value in self.posterior.get_extra_fields(group_by_chain=True).items():
@@ -147,7 +146,7 @@ class NumPyroConverter:
             value = value.copy()
             data[name] = value
             if stat == "num_steps":
-                data["depth"] = np.log2(value).astype(int) + 1
+                data["tree_depth"] = np.log2(value).astype(int) + 1
         return dict_to_dataset(data, library=self.numpyro, dims=None, coords=self.coords)
 
     @requires("posterior")
