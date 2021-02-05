@@ -45,7 +45,6 @@ jobs:
 
   - script: |
       sudo apt-get update
-      sudo apt-get install jags
       python -m pip install --upgrade pip
       python -m pip install wheel
 
