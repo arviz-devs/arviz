@@ -3,6 +3,7 @@ import typing as tp
 
 import numpy as np
 import pytest
+
 pytestmark = pytest.mark.skipif(reason="Don't know how to run PyJags in Azure for now")
 import pyjags
 
