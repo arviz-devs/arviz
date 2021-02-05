@@ -49,9 +49,12 @@ def plot_autocorr(
         x_prime = x
         if combined:
             x_prime = x.flatten()
+        c_i = 1.96 / x_prime.size ** 0.5
         y = autocorr(x_prime)
+
+        ax.fill_between([0, max_lag], -c_i, c_i, color="0.75")
         ax.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
-        ax.hlines(0, 0, max_lag, "steelblue")
+
         ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
 
