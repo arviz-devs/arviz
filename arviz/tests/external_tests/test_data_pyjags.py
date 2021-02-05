@@ -2,8 +2,9 @@
 import typing as tp
 
 import numpy as np
-import pyjags
 import pytest
+pytestmark = pytest.mark.skipif(reason="Don't know how to run PyJags in Azure for now")
+import pyjags
 
 from arviz import InferenceData, from_pyjags, waic
 from arviz.data.io_pyjags import (
@@ -41,7 +42,6 @@ def verify_equality_of_numpy_values_dictionaries(
     return True
 
 
-@pytest.mark.xfail()
 class TestDataPyJAGSWithoutEstimation:
     def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(self):
         arviz_samples_dict_from_pyjags_samples_dict = _convert_pyjags_dict_to_arviz_dict(
