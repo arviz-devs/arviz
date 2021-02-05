@@ -1,4 +1,4 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name, unused-import
+# pylint: disable=no-member, invalid-name, redefined-outer-name, unused-import, wrong-import-position
 import typing as tp
 
 import numpy as np
