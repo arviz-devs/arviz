@@ -10,8 +10,8 @@ from ..utils import _var_names, get_coords
 from .plot_utils import (
     get_plotting_function,
     xarray_to_ndarray,
-    filter_plotters_list,
     xarray_var_iter,
+    make_label,
 )
 
 
@@ -194,11 +194,10 @@ def plot_pair(
     # Get posterior draws and combine chains
     dataset = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, dataset, filter_vars)
-    plotters = filter_plotters_list(
-        list(xarray_var_iter(get_coords(dataset, coords), var_names=var_names, combined=True)),
-        "plot_pair",
+    plotters = list(
+        xarray_var_iter(get_coords(dataset, coords), var_names=var_names, combined=True)
     )
-    flat_var_names = [plotter[0] for plotter in plotters]
+    flat_var_names = [make_label(var_name, selection) for var_name, selection, _ in plotters]
 
     divergent_data = None
     diverging_mask = None
