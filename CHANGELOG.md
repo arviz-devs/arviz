@@ -2,6 +2,9 @@
 
 ## v0.x.x Unreleased
 ### New features
+* add confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
+
+https://github.com/arviz-devs/arviz/pull/1535
 
 ### Maintenance and fixes
 * Fixed ovelapping titles and repeating warnings on circular traceplot ([1517](https://github.com/arviz-devs/arviz/pull/1517))
