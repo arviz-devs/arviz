@@ -426,16 +426,12 @@ class TestDiagnostics:
 
         mcse_mean_hat = mcse(ary, method="mean")
         mcse_sd_hat = mcse(ary, method="sd")
-        ess_mean_hat = ess(ary, method="mean")
-        ess_sd_hat = ess(ary, method="sd")
         ess_bulk_hat = ess(ary, method="bulk")
         ess_tail_hat = ess(ary, method="tail")
         rhat_hat = _rhat_rank(ary)
         (
             mcse_mean_hat_,
             mcse_sd_hat_,
-            ess_mean_hat_,
-            ess_sd_hat_,
             ess_bulk_hat_,
             ess_tail_hat_,
             rhat_hat_,
@@ -445,8 +441,6 @@ class TestDiagnostics:
                 (
                     mcse_mean_hat,
                     mcse_sd_hat,
-                    ess_mean_hat,
-                    ess_sd_hat,
                     ess_bulk_hat,
                     ess_tail_hat,
                     rhat_hat,
@@ -456,8 +450,6 @@ class TestDiagnostics:
                 (
                     mcse_mean_hat_,
                     mcse_sd_hat_,
-                    ess_mean_hat_,
-                    ess_sd_hat_,
                     ess_bulk_hat_,
                     ess_tail_hat_,
                     rhat_hat_,
@@ -466,8 +458,6 @@ class TestDiagnostics:
         else:
             assert_almost_equal(mcse_mean_hat, mcse_mean_hat_)
             assert_almost_equal(mcse_sd_hat, mcse_sd_hat_)
-            assert_almost_equal(ess_mean_hat, ess_mean_hat_)
-            assert_almost_equal(ess_sd_hat, ess_sd_hat_)
             assert_almost_equal(ess_bulk_hat, ess_bulk_hat_)
             assert_almost_equal(ess_tail_hat, ess_tail_hat_)
             if chains in (None, 1):
