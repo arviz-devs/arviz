@@ -2,15 +2,21 @@
 
 ## v0.x.x Unreleased
 ### New features
-* add confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
+* Added `to_zarr` method to InferenceData
+* Added `from_zarr` method to InferenceData
+* Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
 
-https://github.com/arviz-devs/arviz/pull/1535
+### Maintenance and fixes
 
+### Deprecation
+
+### Documentation
+
+## v0.11.1 (2021 Feb 2)
 ### Maintenance and fixes
 * Fixed ovelapping titles and repeating warnings on circular traceplot ([1517](https://github.com/arviz-devs/arviz/pull/1517))
 * Removed repetitive variable names from forest plots of multivariate variables ([1527](https://github.com/arviz-devs/arviz/pull/1527))
-
-### Deprecation
+* Fixed regression in `plot_pair` labels that prevented coord names to be shown when necessary ([1533](https://github.com/arviz-devs/arviz/pull/1533))
 
 ### Documentation
 * Use tabs in ArviZ example gallery ([1521](https://github.com/arviz-devs/arviz/pull/1521))
