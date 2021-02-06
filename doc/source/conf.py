@@ -137,8 +137,8 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 
 html_theme_options = {
-  "github_url": "https://github.com/arviz-devs/arviz",
-  "twitter_url": "https://twitter.com/arviz_devs",
+    "github_url": "https://github.com/arviz-devs/arviz",
+    "twitter_url": "https://twitter.com/arviz_devs",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -153,7 +153,7 @@ html_static_path = ["_static", thumb_directory]
 
 # use additional pages to add a 404 page
 html_additional_pages = {
-    '404': '404.html',
+    "404": "404.html",
 }
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -252,4 +252,5 @@ intersphinx_mapping = {
     "mpl": ("https://matplotlib.org/", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
 }
