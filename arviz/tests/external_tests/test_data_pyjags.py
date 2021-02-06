@@ -2,7 +2,6 @@
 import typing as tp
 
 import numpy as np
-import pyjags
 import pytest
 
 from arviz import InferenceData, from_pyjags, waic
