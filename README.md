@@ -61,23 +61,23 @@ python setup.py install
 <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_forest_ridge.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest_ridge.html">
   <img alt="Ridge plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_forest_ridge_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_forest_ridge.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_parallel.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_parallel.html">
   <img alt="Parallel plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_parallel_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_parallel.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_trace.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_trace.html">
   <img alt="Trace plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_trace_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_trace.png" />
   </a>
   </td>
 
@@ -92,30 +92,30 @@ python setup.py install
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_posterior.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_density.html">
   <img alt="Posterior plot"
   src="https://arviz-devs.github.io/arviz/_static/mpl_plot_posterior_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_joint.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_joint.html">
   <img alt="Joint plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_joint_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_joint.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_ppc.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_ppc.html">
   <img alt="Posterior predictive plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_ppc_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_ppc.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_pair.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_pair.html">
   <img alt="Pair plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_pair_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_pair.png" />
   </a>
   </td>
 
@@ -123,30 +123,30 @@ python setup.py install
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_energy.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_energy.html">
   <img alt="Energy Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_energy_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_energy.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_violin.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_violin.html">
   <img alt="Violin Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_violin_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_violin.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_forest.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest.html">
   <img alt="Forest Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_forest_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_forest.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_autocorr.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_autocorr.html">
   <img alt="Autocorrelation Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_autocorr_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_autocorr.png" />
   </a>
   </td>
 
