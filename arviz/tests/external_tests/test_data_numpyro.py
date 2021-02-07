@@ -74,7 +74,7 @@ class TestDataNumPyro:
         )
         test_dict = {
             "posterior": ["mu", "tau", "eta"],
-            "sample_stats": ["diverging", "tree_size", "depth"],
+            "sample_stats": ["diverging"],
             "log_likelihood": ["obs"],
             "posterior_predictive": ["obs"],
             "predictions": ["obs"],
