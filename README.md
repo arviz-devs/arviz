@@ -63,14 +63,14 @@ python setup.py install
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_forest_ridge.html">
   <img alt="Ridge plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_forest_ridge.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_forest_ridge_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_parallel.html">
   <img alt="Parallel plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_parallel.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_parallel_minmax_thumb.png" />
   </a>
   </td>
 
