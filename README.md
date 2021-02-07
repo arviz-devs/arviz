@@ -82,7 +82,7 @@ python setup.py install
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_density.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_density.html">
   <img alt="Density plot"
   src="https://arviz-devs.github.io/arviz/_static/mpl_plot_density_thumb.png" />
   </a>
@@ -92,7 +92,7 @@ python setup.py install
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_density.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_posterior.html">
   <img alt="Posterior plot"
   src="https://arviz-devs.github.io/arviz/_static/mpl_plot_posterior_thumb.png" />
   </a>
