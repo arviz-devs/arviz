@@ -1,7 +1,8 @@
 """Bokeh Autocorrplot."""
 import numpy as np
-from bokeh.models import DataRange1d
+from bokeh.models import DataRange1d, BoxAnnotation
 from bokeh.models.annotations import Title
+
 
 from ....stats import autocorr
 from ...plot_utils import _scale_fig_size, make_label
@@ -74,8 +75,10 @@ def plot_autocorr(
         x_prime = x
         if combined:
             x_prime = x.flatten()
+        c_i = 1.96 / x_prime.size ** 0.5
         y = autocorr(x_prime)
 
+        ax.add_layout(BoxAnnotation(bottom=-c_i, top=c_i, fill_color="gray"))
         ax.segment(
             x0=np.arange(len(y)),
             y0=0,
@@ -84,7 +87,6 @@ def plot_autocorr(
             line_width=line_width,
             line_color="black",
         )
-        ax.line([0, 0], [0, max_lag], line_color="steelblue")
 
         title = Title()
         title.text = make_label(var_name, selection)

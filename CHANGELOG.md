@@ -4,6 +4,7 @@
 ### New features
 * Added `to_zarr` method to InferenceData
 * Added `from_zarr` method to InferenceData
+* Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
 
 ### Maintenance and fixes
 
