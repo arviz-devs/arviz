@@ -72,12 +72,16 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
 .. code:: bash
 
     @article{arviz_2019,
-	    title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},
-	    author = {Kumar, Ravin and Carroll, Colin and Hartikainen, Ari and Martin, Osvaldo A.},
-	    journal = {The Journal of Open Source Software},
-	    year = {2019},
-	    doi = {10.21105/joss.01143},
-	    url = {http://joss.theoj.org/papers/10.21105/joss.01143},
+        doi = {10.21105/joss.01143},
+        url = {https://doi.org/10.21105/joss.01143},
+        year = {2019},
+        publisher = {The Open Journal},
+        volume = {4},
+        number = {33},
+        pages = {1143},
+        author = {Ravin Kumar and Colin Carroll and Ari Hartikainen and Osvaldo Martin},
+        title = {ArviZ a unified library for exploratory analysis of Bayesian models in Python},
+        journal = {Journal of Open Source Software}
     }
 
 
