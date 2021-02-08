@@ -240,8 +240,6 @@ METRICS_NAMES = [
     "hdi_97%",
     "mcse_mean",
     "mcse_sd",
-    "ess_mean",
-    "ess_sd",
     "ess_bulk",
     "ess_tail",
     "r_hat",

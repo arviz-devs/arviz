@@ -1261,11 +1261,11 @@ def summary(
         circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
     if kind in ["all", "diagnostics"]:
-        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
+        mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+            _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
             dataset,
             input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(7)),
+            output_core_dims=tuple([] for _ in range(5)),
         )
 
     # Combine metrics
@@ -1280,8 +1280,6 @@ def summary(
             f"hdi_{100 * (1 - alpha / 2):g}%",
             "mcse_mean",
             "mcse_sd",
-            "ess_mean",
-            "ess_sd",
             "ess_bulk",
             "ess_tail",
             "r_hat",
@@ -1294,8 +1292,6 @@ def summary(
                 hdi_higher,
                 mcse_mean,
                 mcse_sd,
-                ess_mean,
-                ess_sd,
                 ess_bulk,
                 ess_tail,
                 r_hat,
@@ -1304,7 +1300,7 @@ def summary(
             metrics_ = (mean, sd, hdi_lower, hdi_higher)
             metrics_names_ = metrics_names_[:4]
         elif kind == "diagnostics":
-            metrics_ = (mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat)
+            metrics_ = (mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat)
             metrics_names_ = metrics_names_[4:]
         metrics.extend(metrics_)
         metric_names.extend(metrics_names_)
@@ -1358,11 +1354,7 @@ def summary(
     elif round_to not in ("None", "none") and (fmt.lower() in ("long", "wide")):
         # Don't round xarray object by default (even with "none")
         decimals = {
-            col: 3
-            if col not in {"ess_mean", "ess_sd", "ess_bulk", "ess_tail", "r_hat"}
-            else 2
-            if col == "r_hat"
-            else 0
+            col: 3 if col not in {"ess_bulk", "ess_tail", "r_hat"} else 2 if col == "r_hat" else 0
             for col in summary_df.columns
         }
         summary_df = summary_df.round(decimals)
