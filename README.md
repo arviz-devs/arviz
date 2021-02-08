@@ -77,14 +77,14 @@ python setup.py install
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_trace.html">
   <img alt="Trace plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_trace.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_trace_bars_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_density.html">
   <img alt="Density plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_density_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_density_thumb.png" />
   </a>
   </td>
 
@@ -94,21 +94,21 @@ python setup.py install
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_posterior.html">
   <img alt="Posterior plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_posterior_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_posterior_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_joint.html">
   <img alt="Joint plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_joint.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_joint_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_ppc.html">
   <img alt="Posterior predictive plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_ppc.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_ppc_thumb.png" />
   </a>
   </td>
 
@@ -125,28 +125,28 @@ python setup.py install
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_energy.html">
   <img alt="Energy Plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_energy.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_pair_hex_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_violin.html">
   <img alt="Violin Plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_violin.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_violin_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_forest.html">
   <img alt="Forest Plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_forest.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_forest_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_autocorr.html">
   <img alt="Autocorrelation Plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_autocorr.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_autocorr_thumb.png" />
   </a>
   </td>
 
