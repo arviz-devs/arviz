@@ -9,7 +9,6 @@ Diagnostics
     :toctree: generated/
 
     bfmi
-    geweke
     ess
     rhat
     mcse
