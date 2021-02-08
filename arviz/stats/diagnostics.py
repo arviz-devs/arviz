@@ -994,7 +994,7 @@ def _multichain_statistics(ary):
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan, np.nan
     # ess mean
     ess_mean_value = _ess_mean(ary)
 
@@ -1033,8 +1033,6 @@ def _multichain_statistics(ary):
     return (
         mcse_mean_value,
         mcse_sd_value,
-        ess_mean_value,
-        ess_sd_value,
         ess_bulk_value,
         ess_tail_value,
         rhat_value,
