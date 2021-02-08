@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import stats
 
 from ..data import convert_to_dataset
-from ..utils import Numba, _numba_var, _stack, _var_names, conditional_jit
+from ..utils import Numba, _numba_var, _stack, _var_names
 from .density_utils import histogram as _histogram
 from .stats_utils import _circular_standard_deviation, _sqrt
 from .stats_utils import autocov as _autocov
