@@ -23,7 +23,6 @@ __all__ = [
     "ess",
     "rhat",
     "mcse",
-    "geweke",
     "autocorr",
     "autocov",
     "make_ufunc",
