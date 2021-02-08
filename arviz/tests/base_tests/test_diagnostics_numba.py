@@ -7,7 +7,7 @@ import pytest
 
 from ...data import load_arviz_data
 from ...rcparams import rcParams
-from ...stats import bfmi, geweke, mcse, rhat
+from ...stats import bfmi, mcse, rhat
 from ...stats.diagnostics import _mc_error, ks_summary
 from ...utils import Numba
 from ..helpers import running_on_ci
@@ -73,18 +73,6 @@ def test_ks_summary_numba():
     non_numba = (ks_summary(data)["Count"]).values
     Numba.enable_numba()
     with_numba = (ks_summary(data)["Count"]).values
-    assert np.allclose(non_numba, with_numba)
-    assert Numba.numba_flag == state
-
-
-def test_geweke_numba():
-    """Numba test for geweke."""
-    state = Numba.numba_flag
-    data = np.random.randn(100)
-    Numba.disable_numba()
-    non_numba = geweke(data)
-    Numba.enable_numba()
-    with_numba = geweke(data)
     assert np.allclose(non_numba, with_numba)
     assert Numba.numba_flag == state
 

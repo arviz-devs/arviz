@@ -10,7 +10,7 @@ from numpy.testing import assert_almost_equal
 from ...data import from_cmdstan, load_arviz_data
 from ...plots.plot_utils import xarray_var_iter
 from ...rcparams import rc_context, rcParams
-from ...stats import bfmi, ess, geweke, mcse, rhat
+from ...stats import bfmi, ess, mcse, rhat
 from ...stats.diagnostics import (
     _ess,
     _ess_quantile,
@@ -465,31 +465,6 @@ class TestDiagnostics:
                 assert np.isnan(rhat_hat_)
             else:
                 assert round(rhat_hat, 3) == round(rhat_hat_, 3)
-
-    def test_geweke(self):
-        first = 0.1
-        last = 0.5
-        intervals = 100
-        data = np.random.randn(100000)
-        gw_stat = geweke(data, first, last, intervals)
-
-        # all geweke values should be between -1 and 1 for this many draws from a
-        # normal distribution
-        assert ((gw_stat[:, 1] > -1) | (gw_stat[:, 1] < 1)).all()
-
-        assert gw_stat.shape[0] == intervals
-        assert 100000 * last - gw_stat[:, 0].max() == 1
-
-    def test_geweke_bad_interval(self):
-        # lower bound
-        with pytest.raises(ValueError):
-            geweke(np.random.randn(10), first=0)
-        # upper bound
-        with pytest.raises(ValueError):
-            geweke(np.random.randn(10), last=1)
-        # sum larger than 1
-        with pytest.raises(ValueError):
-            geweke(np.random.randn(10), first=0.9, last=0.9)
 
     def test_ks_summary(self):
         """Instead of psislw data, this test uses fake data."""
