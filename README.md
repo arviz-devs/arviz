@@ -115,7 +115,7 @@ python setup.py install
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/plot_pair.html">
   <img alt="Pair plot"
-  src="https://arviz-devs.github.io/arviz/_images/mpl_plot_pair.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_pair_thumb.png" />
   </a>
   </td>
 
