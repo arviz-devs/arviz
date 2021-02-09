@@ -7,6 +7,7 @@
 * Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535)) 
 
 ### Maintenance and fixes
+* Updated `from_cmdstan` and `from_numpyro` converter to follow schema convention ([1541](https://github.com/arviz-devs/arviz/pull/1541) and [1525](https://github.com/arviz-devs/arviz/pull/1525))
 
 ### Deprecation
 * Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545)) 
