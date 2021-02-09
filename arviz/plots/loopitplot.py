@@ -152,12 +152,8 @@ def plot_loo_pit(
         # ideal unnormalized ECDF of uniform distribution with n_data_points points
         # it is used indistinctively as x or p(u<x) because for u~U(0,1) they are equal
         unif_ecdf = np.arange(n_data_points + 1)
-        p975 = stats.beta.ppf(
-            0.5 + hdi_prob / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1
-        )
-        p025 = stats.beta.ppf(
-            0.5 - hdi_prob / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1
-        )
+        p975 = stats.beta.ppf(0.5 + hdi_prob / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
+        p025 = stats.beta.ppf(0.5 - hdi_prob / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
         unif_ecdf = unif_ecdf / n_data_points
     else:
         x_vals, loo_pit_kde = kde(loo_pit)
