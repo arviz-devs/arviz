@@ -9,7 +9,8 @@
 ### Maintenance and fixes
 
 ### Deprecation
-* Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545)) 
+* Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
+* Removed credible_interval and include_circ arguments ([1548](https://github.com/arviz-devs/arviz/pull/1548)) 
 
 ### Documentation
 
