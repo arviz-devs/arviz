@@ -1,7 +1,7 @@
 """Forest plot."""
 from ..data import convert_to_dataset
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning, get_coords
+from ..utils import _var_names, get_coords
 from .plot_utils import get_plotting_function
 
 
@@ -34,7 +34,6 @@ def plot_forest(
     backend_config=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     """Forest plot to compare HDI intervals from a number of distributions.
 
@@ -115,8 +114,6 @@ def plot_forest(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -183,9 +180,6 @@ def plot_forest(
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools model')
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     if not isinstance(data, (list, tuple)):
         data = [data]
 
