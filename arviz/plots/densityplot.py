@@ -101,10 +101,10 @@ def plot_density(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
+
     Returns
     -------
     axes : matplotlib axes or bokeh figures
-
 
     Examples
     --------
