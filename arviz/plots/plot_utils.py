@@ -586,7 +586,7 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
         else:
             point_value = np.mean(values)
     elif point_estimate == "mode":
-        if isinstance(values[0], float):
+        if values.dtype.kind == "f":
             if bw == "default":
                 if circular:
                     bw = "taylor"
