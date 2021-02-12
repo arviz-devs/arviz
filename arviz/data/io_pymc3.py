@@ -16,7 +16,11 @@ if TYPE_CHECKING:
     from typing import Set  # pylint: disable=ungrouped-imports
 
     import pymc3 as pm
-    import theano
+
+    try:
+        import aesara  # pylint: disable=unused-import
+    except ImportError:
+        import theano as aesara  # pylint: disable=unused-import
     from pymc3 import Model, MultiTrace  # pylint: disable=invalid-name
 else:
     MultiTrace = Any  # pylint: disable=invalid-name
@@ -68,12 +72,16 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         density_dist_obs: bool = True,
     ):
         import pymc3
-        import theano
+
+        try:
+            import aesara  # pylint: disable=redefined-outer-name
+        except ImportError:
+            import theano as aesara
 
         _monkey_patch_pymc3(pymc3)
 
         self.pymc3 = pymc3
-        self.theano = theano
+        self.aesara = aesara
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
         self.trace = trace
@@ -420,10 +428,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         # The constant data vars must be either pm.Data (TensorSharedVariable) or pm.Deterministic
         constant_data_vars = {}  # type: Dict[str, Var]
         for var in self.model.deterministics:
-            if hasattr(self.theano, "gof"):
-                ancestors_func = self.theano.gof.graph.ancestors  # pylint: disable=no-member
+            if hasattr(self.aesara, "gof"):
+                ancestors_func = self.aesara.gof.graph.ancestors  # pylint: disable=no-member
             else:
-                ancestors_func = self.theano.graph.basic.ancestors  # pylint: disable=no-member
+                ancestors_func = self.aesara.graph.basic.ancestors  # pylint: disable=no-member
             ancestors = ancestors_func(var.owner.inputs)
             # no dependency on a random variable
             if not any((isinstance(a, self.pymc3.model.PyMC3Variable) for a in ancestors)):
