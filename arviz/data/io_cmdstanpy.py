@@ -510,7 +510,8 @@ def _unpack_fit(fit, items, save_warmup):
 
 def _unpack_frame(fit, columns, valid_cols, save_warmup):
     """Transform fit to dictionary containing ndarrays.
-    Called if fit object created by cmdstanpy version < 0.9.68
+
+    Called when fit object created by cmdstanpy version < 0.9.68
 
     Parameters
     ----------
