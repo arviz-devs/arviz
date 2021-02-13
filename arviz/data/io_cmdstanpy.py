@@ -126,7 +126,6 @@ class CmdStanPyConverter:
         )
 
 
-
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
@@ -435,7 +434,6 @@ class CmdStanPyConverter:
             },
         )
 
-
     @requires("posterior")
     def posterior_to_xarray_v68(self):
         """Extract posterior samples from output csv."""
@@ -473,7 +471,6 @@ class CmdStanPyConverter:
             ),
         )
 
-
     @requires("posterior")
     def sample_stats_to_xarray_v68(self):
         """Extract sample_stats from fit."""
@@ -509,7 +506,6 @@ def _filter(var_names, spec):
             var_names.remove(item)
     return var_names
 
-
 def _unpack_fit(fit, vars, save_warmup):
     num_warmup = 0
     if save_warmup:
@@ -536,8 +532,6 @@ def _unpack_fit(fit, vars, save_warmup):
             sample[var] = draws[:, :, col_idxs]
 
     return sample, sample_warmup
-
-
 
 
 def _unpack_frame(fit, columns, valid_cols, save_warmup):
@@ -629,10 +623,6 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
     return sample, sample_warmup
 
 
-
-
-
-
 def from_cmdstanpy(
     posterior=None,
     *,
@@ -700,5 +690,3 @@ def from_cmdstanpy(
         dims=dims,
         save_warmup=save_warmup,
     ).to_inference_data()
-
-
