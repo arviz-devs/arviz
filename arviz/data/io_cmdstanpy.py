@@ -439,6 +439,7 @@ class CmdStanPyConverter:
         )
 
 def _as_set(spec):
+    """Uniform representation for args which be name or list of names"""
     if spec is None:
         return []
     if isinstance(spec, str):
@@ -449,6 +450,7 @@ def _as_set(spec):
 
 
 def _filter(names, spec):
+    """Remove names from list of names"""
     if isinstance(spec, str):
         names.remove(spec)
     elif isinstance(spec, list):
@@ -460,11 +462,25 @@ def _filter(names, spec):
     return names
 
 def _filter_columns(columns, spec):
+    """Parse variable name from column label, removing element index, if any"""
     return [col for col in columns if col.split("[")[0].split(".")[0] in spec]
 
 
 
-def _unpack_fit(fit, itemss, save_warmup):
+def _unpack_fit(fit, items, save_warmup):
+    """Transform fit to dictionary containing ndarrays.
+
+    Parameters
+    ----------
+    data: cmdstanpy.CmdStanMCMC
+    items: list
+    save_warmup: bool
+
+    Returns
+    -------
+    dict
+        key, values pairs. Values are formatted to shape = (chains, draws, *shape)
+    """
     num_warmup = 0
     if save_warmup:
         if not fit._save_warmup:  # pylint: disable=protected-access
@@ -476,24 +492,25 @@ def _unpack_fit(fit, itemss, save_warmup):
     sample = {}
     sample_warmup = {}
 
-    for items in itemss:
-        if items in fit.stan_vars_cols:
-            col_idxs = fit.stan_vars_cols[items]
-        elif items in fit.sampler_vars_cols:
-            col_idxs = fit.sampler_vars_cols[items]
+    for item in items:
+        if item in fit.stan_vars_cols:
+            col_idxs = fit.stan_vars_cols[item]
+        elif item in fit.sampler_vars_cols:
+            col_idxs = fit.sampler_vars_cols[item]
         else:
-            raise ValueError("fit data, unknown variable: {}".format(items))
+            raise ValueError("fit data, unknown variable: {}".format(item))
         if save_warmup:
-            sample_warmup[items] = draws[:num_warmup, :, col_idxs]
-            sample[items] = draws[num_warmup:, :, col_idxs]
+            sample_warmup[item] = draws[:num_warmup, :, col_idxs]
+            sample[item] = draws[num_warmup:, :, col_idxs]
         else:
-            sample[items] = draws[:, :, col_idxs]
+            sample[item] = draws[:, :, col_idxs]
 
     return sample, sample_warmup
 
 
 def _unpack_frame(fit, columns, valid_cols, save_warmup):
-    """Transform fit to dictionary containing ndarrays.
+    """Transform fit to dictionary containing ndarrays
+    Called if fit object created by cmdstanpy version < 0.9.68
 
     Parameters
     ----------
@@ -512,11 +529,7 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
     if hasattr(fit, "draws"):
         data = fit.draws(inc_warmup=save_warmup)
         if save_warmup:
-            num_warmup = 0
-            if hasattr(fit, "_draws_warmup"):  # pylint: disable=protected-access
-                num_warmup = fit._draws_warmup  # pylint: disable=protected-access
-            else:
-                num_warmup = fit.num_draws_warmup
+            num_warmup = fit._draws_warmup  # pylint: disable=protected-access
             data_warmup = data[:num_warmup]
             data = data[num_warmup:]
     else:
