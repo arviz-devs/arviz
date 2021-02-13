@@ -278,7 +278,7 @@ class CmdStanPyConverter:
             items = list(self.posterior.stan_vars_cols.keys())
             if self.prior_predictive is not None:
                 try:
-                    items = _filter(vars, self.prior_predictive)
+                    items = _filter(items, self.prior_predictive)
                 except ValueError:
                     pass
             data, data_warmup = _unpack_fit(
@@ -485,11 +485,11 @@ class CmdStanPyConverter:
             self.save_warmup,
         )
         for item in items:
-            item = re.sub("__$", "", item)
-            item = "diverging" if item == "divergent" else item
-            data[item] = data.pop(item).astype(dtypes.get(item, float))
+            name = re.sub("__$", "", item)
+            name = "diverging" if name == "divergent" else name
+            data[name] = data.pop(item).astype(dtypes.get(item, float))
             if data_warmup:
-                data_warmup[item] = data_warmup.pop(item).astype(dtypes.get(item, float))
+                data_warmup[name] = data_warmup.pop(item).astype(dtypes.get(item, float))
         return (
             dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
@@ -498,16 +498,16 @@ class CmdStanPyConverter:
         )
 
 
-def _filter(var_names, spec):
+def _filter(names, spec):
     if isinstance(spec, str):
-        var_names.remove(spec)
+        names.remove(spec)
     elif isinstance(spec, list):
         for item in spec:
-            var_names.remove(item)
+            names.remove(item)
     elif isinstance(spec, dict):
         for item in spec.keys():
-            var_names.remove(item)
-    return var_names
+            names.remove(item)
+    return names
 
 
 def _unpack_fit(fit, itemss, save_warmup):
