@@ -439,7 +439,7 @@ class CmdStanPyConverter:
         )
 
 def _as_set(spec):
-    """Uniform representation for args which be name or list of names"""
+    """Uniform representation for args which be name or list of names."""
     if spec is None:
         return []
     if isinstance(spec, str):
@@ -450,7 +450,7 @@ def _as_set(spec):
 
 
 def _filter(names, spec):
-    """Remove names from list of names"""
+    """Remove names from list of names."""
     if isinstance(spec, str):
         names.remove(spec)
     elif isinstance(spec, list):
@@ -462,7 +462,7 @@ def _filter(names, spec):
     return names
 
 def _filter_columns(columns, spec):
-    """Parse variable name from column label, removing element index, if any"""
+    """Parse variable name from column label, removing element index, if any."""
     return [col for col in columns if col.split("[")[0].split(".")[0] in spec]
 
 
@@ -509,7 +509,7 @@ def _unpack_fit(fit, items, save_warmup):
 
 
 def _unpack_frame(fit, columns, valid_cols, save_warmup):
-    """Transform fit to dictionary containing ndarrays
+    """Transform fit to dictionary containing ndarrays.
     Called if fit object created by cmdstanpy version < 0.9.68
 
     Parameters
