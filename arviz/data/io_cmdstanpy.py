@@ -54,7 +54,6 @@ class CmdStanPyConverter:
 
         self.cmdstanpy = cmdstanpy
 
-
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
@@ -125,7 +124,6 @@ class CmdStanPyConverter:
             ),
         )
 
-
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
@@ -168,22 +166,22 @@ class CmdStanPyConverter:
         posterior_predictive = set(posterior_predictive)
 
         if hasattr(self.posterior, "stan_vars_cols"):
-            vars = list(posterior_predictive)
+            items = list(posterior_predictive)
             data, data_warmup = _unpack_fit(
                 self.posterior,
-                vars,
+                items,
                 self.save_warmup,
-                )
+            )
         else:
             valid_cols = [
                 col for col in columns if col.split("[")[0].split(".")[0] in posterior_predictive
-                ]
+            ]
             data, data_warmup = _unpack_frame(
                 self.posterior,
                 columns,
                 valid_cols,
                 self.save_warmup,
-                )
+            )
 
         return (
             dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
@@ -204,20 +202,22 @@ class CmdStanPyConverter:
         predictions = set(predictions)
 
         if hasattr(self.posterior, "stan_vars_cols"):
-            vars = list(predictions)
+            items = list(predictions)
             data, data_warmup = _unpack_fit(
                 self.posterior,
-                vars,
+                items,
                 self.save_warmup,
-                )
+            )
         else:
-            valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in set(predictions)]
+            valid_cols = [
+                col for col in columns if col.split("[")[0].split(".")[0] in set(predictions)
+            ]
             data, data_warmup = _unpack_frame(
                 self.posterior,
                 columns,
                 valid_cols,
                 self.save_warmup,
-                )
+            )
 
         return (
             dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
@@ -238,20 +238,22 @@ class CmdStanPyConverter:
         log_likelihood = set(log_likelihood)
 
         if hasattr(self.posterior, "stan_vars_cols"):
-            vars = list(log_likelihood)
+            items = list(log_likelihood)
             data, data_warmup = _unpack_fit(
                 self.posterior,
-                vars,
+                items,
                 self.save_warmup,
-                )
+            )
         else:
-            valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in log_likelihood]
+            valid_cols = [
+                col for col in columns if col.split("[")[0].split(".")[0] in log_likelihood
+            ]
             data, data_warmup = _unpack_frame(
                 self.posterior,
                 columns,
                 valid_cols,
                 self.save_warmup,
-                )
+            )
         return (
             dict_to_dataset(
                 data,
@@ -273,17 +275,17 @@ class CmdStanPyConverter:
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
         if hasattr(self.posterior, "stan_vars_cols"):
-            vars = list(self.posterior.stan_vars_cols.keys())
+            items = list(self.posterior.stan_vars_cols.keys())
             if self.prior_predictive is not None:
                 try:
-                    vars = _filter(vars, self.prior_predictive)
+                    items = _filter(vars, self.prior_predictive)
                 except ValueError:
                     pass
             data, data_warmup = _unpack_fit(
                 self.posterior,
-                vars,
+                items,
                 self.save_warmup,
-                )
+            )
         else:
             columns = self.prior.column_names
             prior_predictive = self.prior_predictive
@@ -292,11 +294,13 @@ class CmdStanPyConverter:
             elif isinstance(prior_predictive, str):
                 prior_predictive = [
                     col for col in columns if prior_predictive == col.split("[")[0].split(".")[0]
-                    ]
+                ]
             else:
                 prior_predictive = [
-                    col for col in columns if col.split("[")[0].split(".")[0] in set(prior_predictive)
-                    ]
+                    col
+                    for col in columns
+                    if col.split("[")[0].split(".")[0] in set(prior_predictive)
+                ]
             invalid_cols = set(prior_predictive + [col for col in columns if col.endswith("__")])
             valid_cols = [col for col in columns if col not in invalid_cols]
 
@@ -305,7 +309,7 @@ class CmdStanPyConverter:
                 columns,
                 valid_cols,
                 self.save_warmup,
-                )
+            )
 
         return (
             dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
@@ -437,31 +441,30 @@ class CmdStanPyConverter:
     @requires("posterior")
     def posterior_to_xarray_v68(self):
         """Extract posterior samples from output csv."""
-        vars = list(self.posterior.stan_vars_cols.keys())
+        items = list(self.posterior.stan_vars_cols.keys())
         if self.posterior_predictive is not None:
             try:
-                vars = _filter(vars, self.posterior_predictive)
+                items = _filter(items, self.posterior_predictive)
             except ValueError:
                 pass
         if self.predictions is not None:
             try:
-                vars = _filter(vars, self.predictions)
+                items = _filter(items, self.predictions)
             except ValueError:
                 pass
         if self.log_likelihood is not None:
             try:
-                vars = _filter(vars, self.log_likelihood)
+                items = _filter(items, self.log_likelihood)
             except ValueError:
                 pass
 
-        columns = self.posterior.column_names
         valid_cols = []
-        for var in vars:
-            valid_cols.extend(self.posterior.stan_vars_cols[var])
+        for item in items:
+            valid_cols.extend(self.posterior.stan_vars_cols[item])
 
         data, data_warmup = _unpack_fit(
             self.posterior,
-            vars,
+            items,
             self.save_warmup,
         )
         return (
@@ -475,18 +478,18 @@ class CmdStanPyConverter:
     def sample_stats_to_xarray_v68(self):
         """Extract sample_stats from fit."""
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
-        vars = list(self.posterior.sampler_vars_cols.keys())
+        items = list(self.posterior.sampler_vars_cols.keys())
         data, data_warmup = _unpack_fit(
             self.posterior,
-            vars,
+            items,
             self.save_warmup,
         )
-        for var in vars:
-            name = re.sub("__$", "", var)
-            name = "diverging" if name == "divergent" else name
-            data[name] = data.pop(var).astype(dtypes.get(var, float))
+        for item in items:
+            item = re.sub("__$", "", item)
+            item = "diverging" if item == "divergent" else item
+            data[item] = data.pop(item).astype(dtypes.get(item, float))
             if data_warmup:
-                data_warmup[name] = data_warmup.pop(var).astype(dtypes.get(var, float))
+                data_warmup[item] = data_warmup.pop(item).astype(dtypes.get(item, float))
         return (
             dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
@@ -506,7 +509,8 @@ def _filter(var_names, spec):
             var_names.remove(item)
     return var_names
 
-def _unpack_fit(fit, vars, save_warmup):
+
+def _unpack_fit(fit, itemss, save_warmup):
     num_warmup = 0
     if save_warmup:
         if not fit._save_warmup:  # pylint: disable=protected-access
@@ -518,18 +522,18 @@ def _unpack_fit(fit, vars, save_warmup):
     sample = {}
     sample_warmup = {}
 
-    for var in vars:
-        if var in fit.stan_vars_cols:
-            col_idxs = fit.stan_vars_cols[var]
-        elif var in fit.sampler_vars_cols:
-            col_idxs = fit.sampler_vars_cols[var]
+    for items in itemss:
+        if items in fit.stan_vars_cols:
+            col_idxs = fit.stan_vars_cols[items]
+        elif items in fit.sampler_vars_cols:
+            col_idxs = fit.sampler_vars_cols[items]
         else:
-            raise ValueError('fit data, unknown variable: {}'.format(var))
+            raise ValueError("fit data, unknown variable: {}".format(items))
         if save_warmup:
-            sample_warmup[var] = draws[:num_warmup, :, col_idxs]
-            sample[var] = draws[num_warmup:, :, col_idxs]
+            sample_warmup[items] = draws[:num_warmup, :, col_idxs]
+            sample[items] = draws[num_warmup:, :, col_idxs]
         else:
-            sample[var] = draws[:, :, col_idxs]
+            sample[items] = draws[:, :, col_idxs]
 
     return sample, sample_warmup
 
@@ -555,8 +559,8 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
         data = fit.draws(inc_warmup=save_warmup)
         if save_warmup:
             num_warmup = 0
-            if hasattr(fit, "_draws_warmup"): # pylint: disable=protected-access
-                num_warmup = fit._draws_warmup
+            if hasattr(fit, "_draws_warmup"):  # pylint: disable=protected-access
+                num_warmup = fit._draws_warmup  # pylint: disable=protected-access
             else:
                 num_warmup = fit.num_draws_warmup
             data_warmup = data[:num_warmup]
