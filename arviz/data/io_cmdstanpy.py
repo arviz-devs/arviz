@@ -101,15 +101,16 @@ class CmdStanPyConverter:
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
-        """Extract sample_stats from fit."""
+        """Extract sample_stats from prosterior fit."""
         return self.stats_to_xarray(self.posterior)
 
     @requires("prior")
     def sample_stats_prior_to_xarray(self):
-        """Extract prior sample_stats from fit."""
+        """Extract sample_stats from prior fit."""
         return self.stats_to_xarray(self.prior)
 
     def stats_to_xarray(self, fit):
+        """Extract sample_stats from fit."""
         if not hasattr(fit, "sampler_vars_cols"):
             return self.sample_stats_to_xarray_pre_v_0_9_68(fit)
 
