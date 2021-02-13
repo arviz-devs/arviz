@@ -8,6 +8,7 @@
 ### Maintenance and fixes
 * Updated `from_cmdstan` and `from_numpyro` converter to follow schema convention ([1541](https://github.com/arviz-devs/arviz/pull/1541) and [1525](https://github.com/arviz-devs/arviz/pull/1525))
 * Fix calculation of mode as point estimate ([1552](https://github.com/arviz-devs/arviz/pull/1552))
+* Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
 
 ### Deprecation
 * Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
