@@ -14,7 +14,7 @@ from scipy.optimize import minimize
 from arviz import _log
 from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams
-from ..utils import Numba, _numba_var, _var_names, credible_interval_warning, get_coords
+from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
 from .density_utils import kde as _kde
@@ -34,7 +34,6 @@ __all__ = [
     "apply_test_function",
     "compare",
     "hdi",
-    "hpd",
     "loo",
     "loo_pit",
     "psislw",
@@ -318,42 +317,6 @@ def _ic_matrix(ics, ic_i):
         ic_i_val[:, idx] = ic
 
     return rows, cols, ic_i_val
-
-
-def hpd(
-    # pylint: disable=unused-argument
-    ary,
-    hdi_prob=None,
-    circular=False,
-    multimodal=False,
-    skipna=False,
-    group="posterior",
-    var_names=None,
-    filter_vars=None,
-    coords=None,
-    max_modes=10,
-    dask_kwargs=None,
-    **kwargs,
-):
-    """Pending deprecation. Please refer to :func:`~arviz.hdi`."""
-    # pylint: enable=unused-argument
-    warnings.warn(
-        ("hpd will be deprecated " "Please replace hdi"),
-    )
-    return hdi(
-        ary,
-        hdi_prob,
-        circular,
-        multimodal,
-        skipna,
-        group,
-        var_names,
-        filter_vars,
-        coords,
-        max_modes,
-        dask_kwargs,
-        **kwargs,
-    )
 
 
 def hdi(
@@ -1007,7 +970,6 @@ def summary(
     fmt: "Literal['wide', 'long', 'xarray']" = "wide",
     kind: "Literal['all', 'stats', 'diagnostics']" = "all",
     round_to=None,
-    include_circ=None,
     circ_var_names=None,
     stat_funcs=None,
     extend=True,
@@ -1017,7 +979,6 @@ def summary(
     skipna=False,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
-    credible_interval=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -1046,9 +1007,6 @@ def summary(
         them.
     round_to: int
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
-    include_circ: boolean
-        Whether to include circular statistics
-        deprecated: Please see circ_var_names
     circ_var_names: list
         A list of circular variables to compute circular stats for
     stat_funcs: dict
@@ -1077,8 +1035,6 @@ def summary(
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
         Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -1139,15 +1095,6 @@ def summary(
 
     """
     _log.cache = []
-
-    if include_circ:
-        warnings.warn(
-            "include_circ is deprecated and will be ignored. Use circ_var_names instead",
-            DeprecationWarning,
-        )
-
-    if credible_interval:
-        hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
 
     extra_args = {}  # type: Dict[str, Any]
     if coords is not None:

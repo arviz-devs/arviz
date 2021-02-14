@@ -3,7 +3,7 @@ import warnings
 
 from ..data import convert_to_dataset
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning
+from ..utils import _var_names
 from .plot_utils import default_grid, get_plotting_function, make_label, xarray_var_iter
 
 
@@ -29,7 +29,6 @@ def plot_density(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -102,12 +101,10 @@ def plot_density(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
+
     Returns
     -------
     axes : matplotlib axes or bokeh figures
-
 
     Examples
     --------
@@ -163,9 +160,6 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:

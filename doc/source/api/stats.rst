@@ -11,7 +11,6 @@ Stats
     apply_test_function
     compare
     hdi
-    hpd
     loo
     loo_pit
     psislw

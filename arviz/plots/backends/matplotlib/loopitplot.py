@@ -33,7 +33,7 @@ def plot_loo_pit(
     y,
     color,
     textsize,
-    credible_interval,
+    hdi_prob,
     plot_kwargs,
     backend_kwargs,
     show,
@@ -92,7 +92,7 @@ def plot_loo_pit(
             fill_kwargs.setdefault(
                 "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
             )
-            fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(credible_interval))
+            fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(hdi_prob))
     elif use_hdi:
         if hdi_kwargs is None:
             hdi_kwargs = {}
@@ -129,7 +129,7 @@ def plot_loo_pit(
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
         if not (use_hdi or (ecdf and ecdf_fill)):
-            label = "{:.3g}% credible interval".format(credible_interval) if ecdf else "Uniform"
+            label = "{:.3g}% credible interval".format(hdi_prob) if ecdf else "Uniform"
             ax.plot([], label=label, **plot_unif_kwargs)
         ax.legend()
 
