@@ -16,6 +16,7 @@
 * Removed credible_interval and include_circ arguments ([1548](https://github.com/arviz-devs/arviz/pull/1548)) 
 
 ### Documentation
+* Added an example for converting dataframe to InferenceData ([1556](https://github.com/arviz-devs/arviz/pull/1556))
 
 ## v0.11.1 (2021 Feb 2)
 ### Maintenance and fixes
