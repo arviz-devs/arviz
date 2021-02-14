@@ -794,6 +794,14 @@ def test_plot_ppc_bad_ax(models, fig_ax):
         plot_ppc(models.model_1, ax=ax2)
 
 
+def test_plot_legend(models):
+    axes = plot_ppc(models.model_1)
+    legend_texts = axes.get_legend().get_texts()
+    result = [i.get_text() for i in legend_texts]
+    expected = ["Posterior predictive", "Observed", "Posterior predictive mean"]
+    assert result == expected
+
+
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_violin(models, var_names):
     axes = plot_violin(models.model_1, var_names=var_names)
