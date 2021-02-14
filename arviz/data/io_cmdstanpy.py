@@ -524,7 +524,10 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
     if hasattr(fit, "draws"):
         data = fit.draws(inc_warmup=save_warmup)
         if save_warmup:
-            num_warmup = fit._draws_warmup  # pylint: disable=protected-access
+            if hasattr(fit, "num_draws_warmup"):
+                num_warmup = fit.num_draws_warmup
+            else:
+                num_warmup = fit._draws_warmup  # pylint: disable=protected-access
             data_warmup = data[:num_warmup]
             data = data[num_warmup:]
     else:
