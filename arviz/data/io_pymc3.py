@@ -282,7 +282,12 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     def sample_stats_to_xarray(self):
         """Extract sample_stats from PyMC3 trace."""
         data = {}
-        rename_key = {"model_logp": "lp"}
+        rename_key = {
+            "model_logp": "lp",
+            "mean_tree_accept": "acceptance_rate",
+            "depth": "tree_depth",
+            "tree_size": "n_steps",
+        }
         data = {}
         data_warmup = {}
         for stat in self.trace.stat_names:
