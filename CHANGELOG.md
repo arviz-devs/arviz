@@ -8,6 +8,7 @@
 ### Maintenance and fixes
 * Updated `from_cmdstan`, `from_numpyro` and `from_pymc3` converters to follow schema convention ([1541](https://github.com/arviz-devs/arviz/pull/1541), [1525](https://github.com/arviz-devs/arviz/pull/1525) and [1555](https://github.com/arviz-devs/arviz/pull/1555))
 * Fix calculation of mode as point estimate ([1552](https://github.com/arviz-devs/arviz/pull/1552))
+* Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
 
 
 ### Deprecation
@@ -15,6 +16,7 @@
 * Removed credible_interval and include_circ arguments ([1548](https://github.com/arviz-devs/arviz/pull/1548)) 
 
 ### Documentation
+* Added an example for converting dataframe to InferenceData ([1556](https://github.com/arviz-devs/arviz/pull/1556))
 
 ## v0.11.1 (2021 Feb 2)
 ### Maintenance and fixes
