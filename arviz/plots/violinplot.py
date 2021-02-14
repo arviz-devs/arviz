@@ -1,7 +1,7 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning
+from ..utils import _var_names
 from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
 
 
@@ -27,7 +27,6 @@ def plot_violin(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     """Plot posterior of traces as violin plot.
 
@@ -97,8 +96,6 @@ def plot_violin(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -123,9 +120,6 @@ def plot_violin(
         >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
         data = transform(data)
@@ -141,7 +135,7 @@ def plot_violin(
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
         if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     violinplot_kwargs = dict(
         ax=ax,

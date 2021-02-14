@@ -1,7 +1,7 @@
 """Plot posterior densities."""
 from ..data import convert_to_dataset
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning, get_coords
+from ..utils import _var_names, get_coords
 from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
 
 
@@ -30,7 +30,6 @@ def plot_posterior(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
     **kwargs
 ):
     """Plot Posterior densities in the style of John K. Kruschke's book.
@@ -110,8 +109,6 @@ def plot_posterior(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
-    credible_interval: float or str, optional
-        deprecated: Please see hdi_prob
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -197,9 +194,6 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], hdi_prob=.75)
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     data = convert_to_dataset(data, group=group)
     if transform is not None:
         data = transform(data)

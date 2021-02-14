@@ -2,14 +2,17 @@
 
 ## v0.x.x Unreleased
 ### New features
-* Added `to_zarr` method to InferenceData
-* Added `from_zarr` method to InferenceData
-* Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535)) 
+* Added `to_zarr` and `from_zarr` methods to InferenceData ([1518](https://github.com/arviz-devs/arviz/pull/1535))
+* Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
 
 ### Maintenance and fixes
+* Updated `from_cmdstan`, `from_numpyro` and `from_pymc3` converters to follow schema convention ([1541](https://github.com/arviz-devs/arviz/pull/1541), [1525](https://github.com/arviz-devs/arviz/pull/1525) and [1555](https://github.com/arviz-devs/arviz/pull/1555))
+* Fix calculation of mode as point estimate ([1552](https://github.com/arviz-devs/arviz/pull/1552))
+
 
 ### Deprecation
-* Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545)) 
+* Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
+* Removed credible_interval and include_circ arguments ([1548](https://github.com/arviz-devs/arviz/pull/1548)) 
 
 ### Documentation
 

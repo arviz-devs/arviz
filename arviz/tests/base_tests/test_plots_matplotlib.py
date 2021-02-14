@@ -1286,11 +1286,11 @@ def test_plot_ess_no_divergences(models):
         {},
         {"n_unif": 50, "legend": False},
         {"use_hdi": True, "color": "gray"},
-        {"use_hdi": True, "credible_interval": 0.68},
+        {"use_hdi": True, "hdi_prob": 0.68},
         {"use_hdi": True, "hdi_kwargs": {"fill": 0.1}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"ls": "--"}},
-        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"hatch": "/"}},
+        {"ecdf": True, "hdi_prob": 0.97, "fill_kwargs": {"hatch": "/"}},
     ],
 )
 def test_plot_loo_pit(models, kwargs):

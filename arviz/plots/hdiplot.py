@@ -8,7 +8,6 @@ from xarray import Dataset
 
 from ..rcparams import rcParams
 from ..stats import hdi
-from ..utils import credible_interval_warning
 from .plot_utils import get_plotting_function
 
 
@@ -29,7 +28,6 @@ def plot_hdi(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     r"""
     Plot HDI intervals for regression data.
@@ -76,8 +74,6 @@ def plot_hdi(
         These are kwargs specific to the backend being used. Passed to ::``
     show : bool, optional
         Call backend show function.
-    credible_interval : float, optional
-        Deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -114,9 +110,6 @@ def plot_hdi(
         >>> az.plot_hdi(x_data, hdi_data=hdi_data[1], color="k", ax=ax, fill_kwargs={"alpha": .2})
 
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     if hdi_kwargs is None:
         hdi_kwargs = {}
 
@@ -189,8 +182,3 @@ def plot_hdi(
     plot = get_plotting_function("plot_hdi", "hdiplot", backend)
     ax = plot(**hdiplot_kwargs)
     return ax
-
-
-def plot_hpd(*args, **kwargs):  # noqa: D103
-    warnings.warn("plot_hpd has been deprecated, please use plot_hdi", DeprecationWarning)
-    return plot_hdi(*args, **kwargs)
