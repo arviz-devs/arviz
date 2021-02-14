@@ -494,10 +494,17 @@ def _unpack_fit(fit, items, save_warmup):
         else:
             raise ValueError("fit data, unknown variable: {}".format(item))
         if save_warmup:
-            sample_warmup[item] = draws[:num_warmup, :, col_idxs]
-            sample[item] = draws[num_warmup:, :, col_idxs]
+            if len(col_idxs) == 1:
+                sample_warmup[item] = np.squeeze(draws[:num_warmup, :, col_idxs], axis=2)
+                sample[item] = np.squeeze(draws[num_warmup:, :, col_idxs], axis=2)
+            else:
+                sample_warmup[item] = draws[:num_warmup, :, col_idxs]
+                sample[item] = draws[num_warmup:, :, col_idxs]
         else:
-            sample[item] = draws[:, :, col_idxs]
+            if len(col_idxs) == 1:
+                sample[item] = np.squeeze(draws[:, :, col_idxs], axis=2)
+            else:
+                sample[item] = draws[:, :, col_idxs]
 
     return sample, sample_warmup
 
