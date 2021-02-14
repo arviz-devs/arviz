@@ -677,11 +677,11 @@ def test_plot_khat_bad_input(models):
         {},
         {"n_unif": 50},
         {"use_hdi": True, "color": "gray"},
-        {"use_hdi": True, "credible_interval": 0.68},
+        {"use_hdi": True, "hdi_prob": 0.68},
         {"use_hdi": True, "hdi_kwargs": {"line_dash": "dashed", "alpha": 0}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"line_dash": "--"}},
-        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"color": "red"}},
+        {"ecdf": True, "hdi_prob": 0.97, "fill_kwargs": {"color": "red"}},
     ],
 )
 def test_plot_loo_pit(models, kwargs):
