@@ -93,11 +93,8 @@ class CmdStanPyConverter:
 
         return (
             dict_to_dataset(data, library=self.cmdstanpy, coords=coords, dims=dims),
-            dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=coords, dims=dims
-            ),
+            dict_to_dataset(data_warmup, library=self.cmdstanpy, coords=coords, dims=dims),
         )
-
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
@@ -141,13 +138,11 @@ class CmdStanPyConverter:
         """Convert posterior_predictive samples to xarray."""
         return self.predictive_to_xarray(self.posterior_predictive, self.posterior)
 
-
     @requires("prior")
     @requires("prior_predictive")
     def prior_predictive_to_xarray(self):
         """Convert prior_predictive samples to xarray."""
         return self.predictive_to_xarray(self.prior_predictive, self.prior)
-
 
     def predictive_to_xarray(self, names, fit):
         """Convert predictive samples to xarray."""
@@ -278,7 +273,6 @@ class CmdStanPyConverter:
                 data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
             ),
         )
-
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
@@ -438,6 +432,7 @@ class CmdStanPyConverter:
             ),
         )
 
+
 def _as_set(spec):
     """Uniform representation for args which be name or list of names."""
     if spec is None:
@@ -446,7 +441,6 @@ def _as_set(spec):
         return [spec]
     else:
         return set(spec)
-
 
 
 def _filter(names, spec):
@@ -461,10 +455,10 @@ def _filter(names, spec):
             names.remove(item)
     return names
 
+
 def _filter_columns(columns, spec):
     """Parse variable name from column label, removing element index, if any."""
     return [col for col in columns if col.split("[")[0].split(".")[0] in spec]
-
 
 
 def _unpack_fit(fit, items, save_warmup):
