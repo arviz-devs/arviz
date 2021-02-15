@@ -650,7 +650,8 @@ def _read_output_file(path):
             if line.startswith(b"#"):
                 comments.append(line.decode("utf-8").strip())
                 continue
-            data.append(np.array(line.strip().split(b","), dtype=float))
+            if line.strip():
+                data.append(np.array(line.strip().split(b","), dtype=float))
 
     return columns, np.array(data), comments
 
