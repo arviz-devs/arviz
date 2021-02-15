@@ -4,10 +4,9 @@ import os
 import re
 from collections import defaultdict
 from glob import glob
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
-import pandas as pd
 import xarray as xr
 
 from .. import utils
@@ -265,7 +264,7 @@ class CmdStanConverter:
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
                 if columns is None:
-                    columns = chain_data["sample_columns"]
+                    columns = parsed_output["sample_columns"]
 
                 for key, value in parsed_output["configuration_info"].items():
                     if key not in attrs:
@@ -312,7 +311,7 @@ class CmdStanConverter:
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
                 if columns is None:
-                    columns = chain_data["sample_columns"]
+                    columns = parsed_output["sample_columns"]
 
                 for key, value in parsed_output["configuration_info"].items():
                     if key not in attrs:
@@ -434,13 +433,13 @@ class CmdStanConverter:
         }
 
         columns_new = {}
-        for key, idx in self.sample_stats_columns.items():
+        for key, idx in self.sample_stats_prior_columns.items():
             name = re.sub("__$", "", key)
             name = rename_dict.get(name, name)
             columns_new[name] = idx
 
-        data = _unpack_ndarrays(self.sample_stats_warmup[0], columns_new, dtypes)
-        data_warmup = _unpack_ndarrays(self.sample_stats_warmup[1], columns_new, dtypes)
+        data = _unpack_ndarrays(self.sample_stats_prior[0], columns_new, dtypes)
+        data_warmup = _unpack_ndarrays(self.sample_stats_prior[1], columns_new, dtypes)
         return (
             dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
             dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
