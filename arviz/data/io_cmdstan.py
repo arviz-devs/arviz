@@ -673,7 +673,7 @@ def _read_output(path):
     pconf = _process_configuration(comments)
 
     # split dataframe to warmup and draws
-    saved_warmup = pconf.get("save_warmup", 0) * pconf.get("num_warmup", 0) // pconf.get("thin", 1)
+    saved_warmup = int(pconf.get("save_warmup", 0)) * int(pconf.get("num_warmup", 0)) // int(pconf.get("thin", 1))
 
     data_warmup = data[:saved_warmup]
     data = data[saved_warmup:]
