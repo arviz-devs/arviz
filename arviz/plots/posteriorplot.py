@@ -149,6 +149,13 @@ def plot_posterior(
         >>> rope = {'mu': [{'rope': (-2, 2)}], 'theta': [{'school': 'Choate', 'rope': (2, 4)}]}
         >>> az.plot_posterior(data, var_names=['mu', 'theta'], rope=rope)
 
+    Using `coords` argument to plot only a subset of data
+
+    .. plot::
+        :context: close-figs
+
+        >>> coords = {"school": ["Choate","Phillips Exeter"]}
+        >>> az.plot_posterior(data, var_names=["mu", "theta"], coords=coords)
 
     Add reference lines
 
