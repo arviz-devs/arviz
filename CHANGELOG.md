@@ -2,7 +2,7 @@
 
 ## v0.x.x Unreleased
 ### New features
-* Added `to_zarr` and `from_zarr` methods to InferenceData ([1518](https://github.com/arviz-devs/arviz/pull/1535))
+* Added `to_zarr` and `from_zarr` methods to InferenceData ([1518](https://github.com/arviz-devs/arviz/pull/1518))
 * Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
 
 ### Maintenance and fixes
@@ -17,6 +17,7 @@
 
 ### Documentation
 * Added an example for converting dataframe to InferenceData ([1556](https://github.com/arviz-devs/arviz/pull/1556))
+* Added example for `coords` argument in `plot_posterior` docstring ([1566](https://github.com/arviz-devs/arviz/pull/1566))
 
 ## v0.11.1 (2021 Feb 2)
 ### Maintenance and fixes
