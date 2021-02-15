@@ -432,4 +432,6 @@ class TestDataCmdStanPy:
         assert "warmup_posterior" not in inference_data_false_is_false
         assert "warmup_predictions" not in inference_data_false_is_false
         assert "warmup_log_likelihood" not in inference_data_false_is_false
-        assert "warmup_prior" not in inference_data_false_is_false# pylint: disable=redefined-outer-name
+        assert (
+            "warmup_prior" not in inference_data_false_is_false
+        )  # pylint: disable=redefined-outer-name
