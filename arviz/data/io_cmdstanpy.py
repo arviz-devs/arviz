@@ -113,6 +113,13 @@ class CmdStanPyConverter:
 
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
         items = list(self.posterior.sampler_vars_cols.keys())
+        rename_dict = {
+            "divergent": "diverging",
+            "n_leapfrog": "n_steps",
+            "treedepth": "tree_depth",
+            "stepsize": "step_size",
+            "accept_stat": "acceptance_rate",
+        }
 
         data, data_warmup = _unpack_fit(
             fit,
@@ -121,7 +128,7 @@ class CmdStanPyConverter:
         )
         for item in items:
             name = re.sub("__$", "", item)
-            name = "diverging" if name == "divergent" else name
+            name = rename_dict.get(name, name)
             data[name] = data.pop(item).astype(dtypes.get(item, float))
             if data_warmup:
                 data_warmup[name] = data_warmup.pop(item).astype(dtypes.get(item, float))
