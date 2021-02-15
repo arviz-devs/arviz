@@ -222,7 +222,7 @@ class CmdStanConverter:
     @requires("sample_stats")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
-        dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+        dtypes = {**self.dtypes, "diverging": bool, "n_steps": np.int64, "tree_depth": np.int64}
         rename_dict = {
             "divergent": "diverging",
             "n_leapfrog": "n_steps",
@@ -231,19 +231,14 @@ class CmdStanConverter:
             "accept_stat": "acceptance_rate",
         }
 
-        columns = self.sample_stats_columns
-        sampler_params, sampler_params_warmup = self.sample_stats
+        columns_new = {}
+        for key, idx in self.sample_stats_columns.items():
+            name = re.sub("__$", "", key)
+            name = rename_dict.get(name, name)
+            columns_new[name] = idx
 
-        for j, s_params in enumerate(sampler_params):
-            for key in s_params:
-                name = re.sub("__$", "", key)
-                name = rename_dict.get(name, name)
-                sampler_params[j][name] = s_params[key].astype(dtypes.get(key))
-                sampler_params_warmup[j][name] = sampler_params_warmup[j][key].astype(
-                    dtypes.get(key)
-                )
-        data = _unpack_dataframes(sampler_params)
-        data_warmup = _unpack_dataframes(sampler_params_warmup)
+        data = _unpack_ndarrays(self.sample_stats[0], columns_new, dtypes)
+        data_warmup = _unpack_ndarrays(self.sample_stats[1], columns_new, dtypes)
         return (
             dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
             dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
@@ -343,6 +338,56 @@ class CmdStanConverter:
             dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
         )
 
+    @requires("posterior")
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Convert elementwise log_likelihood samples to xarray."""
+        log_likelihood = self.log_likelihood
+
+        if (isinstance(log_likelihood, (tuple, list)) and log_likelihood[0].endswith(".csv")) or (
+            isinstance(log_likelihood, str) and log_likelihood.endswith(".csv")
+        ):
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+
+            chain_data = []
+            chain_data_warmup = []
+            columns = None
+            attrs = {}
+            for path in log_likelihood:
+                parsed_output = _read_output(path)
+                chain_data.append(parsed_output["sample"])
+                chain_data_warmup.append(parsed_output["sample_warmup"])
+
+                if columns is None:
+                    columns = parsed_output["sample_columns"]
+
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+            data = _unpack_ndarrays(chain_data, columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
+        else:
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+            columns = {
+                col: idx
+                for col, idx in self.posterior_columns.items()
+                if any(item == col.split(".")[0] for item in log_likelihood)
+            }
+            data = _unpack_ndarrays(self.posterior[0], columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(self.posterior[1], columns, self.dtypes)
+            attrs = None
+        return (
+            dict_to_dataset(
+                data, coords=self.coords, dims=self.dims, attrs=attrs, skip_event_dims=True
+            ),
+            dict_to_dataset(
+                data_warmup, coords=self.coords, dims=self.dims, attrs=attrs, skip_event_dims=True
+            ),
+        )
+
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
@@ -379,29 +424,26 @@ class CmdStanConverter:
     @requires("sample_stats_prior")
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats from fit."""
-        dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+        dtypes = {**self.dtypes, "diverging": bool, "n_steps": np.int64, "tree_depth": np.int64}
+        rename_dict = {
+            "divergent": "diverging",
+            "n_leapfrog": "n_steps",
+            "treedepth": "tree_depth",
+            "stepsize": "step_size",
+            "accept_stat": "acceptance_rate",
+        }
 
-        sampler_params, sampler_params_warmup = self.sample_stats_prior
-        for j, s_params in enumerate(sampler_params):
-            rename_dict = {}
-            for key in s_params:
-                key_, *end = key.split(".")
-                name = re.sub("__$", "", key_)
-                name = "diverging" if name == "divergent" else name
-                rename_dict[key] = ".".join((name, *end))
-                sampler_params[j][key] = s_params[key].astype(dtypes.get(key_))
-                sampler_params_warmup[j][key] = sampler_params_warmup[j][key].astype(
-                    dtypes.get(key_)
-                )
-            sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
-            sampler_params_warmup[j] = sampler_params_warmup[j].rename(columns=rename_dict)
-        data = _unpack_dataframes(sampler_params)
-        data_warmup = _unpack_dataframes(sampler_params_warmup)
+        columns_new = {}
+        for key, idx in self.sample_stats_columns.items():
+            name = re.sub("__$", "", key)
+            name = rename_dict.get(name, name)
+            columns_new[name] = idx
+
+        data = _unpack_ndarrays(self.sample_stats_warmup[0], columns_new, dtypes)
+        data_warmup = _unpack_ndarrays(self.sample_stats_warmup[1], columns_new, dtypes)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs_prior),
-            dict_to_dataset(
-                data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs_prior
-            ),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
         )
 
     @requires("prior")
@@ -503,56 +545,6 @@ class CmdStanConverter:
             )
             predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=predictions_constant_data)
-
-    @requires("posterior")
-    @requires("log_likelihood")
-    def log_likelihood_to_xarray(self):
-        """Convert elementwise log_likelihood samples to xarray."""
-        log_likelihood = self.log_likelihood
-
-        if (isinstance(log_likelihood, (tuple, list)) and log_likelihood[0].endswith(".csv")) or (
-            isinstance(log_likelihood, str) and log_likelihood.endswith(".csv")
-        ):
-            if isinstance(log_likelihood, str):
-                log_likelihood = [log_likelihood]
-
-            chain_data = []
-            chain_data_warmup = []
-            columns = None
-            attrs = {}
-            for path in log_likelihood:
-                parsed_output = _read_output(path)
-                chain_data.append(parsed_output["sample"])
-                chain_data_warmup.append(parsed_output["sample_warmup"])
-
-                if columns is None:
-                    columns = parsed_output["sample_columns"]
-
-                for key, value in parsed_output["configuration_info"].items():
-                    if key not in attrs:
-                        attrs[key] = []
-                    attrs[key].append(value)
-            data = _unpack_ndarrays(chain_data, columns, self.dtypes)
-            data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
-        else:
-            if isinstance(log_likelihood, str):
-                log_likelihood = [log_likelihood]
-            columns = {
-                col: idx
-                for col, idx in self.posterior_columns.items()
-                if any(item == col.split(".")[0] for item in log_likelihood)
-            }
-            data = _unpack_ndarrays(self.posterior[0], columns, self.dtypes)
-            data_warmup = _unpack_ndarrays(self.posterior[1], columns, self.dtypes)
-            attrs = None
-        return (
-            dict_to_dataset(
-                data, coords=self.coords, dims=self.dims, attrs=attrs, skip_event_dims=True
-            ),
-            dict_to_dataset(
-                data_warmup, coords=self.coords, dims=self.dims, attrs=attrs, skip_event_dims=True
-            ),
-        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
