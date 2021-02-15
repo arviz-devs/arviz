@@ -56,6 +56,7 @@ class CmdStanConverter:
         dims=None,
         disable_glob=False,
         save_warmup=None,
+        dtypes=None,
     ):
         self.posterior_ = check_glob(posterior, "posterior", disable_glob)
         self.posterior_predictive = check_glob(
@@ -83,29 +84,40 @@ class CmdStanConverter:
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
+        if dtypes is None:
+            self.dtypes = {}
+        else:
+            self.dtypes = dtypes
         # populate posterior and sample_stats
         self._parse_posterior()
         self._parse_prior()
 
     @requires("posterior_")
     def _parse_posterior(self):
-        """Read csv paths to list of dataframes."""
+        """Read csv paths to list of ndarrays."""
         paths = self.posterior_
         if isinstance(paths, str):
             paths = [paths]
 
         chain_data = []
+        chain_columns = None
         for path in paths:
-            chain_data.append(_read_output(path))
+            output_data = _read_output(path)
+            chain_data.append(output_data)
+            if chain_columns is None:
+                chain_columns = chain_data
 
         self.posterior = (
             [item["sample"] for item in chain_data],
             [item["sample_warmup"] for item in chain_data],
         )
+        self.posterior_columns = chain_columns["sample_columns"]
+
         self.sample_stats = (
             [item["sample_stats"] for item in chain_data],
             [item["sample_stats_warmup"] for item in chain_data],
         )
+        self.sample_stats_columns = chain_columns["sample_stats_columns"]
 
         attrs = {}
         for item in chain_data:
@@ -117,23 +129,31 @@ class CmdStanConverter:
 
     @requires("prior_")
     def _parse_prior(self):
-        """Read csv paths to list of dataframes."""
+        """Read csv paths to list of ndarrays."""
         paths = self.prior_
         if isinstance(paths, str):
             paths = [paths]
 
         chain_data = []
+        chain_columns = None
         for path in paths:
-            chain_data.append(_read_output(path))
+            output_data = _read_output(path)
+            chain_data.append(output_data)
+            if chain_columns is None:
+                chain_columns = output_data
 
         self.prior = (
             [item["sample"] for item in chain_data],
             [item["sample_warmup"] for item in chain_data],
         )
+        self.prior_columns = chain_columns["sample_columns"]
+
         self.sample_stats_prior = (
             [item["sample_stats"] for item in chain_data],
             [item["sample_stats_warmup"] for item in chain_data],
         )
+
+        self.sample_stats_prior_columns = chain_columns["sample_stats_columns"]
 
         attrs = {}
         for item in chain_data:
@@ -146,7 +166,7 @@ class CmdStanConverter:
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
-        columns = self.posterior[0][0].columns
+        columns = self.posterior_columns
 
         # filter posterior_predictive, predictions and log_likelihood
         posterior_predictive = self.posterior_predictive
@@ -190,9 +210,9 @@ class CmdStanConverter:
             ]
 
         invalid_cols = posterior_predictive + predictions + log_likelihood
-        valid_cols = [col for col in columns if col not in invalid_cols]
-        data = _unpack_dataframes([item[valid_cols] for item in self.posterior[0]])
-        data_warmup = _unpack_dataframes([item[valid_cols] for item in self.posterior[1]])
+        valid_cols = {col: idx for col, idx in columns.items() if col not in invalid_cols}
+        data = _unpack_ndarrays(self.posterior[0], valid_cols, self.dtypes)
+        data_warmup = _unpack_ndarrays(self.posterior[1], valid_cols, self.dtypes)
         return (
             dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
             dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
@@ -211,6 +231,7 @@ class CmdStanConverter:
             "accept_stat": "acceptance_rate",
         }
 
+        columns = self.sample_stats_columns
         sampler_params, sampler_params_warmup = self.sample_stats
 
         for j, s_params in enumerate(sampler_params):
@@ -234,8 +255,6 @@ class CmdStanConverter:
         """Convert posterior_predictive samples to xarray."""
         posterior_predictive = self.posterior_predictive
 
-        columns = self.posterior[0][0].columns
-
         if (
             isinstance(posterior_predictive, (tuple, list))
             and posterior_predictive[0].endswith(".csv")
@@ -244,34 +263,33 @@ class CmdStanConverter:
                 posterior_predictive = [posterior_predictive]
             chain_data = []
             chain_data_warmup = []
+            columns = None
             attrs = {}
             for path in posterior_predictive:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
+                if columns is None:
+                    columns = chain_data["sample_columns"]
 
                 for key, value in parsed_output["configuration_info"].items():
                     if key not in attrs:
                         attrs[key] = []
                     attrs[key].append(value)
 
-            data = _unpack_dataframes(chain_data)
-            data_warmup = _unpack_dataframes(chain_data_warmup)
+            data = _unpack_ndarrays(chain_data, columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
 
         else:
             if isinstance(posterior_predictive, str):
                 posterior_predictive = [posterior_predictive]
-            posterior_predictive_cols = [
-                col
-                for col in columns
+            columns = {
+                col: idx
+                for col, idx in self.posterior_columns.items()
                 if any(item == col.split(".")[0] for item in posterior_predictive)
-            ]
-            data = _unpack_dataframes(
-                [item[posterior_predictive_cols] for item in self.posterior[0]]
-            )
-            data_warmup = _unpack_dataframes(
-                [item[posterior_predictive_cols] for item in self.posterior[1]]
-            )
+            }
+            data = _unpack_ndarrays(self.posterior[0], columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(self.posterior[1], columns, self.dtypes)
 
             attrs = None
         return (
@@ -285,8 +303,6 @@ class CmdStanConverter:
         """Convert out of sample predictions samples to xarray."""
         predictions = self.predictions
 
-        columns = self.posterior[0][0].columns
-
         if (isinstance(predictions, (tuple, list)) and predictions[0].endswith(".csv")) or (
             isinstance(predictions, str) and predictions.endswith(".csv")
         ):
@@ -294,27 +310,32 @@ class CmdStanConverter:
                 predictions = [predictions]
             chain_data = []
             chain_data_warmup = []
+            columns = None
             attrs = {}
             for path in predictions:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
+                if columns is None:
+                    columns = chain_data["sample_columns"]
 
                 for key, value in parsed_output["configuration_info"].items():
                     if key not in attrs:
                         attrs[key] = []
                     attrs[key].append(value)
 
-            data = _unpack_dataframes(chain_data)
-            data_warmup = _unpack_dataframes(chain_data_warmup)
+            data = _unpack_ndarrays(chain_data, columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
         else:
             if isinstance(predictions, str):
                 predictions = [predictions]
-            predictions_cols = [
-                col for col in columns if any(item == col.split(".")[0] for item in predictions)
-            ]
-            data = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
-            data_warmup = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
+            columns = {
+                col: idx
+                for col, idx in self.posterior_columns.items()
+                if any(item == col.split(".")[0] for item in predictions)
+            }
+            data = _unpack_ndarrays(self.posterior[0], columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(self.posterior[1], columns, self.dtypes)
 
             attrs = None
         return (
@@ -328,7 +349,7 @@ class CmdStanConverter:
         # filter prior_predictive
         prior_predictive = self.prior_predictive
 
-        columns = self.prior[0][0].columns
+        columns = self.prior_columns
 
         if prior_predictive is None or (
             isinstance(prior_predictive, str) and prior_predictive.lower().endswith(".csv")
@@ -344,9 +365,9 @@ class CmdStanConverter:
             ]
 
         invalid_cols = prior_predictive
-        valid_cols = [col for col in columns if col not in invalid_cols]
-        data = _unpack_dataframes([item[valid_cols] for item in self.prior[0]])
-        data_warmup = _unpack_dataframes([item[valid_cols] for item in self.prior[1]])
+        valid_cols = {col: idx for col, idx in columns.items() if col not in invalid_cols}
+        data = _unpack_ndarrays(self.prior[0], valid_cols, self.dtypes)
+        data_warmup = _unpack_ndarrays(self.prior[1], valid_cols, self.dtypes)
         return (
             dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs_prior),
             dict_to_dataset(
@@ -389,11 +410,6 @@ class CmdStanConverter:
         """Convert prior_predictive samples to xarray."""
         prior_predictive = self.prior_predictive
 
-        if self.prior[0][0].empty:
-            columns = self.prior[0][0].columns
-        else:
-            columns = self.prior[1][0].columns
-
         if (
             isinstance(prior_predictive, (tuple, list)) and prior_predictive[0].endswith(".csv")
         ) or (isinstance(prior_predictive, str) and prior_predictive.endswith(".csv")):
@@ -401,29 +417,30 @@ class CmdStanConverter:
                 prior_predictive = [prior_predictive]
             chain_data = []
             chain_data_warmup = []
+            columns = None
             attrs = {}
             for path in prior_predictive:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
+                if columns is None:
+                    columns = parsed_output["sample_columns"]
                 for key, value in parsed_output["configuration_info"].items():
                     if key not in attrs:
                         attrs[key] = []
                     attrs[key].append(value)
-            data = _unpack_dataframes(chain_data)
-            data_warmup = _unpack_dataframes(chain_data_warmup)
+            data = _unpack_ndarrays(chain_data, columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
         else:
             if isinstance(prior_predictive, str):
                 prior_predictive = [prior_predictive]
-            prior_predictive_cols = [
+            columns = [
                 col
-                for col in columns
+                for col in self.prior_columns
                 if any(item == col.split(".")[0] for item in prior_predictive)
             ]
-            data = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[0]])
-            data_warmup = _unpack_dataframes(
-                [item[prior_predictive_cols] for item in self.prior[1]]
-            )
+            data = _unpack_ndarrays(self.prior[0], columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(self.prior[1], columns, self.dtypes)
             attrs = None
         return (
             dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
@@ -493,8 +510,6 @@ class CmdStanConverter:
         """Convert elementwise log_likelihood samples to xarray."""
         log_likelihood = self.log_likelihood
 
-        columns = self.posterior[0][0].columns
-
         if (isinstance(log_likelihood, (tuple, list)) and log_likelihood[0].endswith(".csv")) or (
             isinstance(log_likelihood, str) and log_likelihood.endswith(".csv")
         ):
@@ -503,27 +518,32 @@ class CmdStanConverter:
 
             chain_data = []
             chain_data_warmup = []
+            columns = None
             attrs = {}
             for path in log_likelihood:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
+
+                if columns is None:
+                    columns = parsed_output["sample_columns"]
+
                 for key, value in parsed_output["configuration_info"].items():
                     if key not in attrs:
                         attrs[key] = []
                     attrs[key].append(value)
-            data = _unpack_dataframes(chain_data)
-            data_warmup = _unpack_dataframes(chain_data_warmup)
+            data = _unpack_ndarrays(chain_data, columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
         else:
             if isinstance(log_likelihood, str):
                 log_likelihood = [log_likelihood]
-            log_likelihood_cols = [
-                col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
-            ]
-            data = _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[0]])
-            data_warmup = _unpack_dataframes(
-                [item[log_likelihood_cols] for item in self.posterior[1]]
-            )
+            columns = {
+                col: idx
+                for col, idx in self.posterior_columns.items()
+                if any(item == col.split(".")[0] for item in log_likelihood)
+            }
+            data = _unpack_ndarrays(self.posterior[0], columns, self.dtypes)
+            data_warmup = _unpack_ndarrays(self.posterior[1], columns, self.dtypes)
             attrs = None
         return (
             dict_to_dataset(
@@ -578,7 +598,7 @@ def _process_configuration(comments):
             results["step_size"] = float(val.strip())
         elif "inverse mass matrix" in comment:
             comment = re.sub(r"^\s*#\s*", "", next(comments_gen)).strip()
-            results["inverse_mass_matrix"] = np.array(comment.split(","), dtype=float)
+            results["inverse_mass_matrix"] = [float(item) for item in comment.split(",")]
         elif ("seconds" in comment) and any(
             item in comment for item in ("(Warm-up)", "(Sampling)", "(Total)")
         ):
@@ -618,25 +638,30 @@ def _process_configuration(comments):
                 key = match_empty.group(1)
                 results[key] = None
 
-    results = {key: results[key] for key in sorted(results)}
+    results = {key: str(results[key]) for key in sorted(results)}
     return results
 
 
 def _read_output_file(path):
     comments = []
-
+    data = []
+    columns = None
     # read comments
     with open(path, "rb") as f_obj:
         for line in f_obj:
             if line.startswith(b"#"):
                 comments.append(line.decode("utf-8").strip())
+                continue
+            columns = {key: idx for idx, key in enumerate(line.strip().decode("utf-8").split(","))}
+            break
 
-    with open(path, "rb") as f_obj:
-        data = pd.read_csv(
-            f_obj, comment="#", float_precision=rcParams["data.pandas_float_precision"]
-        )
+        for line in f_obj:
+            if line.startswith(b"#"):
+                comments.append(line.decode("utf-8").strip())
+                continue
+            data.append(np.array(line.strip().split(b","), dtype=float))
 
-    return data, comments
+    return columns, np.array(data), comments
 
 
 def _read_output(path):
@@ -651,29 +676,31 @@ def _read_output(path):
     Dict[str, Any]
     """
     # Read data
-    data, comments = _read_output_file(path)
+    columns, data, comments = _read_output_file(path)
 
     pconf = _process_configuration(comments)
 
     # split dataframe to warmup and draws
     saved_warmup = pconf.get("save_warmup", 0) * pconf.get("num_warmup", 0) // pconf.get("thin", 1)
 
-    data_warmup = data.iloc[:saved_warmup, :]
-    data = data.iloc[saved_warmup:, :]
+    data_warmup = data[:saved_warmup]
+    data = data[saved_warmup:]
 
     # Split data to sample_stats and sample
-    sample_stats_columns = [col for col in data.columns if col.endswith("__")]
-    sample_columns = [col for col in data.columns if col not in sample_stats_columns]
+    sample_stats_columns = {col: idx for col, idx in columns.items() if col.endswith("__")}
+    sample_columns = {col: idx for col, idx in columns.items() if col not in sample_stats_columns}
 
-    sample_stats = data.loc[:, sample_stats_columns]
-    sample_data = data.loc[:, sample_columns]
+    sample_stats = data[:, list(sample_stats_columns.values())]
+    sample_data = data[:, list(sample_columns.values())]
 
-    sample_stats_warmup = data_warmup.loc[:, sample_stats_columns]
-    sample_data_warmup = data_warmup.loc[:, sample_columns]
+    sample_stats_warmup = data_warmup[:, list(sample_stats_columns.values())]
+    sample_data_warmup = data_warmup[:, list(sample_columns.values())]
 
     return {
         "sample": sample_data,
+        "sample_columns": sample_columns,
         "sample_stats": sample_stats,
+        "sample_stats_columns": sample_stats_columns,
         "sample_warmup": sample_data_warmup,
         "sample_stats_warmup": sample_stats_warmup,
         "configuration_info": pconf,
@@ -716,7 +743,7 @@ def _process_data_var(string):
 
 
 def _read_data(path):
-    """Read Rdump output and transform to Python dictionary.
+    """Read Rdump output to dictionary.
 
     Parameters
     ----------
@@ -743,12 +770,14 @@ def _read_data(path):
     return data
 
 
-def _unpack_dataframes(dfs):
-    """Transform a list of pandas.DataFrames to dictionary containing ndarrays.
+def _unpack_ndarrays(arrays, columns, dtypes=None):
+    """Transform a list of ndarrays to dictionary containing ndarrays.
 
     Parameters
     ----------
-    dfs : List[pandas.DataFrame]
+    arrays : List[np.ndarray]
+    columns: Dict[str, int]
+    dtypes: Dict[str, Any]
 
     Returns
     -------
@@ -756,22 +785,21 @@ def _unpack_dataframes(dfs):
         key, values pairs. Values are formatted to shape = (nchain, ndraws, *shape)
     """
     col_groups = defaultdict(list)
-    columns = dfs[0].columns
-    for col in columns:
+    for col, col_idx in columns.items():
         key, *loc = col.split(".")
         loc = tuple(int(i) - 1 for i in loc)
-        col_groups[key].append((col, loc))
+        col_groups[key].append((col_idx, loc))
 
-    chains = len(dfs)
-    draws = len(dfs[0])
+    chains = len(arrays)
+    draws = len(arrays[0])
     sample = {}
     for key, cols_locs in col_groups.items():
         ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
-        dtype = dfs[0][cols_locs[0][0]].dtype
+        dtype = dtypes.get(key, float)
         sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
         for col, loc in cols_locs:
-            for chain_id, df in enumerate(dfs):
-                draw = df[col].values
+            for chain_id, arr in enumerate(arrays):
+                draw = arr[col]
                 if loc == ():
                     sample[key][chain_id, :] = draw
                 else:
@@ -799,6 +827,7 @@ def from_cmdstan(
     dims: Optional[DimSpec] = None,
     disable_glob: Optional[bool] = False,
     save_warmup: Optional[bool] = None,
+    dtypes: Optional[Dict] = None,
 ) -> InferenceData:
     """Convert CmdStan data into an InferenceData object.
 
@@ -846,6 +875,8 @@ def from_cmdstan(
     save_warmup : bool
         Save warmup iterations into InferenceData object, if found in the input files.
         If not defined, use default defined by the rcParams.
+    dtypes : dict
+        A dictionary containing dtype information (int, float) for parameters.
 
     Returns
     -------
@@ -868,4 +899,5 @@ def from_cmdstan(
         dims=dims,
         disable_glob=disable_glob,
         save_warmup=save_warmup,
+        dtypes=dtypes,
     ).to_inference_data()
