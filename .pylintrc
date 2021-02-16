@@ -70,9 +70,8 @@ disable=missing-docstring,
         unsubscriptable-object,
         cyclic-import,
         ungrouped-imports,
-	not-an-iterable
-	no-member
-	
+        not-an-iterable
+        no-member
         #TODO: Remove this once todos are done
         fixme
 
