@@ -788,19 +788,20 @@ def _unpack_ndarrays(arrays, columns, dtypes=None):
     chains = len(arrays)
     draws = len(arrays[0])
     sample = {}
-    for key, cols_locs in col_groups.items():
-        ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
-        dtype = dtypes.get(key, np.float64)
-        sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
-        for col, loc in cols_locs:
-            for chain_id, arr in enumerate(arrays):
-                draw = arr[:, col]
-                if loc == ():
-                    sample[key][chain_id, :] = draw
-                else:
-                    axis1_all = range(sample[key].shape[1])
-                    slicer = (chain_id, axis1_all, *loc)
-                    sample[key][slicer] = draw
+    if draws:
+        for key, cols_locs in col_groups.items():
+            ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
+            dtype = dtypes.get(key, np.float64)
+            sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
+            for col, loc in cols_locs:
+                for chain_id, arr in enumerate(arrays):
+                    draw = arr[:, col]
+                    if loc == ():
+                        sample[key][chain_id, :] = draw
+                    else:
+                        axis1_all = range(sample[key].shape[1])
+                        slicer = (chain_id, axis1_all, *loc)
+                        sample[key][slicer] = draw
     return sample
 
 
