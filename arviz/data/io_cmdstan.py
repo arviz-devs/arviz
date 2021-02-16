@@ -75,9 +75,7 @@ class CmdStanConverter:
         self.dims = dims if dims is not None else {}
 
         self.posterior = None
-        self.sample_stats = None
         self.prior = None
-        self.sample_stats_prior = None
         self.attrs = None
         self.attrs_prior = None
 
@@ -111,11 +109,6 @@ class CmdStanConverter:
             [item["sample_warmup"] for item in chain_data],
         )
         self.posterior_columns = columns["sample_columns"]
-
-        self.sample_stats = (
-            [item["sample_stats"] for item in chain_data],
-            [item["sample_stats_warmup"] for item in chain_data],
-        )
         self.sample_stats_columns = columns["sample_stats_columns"]
 
         attrs = {}
@@ -146,12 +139,6 @@ class CmdStanConverter:
             [item["sample_warmup"] for item in chain_data],
         )
         self.prior_columns = columns["sample_columns"]
-
-        self.sample_stats_prior = (
-            [item["sample_stats"] for item in chain_data],
-            [item["sample_stats_warmup"] for item in chain_data],
-        )
-
         self.sample_stats_prior_columns = columns["sample_stats_columns"]
 
         attrs = {}
@@ -218,7 +205,7 @@ class CmdStanConverter:
         )
 
     @requires("posterior")
-    @requires("sample_stats")
+    @requires("sample_stats_columns")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
         dtypes = {**self.dtypes, "diverging": bool, "n_steps": np.int64, "tree_depth": np.int64}
@@ -236,11 +223,21 @@ class CmdStanConverter:
             name = rename_dict.get(name, name)
             columns_new[name] = idx
 
-        data = _unpack_ndarrays(self.sample_stats[0], columns_new, dtypes)
-        data_warmup = _unpack_ndarrays(self.sample_stats[1], columns_new, dtypes)
+        data = _unpack_ndarrays(self.posterior[0], columns_new, dtypes)
+        data_warmup = _unpack_ndarrays(self.posterior[1], columns_new, dtypes)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs={item: key for key, item in rename_dict.items()},
+            ),
+            dict_to_dataset(
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs={item: key for key, item in rename_dict.items()},
+            ),
         )
 
     @requires("posterior")
@@ -420,7 +417,7 @@ class CmdStanConverter:
         )
 
     @requires("prior")
-    @requires("sample_stats_prior")
+    @requires("sample_stats_prior_columns")
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats from fit."""
         dtypes = {**self.dtypes, "diverging": bool, "n_steps": np.int64, "tree_depth": np.int64}
@@ -438,11 +435,21 @@ class CmdStanConverter:
             name = rename_dict.get(name, name)
             columns_new[name] = idx
 
-        data = _unpack_ndarrays(self.sample_stats_prior[0], columns_new, dtypes)
-        data_warmup = _unpack_ndarrays(self.sample_stats_prior[1], columns_new, dtypes)
+        data = _unpack_ndarrays(self.posterior[0], columns_new, dtypes)
+        data_warmup = _unpack_ndarrays(self.posterior[1], columns_new, dtypes)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs={item: key for key, item in rename_dict.items()},
+            ),
+            dict_to_dataset(
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs={item: key for key, item in rename_dict.items()},
+            ),
         )
 
     @requires("prior")
@@ -686,19 +693,11 @@ def _read_output(path):
     sample_stats_columns = {col: idx for col, idx in columns.items() if col.endswith("__")}
     sample_columns = {col: idx for col, idx in columns.items() if col not in sample_stats_columns}
 
-    sample_stats = data[:, list(sample_stats_columns.values())]
-    sample_data = data[:, list(sample_columns.values())]
-
-    sample_stats_warmup = data_warmup[:, list(sample_stats_columns.values())]
-    sample_data_warmup = data_warmup[:, list(sample_columns.values())]
-
     return {
-        "sample": sample_data,
+        "sample": data,
+        "sample_warmup": data_warmup,
         "sample_columns": sample_columns,
-        "sample_stats": sample_stats,
         "sample_stats_columns": sample_stats_columns,
-        "sample_warmup": sample_data_warmup,
-        "sample_stats_warmup": sample_stats_warmup,
         "configuration_info": pconf,
     }
 
@@ -791,11 +790,11 @@ def _unpack_ndarrays(arrays, columns, dtypes=None):
     sample = {}
     for key, cols_locs in col_groups.items():
         ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
-        dtype = dtypes.get(key, float)
+        dtype = dtypes.get(key, np.float64)
         sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
         for col, loc in cols_locs:
             for chain_id, arr in enumerate(arrays):
-                draw = arr[col]
+                draw = arr[:, col]
                 if loc == ():
                     sample[key][chain_id, :] = draw
                 else:
