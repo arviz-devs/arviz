@@ -308,6 +308,7 @@ class TestDataCmdStanPy:
         test_dict = {"sample_stats": ["lp", "diverging"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+        assert len(inference_data.sample_stats.lp.shape) == 2  # pylint: disable=no-member
 
     def test_inference_data(self, data, eight_schools_params):
         inference_data1 = self.get_inference_data(data, eight_schools_params)
@@ -354,6 +355,8 @@ class TestDataCmdStanPy:
         test_dict = {"posterior": ["theta"], "prior": ["theta"]}
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
+        assert len(inference_data4.posterior.theta.shape) == 3  # pylint: disable=no-member
+        assert len(inference_data4.posterior.mu.shape) == 2  # pylint: disable=no-member
 
     def test_inference_data_warmup(self, data, eight_schools_params):
         inference_data_true_is_true = self.get_inference_data_warmup_true_is_true(
@@ -429,4 +432,6 @@ class TestDataCmdStanPy:
         assert "warmup_posterior" not in inference_data_false_is_false
         assert "warmup_predictions" not in inference_data_false_is_false
         assert "warmup_log_likelihood" not in inference_data_false_is_false
-        assert "warmup_prior" not in inference_data_false_is_false
+        assert (
+            "warmup_prior" not in inference_data_false_is_false
+        )  # pylint: disable=redefined-outer-name
