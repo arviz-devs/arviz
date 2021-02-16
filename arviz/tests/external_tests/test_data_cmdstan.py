@@ -64,7 +64,7 @@ class TestDataCmdStan:
                 continue
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, "sample_stats")
-            assert "comments" in inference_data.sample_stats.attrs
+            assert "step_size" in inference_data.sample_stats.attrs
 
     def test_inference_data_shapes(self, paths):
         """Assert that shapes are transformed correctly"""
