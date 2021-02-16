@@ -99,24 +99,24 @@ class CmdStanConverter:
             paths = [paths]
 
         chain_data = []
-        chain_columns = None
+        columns = None
         for path in paths:
             output_data = _read_output(path)
             chain_data.append(output_data)
-            if chain_columns is None:
-                chain_columns = chain_data
+            if columns is None:
+                columns = output_data
 
         self.posterior = (
             [item["sample"] for item in chain_data],
             [item["sample_warmup"] for item in chain_data],
         )
-        self.posterior_columns = chain_columns["sample_columns"]
+        self.posterior_columns = columns["sample_columns"]
 
         self.sample_stats = (
             [item["sample_stats"] for item in chain_data],
             [item["sample_stats_warmup"] for item in chain_data],
         )
-        self.sample_stats_columns = chain_columns["sample_stats_columns"]
+        self.sample_stats_columns = columns["sample_stats_columns"]
 
         attrs = {}
         for item in chain_data:
@@ -134,25 +134,25 @@ class CmdStanConverter:
             paths = [paths]
 
         chain_data = []
-        chain_columns = None
+        columns = None
         for path in paths:
             output_data = _read_output(path)
             chain_data.append(output_data)
-            if chain_columns is None:
-                chain_columns = output_data
+            if columns is None:
+                columns = output_data
 
         self.prior = (
             [item["sample"] for item in chain_data],
             [item["sample_warmup"] for item in chain_data],
         )
-        self.prior_columns = chain_columns["sample_columns"]
+        self.prior_columns = columns["sample_columns"]
 
         self.sample_stats_prior = (
             [item["sample_stats"] for item in chain_data],
             [item["sample_stats_warmup"] for item in chain_data],
         )
 
-        self.sample_stats_prior_columns = chain_columns["sample_stats_columns"]
+        self.sample_stats_prior_columns = columns["sample_stats_columns"]
 
         attrs = {}
         for item in chain_data:
@@ -673,7 +673,11 @@ def _read_output(path):
     pconf = _process_configuration(comments)
 
     # split dataframe to warmup and draws
-    saved_warmup = int(pconf.get("save_warmup", 0)) * int(pconf.get("num_warmup", 0)) // int(pconf.get("thin", 1))
+    saved_warmup = (
+        int(pconf.get("save_warmup", 0))
+        * int(pconf.get("num_warmup", 0))
+        // int(pconf.get("thin", 1))
+    )
 
     data_warmup = data[:saved_warmup]
     data = data[saved_warmup:]
