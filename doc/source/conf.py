@@ -118,6 +118,8 @@ language = None
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ["_build", "build", "Thumbs.db", ".DS_Store", "notebooks/.ipynb_checkpoints"]
+# configure notfound extension to not add any prefix to the urls
+notfound_urls_prefix = "/arviz/"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
