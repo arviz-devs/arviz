@@ -179,6 +179,7 @@ def _plot_posterior_op(
                 '{"var_name": {"rope": (lo, hi)}}, or an'
                 "iterable of length 2"
             )
+        rope_text = [f"{val:.{format_sig_figs(val, round_to)}g}" for val in vals]
 
         ax.line(
             vals,
@@ -192,7 +193,7 @@ def _plot_posterior_op(
             text_font_size="{}pt".format(ax_labelsize), text_color="black", text_align="center"
         )
 
-        ax.text(x=vals, y=[max_data * 0.2, max_data * 0.2], text=list(map(str, vals)), **text_props)
+        ax.text(x=vals, y=[max_data * 0.2, max_data * 0.2], text=rope_text, **text_props)
 
     def display_point_estimate(max_data):
         if not point_estimate:
