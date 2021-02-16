@@ -208,7 +208,7 @@ class CmdStanConverter:
     @requires("sample_stats_columns")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
-        dtypes = {**self.dtypes, "diverging": bool, "n_steps": np.int64, "tree_depth": np.int64}
+        dtypes = {"diverging": bool, "n_steps": np.int64, "tree_depth": np.int64, **self.dtypes}
         rename_dict = {
             "divergent": "diverging",
             "n_leapfrog": "n_steps",
@@ -420,7 +420,7 @@ class CmdStanConverter:
     @requires("sample_stats_prior_columns")
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats from fit."""
-        dtypes = {**self.dtypes, "diverging": bool, "n_steps": np.int64, "tree_depth": np.int64}
+        dtypes = {"diverging": bool, "n_steps": np.int64, "tree_depth": np.int64, **self.dtypes}
         rename_dict = {
             "divergent": "diverging",
             "n_leapfrog": "n_steps",
