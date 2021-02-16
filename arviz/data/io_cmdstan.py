@@ -7,6 +7,7 @@ from glob import glob
 from typing import Dict, List, Optional, Union
 
 import numpy as np
+import pandas as pd
 import xarray as xr
 
 from .. import utils
@@ -644,8 +645,8 @@ def _read_output_file(path):
     comments = []
     data = []
     columns = None
-    # read comments
     with open(path, "rb") as f_obj:
+        # read header
         for line in f_obj:
             if line.startswith(b"#"):
                 comments.append(line.decode("utf-8").strip())
@@ -653,14 +654,32 @@ def _read_output_file(path):
             columns = {key: idx for idx, key in enumerate(line.strip().decode("utf-8").split(","))}
             break
 
-        for line in f_obj:
-            if line.startswith(b"#"):
-                comments.append(line.decode("utf-8").strip())
-                continue
-            if line.strip():
-                data.append(np.array(line.strip().split(b","), dtype=float))
+        if len(columns) > 20_000:
+            for line in f_obj:
+                line = line.strip()
+                if line.startswith(b"#"):
+                    comments.append(line.decode("utf-8"))
+                    continue
+                if line:
+                    data.append(line.split(b","))
 
-    return columns, np.array(data), comments
+            data = np.array(data, dtype=np.float64)
+        else:
+            f_obj_loc = f_obj.tell()
+            for line in f_obj:
+                if line.startswith(b"#"):
+                    comments.append(line.strip().decode("utf-8"))
+                    continue
+            f_obj.seek(f_obj_loc)
+            data = pd.read_csv(
+                f_obj,
+                header=None,
+                comment="#",
+                float_precision=rcParams["data.pandas_float_precision"],
+                dtype=np.float64,
+            ).values
+
+    return columns, data, comments
 
 
 def _read_output(path):
