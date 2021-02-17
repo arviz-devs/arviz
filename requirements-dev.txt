@@ -1,8 +1,7 @@
 astroid
 numpydoc
 pydocstyle
-pylint == 2.6.0
-astroid < 2.5
+pylint
 pytest
 pytest-cov
 black ; python_version >= '3.6'
