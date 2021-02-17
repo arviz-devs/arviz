@@ -65,6 +65,7 @@ class TestDataCmdStan:
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, "sample_stats")
             assert "step_size" in inference_data.sample_stats.attrs
+            assert inference_data.sample_stats.attrs["step_size"] == "stepsize"
 
     def test_inference_data_shapes(self, paths):
         """Assert that shapes are transformed correctly"""
@@ -174,6 +175,7 @@ class TestDataCmdStan:
                     "y_hat": ["school"],
                     "eta": ["school"],
                 },
+                dtypes={"theta": np.int64},
             )
             test_dict = {
                 "posterior": ["mu", "tau", "theta_tilde", "theta"],
@@ -189,6 +191,7 @@ class TestDataCmdStan:
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
+            assert isinstance(inference_data.posterior.theta, np.integer)
 
     def test_inference_data_input_types3(self, paths, observed_data_paths):
         """Check input types (change, see earlier)

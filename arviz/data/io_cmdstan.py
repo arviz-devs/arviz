@@ -649,35 +649,15 @@ def _read_output_file(path):
         # read header
         for line in f_obj:
             if line.startswith(b"#"):
-                comments.append(line.decode("utf-8").strip())
+                comments.append(line.strip().decode("utf-8"))
                 continue
-            columns = {key: idx for idx, key in enumerate(line.strip().decode("utf-8").split(","))}
-            break
-
-        if len(columns) > 20_000:
-            for line in f_obj:
-                line = line.strip()
-                if line.startswith(b"#"):
-                    comments.append(line.decode("utf-8"))
-                    continue
-                if line:
-                    data.append(line.split(b","))
-
-            data = np.array(data, dtype=np.float64)
-        else:
-            f_obj_loc = f_obj.tell()
-            for line in f_obj:
-                if line.startswith(b"#"):
-                    comments.append(line.strip().decode("utf-8"))
-                    continue
-            f_obj.seek(f_obj_loc)
-            data = pd.read_csv(
-                f_obj,
-                header=None,
-                comment="#",
-                float_precision=rcParams["data.pandas_float_precision"],
-                dtype=np.float64,
-            ).values
+            if columns is None:
+                columns = {
+                    key: idx for idx, key in enumerate(line.strip().decode("utf-8").split(","))
+                }
+                header_location = f_obj.tell()
+        f_obj.seek(header_location)
+        data = np.genfromtxt(f_obj, dtype=np.floating, comments=b"#", delimiter=b",")
 
     return columns, data, comments
 
