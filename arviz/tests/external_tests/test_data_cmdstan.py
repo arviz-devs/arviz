@@ -191,7 +191,7 @@ class TestDataCmdStan:
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
-            assert isinstance(inference_data.posterior.theta, np.integer)
+            assert isinstance(inference_data.posterior.theta.data.flat[0], np.integer)
 
     def test_inference_data_input_types3(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
