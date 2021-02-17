@@ -482,11 +482,11 @@ class CmdStanConverter:
         else:
             if isinstance(prior_predictive, str):
                 prior_predictive = [prior_predictive]
-            columns = [
-                col
-                for col in self.prior_columns
+            columns = {
+                col: idx
+                for col, idx in self.prior_columns.items()
                 if any(item == col.split(".")[0] for item in prior_predictive)
-            ]
+            }
             data = _unpack_ndarrays(self.prior[0], columns, self.dtypes)
             data_warmup = _unpack_ndarrays(self.prior[1], columns, self.dtypes)
             attrs = None
@@ -644,6 +644,7 @@ def _read_output_file(path):
     comments = []
     data = []
     columns = None
+    header_location = None
     with open(path, "rb") as f_obj:
         # read header
         for line in f_obj:
@@ -655,6 +656,8 @@ def _read_output_file(path):
                     key: idx for idx, key in enumerate(line.strip().decode("utf-8").split(","))
                 }
                 header_location = f_obj.tell()
+        if header_location is None:
+            raise ValueError("Invalid cvs file: header is missing")
         f_obj.seek(header_location)
         data = np.genfromtxt(f_obj, dtype=np.floating, comments=b"#", delimiter=b",")
 
