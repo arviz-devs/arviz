@@ -157,7 +157,13 @@ def _plot_posterior_op(
         )
         ax.line([val, val], [0, 0.8 * max_data], line_color="darkorange", line_alpha=0.65)
 
-        ax.text(x=[values.mean()], y=[max_data * 0.6], text=[ref_in_posterior], text_color='darkorange', text_align="center")
+        ax.text(
+            x=[values.mean()],
+            y=[max_data * 0.6],
+            text=[ref_in_posterior],
+            text_color="darkorange",
+            text_align="center",
+        )
 
     def display_rope(max_data):
         if rope is None:
@@ -189,9 +195,7 @@ def _plot_posterior_op(
             line_alpha=0.7,
         )
         probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
-        text_props = dict(
-            text_color="green", text_align="center"
-        )
+        text_props = dict(text_color="green", text_align="center")
         ax.text(
             x=values.mean(),
             y=[max_data * 0.45],
@@ -199,7 +203,13 @@ def _plot_posterior_op(
             **text_props,
         )
 
-        ax.text(x=vals, y=[max_data * 0.2, max_data * 0.2], text=rope_text, **text_props)
+        ax.text(
+            x=vals,
+            y=[max_data * 0.2, max_data * 0.2],
+            text_font_size="{}pt".format(ax_labelsize),
+            text=rope_text,
+            **text_props,
+        )
 
     def display_point_estimate(max_data):
         if not point_estimate:
