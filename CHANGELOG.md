@@ -10,11 +10,12 @@
 * Fix calculation of mode as point estimate ([1552](https://github.com/arviz-devs/arviz/pull/1552))
 * Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
 * Added significant digits formatter to round rope values ([1569](https://github.com/arviz-devs/arviz/pull/1569))
+* Updated `from_cmdstan`. csv reader, dtype problem fixed and dtype kwarg added for manual dtype casting ([1565](https://github.com/arviz-devs/arviz/pull/1565))
 
 
 ### Deprecation
 * Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
-* Removed credible_interval and include_circ arguments ([1548](https://github.com/arviz-devs/arviz/pull/1548)) 
+* Removed credible_interval and include_circ arguments ([1548](https://github.com/arviz-devs/arviz/pull/1548))
 
 ### Documentation
 * Added an example for converting dataframe to InferenceData ([1556](https://github.com/arviz-devs/arviz/pull/1556))

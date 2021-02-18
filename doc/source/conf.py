@@ -60,7 +60,7 @@ extensions = [
     "gallery_generator",
     "myst_nb",
     "sphinx_panels",
-    "notfound.extension"
+    "notfound.extension",
 ]
 
 # ipython directive configuration
