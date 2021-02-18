@@ -155,9 +155,9 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        ax.line([val, val], [0, 0.8 * max_data], line_color="blue", line_alpha=0.65)
+        ax.line([val, val], [0, 0.8 * max_data], line_color="darkorange", line_alpha=0.65)
 
-        ax.text(x=[values.mean()], y=[max_data * 0.6], text=[ref_in_posterior], text_align="center")
+        ax.text(x=[values.mean()], y=[max_data * 0.6], text=[ref_in_posterior], text_color='darkorange', text_align="center")
 
     def display_rope(max_data):
         if rope is None:
@@ -185,19 +185,18 @@ def _plot_posterior_op(
             vals,
             (max_data * 0.02, max_data * 0.02),
             line_width=linewidth * 5,
-            line_color="red",
+            line_color="green",
             line_alpha=0.7,
         )
         probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
+        text_props = dict(
+            text_color="green", text_align="center"
+        )
         ax.text(
             x=values.mean(),
             y=[max_data * 0.45],
             text=[f"{format_as_percent(probability_within_rope, 1)} in ROPE"],
-            text_align="center",
-        )
-
-        text_props = dict(
-            text_font_size="{}pt".format(ax_labelsize), text_color="black", text_align="center"
+            **text_props,
         )
 
         ax.text(x=vals, y=[max_data * 0.2, max_data * 0.2], text=rope_text, **text_props)
