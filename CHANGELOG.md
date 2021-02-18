@@ -9,6 +9,7 @@
 * Updated `from_cmdstanpy`, `from_cmdstan`, `from_numpyro` and `from_pymc3` converters to follow schema convention ([1550](https://github.com/arviz-devs/arviz/pull/1550), [1541](https://github.com/arviz-devs/arviz/pull/1541), [1525](https://github.com/arviz-devs/arviz/pull/1525) and [1555](https://github.com/arviz-devs/arviz/pull/1555))
 * Fix calculation of mode as point estimate ([1552](https://github.com/arviz-devs/arviz/pull/1552))
 * Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
+* Added significant digits formatter to round rope values ([1569](https://github.com/arviz-devs/arviz/pull/1569))
 
 
 ### Deprecation

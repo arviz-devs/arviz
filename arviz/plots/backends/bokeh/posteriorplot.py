@@ -88,7 +88,7 @@ def plot_posterior(
             ref_val=ref_val,
             rope=rope,
             ax_labelsize=ax_labelsize,
-            **kwargs
+            **kwargs,
         )
         idx += 1
         _title = Title()
@@ -119,7 +119,7 @@ def _plot_posterior_op(
     rope,
     ax_labelsize,
     round_to: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ):  # noqa: D202
     """Artist to draw posterior."""
 
