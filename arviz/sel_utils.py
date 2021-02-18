@@ -134,11 +134,13 @@ def xarray_sel_iter(data, var_names=None, combined=False, skip_dims=None, revers
             new_dims = _dims(data, var_name, skip_dims)
             vals = [purge_duplicates(data[var_name][dim].values) for dim in new_dims]
             dims = _zip_dims(new_dims, vals)
+            idims = _zip_dims(new_dims, [range(len(v)) for v in vals])
             if reverse_selections:
                 dims = reversed(dims)
+                idims = reversed(idims)
 
-            for selection in dims:
-                yield var_name, selection
+            for selection, iselection in zip(dims, idims):
+                yield var_name, selection, iselection
 
 
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
@@ -174,14 +176,14 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
     if var_names is None and isinstance(data, xr.DataArray):
         data_to_sel = {data.name: data}
 
-    for var_name, selection in xarray_sel_iter(
+    for var_name, selection, iselection in xarray_sel_iter(
         data,
         var_names=var_names,
         combined=combined,
         skip_dims=skip_dims,
         reverse_selections=reverse_selections,
     ):
-        yield var_name, selection, data_to_sel[var_name].sel(**selection).values
+        yield var_name, selection, iselection, data_to_sel[var_name].sel(**selection).values
 
 
 def xarray_to_ndarray(data, *, var_names=None, combined=True):
@@ -213,12 +215,14 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
 
     iterator1, iterator2 = tee(xarray_sel_iter(data, var_names=var_names, combined=combined))
     vars_and_sel = list(iterator1)
-    unpacked_var_names = [make_label(var_name, selection) for var_name, selection in vars_and_sel]
+    unpacked_var_names = [
+        make_label(var_name, selection) for var_name, selection, _ in vars_and_sel
+    ]
 
     # Merge chains and variables, check dtype to be compatible with divergences data
     data0 = data_to_sel[vars_and_sel[0][0]].sel(**vars_and_sel[0][1])
     unpacked_data = np.empty((len(unpacked_var_names), data0.size), dtype=data0.dtype)
-    for idx, (var_name, selection) in enumerate(iterator2):
+    for idx, (var_name, selection, _) in enumerate(iterator2):
         unpacked_data[idx] = data_to_sel[var_name].sel(**selection).values.flatten()
 
     return unpacked_var_names, unpacked_data

@@ -4,7 +4,6 @@ from bokeh.models import DataRange1d, BoxAnnotation
 from bokeh.models.annotations import Title
 
 
-from ....sel_utils import make_label
 from ....stats import autocorr
 from ...plot_utils import _scale_fig_size
 from .. import show_layout
@@ -20,6 +19,7 @@ def plot_autocorr(
     cols,
     combined,
     textsize,
+    labeller,
     backend_config,
     backend_kwargs,
     show,
@@ -70,7 +70,7 @@ def plot_autocorr(
         start=-1, end=1, bounds=backend_config["bounds_y_range"], min_interval=0.1
     )
 
-    for (var_name, selection, x), ax in zip(
+    for (var_name, selection, isel, x), ax in zip(
         plotters, (item for item in axes.flatten() if item is not None)
     ):
         x_prime = x
@@ -90,7 +90,7 @@ def plot_autocorr(
         )
 
         title = Title()
-        title.text = make_label(var_name, selection)
+        title.text = labeller.make_label_vert(var_name, selection, isel)
         ax.title = title
         ax.x_range = data_range_x
         ax.y_range = data_range_y

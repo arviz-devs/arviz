@@ -1,5 +1,6 @@
 """Autocorrelation plot of data."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..utils import _var_names
@@ -15,6 +16,7 @@ def plot_autocorr(
     grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_config=None,
@@ -53,6 +55,8 @@ def plot_autocorr(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -111,6 +115,9 @@ def plot_autocorr(
     if max_lag is None:
         max_lag = min(100, data["draw"].shape[0])
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     plotters = filter_plotters_list(
         list(xarray_var_iter(data, var_names, combined)), "plot_autocorr"
     )
@@ -125,6 +132,7 @@ def plot_autocorr(
         cols=cols,
         combined=combined,
         textsize=textsize,
+        labeller=labeller,
         backend_kwargs=backend_kwargs,
         show=show,
     )

@@ -1132,9 +1132,10 @@ def summary(
                 raise TypeError(f"InferenceData does not contain group: {group}")
             dataset = data[group]
     else:
-        dataset = convert_to_dataset(data, group="posterior")
+        dataset = get_coords(convert_to_dataset(data, group="posterior"), coords)
     var_names = _var_names(var_names, dataset, filter_vars)
     dataset = dataset if var_names is None else dataset[var_names]
+
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
@@ -1281,9 +1282,9 @@ def summary(
     if fmt.lower() == "wide":
         summary_df = pd.DataFrame(np.full((n_vars, n_metrics), np.nan), columns=metric_names)
         indexs = []
-        for i, (var_name, sel, values) in enumerate(xarray_var_iter(joined, skip_dims={"metric"})):
+        for i, (var_name, sel, isel, values) in enumerate(xarray_var_iter(joined, skip_dims={"metric"})):
             summary_df.iloc[i] = values
-            indexs.append(labeller.make_label_flat(var_name, sel, sel))
+            indexs.append(labeller.make_label_flat(var_name, sel, isel))
         summary_df.index = indexs
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")

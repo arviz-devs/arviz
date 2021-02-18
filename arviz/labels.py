@@ -23,6 +23,8 @@ class BaseLabeller:
         if not sel:
             return var_name_str
         sel_str = self.sel_to_str(sel, isel)
+        if not var_name:
+            return sel_str
         return f"{var_name_str}\n{sel_str}"
 
     def make_label_flat(self, var_name: str, sel: dict, isel: dict):
@@ -30,17 +32,19 @@ class BaseLabeller:
         if not sel:
             return var_name_str
         sel_str = self.sel_to_str(sel, isel)
-        return f"{var_name_str}: {sel_str}"
+        if not var_name:
+            return sel_str
+        return f"{var_name_str}[{sel_str}]"
 
 
 class DimCoordLabeller(BaseLabeller):
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
-        return f"{dim}[{coord_val}]"
+        return f"{dim}: {coord_val}"
 
 
 class DimIdxLabeller(BaseLabeller):
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
-        return f"{dim}[{coord_idx}]"
+        return f"{dim}#{coord_idx}"
 
 
 class MapLabeller(BaseLabeller):
@@ -52,7 +56,7 @@ class MapLabeller(BaseLabeller):
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
         dim_str = self.dim_map.get(dim, dim)
         coord_str = self.coord_map.get(coord_val, coord_val)
-        return f"{dim_str}[{coord_str}]"
+        return super().dim_coord_to_str(dim_str, coord_str, coord_idx)
 
     def var_name_to_str(self, var_name):
         return self.var_name_map.get(var_name, var_name)
