@@ -188,12 +188,10 @@ def _plot_posterior_op(
             line_color="red",
             line_alpha=0.7,
         )
-        less_than_left_probability = (values < vals[0]).mean()
-        less_than_right_probability = (values <= vals[1]).mean()
-        probability_within_rope = less_than_right_probability - less_than_left_probability
+        probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
         ax.text(
-            x=(vals[0]+vals[1])/2,
-            y=[max_data * 0.5],
+            x=values.mean(),
+            y=[max_data * 0.45],
             text=[f"{format_as_percent(probability_within_rope, 1)} in ROPE"],
             text_align="center",
         )

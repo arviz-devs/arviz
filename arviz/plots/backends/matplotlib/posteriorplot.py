@@ -201,12 +201,10 @@ def _plot_posterior_op(
             alpha=0.7,
         )
         text_props = {"size": ax_labelsize, "color": "C2"}
-        less_than_left_probability = (values < vals[0]).mean()
-        less_than_right_probability = (values <= vals[1]).mean()
-        probability_within_rope = less_than_right_probability - less_than_left_probability
+        probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
         ax.text(
-            (vals[0]+vals[1])/2,
-            plot_height * 0.5,
+            values.mean(),
+            plot_height * 0.45,
             f"{format_as_percent(probability_within_rope, 1)} in ROPE",
             weight="semibold",
             horizontalalignment="center",
