@@ -2,7 +2,7 @@
 """Statistical functions in ArviZ."""
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -11,7 +11,7 @@ import xarray as xr
 from scipy.optimize import minimize
 
 from arviz import _log
-from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
+from ..data import CoordSpec, InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams
 from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
@@ -24,7 +24,8 @@ from .stats_utils import logsumexp as _logsumexp
 from .stats_utils import make_ufunc as _make_ufunc
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
-from ..sel_utils import make_label, xarray_var_iter
+from ..sel_utils import xarray_var_iter
+from ..labels import BaseLabeller
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -974,11 +975,11 @@ def summary(
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
-    order=None,
-    index_origin=None,
     skipna=False,
-    coords: Optional[CoordSpec] = None,
-    dims: Optional[DimSpec] = None,
+    labeller=None,
+    coords = None,
+    index_origin=None,
+    order=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -1098,11 +1099,8 @@ def summary(
     """
     _log.cache = []
 
-    extra_args = {}  # type: Dict[str, Any]
     if coords is not None:
-        extra_args["coords"] = coords
-    if dims is not None:
-        extra_args["dims"] = dims
+        coords = {}
     if index_origin is not None:
         warnings.warn(
             "index_origin has been deprecated. summary now shows coordinate values, "
@@ -1110,6 +1108,8 @@ def summary(
             DeprecationWarning,
         )
         index_origin = rcParams["data.index_origin"]
+    if labeller is None:
+        labeller = BaseLabeller()
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
@@ -1132,7 +1132,7 @@ def summary(
                 raise TypeError(f"InferenceData does not contain group: {group}")
             dataset = data[group]
     else:
-        dataset = convert_to_dataset(data, group="posterior", **extra_args)
+        dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset, filter_vars)
     dataset = dataset if var_names is None else dataset[var_names]
 
@@ -1283,7 +1283,7 @@ def summary(
         indexs = []
         for i, (var_name, sel, values) in enumerate(xarray_var_iter(joined, skip_dims={"metric"})):
             summary_df.iloc[i] = values
-            indexs.append(make_label(var_name, sel, position="beside"))
+            indexs.append(labeller.make_label_flat(var_name, sel, sel))
         summary_df.index = indexs
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
