@@ -657,7 +657,7 @@ def _read_output_file(path):
         for line in f_obj:
             line = line.strip()
             if line.startswith(b"#"):
-                comments.append(line.strip().decode("utf-8"))
+                comments.append(line.decode("utf-8"))
                 continue
             if line:
                 data.append(np.array(line.split(b","), dtype=np.float64))
