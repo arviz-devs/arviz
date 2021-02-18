@@ -187,6 +187,7 @@ def _plot_posterior_op(
                 '{"var_name": {"rope": (lo, hi)}}, or an'
                 "iterable of length 2"
             )
+        rope_text = [f"{val:.{format_sig_figs(val, round_to)}g}" for val in vals]
 
         ax.plot(
             vals,
@@ -201,7 +202,7 @@ def _plot_posterior_op(
         ax.text(
             vals[0],
             plot_height * 0.2,
-            f"{vals[0]} ",
+            rope_text[0],
             weight="semibold",
             horizontalalignment="right",
             **text_props,
@@ -209,7 +210,7 @@ def _plot_posterior_op(
         ax.text(
             vals[1],
             plot_height * 0.2,
-            f" {vals[1]}",
+            rope_text[1],
             weight="semibold",
             horizontalalignment="left",
             **text_props,
