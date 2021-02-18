@@ -641,27 +641,28 @@ def _process_configuration(comments):
 
 
 def _read_output_file(path):
+    """Read Stan csv file to ndarray."""
     comments = []
     data = []
     columns = None
-    header_location = None
     with open(path, "rb") as f_obj:
         # read header
         for line in f_obj:
             if line.startswith(b"#"):
                 comments.append(line.strip().decode("utf-8"))
                 continue
-            if columns is None:
-                columns = {
-                    key: idx for idx, key in enumerate(line.strip().decode("utf-8").split(","))
-                }
-                header_location = f_obj.tell()
-        if header_location is None:
-            raise ValueError("Invalid cvs file: header is missing")
-        f_obj.seek(header_location)
-        data = np.genfromtxt(f_obj, dtype=np.floating, comments=b"#", delimiter=b",")
+            columns = {key: idx for idx, key in enumerate(line.strip().decode("utf-8").split(","))}
+            break
+        # read data
+        for line in f_obj:
+            line = line.strip()
+            if line.startswith(b"#"):
+                comments.append(line.strip().decode("utf-8"))
+                continue
+            if line:
+                data.append(np.array(line.split(b","), dtype=np.float64))
 
-    return columns, data, comments
+    return columns, np.array(data, dtype=np.float64), comments
 
 
 def _read_output(path):
