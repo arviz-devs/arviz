@@ -5,7 +5,6 @@ from scipy import stats
 
 from ....stats.density_utils import kde
 from ....stats.stats_utils import smooth_data
-from ....sel_utils import make_label
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
@@ -34,6 +33,7 @@ def plot_bpv(
     color,
     figsize,
     textsize,
+    labeller,
     plot_ref_kwargs,
     backend_kwargs,
     show,
@@ -82,8 +82,8 @@ def plot_bpv(
             )
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
-        var_name, selection, obs_vals = obs_plotters[i]
-        pp_var_name, _, pp_vals = pp_plotters[i]
+        var_name, selection, isel, obs_vals = obs_plotters[i]
+        pp_var_name, _, _, pp_vals = pp_plotters[i]
 
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
@@ -171,7 +171,7 @@ def plot_bpv(
             xlabel = "{} / {}".format(var_name, pp_var_name)
         else:
             xlabel = var_name
-        ax_i.set_title(make_label(xlabel, selection), fontsize=ax_labelsize)
+        ax_i.set_title(labeller.make_label_vert(xlabel, selection, isel), fontsize=ax_labelsize)
 
     if backend_show(show):
         plt.show()

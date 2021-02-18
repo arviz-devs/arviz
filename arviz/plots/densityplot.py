@@ -2,8 +2,8 @@
 import warnings
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..sel_utils import (
-    make_label,
     xarray_var_iter,
 )
 from ..rcparams import rcParams
@@ -29,6 +29,7 @@ def plot_density(
     grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
@@ -95,6 +96,8 @@ def plot_density(
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -172,6 +175,9 @@ def plot_density(
     if transform is not None:
         datasets = [transform(dataset) for dataset in datasets]
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     var_names = _var_names(var_names, datasets)
     n_data = len(datasets)
 
@@ -197,8 +203,8 @@ def plot_density(
     length_plotters = []
     for plotters in to_plot:
         length_plotters.append(len(plotters))
-        for var_name, selection, _ in plotters:
-            label = make_label(var_name, selection)
+        for var_name, selection, isel, _ in plotters:
+            label = labeller.make_label_vert(var_name, selection, isel)
             if label not in all_labels:
                 all_labels.append(label)
     length_plotters = len(all_labels)
@@ -215,8 +221,8 @@ def plot_density(
         to_plot = [
             [
                 (var_name, selection, values)
-                for var_name, selection, values in plotters
-                if make_label(var_name, selection) in all_labels
+                for var_name, selection, isel, values in plotters
+                if labeller.make_label_vert(var_name, selection, isel) in all_labels
             ]
             for plotters in to_plot
         ]
@@ -241,6 +247,7 @@ def plot_density(
         rows=rows,
         cols=cols,
         textsize=textsize,
+        labeller=labeller,
         hdi_prob=hdi_prob,
         point_estimate=point_estimate,
         hdi_markers=hdi_markers,

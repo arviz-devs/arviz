@@ -1027,6 +1027,8 @@ def summary(
     skipna: bool
         If true ignores nan values when computing the summary statistics, it does not affect the
         behaviour of the functions passed to ``stat_funcs``. Defaults to false.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_flat` to generate the labels in the plot titles.
     coords: Dict[str, List[Any]], optional
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional

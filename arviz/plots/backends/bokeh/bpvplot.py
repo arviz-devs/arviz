@@ -36,6 +36,7 @@ def plot_bpv(
     color,
     figsize,
     textsize,
+    labeller,
     plot_ref_kwargs,
     backend_kwargs,
     show,
@@ -83,8 +84,8 @@ def plot_bpv(
             )
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
-        var_name, _, obs_vals = obs_plotters[i]
-        pp_var_name, _, pp_vals = pp_plotters[i]
+        var_name, sel, isel, obs_vals = obs_plotters[i]
+        pp_var_name, _, _, pp_vals = pp_plotters[i]
 
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
@@ -175,12 +176,12 @@ def plot_bpv(
                     obs_vals.mean(), 0, fill_color=color, line_color="black", size=markersize
                 )
 
-        if var_name != pp_var_name:
-            xlabel = "{} / {}".format(var_name, pp_var_name)
-        else:
-            xlabel = var_name
+        # if var_name != pp_var_name:
+        #     xlabel = "{} / {}".format(var_name, pp_var_name)
+        # else:
+        #     xlabel = var_name
         _title = Title()
-        _title.text = xlabel
+        _title.text = labeller.make_label_vert(var_name, sel, isel)
         ax_i.title = _title
         size = str(int(ax_labelsize))
         ax_i.title.text_font_size = f"{size}pt"

@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from bokeh.models.annotations import Legend, Title
 
-from ....sel_utils import make_label
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ...plot_utils import _scale_fig_size, calculate_point_estimate, vectorized_to_hex
@@ -26,6 +25,7 @@ def plot_density(
     rows,
     cols,
     textsize,
+    labeller,
     hdi_prob,
     point_estimate,
     hdi_markers,
@@ -79,8 +79,8 @@ def plot_density(
 
     legend_items = defaultdict(list)
     for m_idx, plotters in enumerate(to_plot):
-        for var_name, selection, values in plotters:
-            label = make_label(var_name, selection)
+        for var_name, selection, isel, values in plotters:
+            label = labeller.make_label_vert(var_name, selection, isel)
 
             if data_labels:
                 data_label = data_labels[m_idx]
