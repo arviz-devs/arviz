@@ -100,21 +100,21 @@ def test_xarray_var_iter_ordering():
         dims={"x": ["in_order"]},
     ).posterior
 
-    coord_names = [sel["in_order"] for _, sel, _ in xarray_var_iter(data)]
+    coord_names = [sel["in_order"] for _, sel, _, _ in xarray_var_iter(data)]
     assert coord_names == coords
 
 
 def test_xarray_var_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are combined"""
     _, _, data = sample_dataset
-    var_names = [var for (var, _, _) in xarray_var_iter(data, var_names=None, combined=True)]
+    var_names = [var for (var, _, _, _) in xarray_var_iter(data, var_names=None, combined=True)]
     assert set(var_names) == {"mu", "tau"}
 
 
 def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are not combined"""
     _, _, data = sample_dataset
-    var_names = [(var, selection) for (var, selection, _) in xarray_var_iter(data, var_names=None)]
+    var_names = [(var, selection) for (var, selection, _, _) in xarray_var_iter(data, var_names=None)]
 
     assert len(var_names) == 4
     for var_name in var_names:
@@ -132,7 +132,7 @@ def test_xarray_var_data_array(sample_dataset):  # pylint: disable=invalid-name
     Touches code that is hard to reach.
     """
     _, _, data = sample_dataset
-    var_names = [var for (var, _, _) in xarray_var_iter(data.mu, var_names=None, combined=True)]
+    var_names = [var for (var, _, _, _) in xarray_var_iter(data.mu, var_names=None, combined=True)]
     assert set(var_names) == {"mu"}
 
 
