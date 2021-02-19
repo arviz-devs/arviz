@@ -1,4 +1,5 @@
 """Density Comparison plot."""
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
 from .plot_utils import get_plotting_function
@@ -14,6 +15,7 @@ def plot_dist_comparison(
     coords=None,
     transform=None,
     legend=True,
+    labeller=None,
     ax=None,
     prior_kwargs=None,
     posterior_kwargs=None,
@@ -95,6 +97,9 @@ def plot_dist_comparison(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     datasets = []
     groups = []
     for group in all_groups:
@@ -138,6 +143,7 @@ def plot_dist_comparison(
         legend=legend,
         groups=groups,
         textsize=textsize,
+        labeller=labeller,
         prior_kwargs=prior_kwargs,
         posterior_kwargs=posterior_kwargs,
         observed_kwargs=observed_kwargs,

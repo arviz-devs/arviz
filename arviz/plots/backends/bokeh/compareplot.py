@@ -44,9 +44,6 @@ def plot_compare(
     yticks_pos = list(yticks_pos)
 
     if plot_ic_diff:
-        yticks_labels[0] = comp_df.index[0]
-        yticks_labels[2::2] = comp_df.index[1:]
-
         ax.yaxis.ticker = yticks_pos
         ax.yaxis.major_label_overrides = {
             dtype(key): value
@@ -77,15 +74,14 @@ def plot_compare(
         ax.multi_line(err_xs, err_ys, line_color=plot_kwargs.get("color_dse", "grey"))
 
     else:
-        yticks_labels = comp_df.index
-        ax.yaxis.ticker = yticks_pos[::2]
+        ax.yaxis.ticker = yticks_pos
         ax.yaxis.major_label_overrides = {
-            key: value for key, value in zip(yticks_pos[::2], yticks_labels)
+            key: value for key, value in zip(yticks_pos, yticks_labels)
         }
 
     ax.circle(
         comp_df[information_criterion],
-        yticks_pos[::2],
+        yticks_pos,
         line_color=plot_kwargs.get("color_ic", "black"),
         fill_color=None,
         line_width=2,
@@ -97,7 +93,7 @@ def plot_compare(
         err_xs = []
         err_ys = []
 
-        for x, y, xerr in zip(comp_df[information_criterion], yticks_pos[::2], comp_df.se):
+        for x, y, xerr in zip(comp_df[information_criterion], yticks_pos, comp_df.se):
             err_xs.append((x - xerr, x + xerr))
             err_ys.append((y, y))
 
@@ -115,7 +111,7 @@ def plot_compare(
             correction = -(2 * p_ic)
         ax.circle(
             comp_df[information_criterion] + correction,
-            yticks_pos[::2],
+            yticks_pos,
             line_color=plot_kwargs.get("color_insample_dev", "black"),
             fill_color=plot_kwargs.get("color_insample_dev", "black"),
             line_width=2,

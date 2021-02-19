@@ -1,6 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
 
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
 
@@ -13,6 +14,7 @@ def plot_compare(
     order_by_rank=True,
     figsize=None,
     textsize=None,
+    labeller=None,
     plot_kwargs=None,
     ax=None,
     backend=None,
@@ -92,10 +94,21 @@ def plot_compare(
     if plot_kwargs is None:
         plot_kwargs = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     yticks_pos, step = np.linspace(0, -1, (comp_df.shape[0] * 2) - 1, retstep=True)
     yticks_pos[1::2] = yticks_pos[1::2] + step / 2
+    labels = [labeller.model_name_to_str(model_name) for model_name in comp_df.index]
 
-    yticks_labels = [""] * len(yticks_pos)
+    if plot_ic_diff:
+        yticks_labels = [""] * len(yticks_pos)
+        yticks_labels[0] = labels[0]
+        yticks_labels[2::2] = labels[1:]
+    else:
+        yticks_labels = labels
+        yticks_pos = yticks_pos[::2]
+
 
     _information_criterion = ["loo", "waic"]
     column_index = [c.lower() for c in comp_df.columns]

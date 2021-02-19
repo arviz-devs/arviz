@@ -186,7 +186,7 @@ def plot_forest(
     if not isinstance(data, (list, tuple)):
         data = [data]
     if len(data) == 1:
-        legend == False
+        legend = False
 
     if coords is None:
         coords = {}

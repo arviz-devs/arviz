@@ -10,7 +10,7 @@ from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
-from ....sel_utils import make_label, xarray_var_iter
+from ....sel_utils import xarray_var_iter
 from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
@@ -50,6 +50,8 @@ def plot_forest(
     ridgeplot_truncate,
     ridgeplot_quantiles,
     textsize,
+    legend,
+    labeller,
     ess,
     r_hat,
     backend_config,
@@ -574,7 +576,7 @@ class VarHandler:
                     reverse_selections=True,
                 )
                 datum_list = list(datum_iter)
-                for _, selection, values in datum_list:
+                for _, selection, isel, values in datum_list:
                     selection_list.append(selection)
                     if not selection:
                         var_name = self.var_name
@@ -582,7 +584,7 @@ class VarHandler:
                         var_name = self.var_name + ":"
                     else:
                         var_name = ""
-                    label = make_label(var_name, selection, position="beside")
+                    label = self.labeller.make_label_flat(var_name, selection, isel)
                     if label not in label_dict:
                         label_dict[label] = OrderedDict()
                     if name not in label_dict[label]:

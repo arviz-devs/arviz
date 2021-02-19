@@ -3,6 +3,7 @@ import numpy as np
 import xarray as xr
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..sel_utils import xarray_var_iter
 from ..stats import mcse
 from ..rcparams import rcParams
@@ -23,6 +24,7 @@ def plot_mcse(
     rug=False,
     rug_kind="diverging",
     n_points=20,
+    labeller=labeller,
     ax=None,
     rug_kwargs=None,
     extra_kwargs=None,
@@ -120,6 +122,9 @@ def plot_mcse(
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
     var_names = _var_names(var_names, data, filter_vars)
 
@@ -155,6 +160,7 @@ def plot_mcse(
         mean_mcse=mean_mcse,
         sd_mcse=sd_mcse,
         textsize=textsize,
+        labeller=labeller,
         text_kwargs=text_kwargs,
         rug_kwargs=rug_kwargs,
         extra_kwargs=extra_kwargs,

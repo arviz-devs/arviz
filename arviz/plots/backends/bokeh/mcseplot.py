@@ -4,7 +4,6 @@ from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
-from ....sel_utils import make_label
 from ....stats.stats_utils import quantile as _quantile
 from ...plot_utils import _scale_fig_size
 from .. import show_layout
@@ -27,6 +26,7 @@ def plot_mcse(
     mean_mcse,
     sd_mcse,
     textsize,
+    labeller,
     text_kwargs,  # pylint: disable=unused-argument
     rug_kwargs,
     extra_kwargs,
@@ -62,7 +62,7 @@ def plot_mcse(
     else:
         ax = np.atleast_2d(ax)
 
-    for (var_name, selection, x), ax_ in zip(
+    for (var_name, selection, isel, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
         if errorbar or rug:
@@ -165,7 +165,7 @@ def plot_mcse(
             ax_.add_glyph(cds_rug, glyph)
 
         title = Title()
-        title.text = make_label(var_name, selection)
+        title.text = labeller.make_label_vert(var_name, selection, isel)
         ax_.title = title
 
         ax_.xaxis.axis_label = "Quantile"

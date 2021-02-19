@@ -42,8 +42,6 @@ def plot_compare(
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     if plot_ic_diff:
-        yticks_labels[0] = comp_df.index[0]
-        yticks_labels[2::2] = comp_df.index[1:]
         ax.set_yticks(yticks_pos)
         ax.errorbar(
             x=comp_df[information_criterion].iloc[1:],
@@ -57,7 +55,7 @@ def plot_compare(
 
     else:
         yticks_labels = comp_df.index
-        ax.set_yticks(yticks_pos[::2])
+        ax.set_yticks(yticks_pos)
 
     if plot_standard_error:
         ax.errorbar(
