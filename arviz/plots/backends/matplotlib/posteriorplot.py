@@ -92,7 +92,9 @@ def plot_posterior(
             **kwargs,
         )
         idx += 1
-        ax_.set_title(labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True)
+        ax_.set_title(
+            labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True
+        )
 
     if backend_show(show):
         plt.show()

@@ -977,7 +977,7 @@ def summary(
     hdi_prob=None,
     skipna=False,
     labeller=None,
-    coords = None,
+    coords=None,
     index_origin=None,
     order=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
@@ -1138,7 +1138,6 @@ def summary(
     var_names = _var_names(var_names, dataset, filter_vars)
     dataset = dataset if var_names is None else dataset[var_names]
 
-
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
         raise TypeError(f"Invalid format: '{fmt}'. Formatting options are: {fmt_group}")
@@ -1284,7 +1283,9 @@ def summary(
     if fmt.lower() == "wide":
         summary_df = pd.DataFrame(np.full((n_vars, n_metrics), np.nan), columns=metric_names)
         indexs = []
-        for i, (var_name, sel, isel, values) in enumerate(xarray_var_iter(joined, skip_dims={"metric"})):
+        for i, (var_name, sel, isel, values) in enumerate(
+            xarray_var_iter(joined, skip_dims={"metric"})
+        ):
             summary_df.iloc[i] = values
             indexs.append(labeller.make_label_flat(var_name, sel, isel))
         summary_df.index = indexs

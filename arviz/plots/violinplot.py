@@ -1,5 +1,6 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..sel_utils import xarray_var_iter
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -22,6 +23,7 @@ def plot_violin(
     grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     shade_kwargs=None,
     rug_kwargs=None,
@@ -121,6 +123,9 @@ def plot_violin(
         >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
+    if labeller is None:
+        labeller = BaseLabeller()
+
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
         data = transform(data)
@@ -152,6 +157,7 @@ def plot_violin(
         rug_kwargs=rug_kwargs,
         bw=bw,
         textsize=textsize,
+        labeller=labeller,
         circular=circular,
         hdi_prob=hdi_prob,
         quartiles=quartiles,

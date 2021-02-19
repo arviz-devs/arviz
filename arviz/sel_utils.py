@@ -8,6 +8,7 @@ from .labels import BaseLabeller
 
 __all__ = ["xarray_sel_iter", "xarray_var_iter", "xarray_to_ndarray"]
 
+
 def selection_to_string(selection):
     """Convert dictionary of coordinates to a string for labels.
 

@@ -416,10 +416,20 @@ class CmdStanConverter:
             attrs = None
         return (
             dict_to_dataset(
-                data, coords=self.coords, dims=self.dims, attrs=attrs, index_origin=self.index_origin, skip_event_dims=True
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+                skip_event_dims=True,
             ),
             dict_to_dataset(
-                data_warmup, coords=self.coords, dims=self.dims, attrs=attrs, index_origin=self.index_origin, skip_event_dims=True
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+                skip_event_dims=True,
             ),
         )
 

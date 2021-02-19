@@ -133,7 +133,9 @@ def plot_mcse(
             ax_.plot(rug_x, rug_y, **rug_kwargs)
             ax_.axhline(y_min, color="k", linewidth=_linewidth, alpha=0.7)
 
-        ax_.set_title(labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True)
+        ax_.set_title(
+            labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True
+        )
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel("Quantile", fontsize=ax_labelsize, wrap=True)
         ax_.set_ylabel(

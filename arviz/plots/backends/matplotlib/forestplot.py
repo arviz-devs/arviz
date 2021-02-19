@@ -55,7 +55,12 @@ def plot_forest(
 ):
     """Matplotlib forest plot."""
     plot_handler = PlotHandler(
-        datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors, labeller=labeller
+        datasets,
+        var_names=var_names,
+        model_names=model_names,
+        combined=combined,
+        colors=colors,
+        labeller=labeller,
     )
 
     if figsize is None:
@@ -198,7 +203,7 @@ class PlotHandler:
         self.combined = combined
 
         if colors == "cycle":
-            #TODO: Use matplotlib prop cycle instead
+            # TODO: Use matplotlib prop cycle instead
             colors = ["C{}".format(idx) for idx, _ in enumerate(self.data)]
         elif isinstance(colors, str):
             colors = [colors for _ in self.data]
@@ -493,6 +498,7 @@ class PlotHandler:
         return max(p.y_max() for p in self.plotters.values())
 
 
+# pylint: disable=too-many-instance-attributes
 class VarHandler:
     """Handle individual variable logic."""
 

@@ -2,7 +2,6 @@
 import numpy as np
 from bokeh.models.annotations import Title
 
-from ....sel_utils import make_label
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ...plot_utils import _scale_fig_size
@@ -24,6 +23,7 @@ def plot_violin(
     rug_kwargs,
     bw,
     textsize,
+    labeller,
     circular,
     hdi_prob,
     quartiles,
@@ -59,7 +59,7 @@ def plot_violin(
     else:
         ax = np.atleast_2d(ax)
 
-    for (var_name, selection, x), ax_ in zip(
+    for (var_name, selection, isel, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
         val = x.flatten()
@@ -91,7 +91,7 @@ def plot_violin(
 
         _title = Title()
         _title.align = "center"
-        _title.text = make_label(var_name, selection)
+        _title.text = labeller.make_label_vert(var_name, selection, isel)
         ax_.title = _title
         ax_.xaxis.major_tick_line_color = None
         ax_.xaxis.minor_tick_line_color = None

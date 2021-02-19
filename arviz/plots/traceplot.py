@@ -3,7 +3,7 @@ import warnings
 from typing import Any, Callable, List, Mapping, Optional, Tuple, Union
 
 from ..data import CoordSpec, InferenceData, convert_to_dataset
-
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..sel_utils import xarray_var_iter
 from ..utils import _var_names, get_coords
@@ -34,6 +34,7 @@ def plot_trace(
     hist_kwargs: Optional[KwargSpec] = None,
     trace_kwargs: Optional[KwargSpec] = None,
     rank_kwargs: Optional[KwargSpec] = None,
+    labeller=None,
     axes=None,
     backend: Optional[str] = None,
     backend_config: Optional[KwargSpec] = None,
@@ -171,6 +172,9 @@ def plot_trace(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     if divergences:
         divergence_data = get_coords(
             divergence_data, {k: v for k, v in coords.items() if k in ("chain", "draw")}
@@ -228,6 +232,7 @@ def plot_trace(
         combined=combined,
         chain_prop=chain_prop,
         legend=legend,
+        labeller=labeller,
         # Generated kwargs
         divergence_data=divergence_data,
         # skip_dims=skip_dims,

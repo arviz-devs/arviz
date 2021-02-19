@@ -144,7 +144,9 @@ def plot_ess(
 
         ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
 
-        ax_.set_title(labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True)
+        ax_.set_title(
+            labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True
+        )
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel(
             "Total number of draws" if kind == "evolution" else "Quantile", fontsize=ax_labelsize

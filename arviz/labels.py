@@ -12,6 +12,7 @@ __all__ = [
     "NoModelLabeller",
 ]
 
+
 def mix_labellers(labellers, class_name="CustomLabeller"):
     """Combine Labeller classes dynamically.
 
@@ -68,8 +69,10 @@ def mix_labellers(labellers, class_name="CustomLabeller"):
     """
     return type(class_name, labellers, {})
 
+
 class BaseLabeller:
     """WIP."""
+
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
         """WIP."""
         return f"{coord_val}"
@@ -134,6 +137,7 @@ class BaseLabeller:
 
 class DimCoordLabeller(BaseLabeller):
     """WIP."""
+
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
         """WIP."""
         return f"{dim}: {coord_val}"
@@ -141,6 +145,7 @@ class DimCoordLabeller(BaseLabeller):
 
 class DimIdxLabeller(BaseLabeller):
     """WIP."""
+
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
         """WIP."""
         return f"{dim}#{coord_idx}"
@@ -148,6 +153,7 @@ class DimIdxLabeller(BaseLabeller):
 
 class MapLabeller(BaseLabeller):
     """WIP."""
+
     def __init__(self, var_name_map=None, dim_map=None, coord_map=None, model_name_map=None):
         """WIP."""
         self.var_name_map = {} if var_name_map is None else var_name_map
@@ -172,9 +178,9 @@ class MapLabeller(BaseLabeller):
         return super().model_name_to_str(model_name_str)
 
 
-
 class NoRepeatLabeller(BaseLabeller):
     """WIP."""
+
     def __init__(self):
         """WIP."""
         self.current_var = None
@@ -190,6 +196,7 @@ class NoRepeatLabeller(BaseLabeller):
 
 class NoModelLabeller(BaseLabeller):
     """WIP."""
+
     def make_model_label(self, model_name, label):
         """WIP."""
         return label

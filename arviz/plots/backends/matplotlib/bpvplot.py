@@ -167,7 +167,9 @@ def plot_bpv(
                     obs_vals.mean(), 0, "o", color=color, markeredgecolor="k", markersize=markersize
                 )
 
-        ax_i.set_title(labeller.make_pp_label(var_name, pp_var_name, selection, isel), fontsize=ax_labelsize)
+        ax_i.set_title(
+            labeller.make_pp_label(var_name, pp_var_name, selection, isel), fontsize=ax_labelsize
+        )
 
     if backend_show(show):
         plt.show()
