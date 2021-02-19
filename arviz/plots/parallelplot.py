@@ -153,7 +153,6 @@ def plot_parallel(
         diverging_mask=diverging_mask,
         posterior=_posterior,
         textsize=textsize,
-        labeller=labeller,
         var_names=var_names,
         legend=legend,
         figsize=figsize,
