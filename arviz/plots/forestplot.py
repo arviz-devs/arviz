@@ -1,5 +1,6 @@
 """Forest plot."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller, NoModelLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
 from .plot_utils import get_plotting_function
@@ -23,6 +24,8 @@ def plot_forest(
     textsize=None,
     linewidth=None,
     markersize=None,
+    legend=True,
+    labeller=None,
     ridgeplot_alpha=None,
     ridgeplot_overlap=2,
     ridgeplot_kind="auto",
@@ -182,9 +185,14 @@ def plot_forest(
     """
     if not isinstance(data, (list, tuple)):
         data = [data]
+    if len(data) == 1:
+        legend == False
 
     if coords is None:
         coords = {}
+
+    if labeller is None:
+        labeller = NoModelLabeller() if legend else BaseLabeller()
 
     datasets = [convert_to_dataset(datum) for datum in reversed(data)]
     if transform is not None:
@@ -233,6 +241,8 @@ def plot_forest(
         ridgeplot_truncate=ridgeplot_truncate,
         ridgeplot_quantiles=ridgeplot_quantiles,
         textsize=textsize,
+        legend=legend,
+        labeller=labeller,
         ess=ess,
         r_hat=r_hat,
         backend_kwargs=backend_kwargs,

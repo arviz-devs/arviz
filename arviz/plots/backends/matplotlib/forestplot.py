@@ -5,11 +5,12 @@ from itertools import tee
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import to_rgba
+from matplotlib.lines import Line2D
 
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
-from ....sel_utils import xarray_var_iter, make_label
+from ....sel_utils import xarray_var_iter
 from ....utils import conditional_jit
 from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show
@@ -44,6 +45,8 @@ def plot_forest(
     ridgeplot_truncate,
     ridgeplot_quantiles,
     textsize,
+    legend,
+    labeller,
     ess,
     r_hat,
     backend_kwargs,
@@ -52,7 +55,7 @@ def plot_forest(
 ):
     """Matplotlib forest plot."""
     plot_handler = PlotHandler(
-        datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors
+        datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors, labeller=labeller
     )
 
     if figsize is None:
@@ -153,6 +156,8 @@ def plot_forest(
     if kind == "ridgeplot":  # space at the top
         y_max += ridgeplot_overlap
     axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
+    if legend:
+        plot_handler.legend(ax=axes[0])
 
     if backend_show(show):
         plt.show()
@@ -165,14 +170,14 @@ class PlotHandler:
 
     # pylint: disable=inconsistent-return-statements
 
-    def __init__(self, datasets, var_names, model_names, combined, colors):
+    def __init__(self, datasets, var_names, model_names, combined, colors, labeller):
         self.data = datasets
 
         if model_names is None:
             if len(self.data) > 1:
                 model_names = ["Model {}".format(idx) for idx, _ in enumerate(self.data)]
             else:
-                model_names = [""]
+                model_names = [None]
         elif len(model_names) != len(self.data):
             raise ValueError("The number of model names does not match the number of models")
 
@@ -193,11 +198,13 @@ class PlotHandler:
         self.combined = combined
 
         if colors == "cycle":
+            #TODO: Use matplotlib prop cycle instead
             colors = ["C{}".format(idx) for idx, _ in enumerate(self.data)]
         elif isinstance(colors, str):
             colors = [colors for _ in self.data]
 
         self.colors = list(reversed(colors))  # y-values are upside down
+        self.labeller = labeller
 
         self.plotters = self.make_plotters()
 
@@ -212,6 +219,7 @@ class PlotHandler:
                 model_names=self.model_names,
                 combined=self.combined,
                 colors=self.colors,
+                labeller=self.labeller,
             )
             y = plotters[var_name].y_max()
         return plotters
@@ -230,6 +238,11 @@ class PlotHandler:
             return np.concatenate(labels), np.concatenate(idxs)
 
         return label_idxs()
+
+    def legend(self, ax):
+        """Add legend with colorcoded model info."""
+        handles = [Line2D([], [], color=c) for c in self.colors]
+        ax.legend(handles=handles, labels=self.model_names)
 
     def display_multiple_ropes(self, rope, ax, y, linewidth, var_name, selection):
         """Display ROPE when more than one interval is provided."""
@@ -483,13 +496,14 @@ class PlotHandler:
 class VarHandler:
     """Handle individual variable logic."""
 
-    def __init__(self, var_name, data, y_start, model_names, combined, colors):
+    def __init__(self, var_name, data, y_start, model_names, combined, colors, labeller):
         self.var_name = var_name
         self.data = data
         self.y_start = y_start
         self.model_names = model_names
         self.combined = combined
         self.colors = colors
+        self.labeller = labeller
         self.model_color = dict(zip(self.model_names, self.colors))
         max_chains = max(datum.chain.max().values for datum in data)
         self.chain_offset = len(data) * 0.45 / max(1, max_chains)
@@ -516,15 +530,13 @@ class VarHandler:
                     reverse_selections=True,
                 )
                 datum_list = list(datum_iter)
-                for _, selection, values in datum_list:
+                for _, selection, isel, values in datum_list:
                     selection_list.append(selection)
-                    if not selection:
+                    if not selection or not len(selection_list) % len(datum_list):
                         var_name = self.var_name
-                    elif not len(selection_list) % len(datum_list):
-                        var_name = self.var_name + ":"
                     else:
                         var_name = ""
-                    label = make_label(var_name, selection, position="beside")
+                    label = self.labeller.make_label_flat(var_name, selection, isel)
                     if label not in label_dict:
                         label_dict[label] = OrderedDict()
                     if name not in label_dict[label]:
@@ -534,10 +546,7 @@ class VarHandler:
         y = self.y_start
         for idx, (label, model_data) in enumerate(label_dict.items()):
             for model_name, value_list in model_data.items():
-                if model_name:
-                    row_label = "{}: {}".format(model_name, label)
-                else:
-                    row_label = label
+                row_label = self.labeller.make_model_label(model_name, label)
                 for values in value_list:
                     yield y, row_label, label, selection_list[idx], values, self.model_color[
                         model_name

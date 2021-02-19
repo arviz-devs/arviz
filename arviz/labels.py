@@ -1,13 +1,24 @@
 # pylint: disable=unused-argument
 """Utilities to generate labels from xarray objects."""
+from typing import Union
 
-__all__ = ["BaseLabeller", "DimCoordLabeller", "DimIdxLabeller", "MapLabeller", "NoRepeatLabeller"]
+__all__ = [
+    "BaseLabeller",
+    "DimCoordLabeller",
+    "DimIdxLabeller",
+    "MapLabeller",
+    "NoRepeatLabeller",
+    "NoModelLabeller",
+]
+
 
 class BaseLabeller:
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
         return f"{coord_val}"
 
     def sel_to_str(self, sel: dict, isel: dict):
+        if not sel:
+            return ""
         return ", ".join(
             [
                 self.dim_coord_to_str(dim, v, i)
@@ -15,26 +26,31 @@ class BaseLabeller:
             ]
         )
 
-    def var_name_to_str(self, var_name: str):
+    def var_name_to_str(self, var_name: Union[str, None]):
         return var_name
 
-    def make_label_vert(self, var_name: str, sel: dict, isel: dict):
+    def make_label_vert(self, var_name: Union[str, None], sel: dict, isel: dict):
         var_name_str = self.var_name_to_str(var_name)
-        if not sel:
-            return var_name_str
         sel_str = self.sel_to_str(sel, isel)
-        if not var_name:
+        if not sel_str:
+            return var_name_str
+        if var_name_str is None:
             return sel_str
         return f"{var_name_str}\n{sel_str}"
 
     def make_label_flat(self, var_name: str, sel: dict, isel: dict):
         var_name_str = self.var_name_to_str(var_name)
-        if not sel:
-            return var_name_str
         sel_str = self.sel_to_str(sel, isel)
-        if not var_name:
+        if not sel_str:
+            return var_name_str
+        if var_name is None:
             return sel_str
         return f"{var_name_str}[{sel_str}]"
+
+    def make_model_label(self, model_name, label):
+        if model_name is None:
+            return label
+        return f"{model_name}: {label}"
 
 
 class DimCoordLabeller(BaseLabeller):
@@ -72,3 +88,8 @@ class NoRepeatLabeller(BaseLabeller):
             return ""
         self.current_var = var_name
         return var_name
+
+
+class NoModelLabeller(BaseLabeller):
+    def make_model_label(self, model_name, label):
+        return label
