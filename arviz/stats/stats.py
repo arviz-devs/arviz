@@ -2,7 +2,7 @@
 """Statistical functions in ArviZ."""
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -11,7 +11,7 @@ import xarray as xr
 from scipy.optimize import minimize
 
 from arviz import _log
-from ..data import CoordSpec, InferenceData, convert_to_dataset, convert_to_inference_data
+from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams
 from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
