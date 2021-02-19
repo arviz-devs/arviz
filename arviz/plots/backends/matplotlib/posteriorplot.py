@@ -14,7 +14,6 @@ from ...plot_utils import (
     round_num,
 )
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
-from ....sel_utils import make_label
 
 
 def plot_posterior(
@@ -36,6 +35,7 @@ def plot_posterior(
     textsize,
     ref_val,
     rope,
+    labeller,
     kwargs,
     backend_kwargs,
     show,
@@ -69,7 +69,7 @@ def plot_posterior(
             backend_kwargs=backend_kwargs,
         )
     idx = 0
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    for (var_name, selection, isel, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(
             idx,
             x.flatten(),
@@ -92,7 +92,7 @@ def plot_posterior(
             **kwargs,
         )
         idx += 1
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+        ax_.set_title(labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True)
 
     if backend_show(show):
         plt.show()

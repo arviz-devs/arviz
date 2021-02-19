@@ -5,7 +5,8 @@ from typing import List, Optional, Union
 import numpy as np
 
 from ..data import convert_to_dataset
-from ..sel_utils import xarray_to_ndarray, xarray_var_iter, make_label
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_to_ndarray, xarray_var_iter
 from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
@@ -27,6 +28,7 @@ def plot_pair(
     fill_last=False,
     divergences=False,
     colorbar=False,
+    labeller=None,
     ax=None,
     divergences_kwargs=None,
     scatter_kwargs=None,
@@ -187,13 +189,18 @@ def plot_pair(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     # Get posterior draws and combine chains
     dataset = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, dataset, filter_vars)
     plotters = list(
         xarray_var_iter(get_coords(dataset, coords), var_names=var_names, combined=True)
     )
-    flat_var_names = [make_label(var_name, selection) for var_name, selection, _ in plotters]
+    flat_var_names = [
+        labeller.make_label_vert(var_name, sel, isel) for var_name, sel, isel, _ in plotters
+    ]
 
     divergent_data = None
     diverging_mask = None

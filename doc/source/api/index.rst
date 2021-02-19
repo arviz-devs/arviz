@@ -15,6 +15,7 @@ API Reference
     stats_utils
     data
     inference_data
+    labels
     utils
     rcparams
     wrappers

@@ -3,6 +3,7 @@ import numpy as np
 from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..sel_utils import xarray_to_ndarray
 from ..rcparams import rcParams
 from ..stats.stats_utils import stats_variance_2d as svar
@@ -21,6 +22,7 @@ def plot_parallel(
     colornd="k",
     colord="C1",
     shadend=0.025,
+    labeller=None,
     ax=None,
     norm_method=None,
     backend=None,
@@ -105,6 +107,9 @@ def plot_parallel(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group="sample_stats")
     _, diverging_mask = xarray_to_ndarray(divergent_data, var_names=("diverging",), combined=True)
@@ -114,7 +119,10 @@ def plot_parallel(
     posterior_data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, posterior_data, filter_vars)
     var_names, _posterior = xarray_to_ndarray(
-        get_coords(posterior_data, coords), var_names=var_names, combined=True
+        get_coords(posterior_data, coords),
+        var_names=var_names,
+        combined=True,
+        label_fun=labeller.make_label_vert,
     )
     if len(var_names) < 2:
         raise ValueError("Number of variables to be plotted must be 2 or greater.")
@@ -145,6 +153,7 @@ def plot_parallel(
         diverging_mask=diverging_mask,
         posterior=_posterior,
         textsize=textsize,
+        labeller=labeller,
         var_names=var_names,
         legend=legend,
         figsize=figsize,

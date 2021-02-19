@@ -4,6 +4,9 @@ from itertools import product, tee
 import numpy as np
 import xarray as xr
 
+from .labels import BaseLabeller
+
+__all__ = ["xarray_sel_iter", "xarray_var_iter", "xarray_to_ndarray"]
 
 def selection_to_string(selection):
     """Convert dictionary of coordinates to a string for labels.
@@ -186,7 +189,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         yield var_name, selection, iselection, data_to_sel[var_name].sel(**selection).values
 
 
-def xarray_to_ndarray(data, *, var_names=None, combined=True):
+def xarray_to_ndarray(data, *, var_names=None, combined=True, label_fun=None):
     """Take xarray data and unpacks into variables and data into list and numpy array respectively.
 
     Assumes that chain and draw are in coordinates
@@ -209,6 +212,8 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
     data: np.array
         Data values
     """
+    if label_fun is None:
+        label_fun = BaseLabeller().make_label_vert
     data_to_sel = data
     if var_names is None and isinstance(data, xr.DataArray):
         data_to_sel = {data.name: data}
@@ -216,13 +221,13 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
     iterator1, iterator2 = tee(xarray_sel_iter(data, var_names=var_names, combined=combined))
     vars_and_sel = list(iterator1)
     unpacked_var_names = [
-        make_label(var_name, selection) for var_name, selection, _ in vars_and_sel
+        label_fun(var_name, selection, isel) for var_name, selection, isel, _ in vars_and_sel
     ]
 
     # Merge chains and variables, check dtype to be compatible with divergences data
     data0 = data_to_sel[vars_and_sel[0][0]].sel(**vars_and_sel[0][1])
     unpacked_data = np.empty((len(unpacked_var_names), data0.size), dtype=data0.dtype)
-    for idx, (var_name, selection, _) in enumerate(iterator2):
+    for idx, (var_name, selection, _, _) in enumerate(iterator2):
         unpacked_data[idx] = data_to_sel[var_name].sel(**selection).values.flatten()
 
     return unpacked_var_names, unpacked_data

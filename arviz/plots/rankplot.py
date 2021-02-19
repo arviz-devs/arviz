@@ -4,6 +4,7 @@ from itertools import cycle
 import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..stats.density_utils import _sturges_formula
@@ -22,6 +23,7 @@ def plot_rank(
     colors="cycle",
     ref_line=True,
     labels=True,
+    labeller=None,
     grid=None,
     figsize=None,
     ax=None,
@@ -164,6 +166,9 @@ def plot_rank(
     if bins is None:
         bins = _sturges_formula(posterior_data, mult=2)
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     rows, cols = default_grid(length_plotters, grid=grid)
 
     chains = len(posterior_data.chain)
@@ -189,6 +194,7 @@ def plot_rank(
         colors=colors,
         ref_line=ref_line,
         labels=labels,
+        labeller=labeller,
         ref_line_kwargs=ref_line_kwargs,
         bar_kwargs=bar_kwargs,
         vlines_kwargs=vlines_kwargs,

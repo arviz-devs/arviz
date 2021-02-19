@@ -97,7 +97,7 @@ def plot_bpv(
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method `make_pp_label` to generate the labels in the plot titles.
     var_names : list of variable names
         Variables to be plotted, if `None` all variable are plotted. Prefix the variables by `~`
         when you want to exclude them from the plot.

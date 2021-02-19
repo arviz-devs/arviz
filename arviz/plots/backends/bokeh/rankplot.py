@@ -9,7 +9,6 @@ from ....stats.density_utils import histogram
 from ...plot_utils import _scale_fig_size, compute_ranks
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
-from ....sel_utils import make_label
 
 
 def plot_rank(
@@ -24,6 +23,7 @@ def plot_rank(
     colors,
     ref_line,
     labels,
+    labeller,
     ref_line_kwargs,
     bar_kwargs,
     vlines_kwargs,
@@ -72,7 +72,7 @@ def plot_rank(
     else:
         axes = np.atleast_2d(axes)
 
-    for ax, (var_name, selection, var_data) in zip(
+    for ax, (var_name, selection, isel, var_data) in zip(
         (item for item in axes.flatten() if item is not None), plotters
     ):
         ranks = compute_ranks(var_data)
@@ -139,7 +139,7 @@ def plot_rank(
             ax.yaxis.major_label_text_font_size = "0pt"
 
         _title = Title()
-        _title.text = make_label(var_name, selection)
+        _title.text = labeller.make_label_vert(var_name, selection, isel)
         ax.title = _title
 
     show_layout(axes, show)

@@ -5,7 +5,6 @@ import numpy as np
 from ....stats.density_utils import histogram
 from ...plot_utils import _scale_fig_size, compute_ranks
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
-from ....sel_utils import make_label
 
 
 def plot_rank(
@@ -20,6 +19,7 @@ def plot_rank(
     colors,
     ref_line,
     labels,
+    labeller,
     ref_line_kwargs,
     bar_kwargs,
     vlines_kwargs,
@@ -65,7 +65,7 @@ def plot_rank(
             backend_kwargs=backend_kwargs,
         )
 
-    for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
+    for ax, (var_name, selection, isel, var_data) in zip(np.ravel(axes), plotters):
         ranks = compute_ranks(var_data)
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
@@ -108,7 +108,7 @@ def plot_rank(
             ax.set_xlabel("Rank (all chains)", fontsize=ax_labelsize)
             ax.set_yticks(y_ticks)
             ax.set_yticklabels(np.arange(len(y_ticks)))
-            ax.set_title(make_label(var_name, selection), fontsize=titlesize)
+            ax.set_title(labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize)
         else:
             ax.set_yticks([])
 

@@ -24,7 +24,7 @@ def plot_mcse(
     rug=False,
     rug_kind="diverging",
     n_points=20,
-    labeller=labeller,
+    labeller=None,
     ax=None,
     rug_kwargs=None,
     extra_kwargs=None,

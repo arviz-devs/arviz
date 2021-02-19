@@ -176,12 +176,8 @@ def plot_bpv(
                     obs_vals.mean(), 0, fill_color=color, line_color="black", size=markersize
                 )
 
-        # if var_name != pp_var_name:
-        #     xlabel = "{} / {}".format(var_name, pp_var_name)
-        # else:
-        #     xlabel = var_name
         _title = Title()
-        _title.text = labeller.make_label_vert(var_name, sel, isel)
+        _title.text = labeller.make_pp_label(var_name, pp_var_name, sel, isel)
         ax_i.title = _title
         size = str(int(ax_labelsize))
         ax_i.title.text_font_size = f"{size}pt"

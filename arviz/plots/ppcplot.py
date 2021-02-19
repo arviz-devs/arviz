@@ -4,6 +4,7 @@ from numbers import Integral
 
 import numpy as np
 
+from ..labels import BaseLabeller
 from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..utils import _var_names
@@ -34,6 +35,7 @@ def plot_ppc(
     animated=False,
     animation_kwargs=None,
     legend=True,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
@@ -236,6 +238,9 @@ def plot_ppc(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     if random_seed is not None:
         np.random.seed(random_seed)
 
@@ -307,6 +312,7 @@ def plot_ppc(
         observed=observed,
         total_pp_samples=total_pp_samples,
         legend=legend,
+        labeller=labeller,
         group=group,
         animation_kwargs=animation_kwargs,
         num_pp_samples=num_pp_samples,

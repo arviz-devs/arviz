@@ -1,5 +1,6 @@
 """Plot posterior densities."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..sel_utils import xarray_var_iter
 from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
@@ -27,6 +28,7 @@ def plot_posterior(
     bw="default",
     circular=False,
     bins=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
@@ -210,6 +212,9 @@ def plot_posterior(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     elif hdi_prob not in (None, "hide"):
@@ -247,6 +252,7 @@ def plot_posterior(
         textsize=textsize,
         ref_val=ref_val,
         rope=rope,
+        labeller=labeller,
         kwargs=kwargs,
         backend_kwargs=backend_kwargs,
         show=show,

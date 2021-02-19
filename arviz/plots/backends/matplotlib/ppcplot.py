@@ -10,7 +10,6 @@ from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
-from ....sel_utils import make_label
 
 _log = logging.getLogger(__name__)
 
@@ -35,6 +34,7 @@ def plot_ppc(
     jitter,
     total_pp_samples,
     legend,
+    labeller,
     group,
     animation_kwargs,
     num_pp_samples,
@@ -112,8 +112,8 @@ def plot_ppc(
                 raise ValueError("All axes must be on the same figure for animation to work")
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
-        var_name, selection, obs_vals = obs_plotters[i]
-        pp_var_name, _, pp_vals = pp_plotters[i]
+        var_name, selection, isel, obs_vals = obs_plotters[i]
+        pp_var_name, _, _, pp_vals = pp_plotters[i]
         dtype = predictive_dataset[pp_var_name].dtype.kind
 
         # flatten non-specified dimensions
@@ -343,11 +343,9 @@ def plot_ppc(
 
             ax_i.set_yticks([])
 
-        if var_name != pp_var_name:
-            xlabel = "{} / {}".format(var_name, pp_var_name)
-        else:
-            xlabel = var_name
-        ax_i.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
+        ax_i.set_xlabel(
+            labeller.make_pp_label(var_name, pp_var_name, selection, isel), fontsize=ax_labelsize
+        )
 
         if legend:
             if i == 0:
