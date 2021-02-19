@@ -222,13 +222,13 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True, label_fun=None):
     iterator1, iterator2 = tee(xarray_sel_iter(data, var_names=var_names, combined=combined))
     vars_and_sel = list(iterator1)
     unpacked_var_names = [
-        label_fun(var_name, selection, isel) for var_name, selection, isel, _ in vars_and_sel
+        label_fun(var_name, selection, isel) for var_name, selection, isel in vars_and_sel
     ]
 
     # Merge chains and variables, check dtype to be compatible with divergences data
     data0 = data_to_sel[vars_and_sel[0][0]].sel(**vars_and_sel[0][1])
     unpacked_data = np.empty((len(unpacked_var_names), data0.size), dtype=data0.dtype)
-    for idx, (var_name, selection, _, _) in enumerate(iterator2):
+    for idx, (var_name, selection, _) in enumerate(iterator2):
         unpacked_data[idx] = data_to_sel[var_name].sel(**selection).values.flatten()
 
     return unpacked_var_names, unpacked_data
