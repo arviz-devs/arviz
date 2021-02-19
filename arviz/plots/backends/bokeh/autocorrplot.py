@@ -28,7 +28,7 @@ def plot_autocorr(
     if backend_config is None:
         backend_config = {}
 
-    len_y = plotters[0][2].size
+    len_y = plotters[0][-1].size
     backend_config.setdefault("bounds_x_range", (0, len_y))
 
     backend_config = {

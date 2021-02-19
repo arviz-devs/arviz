@@ -114,9 +114,7 @@ def test_xarray_sel_iter_ordering_combined(sample_dataset):  # pylint: disable=i
 def test_xarray_sel_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are not combined"""
     _, _, data = sample_dataset
-    var_names = [
-        (var, selection) for (var, selection, _) in xarray_sel_iter(data, var_names=None)
-    ]
+    var_names = [(var, selection) for (var, selection, _) in xarray_sel_iter(data, var_names=None)]
 
     assert len(var_names) == 4
     for var_name in var_names:

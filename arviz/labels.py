@@ -49,9 +49,9 @@ def mix_labellers(labellers, class_name="CustomLabeller"):
            ...: l1 = DimCoordLabeller()
            ...: sel = {"dim1": "a", "dim2": "top"}
            ...: print(f"Output of DimCoordLabeller alone > {l1.sel_to_str(sel, sel)}")
-        In [2]: l2 = MapLabeller(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
+           ...: l2 = MapLabeller(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
            ...: print(f"Output of MapLabeller alone > {l2.sel_to_str(sel, sel)}")
-        In [3]: l3 = mix_labellers(
+           ...: l3 = mix_labellers(
            ...:     (MapLabeller, DimCoordLabeller)
            ...: )(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
            ...: print(f"Output of mixture labeller > {l3.sel_to_str(sel, sel)}")
@@ -61,7 +61,7 @@ def mix_labellers(labellers, class_name="CustomLabeller"):
 
     .. ipython::
 
-        In [4]: l4 = mix_labellers(
+        In [1]: l4 = mix_labellers(
            ...:     (DimCoordLabeller, MapLabeller)
            ...: )(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
            ...: print(f"Output of inverted mixture labeller > {l4.sel_to_str(sel, sel)}")
@@ -164,7 +164,7 @@ class MapLabeller(BaseLabeller):
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
         """WIP."""
         dim_str = self.dim_map.get(dim, dim)
-        coord_str = self.coord_map.get(coord_val, coord_val)
+        coord_str = self.coord_map.get(dim, {}).get(coord_val, coord_val)
         return super().dim_coord_to_str(dim_str, coord_str, coord_idx)
 
     def var_name_to_str(self, var_name):

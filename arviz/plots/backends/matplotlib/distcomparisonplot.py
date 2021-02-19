@@ -94,8 +94,8 @@ def plot_dist_comparison(
             else observed_kwargs
         )
         for idx2, (
-            var,
-            selection,
+            var_name,
+            sel,
             isel,
             data,
         ) in enumerate(plotter):
@@ -112,7 +112,8 @@ def plot_dist_comparison(
                 ax=axes[idx2, -1],
                 **kwargs,
             )
-            axes[-1].set_xlabel(labeller.make_label_vert(var, selection, isel))
+            if idx == 0:
+                axes[idx2, -1].set_xlabel(labeller.make_label_vert(var_name, sel, isel))
 
     if backend_show(show):
         plt.show()

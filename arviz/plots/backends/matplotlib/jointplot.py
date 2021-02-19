@@ -78,8 +78,8 @@ def plot_joint(
     axjoin.tick_params(labelsize=xt_labelsize)
 
     # Flatten data
-    x = plotters[0][2].flatten()
-    y = plotters[1][2].flatten()
+    x = plotters[0][-1].flatten()
+    y = plotters[1][-1].flatten()
 
     if kind == "scatter":
         axjoin.scatter(x, y, **joint_kwargs)

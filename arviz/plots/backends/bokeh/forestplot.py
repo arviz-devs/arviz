@@ -60,7 +60,12 @@ def plot_forest(
 ):
     """Bokeh forest plot."""
     plot_handler = PlotHandler(
-        datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors
+        datasets,
+        var_names=var_names,
+        model_names=model_names,
+        combined=combined,
+        colors=colors,
+        labeller=labeller,
     )
 
     if figsize is None:
@@ -198,7 +203,7 @@ class PlotHandler:
 
     # pylint: disable=inconsistent-return-statements
 
-    def __init__(self, datasets, var_names, model_names, combined, colors):
+    def __init__(self, datasets, var_names, model_names, combined, colors, labeller):
         self.data = datasets
 
         if model_names is None:
@@ -236,6 +241,7 @@ class PlotHandler:
             colors = [colors for _ in self.data]
 
         self.colors = list(reversed(colors))  # y-values are upside down
+        self.labeller = labeller
 
         self.plotters = self.make_plotters()
 
@@ -250,6 +256,7 @@ class PlotHandler:
                 model_names=self.model_names,
                 combined=self.combined,
                 colors=self.colors,
+                labeller=self.labeller,
             )
             y = plotters[var_name].y_max()
         return plotters
@@ -543,13 +550,14 @@ class PlotHandler:
 class VarHandler:
     """Handle individual variable logic."""
 
-    def __init__(self, var_name, data, y_start, model_names, combined, colors):
+    def __init__(self, var_name, data, y_start, model_names, combined, colors, labeller):
         self.var_name = var_name
         self.data = data
         self.y_start = y_start
         self.model_names = model_names
         self.combined = combined
         self.colors = colors
+        self.labeller = labeller
         self.model_color = dict(zip(self.model_names, self.colors))
         max_chains = max(datum.chain.max().values for datum in data)
         self.chain_offset = len(data) * 0.45 / max(1, max_chains)
