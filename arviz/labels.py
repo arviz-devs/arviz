@@ -142,12 +142,14 @@ class DimCoordLabeller(BaseLabeller):
         """WIP."""
         return f"{dim}: {coord_val}"
 
+
 class IdxLabeller(BaseLabeller):
     """WIP."""
 
     def dim_coord_to_str(self, dim, coord_val, coord_idx):
         """WIP."""
         return f"{coord_idx}"
+
 
 class DimIdxLabeller(BaseLabeller):
     """WIP."""
