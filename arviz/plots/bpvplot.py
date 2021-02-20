@@ -98,6 +98,7 @@ def plot_bpv(
         predictive data have the same variable name.
     labeller : labeller instance, optional
         Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     var_names : list of variable names
         Variables to be plotted, if `None` all variable are plotted. Prefix the variables by `~`
         when you want to exclude them from the plot.

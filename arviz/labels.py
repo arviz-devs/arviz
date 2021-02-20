@@ -13,7 +13,7 @@ __all__ = [
 ]
 
 
-def mix_labellers(labellers, class_name="CustomLabeller"):
+def mix_labellers(labellers, class_name="MixtureLabeller"):
     """Combine Labeller classes dynamically.
 
     The Labeller class aims to split plot labeling in ArviZ into atomic tasks to maximize
@@ -142,6 +142,12 @@ class DimCoordLabeller(BaseLabeller):
         """WIP."""
         return f"{dim}: {coord_val}"
 
+class IdxLabeller(BaseLabeller):
+    """WIP."""
+
+    def dim_coord_to_str(self, dim, coord_val, coord_idx):
+        """WIP."""
+        return f"{coord_idx}"
 
 class DimIdxLabeller(BaseLabeller):
     """WIP."""

@@ -95,6 +95,9 @@ def plot_trace(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
     trace_kwargs: dict, optional
         Extra keyword arguments passed to `plt.plot`
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     rank_kwargs : dict, optional
         Extra keyword arguments passed to `arviz.plot_rank`
     axes: axes, optional

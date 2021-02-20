@@ -80,6 +80,9 @@ def plot_violin(
     textsize: int
         Text size of the point_estimates, axis ticks, and highest density interval. If None it will
         be autoscaled based on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     sharex: bool
         Defaults to True, violinplots share a common x-axis scale.
     sharey: bool

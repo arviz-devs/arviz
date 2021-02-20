@@ -65,6 +65,9 @@ def plot_parallel(
     shadend: float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     norm_method: str

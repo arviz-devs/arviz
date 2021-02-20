@@ -89,6 +89,9 @@ def plot_pair(
     colorbar: bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     divergences_kwargs: dicts, optional

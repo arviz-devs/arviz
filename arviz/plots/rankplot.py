@@ -81,6 +81,9 @@ def plot_rank(
         Whether to include a dashed line showing where a uniform distribution would lie
     labels: bool
         whether to plot or not the x and y labels, defaults to True
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.

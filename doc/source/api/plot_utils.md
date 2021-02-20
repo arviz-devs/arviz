@@ -3,7 +3,7 @@
 ```
 # Plot utils
 
-(labellers_api)=
+(labeller_api)=
 ## Labellers
 See also `<upcoming user guide page on labellers>`
 
@@ -13,6 +13,7 @@ See also `<upcoming user guide page on labellers>`
 
   BaseLabeller
   DimCoordLabeller
+  IdxLabeller
   DimIdxLabeller
   MapLabeller
   NoModelLabeller

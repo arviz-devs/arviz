@@ -91,6 +91,12 @@ def plot_forest(
         Line width throughout. If None it will be autoscaled based on figsize.
     markersize: int
         Markersize throughout. If None it will be autoscaled based on figsize.
+    legend : bool, optional
+        Show a legend with the color encoded model information.
+        Defaults to true if there are multiple models
+    labeller : labeller instance, optional
+        Class providing the method `make_model_label` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ridgeplot_alpha: float
         Transparency for ridgeplot fill.  If 0, border is colored by model, otherwise
         a black outline is used.

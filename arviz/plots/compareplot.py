@@ -52,6 +52,9 @@ def plot_compare(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `model_name_to_str` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     plot_kwargs : dict, optional
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',

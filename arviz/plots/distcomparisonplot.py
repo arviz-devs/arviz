@@ -54,6 +54,9 @@ def plot_dist_comparison(
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
+    labeller : labeller instance, optional
+        Class providing the method `make_pp_label` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
         last column is for the combined before/after plots and columns 0 and 1 are
