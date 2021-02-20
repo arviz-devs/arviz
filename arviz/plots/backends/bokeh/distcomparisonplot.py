@@ -10,6 +10,7 @@ def plot_dist_comparison(
     legend,
     groups,
     textsize,
+    labeller,
     prior_kwargs,
     posterior_kwargs,
     observed_kwargs,

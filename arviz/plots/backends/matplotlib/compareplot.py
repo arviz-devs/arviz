@@ -54,8 +54,7 @@ def plot_compare(
         )
 
     else:
-        yticks_labels = comp_df.index
-        ax.set_yticks(yticks_pos)
+        ax.set_yticks(yticks_pos[::2])
 
     if plot_standard_error:
         ax.errorbar(

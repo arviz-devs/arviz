@@ -81,8 +81,8 @@ def plot_joint(
     axjoin.yaxis.axis_label = y_var_name
 
     # Flatten data
-    x = plotters[0][2].flatten()
-    y = plotters[1][2].flatten()
+    x = plotters[0][-1].flatten()
+    y = plotters[1][-1].flatten()
 
     if kind == "scatter":
         axjoin.circle(x, y, **joint_kwargs)

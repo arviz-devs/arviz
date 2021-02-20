@@ -107,7 +107,6 @@ def plot_compare(
         yticks_labels[2::2] = labels[1:]
     else:
         yticks_labels = labels
-        yticks_pos = yticks_pos[::2]
 
     _information_criterion = ["loo", "waic"]
     column_index = [c.lower() for c in comp_df.columns]
