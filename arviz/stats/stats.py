@@ -997,6 +997,8 @@ def summary(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
+    coords: Dict[str, List[Any]], optional
+        Coordinate subset for which to calculate the summary.
     group: str
         Select a group for summary. Defaults to "posterior", "prior" or first group
         in that order, depending what groups exists.
@@ -1029,10 +1031,7 @@ def summary(
         behaviour of the functions passed to ``stat_funcs``. Defaults to false.
     labeller : labeller instance, optional
         Class providing the method `make_label_flat` to generate the labels in the plot titles.
-    coords: Dict[str, List[Any]], optional
-        Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
-    dims: Dict[str, List[str]], optional
-        Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
+        For more details on ``labeller`` usage see :ref:`label_guide`
     credible_interval: float, optional
         deprecated: Please see hdi_prob
     order
@@ -1101,8 +1100,9 @@ def summary(
     """
     _log.cache = []
 
-    if coords is not None:
+    if coords is None:
         coords = {}
+
     if index_origin is not None:
         warnings.warn(
             "index_origin has been deprecated. summary now shows coordinate values, "
@@ -1134,9 +1134,10 @@ def summary(
                 raise TypeError(f"InferenceData does not contain group: {group}")
             dataset = data[group]
     else:
-        dataset = get_coords(convert_to_dataset(data, group="posterior"), coords)
+        dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset, filter_vars)
     dataset = dataset if var_names is None else dataset[var_names]
+    dataset = get_coords(dataset, coords)
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):

@@ -3,6 +3,7 @@
 ```
 # Plot utils
 
+(labellers_api)=
 ## Labellers
 See also `<upcoming user guide page on labellers>`
 
