@@ -37,8 +37,8 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
 
     Examples
     --------
-    Combine the :class:`~arviz.labels.DimCoordLabeller`` with the
-    :class:`~arviz.labels.MapLabeller`` to generate labels in the style of the
+    Combine the :class:`~arviz.labels.DimCoordLabeller` with the
+    :class:`~arviz.labels.MapLabeller` to generate labels in the style of the
     ``DimCoordLabeller`` but using the mappings defined by ``MapLabeller``.
     Note that this works even though both modify the same methods because
     ``MapLabeller`` implements the mapping and then calls `super().method`.
@@ -59,12 +59,12 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
     We can see how the mappings are taken into account as well as the dim+coord style. However,
     he order in the ``labellers`` arg iterator is important! See for yourself:
 
-    .. ipython::
+    .. ipython:: python
 
-        In [1]: l4 = mix_labellers(
-           ...:     (DimCoordLabeller, MapLabeller)
-           ...: )(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
-           ...: print(f"Output of inverted mixture labeller > {l4.sel_to_str(sel, sel)}")
+        l4 = mix_labellers(
+            (DimCoordLabeller, MapLabeller)
+        )(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
+        print(f"Output of inverted mixture labeller > {l4.sel_to_str(sel, sel)}")
 
     """
     return type(class_name, labellers, {})

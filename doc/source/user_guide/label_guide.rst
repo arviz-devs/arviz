@@ -25,9 +25,10 @@ Provided we know that the coordinate values shown for theta correspond to the `s
 we can plot only ``tau`` to better inspect it's 1.03 :func:`~arviz.rhat` and
 ``theta`` for ``Choate`` and ``St. Paul's``, the ones with higher means:
 
-.. ipython::
+.. ipython:: python
 
-    In [1]: az.plot_trace(schools, var_names=["tau", "theta"], coords={"school": ["Choate", "St. Paul's"]}, compact=False);
+    @savefig label_guide_plot_trace.png
+    az.plot_trace(schools, var_names=["tau", "theta"], coords={"school": ["Choate", "St. Paul's"]}, compact=False);
 
 So far so good, we can identify some issues for low ``tau`` values which is great start.
 But say we want to make a report on Deerfield, Hotchkiss and Lawrenceville schools to
@@ -45,7 +46,9 @@ tell it to rename the variable name ``theta`` to ``$\theta$``, like so:
     In [1]: import arviz.labels as azl
        ...: labeller = azl.MapLabeller(var_name_map={"theta": r"$\theta$"})
        ...: coords = {"school": ["Deerfield", "Hotchkiss", "Lawrenceville"]}
-       ...: az.plot_posterior(schools, var_names="theta", coords=coords, labeller=labeller, ref_val=5);
+
+    @savefig label_guide_plot_posterior.png
+    In [1]: az.plot_posterior(schools, var_names="theta", coords=coords, labeller=labeller, ref_val=5);
 
 You can see the labellers available in ArviZ at :ref:`their API reference page <labeller_api>`.
 Their names aim to be descriptive and they all have examples in their docstring.
@@ -165,18 +168,18 @@ Given how we have constructed our dataset, the default order is ``experiment, su
 Hovever, we actually want to have the dimensions in this order: ``subject, date, experiment``.
 And in this case, we need to modify the underlying xarray object in order to get the desired result:
 
-.. ipython::
+.. ipython:: python
 
-    In [1]: dim_order = ("chain", "draw", "subject", "date", "experiment")
-       ...: experiments = experiments.posterior.transpose(*dim_order)
-       ...: az.summary(experiments)
+    dim_order = ("chain", "draw", "subject", "date", "experiment")
+    experiments = experiments.posterior.transpose(*dim_order)
+    az.summary(experiments)
 
 Note however that we don't need to overwrite or store the modified xarray object.
 Doing ``az.summary(experiments.posterior.transpose(*dim_order))`` would work just the same
 if we only want to use this order once.
 
 Labeling with indexes
-=====================
+---------------------
 
 As you may have seen, there are labellers with ``Idx`` in their name:
 :class:`~arviz.labels.IdxLabeller` and  :class:`~arviz.labels.DimIdxLabeller`,
@@ -186,15 +189,15 @@ We have seen before that we can use the ``coords`` argument or
 the :meth:`~arviz.InferenceData.sel` method to select data based on the coordinate values.
 Similarly, we can use the :meth:`~arviz.InferenceData.isel` method to select data based on positional indexes.
 
-.. ipython::
+.. ipython:: python
 
-    In [1]: az.summary(schools, labeller=azl.IdxLabeller())
+    az.summary(schools, labeller=azl.IdxLabeller())
 
 After seeing this summary, we use ``isel`` to generate the summary of a subset only.
 
-.. ipython::
+.. ipython:: python
 
-    In [1]: az.summary(schools.isel(school=[2, 5, 7]), labeller=azl.IdxLabeller())
+    az.summary(schools.isel(school=[2, 5, 7]), labeller=azl.IdxLabeller())
 
 .. warning::
 
@@ -211,7 +214,7 @@ for ``isel`` to work it has to be called on
 not on ``original_idata.isel(<desired positional idxs>)``
 
 Labeller mixtures
-=================
+-----------------
 
 In some cases, none of the available labellers will do the right job.
 One case where this is bound to happen is with ``plot_forest``.
@@ -220,17 +223,19 @@ When setting ``legend=True`` it does not really make sense to add the model name
 :class:`~arviz.labels.BaseLabeller` or :class:`~arviz.labels.NoModelLabeller` depending on the value of ``legend``.
 If we do want to use the ``labeller`` argument however, we have to make sure to enforce this default ourselves:
 
-.. ipython::
+.. ipython:: python
 
-    In [1]: schools2 = az.load_arviz_data("non_centered_eight")
-       ...: az.plot_forest(
-       ...:     (schools, schools2),
-       ...:     model_names=("centered", "non_centered"),
-       ...:     coords={"school": ["Deerfield", "Lawrenceville", "Mt. Hermon"]},
-       ...:     figsize=(10,7),
-       ...:     labeller=azl.DimCoordLabeller(),
-       ...:     legend=True
-       ...: );
+    schools2 = az.load_arviz_data("non_centered_eight")
+
+    @savefig default_plot_forest.png
+    az.plot_forest(
+        (schools, schools2),
+        model_names=("centered", "non_centered"),
+        coords={"school": ["Deerfield", "Lawrenceville", "Mt. Hermon"]},
+        figsize=(10,7),
+        labeller=azl.DimCoordLabeller(),
+        legend=True
+    );
 
 There is a lot of repeated information now.
 The variable names, dims and coords are shown for both models and
@@ -240,19 +245,21 @@ that combines labeller classes for some extra customization.
 Labeller classes aim to split labeling into atomic tasks and have a method per task to maximize extensibility.
 Thus, many new labellers can be created with this mixer function alone without needing to write a new class from scratch.
 
-.. ipython::
+.. ipython:: python
 
-    In [1]: MixtureLabeller = azl.mix_labellers((azl.DimCoordLabeller, azl.NoModelLabeller))
-       ...: az.plot_forest(
-       ...:     (schools, schools2),
-       ...:     model_names=("centered", "non_centered"),
-       ...:     coords={"school": ["Deerfield", "Lawrenceville", "Mt. Hermon"]},
-       ...:     figsize=(10,7),
-       ...:     labeller=MixtureLabeller(),
-       ...:     legend=True
-       ...: );
+    MixtureLabeller = azl.mix_labellers((azl.DimCoordLabeller, azl.NoModelLabeller))
+
+    @savefig mixture_plot_forest.png
+    az.plot_forest(
+        (schools, schools2),
+        model_names=("centered", "non_centered"),
+        coords={"school": ["Deerfield", "Lawrenceville", "Mt. Hermon"]},
+        figsize=(10,7),
+        labeller=MixtureLabeller(),
+        legend=True
+    );
 
 Custom labellers
-================
+----------------
 
 Section in construction...

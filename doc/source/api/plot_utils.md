@@ -5,7 +5,7 @@
 
 (labeller_api)=
 ## Labellers
-See also `<upcoming user guide page on labellers>`
+See also the {ref}`label_guide`
 
 ```{eval-rst}
 .. autosummary::
