@@ -2,28 +2,31 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Added `labeller` argument to enable label customization in plots and summary ([1201](https://github.com/arviz-devs/arviz/pull/1201))
+* Added `arviz.labels` module with classes and utilities ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ### Maintenance and fixes
+* Enforced using coordinate values as default labels ([1201](https://github.com/arviz-devs/arviz/pull/1201))
+* Integrate `index_origin` with all the library ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ### Deprecation
+* Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ### Documentation
+* Added "Label guide" page and API section for `arviz.labels` module ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ## v0.11.2 (2021 Feb 21)
 ### New features
 * Added `to_zarr` and `from_zarr` methods to InferenceData ([1518](https://github.com/arviz-devs/arviz/pull/1518))
 * Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
-* Added `labeller` argument to enable label customization in plots and summary ([1201](https://github.com/arviz-devs/arviz/pull/1201))
-* Added `arviz.labels` module with classes and utilities ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ### Maintenance and fixes
+* Updated CmdStanPy converter form compatibility with versions >=0.9.68 ([1558](https://github.com/arviz-devs/arviz/pull/1558) and ([1564](https://github.com/arviz-devs/arviz/pull/1564))
 * Updated `from_cmdstanpy`, `from_cmdstan`, `from_numpyro` and `from_pymc3` converters to follow schema convention ([1550](https://github.com/arviz-devs/arviz/pull/1550), [1541](https://github.com/arviz-devs/arviz/pull/1541), [1525](https://github.com/arviz-devs/arviz/pull/1525) and [1555](https://github.com/arviz-devs/arviz/pull/1555))
 * Fix calculation of mode as point estimate ([1552](https://github.com/arviz-devs/arviz/pull/1552))
 * Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
 * Added significant digits formatter to round rope values ([1569](https://github.com/arviz-devs/arviz/pull/1569))
 * Updated `from_cmdstan`. csv reader, dtype problem fixed and dtype kwarg added for manual dtype casting ([1565](https://github.com/arviz-devs/arviz/pull/1565))
-* Enforced using coordinate values as default labels ([1201](https://github.com/arviz-devs/arviz/pull/1201))
-* Integrate `index_origin` with all the library ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ### Deprecation
 * Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
@@ -32,7 +35,6 @@
 ### Documentation
 * Added an example for converting dataframe to InferenceData ([1556](https://github.com/arviz-devs/arviz/pull/1556))
 * Added example for `coords` argument in `plot_posterior` docstring ([1566](https://github.com/arviz-devs/arviz/pull/1566))
-* Added "Label guide" page and API section for `arviz.labels` module ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ## v0.11.1 (2021 Feb 2)
 ### Maintenance and fixes
