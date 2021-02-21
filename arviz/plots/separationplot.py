@@ -77,10 +77,9 @@ def plot_separation(
 
     References
     ----------
-    * Greenhill, B. *et al.*, The Separation Plot: A New Visual Method
-      for Evaluating the Fit of Binary Models, *American Journal of
-      Political Science, (2011) see
-      https://doi.org/10.1111/j.1540-5907.2011.00525.x
+    .. [1] Greenhill, B. *et al.*, The Separation Plot: A New Visual Method
+       for Evaluating the Fit of Binary Models, *American Journal of
+       Political Science*, (2011) see https://doi.org/10.1111/j.1540-5907.2011.00525.x
 
     Examples
     --------

@@ -143,7 +143,7 @@ def plot_khat(
 
     References
     ----------
-    ..[1] Vehtari, A., Simpson, D., Gelman, A., Yao, Y., Gabry, J.,
+    .. [1] Vehtari, A., Simpson, D., Gelman, A., Yao, Y., Gabry, J.,
     2019. Pareto Smoothed Importance Sampling. arXiv:1507.02646
     [stat].
     """

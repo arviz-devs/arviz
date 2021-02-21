@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
@@ -28,6 +28,7 @@ def plot_ess(
     n_samples,
     relative,
     min_ess,
+    labeller,
     ylabel,
     rug,
     rug_kind,
@@ -95,7 +96,7 @@ def plot_ess(
             backend_kwargs=backend_kwargs,
         )
 
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    for (var_name, selection, isel, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.plot(xdata, x, **kwargs)
         if kind == "evolution":
             ess_tail = ess_tail_dataset[var_name].sel(**selection)
@@ -143,7 +144,9 @@ def plot_ess(
 
         ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
 
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+        ax_.set_title(
+            labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True
+        )
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel(
             "Total number of draws" if kind == "evolution" else "Quantile", fontsize=ax_labelsize

@@ -9,7 +9,6 @@ from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
     is_valid_quantile,
-    make_label,
     sample_reference_distribution,
 )
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
@@ -34,6 +33,7 @@ def plot_bpv(
     color,
     figsize,
     textsize,
+    labeller,
     plot_ref_kwargs,
     backend_kwargs,
     show,
@@ -82,8 +82,8 @@ def plot_bpv(
             )
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
-        var_name, selection, obs_vals = obs_plotters[i]
-        pp_var_name, _, pp_vals = pp_plotters[i]
+        var_name, selection, isel, obs_vals = obs_plotters[i]
+        pp_var_name, _, _, pp_vals = pp_plotters[i]
 
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
@@ -167,11 +167,9 @@ def plot_bpv(
                     obs_vals.mean(), 0, "o", color=color, markeredgecolor="k", markersize=markersize
                 )
 
-        if var_name != pp_var_name:
-            xlabel = "{} / {}".format(var_name, pp_var_name)
-        else:
-            xlabel = var_name
-        ax_i.set_title(make_label(xlabel, selection), fontsize=ax_labelsize)
+        ax_i.set_title(
+            labeller.make_pp_label(var_name, pp_var_name, selection, isel), fontsize=ax_labelsize
+        )
 
     if backend_show(show):
         plt.show()

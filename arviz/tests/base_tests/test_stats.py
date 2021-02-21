@@ -261,38 +261,22 @@ def test_summary_fmt(centered_eight, fmt):
     assert summary(centered_eight, fmt=fmt) is not None
 
 
-@pytest.mark.parametrize("order", ["C", "F"])
-def test_summary_unpack_order(order):
-    data = from_dict({"a": np.random.randn(4, 100, 4, 5, 3)})
-    az_summary = summary(data, order=order, fmt="wide")
+def test_summary_labels():
+    coords1 = list("abcd")
+    coords2 = np.arange(1, 6)
+    data = from_dict(
+        {"a": np.random.randn(4, 100, 4, 5)},
+        coords={"dim1": coords1, "dim2": coords2},
+        dims={"a": ["dim1", "dim2"]},
+    )
+    az_summary = summary(data, fmt="wide")
     assert az_summary is not None
-    if order != "F":
-        first_index = 4
-        second_index = 5
-        third_index = 3
-    else:
-        first_index = 3
-        second_index = 5
-        third_index = 4
     column_order = []
-    for idx1 in range(first_index):
-        for idx2 in range(second_index):
-            for idx3 in range(third_index):
-                if order != "F":
-                    column_order.append("a[{},{},{}]".format(idx1, idx2, idx3))
-                else:
-                    column_order.append("a[{},{},{}]".format(idx3, idx2, idx1))
+    for coord1 in coords1:
+        for coord2 in coords2:
+            column_order.append("a[{}, {}]".format(coord1, coord2))
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
-
-
-@pytest.mark.parametrize("origin", [0, 1, 2, 3])
-def test_summary_index_origin(origin):
-    data = from_dict({"a": np.random.randn(2, 50, 10)})
-    az_summary = summary(data, index_origin=origin, fmt="wide")
-    assert az_summary is not None
-    for i, col in enumerate(list(az_summary.index)):
-        assert col == "a[{}]".format(i + origin)
 
 
 @pytest.mark.parametrize(
@@ -306,12 +290,12 @@ def test_summary_stat_func(centered_eight, stat_funcs):
 
 def test_summary_nan(centered_eight):
     centered_eight = deepcopy(centered_eight)
-    centered_eight.posterior.theta[:, :, 0] = np.nan
+    centered_eight.posterior["theta"].loc[{"school": "Deerfield"}] = np.nan
     summary_xarray = summary(centered_eight)
     assert summary_xarray is not None
-    assert summary_xarray.loc["theta[0]"].isnull().all()
+    assert summary_xarray.loc["theta[Deerfield]"].isnull().all()
     assert (
-        summary_xarray.loc[[ix for ix in summary_xarray.index if ix != "theta[0]"]]
+        summary_xarray.loc[[ix for ix in summary_xarray.index if ix != "theta[Deerfield]"]]
         .notnull()
         .all()
         .all()
@@ -320,9 +304,9 @@ def test_summary_nan(centered_eight):
 
 def test_summary_skip_nan(centered_eight):
     centered_eight = deepcopy(centered_eight)
-    centered_eight.posterior.theta[:, :10, 1] = np.nan
+    centered_eight.posterior["theta"].loc[{"draw": slice(10), "school": "Deerfield"}] = np.nan
     summary_xarray = summary(centered_eight)
-    theta_1 = summary_xarray.loc["theta[1]"].isnull()
+    theta_1 = summary_xarray.loc["theta[Deerfield]"].isnull()
     assert summary_xarray is not None
     assert ~theta_1[:4].all()
     assert theta_1[4:].all()
@@ -334,16 +318,14 @@ def test_summary_bad_fmt(centered_eight, fmt):
         summary(centered_eight, fmt=fmt)
 
 
-@pytest.mark.parametrize("kind", [1, "bad_kind"])
-def test_summary_bad_kind(centered_eight, kind):
-    with pytest.raises(TypeError, match="Invalid kind"):
-        summary(centered_eight, kind=kind)
+def test_summary_order_deprecation(centered_eight):
+    with pytest.warns(DeprecationWarning, match="order"):
+        summary(centered_eight, order="C")
 
 
-@pytest.mark.parametrize("order", [1, "bad_order"])
-def test_summary_bad_unpack_order(centered_eight, order):
-    with pytest.raises(TypeError, match="Invalid order"):
-        summary(centered_eight, order=order)
+def test_summary_index_origin_deprecation(centered_eight):
+    with pytest.warns(DeprecationWarning, match="index_origin"):
+        summary(centered_eight, index_origin=1)
 
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])

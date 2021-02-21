@@ -12,7 +12,6 @@ from ...plot_utils import (
     _scale_fig_size,
     calculate_point_estimate,
     format_sig_figs,
-    make_label,
     round_num,
 )
 from .. import show_layout
@@ -38,6 +37,7 @@ def plot_posterior(
     textsize,
     ref_val,
     rope,
+    labeller,
     kwargs,
     backend_kwargs,
     show,
@@ -66,7 +66,7 @@ def plot_posterior(
     else:
         ax = np.atleast_2d(ax)
     idx = 0
-    for (var_name, selection, x), ax_ in zip(
+    for (var_name, selection, isel, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
         _plot_posterior_op(
@@ -92,7 +92,7 @@ def plot_posterior(
         )
         idx += 1
         _title = Title()
-        _title.text = make_label(var_name, selection)
+        _title.text = labeller.make_label_vert(var_name, selection, isel)
         ax_.title = _title
 
     show_layout(ax, show)

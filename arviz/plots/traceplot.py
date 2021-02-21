@@ -3,9 +3,11 @@ import warnings
 from typing import Any, Callable, List, Mapping, Optional, Tuple, Union
 
 from ..data import CoordSpec, InferenceData, convert_to_dataset
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
+from ..sel_utils import xarray_var_iter
 from ..utils import _var_names, get_coords
-from .plot_utils import KwargSpec, get_plotting_function, xarray_var_iter
+from .plot_utils import KwargSpec, get_plotting_function
 
 
 def plot_trace(
@@ -32,6 +34,7 @@ def plot_trace(
     hist_kwargs: Optional[KwargSpec] = None,
     trace_kwargs: Optional[KwargSpec] = None,
     rank_kwargs: Optional[KwargSpec] = None,
+    labeller=None,
     axes=None,
     backend: Optional[str] = None,
     backend_config: Optional[KwargSpec] = None,
@@ -92,6 +95,9 @@ def plot_trace(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
     trace_kwargs: dict, optional
         Extra keyword arguments passed to `plt.plot`
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     rank_kwargs : dict, optional
         Extra keyword arguments passed to `arviz.plot_rank`
     axes: axes, optional
@@ -169,6 +175,9 @@ def plot_trace(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     if divergences:
         divergence_data = get_coords(
             divergence_data, {k: v for k, v in coords.items() if k in ("chain", "draw")}
@@ -226,6 +235,7 @@ def plot_trace(
         combined=combined,
         chain_prop=chain_prop,
         legend=legend,
+        labeller=labeller,
         # Generated kwargs
         divergence_data=divergence_data,
         # skip_dims=skip_dims,

@@ -1,9 +1,8 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
 import warnings
-from collections import OrderedDict
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -12,7 +11,7 @@ import xarray as xr
 from scipy.optimize import minimize
 
 from arviz import _log
-from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
+from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams
 from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
@@ -25,6 +24,8 @@ from .stats_utils import logsumexp as _logsumexp
 from .stats_utils import make_ufunc as _make_ufunc
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
+from ..sel_utils import xarray_var_iter
+from ..labels import BaseLabeller
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -974,11 +975,11 @@ def summary(
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
-    order: "Literal['C', 'F']" = "C",
-    index_origin=None,
     skipna=False,
-    coords: Optional[CoordSpec] = None,
-    dims: Optional[DimSpec] = None,
+    labeller=None,
+    coords=None,
+    index_origin=None,
+    order=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -996,6 +997,8 @@ def summary(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
+    coords: Dict[str, List[Any]], optional
+        Coordinate subset for which to calculate the summary.
     group: str
         Select a group for summary. Defaults to "posterior", "prior" or first group
         in that order, depending what groups exists.
@@ -1023,18 +1026,19 @@ def summary(
     hdi_prob: float, optional
         Highest density interval to compute. Defaults to 0.94. This is only meaningful when
         ``stat_funcs`` is None.
-    order: {"C", "F"}
-        If fmt is "wide", use either C or F unpacking order. Defaults to C.
-    index_origin: int
-        If fmt is "wide, select n-based indexing for multivariate parameters.
-        Defaults to rcParam data.index.origin, which is 0.
     skipna: bool
         If true ignores nan values when computing the summary statistics, it does not affect the
         behaviour of the functions passed to ``stat_funcs``. Defaults to false.
-    coords: Dict[str, List[Any]], optional
-        Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
-    dims: Dict[str, List[str]], optional
-        Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_flat` to generate the labels in the plot titles.
+        For more details on ``labeller`` usage see :ref:`label_guide`
+    credible_interval: float, optional
+        deprecated: Please see hdi_prob
+    order
+        deprecated: order is now ignored.
+    index_origin
+        deprecated: index_origin is now ignored, modify the coordinate values to change the
+        value used in summary.
 
     Returns
     -------
@@ -1096,13 +1100,18 @@ def summary(
     """
     _log.cache = []
 
-    extra_args = {}  # type: Dict[str, Any]
-    if coords is not None:
-        extra_args["coords"] = coords
-    if dims is not None:
-        extra_args["dims"] = dims
-    if index_origin is None:
+    if coords is None:
+        coords = {}
+
+    if index_origin is not None:
+        warnings.warn(
+            "index_origin has been deprecated. summary now shows coordinate values, "
+            "to change the label shown, modify the coordinate values before calling sumary",
+            DeprecationWarning,
+        )
         index_origin = rcParams["data.index_origin"]
+    if labeller is None:
+        labeller = BaseLabeller()
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
@@ -1125,21 +1134,23 @@ def summary(
                 raise TypeError(f"InferenceData does not contain group: {group}")
             dataset = data[group]
     else:
-        dataset = convert_to_dataset(data, group="posterior", **extra_args)
+        dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset, filter_vars)
     dataset = dataset if var_names is None else dataset[var_names]
+    dataset = get_coords(dataset, coords)
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
         raise TypeError(f"Invalid format: '{fmt}'. Formatting options are: {fmt_group}")
 
-    unpack_order_group = ("C", "F")
-    if not isinstance(order, str) or (order.upper() not in unpack_order_group):
-        raise TypeError(f"Invalid order: '{order}'. Unpacking options are: {unpack_order_group}")
-
     kind_group = ("all", "stats", "diagnostics")
     if not isinstance(kind, str) or kind not in kind_group:
         raise TypeError(f"Invalid kind: '{kind}'. Kind options are: {kind_group}")
+
+    if order is not None:
+        warnings.warn(
+            "order has been deprecated. summary now shows coordinate values.", DeprecationWarning
+        )
 
     alpha = 1 - hdi_prob
 
@@ -1267,28 +1278,18 @@ def summary(
     joined = (
         xr.concat(metrics, dim="metric").assign_coords(metric=metric_names).reset_coords(drop=True)
     )
+    n_metrics = len(metric_names)
+    n_vars = np.sum([joined[var].size // n_metrics for var in joined.data_vars])
 
     if fmt.lower() == "wide":
-        dfs = []
-        for var_name, values in joined.data_vars.items():
-            if len(values.shape[1:]):
-                index_metric = list(values.metric.values)
-                data_dict = OrderedDict()
-                for idx in np.ndindex(values.shape[1:] if order == "C" else values.shape[1:][::-1]):
-                    if order == "F":
-                        idx = tuple(idx[::-1])
-                    ser = pd.Series(values[(Ellipsis, *idx)].values, index=index_metric)
-                    key_index = ",".join(map(str, (i + index_origin for i in idx)))
-                    key = f"{var_name}[{key_index}]"
-                    data_dict[key] = ser
-                df = pd.DataFrame.from_dict(data_dict, orient="index")
-                df = df.loc[list(data_dict.keys())]
-            else:
-                df = values.to_dataframe()
-                df.index = list(df.index)
-                df = df.T
-            dfs.append(df)
-        summary_df = pd.concat(dfs, sort=False)
+        summary_df = pd.DataFrame(np.full((n_vars, n_metrics), np.nan), columns=metric_names)
+        indexs = []
+        for i, (var_name, sel, isel, values) in enumerate(
+            xarray_var_iter(joined, skip_dims={"metric"})
+        ):
+            summary_df.iloc[i] = values
+            indexs.append(labeller.make_label_flat(var_name, sel, isel))
+        summary_df.index = indexs
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
         df.index = list(df.index)

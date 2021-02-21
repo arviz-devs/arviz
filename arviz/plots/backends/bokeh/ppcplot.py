@@ -29,6 +29,7 @@ def plot_ppc(
     jitter,
     total_pp_samples,
     legend,  # pylint: disable=unused-argument
+    labeller,
     group,  # pylint: disable=unused-argument
     animation_kwargs,  # pylint: disable=unused-argument
     num_pp_samples,
@@ -82,8 +83,8 @@ def plot_ppc(
         raise ValueError("jitter must be >=0.")
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
-        var_name, _, obs_vals = obs_plotters[i]
-        pp_var_name, _, pp_vals = pp_plotters[i]
+        var_name, sel, isel, obs_vals = obs_plotters[i]
+        pp_var_name, _, _, pp_vals = pp_plotters[i]
         dtype = predictive_dataset[pp_var_name].dtype.kind
 
         # flatten non-specified dimensions
@@ -271,11 +272,7 @@ def plot_ppc(
             ax_i.yaxis.minor_tick_line_color = None
             ax_i.yaxis.major_label_text_font_size = "0pt"
 
-        if var_name != pp_var_name:
-            xlabel = "{} / {}".format(var_name, pp_var_name)
-        else:
-            xlabel = var_name
-        ax_i.xaxis.axis_label = xlabel
+        ax_i.xaxis.axis_label = labeller.make_pp_label(var_name, pp_var_name, sel, isel)
 
     show_layout(axes, show)
 

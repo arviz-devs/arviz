@@ -2,6 +2,7 @@
 import numpy as np
 import scipy.stats as stats
 
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..stats import loo_pit as _loo_pit
 from ..stats.density_utils import kde
@@ -20,6 +21,7 @@ def plot_loo_pit(
     hdi_prob=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     color="C0",
     legend=True,
     ax=None,
@@ -66,6 +68,9 @@ def plot_loo_pit(
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int, optional
         Text size for labels. If None it will be autoscaled based on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     color : str or array_like, optional
         Color of the LOO-PIT estimated pdf plot. If ``plot_unif_kwargs`` has no "color" key,
         an slightly lighter color than this argument will be used for the uniform kde lines.
@@ -127,6 +132,9 @@ def plot_loo_pit(
     if ecdf and use_hdi:
         raise ValueError("use_hdi is incompatible with ecdf plot")
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
@@ -184,6 +192,7 @@ def plot_loo_pit(
         plot_unif_kwargs=plot_unif_kwargs,
         loo_pit_kde=loo_pit_kde,
         textsize=textsize,
+        labeller=labeller,
         color=color,
         legend=legend,
         y_hat=y_hat,

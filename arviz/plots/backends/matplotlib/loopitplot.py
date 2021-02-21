@@ -29,6 +29,7 @@ def plot_loo_pit(
     plot_unif_kwargs,
     loo_pit_kde,
     legend,
+    labeller,
     y_hat,
     y,
     color,
@@ -58,15 +59,21 @@ def plot_loo_pit(
     plot_kwargs["color"] = to_hex(color)
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y
     elif isinstance(y, DataArray) and y.name is not None:
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y.name
     elif isinstance(y_hat, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y_hat
     elif isinstance(y_hat, DataArray) and y_hat.name is not None:
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y_hat.name
     else:
         label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = ""
+    xlabel = labeller.var_name_to_str(y)
 
     plot_kwargs.setdefault("label", label)
     plot_kwargs.setdefault("zorder", 5)
@@ -126,6 +133,7 @@ def plot_loo_pit(
         ax.plot(x_vals, loo_pit_kde, **plot_kwargs)
         ax.set_xlim(0, 1)
         ax.set_ylim(0, None)
+    ax.set_xlabel(xlabel)
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
         if not (use_hdi or (ecdf and ecdf_fill)):
