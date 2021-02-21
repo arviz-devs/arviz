@@ -2,6 +2,15 @@
 
 ## v0.x.x Unreleased
 ### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+## v0.11.2 (2021 Feb 21)
+### New features
 * Added `to_zarr` and `from_zarr` methods to InferenceData ([1518](https://github.com/arviz-devs/arviz/pull/1518))
 * Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
 
@@ -11,7 +20,6 @@
 * Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
 * Added significant digits formatter to round rope values ([1569](https://github.com/arviz-devs/arviz/pull/1569))
 * Updated `from_cmdstan`. csv reader, dtype problem fixed and dtype kwarg added for manual dtype casting ([1565](https://github.com/arviz-devs/arviz/pull/1565))
-
 
 ### Deprecation
 * Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
