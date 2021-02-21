@@ -501,12 +501,12 @@ def test_plot_kde_inference_data(models):
             "divergences": True,
             "coords": {"theta_dim_0": [0, 1]},
             "scatter_kwargs": {"marker": "x"},
-            "divergences_kwargs": {"marker": "*", "c": "C"},
+            "divergences_kwargs": {"marker": "*", "c": "C0"},
         },
         {
             "divergences": True,
             "scatter_kwargs": {"marker": "x"},
-            "divergences_kwargs": {"marker": "*", "c": "C"},
+            "divergences_kwargs": {"marker": "*", "c": "C0"},
             "var_names": ["theta", "mu"],
         },
         {"kind": "kde", "var_names": ["theta"]},
@@ -523,7 +523,7 @@ def test_plot_kde_inference_data(models):
         {
             "point_estimate": "mean",
             "reference_values": {"mu": 0, "tau": 0},
-            "reference_values_kwargs": {"c": "C", "marker": "*"},
+            "reference_values_kwargs": {"c": "C0", "marker": "*"},
         },
     ],
 )
