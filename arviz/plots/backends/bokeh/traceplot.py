@@ -10,10 +10,11 @@ from bokeh.models import ColumnDataSource, Dash, DataRange1d, Span
 from bokeh.models.annotations import Title
 
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size
 from ...rankplot import plot_rank
 from .. import show_layout
 from . import backend_kwarg_defaults, dealiase_sel_kwargs
+from ....sel_utils import xarray_var_iter
 
 
 def plot_trace(
@@ -31,6 +32,7 @@ def plot_trace(
     combined,
     chain_prop,
     legend,
+    labeller,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
@@ -167,7 +169,7 @@ def plot_trace(
     cds_var_groups = {}
     draw_name = "draw"
 
-    for var_name, selection, value in list(
+    for var_name, selection, isel, value in list(
         xarray_var_iter(data, var_names=var_names, combined=True)
     ):
         if selection:
@@ -204,7 +206,7 @@ def plot_trace(
 
     cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
-    for idx, (var_name, selection, value) in enumerate(plotters):
+    for idx, (var_name, selection, isel, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
@@ -269,7 +271,7 @@ def plot_trace(
 
         for col in (0, 1):
             _title = Title()
-            _title.text = make_label(var_name, selection)
+            _title.text = labeller.make_label_vert(var_name, selection, isel)
             axes[idx, col].title = _title
             axes[idx, col].y_range = DataRange1d(
                 bounds=backend_config["bounds_y_range"], min_interval=0.1

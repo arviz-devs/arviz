@@ -1,7 +1,9 @@
 """Density Comparison plot."""
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
-from .plot_utils import get_plotting_function, xarray_var_iter
+from .plot_utils import get_plotting_function
+from ..sel_utils import xarray_var_iter
 
 
 def plot_dist_comparison(
@@ -13,6 +15,7 @@ def plot_dist_comparison(
     coords=None,
     transform=None,
     legend=True,
+    labeller=None,
     ax=None,
     prior_kwargs=None,
     posterior_kwargs=None,
@@ -51,6 +54,9 @@ def plot_dist_comparison(
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
+    labeller : labeller instance, optional
+        Class providing the method `make_pp_label` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
         last column is for the combined before/after plots and columns 0 and 1 are
@@ -93,6 +99,9 @@ def plot_dist_comparison(
 
     if coords is None:
         coords = {}
+
+    if labeller is None:
+        labeller = BaseLabeller()
 
     datasets = []
     groups = []
@@ -137,6 +146,7 @@ def plot_dist_comparison(
         legend=legend,
         groups=groups,
         textsize=textsize,
+        labeller=labeller,
         prior_kwargs=prior_kwargs,
         posterior_kwargs=posterior_kwargs,
         observed_kwargs=observed_kwargs,

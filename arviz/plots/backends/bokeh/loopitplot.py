@@ -34,6 +34,7 @@ def plot_loo_pit(
     y,
     color,
     textsize,
+    labeller,
     hdi_prob,
     plot_kwargs,
     backend_kwargs,
@@ -63,15 +64,21 @@ def plot_loo_pit(
     plot_kwargs.setdefault("color", to_hex(color))
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y
     elif isinstance(y, DataArray) and y.name is not None:
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y.name
     elif isinstance(y_hat, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y_hat
     elif isinstance(y_hat, DataArray) and y_hat.name is not None:
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y_hat.name
     else:
         label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = ""
+    xlabel = labeller.var_name_to_str(xlabel)
 
     plot_kwargs.setdefault("legend_label", label)
 
@@ -204,6 +211,7 @@ def plot_loo_pit(
         )
 
     # Sets xlim(0, 1)
+    ax.xaxis.axis_label = xlabel
     ax.line(0, 0)
     ax.line(1, 0)
     show_layout(ax, show)

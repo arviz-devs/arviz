@@ -5,7 +5,7 @@ from bokeh.models.annotations import Title
 
 
 from ....stats import autocorr
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -19,6 +19,7 @@ def plot_autocorr(
     cols,
     combined,
     textsize,
+    labeller,
     backend_config,
     backend_kwargs,
     show,
@@ -27,7 +28,7 @@ def plot_autocorr(
     if backend_config is None:
         backend_config = {}
 
-    len_y = plotters[0][2].size
+    len_y = plotters[0][-1].size
     backend_config.setdefault("bounds_x_range", (0, len_y))
 
     backend_config = {
@@ -69,7 +70,7 @@ def plot_autocorr(
         start=-1, end=1, bounds=backend_config["bounds_y_range"], min_interval=0.1
     )
 
-    for (var_name, selection, x), ax in zip(
+    for (var_name, selection, isel, x), ax in zip(
         plotters, (item for item in axes.flatten() if item is not None)
     ):
         x_prime = x
@@ -89,7 +90,7 @@ def plot_autocorr(
         )
 
         title = Title()
-        title.text = make_label(var_name, selection)
+        title.text = labeller.make_label_vert(var_name, selection, isel)
         ax.title = title
         ax.x_range = data_range_x
         ax.y_range = data_range_y

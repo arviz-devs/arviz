@@ -5,11 +5,9 @@ from collections import defaultdict
 from copy import deepcopy
 
 import numpy as np
-import xarray as xr
 
-from .. import utils
 from ..rcparams import rcParams
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .base import dict_to_dataset, make_attrs, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -32,6 +30,7 @@ class CmdStanPyConverter:
         constant_data=None,
         predictions_constant_data=None,
         log_likelihood=None,
+        index_origin=None,
         coords=None,
         dims=None,
         save_warmup=None,
@@ -45,6 +44,7 @@ class CmdStanPyConverter:
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
         self.log_likelihood = log_likelihood
+        self.index_origin = index_origin
         self.coords = coords
         self.dims = dims
 
@@ -133,9 +133,19 @@ class CmdStanPyConverter:
             if data_warmup:
                 data_warmup[name] = data_warmup.pop(item).astype(dtypes.get(item, float))
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -171,9 +181,19 @@ class CmdStanPyConverter:
             )
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -200,9 +220,19 @@ class CmdStanPyConverter:
             )
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -233,6 +263,7 @@ class CmdStanPyConverter:
                 library=self.cmdstanpy,
                 coords=self.coords,
                 dims=self.dims,
+                index_origin=self.index_origin,
                 skip_event_dims=True,
             ),
             dict_to_dataset(
@@ -240,6 +271,7 @@ class CmdStanPyConverter:
                 library=self.cmdstanpy,
                 coords=self.coords,
                 dims=self.dims,
+                index_origin=self.index_origin,
                 skip_event_dims=True,
             ),
         )
@@ -275,51 +307,57 @@ class CmdStanPyConverter:
             )
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        observed_data = {}
-        for key, vals in self.observed_data.items():
-            vals = utils.one_de(vals)
-            val_dims = self.dims.get(key) if self.dims is not None else None
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.cmdstanpy))
+        return dict_to_dataset(
+            self.observed_data,
+            library=self.cmdstanpy,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
         """Convert constant data to xarray."""
-        constant_data = {}
-        for key, vals in self.constant_data.items():
-            vals = utils.one_de(vals)
-            val_dims = self.dims.get(key) if self.dims is not None else None
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.cmdstanpy))
+        return dict_to_dataset(
+            self.constant_data,
+            library=self.cmdstanpy,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("predictions_constant_data")
     def predictions_constant_data_to_xarray(self):
         """Convert constant data to xarray."""
-        predictions_constant_data = {}
-        for key, vals in self.predictions_constant_data.items():
-            vals = utils.one_de(vals)
-            val_dims = self.dims.get(key) if self.dims is not None else None
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(
-            data_vars=predictions_constant_data, attrs=make_attrs(library=self.cmdstanpy)
+        return dict_to_dataset(
+            self.predictions_constant_data,
+            library=self.cmdstanpy,
+            coords=self.coords,
+            dims=self.dims,
+            attrs=make_attrs(library=self.cmdstanpy),
+            default_dims=[],
+            index_origin=self.index_origin,
         )
 
     def to_inference_data(self):
@@ -614,6 +652,7 @@ def from_cmdstanpy(
     constant_data=None,
     predictions_constant_data=None,
     log_likelihood=None,
+    index_origin=None,
     coords=None,
     dims=None,
     save_warmup=None,
@@ -643,6 +682,9 @@ def from_cmdstanpy(
         Constant data for predictions used in the sampling.
     log_likelihood : str, list of str
         Pointwise log_likelihood for the data.
+    index_origin : int, optional
+        Starting value of integer coordinate values. Defaults to the value in rcParam
+        ``data.index_origin``.
     coords : dict of str or dict of iterable
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -666,6 +708,7 @@ def from_cmdstanpy(
         constant_data=constant_data,
         predictions_constant_data=predictions_constant_data,
         log_likelihood=log_likelihood,
+        index_origin=index_origin,
         coords=coords,
         dims=dims,
         save_warmup=save_warmup,

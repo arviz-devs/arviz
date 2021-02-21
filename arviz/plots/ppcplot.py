@@ -4,9 +4,11 @@ from numbers import Integral
 
 import numpy as np
 
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..utils import _var_names
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 _log = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ def plot_ppc(
     animated=False,
     animation_kwargs=None,
     legend=True,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
@@ -123,6 +126,9 @@ def plot_ppc(
         Keywords passed to `animation.FuncAnimation`. Ignored with matploblib backend.
     legend : bool
         Add legend to figure. By default True.
+    labeller : labeller instance, optional
+        Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -235,6 +241,9 @@ def plot_ppc(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     if random_seed is not None:
         np.random.seed(random_seed)
 
@@ -306,6 +315,7 @@ def plot_ppc(
         observed=observed,
         total_pp_samples=total_pp_samples,
         legend=legend,
+        labeller=labeller,
         group=group,
         animation_kwargs=animation_kwargs,
         num_pp_samples=num_pp_samples,

@@ -1,8 +1,10 @@
 """Plot posterior densities."""
 from ..data import convert_to_dataset
-from ..rcparams import rcParams
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
 from ..utils import _var_names, get_coords
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from ..rcparams import rcParams
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_posterior(
@@ -26,6 +28,7 @@ def plot_posterior(
     bw="default",
     circular=False,
     bins=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
@@ -99,6 +102,9 @@ def plot_posterior(
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -209,6 +215,9 @@ def plot_posterior(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     elif hdi_prob not in (None, "hide"):
@@ -246,6 +255,7 @@ def plot_posterior(
         textsize=textsize,
         ref_val=ref_val,
         rope=rope,
+        labeller=labeller,
         kwargs=kwargs,
         backend_kwargs=backend_kwargs,
         show=show,

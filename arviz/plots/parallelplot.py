@@ -3,10 +3,12 @@ import numpy as np
 from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_to_ndarray
 from ..rcparams import rcParams
 from ..stats.stats_utils import stats_variance_2d as svar
 from ..utils import _numba_var, _var_names, get_coords
-from .plot_utils import get_plotting_function, xarray_to_ndarray
+from .plot_utils import get_plotting_function
 
 
 def plot_parallel(
@@ -20,6 +22,7 @@ def plot_parallel(
     colornd="k",
     colord="C1",
     shadend=0.025,
+    labeller=None,
     ax=None,
     norm_method=None,
     backend=None,
@@ -62,6 +65,9 @@ def plot_parallel(
     shadend: float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     norm_method: str
@@ -104,6 +110,9 @@ def plot_parallel(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group="sample_stats")
     _, diverging_mask = xarray_to_ndarray(divergent_data, var_names=("diverging",), combined=True)
@@ -113,7 +122,10 @@ def plot_parallel(
     posterior_data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, posterior_data, filter_vars)
     var_names, _posterior = xarray_to_ndarray(
-        get_coords(posterior_data, coords), var_names=var_names, combined=True
+        get_coords(posterior_data, coords),
+        var_names=var_names,
+        combined=True,
+        label_fun=labeller.make_label_vert,
     )
     if len(var_names) < 2:
         raise ValueError("Number of variables to be plotted must be 2 or greater.")

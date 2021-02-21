@@ -14,10 +14,10 @@ from ...plots.plot_utils import (
     make_2d,
     set_bokeh_circular_ticks_labels,
     vectorized_to_hex,
-    xarray_to_ndarray,
-    xarray_var_iter,
     compute_ranks,
 )
+from ...sel_utils import xarray_to_ndarray, xarray_sel_iter
+
 from ...rcparams import rc_context
 from ...stats.density_utils import get_bins
 from ...utils import get_coords
@@ -91,7 +91,7 @@ def test_dataset_to_numpy_combined(sample_dataset):
     assert (data[var_names.index("tau")] == tau.reshape(1, 6)).all()
 
 
-def test_xarray_var_iter_ordering():
+def test_xarray_sel_iter_ordering():
     """Assert that coordinate names stay the provided order"""
     coords = list("dcba")
     data = from_dict(  # pylint: disable=no-member
@@ -100,21 +100,21 @@ def test_xarray_var_iter_ordering():
         dims={"x": ["in_order"]},
     ).posterior
 
-    coord_names = [sel["in_order"] for _, sel, _ in xarray_var_iter(data)]
+    coord_names = [sel["in_order"] for _, sel, _ in xarray_sel_iter(data)]
     assert coord_names == coords
 
 
-def test_xarray_var_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
+def test_xarray_sel_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are combined"""
     _, _, data = sample_dataset
-    var_names = [var for (var, _, _) in xarray_var_iter(data, var_names=None, combined=True)]
+    var_names = [var for (var, _, _) in xarray_sel_iter(data, var_names=None, combined=True)]
     assert set(var_names) == {"mu", "tau"}
 
 
-def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
+def test_xarray_sel_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are not combined"""
     _, _, data = sample_dataset
-    var_names = [(var, selection) for (var, selection, _) in xarray_var_iter(data, var_names=None)]
+    var_names = [(var, selection) for (var, selection, _) in xarray_sel_iter(data, var_names=None)]
 
     assert len(var_names) == 4
     for var_name in var_names:
@@ -126,13 +126,13 @@ def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable
         ]
 
 
-def test_xarray_var_data_array(sample_dataset):  # pylint: disable=invalid-name
+def test_xarray_sel_data_array(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are combined
 
     Touches code that is hard to reach.
     """
     _, _, data = sample_dataset
-    var_names = [var for (var, _, _) in xarray_var_iter(data.mu, var_names=None, combined=True)]
+    var_names = [var for (var, _, _) in xarray_sel_iter(data.mu, var_names=None, combined=True)]
     assert set(var_names) == {"mu"}
 
 

@@ -1,9 +1,11 @@
 """Bayesian p-value Posterior/Prior predictive plot."""
 import numpy as np
 
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
+from ..sel_utils import xarray_var_iter
 
 
 def plot_bpv(
@@ -20,6 +22,7 @@ def plot_bpv(
     grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     data_pairs=None,
     var_names=None,
     filter_vars=None,
@@ -93,6 +96,9 @@ def plot_bpv(
         For example, `data_pairs = {'y' : 'y_hat'}`
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
+    labeller : labeller instance, optional
+        Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     var_names : list of variable names
         Variables to be plotted, if `None` all variable are plotted. Prefix the variables by `~`
         when you want to exclude them from the plot.
@@ -186,6 +192,9 @@ def plot_bpv(
     if data_pairs is None:
         data_pairs = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
@@ -260,6 +269,7 @@ def plot_bpv(
         color=color,
         figsize=figsize,
         textsize=textsize,
+        labeller=labeller,
         plot_ref_kwargs=plot_ref_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,

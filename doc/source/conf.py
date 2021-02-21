@@ -82,7 +82,8 @@ templates_path = ["../_templates"]
 #
 
 # MyST related params
-jupyter_execute_notebooks = "off"
+jupyter_execute_notebooks = "auto"
+execution_excludepatterns = ['*.ipynb']
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ....stats import autocorr
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
@@ -16,6 +16,7 @@ def plot_autocorr(
     cols,
     combined,
     textsize,
+    labeller,
     backend_kwargs,
     show,
 ):
@@ -45,7 +46,7 @@ def plot_autocorr(
             backend_kwargs=backend_kwargs,
         )
 
-    for (var_name, selection, x), ax in zip(plotters, np.ravel(axes)):
+    for (var_name, selection, isel, x), ax in zip(plotters, np.ravel(axes)):
         x_prime = x
         if combined:
             x_prime = x.flatten()
@@ -55,7 +56,9 @@ def plot_autocorr(
         ax.fill_between([0, max_lag], -c_i, c_i, color="0.75")
         ax.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
 
-        ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+        ax.set_title(
+            labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True
+        )
         ax.tick_params(labelsize=xt_labelsize)
 
     if np.asarray(axes).size > 0:

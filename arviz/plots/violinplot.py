@@ -1,8 +1,10 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
-from ..rcparams import rcParams
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
 from ..utils import _var_names
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from ..rcparams import rcParams
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_violin(
@@ -21,6 +23,7 @@ def plot_violin(
     grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     shade_kwargs=None,
     rug_kwargs=None,
@@ -77,6 +80,9 @@ def plot_violin(
     textsize: int
         Text size of the point_estimates, axis ticks, and highest density interval. If None it will
         be autoscaled based on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     sharex: bool
         Defaults to True, violinplots share a common x-axis scale.
     sharey: bool
@@ -120,6 +126,9 @@ def plot_violin(
         >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
+    if labeller is None:
+        labeller = BaseLabeller()
+
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
         data = transform(data)
@@ -151,6 +160,7 @@ def plot_violin(
         rug_kwargs=rug_kwargs,
         bw=bw,
         textsize=textsize,
+        labeller=labeller,
         circular=circular,
         hdi_prob=hdi_prob,
         quartiles=quartiles,

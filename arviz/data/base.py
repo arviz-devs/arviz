@@ -17,6 +17,7 @@ except ImportError:
     import json  # type: ignore
 
 from .. import __version__, utils
+from ..rcparams import rcParams
 
 CoordSpec = Dict[str, List[Any]]
 DimSpec = Dict[str, List[str]]
@@ -49,7 +50,13 @@ class requires:  # pylint: disable=invalid-name
 
 
 def generate_dims_coords(
-    shape, var_name, dims=None, coords=None, default_dims=None, skip_event_dims=None
+    shape,
+    var_name,
+    dims=None,
+    coords=None,
+    default_dims=None,
+    index_origin=None,
+    skip_event_dims=None,
 ):
     """Generate default dimensions and coordinates for a variable.
 
@@ -70,6 +77,9 @@ def generate_dims_coords(
         when manipulating Monte Carlo traces, the ``default_dims`` would be
         ``["chain" , "draw"]`` which ArviZ uses as its own names for dimensions
         of MCMC traces.
+    index_origin : int, optional
+        Starting value of integer coordinate values. Defaults to the value in rcParam
+        ``data.index_origin``.
     skip_event_dims : bool, default False
 
     Returns
@@ -79,6 +89,8 @@ def generate_dims_coords(
     dict[str] -> list[str]
         Default coords
     """
+    if index_origin is None:
+        index_origin = rcParams["data.index_origin"]
     if default_dims is None:
         default_dims = []
     if dims is None:
@@ -127,19 +139,30 @@ def generate_dims_coords(
                 dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:
-            coords[dim_name] = utils.arange(dim_len)
+            coords[dim_name] = np.arange(index_origin, dim_len + index_origin)
     coords = {key: coord for key, coord in coords.items() if any(key == dim for dim in dims)}
     return dims, coords
 
 
-def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None, skip_event_dims=None):
+def numpy_to_data_array(
+    ary,
+    *,
+    var_name="data",
+    coords=None,
+    dims=None,
+    default_dims=None,
+    index_origin=None,
+    skip_event_dims=None,
+):
     """Convert a numpy array to an xarray.DataArray.
 
-    The first two dimensions will be (chain, draw), and any remaining
+    By default, the first two dimensions will be (chain, draw), and any remaining
     dimensions will be "shape".
-    If the numpy array is 1d, this dimension is interpreted as draw
-    If the numpy array is 2d, it is interpreted as (chain, draw)
-    If the numpy array is 3 or more dimensions, the last dimensions are kept as shapes.
+    * If the numpy array is 1d, this dimension is interpreted as draw
+    * If the numpy array is 2d, it is interpreted as (chain, draw)
+    * If the numpy array is 3 or more dimensions, the last dimensions are kept as shapes.
+
+    To modify this behaviour, use ``default_dims``.
 
     Parameters
     ----------
@@ -154,6 +177,11 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None, skip_ev
         is the name of the dimension, the values are the index values.
     dims : List(str)
         A list of coordinate names for the variable
+    default_dims : list of str, optional
+        Passed to :py:func:`generate_dims_coords`. Defaults to ``["chain", "draw"]``, and
+        an empty list is accepted
+    index_origin : int, optional
+        Passed to :py:func:`generate_dims_coords`
     skip_event_dims : bool
 
     Returns
@@ -162,37 +190,43 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None, skip_ev
         Will have the same data as passed, but with coordinates and dimensions
     """
     # manage and transform copies
-    default_dims = ["chain", "draw"]
-    ary = utils.two_de(ary)
-    n_chains, n_samples, *shape = ary.shape
-    if n_chains > n_samples:
-        warnings.warn(
-            "More chains ({n_chains}) than draws ({n_samples}). "
-            "Passed array should have shape (chains, draws, *shape)".format(
-                n_chains=n_chains, n_samples=n_samples
-            ),
-            UserWarning,
-        )
+    if default_dims is None:
+        default_dims = ["chain", "draw"]
+    if "chain" in default_dims and "draw" in default_dims:
+        ary = utils.two_de(ary)
+        n_chains, n_samples, *_ = ary.shape
+        if n_chains > n_samples:
+            warnings.warn(
+                "More chains ({n_chains}) than draws ({n_samples}). "
+                "Passed array should have shape (chains, draws, *shape)".format(
+                    n_chains=n_chains, n_samples=n_samples
+                ),
+                UserWarning,
+            )
+    else:
+        ary = utils.one_de(ary)
 
     dims, coords = generate_dims_coords(
-        shape,
+        ary.shape[len(default_dims) :],
         var_name,
         dims=dims,
         coords=coords,
         default_dims=default_dims,
+        index_origin=index_origin,
         skip_event_dims=skip_event_dims,
     )
 
     # reversed order for default dims: 'chain', 'draw'
-    if "draw" not in dims:
+    if "draw" not in dims and "draw" in default_dims:
         dims = ["draw"] + dims
-    if "chain" not in dims:
+    if "chain" not in dims and "chain" in default_dims:
         dims = ["chain"] + dims
 
-    if "chain" not in coords:
-        coords["chain"] = utils.arange(n_chains)
-    if "draw" not in coords:
-        coords["draw"] = utils.arange(n_samples)
+    index_origin = rcParams["data.index_origin"]
+    if "chain" not in coords and "chain" in default_dims:
+        coords["chain"] = np.arange(index_origin, n_chains + index_origin)
+    if "draw" not in coords and "draw" in default_dims:
+        coords["draw"] = np.arange(index_origin, n_samples + index_origin)
 
     # filter coords based on the dims
     coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}
@@ -200,7 +234,15 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None, skip_ev
 
 
 def dict_to_dataset(
-    data, *, attrs=None, library=None, coords=None, dims=None, skip_event_dims=None
+    data,
+    *,
+    attrs=None,
+    library=None,
+    coords=None,
+    dims=None,
+    default_dims=None,
+    index_origin=None,
+    skip_event_dims=None,
 ):
     """Convert a dictionary of numpy arrays to an xarray.Dataset.
 
@@ -217,6 +259,10 @@ def dict_to_dataset(
     dims : dict[str] -> list[str]
         Dimensions of each variable. The keys are variable names, values are lists of
         coordinates.
+    default_dims : list of str, optional
+        Passed to :py:func:`numpy_to_data_array`
+    index_origin : int, optional
+        Passed to :py:func:`numpy_to_data_array`
     skip_event_dims : bool
         If True, cut extra dims whenever present to match the shape of the data.
         Necessary for PPLs which have the same name in both observed data and log
@@ -238,7 +284,13 @@ def dict_to_dataset(
     data_vars = {}
     for key, values in data.items():
         data_vars[key] = numpy_to_data_array(
-            values, var_name=key, coords=coords, dims=dims.get(key), skip_event_dims=skip_event_dims
+            values,
+            var_name=key,
+            coords=coords,
+            dims=dims.get(key),
+            default_dims=default_dims,
+            index_origin=index_origin,
+            skip_event_dims=skip_event_dims,
         )
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
 
@@ -312,7 +364,7 @@ def _extend_xr_method(func, doc="", description="", examples="", see_also=""):
         return None if _inplace else out
 
     description_default = """{method_name} method is extended from xarray.Dataset methods.
-    
+
     {description}For more info see :meth:`xarray:xarray.Dataset.{method_name}`
     """.format(
         description=description, method_name=func.__name__  # pylint: disable=no-member

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show
 
 
@@ -16,6 +16,7 @@ def plot_dist_comparison(
     legend,
     groups,
     textsize,
+    labeller,
     prior_kwargs,
     posterior_kwargs,
     observed_kwargs,
@@ -93,12 +94,12 @@ def plot_dist_comparison(
             else observed_kwargs
         )
         for idx2, (
-            var,
-            selection,
+            var_name,
+            sel,
+            isel,
             data,
         ) in enumerate(plotter):
-            label = make_label(var, selection)
-            label = f"{group} {label}"
+            label = f"{group}"
             plot_dist(
                 data,
                 label=label if legend else None,
@@ -111,6 +112,8 @@ def plot_dist_comparison(
                 ax=axes[idx2, -1],
                 **kwargs,
             )
+            if idx == 0:
+                axes[idx2, -1].set_xlabel(labeller.make_label_vert(var_name, sel, isel))
 
     if backend_show(show):
         plt.show()
