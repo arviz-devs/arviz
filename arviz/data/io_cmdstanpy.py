@@ -527,6 +527,7 @@ def _unpack_fit(fit, items, save_warmup):
         else:
             num_warmup = fit.num_draws_warmup
 
+    nchains = fit.chains
     draws = np.swapaxes(fit.draws(inc_warmup=save_warmup), 0, 1)
     sample = {}
     sample_warmup = {}
@@ -534,22 +535,23 @@ def _unpack_fit(fit, items, save_warmup):
     for item in items:
         if item in fit.stan_vars_cols:
             col_idxs = fit.stan_vars_cols[item]
+            if len(col_idxs) == 1:
+                raw_draws = draws[..., col_idxs[0]]
+            else:
+                raw_draws = fit.stan_variable(item)
+                raw_draws = np.swapaxes(
+                    raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
+                )
         elif item in fit.sampler_vars_cols:
             col_idxs = fit.sampler_vars_cols[item]
+            raw_draws = draws[..., col_idxs[0]]
         else:
             raise ValueError("fit data, unknown variable: {}".format(item))
         if save_warmup:
-            if len(col_idxs) == 1:
-                sample_warmup[item] = np.squeeze(draws[:num_warmup, :, col_idxs], axis=2)
-                sample[item] = np.squeeze(draws[num_warmup:, :, col_idxs], axis=2)
-            else:
-                sample_warmup[item] = draws[:num_warmup, :, col_idxs]
-                sample[item] = draws[num_warmup:, :, col_idxs]
+            sample_warmup[item] = raw_draws[:, :num_warmup, ...]
+            sample[item] = raw_draws[:, num_warmup:, ...]
         else:
-            if len(col_idxs) == 1:
-                sample[item] = np.squeeze(draws[:, :, col_idxs], axis=2)
-            else:
-                sample[item] = draws[:, :, col_idxs]
+            sample[item] = raw_draws
 
     return sample, sample_warmup
 
