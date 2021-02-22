@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import stats
 
 from ..data import convert_to_dataset
-from ..utils import Numba, _numba_var, _stack, _var_names, conditional_jit
+from ..utils import Numba, _numba_var, _stack, _var_names
 from .density_utils import histogram as _histogram
 from .stats_utils import _circular_standard_deviation, _sqrt
 from .stats_utils import autocov as _autocov
@@ -17,7 +17,7 @@ from .stats_utils import quantile as _quantile
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
-__all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
+__all__ = ["bfmi", "ess", "rhat", "mcse"]
 
 
 def bfmi(data):
@@ -413,87 +413,6 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask_kwargs=None):
         func_kwargs=func_kwargs,
         dask_kwargs=dask_kwargs,
     )
-
-
-@conditional_jit(forceobj=True)
-def geweke(ary, first=0.1, last=0.5, intervals=20):
-    r"""Compute z-scores for convergence diagnostics.
-
-    Compare the mean of the first % of series with the mean of the last % of series. x is divided
-    into a number of segments for which this difference is computed. If the series is converged,
-    this score should oscillate between -1 and 1.
-
-    Parameters
-    ----------
-    ary : 1D array-like
-      The trace of some stochastic parameter.
-    first : float
-      The fraction of series at the beginning of the trace.
-    last : float
-      The fraction of series at the end to be compared with the section
-      at the beginning.
-    intervals : int
-      The number of segments.
-
-    Returns
-    -------
-    scores : list [[]]
-      Return a list of [i, score], where i is the starting index for each interval and score the
-      Geweke score on the interval.
-
-    Notes
-    -----
-    The Geweke score on some series x is computed by:
-
-      .. math:: \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
-
-    where :math:`E` stands for the mean, :math:`V` the variance,
-    :math:`x_s` a section at the start of the series and
-    :math:`x_e` a section at the end of the series.
-
-    References
-    ----------
-    * Geweke (1992)
-    """
-    # Filter out invalid intervals
-    return _geweke(ary, first, last, intervals)
-
-
-def _geweke(ary, first, last, intervals):
-    _numba_flag = Numba.numba_flag
-    for interval in (first, last):
-        if interval <= 0 or interval >= 1:
-            raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
-    if first + last >= 1:
-        raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
-
-    # Initialize list of z-scores
-    zscores = []
-
-    # Last index value
-    end = len(ary) - 1
-
-    # Start intervals going up to the <last>% of the chain
-    last_start_idx = (1 - last) * end
-
-    # Calculate starting indices
-    start_indices = np.linspace(0, last_start_idx, num=intervals, endpoint=True, dtype=int)
-
-    # Loop over start indices
-    for start in start_indices:
-        # Calculate slices
-        first_slice = ary[start : start + int(first * (end - start))]
-        last_slice = ary[int(end - last * (end - start)) :]
-
-        z_score = first_slice.mean() - last_slice.mean()
-        if _numba_flag:
-            z_score /= _sqrt(svar(first_slice), svar(last_slice))
-        else:
-            z_score /= np.sqrt(first_slice.var() + last_slice.var())
-
-        zscores.append([start, z_score])
-
-    return np.array(zscores)
 
 
 def ks_summary(pareto_tail_indices):
@@ -994,7 +913,7 @@ def _multichain_statistics(ary):
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan, np.nan
     # ess mean
     ess_mean_value = _ess_mean(ary)
 
@@ -1033,8 +952,6 @@ def _multichain_statistics(ary):
     return (
         mcse_mean_value,
         mcse_sd_value,
-        ess_mean_value,
-        ess_sd_value,
         ess_bulk_value,
         ess_tail_value,
         rhat_value,

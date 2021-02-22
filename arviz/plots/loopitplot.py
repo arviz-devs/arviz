@@ -2,6 +2,7 @@
 import numpy as np
 import scipy.stats as stats
 
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..stats import loo_pit as _loo_pit
 from ..stats.density_utils import kde
@@ -17,9 +18,10 @@ def plot_loo_pit(
     ecdf_fill=True,
     n_unif=100,
     use_hdi=False,
-    credible_interval=None,
+    hdi_prob=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     color="C0",
     legend=True,
     ax=None,
@@ -49,8 +51,8 @@ def plot_loo_pit(
     ecdf : bool, optional
         Plot the difference between the LOO-PIT Empirical Cumulative Distribution Function
         (ECDF) and the uniform CDF instead of LOO-PIT kde.
-        In this case, instead of overlaying uniform distributions, the beta ``credible_interval``
-        interval around the theoretical uniform CDF is shown. This approximation only holds
+        In this case, instead of overlaying uniform distributions, the beta ``hdi_prob``
+        around the theoretical uniform CDF is shown. This approximation only holds
         for large S and ECDF values not vary close to 0 nor 1. For more information, see
         `Vehtari et al. (2019)`, `Appendix G <https://avehtari.github.io/rhat_ess/rhat_ess.html>`_.
     ecdf_fill : bool, optional
@@ -60,12 +62,15 @@ def plot_loo_pit(
         Number of datasets to simulate and overlay from the uniform distribution.
     use_hdi : bool, optional
         Compute expected hdi values instead of overlaying the sampled uniform distributions.
-    credible_interval : float, optional
-        Theoretical credible interval. Works with ``use_hdi=True`` or ``ecdf=True``.
+    hdi_prob : float, optional
+        Probability for the highest density interval. Works with ``use_hdi=True`` or ``ecdf=True``.
     figsize : figure size tuple, optional
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int, optional
         Text size for labels. If None it will be autoscaled based on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     color : str or array_like, optional
         Color of the LOO-PIT estimated pdf plot. If ``plot_unif_kwargs`` has no "color" key,
         an slightly lighter color than this argument will be used for the uniform kde lines.
@@ -127,6 +132,9 @@ def plot_loo_pit(
     if ecdf and use_hdi:
         raise ValueError("use_hdi is incompatible with ecdf plot")
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
@@ -139,11 +147,11 @@ def plot_loo_pit(
     unif = None
     x_vals = None
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.hdi_prob"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= credible_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     if ecdf:
         loo_pit.sort()
@@ -152,12 +160,8 @@ def plot_loo_pit(
         # ideal unnormalized ECDF of uniform distribution with n_data_points points
         # it is used indistinctively as x or p(u<x) because for u~U(0,1) they are equal
         unif_ecdf = np.arange(n_data_points + 1)
-        p975 = stats.beta.ppf(
-            0.5 + credible_interval / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1
-        )
-        p025 = stats.beta.ppf(
-            0.5 - credible_interval / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1
-        )
+        p975 = stats.beta.ppf(0.5 + hdi_prob / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
+        p025 = stats.beta.ppf(0.5 - hdi_prob / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
         unif_ecdf = unif_ecdf / n_data_points
     else:
         x_vals, loo_pit_kde = kde(loo_pit)
@@ -165,7 +169,7 @@ def plot_loo_pit(
         unif = np.random.uniform(size=(n_unif, loo_pit.size))
         if use_hdi:
             n_obs = loo_pit.size
-            hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - credible_interval) / 2)
+            hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
             hdi_odds = (hdi_ / (1 - hdi_), (1 - hdi_) / hdi_)
 
     loo_pit_kwargs = dict(
@@ -188,11 +192,12 @@ def plot_loo_pit(
         plot_unif_kwargs=plot_unif_kwargs,
         loo_pit_kde=loo_pit_kde,
         textsize=textsize,
+        labeller=labeller,
         color=color,
         legend=legend,
         y_hat=y_hat,
         y=y,
-        credible_interval=credible_interval,
+        hdi_prob=hdi_prob,
         plot_kwargs=plot_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,

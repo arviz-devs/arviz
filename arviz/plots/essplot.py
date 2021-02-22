@@ -3,10 +3,12 @@ import numpy as np
 import xarray as xr
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
+from ..sel_utils import xarray_var_iter
 from ..stats import ess
 from ..utils import _var_names, get_coords
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_ess(
@@ -24,6 +26,7 @@ def plot_ess(
     n_points=20,
     extra_methods=False,
     min_ess=400,
+    labeller=None,
     ax=None,
     extra_kwargs=None,
     text_kwargs=None,
@@ -74,6 +77,9 @@ def plot_ess(
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess: int
         Minimum number of ESS desired.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -173,6 +179,8 @@ def plot_ess(
         coords = {}
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
+    if labeller is None:
+        labeller = BaseLabeller()
     extra_methods = False if kind == "evolution" else extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
@@ -273,6 +281,7 @@ def plot_ess(
         n_samples=n_samples,
         relative=relative,
         min_ess=min_ess,
+        labeller=labeller,
         ylabel=ylabel,
         rug=rug,
         rug_kind=rug_kind,

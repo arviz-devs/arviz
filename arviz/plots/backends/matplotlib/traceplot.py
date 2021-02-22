@@ -10,7 +10,7 @@ import matplotlib.ticker as mticker
 
 from ....stats.density_utils import get_bins
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, format_coords_as_labels, make_label
+from ...plot_utils import _scale_fig_size, format_coords_as_labels
 from ...rankplot import plot_rank
 from . import backend_kwarg_defaults, backend_show, dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 
@@ -30,6 +30,7 @@ def plot_trace(
     combined,
     chain_prop,
     legend,
+    labeller,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
@@ -221,7 +222,7 @@ def plot_trace(
         spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
 
     # pylint: disable=too-many-nested-blocks
-    for idx, (var_name, selection, value) in enumerate(plotters):
+    for idx, (var_name, selection, isel, value) in enumerate(plotters):
         for idy in range(2):
             value = np.atleast_2d(value)
 
@@ -325,7 +326,10 @@ def plot_trace(
                 if circular:
                     y = 0.13 if selection else 0.12
             ax.set_title(
-                make_label(var_name, selection), fontsize=titlesize, wrap=True, y=textsize * y
+                labeller.make_label_vert(var_name, selection, isel),
+                fontsize=titlesize,
+                wrap=True,
+                y=textsize * y,
             )
             ax.tick_params(labelsize=xt_labelsize)
 

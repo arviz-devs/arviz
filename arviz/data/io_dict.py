@@ -1,11 +1,9 @@
 """Dictionary specific conversion code."""
 import warnings
+from typing import Optional
 
-import xarray as xr
-
-from .. import utils
 from ..rcparams import rcParams
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .base import dict_to_dataset, requires
 from .inference_data import WARMUP_TAG, InferenceData
 
 
@@ -33,6 +31,7 @@ class DictConverter:
         warmup_log_likelihood=None,
         warmup_sample_stats=None,
         save_warmup=None,
+        index_origin=None,
         coords=None,
         dims=None,
         pred_dims=None,
@@ -63,6 +62,8 @@ class DictConverter:
             if coords is None
             else {**coords, **pred_coords}
         )
+        self.index_origin = index_origin
+        self.coords = coords
         self.dims = dims
         self.pred_dims = dims if pred_dims is None else pred_dims
         self.attrs = {} if attrs is None else attrs
@@ -92,10 +93,20 @@ class DictConverter:
 
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
-                data_warmup, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data_warmup,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -119,10 +130,20 @@ class DictConverter:
 
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
-                data_warmup, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data_warmup,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -143,6 +164,7 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs=self.attrs,
+                index_origin=self.index_origin,
                 skip_event_dims=True,
             ),
             dict_to_dataset(
@@ -151,6 +173,7 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs=self.attrs,
+                index_origin=self.index_origin,
                 skip_event_dims=True,
             ),
         )
@@ -167,10 +190,20 @@ class DictConverter:
 
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
-                data_warmup, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data_warmup,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -186,10 +219,20 @@ class DictConverter:
 
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.pred_dims, attrs=self.attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.pred_dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
-                data_warmup, library=None, coords=self.coords, dims=self.pred_dims, attrs=self.attrs
+                data_warmup,
+                library=None,
+                coords=self.coords,
+                dims=self.pred_dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -201,7 +244,12 @@ class DictConverter:
             raise TypeError("DictConverter.prior is not a dictionary")
 
         return dict_to_dataset(
-            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            attrs=self.attrs,
+            index_origin=self.index_origin,
         )
 
     @requires("sample_stats_prior")
@@ -212,7 +260,12 @@ class DictConverter:
             raise TypeError("DictConverter.sample_stats_prior is not a dictionary")
 
         return dict_to_dataset(
-            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            attrs=self.attrs,
+            index_origin=self.index_origin,
         )
 
     @requires("prior_predictive")
@@ -223,25 +276,29 @@ class DictConverter:
             raise TypeError("DictConverter.prior_predictive is not a dictionary")
 
         return dict_to_dataset(
-            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            attrs=self.attrs,
+            index_origin=self.index_origin,
         )
 
-    def data_to_xarray(self, dct, group, dims=None):
+    def data_to_xarray(self, data, group, dims=None):
         """Convert data to xarray."""
-        data = dct
         if not isinstance(data, dict):
             raise TypeError("DictConverter.{} is not a dictionary".format(group))
         if dims is None:
             dims = {} if self.dims is None else self.dims
-        new_data = dict()
-        for key, vals in data.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            new_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=new_data, attrs=make_attrs(attrs=self.attrs, library=None))
+        return dict_to_dataset(
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+            attrs=self.attrs,
+            index_origin=self.index_origin,
+        )
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
@@ -304,6 +361,7 @@ def from_dict(
     warmup_log_likelihood=None,
     warmup_sample_stats=None,
     save_warmup=None,
+    index_origin: Optional[int] = None,
     coords=None,
     dims=None,
     pred_dims=None,
@@ -336,6 +394,7 @@ def from_dict(
     save_warmup : bool
         Save warmup iterations InferenceData object. If not defined, use default
         defined by the rcParams.
+    index_origin : int, optional
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -370,6 +429,7 @@ def from_dict(
         warmup_log_likelihood=warmup_log_likelihood,
         warmup_sample_stats=warmup_sample_stats,
         save_warmup=save_warmup,
+        index_origin=index_origin,
         coords=coords,
         dims=dims,
         pred_dims=pred_dims,

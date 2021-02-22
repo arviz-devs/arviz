@@ -1,14 +1,14 @@
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
+import sys
 import uuid
 import warnings
 from collections import OrderedDict, defaultdict
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
-import sys
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -26,6 +26,7 @@ from typing import (
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
+from packaging import version
 
 from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
@@ -588,6 +589,106 @@ class InferenceData(Mapping[str, xr.Dataset]):
         else:
             (dfs,) = dfs.values()
         return dfs
+
+    def to_zarr(self, store=None):
+        """Convert InferenceData to a :class:`zarr.hierarchy.Group`.
+
+        The zarr storage is using the same group names as the InferenceData.
+
+        Raises
+        ------
+        TypeError
+            If no valid store is found.
+
+        Parameters
+        ----------
+        store: zarr.storage i.e MutableMapping or str, optional
+            Zarr storage class or path to desired DirectoryStore.
+
+        Returns
+        -------
+        zarr.hierarchy.group
+            A zarr hierarchy group containing the InferenceData.
+
+        References
+        ----------
+        https://zarr.readthedocs.io/
+        """
+        try:  # Check zarr
+            import zarr
+
+            assert version.parse(zarr.__version__) >= version.parse("2.5.0")
+        except (ImportError, AssertionError) as err:
+            raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
+
+        # Check store type and create store if necessary
+        if store is None:
+            store = zarr.storage.TempStore(suffix="arviz")
+        elif isinstance(store, str):
+            store = zarr.storage.DirectoryStore(path=store)
+        elif not isinstance(store, MutableMapping):
+            raise TypeError(f"No valid store found: {store}")
+
+        groups = self.groups()
+
+        if not groups:
+            raise TypeError("No valid groups found!")
+
+        for group in groups:
+            # Create zarr group in store with same group name
+            getattr(self, group).to_zarr(store=store, group=group, mode="w")
+
+        return zarr.open(store)  # Open store to get overarching group
+
+    @staticmethod
+    def from_zarr(store) -> "InferenceData":
+        """Initialize object from a zarr store or path.
+
+        Expects that the zarr store will have groups, each of which can be loaded by xarray.
+        By default, the datasets of the InferenceData object will be lazily loaded instead
+        of being loaded into memory. This
+        behaviour is regulated by the value of ``az.rcParams["data.load"]``.
+
+        Parameters
+        ----------
+        store: MutableMapping or zarr.hierarchy.Group or str.
+            Zarr storage class or path to desired Store.
+
+        Returns
+        -------
+        InferenceData object
+
+        References
+        ----------
+        https://zarr.readthedocs.io/
+        """
+        try:
+            import zarr
+
+            assert version.parse(zarr.__version__) >= version.parse("2.5.0")
+        except (ImportError, AssertionError) as err:
+            raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
+
+        # Check store type and create store if necessary
+        if isinstance(store, str):
+            store = zarr.storage.DirectoryStore(path=store)
+        elif isinstance(store, zarr.hierarchy.Group):
+            store = store.store
+        elif not isinstance(store, MutableMapping):
+            raise TypeError(f"No valid store found: {store}")
+
+        groups = {}
+        zarr_handle = zarr.open(store, mode="r")
+
+        # Open each group via xarray method
+        for key_group, _ in zarr_handle.groups():
+            with xr.open_zarr(store=store, group=key_group) as data:
+                if rcParams["data.load"] == "eager":
+                    groups[key_group] = data.load()
+                else:
+                    groups[key_group] = data
+
+        return InferenceData(**groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
         """Concatenate two InferenceData objects."""

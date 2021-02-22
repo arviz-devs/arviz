@@ -4,9 +4,10 @@ import numpy as np
 
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
 from . import backend_kwarg_defaults
+from ...plot_utils import _scale_fig_size
+from ....sel_utils import make_label
 
 
 def plot_joint(
@@ -80,8 +81,8 @@ def plot_joint(
     axjoin.yaxis.axis_label = y_var_name
 
     # Flatten data
-    x = plotters[0][2].flatten()
-    y = plotters[1][2].flatten()
+    x = plotters[0][-1].flatten()
+    y = plotters[1][-1].flatten()
 
     if kind == "scatter":
         axjoin.circle(x, y, **joint_kwargs)

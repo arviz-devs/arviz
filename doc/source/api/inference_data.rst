@@ -33,6 +33,8 @@ IO / Conversion
   InferenceData.to_json
   InferenceData.from_netcdf
   InferenceData.to_netcdf
+  InferenceData.from_zarr
+  InferenceData.to_zarr
   InferenceData.chunk
   InferenceData.compute
   InferenceData.load

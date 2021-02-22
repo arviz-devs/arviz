@@ -1,8 +1,10 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
+from ..utils import _var_names
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_violin(
@@ -21,13 +23,13 @@ def plot_violin(
     grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     shade_kwargs=None,
     rug_kwargs=None,
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     """Plot posterior of traces as violin plot.
 
@@ -78,6 +80,9 @@ def plot_violin(
     textsize: int
         Text size of the point_estimates, axis ticks, and highest density interval. If None it will
         be autoscaled based on figsize.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     sharex: bool
         Defaults to True, violinplots share a common x-axis scale.
     sharey: bool
@@ -97,8 +102,6 @@ def plot_violin(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -123,8 +126,8 @@ def plot_violin(
         >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
+    if labeller is None:
+        labeller = BaseLabeller()
 
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
@@ -141,7 +144,7 @@ def plot_violin(
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
         if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     violinplot_kwargs = dict(
         ax=ax,
@@ -157,6 +160,7 @@ def plot_violin(
         rug_kwargs=rug_kwargs,
         bw=bw,
         textsize=textsize,
+        labeller=labeller,
         circular=circular,
         hdi_prob=hdi_prob,
         quartiles=quartiles,

@@ -3,10 +3,9 @@ import logging
 from typing import Callable, Optional
 
 import numpy as np
-import xarray as xr
 
 from .. import utils
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .base import dict_to_dataset, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -30,6 +29,7 @@ class NumPyroConverter:
         predictions=None,
         constant_data=None,
         predictions_constant_data=None,
+        index_origin=None,
         coords=None,
         dims=None,
         pred_dims=None,
@@ -51,6 +51,7 @@ class NumPyroConverter:
             Dictionary containing constant data variables mapped to their values.
         predictions_constant_data: dict
             Constant data used for out-of-sample predictions.
+        index_origin : int, optinal
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
@@ -69,6 +70,7 @@ class NumPyroConverter:
         self.predictions = predictions
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
+        self.index_origin = index_origin
         self.coords = coords
         self.dims = dims
         self.pred_dims = pred_dims
@@ -127,17 +129,22 @@ class NumPyroConverter:
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         data = self._samples
-        return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(
+            data,
+            library=self.numpyro,
+            coords=self.coords,
+            dims=self.dims,
+            index_origin=self.index_origin,
+        )
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from NumPyro posterior."""
-        # match PyMC3 stat names
         rename_key = {
             "potential_energy": "lp",
             "adapt_state.step_size": "step_size",
-            "num_steps": "tree_size",
-            "accept_prob": "mean_tree_accept",
+            "num_steps": "n_steps",
+            "accept_prob": "acceptance_rate",
         }
         data = {}
         for stat, value in self.posterior.get_extra_fields(group_by_chain=True).items():
@@ -147,8 +154,14 @@ class NumPyroConverter:
             value = value.copy()
             data[name] = value
             if stat == "num_steps":
-                data["depth"] = np.log2(value).astype(int) + 1
-        return dict_to_dataset(data, library=self.numpyro, dims=None, coords=self.coords)
+                data["tree_depth"] = np.log2(value).astype(int) + 1
+        return dict_to_dataset(
+            data,
+            library=self.numpyro,
+            dims=None,
+            coords=self.coords,
+            index_origin=self.index_origin,
+        )
 
     @requires("posterior")
     @requires("model")
@@ -164,7 +177,12 @@ class NumPyroConverter:
                 shape = (self.nchains, self.ndraws) + log_like.shape[1:]
                 data[obs_name] = np.reshape(log_like.copy(), shape)
         return dict_to_dataset(
-            data, library=self.numpyro, dims=self.dims, coords=self.coords, skip_event_dims=True
+            data,
+            library=self.numpyro,
+            dims=self.dims,
+            coords=self.coords,
+            index_origin=self.index_origin,
+            skip_event_dims=True,
         )
 
     def translate_posterior_predictive_dict_to_xarray(self, dct, dims):
@@ -182,7 +200,13 @@ class NumPyroConverter:
                     "posterior predictive shape not compatible with number of chains and draws. "
                     "This can mean that some draws or even whole chains are not represented."
                 )
-        return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=dims)
+        return dict_to_dataset(
+            data,
+            library=self.numpyro,
+            coords=self.coords,
+            dims=dims,
+            index_origin=self.index_origin,
+        )
 
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
@@ -218,6 +242,7 @@ class NumPyroConverter:
                     library=self.numpyro,
                     coords=self.coords,
                     dims=self.dims,
+                    index_origin=self.index_origin,
                 )
             )
         return priors_dict
@@ -226,47 +251,38 @@ class NumPyroConverter:
     @requires("model")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
-        observed_data = {}
-        for name, vals in self.observations.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(name)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, name, dims=val_dims, coords=self.coords
-            )
-            # filter coords based on the dims
-            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.numpyro))
-
-    def convert_constant_data_to_xarray(self, dct, dims):
-        """Convert constant_data or predictions_constant_data to xarray."""
-        if dims is None:
-            dims = {}
-        constant_data = {}
-        for name, vals in dct.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(name)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, name, dims=val_dims, coords=self.coords
-            )
-            # filter coords based on the dims
-            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.numpyro))
+        return dict_to_dataset(
+            self.observations,
+            library=self.numpyro,
+            dims=self.dims,
+            coords=self.coords,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
         """Convert constant_data to xarray."""
-        return self.convert_constant_data_to_xarray(self.constant_data, self.dims)
+        return dict_to_dataset(
+            self.constant_data,
+            library=self.numpyro,
+            dims=self.dims,
+            coords=self.coords,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("predictions_constant_data")
     def predictions_constant_data_to_xarray(self):
         """Convert predictions_constant_data to xarray."""
-        return self.convert_constant_data_to_xarray(self.predictions_constant_data, self.pred_dims)
+        return dict_to_dataset(
+            self.predictions_constant_data,
+            library=self.numpyro,
+            dims=self.pred_dims,
+            coords=self.coords,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -298,6 +314,7 @@ def from_numpyro(
     predictions=None,
     constant_data=None,
     predictions_constant_data=None,
+    index_origin=None,
     coords=None,
     dims=None,
     pred_dims=None,
@@ -322,6 +339,7 @@ def from_numpyro(
         Dictionary containing constant data variables mapped to their values.
     predictions_constant_data: dict
         Constant data used for out-of-sample predictions.
+    index_origin : int, optional
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
@@ -338,6 +356,7 @@ def from_numpyro(
         predictions=predictions,
         constant_data=constant_data,
         predictions_constant_data=predictions_constant_data,
+        index_origin=index_origin,
         coords=coords,
         dims=dims,
         pred_dims=pred_dims,

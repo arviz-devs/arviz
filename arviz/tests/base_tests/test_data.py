@@ -1,5 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
+
 import os
 from collections import namedtuple
 from copy import deepcopy

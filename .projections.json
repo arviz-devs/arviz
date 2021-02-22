@@ -1,0 +1,17 @@
+{
+  "arviz/plots/backends/matplotlib/*.py": {
+    "alternate": "arviz/plots/backends/bokeh/{}.py",
+    "related": "arviz/plots/{}.py",
+    "type": "mpl"
+  },
+  "arviz/plots/backends/bokeh/*.py": {
+    "alternate": "arviz/plots/backends/matplotlib/{}.py",
+    "related": "arviz/plots/{}.py",
+    "type": "bokeh"
+  },
+  "arviz/plots/*.py": {
+    "alternate": "arviz/plots/backends/matplotlib/{}.py",
+    "related": "arviz/plots/backends/bokeh/{}.py",
+    "type": "base"
+  }
+}

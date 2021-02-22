@@ -8,7 +8,7 @@ from matplotlib import animation, get_backend
 
 from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 _log = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ def plot_ppc(
     jitter,
     total_pp_samples,
     legend,
+    labeller,
     group,
     animation_kwargs,
     num_pp_samples,
@@ -111,8 +112,8 @@ def plot_ppc(
                 raise ValueError("All axes must be on the same figure for animation to work")
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
-        var_name, selection, obs_vals = obs_plotters[i]
-        pp_var_name, _, pp_vals = pp_plotters[i]
+        var_name, selection, isel, obs_vals = obs_plotters[i]
+        pp_var_name, _, _, pp_vals = pp_plotters[i]
         dtype = predictive_dataset[pp_var_name].dtype.kind
 
         # flatten non-specified dimensions
@@ -124,14 +125,12 @@ def plot_ppc(
             plot_kwargs = {"color": color, "alpha": alpha, "linewidth": 0.5 * linewidth}
             if dtype == "i":
                 plot_kwargs["drawstyle"] = "steps-pre"
-            ax_i.plot(
-                [], color=color, label="{} predictive {}".format(group.capitalize(), pp_var_name)
-            )
+            ax_i.plot([], color=color, label="{} predictive".format(group.capitalize()))
             if observed:
                 if dtype == "f":
                     plot_kde(
                         obs_vals,
-                        label="Observed {}".format(var_name),
+                        label="Observed",
                         plot_kwargs={"color": "k", "linewidth": linewidth, "zorder": 3},
                         fill_kwargs={"alpha": 0},
                         ax=ax_i,
@@ -144,7 +143,7 @@ def plot_ppc(
                     ax_i.plot(
                         bin_edges,
                         hist,
-                        label="Observed {}".format(var_name),
+                        label="Observed",
                         color="k",
                         linewidth=linewidth,
                         zorder=3,
@@ -179,7 +178,7 @@ def plot_ppc(
                         ax_i.plot(x_s, y_s, **plot_kwargs)
 
             if mean:
-                label = "{} predictive mean {}".format(group.capitalize(), pp_var_name)
+                label = "{} predictive mean".format(group.capitalize())
                 if dtype == "f":
                     rep = len(pp_densities)
                     len_density = len(pp_densities[0])
@@ -224,7 +223,7 @@ def plot_ppc(
                     *_empirical_cdf(obs_vals),
                     color="k",
                     linewidth=linewidth,
-                    label="Observed {}".format(var_name),
+                    label="Observed",
                     drawstyle=drawstyle,
                     zorder=3
                 )
@@ -253,7 +252,7 @@ def plot_ppc(
                     drawstyle=drawstyle,
                     linewidth=linewidth
                 )
-            ax_i.plot([], color=color, label="Posterior predictive {}".format(pp_var_name))
+            ax_i.plot([], color=color, label="Posterior predictive")
             if mean:
                 ax_i.plot(
                     *_empirical_cdf(pp_vals.flatten()),
@@ -261,7 +260,7 @@ def plot_ppc(
                     linestyle="--",
                     linewidth=linewidth * 1.5,
                     drawstyle=drawstyle,
-                    label="Posterior predictive mean {}".format(pp_var_name)
+                    label="Posterior predictive mean"
                 )
             ax_i.set_yticks([0, 0.5, 1])
 
@@ -276,7 +275,7 @@ def plot_ppc(
                             "linewidth": linewidth * 1.5,
                             "zorder": 3,
                         },
-                        label="Posterior predictive mean {}".format(pp_var_name),
+                        label="Posterior predictive mean",
                         ax=ax_i,
                         legend=legend,
                     )
@@ -290,7 +289,7 @@ def plot_ppc(
                         hist,
                         color=color,
                         linewidth=linewidth * 1.5,
-                        label="Posterior predictive mean {}".format(pp_var_name),
+                        label="Posterior predictive mean",
                         zorder=3,
                         linestyle="--",
                         drawstyle="steps-pre",
@@ -316,7 +315,7 @@ def plot_ppc(
                     color="k",
                     markersize=markersize,
                     alpha=alpha,
-                    label="Observed {}".format(var_name),
+                    label="Observed",
                     zorder=4,
                 )
 
@@ -340,17 +339,13 @@ def plot_ppc(
                         vals, yvals, "o", zorder=2, color=color, markersize=markersize, alpha=alpha
                     )
 
-            ax_i.plot(
-                [], color=color, marker="o", label="Posterior predictive {}".format(pp_var_name)
-            )
+            ax_i.plot([], color=color, marker="o", label="Posterior predictive")
 
             ax_i.set_yticks([])
 
-        if var_name != pp_var_name:
-            xlabel = "{} / {}".format(var_name, pp_var_name)
-        else:
-            xlabel = var_name
-        ax_i.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
+        ax_i.set_xlabel(
+            labeller.make_pp_label(var_name, pp_var_name, selection, isel), fontsize=ax_labelsize
+        )
 
         if legend:
             if i == 0:

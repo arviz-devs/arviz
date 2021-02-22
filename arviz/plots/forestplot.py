@@ -1,7 +1,8 @@
 """Forest plot."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller, NoModelLabeller
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning, get_coords
+from ..utils import _var_names, get_coords
 from .plot_utils import get_plotting_function
 
 
@@ -23,6 +24,8 @@ def plot_forest(
     textsize=None,
     linewidth=None,
     markersize=None,
+    legend=True,
+    labeller=None,
     ridgeplot_alpha=None,
     ridgeplot_overlap=2,
     ridgeplot_kind="auto",
@@ -34,7 +37,6 @@ def plot_forest(
     backend_config=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     """Forest plot to compare HDI intervals from a number of distributions.
 
@@ -89,6 +91,12 @@ def plot_forest(
         Line width throughout. If None it will be autoscaled based on figsize.
     markersize: int
         Markersize throughout. If None it will be autoscaled based on figsize.
+    legend : bool, optional
+        Show a legend with the color encoded model information.
+        Defaults to true if there are multiple models
+    labeller : labeller instance, optional
+        Class providing the method `make_model_label` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ridgeplot_alpha: float
         Transparency for ridgeplot fill.  If 0, border is colored by model, otherwise
         a black outline is used.
@@ -115,8 +123,6 @@ def plot_forest(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -183,14 +189,16 @@ def plot_forest(
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools model')
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     if not isinstance(data, (list, tuple)):
         data = [data]
+    if len(data) == 1:
+        legend = False
 
     if coords is None:
         coords = {}
+
+    if labeller is None:
+        labeller = NoModelLabeller() if legend else BaseLabeller()
 
     datasets = [convert_to_dataset(datum) for datum in reversed(data)]
     if transform is not None:
@@ -239,6 +247,8 @@ def plot_forest(
         ridgeplot_truncate=ridgeplot_truncate,
         ridgeplot_quantiles=ridgeplot_quantiles,
         textsize=textsize,
+        legend=legend,
+        labeller=labeller,
         ess=ess,
         r_hat=r_hat,
         backend_kwargs=backend_kwargs,

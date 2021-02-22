@@ -501,12 +501,12 @@ def test_plot_kde_inference_data(models):
             "divergences": True,
             "coords": {"theta_dim_0": [0, 1]},
             "scatter_kwargs": {"marker": "x"},
-            "divergences_kwargs": {"marker": "*", "c": "C"},
+            "divergences_kwargs": {"marker": "*", "c": "C0"},
         },
         {
             "divergences": True,
             "scatter_kwargs": {"marker": "x"},
-            "divergences_kwargs": {"marker": "*", "c": "C"},
+            "divergences_kwargs": {"marker": "*", "c": "C0"},
             "var_names": ["theta", "mu"],
         },
         {"kind": "kde", "var_names": ["theta"]},
@@ -523,7 +523,7 @@ def test_plot_kde_inference_data(models):
         {
             "point_estimate": "mean",
             "reference_values": {"mu": 0, "tau": 0},
-            "reference_values_kwargs": {"c": "C", "marker": "*"},
+            "reference_values_kwargs": {"c": "C0", "marker": "*"},
         },
     ],
 )
@@ -792,6 +792,14 @@ def test_plot_ppc_bad_ax(models, fig_ax):
         )
     with pytest.raises(ValueError, match="2 axes"):
         plot_ppc(models.model_1, ax=ax2)
+
+
+def test_plot_legend(models):
+    axes = plot_ppc(models.model_1)
+    legend_texts = axes.get_legend().get_texts()
+    result = [i.get_text() for i in legend_texts]
+    expected = ["Posterior predictive", "Observed", "Posterior predictive mean"]
+    assert result == expected
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
@@ -1286,11 +1294,11 @@ def test_plot_ess_no_divergences(models):
         {},
         {"n_unif": 50, "legend": False},
         {"use_hdi": True, "color": "gray"},
-        {"use_hdi": True, "credible_interval": 0.68},
+        {"use_hdi": True, "hdi_prob": 0.68},
         {"use_hdi": True, "hdi_kwargs": {"fill": 0.1}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"ls": "--"}},
-        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"hatch": "/"}},
+        {"ecdf": True, "hdi_prob": 0.97, "fill_kwargs": {"hatch": "/"}},
     ],
 )
 def test_plot_loo_pit(models, kwargs):
@@ -1302,42 +1310,6 @@ def test_plot_loo_pit_incompatible_args(models):
     """Test error when both ecdf and use_hdi are True."""
     with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hdi=True)
-
-
-@pytest.mark.parametrize(
-    "args",
-    [
-        {"y": "str"},
-        {"y": "DataArray", "y_hat": "str"},
-        {"y": "ndarray", "y_hat": "str"},
-        {"y": "ndarray", "y_hat": "DataArray"},
-        {"y": "ndarray", "y_hat": "ndarray"},
-    ],
-)
-def test_plot_loo_pit_label(models, args):
-    assert_name = args["y"] != "ndarray" or args.get("y_hat") != "ndarray"
-
-    if args["y"] == "str":
-        y = "y"
-    elif args["y"] == "DataArray":
-        y = models.model_1.observed_data.y
-    elif args["y"] == "ndarray":
-        y = models.model_1.observed_data.y.values
-
-    if args.get("y_hat") == "str":
-        y_hat = "y"
-    elif args.get("y_hat") == "DataArray":
-        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw"))
-    elif args.get("y_hat") == "ndarray":
-        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw")).values
-    else:
-        y_hat = None
-
-    ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat)
-    if assert_name:
-        assert "y" in ax.get_legend_handles_labels()[1][0]
-    else:
-        assert "y" not in ax.get_legend_handles_labels()[1][0]
 
 
 @pytest.mark.parametrize(

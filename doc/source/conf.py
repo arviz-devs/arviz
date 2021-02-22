@@ -59,7 +59,8 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
     "myst_nb",
-    "sphinx_panels"
+    "sphinx_panels",
+    "notfound.extension",
 ]
 
 # ipython directive configuration
@@ -81,7 +82,8 @@ templates_path = ["../_templates"]
 #
 
 # MyST related params
-jupyter_execute_notebooks = "off"
+jupyter_execute_notebooks = "auto"
+execution_excludepatterns = ['*.ipynb']
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
 
@@ -117,6 +119,8 @@ language = None
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ["_build", "build", "Thumbs.db", ".DS_Store", "notebooks/.ipynb_checkpoints"]
+# configure notfound extension to not add any prefix to the urls
+notfound_urls_prefix = "/arviz/"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -137,8 +141,8 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 
 html_theme_options = {
-  "github_url": "https://github.com/arviz-devs/arviz",
-  "twitter_url": "https://twitter.com/arviz_devs",
+    "github_url": "https://github.com/arviz-devs/arviz",
+    "twitter_url": "https://twitter.com/arviz_devs",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -153,7 +157,7 @@ html_static_path = ["_static", thumb_directory]
 
 # use additional pages to add a 404 page
 html_additional_pages = {
-    '404': '404.html',
+    "404": "404.html",
 }
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -252,4 +256,5 @@ intersphinx_mapping = {
     "mpl": ("https://matplotlib.org/", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
 }

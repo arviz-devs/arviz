@@ -61,30 +61,30 @@ python setup.py install
 <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_forest_ridge.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest_ridge.html">
   <img alt="Ridge plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_forest_ridge_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_forest_ridge_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_parallel.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_parallel.html">
   <img alt="Parallel plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_parallel_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_parallel_minmax_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_trace.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_trace.html">
   <img alt="Trace plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_trace_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_trace_bars_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_density.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_density.html">
   <img alt="Density plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_density_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_density_thumb.png" />
   </a>
   </td>
 
@@ -92,30 +92,30 @@ python setup.py install
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_posterior.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_posterior.html">
   <img alt="Posterior plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_posterior_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_posterior_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_joint.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_joint.html">
   <img alt="Joint plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_joint_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_joint_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_ppc.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_ppc.html">
   <img alt="Posterior predictive plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_ppc_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_ppc_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_pair.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_pair.html">
   <img alt="Pair plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_pair_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_pair_thumb.png" />
   </a>
   </td>
 
@@ -123,30 +123,30 @@ python setup.py install
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_energy.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_energy.html">
   <img alt="Energy Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_energy_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_pair_hex_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_violin.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_violin.html">
   <img alt="Violin Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_violin_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_violin_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_forest.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest.html">
   <img alt="Forest Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_forest_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_forest_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_autocorr.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_autocorr.html">
   <img alt="Autocorrelation Plot"
-  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_autocorr_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_autocorr_thumb.png" />
   </a>
   </td>
 
@@ -167,12 +167,16 @@ Here is the citation in BibTeX format
 
 ```
 @article{arviz_2019,
-	title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},
-	author = {Kumar, Ravin and Colin, Carroll and Hartikainen, Ari and Martin, Osvaldo A.},
-	journal = {The Journal of Open Source Software},
-	year = {2019},
-	doi = {10.21105/joss.01143},
-	url = {http://joss.theoj.org/papers/10.21105/joss.01143},
+  doi = {10.21105/joss.01143},
+  url = {https://doi.org/10.21105/joss.01143},
+  year = {2019},
+  publisher = {The Open Journal},
+  volume = {4},
+  number = {33},
+  pages = {1143},
+  author = {Ravin Kumar and Colin Carroll and Ari Hartikainen and Osvaldo Martin},
+  title = {ArviZ a unified library for exploratory analysis of Bayesian models in Python},
+  journal = {Journal of Open Source Software}
 }
 ```
 

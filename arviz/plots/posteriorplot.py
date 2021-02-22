@@ -1,8 +1,10 @@
 """Plot posterior densities."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
+from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning, get_coords
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_posterior(
@@ -26,11 +28,11 @@ def plot_posterior(
     bw="default",
     circular=False,
     bins=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
     **kwargs
 ):
     """Plot Posterior densities in the style of John K. Kruschke's book.
@@ -100,6 +102,9 @@ def plot_posterior(
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -110,8 +115,6 @@ def plot_posterior(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
-    credible_interval: float or str, optional
-        deprecated: Please see hdi_prob
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -152,6 +155,13 @@ def plot_posterior(
         >>> rope = {'mu': [{'rope': (-2, 2)}], 'theta': [{'school': 'Choate', 'rope': (2, 4)}]}
         >>> az.plot_posterior(data, var_names=['mu', 'theta'], rope=rope)
 
+    Using `coords` argument to plot only a subset of data
+
+    .. plot::
+        :context: close-figs
+
+        >>> coords = {"school": ["Choate","Phillips Exeter"]}
+        >>> az.plot_posterior(data, var_names=["mu", "theta"], coords=coords)
 
     Add reference lines
 
@@ -197,9 +207,6 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], hdi_prob=.75)
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     data = convert_to_dataset(data, group=group)
     if transform is not None:
         data = transform(data)
@@ -207,6 +214,9 @@ def plot_posterior(
 
     if coords is None:
         coords = {}
+
+    if labeller is None:
+        labeller = BaseLabeller()
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
@@ -245,6 +255,7 @@ def plot_posterior(
         textsize=textsize,
         ref_val=ref_val,
         rope=rope,
+        labeller=labeller,
         kwargs=kwargs,
         backend_kwargs=backend_kwargs,
         show=show,

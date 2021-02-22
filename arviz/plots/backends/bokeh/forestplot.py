@@ -10,12 +10,13 @@ from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
+from ....sel_utils import xarray_var_iter
 from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
 from ....utils import conditional_jit
-from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -49,6 +50,8 @@ def plot_forest(
     ridgeplot_truncate,
     ridgeplot_quantiles,
     textsize,
+    legend,
+    labeller,
     ess,
     r_hat,
     backend_config,
@@ -57,7 +60,12 @@ def plot_forest(
 ):
     """Bokeh forest plot."""
     plot_handler = PlotHandler(
-        datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors
+        datasets,
+        var_names=var_names,
+        model_names=model_names,
+        combined=combined,
+        colors=colors,
+        labeller=labeller,
     )
 
     if figsize is None:
@@ -195,7 +203,7 @@ class PlotHandler:
 
     # pylint: disable=inconsistent-return-statements
 
-    def __init__(self, datasets, var_names, model_names, combined, colors):
+    def __init__(self, datasets, var_names, model_names, combined, colors, labeller):
         self.data = datasets
 
         if model_names is None:
@@ -233,6 +241,7 @@ class PlotHandler:
             colors = [colors for _ in self.data]
 
         self.colors = list(reversed(colors))  # y-values are upside down
+        self.labeller = labeller
 
         self.plotters = self.make_plotters()
 
@@ -247,6 +256,7 @@ class PlotHandler:
                 model_names=self.model_names,
                 combined=self.combined,
                 colors=self.colors,
+                labeller=self.labeller,
             )
             y = plotters[var_name].y_max()
         return plotters
@@ -540,13 +550,14 @@ class PlotHandler:
 class VarHandler:
     """Handle individual variable logic."""
 
-    def __init__(self, var_name, data, y_start, model_names, combined, colors):
+    def __init__(self, var_name, data, y_start, model_names, combined, colors, labeller):
         self.var_name = var_name
         self.data = data
         self.y_start = y_start
         self.model_names = model_names
         self.combined = combined
         self.colors = colors
+        self.labeller = labeller
         self.model_color = dict(zip(self.model_names, self.colors))
         max_chains = max(datum.chain.max().values for datum in data)
         self.chain_offset = len(data) * 0.45 / max(1, max_chains)
@@ -572,9 +583,16 @@ class VarHandler:
                     skip_dims=skip_dims,
                     reverse_selections=True,
                 )
-                for _, selection, values in datum_iter:
+                datum_list = list(datum_iter)
+                for _, selection, isel, values in datum_list:
                     selection_list.append(selection)
-                    label = make_label(self.var_name, selection, position="beside")
+                    if not selection:
+                        var_name = self.var_name
+                    elif len(selection_list) == len(datum_list):
+                        var_name = self.var_name + ":"
+                    else:
+                        var_name = ""
+                    label = self.labeller.make_label_flat(var_name, selection, isel)
                     if label not in label_dict:
                         label_dict[label] = OrderedDict()
                     if name not in label_dict[label]:
