@@ -3,7 +3,7 @@ import datetime
 import functools
 import warnings
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
 import pkg_resources
@@ -21,6 +21,8 @@ from ..rcparams import rcParams
 
 CoordSpec = Dict[str, List[Any]]
 DimSpec = Dict[str, List[str]]
+RequiresArgTypeT = TypeVar("RequiresArgTypeT")
+RequiresReturnTypeT = TypeVar("RequiresReturnTypeT")
 
 
 class requires:  # pylint: disable=invalid-name
@@ -32,19 +34,34 @@ class requires:  # pylint: disable=invalid-name
     missing. Both functionalities can be combined as desired.
     """
 
-    def __init__(self, *props):
-        self.props = props
+    def __init__(self, *props: Union[str, List[str]]) -> None:
+        self.props: Tuple[Union[str, List[str]], ...] = props
 
-    def __call__(self, func):  # noqa: D202
+    # Until typing.ParamSpec (https://www.python.org/dev/peps/pep-0612/) is available
+    # in all our supported Python versions, there is no way to simultaneously express
+    # the following two properties:
+    # - the input function may take arbitrary args/kwargs, and
+    # - the output function takes those same arbitrary args/kwargs, but has a different return type.
+    # We either have to limit the input function to e.g. only allowing a "self" argument,
+    # or we have to adopt the current approach of annotating the returned function as if
+    # it was defined as "def f(*args: Any, **kwargs: Any) -> Optional[RequiresReturnTypeT]".
+    #
+    # Since all functions decorated with @requires currently only accept a single argument,
+    # we choose to limit application of @requires to only functions of one argument.
+    # When typing.ParamSpec is available, this definition can be updated to use it.
+    # See https://github.com/arviz-devs/arviz/pull/1504 for more discussion.
+    def __call__(
+        self, func: Callable[[RequiresArgTypeT], RequiresReturnTypeT]
+    ) -> Callable[[RequiresArgTypeT], Optional[RequiresReturnTypeT]]:  # noqa: D202
         """Wrap the decorated function."""
 
-        def wrapped(cls, *args, **kwargs):
+        def wrapped(cls: RequiresArgTypeT) -> Optional[RequiresReturnTypeT]:
             """Return None if not all props are available."""
             for prop in self.props:
                 prop = [prop] if isinstance(prop, str) else prop
                 if all([getattr(cls, prop_i) is None for prop_i in prop]):
                     return None
-            return func(cls, *args, **kwargs)
+            return func(cls)
 
         return wrapped
 

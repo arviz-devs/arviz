@@ -214,10 +214,13 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             log_like_val = np.where(mask, np.nan, log_like_val)
         return log_like_val
 
-    @requires("trace")
-    @requires("model")
     def _extract_log_likelihood(self, trace):
         """Compute log likelihood of each observation."""
+        if self.trace is None:
+            return None
+        if self.model is None:
+            return None
+
         # If we have predictions, then we have a thinned trace which does not
         # support extracting a log likelihood.
         if self.log_likelihood is True:
