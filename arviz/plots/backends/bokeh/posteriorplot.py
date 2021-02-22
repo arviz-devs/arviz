@@ -13,6 +13,7 @@ from ...plot_utils import (
     calculate_point_estimate,
     format_sig_figs,
     round_num,
+    vectorized_to_hex,
 )
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
@@ -37,7 +38,12 @@ def plot_posterior(
     textsize,
     ref_val,
     rope,
+<<<<<<< HEAD
     labeller,
+=======
+    ref_val_color,
+    rope_color,
+>>>>>>> Added rope_color and ref_val_color arguments to plot_posterior
     kwargs,
     backend_kwargs,
     show,
@@ -87,6 +93,8 @@ def plot_posterior(
             linewidth=linewidth,
             ref_val=ref_val,
             rope=rope,
+            ref_val_color=ref_val_color,
+            rope_color=rope_color,
             ax_labelsize=ax_labelsize,
             **kwargs,
         )
@@ -117,6 +125,8 @@ def _plot_posterior_op(
     skipna,
     ref_val,
     rope,
+    ref_val_color,
+    rope_color,
     ax_labelsize,
     round_to: Optional[int] = None,
     **kwargs,
@@ -155,13 +165,22 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        ax.line([val, val], [0, 0.8 * max_data], line_color="darkorange", line_alpha=0.65)
+        ax.line(
+            [val, val],
+            [0, 0.8 * max_data],
+            line_color=vectorized_to_hex("C1")
+            if ref_val_color is None
+            else vectorized_to_hex(ref_val_color),
+            line_alpha=0.65,
+        )
 
         ax.text(
             x=[values.mean()],
             y=[max_data * 0.6],
             text=[ref_in_posterior],
-            text_color="darkorange",
+            text_color=vectorized_to_hex("C1")
+            if ref_val_color is None
+            else vectorized_to_hex(ref_val_color),
             text_align="center",
         )
 
@@ -191,11 +210,18 @@ def _plot_posterior_op(
             vals,
             (max_data * 0.02, max_data * 0.02),
             line_width=linewidth * 5,
-            line_color="green",
+            line_color=vectorized_to_hex("C2")
+            if rope_color is None
+            else vectorized_to_hex(rope_color),
             line_alpha=0.7,
         )
         probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
-        text_props = dict(text_color="green", text_align="center")
+        text_props = dict(
+            text_color=vectorized_to_hex("C2")
+            if rope_color is None
+            else vectorized_to_hex(rope_color),
+            text_align="center",
+        )
         ax.text(
             x=values.mean(),
             y=[max_data * 0.45],
