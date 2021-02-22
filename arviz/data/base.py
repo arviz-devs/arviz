@@ -142,7 +142,6 @@ def generate_dims_coords(
     if skip_event_dims:
         # this is needed in case the reduction keeps the dimension with size 1
         for i, (dim, dim_size) in enumerate(zip(dims, shape)):
-            print(f"{i}, dim: {dim}, {dim_size} =? {len(coords.get(dim, []))}")
             if (dim in coords) and (dim_size != len(coords[dim])):
                 dims = dims[:i]
                 break
