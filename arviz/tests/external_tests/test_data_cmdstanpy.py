@@ -395,13 +395,13 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
+            "~warmup_posterior": [],
+            "~warmup_predictions": [],
+            "~warmup_log_likelihood": [],
+            "~warmup_prior": [],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_true)
         assert not fails
-        assert "warmup_posterior" not in inference_data_false_is_true
-        assert "warmup_predictions" not in inference_data_false_is_true
-        assert "warmup_log_likelihood" not in inference_data_false_is_true
-        assert "warmup_prior" not in inference_data_false_is_true
         # inference_data no warmup
         test_dict = {
             "posterior": ["theta"],
@@ -411,13 +411,13 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
+            "~warmup_posterior": [],
+            "~warmup_predictions": [],
+            "~warmup_log_likelihood": [],
+            "~warmup_prior": [],
         }
         fails = check_multiple_attrs(test_dict, inference_data_true_is_false)
         assert not fails
-        assert "warmup_posterior" not in inference_data_true_is_false
-        assert "warmup_predictions" not in inference_data_true_is_false
-        assert "warmup_log_likelihood" not in inference_data_true_is_false
-        assert "warmup_prior" not in inference_data_true_is_false
         # inference_data no warmup
         test_dict = {
             "posterior": ["theta"],
@@ -427,12 +427,10 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
+            "~warmup_posterior": [],
+            "~warmup_predictions": [],
+            "~warmup_log_likelihood": [],
+            "~warmup_prior": [],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_false)
         assert not fails
-        assert "warmup_posterior" not in inference_data_false_is_false
-        assert "warmup_predictions" not in inference_data_false_is_false
-        assert "warmup_log_likelihood" not in inference_data_false_is_false
-        assert (
-            "warmup_prior" not in inference_data_false_is_false
-        )  # pylint: disable=redefined-outer-name
