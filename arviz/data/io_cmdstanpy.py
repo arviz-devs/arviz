@@ -92,8 +92,20 @@ class CmdStanPyConverter:
         coords = deepcopy(self.coords) if self.coords is not None else {}
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=coords, dims=dims),
-            dict_to_dataset(data_warmup, library=self.cmdstanpy, coords=coords, dims=dims),
+            dict_to_dataset(
+                data,
+                library=self.cmdstanpy,
+                coords=coords,
+                dims=dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=coords,
+                dims=dims,
+                index_origin=self.index_origin,
+            ),
         )
 
     @requires("posterior")
@@ -445,9 +457,19 @@ class CmdStanPyConverter:
         )
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -471,9 +493,19 @@ class CmdStanPyConverter:
             if data_warmup:
                 data_warmup[name] = data_warmup.pop(s_param).astype(dtypes.get(s_param, float))
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 

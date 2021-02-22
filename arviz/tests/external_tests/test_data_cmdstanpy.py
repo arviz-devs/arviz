@@ -40,13 +40,14 @@ def _create_test_data():
         parameters {
             real mu;
             real<lower=0> tau;
-            real eta[J];
+            real eta[J / 2, 2];
         }
 
         transformed parameters {
             real theta[J];
-            for (j in 1:J)
-                theta[j] = mu + tau * eta[j];
+            for (j in 1:J/2)
+                theta[j] = mu + tau * eta[j, 1];
+                theta[j+4] = mu + tau * eta[j, 2];
         }
 
         model {
