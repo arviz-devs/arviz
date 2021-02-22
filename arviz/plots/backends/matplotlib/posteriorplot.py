@@ -165,12 +165,14 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        ref_val_props = {
-            "color": vectorized_to_hex("C1")
-            if ref_val_color is None
-            else vectorized_to_hex(ref_val_color)
-        }
-        ax.axvline(val, ymin=0.05, ymax=0.75, lw=linewidth, alpha=0.65, **ref_val_props)
+        ax.axvline(
+            val,
+            ymin=0.05,
+            ymax=0.75,
+            lw=linewidth,
+            alpha=0.65,
+            color=vectorized_to_hex(ref_val_color),
+        )
         ax.text(
             values.mean(),
             plot_height * 0.6,
@@ -178,7 +180,7 @@ def _plot_posterior_op(
             size=ax_labelsize,
             weight="semibold",
             horizontalalignment="center",
-            **ref_val_props,
+            color=vectorized_to_hex(ref_val_color),
         )
 
     def display_rope():
@@ -202,12 +204,6 @@ def _plot_posterior_op(
                 "iterable of length 2"
             )
         rope_text = [f"{val:.{format_sig_figs(val, round_to)}g}" for val in vals]
-
-        rope_props = {
-            "color": vectorized_to_hex("C2")
-            if rope_color is None
-            else vectorized_to_hex(rope_color)
-        }
         ax.plot(
             vals,
             (plot_height * 0.02, plot_height * 0.02),
@@ -215,7 +211,7 @@ def _plot_posterior_op(
             solid_capstyle="butt",
             zorder=0,
             alpha=0.7,
-            **rope_props,
+            color=vectorized_to_hex(rope_color),
         )
         probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
         ax.text(
@@ -225,7 +221,7 @@ def _plot_posterior_op(
             weight="semibold",
             horizontalalignment="center",
             size=ax_labelsize,
-            **rope_props,
+            color=vectorized_to_hex(rope_color),
         )
         ax.text(
             vals[0],
@@ -234,7 +230,7 @@ def _plot_posterior_op(
             weight="semibold",
             horizontalalignment="right",
             size=ax_labelsize,
-            **rope_props,
+            color=vectorized_to_hex(rope_color),
         )
         ax.text(
             vals[1],
@@ -243,7 +239,7 @@ def _plot_posterior_op(
             weight="semibold",
             horizontalalignment="left",
             size=ax_labelsize,
-            **rope_props,
+            color=vectorized_to_hex(rope_color),
         )
 
     def display_point_estimate():

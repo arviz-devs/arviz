@@ -165,9 +165,7 @@ def _plot_posterior_op(
         ax.line(
             [val, val],
             [0, 0.8 * max_data],
-            line_color=vectorized_to_hex("C1")
-            if ref_val_color is None
-            else vectorized_to_hex(ref_val_color),
+            line_color=vectorized_to_hex(ref_val_color),
             line_alpha=0.65,
         )
 
@@ -175,9 +173,7 @@ def _plot_posterior_op(
             x=[values.mean()],
             y=[max_data * 0.6],
             text=[ref_in_posterior],
-            text_color=vectorized_to_hex("C1")
-            if ref_val_color is None
-            else vectorized_to_hex(ref_val_color),
+            text_color=vectorized_to_hex(ref_val_color),
             text_align="center",
         )
 
@@ -207,16 +203,12 @@ def _plot_posterior_op(
             vals,
             (max_data * 0.02, max_data * 0.02),
             line_width=linewidth * 5,
-            line_color=vectorized_to_hex("C2")
-            if rope_color is None
-            else vectorized_to_hex(rope_color),
+            line_color=vectorized_to_hex(rope_color),
             line_alpha=0.7,
         )
         probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
         text_props = dict(
-            text_color=vectorized_to_hex("C2")
-            if rope_color is None
-            else vectorized_to_hex(rope_color),
+            text_color=vectorized_to_hex(rope_color),
             text_align="center",
         )
         ax.text(
