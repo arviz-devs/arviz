@@ -24,6 +24,8 @@ def plot_posterior(
     group="posterior",
     rope=None,
     ref_val=None,
+    rope_color="C2",
+    ref_val_color="C1",
     kind="kde",
     bw="default",
     circular=False,
@@ -84,6 +86,10 @@ def plot_posterior(
         display the percentage below and above the values in ref_val. Must be None (default),
         a constant, a list or a dictionary like see an example below. If a list is provided, its
         length should match the number of variables.
+    rope_color: str, optional
+        Specifies the color of ROPE and displayed percentage within ROPE
+    ref_val_color: str, optional
+        Specifies the color of the displayed percentage
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
         a histogram is always used.
@@ -255,6 +261,8 @@ def plot_posterior(
         textsize=textsize,
         ref_val=ref_val,
         rope=rope,
+        ref_val_color=ref_val_color,
+        rope_color=rope_color,
         labeller=labeller,
         kwargs=kwargs,
         backend_kwargs=backend_kwargs,
