@@ -261,12 +261,9 @@ def plot_posterior(
         textsize=textsize,
         ref_val=ref_val,
         rope=rope,
-<<<<<<< HEAD
-        labeller=labeller,
-=======
         ref_val_color=ref_val_color,
         rope_color=rope_color,
->>>>>>> Added rope_color and ref_val_color arguments to plot_posterior
+        labeller=labeller,
         kwargs=kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
