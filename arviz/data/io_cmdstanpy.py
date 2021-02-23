@@ -727,7 +727,11 @@ def from_cmdstanpy(
     predictions_constant_data : dict
         Constant data for predictions used in the sampling.
     log_likelihood : str, list of str, dict of {str: str}
-        Pointwise log_likelihood for the data.
+        Pointwise log_likelihood for the data. If a dict, its keys should represent var_names
+        from the corresponding observed data and its values the stan variable where the
+        data is stored. By default, if a variable ``log_lik`` is present in the Stan model,
+        it will be retrieved as pointwise log likelihood values. Use ``False`` to avoid this
+        behaviour.
     index_origin : int, optional
         Starting value of integer coordinate values. Defaults to the value in rcParam
         ``data.index_origin``.
