@@ -50,6 +50,9 @@ class CmdStanPyConverter:
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
+        if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
+            self.log_likelihood = ["log_lik"]
+
         import cmdstanpy  # pylint: disable=import-error
 
         self.cmdstanpy = cmdstanpy
@@ -269,6 +272,13 @@ class CmdStanPyConverter:
                 valid_cols,
                 self.save_warmup,
             )
+        if isinstance(self.log_likelihood, dict):
+            data = {obs_name: data[lik_name] for obs_name, lik_name in self.log_likelihood.items()}
+            if data_warmup:
+                data_warmup = {
+                    obs_name: data_warmup[lik_name]
+                    for obs_name, lik_name in self.log_likelihood.items()
+                }
         return (
             dict_to_dataset(
                 data,
@@ -516,7 +526,9 @@ def _as_set(spec):
         return []
     if isinstance(spec, str):
         return [spec]
-    else:
+    try:
+        return set(spec.values())
+    except AttributeError:
         return set(spec)
 
 
@@ -528,7 +540,7 @@ def _filter(names, spec):
         for item in spec:
             names.remove(item)
     elif isinstance(spec, dict):
-        for item in spec.keys():
+        for item in spec.values():
             names.remove(item)
     return names
 
@@ -570,7 +582,7 @@ def _unpack_fit(fit, items, save_warmup):
             if len(col_idxs) == 1:
                 raw_draws = draws[..., col_idxs[0]]
             else:
-                raw_draws = fit.stan_variable(item)
+                raw_draws = fit.stan_variable(item, inc_warmup=save_warmup)
                 raw_draws = np.swapaxes(
                     raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
                 )
@@ -714,7 +726,7 @@ def from_cmdstanpy(
         Constant data used in the sampling.
     predictions_constant_data : dict
         Constant data for predictions used in the sampling.
-    log_likelihood : str, list of str
+    log_likelihood : str, list of str, dict of {str: str}
         Pointwise log_likelihood for the data.
     index_origin : int, optional
         Starting value of integer coordinate values. Defaults to the value in rcParam

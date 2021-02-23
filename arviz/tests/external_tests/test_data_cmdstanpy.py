@@ -177,7 +177,7 @@ class TestDataCmdStanPy:
             observed_data={"y": eight_schools_params["y"]},
             constant_data={"y": eight_schools_params["y"]},
             predictions_constant_data={"y": eight_schools_params["y"]},
-            log_likelihood="log_lik",
+            log_likelihood={"y": "log_lik"},
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "y": ["school"],
@@ -333,7 +333,7 @@ class TestDataCmdStanPy:
             "observed_data": ["y"],
             "constant_data": ["y"],
             "predictions_constant_data": ["y"],
-            "log_likelihood": ["log_lik"],
+            "log_likelihood": ["y", "~log_lik"],
             "prior": ["theta"],
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
@@ -363,7 +363,11 @@ class TestDataCmdStanPy:
         fails = check_multiple_attrs(test_dict, inference_data3)
         assert not fails
         # inference_data 4
-        test_dict = {"posterior": ["eta", "mu", "theta"], "prior": ["theta"]}
+        test_dict = {
+            "posterior": ["eta", "mu", "theta"],
+            "prior": ["theta"],
+            "log_likelihood": ["log_lik"],
+        }
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
         assert len(inference_data4.posterior.theta.shape) == 3  # pylint: disable=no-member
@@ -436,7 +440,7 @@ class TestDataCmdStanPy:
             "observed_data": ["y"],
             "constant_data": ["y"],
             "predictions_constant_data": ["y"],
-            "log_likelihood": ["log_lik"],
+            "log_likelihood": ["y"],
             "prior": ["theta"],
             "~warmup_posterior": [],
             "~warmup_predictions": [],
