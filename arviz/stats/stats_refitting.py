@@ -99,7 +99,7 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
         warnings.warn("reloo is an experimental and untested feature", UserWarning)
 
     if np.any(khats > k_thresh):
-        for idx in np.argwhere(khats.values > 0.7):
+        for idx in np.argwhere(khats.values > k_thresh):
             if verbose:
                 _log.info("Refitting model excluding observation %d", idx)
             new_obs, excluded_obs = wrapper.sel_observations(idx)
