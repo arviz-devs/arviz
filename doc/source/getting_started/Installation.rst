@@ -1,16 +1,17 @@
-############
-Installation
-############
+##################
+Installation guide
+##################
 
 This section provides detailed information about installing ArviZ. Most ArviZ
 functionality is available with the basic requirements, but ArviZ also has optional
 dependencies to further enhance the library. This guide will cover both basic and fully-fledged ArviZ installs and several installation methods.
 
-ArviZ can be installed either using pip or conda-forge
 
 ******
 Stable
 ****** 
+
+ArviZ can be installed either using pip or conda-forge.
 
 Using pip
 =========
@@ -32,6 +33,8 @@ Using conda-forge
 
     conda install -c conda-forge arviz
 
+.. _dev-version:
+
 ***********
 Development
 *********** 
@@ -43,17 +46,6 @@ may use
 
     pip install git+https://github.com/arviz-devs/arviz
 
-ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
-`PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
-`Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_,
-`emcee <https://emcee.readthedocs.io/en/stable/>`_, and
-`TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for PyMC4, Edward2, and Edward are on the roadmap.
-
-A Julia wrapper, `ArviZ.jl <https://arviz-devs.github.io/ArviZ.jl/stable/>`_ is
-also available. It provides built-in support for
-`Turing.jl <https://turing.ml/dev/>`_, `CmdStan.jl
-<https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl
-<https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
 
 ************
 Dependencies
@@ -88,7 +80,7 @@ The list of optional dependencies to further enhance ArviZ are.
 
 - UltraJSON
 
-  If available, ArviZ makes use of faster ujson when ``arviz.from_json(filename)`` is
+  If available, ArviZ makes use of faster ujson when :func:`arviz.from_json` is
   invoked. UltraJSON can be either installed via `pip <https://pypi.org/project/ujson/>`_ or `conda <https://anaconda.org/anaconda/ujson>`_.
 
 - Dask

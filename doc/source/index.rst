@@ -43,11 +43,7 @@ Alternatively you can use conda-forge
 
     conda install -c conda-forge arviz
 
-For the latest (unstable) version
-
-.. code:: bash
-
-    pip install git+https://github.com/arviz-devs/arviz
+To install the latest development version of ArviZ, please check the :ref:`Installation guide <dev-version>` for details.
 
 **Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
 
