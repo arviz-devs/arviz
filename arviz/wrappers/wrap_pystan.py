@@ -17,7 +17,7 @@ class PyStanSamplingWrapper(SamplingWrapper):
     Sampling wrappers are an experimental feature in a very early stage. Please use them
     with caution.
 
-    See also
+    See Also
     --------
     SamplingWrapper
     """
