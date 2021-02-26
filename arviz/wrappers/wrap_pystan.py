@@ -9,12 +9,17 @@ class PyStanSamplingWrapper(SamplingWrapper):
 
     See the documentation on  :class:`~arviz.SamplingWrapper` for a more detailed
     description. An example of ``PyStanSamplingWrapper`` usage can be found
-    in the :ref:`pystan_refitting` notebook.
+    in the :ref:`pystan_refitting` notebook. For usage examples of other wrappers
+    see the user guide pages on :ref:`wrapper_guide`.
 
     Warnings
     --------
     Sampling wrappers are an experimental feature in a very early stage. Please use them
     with caution.
+
+    See Also
+    --------
+    SamplingWrapper
     """
 
     def sel_observations(self, idx):
