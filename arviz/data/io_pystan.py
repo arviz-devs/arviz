@@ -760,6 +760,8 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
 
         # in future fix the correct number of draws if fit.save_warmup is True
         new_shape = (*fit.dims[fit.param_names.index(var)], -1, fit.num_chains)
+        if 0 in new_shape:
+            continue
         values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])
