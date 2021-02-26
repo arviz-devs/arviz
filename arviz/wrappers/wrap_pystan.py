@@ -90,7 +90,6 @@ class PyStan3SamplingWrapper(SamplingWrapper):
         self.model_code = model_code
 
         super().__init__(
-            self,
             model=None,
             idata_orig=idata_orig,
             log_lik_fun=log_lik_fun,
