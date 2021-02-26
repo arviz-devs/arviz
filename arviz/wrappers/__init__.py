@@ -2,4 +2,4 @@
 from .base import SamplingWrapper
 from .wrap_pystan import PyStanSamplingWrapper
 
-__all__ = ["SamplingWrapper", "PyStanSamplingWrapper"]
+__all__ = ["SamplingWrapper", "PyStanSamplingWrapper", "PyStan3SamplingWrapper"]
