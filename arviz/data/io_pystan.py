@@ -633,7 +633,7 @@ def get_sample_stats(fit, warmup=False):
         "treedepth": "tree_depth",
         "stepsize": "step_size",
         "accept_stat": "acceptance_rate",
-        "lp":"lp",
+        "lp": "lp",
     }
 
     ndraws_warmup = fit.sim["warmup2"]
@@ -659,8 +659,7 @@ def get_sample_stats(fit, warmup=False):
     data = OrderedDict()
     for key, values in extraction.items():
         values = np.stack(values, axis=0)
-        dtype = dtypes.get(key)
-        values = values.astype(dtype)
+        values = values.astype(dtypes.get(key))
         name = re.sub("__$", "", key)
         name = rename_dict.get(name, name)
         data[name] = values
@@ -669,8 +668,7 @@ def get_sample_stats(fit, warmup=False):
     if warmup:
         for key, values in extraction_warmup.items():
             values = np.stack(values, axis=0)
-            dtype = dtypes.get(key)
-            values = values.astype(dtype)
+            values = values.astype(dtypes.get(key))
             name = re.sub("__$", "", key)
             name = rename_dict.get(name, name)
             data_warmup[name] = values
@@ -788,7 +786,7 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None):
         "treedepth": "tree_depth",
         "stepsize": "step_size",
         "accept_stat": "acceptance_rate",
-        "lp":"lp",
+        "lp": "lp",
     }
 
     if isinstance(variables, str):
@@ -804,8 +802,7 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None):
         values = fit._draws[fit._parameter_indexes(key)]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])
-        dtype = dtypes.get(key)
-        values = values.astype(dtype)
+        values = values.astype(dtypes.get(key))
         name = re.sub("__$", "", key)
         name = rename_dict.get(name, name)
         data[name] = values
