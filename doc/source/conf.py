@@ -18,9 +18,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import re
 import sys
-from typing import Dict
+from typing import Dict, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import arviz
@@ -86,7 +85,6 @@ jupyter_execute_notebooks = "auto"
 execution_excludepatterns = ["*.ipynb"]
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
-
 
 # The base toctree document.
 master_doc = "index"
