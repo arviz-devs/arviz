@@ -59,7 +59,7 @@ class requires:  # pylint: disable=invalid-name
             """Return None if not all props are available."""
             for prop in self.props:
                 prop = [prop] if isinstance(prop, str) else prop
-                if all([getattr(cls, prop_i) is None for prop_i in prop]):
+                if all((getattr(cls, prop_i) is None for prop_i in prop)):
                     return None
             return func(cls)
 

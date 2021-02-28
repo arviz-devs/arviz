@@ -52,7 +52,7 @@ def plot_energy(
     if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
         fill_color[1].startswith("C") and len(fill_color[1]) == 2
     ):
-        fill_color = tuple([_colors[int(color[1:]) % 10] for color in fill_color])
+        fill_color = tuple((_colors[int(color[1:]) % 10] for color in fill_color))
     elif fill_color[0].startswith("C") and len(fill_color[0]) == 2:
         fill_color = tuple([_colors[int(fill_color[0][1:]) % 10]] + list(fill_color[1:]))
     elif fill_color[1].startswith("C") and len(fill_color[1]) == 2:
