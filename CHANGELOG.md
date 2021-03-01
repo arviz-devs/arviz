@@ -13,7 +13,7 @@
 * Integrate `index_origin` with all the library ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 * Fix pareto k threshold typo in reloo function ([1580](https://github.com/arviz-devs/arviz/pull/1580))
 * Preserve shape from Stan code in `from_cmdstanpy` ([1579](https://github.com/arviz-devs/arviz/pull/1579))
-* Enabled pylint `use-a-generator` and `consider-using-generator` checks ([1588](https://github.com/arviz-devs/arviz/pull/1588))
+* Used generator instead of list wherever possible ([1588](https://github.com/arviz-devs/arviz/pull/1588))
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
