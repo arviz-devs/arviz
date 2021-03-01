@@ -20,6 +20,7 @@
 
 ### Documentation
 * Added "Label guide" page and API section for `arviz.labels` module ([1201](https://github.com/arviz-devs/arviz/pull/1201))
+* Add "Installation guide" page to the documentation ([1551](https://github.com/arviz-devs/arviz/pull/1551))
 
 ## v0.11.2 (2021 Feb 21)
 ### New features
