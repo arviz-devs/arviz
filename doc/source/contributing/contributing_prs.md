@@ -34,6 +34,7 @@ In the event of two or more people working on the same issue, the general preced
 ### If the issue ticket has someone assigned to it
 If the issue is assigned then precedence goes to the assignee. However if there has been no activity for 2 weeks from assignment date the ticket is open for all again and can be unassigned.
 
+(dev_summary)=
 # Development process - summary
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/),
