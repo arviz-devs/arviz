@@ -20,6 +20,7 @@
 import os
 import re
 import sys
+from typing import Dict
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import arviz
@@ -181,7 +182,7 @@ html_favicon = "_static/favicon.ico"
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+latex_elements : Dict[str, str] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
