@@ -164,9 +164,9 @@ def plot_forest(
         legend_it_ess = []
         for (model_name, glyphs) in plotted_ess.items():
             legend_it_ess.append((model_name, glyphs))
-        legend_ess = Legend(items = legend_it_ess)
-        axes[0, idx].add_layout(legend_ess, 'right')
-        axes[0, idx].legend.click_policy = 'hide'
+        legend_ess = Legend(items=legend_it_ess)
+        axes[0, idx].add_layout(legend_ess, "right")
+        axes[0, idx].legend.click_policy = "hide"
         idx += 1
 
     if r_hat:
@@ -175,9 +175,9 @@ def plot_forest(
         legend_it_r_hat = []
         for (model_name, glyphs) in plotted_r_hat.items():
             legend_it_r_hat.append((model_name, glyphs))
-        legend_r_hat = Legend(items = legend_it_r_hat)
-        axes[0, idx].add_layout(legend_r_hat, 'right')
-        axes[0, idx].legend.click_policy = 'hide'
+        legend_r_hat = Legend(items=legend_it_r_hat)
+        axes[0, idx].add_layout(legend_r_hat, "right")
+        axes[0, idx].legend.click_policy = "hide"
         idx += 1
 
     for i, ax_ in enumerate(axes.ravel()):
@@ -210,14 +210,14 @@ def plot_forest(
         0
     ].group_offset
     axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-
-    
+
     legend_it = []
     for (model_name, glyphs) in plotted.items():
         legend_it.append((model_name, glyphs))
-    
-    legend = Legend(items = legend_it)
-    axes[0, 0].add_layout(legend, 'right')
-    axes[0, 0].legend.click_policy = 'hide'
+
+    legend = Legend(items=legend_it)
+    axes[0, 0].add_layout(legend, "right")
+    axes[0, 0].legend.click_policy = "hide"
     show_layout(axes, show)
 
     return axes
@@ -301,24 +301,28 @@ class PlotHandler:
 
         return label_idxs()
 
-    def display_multiple_ropes(self, rope, ax, y, linewidth, var_name, selection, plotted, model_name):
+    def display_multiple_ropes(
+        self, rope, ax, y, linewidth, var_name, selection, plotted, model_name
+    ):
         """Display ROPE when more than one interval is provided."""
         for sel in rope.get(var_name, []):
             # pylint: disable=line-too-long
             if all(k in selection and selection[k] == v for k, v in sel.items() if k != "rope"):
                 vals = sel["rope"]
-                plotted[model_name].append(ax.line(
-                    vals,
-                    (y + 0.05, y + 0.05),
-                    line_width=linewidth * 2,
-                    color=[
-                        color
-                        for _, color in zip(
-                            range(3), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-                        )
-                    ][2],
-                    line_alpha=0.7,
-                ))
+                plotted[model_name].append(
+                    ax.line(
+                        vals,
+                        (y + 0.05, y + 0.05),
+                        line_width=linewidth * 2,
+                        color=[
+                            color
+                            for _, color in zip(
+                                range(3), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                            )
+                        ][2],
+                        line_alpha=0.7,
+                    )
+                )
                 return ax
 
     def ridgeplot(
@@ -332,7 +336,7 @@ class PlotHandler:
         ridgeplot_truncate,
         ridgeplot_quantiles,
         ax,
-        plotted
+        plotted,
     ):
         """Draw ridgeplot for each plotter.
 
@@ -381,15 +385,17 @@ class PlotHandler:
                         facecolor = color
                         alpha = [alpha if ci else 0 for ci in ((x >= hdi_[0]) & (x <= hdi_[1]))]
                     y_min = np.ones_like(x) * y_min
-                    plotted[model_name].append(ax.vbar(
-                        x=x,
-                        top=y_max - y_min,
-                        bottom=y_min,
-                        width=0.9,
-                        line_color=border,
-                        color=facecolor,
-                        fill_alpha=alpha,
-                    ))
+                    plotted[model_name].append(
+                        ax.vbar(
+                            x=x,
+                            top=y_max - y_min,
+                            bottom=y_min,
+                            width=0.9,
+                            line_color=border,
+                            color=facecolor,
+                            fill_alpha=alpha,
+                        )
+                    )
                 else:
                     tr_x = x[(x >= hdi_[0]) & (x <= hdi_[1])]
                     tr_y_min = np.ones_like(tr_x) * y_min
@@ -405,36 +411,46 @@ class PlotHandler:
                     patch.level = "overlay"
                     plotted[model_name].append(patch)
                     if ridgeplot_truncate:
-                        plotted[model_name].append(ax.line(
-                            x, y_max, line_dash="solid", line_width=linewidth, line_color=border
-                        ))
-                        plotted[model_name].append(ax.line(
-                            x, y_min, line_dash="solid", line_width=linewidth, line_color=border
-                        ))
+                        plotted[model_name].append(
+                            ax.line(
+                                x, y_max, line_dash="solid", line_width=linewidth, line_color=border
+                            )
+                        )
+                        plotted[model_name].append(
+                            ax.line(
+                                x, y_min, line_dash="solid", line_width=linewidth, line_color=border
+                            )
+                        )
                     else:
-                        plotted[model_name].append(ax.line(
-                            tr_x,
-                            tr_y_max,
-                            line_dash="solid",
-                            line_width=linewidth,
-                            line_color=border,
-                        ))
-                        plotted[model_name].append(ax.line(
-                            tr_x,
-                            tr_y_min,
-                            line_dash="solid",
-                            line_width=linewidth,
-                            line_color=border,
-                        ))
+                        plotted[model_name].append(
+                            ax.line(
+                                tr_x,
+                                tr_y_max,
+                                line_dash="solid",
+                                line_width=linewidth,
+                                line_color=border,
+                            )
+                        )
+                        plotted[model_name].append(
+                            ax.line(
+                                tr_x,
+                                tr_y_min,
+                                line_dash="solid",
+                                line_width=linewidth,
+                                line_color=border,
+                            )
+                        )
                 if ridgeplot_quantiles is not None:
                     quantiles = [x[np.sum(y_q < quant)] for quant in ridgeplot_quantiles]
-                    plotted[model_name].append(ax.diamond(
-                        quantiles,
-                        np.ones_like(quantiles) * y_min[0],
-                        line_color="black",
-                        fill_color="black",
-                        size=markersize,
-                    ))
+                    plotted[model_name].append(
+                        ax.diamond(
+                            quantiles,
+                            np.ones_like(quantiles) * y_min[0],
+                            line_color="black",
+                            fill_color="black",
+                            size=markersize,
+                        )
+                    )
 
         return ax
 
@@ -498,22 +514,31 @@ class PlotHandler:
         for plotter in self.plotters.values():
             for y, model_name, selection, values, color in plotter.treeplot(qlist, hdi_prob):
                 if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, plotter.var_name, selection, plotted, model_name)
+                    self.display_multiple_ropes(
+                        rope, ax, y, linewidth, plotter.var_name, selection, plotted, model_name
+                    )
 
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
                 )
                 for width, j in param_iter:
-                    plotted[model_name].append(ax.line(
-                        [values[j], values[-(j + 1)]], [y, y], line_width=width, line_color=color
-                    ))
-                plotted[model_name].append(ax.circle(
-                    x=values[mid],
-                    y=y,
-                    size=markersize * 0.75,
-                    fill_color=color,
-                ))
+                    plotted[model_name].append(
+                        ax.line(
+                            [values[j], values[-(j + 1)]],
+                            [y, y],
+                            line_width=width,
+                            line_color=color,
+                        )
+                    )
+                plotted[model_name].append(
+                    ax.circle(
+                        x=values[mid],
+                        y=y,
+                        size=markersize * 0.75,
+                        fill_color=color,
+                    )
+                )
         _title = Title()
         _title.text = "{:.1%} HDI".format(hdi_prob)
         ax.title = _title
@@ -526,13 +551,15 @@ class PlotHandler:
         for plotter in self.plotters.values():
             for y, ess, color, model_name in plotter.ess():
                 if ess is not None:
-                    plotted[model_name].append(ax.circle(
-                        x=ess,
-                        y=y,
-                        fill_color=color,
-                        size=markersize,
-                        line_color="black",
-                    ))
+                    plotted[model_name].append(
+                        ax.circle(
+                            x=ess,
+                            y=y,
+                            fill_color=color,
+                            size=markersize,
+                            line_color="black",
+                        )
+                    )
                 if ess > max_ess:
                     max_ess = ess
         ax.x_range._property_values["start"] = 0  # pylint: disable=protected-access
@@ -551,7 +578,11 @@ class PlotHandler:
         for plotter in self.plotters.values():
             for y, r_hat, color, model_name in plotter.r_hat():
                 if r_hat is not None:
-                    plotted[model_name].append(ax.circle(x=r_hat, y=y, fill_color=color, size=markersize, line_color="black"))
+                    plotted[model_name].append(
+                        ax.circle(
+                            x=r_hat, y=y, fill_color=color, size=markersize, line_color="black"
+                        )
+                    )
         ax.x_range._property_values["start"] = 0.9  # pylint: disable=protected-access
         ax.x_range._property_values["end"] = 2.1  # pylint: disable=protected-access
 
@@ -638,9 +669,9 @@ class VarHandler:
                 else:
                     row_label = label
                 for values in value_list:
-                    yield y, row_label, model_name, label, selection_list[idx], values, self.model_color[
-                        model_name
-                    ]
+                    yield y, row_label, model_name, label, selection_list[
+                        idx
+                    ], values, self.model_color[model_name]
                     y += self.chain_offset
                 y += self.var_offset
             y += self.group_offset
@@ -702,7 +733,9 @@ class VarHandler:
             hdi_vals.append(hdi_)
 
         scaling = max(np.max(j) for j in pdfs)
-        for y, x, hdi_val, pdf, pdf_q, color, model_name in zip(yvals, xvals, hdi_vals, pdfs, pdfs_q, colors, model_names):
+        for y, x, hdi_val, pdf, pdf_q, color, model_name in zip(
+            yvals, xvals, hdi_vals, pdfs, pdfs_q, colors, model_names
+        ):
             yield x, y, mult * pdf / scaling + y, hdi_val, pdf_q, color, model_name
 
     def ess(self):
