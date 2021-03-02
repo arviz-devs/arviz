@@ -100,16 +100,14 @@ def plot_khat(
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
     rgba_c[:, 3] = alphas
     rgba_c = vectorized_to_hex(rgba_c)
+    kwargs.setdefault("c", rgba_c)
 
     if ax is None:
-        fig, ax = create_axes_grid(
-            1,
-            backend_kwargs=backend_kwargs,
-        )
+        fig, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
     else:
         fig = ax.get_figure()
 
-    sc_plot = ax.scatter(xdata, khats, c=rgba_c, **kwargs)
+    sc_plot = ax.scatter(xdata, khats, **kwargs)
 
     if threshold is not None:
         idxs = xdata[khats > threshold]
