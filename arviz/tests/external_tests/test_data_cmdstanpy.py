@@ -40,19 +40,22 @@ def _create_test_data():
         parameters {
             real mu;
             real<lower=0> tau;
-            real eta[J];
+            real eta[2, J / 2];
         }
 
         transformed parameters {
             real theta[J];
-            for (j in 1:J)
-                theta[j] = mu + tau * eta[j];
+            for (j in 1:J/2) {
+                theta[j] = mu + tau * eta[1, j];
+                theta[j + 4] = mu + tau * eta[2, j];
+            }
         }
 
         model {
             mu ~ normal(0, 5);
             tau ~ cauchy(0, 5);
-            eta ~ normal(0, 1);
+            eta[1] ~ normal(0, 1);
+            eta[2] ~ normal(0, 1);
             y ~ normal(theta, sigma);
         }
 
@@ -174,14 +177,13 @@ class TestDataCmdStanPy:
             observed_data={"y": eight_schools_params["y"]},
             constant_data={"y": eight_schools_params["y"]},
             predictions_constant_data={"y": eight_schools_params["y"]},
-            log_likelihood="log_lik",
+            log_likelihood={"y": "log_lik"},
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
-                "theta": ["school"],
                 "y": ["school"],
                 "log_lik": ["school"],
                 "y_hat": ["school"],
-                "eta": ["school"],
+                "theta": ["school"],
             },
         )
 
@@ -202,10 +204,10 @@ class TestDataCmdStanPy:
                 "log_lik_dim": np.arange(eight_schools_params["J"]),
             },
             dims={
-                "theta": ["school"],
+                "eta": ["extra_dim", "half school"],
                 "y": ["school"],
                 "y_hat": ["school"],
-                "eta": ["school"],
+                "theta": ["school"],
                 "log_lik": ["log_lik_dim"],
             },
         )
@@ -218,8 +220,17 @@ class TestDataCmdStanPy:
             prior=data.obj,
             prior_predictive=["y_hat", "log_lik"],
             observed_data={"y": eight_schools_params["y"]},
-            coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
+            coords={
+                "school": np.arange(eight_schools_params["J"]),
+                "half school": ["a", "b", "c", "d"],
+                "extra_dim": ["x", "y"],
+            },
+            dims={
+                "eta": ["extra_dim", "half school"],
+                "y": ["school"],
+                "y_hat": ["school"],
+                "theta": ["school"],
+            },
         )
 
     def get_inference_data4(self, data, eight_schools_params):
@@ -248,11 +259,11 @@ class TestDataCmdStanPy:
             log_likelihood="log_lik",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
-                "theta": ["school"],
+                "eta": ["extra_dim", "half school"],
                 "y": ["school"],
                 "log_lik": ["school"],
                 "y_hat": ["school"],
-                "eta": ["school"],
+                "theta": ["school"],
             },
             save_warmup=True,
         )
@@ -271,11 +282,11 @@ class TestDataCmdStanPy:
             log_likelihood="log_lik",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
-                "theta": ["school"],
+                "eta": ["extra_dim", "half school"],
                 "y": ["school"],
                 "log_lik": ["school"],
                 "y_hat": ["school"],
-                "eta": ["school"],
+                "theta": ["school"],
             },
             save_warmup=True,
         )
@@ -294,11 +305,11 @@ class TestDataCmdStanPy:
             log_likelihood="log_lik",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
-                "theta": ["school"],
+                "eta": ["extra_dim", "half school"],
                 "y": ["school"],
                 "log_lik": ["school"],
                 "y_hat": ["school"],
-                "eta": ["school"],
+                "theta": ["school"],
             },
             save_warmup=False,
         )
@@ -322,7 +333,7 @@ class TestDataCmdStanPy:
             "observed_data": ["y"],
             "constant_data": ["y"],
             "predictions_constant_data": ["y"],
-            "log_likelihood": ["log_lik"],
+            "log_likelihood": ["y", "~log_lik"],
             "prior": ["theta"],
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
@@ -352,10 +363,15 @@ class TestDataCmdStanPy:
         fails = check_multiple_attrs(test_dict, inference_data3)
         assert not fails
         # inference_data 4
-        test_dict = {"posterior": ["theta"], "prior": ["theta"]}
+        test_dict = {
+            "posterior": ["eta", "mu", "theta"],
+            "prior": ["theta"],
+            "log_likelihood": ["log_lik"],
+        }
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
         assert len(inference_data4.posterior.theta.shape) == 3  # pylint: disable=no-member
+        assert len(inference_data4.posterior.eta.shape) == 4  # pylint: disable=no-member
         assert len(inference_data4.posterior.mu.shape) == 2  # pylint: disable=no-member
 
     def test_inference_data_warmup(self, data, eight_schools_params):
@@ -394,13 +410,13 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
+            "~warmup_posterior": [],
+            "~warmup_predictions": [],
+            "~warmup_log_likelihood": [],
+            "~warmup_prior": [],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_true)
         assert not fails
-        assert "warmup_posterior" not in inference_data_false_is_true
-        assert "warmup_predictions" not in inference_data_false_is_true
-        assert "warmup_log_likelihood" not in inference_data_false_is_true
-        assert "warmup_prior" not in inference_data_false_is_true
         # inference_data no warmup
         test_dict = {
             "posterior": ["theta"],
@@ -410,13 +426,13 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
+            "~warmup_posterior": [],
+            "~warmup_predictions": [],
+            "~warmup_log_likelihood": [],
+            "~warmup_prior": [],
         }
         fails = check_multiple_attrs(test_dict, inference_data_true_is_false)
         assert not fails
-        assert "warmup_posterior" not in inference_data_true_is_false
-        assert "warmup_predictions" not in inference_data_true_is_false
-        assert "warmup_log_likelihood" not in inference_data_true_is_false
-        assert "warmup_prior" not in inference_data_true_is_false
         # inference_data no warmup
         test_dict = {
             "posterior": ["theta"],
@@ -424,14 +440,12 @@ class TestDataCmdStanPy:
             "observed_data": ["y"],
             "constant_data": ["y"],
             "predictions_constant_data": ["y"],
-            "log_likelihood": ["log_lik"],
+            "log_likelihood": ["y"],
             "prior": ["theta"],
+            "~warmup_posterior": [],
+            "~warmup_predictions": [],
+            "~warmup_log_likelihood": [],
+            "~warmup_prior": [],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_false)
         assert not fails
-        assert "warmup_posterior" not in inference_data_false_is_false
-        assert "warmup_predictions" not in inference_data_false_is_false
-        assert "warmup_log_likelihood" not in inference_data_false_is_false
-        assert (
-            "warmup_prior" not in inference_data_false_is_false
-        )  # pylint: disable=redefined-outer-name

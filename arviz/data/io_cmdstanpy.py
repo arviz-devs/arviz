@@ -50,6 +50,9 @@ class CmdStanPyConverter:
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
+        if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
+            self.log_likelihood = ["log_lik"]
+
         import cmdstanpy  # pylint: disable=import-error
 
         self.cmdstanpy = cmdstanpy
@@ -92,8 +95,20 @@ class CmdStanPyConverter:
         coords = deepcopy(self.coords) if self.coords is not None else {}
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=coords, dims=dims),
-            dict_to_dataset(data_warmup, library=self.cmdstanpy, coords=coords, dims=dims),
+            dict_to_dataset(
+                data,
+                library=self.cmdstanpy,
+                coords=coords,
+                dims=dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=coords,
+                dims=dims,
+                index_origin=self.index_origin,
+            ),
         )
 
     @requires("posterior")
@@ -257,6 +272,13 @@ class CmdStanPyConverter:
                 valid_cols,
                 self.save_warmup,
             )
+        if isinstance(self.log_likelihood, dict):
+            data = {obs_name: data[lik_name] for obs_name, lik_name in self.log_likelihood.items()}
+            if data_warmup:
+                data_warmup = {
+                    obs_name: data_warmup[lik_name]
+                    for obs_name, lik_name in self.log_likelihood.items()
+                }
         return (
             dict_to_dataset(
                 data,
@@ -445,9 +467,19 @@ class CmdStanPyConverter:
         )
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -471,9 +503,19 @@ class CmdStanPyConverter:
             if data_warmup:
                 data_warmup[name] = data_warmup.pop(s_param).astype(dtypes.get(s_param, float))
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -484,7 +526,9 @@ def _as_set(spec):
         return []
     if isinstance(spec, str):
         return [spec]
-    else:
+    try:
+        return set(spec.values())
+    except AttributeError:
         return set(spec)
 
 
@@ -496,7 +540,7 @@ def _filter(names, spec):
         for item in spec:
             names.remove(item)
     elif isinstance(spec, dict):
-        for item in spec.keys():
+        for item in spec.values():
             names.remove(item)
     return names
 
@@ -527,6 +571,7 @@ def _unpack_fit(fit, items, save_warmup):
         else:
             num_warmup = fit.num_draws_warmup
 
+    nchains = fit.chains
     draws = np.swapaxes(fit.draws(inc_warmup=save_warmup), 0, 1)
     sample = {}
     sample_warmup = {}
@@ -534,22 +579,23 @@ def _unpack_fit(fit, items, save_warmup):
     for item in items:
         if item in fit.stan_vars_cols:
             col_idxs = fit.stan_vars_cols[item]
+            if len(col_idxs) == 1:
+                raw_draws = draws[..., col_idxs[0]]
+            else:
+                raw_draws = fit.stan_variable(item, inc_warmup=save_warmup)
+                raw_draws = np.swapaxes(
+                    raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
+                )
         elif item in fit.sampler_vars_cols:
             col_idxs = fit.sampler_vars_cols[item]
+            raw_draws = draws[..., col_idxs[0]]
         else:
             raise ValueError("fit data, unknown variable: {}".format(item))
         if save_warmup:
-            if len(col_idxs) == 1:
-                sample_warmup[item] = np.squeeze(draws[:num_warmup, :, col_idxs], axis=2)
-                sample[item] = np.squeeze(draws[num_warmup:, :, col_idxs], axis=2)
-            else:
-                sample_warmup[item] = draws[:num_warmup, :, col_idxs]
-                sample[item] = draws[num_warmup:, :, col_idxs]
+            sample_warmup[item] = raw_draws[:, :num_warmup, ...]
+            sample[item] = raw_draws[:, num_warmup:, ...]
         else:
-            if len(col_idxs) == 1:
-                sample[item] = np.squeeze(draws[:, :, col_idxs], axis=2)
-            else:
-                sample[item] = draws[:, :, col_idxs]
+            sample[item] = raw_draws
 
     return sample, sample_warmup
 
@@ -680,8 +726,12 @@ def from_cmdstanpy(
         Constant data used in the sampling.
     predictions_constant_data : dict
         Constant data for predictions used in the sampling.
-    log_likelihood : str, list of str
-        Pointwise log_likelihood for the data.
+    log_likelihood : str, list of str, dict of {str: str}
+        Pointwise log_likelihood for the data. If a dict, its keys should represent var_names
+        from the corresponding observed data and its values the stan variable where the
+        data is stored. By default, if a variable ``log_lik`` is present in the Stan model,
+        it will be retrieved as pointwise log likelihood values. Use ``False`` to avoid this
+        behaviour.
     index_origin : int, optional
         Starting value of integer coordinate values. Defaults to the value in rcParam
         ``data.index_origin``.
