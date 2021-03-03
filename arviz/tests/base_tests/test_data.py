@@ -449,7 +449,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         assert not fails
         # assert _groups attribute contains all groups
         groups = getattr(idata, "_groups")
-        assert all([group in groups for group in test_dict])
+        assert all((group in groups for group in test_dict))
 
         # Use del method
         if use == "del":
