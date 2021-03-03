@@ -140,6 +140,8 @@ def plot_elpd(
                 sharey="row",
                 sharex="all",
             )
+        else:
+            fig = ax.get_figure()
 
         for i in range(0, numvars - 1):
             var1 = pointwise_data[i]
