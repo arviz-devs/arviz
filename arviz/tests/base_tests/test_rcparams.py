@@ -102,7 +102,7 @@ def test_rcparams_repr_str():
     str_str = rcParams.__str__()
     assert repr_str.startswith("RcParams")
     for string in (repr_str, str_str):
-        assert all([key in string for key in rcParams.keys()])
+        assert all((key in string for key in rcParams.keys()))
 
 
 ### Test arvizrc.template file is up to date ###
@@ -110,10 +110,10 @@ def test_rctemplate_updated():
     fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../arvizrc.template")
     rc_pars_template = read_rcfile(fname)
     rc_defaults = rc_params(ignore_files=True)
-    assert all([key in rc_pars_template.keys() for key in rc_defaults.keys()]), [
+    assert all((key in rc_pars_template.keys() for key in rc_defaults.keys())), [
         key for key in rc_defaults.keys() if key not in rc_pars_template
     ]
-    assert all([value == rc_pars_template[key] for key, value in rc_defaults.items()]), [
+    assert all((value == rc_pars_template[key] for key, value in rc_defaults.items())), [
         key for key, value in rc_defaults.items() if value != rc_pars_template[key]
     ]
 

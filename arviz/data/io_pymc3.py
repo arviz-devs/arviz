@@ -43,7 +43,7 @@ def _monkey_patch_pymc3(pm: ModuleType) -> None:  # pylint: disable=invalid-name
         """Use object identity for MultiObservedRV equality."""
         return self is other
 
-    if tuple([int(x) for x in pm.__version__.split(".")]) < (3, 9):  # type: ignore
+    if tuple((int(x) for x in pm.__version__.split("."))) < (3, 9):  # type: ignore
         pm.model.MultiObservedRV.__eq__ = fixed_eq  # type: ignore
 
 
