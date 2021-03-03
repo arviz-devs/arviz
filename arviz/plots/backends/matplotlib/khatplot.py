@@ -76,31 +76,35 @@ def plot_khat(
     kwargs = matplotlib_kwarg_dealiaser(kwargs, "scatter")
     kwargs.setdefault("s", markersize)
     kwargs.setdefault("marker", "+")
-    color_mapping = None
-    cmap = None
-    if isinstance(color, str):
-        if color in dims:
-            colors, color_mapping = color_from_dim(khats, color)
-            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
-            cmap = getattr(cm, cmap_name)
-            rgba_c = cmap(colors)
+
+    c_kwarg = kwargs.get("c", None)
+
+    if c_kwarg is None:
+        color_mapping = None
+        cmap = None
+        if isinstance(color, str):
+            if color in dims:
+                colors, color_mapping = color_from_dim(khats, color)
+                cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
+                cmap = getattr(cm, cmap_name)
+                rgba_c = cmap(colors)
+            else:
+                legend = False
+                rgba_c = to_rgba_array(np.full(n_data_points, color))
         else:
             legend = False
-            rgba_c = to_rgba_array(np.full(n_data_points, color))
-    else:
-        legend = False
-        try:
-            rgba_c = to_rgba_array(color)
-        except ValueError:
-            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
-            cmap = getattr(cm, cmap_name)
-            rgba_c = cmap(color)
+            try:
+                rgba_c = to_rgba_array(color)
+            except ValueError:
+                cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
+                cmap = getattr(cm, cmap_name)
+                rgba_c = cmap(color)
 
-    khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
-    alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
-    rgba_c[:, 3] = alphas
-    rgba_c = vectorized_to_hex(rgba_c)
-    kwargs.setdefault("c", rgba_c)
+        khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
+        alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
+        rgba_c[:, 3] = alphas
+        rgba_c = vectorized_to_hex(rgba_c)
+        kwargs["c"] = rgba_c
 
     if ax is None:
         fig, ax = create_axes_grid(
