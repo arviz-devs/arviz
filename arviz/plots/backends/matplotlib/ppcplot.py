@@ -108,7 +108,7 @@ def plot_ppc(
             )
         if animated:
             fig = axes[0].get_figure()
-            if not all([ax.get_figure() is fig for ax in axes]):
+            if not all((ax.get_figure() is fig for ax in axes)):
                 raise ValueError("All axes must be on the same figure for animation to work")
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
