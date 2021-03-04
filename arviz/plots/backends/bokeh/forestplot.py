@@ -161,23 +161,15 @@ def plot_forest(
     if ess:
         plotted_ess = defaultdict(list)
         plot_handler.plot_neff(axes[0, idx], markersize, plotted_ess)
-        legend_it_ess = []
-        for (model_name, glyphs) in plotted_ess.items():
-            legend_it_ess.append((model_name, glyphs))
-        legend_ess = Legend(items=legend_it_ess)
-        axes[0, idx].add_layout(legend_ess, "right")
-        axes[0, idx].legend.click_policy = "hide"
+        if legend:
+            plot_handler.legend(axes[0, idx], plotted_ess)
         idx += 1
 
     if r_hat:
         plotted_r_hat = defaultdict(list)
         plot_handler.plot_rhat(axes[0, idx], markersize, plotted_r_hat)
-        legend_it_r_hat = []
-        for (model_name, glyphs) in plotted_r_hat.items():
-            legend_it_r_hat.append((model_name, glyphs))
-        legend_r_hat = Legend(items=legend_it_r_hat)
-        axes[0, idx].add_layout(legend_r_hat, "right")
-        axes[0, idx].legend.click_policy = "hide"
+        if legend:
+            plot_handler.legend(axes[0, idx], plotted_r_hat)
         idx += 1
 
     for i, ax_ in enumerate(axes.ravel()):
@@ -195,6 +187,7 @@ def plot_forest(
         ax_.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=2)
 
     labels, ticks = plot_handler.labels_and_ticks()
+    ticks = [int(tick) if (tick).is_integer() else tick for tick in ticks]
 
     axes[0, 0].yaxis.ticker = FixedTicker(ticks=ticks)
     axes[0, 0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
@@ -211,13 +204,8 @@ def plot_forest(
     ].group_offset
     axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-
 
-    legend_it = []
-    for (model_name, glyphs) in plotted.items():
-        legend_it.append((model_name, glyphs))
-
-    legend = Legend(items=legend_it)
-    axes[0, 0].add_layout(legend, "right")
-    axes[0, 0].legend.click_policy = "hide"
+    if legend:
+        plot_handler.legend(axes[0, 0], plotted)
     show_layout(axes, show)
 
     return axes
@@ -300,6 +288,15 @@ class PlotHandler:
             return np.concatenate(labels), np.concatenate(idxs)
 
         return label_idxs()
+
+    def legend(self, ax, plotted):
+        legend_it = []
+        for (model_name, glyphs) in plotted.items():
+            legend_it.append((model_name, glyphs))
+
+        legend = Legend(items=legend_it)
+        ax.add_layout(legend, "right")
+        ax.legend.click_policy = "hide"
 
     def display_multiple_ropes(
         self, rope, ax, y, linewidth, var_name, selection, plotted, model_name
@@ -648,10 +645,8 @@ class VarHandler:
                 datum_list = list(datum_iter)
                 for _, selection, isel, values in datum_list:
                     selection_list.append(selection)
-                    if not selection:
+                    if not selection or not len(selection_list) % len(datum_list):
                         var_name = self.var_name
-                    elif len(selection_list) == len(datum_list):
-                        var_name = self.var_name + ":"
                     else:
                         var_name = ""
                     label = self.labeller.make_label_flat(var_name, selection, isel)
@@ -664,10 +659,7 @@ class VarHandler:
         y = self.y_start
         for idx, (label, model_data) in enumerate(label_dict.items()):
             for model_name, value_list in model_data.items():
-                if model_name:
-                    row_label = "{}: {}".format(model_name, label)
-                else:
-                    row_label = label
+                row_label = self.labeller.make_model_label(model_name, label)
                 for values in value_list:
                     yield y, row_label, model_name, label, selection_list[
                         idx
