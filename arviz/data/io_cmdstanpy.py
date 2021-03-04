@@ -54,8 +54,10 @@ class CmdStanPyConverter:
             if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
         else:
-            if self.log_likelihood is None and any(
-                name.split("[")[0] == "log_lik" for name in self.posterior.column_names
+            if (
+                self.log_likelihood is None
+                and self.posterior is not None
+                and any(name.split("[")[0] == "log_lik" for name in self.posterior.column_names)
             ):
                 self.log_likelihood = ["log_lik"]
 
