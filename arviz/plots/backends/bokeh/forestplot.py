@@ -202,7 +202,7 @@ def plot_forest(
     ] = -all_plotters[  # pylint: disable=protected-access
         0
     ].group_offset
-    axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-
+    axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
     if legend:
         plot_handler.legend(axes[0, 0], plotted)
