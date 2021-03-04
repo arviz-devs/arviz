@@ -50,8 +50,12 @@ class CmdStanPyConverter:
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
-        if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
-            self.log_likelihood = ["log_lik"]
+        if hasattr(self.posterior, "stan_vars_cols"):
+            if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
+                self.log_likelihood = ["log_lik"]
+        else:
+            if self.log_likelihood is None and any("log_lik" == name.split("[")[0] for name in self.posterior.column_names):
+                self.log_likelihood = ["log_lik"]
 
         import cmdstanpy  # pylint: disable=import-error
 
@@ -309,7 +313,7 @@ class CmdStanPyConverter:
                 except ValueError:
                     pass
             data, data_warmup = _unpack_fit(
-                self.posterior,
+                self.prior,
                 items,
                 self.save_warmup,
             )
