@@ -118,6 +118,7 @@ class TestDataPyStan:
             coords=None,
             dims=None,
             posterior_model=data.model,
+            log_likelihood=[],
             prior_model=data.model,
             save_warmup=pystan_version() == 2,
         )
@@ -173,6 +174,7 @@ class TestDataPyStan:
             "predictions_constant_data": ["sigma", "y"],
             "sample_stats_prior": ["diverging"],
             "sample_stats": ["diverging", "lp"],
+            "log_likelihood": ["log_lik"],
             "prior_predictive": ["y_hat", "log_lik"],
         }
         fails = check_multiple_attrs(test_dict, inference_data3)
@@ -261,7 +263,7 @@ class TestDataPyStan:
         idata = from_pystan(posterior=fit)
         assert idata is not None
         for j, fpar in enumerate(fit.sim["fnames_oi"]):
-            if fpar == "lp__":
+            if fpar in {"lp__", "log_lik"}:
                 continue
             par, *shape = fpar.replace("]", "").split("[")
             assert hasattr(idata.posterior, par)
