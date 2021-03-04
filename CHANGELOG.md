@@ -16,6 +16,7 @@
 * Preserve shape from Stan code in `from_cmdstanpy` ([1579](https://github.com/arviz-devs/arviz/pull/1579))
 * Used generator instead of list wherever possible ([1588](https://github.com/arviz-devs/arviz/pull/1588))
 * Correctly use chain index when constructing PyMC3 `DefaultTrace` in `from_pymc3` ([1590](https://github.com/arviz-devs/arviz/pull/1590))
+* Fix bugs in CmdStanPyConverter ([1595](https://github.com/arviz-devs/arviz/pull/1595) and [1598](https://github.com/arviz-devs/arviz/pull/1598))
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
