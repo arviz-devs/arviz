@@ -55,7 +55,7 @@ class CmdStanPyConverter:
                 self.log_likelihood = ["log_lik"]
         else:
             if self.log_likelihood is None and any(
-                "log_lik" == name.split("[")[0] for name in self.posterior.column_names
+                name.split("[")[0] == "log_lik" for name in self.posterior.column_names
             ):
                 self.log_likelihood = ["log_lik"]
 
