@@ -1,6 +1,6 @@
 """Plot kde or histograms and values from MCMC samples."""
 import warnings
-from typing import Any, Callable, List, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, List, Mapping, Optional, Tuple, Union, Sequence
 
 from ..data import CoordSpec, InferenceData, convert_to_dataset
 from ..labels import BaseLabeller
@@ -12,7 +12,7 @@ from .plot_utils import KwargSpec, get_plotting_function
 
 def plot_trace(
     data: InferenceData,
-    var_names: Optional[List[str]] = None,
+    var_names: Optional[Sequence[str]] = None,
     filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
