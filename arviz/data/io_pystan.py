@@ -54,6 +54,13 @@ class PyStanConverter:
         self.dims = dims
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
+        if (
+            self.log_likelihood is None
+            and self.posterior is not None
+            and "log_lik" in self.posterior.sim["pars_oi"]
+        ):
+            self.log_likelihood = ["log_lik"]
+
         import pystan  # pylint: disable=import-error
 
         self.pystan = pystan
@@ -312,6 +319,13 @@ class PyStan3Converter:
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
+
+        if (
+            self.log_likelihood is None
+            and self.posterior is not None
+            and "log_lik" in self.posterior.param_names
+        ):
+            self.log_likelihood = ["log_lik"]
 
         import stan  # pylint: disable=import-error
 

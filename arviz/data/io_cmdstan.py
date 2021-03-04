@@ -90,6 +90,13 @@ class CmdStanConverter:
         self._parse_posterior()
         self._parse_prior()
 
+        if (
+            self.log_likelihood is None
+            and self.posterior_ is not None
+            and any(name.split(".")[0] == "log_lik" for name in self.posterior_columns)
+        ):
+            self.log_likelihood = ["log_lik"]
+
     @requires("posterior_")
     def _parse_posterior(self):
         """Read csv paths to list of ndarrays."""
