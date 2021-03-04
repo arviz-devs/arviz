@@ -93,13 +93,13 @@ def plot_khat(
                 rgba_c = to_rgba_array(np.full(n_data_points, color))
         else:
             legend = False
-            color = (color - color.min()) / (color.max() - color.min())
             try:
                 rgba_c = to_rgba_array(color)
             except ValueError:
                 cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
                 cmap = getattr(cm, cmap_name)
-                rgba_c = cmap(color)
+                norm_fun = kwargs.get("norm", mpl.colors.Normalize(color.min(), color.max()))
+                rgba_c = cmap(norm_fun(color))
 
         khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
         alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
