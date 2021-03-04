@@ -20,7 +20,7 @@ jobs:
         emcee.version: "latest"
         name: "External latest"
 
-      Python_38_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
+      Python_38_Special_versions:
         python.version: 3.8
         pystan.version: "preview"
         cmdstanpy.version: 0.9.67
