@@ -78,6 +78,8 @@ def plot_elpd(
                 1,
                 backend_kwargs=backend_kwargs,
             )
+        else:
+            fig = ax.get_figure()
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)
@@ -138,6 +140,8 @@ def plot_elpd(
                 sharey="row",
                 sharex="all",
             )
+        else:
+            fig = ax.get_figure()
 
         for i in range(0, numvars - 1):
             var1 = pointwise_data[i]
