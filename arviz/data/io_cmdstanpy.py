@@ -50,8 +50,16 @@ class CmdStanPyConverter:
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
-        if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
-            self.log_likelihood = ["log_lik"]
+        if hasattr(self.posterior, "stan_vars_cols"):
+            if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
+                self.log_likelihood = ["log_lik"]
+        else:
+            if (
+                self.log_likelihood is None
+                and self.posterior is not None
+                and any(name.split("[")[0] == "log_lik" for name in self.posterior.column_names)
+            ):
+                self.log_likelihood = ["log_lik"]
 
         import cmdstanpy  # pylint: disable=import-error
 
@@ -309,7 +317,7 @@ class CmdStanPyConverter:
                 except ValueError:
                     pass
             data, data_warmup = _unpack_fit(
-                self.posterior,
+                self.prior,
                 items,
                 self.save_warmup,
             )
@@ -483,7 +491,6 @@ class CmdStanPyConverter:
             ),
         )
 
-    @requires("posterior")
     def sample_stats_to_xarray_pre_v_0_9_68(self, fit):
         """Extract sample_stats from fit."""
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
