@@ -263,10 +263,10 @@ class TestDataPyStan:
         idata = from_pystan(posterior=fit)
         assert idata is not None
         for j, fpar in enumerate(fit.sim["fnames_oi"]):
-            if fpar in {"lp__", "log_lik"}:
-                continue
             par, *shape = fpar.replace("]", "").split("[")
-            assert hasattr(idata.posterior, par)
+            if par in {"lp__", "log_lik"}:
+                continue
+            assert hasattr(idata.posterior, par), (par, list(idata.posterior.data_vars))
             if shape:
                 shape = [slice(None), slice(None)] + list(map(int, shape))
                 assert idata.posterior[par][tuple(shape)].values.mean() == float(j)
