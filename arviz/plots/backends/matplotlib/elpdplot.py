@@ -141,7 +141,7 @@ def plot_elpd(
                 sharex="all",
             )
         else:
-            fig = ax.get_figure()
+            fig = ax.ravel()[0].get_figure()
 
         for i in range(0, numvars - 1):
             var1 = pointwise_data[i]
@@ -179,7 +179,8 @@ def plot_elpd(
                     "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
                 )
         if xlabels:
-            set_xticklabels(ax[-1, -1], coord_labels)
+            for i in range(len(ax)):
+                set_xticklabels(ax[-1, :][i], coord_labels)
             fig.autofmt_xdate()
             fig.tight_layout()
         if legend:
