@@ -878,10 +878,7 @@ def _unpack_ndarrays(arrays, columns, dtypes=None):
         for key, cols_locs in col_groups.items():
             ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
             dtype = dtypes.get(key, np.float64)
-            if dtype == bool:
-                sample[key] = np.full((chains, draws, *ndim), 0, dtype=np.bool)
-            else:
-                sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
+            sample[key] = np.zeros((chains, draws, *ndim), dtype=dtype)
             for col, loc in cols_locs:
                 for chain_id, arr in enumerate(arrays):
                     draw = arr[:, col]
