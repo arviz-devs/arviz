@@ -166,7 +166,6 @@ class TestDataCmdStan:
                 constant_data_var=["y"],
                 predictions_constant_data=observed_data_paths[0],
                 predictions_constant_data_var=["y"],
-                log_likelihood="log_lik",
                 coords={"school": np.arange(8)},
                 dims={
                     "theta": ["school"],
@@ -277,7 +276,7 @@ class TestDataCmdStan:
                 prior_predictive=None,
                 observed_data=observed_data_paths[0],
                 observed_data_var=["y"],
-                log_likelihood=["log_lik"],
+                log_likelihood=["y_hat"],
                 coords={"school": np.arange(8), "log_lik_dim": np.arange(8)},
                 dims={
                     "theta": ["school"],
@@ -290,7 +289,7 @@ class TestDataCmdStan:
             test_dict = {
                 "posterior": ["mu", "tau", "theta_tilde", "theta"],
                 "prior": ["mu", "tau", "theta_tilde", "theta"],
-                "log_likelihood": ["log_lik"],
+                "log_likelihood": ["y_hat"],
                 "observed_data": ["y"],
                 "sample_stats_prior": ["lp"],
             }
