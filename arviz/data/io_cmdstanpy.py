@@ -491,8 +491,7 @@ class CmdStanPyConverter:
             ),
         )
 
-    @requires("posterior")
-    def sample_stats_to_xarray_pre_v_0_9_68(self, fit):
+    def sample_stats_to_xarray_pre_v_0_9_68(self, fit)
         """Extract sample_stats from fit."""
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
         columns = fit.column_names
