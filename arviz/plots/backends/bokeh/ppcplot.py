@@ -305,10 +305,12 @@ def plot_ppc(
         if legend:
             legend = Legend(
                 items=legend_it,
-                location="center_right",
-                orientation="horizontal",
+                location="top_left",
+                orientation="vertical",
             )
-            ax_i.add_layout(legend, "above")
+            ax_i.add_layout(legend)
+            if textsize is not None:
+                ax_i.legend.label_text_font_size = str(textsize) + "pt"
             ax_i.legend.click_policy = "hide"
         ax_i.xaxis.axis_label = labeller.make_pp_label(var_name, pp_var_name, sel, isel)
 
