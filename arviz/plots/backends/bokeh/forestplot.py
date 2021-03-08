@@ -109,9 +109,9 @@ def plot_forest(
 
         for i, width_r in zip(range(ncols), width_ratios):
             backend_kwargs_i = backend_kwargs.copy()
-            backend_kwargs_i.setdefault("width", int(figsize[0] * dpi))
+            backend_kwargs_i.setdefault("height", int(figsize[1] * dpi))
             backend_kwargs_i.setdefault(
-                "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
+                "width", int(figsize[0] * (width_r / sum(width_ratios)) * dpi * 1.25)
             )
             if i == 0:
                 ax = bkp.figure(
@@ -283,6 +283,14 @@ class PlotHandler:
             labels, idxs = [], []
             for plotter in val:
                 sub_labels, sub_idxs, _, _, _ = plotter.labels_ticks_and_vals()
+                labels_to_idxs = defaultdict(list)
+                for label, idx in zip(sub_labels, sub_idxs):
+                    labels_to_idxs[label].append(idx)
+                sub_idxs = []
+                sub_labels = []
+                for label, all_idx in labels_to_idxs.items():
+                    sub_labels.append(label)
+                    sub_idxs.append(np.mean([j for j in all_idx]))
                 labels.append(sub_labels)
                 idxs.append(sub_idxs)
             return np.concatenate(labels), np.concatenate(idxs)
@@ -295,8 +303,8 @@ class PlotHandler:
         for (model_name, glyphs) in plotted.items():
             legend_it.append((model_name, glyphs))
 
-        legend = Legend(items=legend_it)
-        ax.add_layout(legend, "right")
+        legend = Legend(items=legend_it, orientation="vertical", location="top_left")
+        ax.add_layout(legend, "above")
         ax.legend.click_policy = "hide"
 
     def display_multiple_ropes(
@@ -675,12 +683,13 @@ class VarHandler:
         for y, label, model_name, _, _, vals, color in self.iterator():
             y_ticks[label].append((y, vals, color, model_name))
         labels, ticks, vals, colors, model_names = [], [], [], [], []
-        for label, data in y_ticks.items():
-            labels.append(label)
-            ticks.append(np.mean([j[0] for j in data]))
-            vals.append(np.vstack([j[1] for j in data]))
-            model_names.append(data[0][3])
-            colors.append(data[0][2])  # the colors are all the same
+        for label, all_data in y_ticks.items():
+            for data in all_data:
+                labels.append(label)
+                ticks.append(np.mean([j[0] for j in all_data]))
+                vals.append(np.array(data[1]))
+                model_names.append(data[3])
+                colors.append(data[2])  # the colors are all the same
         return labels, ticks, vals, colors, model_names
 
     def treeplot(self, qlist, hdi_prob):
