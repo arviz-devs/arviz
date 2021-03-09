@@ -8,7 +8,7 @@ __all__ = [
     "DimCoordLabeller",
     "DimIdxLabeller",
     "MapLabeller",
-    "NoRepeatLabeller",
+    "NoVarLabeller",
     "NoModelLabeller",
 ]
 
