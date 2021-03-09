@@ -117,7 +117,7 @@ def plot_forest(
                 ax = bkp.figure(
                     **backend_kwargs_i,
                 )
-                backend_kwargs_i.setdefault("y_range", ax.y_range)
+                backend_kwargs.setdefault("y_range", ax.y_range)
             else:
                 ax = bkp.figure(**backend_kwargs_i)
             axes.append(ax)
@@ -197,12 +197,13 @@ def plot_forest(
     if kind == "ridgeplot":  # space at the top
         y_max += ridgeplot_overlap
 
-    axes[0, 0].y_range._property_values[
-        "start"
-    ] = -all_plotters[  # pylint: disable=protected-access
-        0
-    ].group_offset
-    axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
+    for i in range(idx):
+        axes[0, i].y_range._property_values[
+            "start"
+        ] = -all_plotters[  # pylint: disable=protected-access
+            0
+        ].group_offset
+        axes[0, i].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
     if legend:
         plot_handler.legend(axes[0, 0], plotted)
@@ -686,7 +687,7 @@ class VarHandler:
         for label, all_data in y_ticks.items():
             for data in all_data:
                 labels.append(label)
-                ticks.append(np.mean([j[0] for j in all_data]))
+                ticks.append(data[0])
                 vals.append(np.array(data[1]))
                 model_names.append(data[3])
                 colors.append(data[2])  # the colors are all the same

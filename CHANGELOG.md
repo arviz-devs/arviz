@@ -22,6 +22,7 @@
 * Fix `c` argument in `plot_khat` ([1592](https://github.com/arviz-devs/arviz/pull/1592))
 * Fix `ax` argument in `plot_elpd` ([1593](https://github.com/arviz-devs/arviz/pull/1593))
 * Remove warning in `stats.py` compare function ([1607](https://github.com/arviz-devs/arviz/pull/1607))
+* Fix `ess/rhat` plots in `plot_forest` ([1606](https://github.com/arviz-devs/arviz/pull/1606))
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
