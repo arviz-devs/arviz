@@ -43,7 +43,7 @@ def _monkey_patch_pymc3(pm: ModuleType) -> None:  # pylint: disable=invalid-name
         """Use object identity for MultiObservedRV equality."""
         return self is other
 
-    if tuple([int(x) for x in pm.__version__.split(".")]) < (3, 9):  # type: ignore
+    if tuple((int(x) for x in pm.__version__.split("."))) < (3, 9):  # type: ignore
         pm.model.MultiObservedRV.__eq__ = fixed_eq  # type: ignore
 
 
@@ -214,10 +214,13 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             log_like_val = np.where(mask, np.nan, log_like_val)
         return log_like_val
 
-    @requires("trace")
-    @requires("model")
     def _extract_log_likelihood(self, trace):
         """Compute log likelihood of each observation."""
+        if self.trace is None:
+            return None
+        if self.model is None:
+            return None
+
         # If we have predictions, then we have a thinned trace which does not
         # support extracting a log likelihood.
         if self.log_likelihood is True:
@@ -240,12 +243,12 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "`pip install pymc3>=3.8` or `conda install -c conda-forge pymc3>=3.8`."
             ) from err
         for var, log_like_fun in cached:
-            for chain in trace.chains:
+            for k, chain in enumerate(trace.chains):
                 log_like_chain = [
                     self.log_likelihood_vals_point(point, var, log_like_fun)
                     for point in trace.points([chain])
                 ]
-                log_likelihood_dict.insert(var.name, np.stack(log_like_chain), chain)
+                log_likelihood_dict.insert(var.name, np.stack(log_like_chain), k)
         return log_likelihood_dict.trace_dict
 
     @requires("trace")

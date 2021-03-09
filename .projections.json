@@ -13,5 +13,13 @@
     "alternate": "arviz/plots/backends/matplotlib/{}.py",
     "related": "arviz/plots/backends/bokeh/{}.py",
     "type": "base"
+  },
+  "arviz/data/io_*.py": {
+    "alternate": "arviz/tests/external_tests/test_data_{}.py",
+    "type": "converter"
+  },
+  "arviz/tests/external_tests/test_data_*.py": {
+    "alternate": "arviz/data/io_{}.py",
+    "type": "test"
   }
 }

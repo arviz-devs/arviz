@@ -12,6 +12,7 @@ from ...plot_utils import (
     calculate_point_estimate,
     format_sig_figs,
     round_num,
+    vectorized_to_hex,
 )
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
@@ -35,6 +36,8 @@ def plot_posterior(
     textsize,
     ref_val,
     rope,
+    ref_val_color,
+    rope_color,
     labeller,
     kwargs,
     backend_kwargs,
@@ -87,6 +90,8 @@ def plot_posterior(
             skipna=skipna,
             ref_val=ref_val,
             rope=rope,
+            ref_val_color=ref_val_color,
+            rope_color=rope_color,
             ax_labelsize=ax_labelsize,
             xt_labelsize=xt_labelsize,
             **kwargs,
@@ -119,6 +124,8 @@ def _plot_posterior_op(
     skipna,
     ref_val,
     rope,
+    ref_val_color,
+    rope_color,
     ax_labelsize,
     xt_labelsize,
     round_to=None,
@@ -158,15 +165,22 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        ax.axvline(val, ymin=0.05, ymax=0.75, color="C1", lw=linewidth, alpha=0.65)
+        ax.axvline(
+            val,
+            ymin=0.05,
+            ymax=0.75,
+            lw=linewidth,
+            alpha=0.65,
+            color=vectorized_to_hex(ref_val_color),
+        )
         ax.text(
             values.mean(),
             plot_height * 0.6,
             ref_in_posterior,
             size=ax_labelsize,
-            color="C1",
             weight="semibold",
             horizontalalignment="center",
+            color=vectorized_to_hex(ref_val_color),
         )
 
     def display_rope():
@@ -190,24 +204,33 @@ def _plot_posterior_op(
                 "iterable of length 2"
             )
         rope_text = [f"{val:.{format_sig_figs(val, round_to)}g}" for val in vals]
-
         ax.plot(
             vals,
             (plot_height * 0.02, plot_height * 0.02),
             lw=linewidth * 5,
-            color="C2",
             solid_capstyle="butt",
             zorder=0,
             alpha=0.7,
+            color=vectorized_to_hex(rope_color),
         )
-        text_props = {"size": ax_labelsize, "color": "C2"}
+        probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
+        ax.text(
+            values.mean(),
+            plot_height * 0.45,
+            f"{format_as_percent(probability_within_rope, 1)} in ROPE",
+            weight="semibold",
+            horizontalalignment="center",
+            size=ax_labelsize,
+            color=vectorized_to_hex(rope_color),
+        )
         ax.text(
             vals[0],
             plot_height * 0.2,
             rope_text[0],
             weight="semibold",
             horizontalalignment="right",
-            **text_props,
+            size=ax_labelsize,
+            color=vectorized_to_hex(rope_color),
         )
         ax.text(
             vals[1],
@@ -215,7 +238,8 @@ def _plot_posterior_op(
             rope_text[1],
             weight="semibold",
             horizontalalignment="left",
-            **text_props,
+            size=ax_labelsize,
+            color=vectorized_to_hex(rope_color),
         )
 
     def display_point_estimate():

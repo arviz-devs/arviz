@@ -54,6 +54,13 @@ class PyStanConverter:
         self.dims = dims
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
+        if (
+            self.log_likelihood is None
+            and self.posterior is not None
+            and "log_lik" in self.posterior.sim["pars_oi"]
+        ):
+            self.log_likelihood = ["log_lik"]
+
         import pystan  # pylint: disable=import-error
 
         self.pystan = pystan
@@ -312,6 +319,13 @@ class PyStan3Converter:
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
+
+        if (
+            self.log_likelihood is None
+            and self.posterior is not None
+            and "log_lik" in self.posterior.param_names
+        ):
+            self.log_likelihood = ["log_lik"]
 
         import stan  # pylint: disable=import-error
 
@@ -627,6 +641,14 @@ def get_sample_stats(fit, warmup=False):
     """Extract sample stats from PyStan fit."""
     dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
+    rename_dict = {
+        "divergent": "diverging",
+        "n_leapfrog": "n_steps",
+        "treedepth": "tree_depth",
+        "stepsize": "step_size",
+        "accept_stat": "acceptance_rate",
+    }
+
     ndraws_warmup = fit.sim["warmup2"]
     if max(ndraws_warmup) == 0:
         warmup = False
@@ -653,17 +675,16 @@ def get_sample_stats(fit, warmup=False):
         dtype = dtypes.get(key)
         values = values.astype(dtype)
         name = re.sub("__$", "", key)
-        name = "diverging" if name == "divergent" else name
+        name = rename_dict.get(name, name)
         data[name] = values
 
     data_warmup = OrderedDict()
     if warmup:
         for key, values in extraction_warmup.items():
             values = np.stack(values, axis=0)
-            dtype = dtypes.get(key)
-            values = values.astype(dtype)
+            values = values.astype(dtypes.get(key))
             name = re.sub("__$", "", key)
-            name = "diverging" if name == "divergent" else name
+            name = rename_dict.get(name, name)
             data_warmup[name] = values
 
     return data, data_warmup
@@ -760,6 +781,8 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
 
         # in future fix the correct number of draws if fit.save_warmup is True
         new_shape = (*fit.dims[fit.param_names.index(var)], -1, fit.num_chains)
+        if 0 in new_shape:
+            continue
         values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])
@@ -772,6 +795,14 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
 def get_sample_stats_stan3(fit, variables=None, ignore=None):
     """Extract sample stats from PyStan3 fit."""
     dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+
+    rename_dict = {
+        "divergent": "diverging",
+        "n_leapfrog": "n_steps",
+        "treedepth": "tree_depth",
+        "stepsize": "step_size",
+        "accept_stat": "acceptance_rate",
+    }
 
     if isinstance(variables, str):
         variables = [variables]
@@ -789,7 +820,7 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None):
         dtype = dtypes.get(key)
         values = values.astype(dtype)
         name = re.sub("__$", "", key)
-        name = "diverging" if name == "divergent" else name
+        name = rename_dict.get(name, name)
         data[name] = values
 
     return data

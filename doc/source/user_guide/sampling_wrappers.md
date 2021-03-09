@@ -1,3 +1,4 @@
+(wrapper_guide)=
 # Sampling wrappers
 Sampling wrappers allow ArviZ to call PPLs in order to perform a limited
 subset of their capabilities and calculate stats and diagnostics that require
