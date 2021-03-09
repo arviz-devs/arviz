@@ -890,6 +890,17 @@ def test_plot_ppc(models, kind, alpha, observed):
     assert axes
 
 
+def test_plot_ppc_textsize(models):
+    axes = plot_ppc(
+        models.model_1,
+        textsize=10,
+        random_seed=3,
+        backend="bokeh",
+        show=False,
+    )
+    assert axes
+
+
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
 def test_plot_ppc_multichain(kind, jitter):
