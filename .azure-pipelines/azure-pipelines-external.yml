@@ -13,15 +13,17 @@ jobs:
       Python_38_Latest:
         python.version: 3.8
         pystan.version: "latest"
+        cmdstanpy.version: "latest"
         pymc3.version: "latest"
         pyro.version: "latest"
         pytorch.version: "latest"
         emcee.version: "latest"
         name: "External latest"
 
-      Python_38_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
+      Python_38_Special_versions:
         python.version: 3.8
         pystan.version: "preview"
+        cmdstanpy.version: 0.9.67
         pymc3.version: "github"
         pyro.version: 1.2
         pytorch.version: 1.4
@@ -67,6 +69,12 @@ jobs:
           fi
       fi
 
+      if [ "$(cmdstanpy.version)" = "latest" ]; then
+          python -m pip --no-cache-dir install cmdstanpy
+      else
+          python -m pip --no-cache-dir install cmdstanpy=="$(cmdstanpy.version)"
+      fi
+
       if [ "$(pyro.version)" = "latest" ]; then
           python -m pip --no-cache-dir install pyro-ppl
       else
@@ -89,7 +97,7 @@ jobs:
           python -m pip --no-cache-dir install pymc3
       fi
 
-      grep -Ev '^pystan|^pyro|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
+      grep -Ev '^pystan|^cmdstanpy|^pyro|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
     displayName: 'Install packages'
 
   - script: |

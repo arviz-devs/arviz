@@ -90,6 +90,13 @@ class CmdStanConverter:
         self._parse_posterior()
         self._parse_prior()
 
+        if (
+            self.log_likelihood is None
+            and self.posterior_ is not None
+            and any(name.split(".")[0] == "log_lik" for name in self.posterior_columns)
+        ):
+            self.log_likelihood = ["log_lik"]
+
     @requires("posterior_")
     def _parse_posterior(self):
         """Read csv paths to list of ndarrays."""
@@ -871,7 +878,7 @@ def _unpack_ndarrays(arrays, columns, dtypes=None):
         for key, cols_locs in col_groups.items():
             ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
             dtype = dtypes.get(key, np.float64)
-            sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
+            sample[key] = np.zeros((chains, draws, *ndim), dtype=dtype)
             for col, loc in cols_locs:
                 for chain_id, arr in enumerate(arrays):
                     draw = arr[:, col]

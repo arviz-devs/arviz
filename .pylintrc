@@ -72,8 +72,6 @@ disable=missing-docstring,
         ungrouped-imports,
         not-an-iterable,
         no-member,
-        use-a-generator,
-        consider-using-generator,
         #TODO: Remove this once todos are done
         fixme
 

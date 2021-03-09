@@ -427,12 +427,6 @@ def _cov(data):
         raise ValueError("{} dimension arrays are not supported".format(data.ndim))
 
 
-@conditional_jit(nopython=True)
-def full(shape, x, dtype=None):
-    """Jitting numpy full."""
-    return np.full(shape, x, dtype=dtype)
-
-
 def flatten_inference_data_to_dict(
     data,
     var_names=None,
