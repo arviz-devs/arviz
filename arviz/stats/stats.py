@@ -143,10 +143,6 @@ def compare(
     waic : Compute the widely applicable information criterion.
 
     """
-    warnings.warn(
-        "The default method used to estimate the weights for each model,"
-        "has changed from BB-pseudo-BMA to stacking"
-    )
     names = list(dataset_dict.keys())
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if scale == "log":
