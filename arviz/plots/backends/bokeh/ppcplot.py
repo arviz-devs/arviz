@@ -1,5 +1,6 @@
 """Bokeh Posterior predictive plot."""
 import numpy as np
+from bokeh.models.annotations import Legend
 
 from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
@@ -86,6 +87,7 @@ def plot_ppc(
         var_name, sel, isel, obs_vals = obs_plotters[i]
         pp_var_name, _, _, pp_vals = pp_plotters[i]
         dtype = predictive_dataset[pp_var_name].dtype.kind
+        legend_it = []
 
         # flatten non-specified dimensions
         obs_vals = obs_vals.flatten()
@@ -111,14 +113,19 @@ def plot_ppc(
                     pp_xs.append(bin_edges)
 
             if dtype == "f":
-                ax_i.multi_line(pp_xs, pp_densities, **plot_kwargs)
+                multi_line = ax_i.multi_line(pp_xs, pp_densities, **plot_kwargs)
+                legend_it.append(("{} predictive".format(group.capitalize()), [multi_line]))
             else:
+                all_steps = []
                 for x_s, y_s in zip(pp_xs, pp_densities):
-                    ax_i.step(x_s, y_s, **plot_kwargs)
+                    step = ax_i.step(x_s, y_s, **plot_kwargs)
+                    all_steps.append(step)
+                legend_it.append(("{} predictive".format(group.capitalize()), all_steps))
 
             if observed:
+                label = "Observed"
                 if dtype == "f":
-                    plot_kde(
+                    _, glyph = plot_kde(
                         obs_vals,
                         plot_kwargs={"line_color": "black", "line_width": linewidth},
                         fill_kwargs={"alpha": 0},
@@ -126,20 +133,24 @@ def plot_ppc(
                         backend="bokeh",
                         backend_kwargs={},
                         show=False,
+                        return_glyph=True,
                     )
+                    legend_it.append((label, glyph))
                 else:
                     bins = get_bins(obs_vals)
                     _, hist, bin_edges = histogram(obs_vals, bins=bins)
                     hist = np.concatenate((hist[:1], hist))
-                    ax_i.step(
+                    step = ax_i.step(
                         bin_edges,
                         hist,
                         line_color="black",
                         line_width=linewidth,
                         mode="center",
                     )
+                    legend_it.append((label, [step]))
 
             if mean:
+                label = "{} predictive mean".format(group.capitalize())
                 if dtype == "f":
                     rep = len(pp_densities)
                     len_density = len(pp_densities[0])
@@ -150,19 +161,20 @@ def plot_ppc(
                     new_x -= (new_x[1] - new_x[0]) / 2
                     for irep in range(rep):
                         new_d[irep][bins[irep]] = pp_densities[irep]
-                    ax_i.line(
+                    line = ax_i.line(
                         new_x,
                         new_d.mean(0),
                         color=color,
                         line_dash="dashed",
                         line_width=linewidth,
                     )
+                    legend_it.append((label, [line]))
                 else:
                     vals = pp_vals.flatten()
                     bins = get_bins(vals)
                     _, hist, bin_edges = histogram(vals, bins=bins)
                     hist = np.concatenate((hist[:1], hist))
-                    ax_i.step(
+                    step = ax_i.step(
                         bin_edges,
                         hist,
                         line_color=color,
@@ -170,12 +182,14 @@ def plot_ppc(
                         line_dash="dashed",
                         mode="center",
                     )
+                    legend_it.append((label, [step]))
             ax_i.yaxis.major_tick_line_color = None
             ax_i.yaxis.minor_tick_line_color = None
             ax_i.yaxis.major_label_text_font_size = "0pt"
 
         elif kind == "cumulative":
             if observed:
+                label = "Observed"
                 if dtype == "f":
                     glyph = ax_i.line(
                         *_empirical_cdf(obs_vals),
@@ -183,39 +197,45 @@ def plot_ppc(
                         line_width=linewidth,
                     )
                     glyph.level = "overlay"
+                    legend_it.append((label, [glyph]))
 
                 else:
-                    ax_i.step(
+                    step = ax_i.step(
                         *_empirical_cdf(obs_vals),
                         line_color="black",
                         line_width=linewidth,
                         mode="center",
                     )
+                    legend_it.append((label, [step]))
             pp_densities = np.empty((2 * len(pp_sampled_vals), pp_sampled_vals[0].size))
             for idx, vals in enumerate(pp_sampled_vals):
                 vals = np.array([vals]).flatten()
                 pp_x, pp_density = _empirical_cdf(vals)
                 pp_densities[2 * idx] = pp_x
                 pp_densities[2 * idx + 1] = pp_density
-            ax_i.multi_line(
+            multi_line = ax_i.multi_line(
                 list(pp_densities[::2]),
                 list(pp_densities[1::2]),
                 line_alpha=alpha,
                 line_color=color,
                 line_width=linewidth,
             )
+            legend_it.append(("{} predictive".format(group.capitalize()), [multi_line]))
             if mean:
-                ax_i.line(
+                label = "{} predictive mean".format(group.capitalize())
+                line = ax_i.line(
                     *_empirical_cdf(pp_vals.flatten()),
                     color=color,
                     line_dash="dashed",
                     line_width=linewidth,
                 )
+                legend_it.append((label, [line]))
 
         elif kind == "scatter":
             if mean:
+                label = "{} predictive mean".format(group.capitalize())
                 if dtype == "f":
-                    plot_kde(
+                    _, glyph = plot_kde(
                         pp_vals.flatten(),
                         plot_kwargs={
                             "line_color": color,
@@ -226,13 +246,15 @@ def plot_ppc(
                         backend="bokeh",
                         backend_kwargs={},
                         show=False,
+                        return_glyph=True,
                     )
+                    legend_it.append((label, glyph))
                 else:
                     vals = pp_vals.flatten()
                     bins = get_bins(vals)
                     _, hist, bin_edges = histogram(vals, bins=bins)
                     hist = np.concatenate((hist[:1], hist))
-                    ax_i.step(
+                    step = ax_i.step(
                         bin_edges,
                         hist,
                         color=color,
@@ -240,6 +262,7 @@ def plot_ppc(
                         line_dash="dashed",
                         mode="center",
                     )
+                    legend_it.append((label, [step]))
 
             jitter_scale = 0.1
             y_rows = np.linspace(0, 0.1, num_pp_samples + 1)
@@ -247,6 +270,7 @@ def plot_ppc(
             scale_high = jitter_scale * jitter
 
             if observed:
+                label = "Observed"
                 obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
                 if jitter:
                     obs_yvals += np.random.uniform(
@@ -260,18 +284,34 @@ def plot_ppc(
                     line_alpha=alpha,
                 )
                 glyph.level = "overlay"
+                legend_it.append((label, [glyph]))
 
+            all_scatter = []
             for vals, y in zip(pp_sampled_vals, y_rows[1:]):
                 vals = np.ravel(vals)
                 yvals = np.full_like(vals, y, dtype=np.float64)
                 if jitter:
                     yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
-                ax_i.scatter(vals, yvals, fill_color=color, size=markersize, fill_alpha=alpha)
+                scatter = ax_i.scatter(
+                    vals, yvals, fill_color=color, size=markersize, fill_alpha=alpha
+                )
+                all_scatter.append(scatter)
 
+            legend_it.append(("{} predictive".format(group.capitalize()), all_scatter))
             ax_i.yaxis.major_tick_line_color = None
             ax_i.yaxis.minor_tick_line_color = None
             ax_i.yaxis.major_label_text_font_size = "0pt"
 
+        if legend:
+            legend = Legend(
+                items=legend_it,
+                location="top_left",
+                orientation="vertical",
+            )
+            ax_i.add_layout(legend)
+            if textsize is not None:
+                ax_i.legend.label_text_font_size = f"{textsize}pt"
+            ax_i.legend.click_policy = "hide"
         ax_i.xaxis.axis_label = labeller.make_pp_label(var_name, pp_var_name, sel, isel)
 
     show_layout(axes, show)
