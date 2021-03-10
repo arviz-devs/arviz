@@ -8,7 +8,7 @@ __all__ = [
     "DimCoordLabeller",
     "DimIdxLabeller",
     "MapLabeller",
-    "NoRepeatLabeller",
+    "NoVarLabeller",
     "NoModelLabeller",
 ]
 
@@ -186,20 +186,12 @@ class MapLabeller(BaseLabeller):
         return super().model_name_to_str(model_name_str)
 
 
-class NoRepeatLabeller(BaseLabeller):
+class NoVarLabeller(BaseLabeller):
     """WIP."""
-
-    def __init__(self):
-        """WIP."""
-        self.current_var = None
 
     def var_name_to_str(self, var_name):
         """WIP."""
-        current_var = getattr(self, "current_var", None)
-        if var_name == current_var:
-            return ""
-        self.current_var = var_name
-        return var_name
+        return None
 
 
 class NoModelLabeller(BaseLabeller):
