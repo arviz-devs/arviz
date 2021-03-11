@@ -15,7 +15,6 @@ data.metagroups              : {
     observed_vars: posterior_predictive, observed_data, prior_predictive
 }
 data.save_warmup             : false # save warmup iterations, one of "true", "false"
-data.pandas_float_precision  : high   # pandas csv_reader float_precision, one of "high", None, "round_trip"
 
 ### PLOT  ###
 # rcParams related with plotting functions
