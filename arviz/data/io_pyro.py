@@ -66,7 +66,9 @@ class PyroConverter:
         self.posterior = posterior
         self.prior = prior
         self.posterior_predictive = posterior_predictive
-        self.log_likelihood = rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.predictions = predictions
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
@@ -226,17 +228,31 @@ class PyroConverter:
             dims = {}
         else:
             dims = self.dims
-        return dict_to_dataset(self.observations, library=self.pyro, coords=self.coords, dims=dims, default_dims=[])
+        return dict_to_dataset(
+            self.observations, library=self.pyro, coords=self.coords, dims=dims, default_dims=[]
+        )
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
         """Convert constant_data to xarray."""
-        return dict_to_dataset(self.constant_data, library=self.pyro, coords=self.coords, dims=self.dims, default_dims=[])
+        return dict_to_dataset(
+            self.constant_data,
+            library=self.pyro,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+        )
 
     @requires("predictions_constant_data")
     def predictions_constant_data_to_xarray(self):
         """Convert predictions_constant_data to xarray."""
-        return dict_to_dataset(self.predictions_constant_data, library=self.pyro, coords=self.coords, dims=self.pred_dims, default_dims=[])
+        return dict_to_dataset(
+            self.predictions_constant_data,
+            library=self.pyro,
+            coords=self.coords,
+            dims=self.pred_dims,
+            default_dims=[],
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""

@@ -71,7 +71,9 @@ class NumPyroConverter:
         self.predictions = predictions
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
-        self.log_likelihood = rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.index_origin = rcParams["data.index_origin"] if index_origin is None else index_origin
         self.coords = coords
         self.dims = dims
