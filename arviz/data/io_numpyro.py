@@ -4,7 +4,8 @@ from typing import Callable, Optional
 
 import numpy as np
 
-from .. import utils, rcParams
+from .. import utils
+from ..rcparams import rcParams
 from .base import dict_to_dataset, requires
 from .inference_data import InferenceData
 

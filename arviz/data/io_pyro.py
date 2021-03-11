@@ -4,11 +4,11 @@ from typing import Callable, Optional
 import warnings
 
 import numpy as np
-import xarray as xr
 from packaging import version
 
-from .. import utils, rcParams
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .. import utils
+from ..rcparams import rcParams
+from .base import dict_to_dataset, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
