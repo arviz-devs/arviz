@@ -53,7 +53,7 @@ class CmdStanPyConverter:
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
         if hasattr(self.posterior, "stan_vars_cols"):
-            if self.log_likelihood and "log_lik" in self.posterior.stan_vars_cols:
+            if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
         else:
             if (

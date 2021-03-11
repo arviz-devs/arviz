@@ -57,7 +57,7 @@ class PyStanConverter:
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
         if (
-            self.log_likelihood
+            self.log_likelihood is True
             and self.posterior is not None
             and "log_lik" in self.posterior.sim["pars_oi"]
         ):
@@ -325,7 +325,7 @@ class PyStan3Converter:
         self.dims = dims
 
         if (
-            self.log_likelihood
+            self.log_likelihood is True
             and self.posterior is not None
             and "log_lik" in self.posterior.param_names
         ):
