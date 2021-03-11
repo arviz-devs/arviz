@@ -172,6 +172,11 @@ def plot_forest(
             plot_handler.legend(axes[0, idx], plotted_r_hat)
         idx += 1
 
+    all_plotters = list(plot_handler.plotters.values())
+    y_max = plot_handler.y_max() - all_plotters[-1].group_offset
+    if kind == "ridgeplot":  # space at the top
+        y_max += ridgeplot_overlap
+
     for i, ax_ in enumerate(axes.ravel()):
         if kind == "ridgeplot":
             ax_.xgrid.grid_line_color = None
@@ -186,24 +191,16 @@ def plot_forest(
         ax_.x_range = DataRange1d(bounds=backend_config["bounds_x_range"], min_interval=1)
         ax_.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=2)
 
+        ax_.y_range._property_values["start"] = -all_plotters[  # pylint: disable=protected-access
+            0
+        ].group_offset
+        ax_.y_range._property_values["end"] = y_max  # pylint: disable=protected-access
+
     labels, ticks = plot_handler.labels_and_ticks()
     ticks = [int(tick) if (tick).is_integer() else tick for tick in ticks]
 
     axes[0, 0].yaxis.ticker = FixedTicker(ticks=ticks)
     axes[0, 0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
-
-    all_plotters = list(plot_handler.plotters.values())
-    y_max = plot_handler.y_max() - all_plotters[-1].group_offset
-    if kind == "ridgeplot":  # space at the top
-        y_max += ridgeplot_overlap
-
-    for i in range(idx):
-        axes[0, i].y_range._property_values[
-            "start"
-        ] = -all_plotters[  # pylint: disable=protected-access
-            0
-        ].group_offset
-        axes[0, i].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
     if legend:
         plot_handler.legend(axes[0, 0], plotted)
