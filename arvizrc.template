@@ -7,6 +7,7 @@ data.index_origin            : 0     # index origin, must be either 0 or 1
 data.load                    : lazy  # Sets the default data loading mode.
                                      # "lazy" stands for xarray lazy loading,
                                      # "eager" loads all datasets into memory
+data.log_likelihood          : true   # save pointwise log likelihood values, one of "true", "false"
 data.metagroups              : {
     posterior_groups: posterior, posterior_predictive, sample_stats, log_likelihood
     prior_groups: prior, prior_predictive, sample_stats_prior
@@ -14,7 +15,7 @@ data.metagroups              : {
     latent_vars: posterior, prior
     observed_vars: posterior_predictive, observed_data, prior_predictive
 }
-data.save_warmup             : false # save warmup iterations, one of "true", "false"
+data.save_warmup             : false  # save warmup iterations, one of "true", "false"
 
 ### PLOT  ###
 # rcParams related with plotting functions
@@ -49,5 +50,6 @@ plot.matplotlib.show         : false       # call plt.show. One of "true", "fals
 # rcParams related with statistical and diagnostic functions
 stats.hdi_prob      : 0.94               # Friendly reminder of the arbitrary nature of commonly used values like 95%
 stats.information_criterion  : loo       # One of "loo", "waic"
+stats.ic_compare_method      : stacking  # One of "stacking", "bb-pseudo-bma", "pseudo-bma"
 stats.ic_pointwise           : false     # One of "true", "false"
 stats.ic_scale               : log       # One of "deviance", "log", "negative_log"

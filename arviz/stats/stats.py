@@ -64,13 +64,14 @@ def compare(
     method: str
         Method used to estimate the weights for each model. Available options are:
 
-        - 'stacking' : (default) stacking of predictive distributions.
+        - 'stacking' : stacking of predictive distributions.
         - 'BB-pseudo-BMA' : pseudo-Bayesian Model averaging using Akaike-type
           weighting. The weights are stabilized using the Bayesian bootstrap.
         - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
           weighting, without Bootstrap stabilization (not recommended).
 
         For more information read https://arxiv.org/abs/1704.02030
+        Defaults to ``rcParams["stats.ic_compare_method"]``.
     b_samples: int
         Number of samples taken by the Bayesian bootstrap estimation.
         Only useful when method = 'BB-pseudo-BMA'.
@@ -195,6 +196,7 @@ def compare(
     else:
         raise NotImplementedError(f"The information criterion {ic} is not supported.")
 
+    method = rcParams["stats.ic_compare_method"] if method is None else method
     if method.lower() not in ["stacking", "bb-pseudo-bma", "pseudo-bma"]:
         raise ValueError(f"The method {method}, to compute weights, is not supported.")
 
