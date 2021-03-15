@@ -214,7 +214,7 @@ def compare(
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        if len(dataset.log_likelihood.data_vars) > 1:
+        if len(dataset.log_likelihood.data_vars) > 1 and var_name is None:
             raise ValueError(
                 (
                     f"Dataset {name} has multiple variables in its log_likelihood.\n"
