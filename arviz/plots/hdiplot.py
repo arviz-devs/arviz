@@ -108,7 +108,7 @@ def plot_hdi(
         >>> hdi_data = az.hdi(y_data, input_core_dims=[["draw"]])
         >>> ax = az.plot_hdi(x_data, hdi_data=hdi_data[0], color="r", fill_kwargs={"alpha": .2})
         >>> az.plot_hdi(x_data, hdi_data=hdi_data[1], color="k", ax=ax, fill_kwargs={"alpha": .2})
-    
+
     ``plot_hdi`` can also be used with Inference Data objects. Here we use the posterior predictive to plot the HDI interval.
 
     .. plot::
