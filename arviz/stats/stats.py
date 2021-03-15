@@ -2,13 +2,14 @@
 """Statistical functions in ArviZ."""
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Dict
 
 import numpy as np
 import pandas as pd
 import scipy.stats as st
 import xarray as xr
 from scipy.optimize import minimize
+from typing_extensions import Literal
 
 from arviz import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
@@ -27,9 +28,6 @@ from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 from ..sel_utils import xarray_var_iter
 from ..labels import BaseLabeller
 
-if TYPE_CHECKING:
-    from typing_extensions import Literal
-
 
 __all__ = [
     "apply_test_function",
@@ -45,7 +43,14 @@ __all__ = [
 
 
 def compare(
-    dataset_dict, ic=None, method="stacking", b_samples=1000, alpha=1, seed=None, scale=None
+    dataset_dict: Optional[Dict[str, InferenceData]],
+    ic: Optional[Literal["loo", "waic"]] = None,
+    method: Literal["stacking", "BB-pseudo-BMA", "pseudo-MA"] = "stacking",
+    b_samples: int = 1000,
+    alpha: float = 1,
+    seed=None,
+    scale: Optional[Literal["log", "negative_log", "deviance"]] = None,
+    var_name: Optional[str] = None,
 ):
     r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
@@ -58,10 +63,10 @@ def compare(
     ----------
     dataset_dict: dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
-    ic: str
+    ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
-    method: str
+    method: str, optional
         Method used to estimate the weights for each model. Available options are:
 
         - 'stacking' : (default) stacking of predictive distributions.
@@ -71,18 +76,18 @@ def compare(
           weighting, without Bootstrap stabilization (not recommended).
 
         For more information read https://arxiv.org/abs/1704.02030
-    b_samples: int
+    b_samples: int, optional default = 1000
         Number of samples taken by the Bayesian bootstrap estimation.
         Only useful when method = 'BB-pseudo-BMA'.
-    alpha: float
+    alpha: float, optional
         The shape parameter in the Dirichlet distribution used for the Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
         on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
-    seed: int or np.random.RandomState instance
+    seed: int or np.random.RandomState instance, optional
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
         np.random state is used.
-    scale: str
+    scale: str, optional
         Output scale for IC. Available options are:
 
         - `log` : (default) log-score (after Vehtari et al. (2017))
@@ -91,6 +96,9 @@ def compare(
 
         A higher log-score (or a lower deviance) indicates a model with better predictive
         accuracy.
+    var_name: str, optional
+        If there is more than a single observed variable in the ``InferenceData``, which
+        should be used as the basis for comparison.
 
     Returns
     -------
@@ -206,7 +214,16 @@ def compare(
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        ics = ics.append([ic_func(dataset, pointwise=True, scale=scale)])
+        if len(dataset.log_likelihood.data_vars) > 1:
+            raise ValueError(
+                (
+                    f"Dataset {name} has multiple variables in its log_likelihood.\n"
+                    "In such cases, the var_name parameter is mandatory."
+                )
+            )
+        # Here is where the IC function is actually computed -- the rest of this
+        # function is argument processing and return value formatting
+        ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
