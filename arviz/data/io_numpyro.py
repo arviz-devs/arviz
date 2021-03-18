@@ -92,7 +92,11 @@ class NumPyroConverter:
                     for i, v in enumerate(tree_flatten_samples)
                 }
             self._samples = samples
-            self.nchains, self.ndraws, self.nthinning = posterior.num_chains, posterior.num_samples, posterior.thinning
+            self.nchains, self.ndraws, self.nthinning = (
+                posterior.num_chains,
+                posterior.num_samples,
+                posterior.thinning,
+            )
             self.ndraws //= self.nthinning
             self.model = self.posterior.sampler.model
             # model arguments and keyword arguments
