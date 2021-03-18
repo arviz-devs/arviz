@@ -227,3 +227,27 @@ class TestDataNumPyro:
         inference_data = from_numpyro(predictions=predictions, num_chains=chains)
         nchains = inference_data.predictions.dims["chain"]
         assert nchains == chains
+
+    def test_mcmc_with_thinning(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        x = np.random.normal(10, 3, size=100)
+
+        def model_with_thinning(x):
+            numpyro.sample(
+                "x",
+                dist.Normal(
+                    numpyro.sample("loc", dist.Uniform(0, 20)),
+                    numpyro.sample("scale", dist.Uniform(0, 20)),
+                ),
+                obs=x,
+            )
+
+        nuts_kernel = NUTS(model_with_thinning)
+        mcmc = MCMC(nuts_kernel, num_samples=10, num_warmup=2, thinning=2)
+        mcmc.run(PRNGKey(0), x=x)
+
+        inference_data = from_numpyro(mcmc)
+        assert not hasattr(inference_data.sample_stats, "log_likelihood")
