@@ -19,7 +19,6 @@ class NumPyroConverter:
     model = None  # type: Optional[Callable]
     nchains = None  # type: int
     ndraws = None  # type: int
-    nthinning = None  # type: int
 
     def __init__(
         self,
@@ -92,12 +91,10 @@ class NumPyroConverter:
                     for i, v in enumerate(tree_flatten_samples)
                 }
             self._samples = samples
-            self.nchains, self.ndraws, self.nthinning = (
+            self.nchains, self.ndraws = (
                 posterior.num_chains,
-                posterior.num_samples,
-                posterior.thinning,
+                posterior.num_samples // posterior.thinning,
             )
-            self.ndraws //= self.nthinning
             self.model = self.posterior.sampler.model
             # model arguments and keyword arguments
             self._args = self.posterior._args  # pylint: disable=protected-access
