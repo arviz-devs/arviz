@@ -8,7 +8,7 @@ import pytest
 from numpy.testing import assert_almost_equal
 
 from ...data import from_cmdstan, load_arviz_data
-from ...rcparams import rc_context, rcParams
+from ...rcparams import rcParams
 from ...stats import bfmi, ess, mcse, rhat
 from ...sel_utils import xarray_var_iter
 from ...stats.diagnostics import (
@@ -119,8 +119,7 @@ class TestDiagnostics:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "..", "saved_models")
         path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
-        with rc_context(rc={"data.pandas_float_precision": "high"}):
-            posterior = from_cmdstan(path)
+        posterior = from_cmdstan(path)
         reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_posterior.csv")
         reference = (
             pd.read_csv(reference_path, index_col=0, float_precision="high")
