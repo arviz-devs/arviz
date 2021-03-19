@@ -119,8 +119,7 @@ class TestDiagnostics:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "..", "saved_models")
         path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
-        with rc_context(rc={"data.pandas_float_precision": "high"}):
-            posterior = from_cmdstan(path)
+        posterior = from_cmdstan(path)
         reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_posterior.csv")
         reference = (
             pd.read_csv(reference_path, index_col=0, float_precision="high")
