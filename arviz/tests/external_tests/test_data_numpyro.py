@@ -235,7 +235,7 @@ class TestDataNumPyro:
 
         x = np.random.normal(10, 3, size=100)
 
-        def model_with_thinning(x):
+        def model(x):
             numpyro.sample(
                 "x",
                 dist.Normal(
@@ -245,7 +245,7 @@ class TestDataNumPyro:
                 obs=x,
             )
 
-        nuts_kernel = NUTS(model_with_thinning)
+        nuts_kernel = NUTS(model)
         mcmc = MCMC(nuts_kernel, num_samples=10, num_warmup=2, thinning=2)
         mcmc.run(PRNGKey(0), x=x)
 
