@@ -123,9 +123,9 @@ def _validate_probability(value):
 
 def _validate_boolean(value):
     """Validate value is a float."""
-    if value not in {True, False} or (
-        isinstance(value, str) and value.lower() in {"true", "false"}
-    ):
+    if isinstance(value, str):
+        value = value.lower()
+    if value not in {True, False, "true", "false"}:
         raise ValueError("Only boolean values are valid.")
     return value is True or value == "true"
 
