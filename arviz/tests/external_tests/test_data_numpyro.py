@@ -228,7 +228,8 @@ class TestDataNumPyro:
         nchains = inference_data.predictions.dims["chain"]
         assert nchains == chains
 
-    def test_mcmc_with_thinning(self):
+    @pytest.mark.parametrize("thin", [1, 2, 3, 5, 10])
+    def test_mcmc_with_thinning(self, thin):
         import numpyro
         import numpyro.distributions as dist
         from numpyro.infer import MCMC, NUTS
@@ -246,7 +247,7 @@ class TestDataNumPyro:
             )
 
         nuts_kernel = NUTS(model)
-        mcmc = MCMC(nuts_kernel, num_samples=10, num_warmup=2, thinning=2)
+        mcmc = MCMC(nuts_kernel, num_warmup=100, num_samples=400, num_chains=2, thinning=thin)
         mcmc.run(PRNGKey(0), x=x)
 
         inference_data = from_numpyro(mcmc)
