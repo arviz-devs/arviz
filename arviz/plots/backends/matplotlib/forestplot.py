@@ -238,6 +238,14 @@ class PlotHandler:
             labels, idxs = [], []
             for plotter in val:
                 sub_labels, sub_idxs, _, _ = plotter.labels_ticks_and_vals()
+                labels_to_idxs = defaultdict(list)
+                for label, idx in zip(sub_labels, sub_idxs):
+                    labels_to_idxs[label].append(idx)
+                sub_idxs = []
+                sub_labels = []
+                for label, all_idx in labels_to_idxs.items():
+                    sub_labels.append(label)
+                    sub_idxs.append(np.mean([j for j in all_idx]))
                 labels.append(sub_labels)
                 idxs.append(sub_idxs)
             return np.concatenate(labels), np.concatenate(idxs)
@@ -567,11 +575,12 @@ class VarHandler:
         for y, label, _, _, vals, color in self.iterator():
             y_ticks[label].append((y, vals, color))
         labels, ticks, vals, colors = [], [], [], []
-        for label, data in y_ticks.items():
-            labels.append(label)
-            ticks.append(np.mean([j[0] for j in data]))
-            vals.append(np.vstack([j[1] for j in data]))
-            colors.append(data[0][2])  # the colors are all the same
+        for label, all_data in y_ticks.items():
+            for data in all_data:
+                labels.append(label)
+                ticks.append(data[0])
+                vals.append(np.array(data[1]))
+                colors.append(data[2])  # the colors are all the same
         return labels, ticks, vals, colors
 
     def treeplot(self, qlist, hdi_prob):
