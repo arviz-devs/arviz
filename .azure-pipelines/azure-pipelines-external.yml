@@ -128,6 +128,14 @@ jobs:
     displayName: 'black'
 
   - script: |
+      python -m mypy .
+    displayName: 'mypy'
+
+  - script: |
+      python -m typing_copilot.cli tighten --error-if-can-tighten
+    displayName: 'typing_copilot'
+
+  - script: |
       pytest arviz/tests/helpers.py
     displayName: 'precompile models'
 
