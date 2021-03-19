@@ -1627,7 +1627,6 @@ def concat(
     inplace: "Literal[True]",
     reset_dim: bool = True,
 ) -> None:
-    """Overload definition, see below for docstring."""
     ...
 
 
@@ -1639,7 +1638,6 @@ def concat(
     inplace: "Literal[False]",
     reset_dim: bool = True,
 ) -> InferenceData:
-    """Overload definition, see below for docstring."""
     ...
 
 
@@ -1652,7 +1650,6 @@ def concat(
     inplace: "Literal[False]",
     reset_dim: bool = True,
 ) -> InferenceData:
-    """Overload definition, see below for docstring."""
     ...
 
 
@@ -1665,7 +1662,6 @@ def concat(
     inplace: "Literal[True]",
     reset_dim: bool = True,
 ) -> None:
-    """Overload definition, see below for docstring."""
     ...
 
 
@@ -1678,7 +1674,6 @@ def concat(
     inplace: bool = False,
     reset_dim: bool = True,
 ) -> Optional[InferenceData]:
-    """Overload definition, see below for docstring."""
     ...
 
 
