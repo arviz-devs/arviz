@@ -1626,7 +1626,7 @@ def concat(
     copy: bool = True,
     inplace: "Literal[True]",
     reset_dim: bool = True,
-) -> None: 
+) -> None:
     ...
 
 
