@@ -91,7 +91,10 @@ class NumPyroConverter:
                     for i, v in enumerate(tree_flatten_samples)
                 }
             self._samples = samples
-            self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
+            self.nchains, self.ndraws = (
+                posterior.num_chains,
+                posterior.num_samples // posterior.thinning,
+            )
             self.model = self.posterior.sampler.model
             # model arguments and keyword arguments
             self._args = self.posterior._args  # pylint: disable=protected-access
