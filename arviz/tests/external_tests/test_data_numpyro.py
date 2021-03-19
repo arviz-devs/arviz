@@ -251,4 +251,4 @@ class TestDataNumPyro:
         mcmc.run(PRNGKey(0), x=x)
 
         inference_data = from_numpyro(mcmc)
-        assert not hasattr(inference_data.sample_stats, "log_likelihood")
+        assert inference_data.posterior["loc"].shape == (2, 400 // thin)
