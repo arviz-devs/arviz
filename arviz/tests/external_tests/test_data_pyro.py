@@ -253,7 +253,7 @@ class TestDataPyro:
         test_dict = {
             "posterior": ["beta"],
             "sample_stats": ["diverging"],
-            "~log_likelihood": [],
+            "~log_likelihood": [""],
             "observed_data": ["y"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)

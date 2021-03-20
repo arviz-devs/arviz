@@ -257,7 +257,7 @@ class TestDataCmdStan:
                 "sample_stats": ["lp"],
                 "sample_stats_prior": ["lp"],
                 "posterior_predictive": ["x", "y", "Z"],
-                "~log_likelihood": [],
+                "~log_likelihood": [""],
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails

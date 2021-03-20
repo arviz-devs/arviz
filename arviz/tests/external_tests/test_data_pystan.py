@@ -200,7 +200,7 @@ class TestDataPyStan:
             "posterior": ["theta"],
             "prior": ["theta"],
             "sample_stats": ["diverging", "lp"],
-            "~log_likelihood": [],
+            "~log_likelihood": [""],
         }
         if pystan_version() == 2:
             test_dict.update(
@@ -213,7 +213,7 @@ class TestDataPyStan:
             "posterior": ["theta"],
             "prior": ["theta"],
             "sample_stats": ["diverging", "lp"],
-            "~log_likelihood": [],
+            "~log_likelihood": [""],
         }
         if pystan_version() == 2:
             test_dict.update(

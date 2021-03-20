@@ -383,7 +383,7 @@ class TestDataCmdStanPy:
         test_dict = {
             "posterior": ["eta", "mu", "theta"],
             "prior": ["theta"],
-            "~log_likelihood": [],
+            "~log_likelihood": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
@@ -434,10 +434,10 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
-            "~warmup_posterior": [],
-            "~warmup_predictions": [],
-            "~warmup_log_likelihood": [],
-            "~warmup_prior": [],
+            "~warmup_posterior": [""],
+            "~warmup_predictions": [""],
+            "~warmup_log_likelihood": [""],
+            "~warmup_prior": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_true)
         assert not fails
@@ -450,10 +450,10 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
-            "~warmup_posterior": [],
-            "~warmup_predictions": [],
-            "~warmup_log_likelihood": [],
-            "~warmup_prior": [],
+            "~warmup_posterior": [""],
+            "~warmup_predictions": [""],
+            "~warmup_log_likelihood": [""],
+            "~warmup_prior": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data_true_is_false)
         assert not fails
@@ -466,10 +466,10 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["y"],
             "prior": ["theta"],
-            "~warmup_posterior": [],
-            "~warmup_predictions": [],
-            "~warmup_log_likelihood": [],
-            "~warmup_prior": [],
+            "~warmup_posterior": [""],
+            "~warmup_predictions": [""],
+            "~warmup_log_likelihood": [""],
+            "~warmup_prior": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_false)
         assert not fails
