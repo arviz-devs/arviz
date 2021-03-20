@@ -123,6 +123,21 @@ class TestDataPyStan:
             save_warmup=pystan_version() == 2,
         )
 
+    def get_inference_data5(self, data):
+        """minimal input."""
+        return from_pystan(
+            posterior=data.obj,
+            posterior_predictive=None,
+            prior=data.obj,
+            prior_predictive=None,
+            coords=None,
+            dims=None,
+            posterior_model=data.model,
+            log_likelihood=False,
+            prior_model=data.model,
+            save_warmup=pystan_version() == 2,
+        )
+
     def test_sampler_stats(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         test_dict = {"sample_stats": ["diverging"]}
@@ -133,7 +148,8 @@ class TestDataPyStan:
         inference_data1 = self.get_inference_data(data, eight_schools_params)
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
-        inference_data4 = self.get_inference_data4(data)
+        inference_data4 = self.get_inference_data4(data, eight_schools_params)
+        inference_data5 = self.get_inference_data5(data, eight_schools_params)
         # inference_data 1
         test_dict = {
             "posterior": ["theta"],
@@ -184,12 +200,26 @@ class TestDataPyStan:
             "posterior": ["theta"],
             "prior": ["theta"],
             "sample_stats": ["diverging", "lp"],
+            "~log_likelihood": [],
         }
         if pystan_version() == 2:
             test_dict.update(
                 {"warmup_posterior": ["theta"], "warmup_sample_stats": ["diverging", "lp"]}
             )
         fails = check_multiple_attrs(test_dict, inference_data4)
+        assert not fails
+        # inference_data 5
+        test_dict = {
+            "posterior": ["theta"],
+            "prior": ["theta"],
+            "sample_stats": ["diverging", "lp"],
+            "~log_likelihood": [],
+        }
+        if pystan_version() == 2:
+            test_dict.update(
+                {"warmup_posterior": ["theta"], "warmup_sample_stats": ["diverging", "lp"]}
+            )
+        fails = check_multiple_attrs(test_dict, inference_data5)
         assert not fails
 
     def test_invalid_fit(self, data):

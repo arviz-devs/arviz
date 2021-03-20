@@ -57,11 +57,14 @@ class CmdStanPyConverter:
                 self.log_likelihood = ["log_lik"]
         else:
             if (
-                self.log_likelihood
+                self.log_likelihood is True
                 and self.posterior is not None
                 and any(name.split("[")[0] == "log_lik" for name in self.posterior.column_names)
             ):
                 self.log_likelihood = ["log_lik"]
+
+        if self.log_likelihood is False:
+            self.log_likelihood = None
 
         import cmdstanpy  # pylint: disable=import-error
 
