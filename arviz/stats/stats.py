@@ -149,12 +149,6 @@ def compare(
     --------
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
-
-    Notes
-    -----
-    If the `log_likelihood` group is not present in the input datasets, ArviZ will attempt
-    to compute it.
-
     """
     names = list(dataset_dict.keys())
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
