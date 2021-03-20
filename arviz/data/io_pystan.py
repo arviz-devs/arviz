@@ -62,6 +62,8 @@ class PyStanConverter:
             and "log_lik" in self.posterior.sim["pars_oi"]
         ):
             self.log_likelihood = ["log_lik"]
+        elif self.log_likelihood is False:
+            self.log_likelihood = None
 
         import pystan  # pylint: disable=import-error
 
