@@ -136,6 +136,18 @@ jobs:
     displayName: 'typing_copilot'
 
   - script: |
+      python -m typing_copilot.cli tighten
+    condition: failed()
+    displayName: 'update mypy.ini with typing_copilot'
+
+  - task: PublishBuildArtifacts@1
+    condition: failed()
+    inputs:
+      pathtoPublish: 'mypy.ini'
+      artifactName: 'mypy.ini'
+    displayName: 'Upload updated mypy.ini'
+
+  - script: |
       pytest arviz/tests/helpers.py
     displayName: 'precompile models'
 
