@@ -246,7 +246,7 @@ class TestDataCmdStan:
                 prior_predictive=path,
                 observed_data=None,
                 observed_data_var=None,
-                log_likelihood=Fales,
+                log_likelihood=False,
                 coords={"rand": np.arange(3)},
                 dims={"x": ["rand"]},
             )
@@ -257,7 +257,8 @@ class TestDataCmdStan:
                 "sample_stats": ["lp"],
                 "sample_stats_prior": ["lp"],
                 "posterior_predictive": ["x", "y", "Z"],
-                "~log_likelihood": [],
+                "~log_likelihood": []
+                ,
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
