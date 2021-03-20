@@ -150,6 +150,11 @@ def compare(
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
 
+    Notes
+    -----
+    If the `log_likelihood` group is not present in the input datasets, ArviZ will attempt
+    to compute it.
+
     """
     names = list(dataset_dict.keys())
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
@@ -214,16 +219,14 @@ def compare(
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        if len(dataset.log_likelihood.data_vars) > 1 and var_name is None:
-            raise ValueError(
-                (
-                    f"Dataset {name} has multiple variables in its log_likelihood.\n"
-                    "In such cases, the var_name parameter is mandatory."
-                )
-            )
-        # Here is where the IC function is actually computed -- the rest of this
-        # function is argument processing and return value formatting
-        ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
+        try:
+            # Here is where the IC function is actually computed -- the rest of this
+            # function is argument processing and return value formatting
+            ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
+        except Exception as e:
+            raise e.__class__(
+                f"Encountered error trying to compute {ic} from model {name}: {e}"
+            ) from e
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
