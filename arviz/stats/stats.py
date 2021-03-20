@@ -2,7 +2,7 @@
 """Statistical functions in ArviZ."""
 import warnings
 from copy import deepcopy
-from typing import List, Optional, Tuple, Union, Dict
+from typing import List, Optional, Tuple, Union, Mapping
 
 import numpy as np
 import pandas as pd
@@ -43,7 +43,7 @@ __all__ = [
 
 
 def compare(
-    dataset_dict: Optional[Dict[str, InferenceData]],
+    dataset_dict: Mapping[str, InferenceData],
     ic: Optional[Literal["loo", "waic"]] = None,
     method: Literal["stacking", "BB-pseudo-BMA", "pseudo-MA"] = "stacking",
     b_samples: int = 1000,
