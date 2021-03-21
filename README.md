@@ -1,5 +1,6 @@
 <img src="https://arviz-devs.github.io/arviz/_static/logo.png" height=100></img>
 
+[![PyPI version](https://badge.fury.io/py/arviz.svg)](https://badge.fury.io/py/arviz)
 [![Azure Build Status](https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=main)](https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=main)
 [![codecov](https://codecov.io/gh/arviz-devs/arviz/branch/main/graph/badge.svg)](https://codecov.io/gh/arviz-devs/arviz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
