@@ -1,9 +1,13 @@
 ArviZ: Exploratory analysis of Bayesian models
 ==============================================
+|pypi|
 |Build Status|
 |Coverage Status|
 |Zenodo|
 |NumFocus|
+
+.. |pypi| image:: https://badge.fury.io/py/arviz.svg
+    :target: https://badge.fury.io/py/arviz
 
 .. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01143/status.svg
    :target: https://doi.org/10.21105/joss.01143
@@ -13,6 +17,12 @@ ArviZ: Exploratory analysis of Bayesian models
 
 .. |NumFocus| image:: https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&colorA=E1523D&colorB=007D8A
    :target: https://www.numfocus.org/
+
+.. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=main
+   :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=main
+
+.. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/main/graph/badge.svg
+  :target: https://codecov.io/gh/arviz-devs/arviz
 
 .. raw:: html
 
@@ -51,7 +61,7 @@ ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray dataset
 `PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
 `Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_,
 `emcee <https://emcee.readthedocs.io/en/stable/>`_, and
-`TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for PyMC4, Edward2, and Edward are on the roadmap.
+`TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for Edward2 is on the roadmap.
 
 A Julia wrapper, `ArviZ.jl <https://arviz-devs.github.io/ArviZ.jl/stable/>`_ is
 also available. It provides built-in support for
@@ -196,7 +206,4 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
     </div>
 
 
-.. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=main
-   :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=main
-.. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/main/graph/badge.svg
-  :target: https://codecov.io/gh/arviz-devs/arviz
+
