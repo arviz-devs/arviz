@@ -139,6 +139,16 @@ class TestDataPyMC3:
             assert ivalues.shape[0] == 1  # one chain in predictions
             assert np.all(np.isclose(ivalues[0], values))
 
+    def test_from_pymc_trace_inference_data(self):
+        # check if error is raised successfully after passing InferenceData as trace
+        with pm.Model():
+            p = pm.Uniform("p", 0, 1)
+            pm.Binomial("w", p=p, n=2, observed=1)
+            trace = pm.sample(100, chains=2, return_inferencedata=True)
+            assert isinstance(trace, InferenceData)
+            with pytest.raises(ValueError):
+                from_pymc3(trace=trace)
+
     def test_from_pymc_predictions_new(self, data, eight_schools_params):
         # check creating new
         inference_data, posterior_predictive = self.make_predictions_inference_data(
