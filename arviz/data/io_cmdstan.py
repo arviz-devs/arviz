@@ -10,7 +10,7 @@ import numpy as np
 
 from .. import utils
 from ..rcparams import rcParams
-from .base import CoordSpec, DimSpec, dict_to_dataset, requires
+from .base import CoordSpec, DimSpec, dict_to_dataset, infer_stan_dtypes, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -83,9 +83,19 @@ class CmdStanConverter:
         self.index_origin = index_origin
 
         if dtypes is None:
-            self.dtypes = {}
-        else:
-            self.dtypes = dtypes
+            dtypes = {}
+        elif isinstance(dtypes, str):
+            dtypes_path = Path(dtypes)
+            if dtypes_path.exists():
+                with dtypes_path.open("r") as fh:
+                    model_code = fh.read()
+            else:
+                model_code = dtypes
+
+            dtypes = infer_stan_dtypes(model_code)
+
+        self.dtypes = dtypes
+
         # populate posterior and sample_stats
         self._parse_posterior()
         self._parse_prior()
@@ -963,8 +973,9 @@ def from_cmdstan(
     save_warmup : bool
         Save warmup iterations into InferenceData object, if found in the input files.
         If not defined, use default defined by the rcParams.
-    dtypes : dict
+    dtypes : dict or str
         A dictionary containing dtype information (int, float) for parameters.
+        If input is a string, it is assumed to be a model code or path to model code file.
 
     Returns
     -------

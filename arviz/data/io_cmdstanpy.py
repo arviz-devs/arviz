@@ -3,11 +3,12 @@ import logging
 import re
 from collections import defaultdict
 from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 
 from ..rcparams import rcParams
-from .base import dict_to_dataset, make_attrs, requires
+from .base import dict_to_dataset, infer_stan_dtypes, make_attrs, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class CmdStanPyConverter:
         coords=None,
         dims=None,
         save_warmup=None,
+        dtypes=None,
     ):
         self.posterior = posterior  # CmdStanPy CmdStanMCMC object
         self.posterior_predictive = posterior_predictive
@@ -51,6 +53,20 @@ class CmdStanPyConverter:
         self.dims = dims
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
+
+        if dtypes is None:
+            dtypes = {}
+        elif isinstance(dtypes, str):
+            dtypes_path = Path(dtypes)
+            if dtypes_path.exists():
+                with dtypes_path.open("r") as fh:
+                    model_code = fh.read()
+            else:
+                model_code = dtypes
+
+            dtypes = infer_stan_dtypes(model_code)
+
+        self.dtypes = dtypes
 
         if hasattr(self.posterior, "stan_vars_cols"):
             if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
@@ -139,7 +155,12 @@ class CmdStanPyConverter:
         if not hasattr(fit, "sampler_vars_cols"):
             return self.sample_stats_to_xarray_pre_v_0_9_68(fit)
 
-        dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+        dtypes = {
+            "divergent__": bool,
+            "n_leapfrog__": np.int64,
+            "treedepth__": np.int64,
+            **self.dtypes,
+        }
         items = list(fit.sampler_vars_cols.keys())
         rename_dict = {
             "divergent": "diverging",
@@ -562,7 +583,7 @@ def _filter_columns(columns, spec):
     return [col for col in columns if col.split("[")[0].split(".")[0] in spec]
 
 
-def _unpack_fit(fit, items, save_warmup):
+def _unpack_fit(fit, items, save_warmup, dtypes):
     """Transform fit to dictionary containing ndarrays.
 
     Parameters
@@ -570,6 +591,7 @@ def _unpack_fit(fit, items, save_warmup):
     data: cmdstanpy.CmdStanMCMC
     items: list
     save_warmup: bool
+    dtypes: dict
 
     Returns
     -------
@@ -603,6 +625,7 @@ def _unpack_fit(fit, items, save_warmup):
             raw_draws = draws[..., col_idxs[0]]
         else:
             raise ValueError("fit data, unknown variable: {}".format(item))
+        raw_draws = raw_draws.astype(dtypes.get(item))
         if save_warmup:
             sample_warmup[item] = raw_draws[:, :num_warmup, ...]
             sample[item] = raw_draws[:, num_warmup:, ...]
@@ -693,9 +716,11 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
                 # location to insert extracted array
                 shape_loc = tuple([Ellipsis] + [j - 1 for j in shape_loc])
                 # reorder draw, chain -> chain, draw and insert to ndarray
-                sample[key][shape_loc] = np.swapaxes(data[..., i], 0, 1)
+                sample[key][shape_loc] = np.swapaxes(data[..., i], 0, 1).astype(dtypes.get(key))
                 if save_warmup:
-                    sample_warmup[key][shape_loc] = np.swapaxes(data_warmup[..., i], 0, 1)
+                    sample_warmup[key][shape_loc] = np.swapaxes(data_warmup[..., i], 0, 1).astype(
+                        dtypes.get(key)
+                    )
     return sample, sample_warmup
 
 
@@ -714,6 +739,7 @@ def from_cmdstanpy(
     coords=None,
     dims=None,
     save_warmup=None,
+    dtypes=None,
 ):
     """Convert CmdStanPy data into an InferenceData object.
 
@@ -755,6 +781,9 @@ def from_cmdstanpy(
     save_warmup : bool
         Save warmup iterations into InferenceData object, if found in the input files.
         If not defined, use default defined by the rcParams.
+    dtypes: dict or str
+        A dictionary containing dtype information (int, float) for parameters.
+        If input is a string, it is assumed to be a model code or path to model code file.
 
     Returns
     -------
@@ -774,4 +803,5 @@ def from_cmdstanpy(
         coords=coords,
         dims=dims,
         save_warmup=save_warmup,
+        dtypes=dtypes,
     ).to_inference_data()

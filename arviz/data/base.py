@@ -440,7 +440,7 @@ def _make_json_serializable(data: dict) -> dict:
     return ret
 
 
-def infer_stan_dtype(stan_code):
+def infer_stan_dtypes(stan_code):
     """Infer Stan integer variables from generated quantities block."""
     # Remove old deprecated comments
     stan_code = "\n".join(
