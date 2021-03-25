@@ -117,6 +117,7 @@ class CmdStanPyConverter:
             self.posterior,
             items,
             self.save_warmup,
+            self.dtypes,
         )
 
         # copy dims and coords  - Mitzi question:  why???
@@ -229,6 +230,7 @@ class CmdStanPyConverter:
                 fit.column_names,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
 
         return (
@@ -269,6 +271,7 @@ class CmdStanPyConverter:
                 columns,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
 
         return (
@@ -309,6 +312,7 @@ class CmdStanPyConverter:
                 columns,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
         if isinstance(self.log_likelihood, dict):
             data = {obs_name: data[lik_name] for obs_name, lik_name in self.log_likelihood.items()}
@@ -365,6 +369,7 @@ class CmdStanPyConverter:
                 columns,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
 
         return (
@@ -503,6 +508,7 @@ class CmdStanPyConverter:
             columns,
             valid_cols,
             self.save_warmup,
+            self.dtypes,
         )
 
         return (
@@ -532,6 +538,7 @@ class CmdStanPyConverter:
             columns,
             valid_cols,
             self.save_warmup,
+            self.dtypes,
         )
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")

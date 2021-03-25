@@ -1,4 +1,4 @@
-# pylint: ignore=too-many-lines
+# pylint: disable=too-many-lines
 """CmdStan-specific conversion code."""
 import logging
 import os
