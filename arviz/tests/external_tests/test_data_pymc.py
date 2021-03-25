@@ -10,6 +10,7 @@ from numpy import ma
 
 from arviz import (  # pylint: disable=wrong-import-position
     InferenceData,
+    from_dict,
     from_pymc3,
     from_pymc3_predictions,
 )
@@ -107,7 +108,7 @@ class TestDataPyMC3:
                 )
 
     def test_from_pymc_predictions(self, data, eight_schools_params):
-        "Test that we can add predictions to a previously-existing InferenceData."
+        """Test that we can add predictions to a previously-existing InferenceData."""
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
             "sample_stats": ["diverging", "lp"],
@@ -140,14 +141,13 @@ class TestDataPyMC3:
             assert np.all(np.isclose(ivalues[0], values))
 
     def test_from_pymc_trace_inference_data(self):
-        # check if error is raised successfully after passing InferenceData as trace
-        with pm.Model():
-            p = pm.Uniform("p", 0, 1)
-            pm.Binomial("w", p=p, n=2, observed=1)
-            trace = pm.sample(100, chains=2, return_inferencedata=True)
-            assert isinstance(trace, InferenceData)
-            with pytest.raises(ValueError):
-                from_pymc3(trace=trace)
+        """Check if the error is raised successfully after passing InferenceData as trace"""
+        idata = from_dict(
+            posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+        )
+        assert isinstance(idata, InferenceData)
+        with pytest.raises(ValueError):
+            from_pymc3(trace=idata, model=pm.Model())
 
     def test_from_pymc_predictions_new(self, data, eight_schools_params):
         # check creating new
