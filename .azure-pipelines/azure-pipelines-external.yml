@@ -22,7 +22,7 @@ jobs:
 
       Python_38_Special_versions:
         python.version: 3.8
-        pystan.version: 2.19.1
+        pystan.version: 2.19.1.1
         cmdstanpy.version: 0.9.67
         pymc3.version: "github"
         pyro.version: 1.2
