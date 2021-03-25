@@ -438,3 +438,46 @@ def _make_json_serializable(data: dict) -> dict:
                 f"Value associated with variable `{type(value)}` is not JSON serializable."
             )
     return ret
+
+
+def infer_stan_dtype(stan_code):
+    """Infer Stan integer variables from generated quantities block."""
+    # Remove old deprecated comments
+    stan_code = "\n".join(
+        line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines()
+    )
+    pattern_remove_comments = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE
+    )
+    stan_code = re.sub(pattern_remove_comments, "", stan_code)
+
+    # Check generated quantities
+    if "generated quantities" not in stan_code:
+        return {}
+
+    # Extract generated quantities block
+    gen_quantities_location = stan_code.index("generated quantities")
+    block_start = gen_quantities_location + stan_code[gen_quantities_location:].index("{")
+
+    curly_bracket_count = 0
+    for block_end, char in enumerate(stan_code[block_start:], block_start + 1):
+        if char == "{":
+            curly_bracket_count += 1
+        elif char == "}":
+            curly_bracket_count -= 1
+
+            if curly_bracket_count == 0:
+                break
+
+    stan_code = stan_code[block_start:block_end]
+
+    stan_integer = r"int"
+    stan_limits = r"(?:\<[^\>]+\>)*"  # ignore group: 0 or more <....>
+    stan_param = r"([^;=\s\[]+)"  # capture group: ends= ";", "=", "[" or whitespace
+    stan_ws = r"\s*"  # 0 or more whitespace
+    stan_ws_one = r"\s+"  # 1 or more whitespace
+    pattern_int = re.compile(
+        "".join((stan_integer, stan_ws_one, stan_limits, stan_ws, stan_param)), re.IGNORECASE
+    )
+    dtypes = {key.strip(): "int" for key in re.findall(pattern_int, stan_code_gen)}
+    return dtypes

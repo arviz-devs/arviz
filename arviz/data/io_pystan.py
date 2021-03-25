@@ -10,7 +10,7 @@ import xarray as xr
 
 from .. import _log
 from ..rcparams import rcParams
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .base import dict_to_dataset, generate_dims_coords, infer_stan_dtype, make_attrs, requires
 from .inference_data import InferenceData
 
 try:
@@ -859,30 +859,14 @@ def infer_dtypes(fit, model=None):
     Function strips out generated quantities block and searchs for `int`
     dtypes after stripping out comments inside the block.
     """
-    pattern_remove_comments = re.compile(
-        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE
-    )
-    stan_integer = r"int"
-    stan_limits = r"(?:\<[^\>]+\>)*"  # ignore group: 0 or more <....>
-    stan_param = r"([^;=\s\[]+)"  # capture group: ends= ";", "=", "[" or whitespace
-    stan_ws = r"\s*"  # 0 or more whitespace
-    pattern_int = re.compile(
-        "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)), re.IGNORECASE
-    )
     if model is None:
         stan_code = fit.get_stancode()
         model_pars = fit.model_pars
     else:
         stan_code = model.program_code
         model_pars = fit.param_names
-    # remove deprecated comments
-    stan_code = "\n".join(
-        line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines()
-    )
-    stan_code = re.sub(pattern_remove_comments, "", stan_code)
-    stan_code = stan_code.split("generated quantities")[-1]
-    dtypes = re.findall(pattern_int, stan_code)
-    dtypes = {item.strip(): "int" for item in dtypes if item.strip() in model_pars}
+
+    dtypes = {key: item for key, item in infer_stan_dtype(stan_code).items() if key in model_pars}
     return dtypes
 
 
