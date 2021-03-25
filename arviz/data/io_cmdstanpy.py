@@ -59,8 +59,8 @@ class CmdStanPyConverter:
         elif isinstance(dtypes, str):
             dtypes_path = Path(dtypes)
             if dtypes_path.exists():
-                with dtypes_path.open("r") as fh:
-                    model_code = fh.read()
+                with dtypes_path.open("r") as f_obj:
+                    model_code = f_obj.read()
             else:
                 model_code = dtypes
 
@@ -174,6 +174,7 @@ class CmdStanPyConverter:
             fit,
             items,
             self.save_warmup,
+            self.dtypes,
         )
         for item in items:
             name = re.sub("__$", "", item)
@@ -219,6 +220,7 @@ class CmdStanPyConverter:
                 fit,
                 predictive,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             valid_cols = _filter_columns(fit.column_names, predictive)
@@ -257,6 +259,7 @@ class CmdStanPyConverter:
                 self.posterior,
                 predictions,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             columns = self.posterior.column_names
@@ -296,6 +299,7 @@ class CmdStanPyConverter:
                 self.posterior,
                 log_likelihood,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             columns = self.posterior.column_names
@@ -346,6 +350,7 @@ class CmdStanPyConverter:
                 self.prior,
                 items,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             columns = self.prior.column_names
@@ -635,7 +640,7 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
     return sample, sample_warmup
 
 
-def _unpack_frame(fit, columns, valid_cols, save_warmup):
+def _unpack_frame(fit, columns, valid_cols, save_warmup, dtypes):
     """Transform fit to dictionary containing ndarrays.
 
     Called when fit object created by cmdstanpy version < 0.9.68
@@ -646,6 +651,7 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
     columns: list
     valid_cols: list
     save_warmup: bool
+    dtypes: dict
 
     Returns
     -------
@@ -708,9 +714,9 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
         if shape_location is None:
             # reorder draw, chain -> chain, draw
             (i,) = column_locs[key]
-            sample[key] = np.swapaxes(data[..., i], 0, 1)
+            sample[key] = np.swapaxes(data[..., i], 0, 1).astype(dtypes.get(key))
             if save_warmup:
-                sample_warmup[key] = np.swapaxes(data_warmup[..., i], 0, 1)
+                sample_warmup[key] = np.swapaxes(data_warmup[..., i], 0, 1).astype(dtypes.get(key))
         else:
             for i, shape_loc in zip(column_locs[key], shape_location):
                 # location to insert extracted array

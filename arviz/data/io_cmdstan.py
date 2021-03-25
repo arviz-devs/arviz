@@ -1,9 +1,11 @@
+# pylint: ignore=too-many-lines
 """CmdStan-specific conversion code."""
 import logging
 import os
 import re
 from collections import defaultdict
 from glob import glob
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -87,8 +89,8 @@ class CmdStanConverter:
         elif isinstance(dtypes, str):
             dtypes_path = Path(dtypes)
             if dtypes_path.exists():
-                with dtypes_path.open("r") as fh:
-                    model_code = fh.read()
+                with dtypes_path.open("r") as f_obj:
+                    model_code = f_obj.read()
             else:
                 model_code = dtypes
 

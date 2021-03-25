@@ -1,6 +1,7 @@
 """Low level converters usually used by other functions."""
 import datetime
 import functools
+import re
 import warnings
 from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
@@ -460,6 +461,7 @@ def infer_stan_dtypes(stan_code):
     block_start = gen_quantities_location + stan_code[gen_quantities_location:].index("{")
 
     curly_bracket_count = 0
+    block_end = None
     for block_end, char in enumerate(stan_code[block_start:], block_start + 1):
         if char == "{":
             curly_bracket_count += 1
@@ -479,5 +481,5 @@ def infer_stan_dtypes(stan_code):
     pattern_int = re.compile(
         "".join((stan_integer, stan_ws_one, stan_limits, stan_ws, stan_param)), re.IGNORECASE
     )
-    dtypes = {key.strip(): "int" for key in re.findall(pattern_int, stan_code_gen)}
+    dtypes = {key.strip(): "int" for key in re.findall(pattern_int, stan_code)}
     return dtypes
