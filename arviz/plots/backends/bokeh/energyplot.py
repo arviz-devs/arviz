@@ -45,7 +45,7 @@ def plot_energy(
     fill_kwargs = {} if fill_kwargs is None else fill_kwargs
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("line_width", line_width)
-    if kind=="hist":
+    if kind == "hist":
         legend = False
 
     if ax is None:
@@ -103,7 +103,7 @@ def plot_energy(
                 )
             )
 
-    elif kind=="hist":
+    elif kind == "hist":
         hist_kwargs = plot_kwargs.copy()
         hist_kwargs.update(**fill_kwargs)
 

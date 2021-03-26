@@ -96,7 +96,7 @@ def plot_energy(
         warnings.warn(
             "kind histogram will be deprecated in a future release. Use `hist` "
             "or set rcParam `plot.density_kind` to `hist`",
-            FutureWarning
+            FutureWarning,
         )
         kind = "hist"
 
