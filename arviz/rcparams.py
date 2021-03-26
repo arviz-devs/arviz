@@ -232,6 +232,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.log_likelihood": (True, _validate_boolean),
     "data.save_warmup": (False, _validate_boolean),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.density_kind": ("kde", _make_validate_choice({"kde", "hist"})),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",

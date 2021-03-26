@@ -26,7 +26,7 @@ def plot_posterior(
     ref_val=None,
     rope_color="C2",
     ref_val_color="C1",
-    kind="kde",
+    kind=None,
     bw="default",
     circular=False,
     bins=None,
@@ -92,7 +92,7 @@ def plot_posterior(
         Specifies the color of the displayed percentage
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
-        a histogram is always used.
+        a histogram is always used. Defaults to rcParam ``plot.density_kind``
     bw: float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
@@ -234,6 +234,9 @@ def plot_posterior(
         point_estimate = rcParams["plot.point_estimate"]
     elif point_estimate not in {"mean", "median", "mode", None}:
         raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
+
+    if kind is None:
+        kind = rcParams["plot.density_kind"]
 
     plotters = filter_plotters_list(
         list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
