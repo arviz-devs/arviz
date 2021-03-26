@@ -63,7 +63,7 @@ class CmdStanPyConverter:
             ):
                 self.log_likelihood = ["log_lik"]
 
-        if self.log_likelihood is False:
+        if isinstance(self.log_likelihood, bool):
             self.log_likelihood = None
 
         import cmdstanpy  # pylint: disable=import-error
