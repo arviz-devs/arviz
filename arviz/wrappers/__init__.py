@@ -1,5 +1,5 @@
 """Sampling wrappers."""
 from .base import SamplingWrapper
-from .wrap_pystan import PyStan3SamplingWrapper, PyStanSamplingWrapper
+from .wrap_stan import PyStan2SamplingWrapper, PyStanSamplingWrapper
 
-__all__ = ["SamplingWrapper", "PyStan3SamplingWrapper", "PyStanSamplingWrapper"]
+__all__ = ["SamplingWrapper", "PyStan2SamplingWrapper", "PyStanSamplingWrapper"]
