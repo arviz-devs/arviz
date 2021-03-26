@@ -17,7 +17,7 @@ See also the {ref}`label_guide`
   DimIdxLabeller
   MapLabeller
   NoModelLabeller
-  NoRepeatLabeller
+  NoVarLabeller
 ```
 
 ## Labeling utils
