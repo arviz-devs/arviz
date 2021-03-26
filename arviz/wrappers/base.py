@@ -13,7 +13,7 @@ class SamplingWrapper:
     performed from ArviZ.
 
     For usage examples see user guide pages on :ref:`wrapper_guide`.See other
-    SamplingWrapper classes at :ref:`wrappers api section <wrappers_api>`. 
+    SamplingWrapper classes at :ref:`wrappers api section <wrappers_api>`.
 
     Parameters
     ----------
