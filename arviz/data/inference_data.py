@@ -339,14 +339,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     else:
                         groups[group] = data
             return InferenceData(**groups)
-        except OSError as e:
+        except OSError as e:  # pylint: disable=invalid-name
             if e.errno == -101:
                 raise type(e)(
                     str(e)
                     + (
-                        " while reading a NetCDF file. This is probably an error in HDF5, which happens because your OS"
-                        " does not support HDF5 file locking.  See "
-                        "https://stackoverflow.com/questions/49317927/errno-101-netcdf-hdf-error-when-opening-netcdf-file#49317928"
+                        " while reading a NetCDF file. This is probably an error in HDF5, "
+                        "which happens because your OS does not support HDF5 file locking.  See "
+                        "https://stackoverflow.com/questions/49317927/"
+                        "errno-101-netcdf-hdf-error-when-opening-netcdf-file#49317928"
                         " for a possible solution."
                     )
                 )
