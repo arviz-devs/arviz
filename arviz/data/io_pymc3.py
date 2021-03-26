@@ -104,6 +104,12 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         # way to access the model from the trace.
         self.attrs = None
         if trace is not None:
+            if isinstance(self.trace, InferenceData):
+                raise ValueError(
+                    "Using the `InferenceData` as a `trace` argument won't work. "
+                    "Please use the `arviz.InferenceData.extend` method to extend the "
+                    "`InferenceData` with groups from another `InferenceData`."
+                )
             if self.model is None:
                 self.model = list(self.trace._straces.values())[  # pylint: disable=protected-access
                     0
