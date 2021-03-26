@@ -8,11 +8,14 @@ import sys
 import warnings
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Literal, get_args
 
 import numpy as np
 
 _log = logging.getLogger(__name__)
+
+ScaleKeyword = Literal["log", "negative_log", "deviance"]
+ICKeyword = Literal["loo", "waic"]
 
 
 def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
@@ -274,9 +277,9 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "stats.hdi_prob": (0.94, _validate_probability),
-    "stats.information_criterion": ("loo", _make_validate_choice({"waic", "loo"})),
+    "stats.information_criterion": ("loo", _make_validate_choice(set(get_args(ICKeyword)))),
     "stats.ic_pointwise": (False, _validate_boolean),
-    "stats.ic_scale": ("log", _make_validate_choice({"deviance", "log", "negative_log"})),
+    "stats.ic_scale": ("log", _make_validate_choice(set(get_args(ScaleKeyword)))),
 }
 
 

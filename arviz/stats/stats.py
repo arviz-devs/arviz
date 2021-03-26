@@ -2,7 +2,7 @@
 """Statistical functions in ArviZ."""
 import warnings
 from copy import deepcopy
-from typing import List, Optional, Tuple, Union, Mapping
+from typing import List, Optional, Tuple, Union, Mapping, cast, get_args
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ from typing_extensions import Literal
 
 from arviz import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
-from ..rcparams import rcParams
+from ..rcparams import rcParams, ScaleKeyword, ICKeyword
 from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
@@ -44,12 +44,12 @@ __all__ = [
 
 def compare(
     dataset_dict: Mapping[str, InferenceData],
-    ic: Optional[Literal["loo", "waic"]] = None,
+    ic: Optional[ICKeyword] = None,
     method: Literal["stacking", "BB-pseudo-BMA", "pseudo-MA"] = "stacking",
     b_samples: int = 1000,
     alpha: float = 1,
     seed=None,
-    scale: Optional[Literal["log", "negative_log", "deviance"]] = None,
+    scale: Optional[ScaleKeyword] = None,
     var_name: Optional[str] = None,
 ):
     r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
@@ -151,7 +151,11 @@ def compare(
     waic : Compute the widely applicable information criterion.
     """
     names = list(dataset_dict.keys())
-    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
+    if scale is not None:
+        scale = cast(ScaleKeyword, scale.lower())
+    else:
+        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
+    assert scale in get_args(ScaleKeyword)
     if scale == "log":
         scale_value = 1
         ascending = False
@@ -162,7 +166,11 @@ def compare(
             scale_value = -2
         ascending = True
 
-    ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
+    if ic is None:
+        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
+    else:
+        ic = cast(ICKeyword, ic.lower())
+    assert ic in get_args(ICKeyword)
     if ic == "loo":
         ic_func = loo
         df_comp = pd.DataFrame(
