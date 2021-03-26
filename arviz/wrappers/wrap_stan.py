@@ -104,7 +104,7 @@ class PyStanSamplingWrapper(StanSamplingWrapper):
         """Rebuild and resample the PyStan model on modified_observed_data."""
         import stan  # pylint: disable=import-error,import-outside-toplevel
 
-        self.model: Union[str,stan.Model]
+        self.model: Union[str, stan.Model]
         if isinstance(self.model, str):
             program_code = self.model
         else:
