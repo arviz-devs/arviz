@@ -9,7 +9,7 @@ Basic labeling
 
 All ArviZ plotting functions and some stats functions take an optional ``labeller`` argument.
 By default, labels show the variable name and the coordinate value
-(for multidimensinal variables only).
+(for multidimensional variables only).
 The first example below uses this default labeling.
 
 .. ipython::
@@ -61,11 +61,11 @@ Labels in ArviZ can generally be sorted in two ways,
 using the arguments passed to ArviZ plotting functions or
 sorting the underlying xarray Dataset.
 The first one is more convenient for single time ordering
-whereas the second is better if you want plots consistenly sorted that way and
+whereas the second is better if you want plots consistently sorted that way and
 is also more flexible, using ArviZ args is more limited.
 
 Both alternatives have an important limitation though.
-Multidimension variables are always together.
+Multidimensional variables are always together.
 We can sort ``theta, mu, tau`` in any order, and within ``theta`` we can sort the schools in any order,
 but it's not possible to show half the schools, then ``mu`` and ``tau`` and then the rest of the schools.
 
@@ -131,7 +131,7 @@ Again we have two alternatives:
 Sorting dimensions
 ..................
 
-In some cases, our multidimensinal variables may not have only a length ``n`` dimension
+In some cases, our multidimensional variables may not have only a length ``n`` dimension
 (in addition to the ``chain`` and ``draw`` ones)
 but could also have multiple dimensions.
 Let's imagine we have performed a set of fixed experiments on several days to multiple subjects,
@@ -165,7 +165,7 @@ Given how we have constructed our dataset, the default order is ``experiment, su
 
       In [1]: az.summary(experiments)
 
-Hovever, we actually want to have the dimensions in this order: ``subject, date, experiment``.
+However, we actually want to have the dimensions in this order: ``subject, date, experiment``.
 And in this case, we need to modify the underlying xarray object in order to get the desired result:
 
 .. ipython:: python
@@ -244,6 +244,8 @@ For cases like this, ArviZ provides a convenience function :func:`~arviz.labels.
 that combines labeller classes for some extra customization.
 Labeller classes aim to split labeling into atomic tasks and have a method per task to maximize extensibility.
 Thus, many new labellers can be created with this mixer function alone without needing to write a new class from scratch.
+There are more usage examples of :func:`~arviz.labels.mix_labellers` in its docstring page, click on
+it to go there.
 
 .. ipython:: python
 
@@ -261,5 +263,113 @@ Thus, many new labellers can be created with this mixer function alone without n
 
 Custom labellers
 ----------------
+So far we have managed to customize the labels in the plots without having to write a new class
+from scratch all by ourselves. However, there could be cases where we have to customize our labels
+further than what these sample labellers allow. In such cases, we have to subclass one of the
+labellers in ``arviz.labels`` and override some of its methods.
 
-Section in construction...
+One case where we might need to do this is when non indexing coordinates are present.
+This happens for example after doing pointwise selection on multiple dimensions,
+but we can also add extra dimensions to our models manually, as shown in TBD.
+For this example, let's use pointwise selection.
+Say for example one of the variables in the posterior represents a covariance matrix, and we want
+to keep it as is for other post-processing tasks instead of extracting the sub diagonal triangular
+matrix with no repeated info as a flattened array. Or any other pointwise selection really.
+
+Here is our data:
+
+
+.. ipython:: python
+
+    from numpy.random import default_rng
+    import numpy as np
+    import xarray as xr
+    rng = default_rng()
+    cov = rng.normal(size=(4, 500, 3, 3))
+    cov = np.einsum("...ij,...kj", cov, cov)
+    cov[:, :, [0, 1, 2], [0, 1, 2]] = 1
+    subjects = ["ecoli", "pseudomonas", "clostridium"]
+    idata = az.from_dict(
+        {"cov": cov},
+        dims={"cov": ["subject", "subject bis"]},
+        coords={"subject": subjects, "subject bis": subjects}
+    )
+    idata.posterior
+
+To select a non rectangular slice with xarray and get the result flattened and without nans, we can
+use DataArrays indexed with a dimension which is not present in our current dataset:
+
+.. ipython:: python
+
+    coords = {
+        'subject': xr.DataArray(
+            ["ecoli", "ecoli", "pseudomonas"], dims=['pointwise_sel']
+        ),
+        'subject bis': xr.DataArray(
+            ["pseudomonas", "clostridium", "clostridium"], dims=['pointwise_sel']
+        )
+    }
+    idata.posterior.sel(coords)
+
+We see now that ``subject`` and ``subject bis`` are no longer indexing coordinates, and
+therefore won't be available to the labeller:
+
+.. ipython:: python
+
+    @savefig default_plot_posterior.png
+    az.plot_posterior(idata, coords=coords);
+
+To get around this limitation, we will store the coords used for pointwise selection
+as a Dataset which we will pass to the labeller so it can use the info it has available
+(``pointwise_sel`` and its position in this case) to subset this coords Dataset
+and use that instead to label.
+One option is to format these non-indexing coordinates as a dictionary whose
+keys are dimension names and values coordinate labels and pass that to the parent's
+``sel_to_str`` method:
+
+.. ipython:: python
+
+    coords_ds = xr.Dataset(coords)
+
+    class NonIdxCoordLabeller(azl.BaseLabeller):
+        """Use non indexing coordinates as labels."""
+        def __init__(self, coords_ds):
+            self.coords_ds = coords_ds
+        def sel_to_str(self, sel, isel):
+            new_sel = {k: v.values for k, v in self.coords_ds.sel(sel).items()}
+            return super().sel_to_str(new_sel, new_sel)
+
+    labeller = NonIdxCoordLabeller(coords_ds)
+
+    @savefig custom_plot_posterior1.png
+    az.plot_posterior(idata, coords=coords, labeller=labeller);
+
+This has the advantage of requiring very little extra code and to allow to combine
+our newly created ``NonIdxCoordLabeller`` with other labellers like we did in
+the previous section.
+
+Another option is to go for a much more customized look, and handle everything
+on ``make_label_vert`` to get labels like "Correlation between subjects x and y".
+
+.. ipython:: python
+
+    class NonIdxCoordLabeller(azl.BaseLabeller):
+        """Use non indexing coordinates as labels."""
+        def __init__(self, coords_ds):
+            self.coords_ds = coords_ds
+        def make_label_vert(self, var_name, sel, isel):
+            coords_ds_subset = self.coords_ds.sel(sel)
+            subj = coords_ds_subset["subject"].values
+            subj_bis = coords_ds_subset["subject bis"].values
+            return f"Correlation between subjects\n{subj} & {subj_bis}"
+
+    labeller = NonIdxCoordLabeller(coords_ds)
+
+    @savefig custom_plot_posterior2.png
+    az.plot_posterior(idata, coords=coords, labeller=labeller);
+
+This won't combine properly with other labellers, but it serves its function, and
+achieves complete customization of the labels, so we probably won't want to combine
+it with other labellers either. The main drawback is that we have only overridden
+``make_label_vert``, so functions like ``plot_forest`` or ``summary`` who
+use ``make_label_flat`` will still fall back to the methods defined by ``BaseLabeller``.
