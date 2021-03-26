@@ -241,26 +241,32 @@ class TestDataPyStan:
                 _ = from_pystan(posterior=fit)
 
     def test_empty_parameter(self):
+        model_code = """
+            parameters {
+                real y;
+                vector[3] x;
+                vector[0] a;
+                vector[2] z;
+            }
+            model {
+                y ~ normal(0,1);
+            }
+        """
         if pystan_version() == 2:
-            model_code = """
-                parameters {
-                    real y;
-                    vector[3] x;
-                    vector[0] a;
-                    vector[2] z;
-                }
-                model {
-                    y ~ normal(0,1);
-                }
-            """
             from pystan import StanModel  # pylint: disable=import-error
 
             model = StanModel(model_code=model_code)
-            fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
-            posterior = from_pystan(posterior=fit)
-            test_dict = {"posterior": ["y", "x", "z"], "sample_stats": ["diverging"]}
-            fails = check_multiple_attrs(test_dict, posterior)
-            assert not fails
+            fit = model.sampling(iter=500, chains=2, check_hmc_diagnostics=False)
+        else:
+            import stan  # pylint: disable=import-error
+
+            model = stan.build(model_code)
+            fit = model.sample(num_samples=500, num_chains=2)
+
+        posterior = from_pystan(posterior=fit)
+        test_dict = {"posterior": ["y", "x", "z", "~a"], "sample_stats": ["diverging"]}
+        fails = check_multiple_attrs(test_dict, posterior)
+        assert not fails
 
     def test_get_draws(self, data):
         fit = data.obj
