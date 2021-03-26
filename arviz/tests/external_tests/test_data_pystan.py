@@ -148,8 +148,8 @@ class TestDataPyStan:
         inference_data1 = self.get_inference_data(data, eight_schools_params)
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
-        inference_data4 = self.get_inference_data4(data, eight_schools_params)
-        inference_data5 = self.get_inference_data5(data, eight_schools_params)
+        inference_data4 = self.get_inference_data4(data)
+        inference_data5 = self.get_inference_data5(data)
         # inference_data 1
         test_dict = {
             "posterior": ["theta"],
@@ -159,7 +159,7 @@ class TestDataPyStan:
             "constant_data": ["sigma"],
             "predictions_constant_data": ["sigma"],
             "sample_stats": ["diverging", "lp"],
-            "log_likelihood": ["y"],
+            "log_likelihood": ["y", "~log_lik"],
             "prior": ["theta"],
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
