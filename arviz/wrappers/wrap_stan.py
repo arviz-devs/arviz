@@ -1,5 +1,7 @@
 # pylint: disable=arguments-differ
 """Base class for PyStan wrappers."""
+from typing import Union
+
 from ..data import from_cmdstanpy, from_pystan
 from .base import SamplingWrapper
 
