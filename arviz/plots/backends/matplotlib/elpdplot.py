@@ -138,7 +138,7 @@ def plot_elpd(
                 squeeze=False,
                 constrained_layout=not xlabels,
                 sharey="row",
-                sharex="all",
+                sharex="col",
             )
         else:
             fig = ax.ravel()[0].get_figure()
@@ -180,7 +180,7 @@ def plot_elpd(
                 )
         if xlabels:
             for i in range(len(ax)):
-                set_xticklabels(ax[-1, :][i], coord_labels)
+                set_xticklabels(ax[-1, i], coord_labels)
             fig.autofmt_xdate()
             fig.tight_layout()
         if legend:
