@@ -230,6 +230,7 @@ class TestDataCmdStanPy:
                 "y": ["school"],
                 "y_hat": ["school"],
                 "theta": ["school"],
+                "log_lik": ["log_lik_dim"],
             },
         )
 
@@ -240,6 +241,20 @@ class TestDataCmdStanPy:
             posterior_predictive=None,
             prior=data.obj,
             prior_predictive=None,
+            log_likelihood=False,
+            observed_data={"y": eight_schools_params["y"]},
+            coords=None,
+            dims=None,
+        )
+
+    def get_inference_data5(self, data, eight_schools_params):
+        """multiple vars as lists."""
+        return from_cmdstanpy(
+            posterior=data.obj,
+            posterior_predictive=None,
+            prior=data.obj,
+            prior_predictive=None,
+            log_likelihood="log_lik",
             observed_data={"y": eight_schools_params["y"]},
             coords=None,
             dims=None,
@@ -326,6 +341,7 @@ class TestDataCmdStanPy:
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
         inference_data4 = self.get_inference_data4(data, eight_schools_params)
+        inference_data5 = self.get_inference_data4(data, eight_schools_params)
         # inference_data 1
         test_dict = {
             "posterior": ["theta"],
@@ -359,6 +375,7 @@ class TestDataCmdStanPy:
             "sample_stats_prior": ["lp"],
             "sample_stats": ["lp"],
             "prior_predictive": ["y_hat"],
+            "log_likelihood": ["log_lik"],
         }
         fails = check_multiple_attrs(test_dict, inference_data3)
         assert not fails
@@ -366,13 +383,20 @@ class TestDataCmdStanPy:
         test_dict = {
             "posterior": ["eta", "mu", "theta"],
             "prior": ["theta"],
-            "log_likelihood": ["log_lik"],
+            "~log_likelihood": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
         assert len(inference_data4.posterior.theta.shape) == 3  # pylint: disable=no-member
         assert len(inference_data4.posterior.eta.shape) == 4  # pylint: disable=no-member
         assert len(inference_data4.posterior.mu.shape) == 2  # pylint: disable=no-member
+        # inference_data 5
+        test_dict = {
+            "posterior": ["eta", "mu", "theta"],
+            "prior": ["theta"],
+            "log_likelihood": ["log_lik"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data5)
 
     def test_inference_data_warmup(self, data, eight_schools_params):
         inference_data_true_is_true = self.get_inference_data_warmup_true_is_true(
@@ -410,10 +434,10 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
-            "~warmup_posterior": [],
-            "~warmup_predictions": [],
-            "~warmup_log_likelihood": [],
-            "~warmup_prior": [],
+            "~warmup_posterior": [""],
+            "~warmup_predictions": [""],
+            "~warmup_log_likelihood": [""],
+            "~warmup_prior": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_true)
         assert not fails
@@ -426,10 +450,10 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["log_lik"],
             "prior": ["theta"],
-            "~warmup_posterior": [],
-            "~warmup_predictions": [],
-            "~warmup_log_likelihood": [],
-            "~warmup_prior": [],
+            "~warmup_posterior": [""],
+            "~warmup_predictions": [""],
+            "~warmup_log_likelihood": [""],
+            "~warmup_prior": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data_true_is_false)
         assert not fails
@@ -442,10 +466,10 @@ class TestDataCmdStanPy:
             "predictions_constant_data": ["y"],
             "log_likelihood": ["y"],
             "prior": ["theta"],
-            "~warmup_posterior": [],
-            "~warmup_predictions": [],
-            "~warmup_log_likelihood": [],
-            "~warmup_prior": [],
+            "~warmup_posterior": [""],
+            "~warmup_predictions": [""],
+            "~warmup_log_likelihood": [""],
+            "~warmup_prior": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data_false_is_false)
         assert not fails

@@ -43,7 +43,7 @@ def plot_energy(
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
-    types = "hist" if kind in {"hist", "histogram"} else "plot"
+    types = "hist" if kind == "hist" else "plot"
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
 
     _colors = [
@@ -82,7 +82,7 @@ def plot_energy(
                 ax=ax,
                 legend=False,
             )
-    elif kind in {"hist", "histogram"}:
+    elif kind == "hist":
         for alpha, color, label, value in series:
             ax.hist(
                 value.flatten(),

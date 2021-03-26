@@ -63,7 +63,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         trace=None,
         prior=None,
         posterior_predictive=None,
-        log_likelihood=True,
+        log_likelihood=None,
         predictions=None,
         coords: Optional[Coords] = None,
         dims: Optional[Dims] = None,
@@ -137,7 +137,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.predictions = predictions
 
         def arbitrary_element(dct: Dict[Any, np.ndarray]) -> np.ndarray:
@@ -523,7 +525,7 @@ def from_pymc3(
     *,
     prior: Optional[Dict[str, Any]] = None,
     posterior_predictive: Optional[Dict[str, Any]] = None,
-    log_likelihood: Union[bool, Iterable[str]] = True,
+    log_likelihood: Union[bool, Iterable[str], None] = None,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
     model: Optional[Model] = None,
@@ -551,6 +553,7 @@ def from_pymc3(
     log_likelihood : bool or array_like of str, optional
         List of variables to calculate `log_likelihood`. Defaults to True which calculates
         `log_likelihood` for all observed variables. If set to False, log_likelihood is skipped.
+        Defaults to the value of rcParam ``data.log_likelihood``.
     coords : dict of {str: array-like}, optional
         Map of coordinate names to coordinate values
     dims : dict of {str: list of str}, optional

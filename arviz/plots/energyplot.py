@@ -1,4 +1,6 @@
 """Plot energy transition distribution in HMC inference."""
+import warnings
+
 from ..data import convert_to_dataset
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
@@ -6,7 +8,7 @@ from .plot_utils import get_plotting_function
 
 def plot_energy(
     data,
-    kind="kde",
+    kind=None,
     bfmi=True,
     figsize=None,
     legend=True,
@@ -30,7 +32,7 @@ def plot_energy(
     data : xarray dataset, or object that can be converted (must represent
            `sample_stats` and have an `energy` variable)
     kind : str
-        Type of plot to display {"kde", "histogram")
+        Type of plot to display {"kde", "hist")
     bfmi : bool
         If True add to the plot the value of the estimated Bayesian fraction of missing information
     figsize : tuple
@@ -89,6 +91,17 @@ def plot_energy(
 
     """
     energy = convert_to_dataset(data, group="sample_stats").energy.values
+
+    if kind == "histogram":
+        warnings.warn(
+            "kind histogram will be deprecated in a future release. Use `hist` "
+            "or set rcParam `plot.density_kind` to `hist`",
+            FutureWarning,
+        )
+        kind = "hist"
+
+    if kind is None:
+        kind = rcParams["plot.density_kind"]
 
     plot_energy_kwargs = dict(
         ax=ax,
