@@ -104,14 +104,6 @@ def _validate_positive_int(value):
         raise ValueError("Only positive values are valid")
 
 
-def _validate_positive_int_or_none(value):
-    """Validate value is a natural number or None."""
-    if value is None or isinstance(value, str) and value.lower() == "none":
-        return None
-    else:
-        return _validate_positive_int(value)
-
-
 def _validate_float(value):
     """Validate value is a float."""
     try:
@@ -119,14 +111,6 @@ def _validate_float(value):
     except ValueError as err:
         raise ValueError("Could not convert to float") from err
     return value
-
-
-def _validate_float_or_none(value):
-    """Validate value is a float or None."""
-    if value is None or isinstance(value, str) and value.lower() == "none":
-        return None
-    else:
-        return _validate_float(value)
 
 
 def _validate_probability(value):
@@ -139,9 +123,24 @@ def _validate_probability(value):
 
 def _validate_boolean(value):
     """Validate value is a float."""
-    if value not in {True, "true", False, "false"}:
+    if isinstance(value, str):
+        value = value.lower()
+    if value not in {True, False, "true", "false"}:
         raise ValueError("Only boolean values are valid.")
     return value is True or value == "true"
+
+
+def _add_none_to_validator(base_validator):
+    """Create a validator function that catches none and then calls base_fun."""
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
+
+    def validate_with_none(value):
+        if value is None or isinstance(value, str) and value.lower() == "none":
+            return None
+        return base_validator(value)
+
+    return validate_with_none
 
 
 def _validate_bokeh_marker(value):
@@ -207,6 +206,8 @@ def make_iterable_validator(scalar_validator, length=None, allow_none=False, all
     return validate_iterable
 
 
+_validate_float_or_none = _add_none_to_validator(_validate_float)
+_validate_positive_int_or_none = _add_none_to_validator(_validate_positive_int)
 _validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-name
     _validate_float_or_none, length=2, allow_none=True, allow_auto=True
 )
@@ -228,8 +229,10 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.metagroups": (METAGROUPS, _validate_dict_of_lists),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
+    "data.log_likelihood": (True, _validate_boolean),
     "data.save_warmup": (False, _validate_boolean),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.density_kind": ("kde", _make_validate_choice({"kde", "hist"})),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",
@@ -277,6 +280,10 @@ defaultParams = {  # pylint: disable=invalid-name
     "stats.information_criterion": ("loo", _make_validate_choice({"waic", "loo"})),
     "stats.ic_pointwise": (False, _validate_boolean),
     "stats.ic_scale": ("log", _make_validate_choice({"deviance", "log", "negative_log"})),
+    "stats.ic_compare_method": (
+        "stacking",
+        _make_validate_choice({"stacking", "bb-pseudo-bma", "pseudo-bma"}),
+    ),
 }
 
 

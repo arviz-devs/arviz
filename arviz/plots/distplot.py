@@ -51,8 +51,9 @@ def plot_dist(
     color : string
         valid matplotlib color
     kind : string
-        By default ("auto") continuous variables are plotted using KDEs and discrete ones using
-        histograms. To override this use "hist" to plot histograms and "kde" for KDEs
+        By default ("auto") continuous variables will use the kind defined by rcParam
+        ``plot.density_kind`` and discrete ones will use histograms.
+        To override this use "hist" to plot histograms and "kde" for KDEs
     cumulative : bool
         If true plot the estimated cumulative distribution function. Defaults to False.
         Ignored for 2D KDE
@@ -172,7 +173,7 @@ def plot_dist(
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
     if kind == "auto":
-        kind = "hist" if values.dtype.kind == "i" else "kde"
+        kind = "hist" if values.dtype.kind == "i" else rcParams["plot.density_kind"]
 
     dist_plot_args = dict(
         # User Facing API that can be simplified
