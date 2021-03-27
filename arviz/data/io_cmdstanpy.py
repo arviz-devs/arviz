@@ -43,7 +43,9 @@ class CmdStanPyConverter:
         self.observed_data = observed_data
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.index_origin = index_origin
         self.coords = coords
         self.dims = dims
@@ -51,15 +53,18 @@ class CmdStanPyConverter:
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
         if hasattr(self.posterior, "stan_vars_cols"):
-            if self.log_likelihood is None and "log_lik" in self.posterior.stan_vars_cols:
+            if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
         else:
             if (
-                self.log_likelihood is None
+                self.log_likelihood is True
                 and self.posterior is not None
                 and any(name.split("[")[0] == "log_lik" for name in self.posterior.column_names)
             ):
                 self.log_likelihood = ["log_lik"]
+
+        if isinstance(self.log_likelihood, bool):
+            self.log_likelihood = None
 
         import cmdstanpy  # pylint: disable=import-error
 
@@ -733,12 +738,12 @@ def from_cmdstanpy(
         Constant data used in the sampling.
     predictions_constant_data : dict
         Constant data for predictions used in the sampling.
-    log_likelihood : str, list of str, dict of {str: str}
+    log_likelihood : str, list of str, dict of {str: str}, optional
         Pointwise log_likelihood for the data. If a dict, its keys should represent var_names
         from the corresponding observed data and its values the stan variable where the
         data is stored. By default, if a variable ``log_lik`` is present in the Stan model,
-        it will be retrieved as pointwise log likelihood values. Use ``False`` to avoid this
-        behaviour.
+        it will be retrieved as pointwise log likelihood values. Use ``False``
+        or set ``data.log_likelihood`` to false to avoid this behaviour.
     index_origin : int, optional
         Starting value of integer coordinate values. Defaults to the value in rcParam
         ``data.index_origin``.

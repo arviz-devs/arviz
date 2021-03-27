@@ -157,7 +157,7 @@ class TestDataPyMC3:
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
             "predictions": ["obs"],
-            "~observed_data": "",
+            "~observed_data": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
@@ -339,7 +339,7 @@ class TestDataPyMC3:
         }
         if not log_likelihood:
             test_dict.pop("log_likelihood")
-            test_dict["~log_likelihood"] = []
+            test_dict["~log_likelihood"] = [""]
         if isinstance(log_likelihood, list):
             test_dict["log_likelihood"] = ["y1", "~y2"]
 
@@ -463,7 +463,7 @@ class TestDataPyMC3:
             # assert predictive_trace["obs"].shape == (400, 2)
             # but the shape seems to vary between pymc3 versions
             inference_data = from_pymc3_predictions(predictive_trace, posterior_trace=trace)
-        test_dict = {"posterior": ["beta"], "~observed_data": ""}
+        test_dict = {"posterior": ["beta"], "~observed_data": [""]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails, "Posterior data not copied over as expected."
         test_dict = {"predictions": ["obs"]}
@@ -540,7 +540,7 @@ class TestDataPyMC3:
             inference_data = from_pymc3(prior=prior)
         test_dict = {
             "prior": ["beta", "obs"],
-            "~prior_predictive": [],
+            "~prior_predictive": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
@@ -593,8 +593,8 @@ class TestPyMC3WarmupHandling:
             f"{post_prefix}sample_stats": ["~tune", "accept"],
             f"{warmup_prefix}warmup_posterior": ["u1", "n1"],
             f"{warmup_prefix}warmup_sample_stats": ["~tune"],
-            "~warmup_log_likelihood": [],
-            "~log_likelihood": [],
+            "~warmup_log_likelihood": [""],
+            "~log_likelihood": [""],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
@@ -631,8 +631,8 @@ class TestPyMC3WarmupHandling:
         test_dict = {
             "posterior": ["u1", "n1"],
             "sample_stats": ["~tune", "accept"],
-            "~warmup_posterior": [],
-            "~warmup_sample_stats": [],
+            "~warmup_posterior": [""],
+            "~warmup_sample_stats": [""],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
@@ -677,8 +677,8 @@ class TestPyMC3WarmupHandling:
             test_dict = {
                 "posterior": ["u1", "n1"],
                 "sample_stats": ["~tune", "accept"],
-                "~warmup_posterior": [],
-                "~warmup_sample_stats": [],
+                "~warmup_posterior": [""],
+                "~warmup_sample_stats": [""],
             }
             fails = check_multiple_attrs(test_dict, idata)
             assert not fails

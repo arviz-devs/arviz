@@ -4,11 +4,11 @@ from typing import Callable, Optional
 import warnings
 
 import numpy as np
-import xarray as xr
 from packaging import version
 
 from .. import utils
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from ..rcparams import rcParams
+from .base import dict_to_dataset, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class PyroConverter:
         posterior=None,
         prior=None,
         posterior_predictive=None,
-        log_likelihood=True,
+        log_likelihood=None,
         predictions=None,
         constant_data=None,
         predictions_constant_data=None,
@@ -66,13 +66,15 @@ class PyroConverter:
         self.posterior = posterior
         self.prior = prior
         self.posterior_predictive = posterior_predictive
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.predictions = predictions
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
         self.coords = coords
-        self.dims = dims
-        self.pred_dims = pred_dims
+        self.dims = {} if dims is None else dims
+        self.pred_dims = {} if pred_dims is None else pred_dims
         import pyro
 
         def arbitrary_element(dct):
@@ -226,43 +228,31 @@ class PyroConverter:
             dims = {}
         else:
             dims = self.dims
-        observed_data = {}
-        for name, vals in self.observations.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(name)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, name, dims=val_dims, coords=self.coords
-            )
-            # filter coords based on the dims
-            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pyro))
-
-    def convert_constant_data_to_xarray(self, dct, dims):
-        """Convert constant_data or predictions_constant_data to xarray."""
-        if dims is None:
-            dims = {}
-        constant_data = {}
-        for name, vals in dct.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(name)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, name, dims=val_dims, coords=self.coords
-            )
-            # filter coords based on the dims
-            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pyro))
+        return dict_to_dataset(
+            self.observations, library=self.pyro, coords=self.coords, dims=dims, default_dims=[]
+        )
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
         """Convert constant_data to xarray."""
-        return self.convert_constant_data_to_xarray(self.constant_data, self.dims)
+        return dict_to_dataset(
+            self.constant_data,
+            library=self.pyro,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+        )
 
     @requires("predictions_constant_data")
     def predictions_constant_data_to_xarray(self):
         """Convert predictions_constant_data to xarray."""
-        return self.convert_constant_data_to_xarray(self.predictions_constant_data, self.pred_dims)
+        return dict_to_dataset(
+            self.predictions_constant_data,
+            library=self.pyro,
+            coords=self.coords,
+            dims=self.pred_dims,
+            default_dims=[],
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
@@ -286,7 +276,7 @@ def from_pyro(
     *,
     prior=None,
     posterior_predictive=None,
-    log_likelihood=True,
+    log_likelihood=None,
     predictions=None,
     constant_data=None,
     predictions_constant_data=None,
@@ -310,7 +300,8 @@ def from_pyro(
     posterior_predictive : dict
         Posterior predictive samples for the posterior
     log_likelihood : bool, optional
-        Calculate and store pointwise log likelihood values.
+        Calculate and store pointwise log likelihood values. Defaults to the value
+        of rcParam ``data.log_likelihood``.
     predictions: dict
         Out of sample predictions
     constant_data: dict

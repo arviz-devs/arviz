@@ -5,6 +5,7 @@ from typing import Callable, Optional
 import numpy as np
 
 from .. import utils
+from ..rcparams import rcParams
 from .base import dict_to_dataset, requires
 from .inference_data import InferenceData
 
@@ -29,6 +30,7 @@ class NumPyroConverter:
         predictions=None,
         constant_data=None,
         predictions_constant_data=None,
+        log_likelihood=None,
         index_origin=None,
         coords=None,
         dims=None,
@@ -70,7 +72,10 @@ class NumPyroConverter:
         self.predictions = predictions
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
-        self.index_origin = index_origin
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
+        self.index_origin = rcParams["data.index_origin"] if index_origin is None else index_origin
         self.coords = coords
         self.dims = dims
         self.pred_dims = pred_dims
@@ -170,6 +175,8 @@ class NumPyroConverter:
     @requires("model")
     def log_likelihood_to_xarray(self):
         """Extract log likelihood from NumPyro posterior."""
+        if not self.log_likelihood:
+            return None
         data = {}
         if self.observations is not None:
             samples = self.posterior.get_samples(group_by_chain=False)
@@ -317,6 +324,7 @@ def from_numpyro(
     predictions=None,
     constant_data=None,
     predictions_constant_data=None,
+    log_likelihood=None,
     index_origin=None,
     coords=None,
     dims=None,
@@ -359,6 +367,7 @@ def from_numpyro(
         predictions=predictions,
         constant_data=constant_data,
         predictions_constant_data=predictions_constant_data,
+        log_likelihood=log_likelihood,
         index_origin=index_origin,
         coords=coords,
         dims=dims,
