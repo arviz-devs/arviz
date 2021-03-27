@@ -19,7 +19,7 @@
 #
 import os
 import sys
-from typing import Dict, Sequence
+from typing import Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import arviz
@@ -161,16 +161,15 @@ html_context = {
     "github_version": "main",
     "doc_path": "doc/source/",
 }
+html_sidebars : Dict[str, Any] = {
+  "community": []
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_static_path = ["_static", thumb_directory]
-
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-# html_sidebars = {}
 
 # use additional pages to add a 404 page
 html_additional_pages = {
