@@ -9,7 +9,13 @@ import pandas as pd
 import scipy.stats as st
 import xarray as xr
 from scipy.optimize import minimize
-from typing_extensions import Literal, get_args
+from typing_extensions import Literal
+
+NO_GET_ARGS: bool = False
+try:
+    from typing_extensions import get_args
+except ImportError:
+    NO_GET_ARGS = True
 
 from arviz import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
@@ -156,12 +162,10 @@ def compare(
         scale = cast(ScaleKeyword, scale.lower())
     else:
         scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
-    if scale not in get_args(ScaleKeyword):
-        raise ValueError(
-            f"{scale} is not a valid value for scale: must be in {get_args(ScaleKeyword)}"
-        )
+    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
+    if scale not in allowable:
+        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
 
-    assert scale in get_args(ScaleKeyword)
     if scale == "log":
         scale_value = 1
         ascending = False
@@ -176,8 +180,9 @@ def compare(
         ic = cast(ICKeyword, rcParams["stats.information_criterion"])
     else:
         ic = cast(ICKeyword, ic.lower())
-    if ic not in get_args(ICKeyword):
-        raise ValueError(f"{ic} is not a valid value for ic: must be in {get_args(ICKeyword)}")
+    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
+    if ic not in allowable:
+        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
     if ic == "loo":
         ic_func: Callable = loo
         df_comp = pd.DataFrame(

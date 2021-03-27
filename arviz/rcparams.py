@@ -9,7 +9,14 @@ import warnings
 from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any, Dict
-from typing_extensions import Literal, get_args
+from typing_extensions import Literal
+
+NO_GET_ARGS: bool = False
+try:
+    from typing_extensions import get_args
+except ImportError:
+    NO_GET_ARGS = True
+
 
 import numpy as np
 
@@ -281,9 +288,17 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "stats.hdi_prob": (0.94, _validate_probability),
-    "stats.information_criterion": ("loo", _make_validate_choice(set(get_args(ICKeyword)))),
+    "stats.information_criterion": (
+        "loo",
+        _make_validate_choice({"loo", "waic"} if NO_GET_ARGS else set(get_args(ICKeyword))),
+    ),
     "stats.ic_pointwise": (False, _validate_boolean),
-    "stats.ic_scale": ("log", _make_validate_choice(set(get_args(ScaleKeyword)))),
+    "stats.ic_scale": (
+        "log",
+        _make_validate_choice(
+            {"log", "negative_log", "deviance"} if NO_GET_ARGS else set(get_args(ScaleKeyword))
+        ),
+    ),
     "stats.ic_compare_method": (
         "stacking",
         _make_validate_choice({"stacking", "bb-pseudo-bma", "pseudo-bma"}),
