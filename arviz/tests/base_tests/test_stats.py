@@ -151,7 +151,7 @@ def test_compare_same(centered_eight, multidim_models, method, multidim):
 
 def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(ValueError):
         compare(model_dict, ic="Unknown", method="stacking")
     with pytest.raises(ValueError):
         compare(model_dict, ic="loo", method="Unknown")
