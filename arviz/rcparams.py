@@ -8,7 +8,8 @@ import sys
 import warnings
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Dict, Literal, get_args
+from typing import Any, Dict
+from typing_extensions import Literal, get_args
 
 import numpy as np
 
