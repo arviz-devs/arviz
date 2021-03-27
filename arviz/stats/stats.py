@@ -2,14 +2,14 @@
 """Statistical functions in ArviZ."""
 import warnings
 from copy import deepcopy
-from typing import List, Optional, Tuple, Union, Mapping, cast, get_args
+from typing import List, Optional, Tuple, Union, Mapping, cast, Callable
 
 import numpy as np
 import pandas as pd
 import scipy.stats as st
 import xarray as xr
 from scipy.optimize import minimize
-from typing_extensions import Literal
+from typing_extensions import Literal, get_args
 
 from arviz import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
@@ -156,6 +156,11 @@ def compare(
         scale = cast(ScaleKeyword, scale.lower())
     else:
         scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
+    if scale not in get_args(ScaleKeyword):
+        raise ValueError(
+            f"{scale} is not a valid value for scale: must be in {get_args(ScaleKeyword)}"
+        )
+
     assert scale in get_args(ScaleKeyword)
     if scale == "log":
         scale_value = 1
@@ -171,9 +176,10 @@ def compare(
         ic = cast(ICKeyword, rcParams["stats.information_criterion"])
     else:
         ic = cast(ICKeyword, ic.lower())
-    assert ic in get_args(ICKeyword)
+    if ic not in get_args(ICKeyword):
+        raise ValueError(f"{ic} is not a valid value for ic: must be in {get_args(ICKeyword)}")
     if ic == "loo":
-        ic_func = loo
+        ic_func: Callable = loo
         df_comp = pd.DataFrame(
             index=names,
             columns=[
@@ -187,7 +193,7 @@ def compare(
                 "warning",
                 "loo_scale",
             ],
-            dtype=np.float,
+            dtype=np.float_,
         )
         scale_col = "loo_scale"
     elif ic == "waic":
@@ -205,7 +211,7 @@ def compare(
                 "warning",
                 "waic_scale",
             ],
-            dtype=np.float,
+            dtype=np.float_,
         )
         scale_col = "waic_scale"
     else:
@@ -1300,7 +1306,9 @@ def summary(
     n_vars = np.sum([joined[var].size // n_metrics for var in joined.data_vars])
 
     if fmt.lower() == "wide":
-        summary_df = pd.DataFrame(np.full((n_vars, n_metrics), np.nan), columns=metric_names)
+        summary_df = pd.DataFrame(
+            (np.full(cast(Tuple[int, int], (n_vars, n_metrics)), np.nan)), columns=metric_names
+        )
         indexs = []
         for i, (var_name, sel, isel, values) in enumerate(
             xarray_var_iter(joined, skip_dims={"metric"})
