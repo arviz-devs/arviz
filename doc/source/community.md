@@ -34,10 +34,6 @@ that hopefully can bridge the gap.
 Do you know of resources about ArviZ that are not listed here? Open an issue or a PR and
 let us know!
 
-## Case studies and example compilations
-* https://github.com/pymc-devs/pymc-examples
-* https://mc-stan.org/users/documentation/case-studies
-
 ## Books
 * Bayesian Modeling and Computation in Python
 * BAP
@@ -47,9 +43,12 @@ let us know!
 * Learning Bayesian Statistics
 * dats'n'stats
 
-## Blogs
+## Blogs and example compilations
 If you have a blog that has 2 or more posts tagged as "ArviZ", you can submit
 a pull request to add your blog to this list
+
+* https://github.com/pymc-devs/pymc-examples
+* https://mc-stan.org/users/documentation/case-studies
 
 ```{panels}
 Blog title

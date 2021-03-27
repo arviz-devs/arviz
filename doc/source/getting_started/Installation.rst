@@ -9,7 +9,7 @@ dependencies to further enhance the library. This guide will cover both basic an
 
 ******
 Stable
-****** 
+******
 
 ArviZ can be installed either using pip or conda-forge.
 
@@ -25,7 +25,7 @@ Use the below pip command to install ArviZ with all of it's :ref:`Optional-depen
 .. code:: bash
 
     pip install arviz[all]
-    
+
 Using conda-forge
 =================
 
@@ -37,7 +37,7 @@ Using conda-forge
 
 ***********
 Development
-*********** 
+***********
 
 If you want to install the latest development version of ArviZ, then you
 may use
@@ -46,6 +46,7 @@ may use
 
     pip install git+https://github.com/arviz-devs/arviz
 
+.. _arviz-dependencies:
 
 ************
 Dependencies
@@ -71,7 +72,7 @@ The list of optional dependencies to further enhance ArviZ are.
 - Numba
 
   Necessary to speed up the code computation. The installation details can be found
-  `here <https://numba.pydata.org/numba-doc/latest/user/installing.html>`_. Further details on enhanced functionality provided in ArviZ by Numba can be 
+  `here <https://numba.pydata.org/numba-doc/latest/user/installing.html>`_. Further details on enhanced functionality provided in ArviZ by Numba can be
   `found here <https://arviz-devs.github.io/arviz/user_guide/Numba.html>`_.
 
 - Bokeh
@@ -86,7 +87,7 @@ The list of optional dependencies to further enhance ArviZ are.
 - Dask
 
   Necessary to scale the packages and the surrounding ecosystem. The installation details can be found `at this link <https://docs.dask.org/en/latest/install.html>`_.
-  
+
 
 
 

@@ -1,7 +1,7 @@
 (developer_guide)=
 
 # Developer Guide
-> ## Library architecture
+## Library architecture
 ArviZ is organized in modules (the folders in https://github.com/arviz-devs/arviz/tree/main/arviz).
 The main 3 modules are `data`, `plots` and `stats`,
 and then the `tests` folder is where tests for all these 3 modules are.
