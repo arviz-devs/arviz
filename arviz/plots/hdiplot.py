@@ -115,9 +115,13 @@ def plot_hdi(
     .. plot::
         :context: close-figs
 
-        >>> data = az.load_arviz_data('radon')
-        >>> x_data = np.array(data.posterior_predictive.obs_id)
-        >>> y_data = np.array(data.posterior_predictive.y)
+        >>> X = np.random.normal(0,1,100)
+        >>> Y = np.random.normal(2 + X * 0.5, 0.5, (10,100))
+        >>> X = {"x":X}
+        >>> Y = {"y": Y}
+        >>> dataset = az.from_dict(posterior=Y, constant_data = X)
+        >>> x_data = dataset.constant_data.x
+        >>> y_data = dataset.posterior.y
         >>> az.plot_hdi(x_data, y_data)
 
     """
