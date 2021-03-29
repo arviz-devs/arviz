@@ -1312,7 +1312,7 @@ def summary(
 
     if fmt.lower() == "wide":
         summary_df = pd.DataFrame(
-            (np.full(cast(Tuple[int, int], (n_vars, n_metrics)), np.nan)), columns=metric_names
+            (np.full((cast(int, n_vars), n_metrics), np.nan)), columns=metric_names
         )
         indexs = []
         for i, (var_name, sel, isel, values) in enumerate(

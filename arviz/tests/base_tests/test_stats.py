@@ -40,7 +40,7 @@ def non_centered_eight():
     return non_centered_eight
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def multivariable_log_likelihood(centered_eight):
     centered_eight = centered_eight.copy()
     centered_eight.add_groups({"log_likelihood": centered_eight.sample_stats.log_likelihood})
@@ -218,7 +218,7 @@ def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_
     }
     with pytest.raises(TypeError, match="several log likelihood arrays"):
         get_log_likelihood(compare_dict["problematic"])
-    with pytest.raises(TypeError, match="model problematic"):
+    with pytest.raises(TypeError, match=f"{ic}.*model problematic"):
         compare(compare_dict, ic=ic)
     assert compare(compare_dict, ic=ic, var_name="obs") is not None
 
