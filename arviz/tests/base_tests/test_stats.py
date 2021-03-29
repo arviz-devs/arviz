@@ -40,6 +40,23 @@ def non_centered_eight():
     return non_centered_eight
 
 
+@pytest.fixture
+def multivariable_log_likelihood(centered_eight):
+    centered_eight = centered_eight.copy()
+    centered_eight.add_groups({"log_likelihood": centered_eight.sample_stats.log_likelihood})
+    centered_eight.log_likelihood = centered_eight.log_likelihood.rename_vars(
+        {"log_likelihood": "obs"}
+    )
+    new_arr = DataArray(
+        np.zeros(centered_eight.log_likelihood["obs"].values.shape),
+        dims=["chain", "draw", "school"],
+        coords=centered_eight.log_likelihood.coords,
+    )
+    centered_eight.log_likelihood["decoy"] = new_arr
+    delattr(centered_eight, "sample_stats")
+    return centered_eight
+
+
 def test_hdp():
     normal_sample = np.random.randn(5000000)
     interval = hdi(normal_sample)
@@ -190,6 +207,20 @@ def test_compare_different_size(centered_eight, non_centered_eight):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
     with pytest.raises(ValueError):
         compare(model_dict, ic="waic", method="stacking")
+
+
+@pytest.mark.parametrize("ic", ["loo", "waic"])
+def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_centered_eight, ic):
+    compare_dict = {
+        "centered_eight": centered_eight,
+        "non_centered_eight": non_centered_eight,
+        "problematic": multivariable_log_likelihood,
+    }
+    with pytest.raises(TypeError, match="several log likelihood arrays"):
+        get_log_likelihood(compare_dict["problematic"])
+    with pytest.raises(TypeError, match="model problematic"):
+        compare(compare_dict, ic=ic)
+    assert compare(compare_dict, ic=ic, var_name="obs") is not None
 
 
 def test_summary_ndarray():
