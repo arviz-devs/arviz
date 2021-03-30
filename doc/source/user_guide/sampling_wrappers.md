@@ -15,7 +15,7 @@ pystan2_refitting
 pystan_refitting
 pymc3_refitting
 numpyro_refitting
-pystan_refitting_xr_lik
+pystan2_refitting_xr_lik
 pymc3_refitting_xr_lik
 numpyro_refitting_xr_lik
 ```
