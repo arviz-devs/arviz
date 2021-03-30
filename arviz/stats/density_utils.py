@@ -8,7 +8,6 @@ from scipy.optimize import brentq
 from scipy.signal import convolve, convolve2d, gaussian  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 from scipy.special import ive  # pylint: disable=no-name-in-module
-from numpy import histogram_bin_edges
 
 from ..utils import _cov, _dot, _stack, conditional_jit
 
@@ -954,11 +953,9 @@ def get_bins(values):
     # Sturges histogram bin estimator
     bins_sturges = (x_max - x_min) / (np.log2(values.size) + 1)
 
-        # The Freedman-Diaconis histogram bin estimator.
-        iqr = np.subtract(
-            *np.percentile(values, [75, 25])
-        )  # pylint: disable=assignment-from-no-return
-        bins_fd = 2 * iqr * values.size ** (-1 / 3)
+    # The Freedman-Diaconis histogram bin estimator.
+    iqr = np.subtract(*np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
+    bins_fd = 2 * iqr * values.size ** (-1 / 3)
 
     width = np.round(np.max([1, bins_sturges, bins_fd])).astype(int)
 
