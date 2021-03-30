@@ -591,13 +591,13 @@ def _unpack_fit(fit, items, save_warmup):
     for item in items:
         if item in fit.stan_vars_cols:
             col_idxs = fit.stan_vars_cols[item]
-            if len(col_idxs) == 1:
-                raw_draws = draws[..., col_idxs[0]]
-            else:
-                raw_draws = fit.stan_variable(item, inc_warmup=save_warmup)
-                raw_draws = np.swapaxes(
-                    raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
-                )
+            #if len(col_idxs) == 1:
+            #    raw_draws = draws[..., col_idxs[0]]
+            #else:
+            raw_draws = fit.stan_variable(item, inc_warmup=save_warmup)
+            raw_draws = np.swapaxes(
+                raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
+            )
         elif item in fit.sampler_vars_cols:
             col_idxs = fit.sampler_vars_cols[item]
             raw_draws = draws[..., col_idxs[0]]
