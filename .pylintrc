@@ -244,6 +244,7 @@ function-naming-style=snake_case
 
 # Good variable names which should always be accepted, separated by a comma
 good-names=b,
+           e,
            i,
            j,
            k,
@@ -265,7 +266,7 @@ good-names=b,
            ok,
            sd,
            tr,
-	         eta,
+           eta,
            Run,
            _log,
            _
