@@ -12,8 +12,8 @@ class SamplingWrapper:
     functions requiring refitting like Leave Future Out or Simulation Based Calibration can be
     performed from ArviZ.
 
-    See other SamplingWrapper classes at :ref:`wrappers api section <wrappers_api>`. For
-    usage examples see user guide pages on :ref:`wrapper_guide`.
+    For usage examples see user guide pages on :ref:`wrapper_guide`.See other
+    SamplingWrapper classes at :ref:`wrappers api section <wrappers_api>`.
 
     Parameters
     ----------
