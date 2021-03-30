@@ -2,17 +2,24 @@
 """Statistical functions in ArviZ."""
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Mapping, cast, Callable
 
 import numpy as np
 import pandas as pd
 import scipy.stats as st
 import xarray as xr
 from scipy.optimize import minimize
+from typing_extensions import Literal
+
+NO_GET_ARGS: bool = False
+try:
+    from typing_extensions import get_args
+except ImportError:
+    NO_GET_ARGS = True
 
 from arviz import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
-from ..rcparams import rcParams
+from ..rcparams import rcParams, ScaleKeyword, ICKeyword
 from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
@@ -26,9 +33,6 @@ from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 from ..sel_utils import xarray_var_iter
 from ..labels import BaseLabeller
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
 
 
 __all__ = [
@@ -45,7 +49,14 @@ __all__ = [
 
 
 def compare(
-    dataset_dict, ic=None, method="stacking", b_samples=1000, alpha=1, seed=None, scale=None
+    dataset_dict: Mapping[str, InferenceData],
+    ic: Optional[ICKeyword] = None,
+    method: Literal["stacking", "BB-pseudo-BMA", "pseudo-MA"] = "stacking",
+    b_samples: int = 1000,
+    alpha: float = 1,
+    seed=None,
+    scale: Optional[ScaleKeyword] = None,
+    var_name: Optional[str] = None,
 ):
     r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
@@ -58,10 +69,10 @@ def compare(
     ----------
     dataset_dict: dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
-    ic: str
+    ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
-    method: str
+    method: str, optional
         Method used to estimate the weights for each model. Available options are:
 
         - 'stacking' : stacking of predictive distributions.
@@ -71,19 +82,19 @@ def compare(
           weighting, without Bootstrap stabilization (not recommended).
 
         For more information read https://arxiv.org/abs/1704.02030
-        Defaults to ``rcParams["stats.ic_compare_method"]``.
-    b_samples: int
+    b_samples: int, optional default = 1000
         Number of samples taken by the Bayesian bootstrap estimation.
         Only useful when method = 'BB-pseudo-BMA'.
-    alpha: float
+        Defaults to ``rcParams["stats.ic_compare_method"]``.
+    alpha: float, optional
         The shape parameter in the Dirichlet distribution used for the Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
         on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
-    seed: int or np.random.RandomState instance
+    seed: int or np.random.RandomState instance, optional
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
         np.random state is used.
-    scale: str
+    scale: str, optional
         Output scale for IC. Available options are:
 
         - `log` : (default) log-score (after Vehtari et al. (2017))
@@ -92,6 +103,9 @@ def compare(
 
         A higher log-score (or a lower deviance) indicates a model with better predictive
         accuracy.
+    var_name: str, optional
+        If there is more than a single observed variable in the ``InferenceData``, which
+        should be used as the basis for comparison.
 
     Returns
     -------
@@ -142,10 +156,16 @@ def compare(
     --------
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
-
     """
     names = list(dataset_dict.keys())
-    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
+    if scale is not None:
+        scale = cast(ScaleKeyword, scale.lower())
+    else:
+        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
+    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
+    if scale not in allowable:
+        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
+
     if scale == "log":
         scale_value = 1
         ascending = False
@@ -156,9 +176,15 @@ def compare(
             scale_value = -2
         ascending = True
 
-    ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
+    if ic is None:
+        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
+    else:
+        ic = cast(ICKeyword, ic.lower())
+    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
+    if ic not in allowable:
+        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
     if ic == "loo":
-        ic_func = loo
+        ic_func: Callable = loo
         df_comp = pd.DataFrame(
             index=names,
             columns=[
@@ -172,7 +198,7 @@ def compare(
                 "warning",
                 "loo_scale",
             ],
-            dtype=np.float,
+            dtype=np.float_,
         )
         scale_col = "loo_scale"
     elif ic == "waic":
@@ -190,7 +216,7 @@ def compare(
                 "warning",
                 "waic_scale",
             ],
-            dtype=np.float,
+            dtype=np.float_,
         )
         scale_col = "waic_scale"
     else:
@@ -208,7 +234,12 @@ def compare(
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        ics = ics.append([ic_func(dataset, pointwise=True, scale=scale)])
+        try:
+            # Here is where the IC function is actually computed -- the rest of this
+            # function is argument processing and return value formatting
+            ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
+        except Exception as e:
+            raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
@@ -1280,7 +1311,9 @@ def summary(
     n_vars = np.sum([joined[var].size // n_metrics for var in joined.data_vars])
 
     if fmt.lower() == "wide":
-        summary_df = pd.DataFrame(np.full((n_vars, n_metrics), np.nan), columns=metric_names)
+        summary_df = pd.DataFrame(
+            (np.full((cast(int, n_vars), n_metrics), np.nan)), columns=metric_names
+        )
         indexs = []
         for i, (var_name, sel, isel, values) in enumerate(
             xarray_var_iter(joined, skip_dims={"metric"})

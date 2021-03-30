@@ -412,7 +412,11 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
 
 def get_log_likelihood(idata, var_name=None):
     """Retrieve the log likelihood dataarray of a given variable."""
-    if hasattr(idata, "sample_stats") and hasattr(idata.sample_stats, "log_likelihood"):
+    if (
+        not hasattr(idata, "log_likelihood")
+        and hasattr(idata, "sample_stats")
+        and hasattr(idata.sample_stats, "log_likelihood")
+    ):
         warnings.warn(
             "Storing the log_likelihood in sample_stats groups has been deprecated",
             DeprecationWarning,

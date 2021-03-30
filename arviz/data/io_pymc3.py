@@ -89,7 +89,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         # this permits us to get the model from command-line argument or from with model:
         try:
             self.model = self.pymc3.modelcontext(model or self.model)
-        except TypeError:
+        except TypeError as e:
+            _log.error("Got error %s trying to find log_likelihood in translation.", e)
             self.model = None
 
         if self.model is None:
@@ -251,12 +252,17 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "`pip install pymc3>=3.8` or `conda install -c conda-forge pymc3>=3.8`."
             ) from err
         for var, log_like_fun in cached:
-            for k, chain in enumerate(trace.chains):
-                log_like_chain = [
-                    self.log_likelihood_vals_point(point, var, log_like_fun)
-                    for point in trace.points([chain])
-                ]
-                log_likelihood_dict.insert(var.name, np.stack(log_like_chain), k)
+            try:
+                for k, chain in enumerate(trace.chains):
+                    log_like_chain = [
+                        self.log_likelihood_vals_point(point, var, log_like_fun)
+                        for point in trace.points([chain])
+                    ]
+                    log_likelihood_dict.insert(var.name, np.stack(log_like_chain), k)
+            except TypeError as e:
+                raise TypeError(
+                    *tuple(["While computing log-likelihood for {var}: "] + list(e.args))
+                ) from e
         return log_likelihood_dict.trace_dict
 
     @requires("trace")
