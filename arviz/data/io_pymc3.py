@@ -63,7 +63,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         trace=None,
         prior=None,
         posterior_predictive=None,
-        log_likelihood=True,
+        log_likelihood=None,
         predictions=None,
         coords: Optional[Coords] = None,
         dims: Optional[Dims] = None,
@@ -89,7 +89,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         # this permits us to get the model from command-line argument or from with model:
         try:
             self.model = self.pymc3.modelcontext(model or self.model)
-        except TypeError:
+        except TypeError as e:
+            _log.error("Got error %s trying to find log_likelihood in translation.", e)
             self.model = None
 
         if self.model is None:
@@ -137,7 +138,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.predictions = predictions
 
         def arbitrary_element(dct: Dict[Any, np.ndarray]) -> np.ndarray:
@@ -249,12 +252,17 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "`pip install pymc3>=3.8` or `conda install -c conda-forge pymc3>=3.8`."
             ) from err
         for var, log_like_fun in cached:
-            for k, chain in enumerate(trace.chains):
-                log_like_chain = [
-                    self.log_likelihood_vals_point(point, var, log_like_fun)
-                    for point in trace.points([chain])
-                ]
-                log_likelihood_dict.insert(var.name, np.stack(log_like_chain), k)
+            try:
+                for k, chain in enumerate(trace.chains):
+                    log_like_chain = [
+                        self.log_likelihood_vals_point(point, var, log_like_fun)
+                        for point in trace.points([chain])
+                    ]
+                    log_likelihood_dict.insert(var.name, np.stack(log_like_chain), k)
+            except TypeError as e:
+                raise TypeError(
+                    *tuple(["While computing log-likelihood for {var}: "] + list(e.args))
+                ) from e
         return log_likelihood_dict.trace_dict
 
     @requires("trace")
@@ -523,7 +531,7 @@ def from_pymc3(
     *,
     prior: Optional[Dict[str, Any]] = None,
     posterior_predictive: Optional[Dict[str, Any]] = None,
-    log_likelihood: Union[bool, Iterable[str]] = True,
+    log_likelihood: Union[bool, Iterable[str], None] = None,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
     model: Optional[Model] = None,
@@ -551,6 +559,7 @@ def from_pymc3(
     log_likelihood : bool or array_like of str, optional
         List of variables to calculate `log_likelihood`. Defaults to True which calculates
         `log_likelihood` for all observed variables. If set to False, log_likelihood is skipped.
+        Defaults to the value of rcParam ``data.log_likelihood``.
     coords : dict of {str: array-like}, optional
         Map of coordinate names to coordinate values
     dims : dict of {str: list of str}, optional

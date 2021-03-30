@@ -96,6 +96,8 @@ class CmdStanConverter:
             and any(name.split(".")[0] == "log_lik" for name in self.posterior_columns)
         ):
             self.log_likelihood = ["log_lik"]
+        elif isinstance(self.log_likelihood, bool):
+            self.log_likelihood = None
 
     @requires("posterior_")
     def _parse_posterior(self):

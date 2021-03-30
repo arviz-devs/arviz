@@ -10,6 +10,8 @@
 * Added interactive legend to bokeh `forestplot` ([1591](https://github.com/arviz-devs/arviz/pull/1591))
 * Added interactive legend to bokeh `ppcplot` ([1602](https://github.com/arviz-devs/arviz/pull/1602))
 * Add more helpful error message for HDF5 problems reading `InferenceData` from NetCDF ([1637](https://github.com/arviz-devs/arviz/pull/1637))
+* Added `data.log_likelihood`, `stats.ic_compare_method` and `plot.density_kind` to `rcParams` ([1611](https://github.com/arviz-devs/arviz/pull/1611))
+* Improve error messages in `stats.compare()`, and `var_name` parameter. ([1616](https://github.com/arviz-devs/arviz/pull/1616))
 
 ### Maintenance and fixes
 * Enforced using coordinate values as default labels ([1201](https://github.com/arviz-devs/arviz/pull/1201))
@@ -36,6 +38,7 @@
 * Added "Label guide" page and API section for `arviz.labels` module ([1201](https://github.com/arviz-devs/arviz/pull/1201) and [1635](https://github.com/arviz-devs/arviz/pull/1635))
 * Add "Installation guide" page to the documentation ([1551](https://github.com/arviz-devs/arviz/pull/1551))
 * Improve documentation on experimental `SamplingWrapper` classes ([1582](https://github.com/arviz-devs/arviz/pull/1582))
+* Added example to `plot_hdi` using Inference Data ([1615](https://github.com/arviz-devs/arviz/pull/1615))
 
 ## v0.11.2 (2021 Feb 21)
 ### New features

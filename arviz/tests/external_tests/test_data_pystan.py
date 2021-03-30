@@ -1,4 +1,4 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name
+# pylint: disable=no-member, invalid-name, redefined-outer-name, too-many-function-args
 import importlib
 from collections import OrderedDict
 
@@ -123,6 +123,21 @@ class TestDataPyStan:
             save_warmup=pystan_version() == 2,
         )
 
+    def get_inference_data5(self, data):
+        """minimal input."""
+        return from_pystan(
+            posterior=data.obj,
+            posterior_predictive=None,
+            prior=data.obj,
+            prior_predictive=None,
+            coords=None,
+            dims=None,
+            posterior_model=data.model,
+            log_likelihood=False,
+            prior_model=data.model,
+            save_warmup=pystan_version() == 2,
+        )
+
     def test_sampler_stats(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         test_dict = {"sample_stats": ["diverging"]}
@@ -134,6 +149,7 @@ class TestDataPyStan:
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
         inference_data4 = self.get_inference_data4(data)
+        inference_data5 = self.get_inference_data5(data)
         # inference_data 1
         test_dict = {
             "posterior": ["theta"],
@@ -143,7 +159,7 @@ class TestDataPyStan:
             "constant_data": ["sigma"],
             "predictions_constant_data": ["sigma"],
             "sample_stats": ["diverging", "lp"],
-            "log_likelihood": ["y"],
+            "log_likelihood": ["y", "~log_lik"],
             "prior": ["theta"],
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
@@ -184,12 +200,26 @@ class TestDataPyStan:
             "posterior": ["theta"],
             "prior": ["theta"],
             "sample_stats": ["diverging", "lp"],
+            "~log_likelihood": [""],
         }
         if pystan_version() == 2:
             test_dict.update(
                 {"warmup_posterior": ["theta"], "warmup_sample_stats": ["diverging", "lp"]}
             )
         fails = check_multiple_attrs(test_dict, inference_data4)
+        assert not fails
+        # inference_data 5
+        test_dict = {
+            "posterior": ["theta"],
+            "prior": ["theta"],
+            "sample_stats": ["diverging", "lp"],
+            "~log_likelihood": [""],
+        }
+        if pystan_version() == 2:
+            test_dict.update(
+                {"warmup_posterior": ["theta"], "warmup_sample_stats": ["diverging", "lp"]}
+            )
+        fails = check_multiple_attrs(test_dict, inference_data5)
         assert not fails
 
     def test_invalid_fit(self, data):
@@ -211,26 +241,32 @@ class TestDataPyStan:
                 _ = from_pystan(posterior=fit)
 
     def test_empty_parameter(self):
+        model_code = """
+            parameters {
+                real y;
+                vector[3] x;
+                vector[0] a;
+                vector[2] z;
+            }
+            model {
+                y ~ normal(0,1);
+            }
+        """
         if pystan_version() == 2:
-            model_code = """
-                parameters {
-                    real y;
-                    vector[3] x;
-                    vector[0] a;
-                    vector[2] z;
-                }
-                model {
-                    y ~ normal(0,1);
-                }
-            """
             from pystan import StanModel  # pylint: disable=import-error
 
             model = StanModel(model_code=model_code)
-            fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
-            posterior = from_pystan(posterior=fit)
-            test_dict = {"posterior": ["y", "x", "z"], "sample_stats": ["diverging"]}
-            fails = check_multiple_attrs(test_dict, posterior)
-            assert not fails
+            fit = model.sampling(iter=500, chains=2, check_hmc_diagnostics=False)
+        else:
+            import stan  # pylint: disable=import-error
+
+            model = stan.build(model_code)
+            fit = model.sample(num_samples=500, num_chains=2)
+
+        posterior = from_pystan(posterior=fit)
+        test_dict = {"posterior": ["y", "x", "z", "~a"], "sample_stats": ["diverging"]}
+        fails = check_multiple_attrs(test_dict, posterior)
+        assert not fails
 
     def test_get_draws(self, data):
         fit = data.obj

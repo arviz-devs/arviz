@@ -246,6 +246,7 @@ class TestDataCmdStan:
                 prior_predictive=path,
                 observed_data=None,
                 observed_data_var=None,
+                log_likelihood=False,
                 coords={"rand": np.arange(3)},
                 dims={"x": ["rand"]},
             )
@@ -256,6 +257,7 @@ class TestDataCmdStan:
                 "sample_stats": ["lp"],
                 "sample_stats_prior": ["lp"],
                 "posterior_predictive": ["x", "y", "Z"],
+                "~log_likelihood": [""],
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
@@ -287,9 +289,9 @@ class TestDataCmdStan:
                 },
             )
             test_dict = {
-                "posterior": ["mu", "tau", "theta_tilde", "theta"],
+                "posterior": ["mu", "tau", "theta_tilde", "theta", "log_lik"],
                 "prior": ["mu", "tau", "theta_tilde", "theta"],
-                "log_likelihood": ["y_hat"],
+                "log_likelihood": ["y_hat", "~log_lik"],
                 "observed_data": ["y"],
                 "sample_stats_prior": ["lp"],
             }

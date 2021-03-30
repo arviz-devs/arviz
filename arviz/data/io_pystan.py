@@ -49,17 +49,21 @@ class PyStanConverter:
         self.observed_data = observed_data
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.coords = coords
         self.dims = dims
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
         if (
-            self.log_likelihood is None
+            self.log_likelihood is True
             and self.posterior is not None
             and "log_lik" in self.posterior.sim["pars_oi"]
         ):
             self.log_likelihood = ["log_lik"]
+        elif isinstance(self.log_likelihood, bool):
+            self.log_likelihood = None
 
         import pystan  # pylint: disable=import-error
 
@@ -316,16 +320,20 @@ class PyStan3Converter:
         self.observed_data = observed_data
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.coords = coords
         self.dims = dims
 
         if (
-            self.log_likelihood is None
+            self.log_likelihood is True
             and self.posterior is not None
             and "log_lik" in self.posterior.param_names
         ):
             self.log_likelihood = ["log_lik"]
+        elif isinstance(self.log_likelihood, bool):
+            self.log_likelihood = None
 
         import stan  # pylint: disable=import-error
 
@@ -929,7 +937,10 @@ def from_pystan(
         posterior. It is recommended to use this argument as a dictionary whose keys
         are observed variable names and its values are the variables storing log
         likelihood arrays in the Stan code. In other cases, a dictionary with keys
-        equal to its values is used.
+        equal to its values is used. By default, if a variable ``log_lik`` is
+        present in the Stan model, it will be retrieved as pointwise log
+        likelihood values. Use ``False`` or set ``data.log_likelihood`` to
+        false to avoid this behaviour.
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
