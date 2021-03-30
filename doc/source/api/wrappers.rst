@@ -11,3 +11,4 @@ Experimental feature
 
     SamplingWrapper
     PyStanSamplingWrapper
+    PyStan2SamplingWrapper
