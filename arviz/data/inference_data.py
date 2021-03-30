@@ -328,16 +328,30 @@ class InferenceData(Mapping[str, xr.Dataset]):
         InferenceData object
         """
         groups = {}
-        with nc.Dataset(filename, mode="r") as data:
-            data_groups = list(data.groups)
+        try:
+            with nc.Dataset(filename, mode="r") as data:
+                data_groups = list(data.groups)
 
-        for group in data_groups:
-            with xr.open_dataset(filename, group=group) as data:
-                if rcParams["data.load"] == "eager":
-                    groups[group] = data.load()
-                else:
-                    groups[group] = data
-        return InferenceData(**groups)
+            for group in data_groups:
+                with xr.open_dataset(filename, group=group) as data:
+                    if rcParams["data.load"] == "eager":
+                        groups[group] = data.load()
+                    else:
+                        groups[group] = data
+            return InferenceData(**groups)
+        except OSError as e:  # pylint: disable=invalid-name
+            if e.errno == -101:
+                raise type(e)(
+                    str(e)
+                    + (
+                        " while reading a NetCDF file. This is probably an error in HDF5, "
+                        "which happens because your OS does not support HDF5 file locking.  See "
+                        "https://stackoverflow.com/questions/49317927/"
+                        "errno-101-netcdf-hdf-error-when-opening-netcdf-file#49317928"
+                        " for a possible solution."
+                    )
+                )
+            raise e
 
     def to_netcdf(
         self, filename: str, compress: bool = True, groups: Optional[List[str]] = None
