@@ -11,10 +11,11 @@ whereas the second one externalizes the computation of the pointwise log
 likelihood to the user who is expected to write it with xarray/numpy.
 
 ```{toctree}
+pystan2_refitting
 pystan_refitting
 pymc3_refitting
 numpyro_refitting
-pystan_refitting_xr_lik
+pystan2_refitting_xr_lik
 pymc3_refitting_xr_lik
 numpyro_refitting_xr_lik
 ```
