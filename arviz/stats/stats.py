@@ -648,7 +648,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
     pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
 
-    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
@@ -692,7 +692,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
         warn_mg = True
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs = {"input_core_dims": [["sample"]]}
+    kwargs = {"input_core_dims": [["__sample__"]]}
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
         _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
     )
@@ -782,9 +782,11 @@ def psislw(log_weights, reff=1.0):
            ...: az.psislw(-log_likelihood, reff=0.8)
 
     """
-    if hasattr(log_weights, "sample"):
-        n_samples = len(log_weights.sample)
-        shape = [size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "sample"]
+    if hasattr(log_weights, "__sample__"):
+        n_samples = len(log_weights.__sample__)
+        shape = [
+            size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "__sample__"
+        ]
     else:
         n_samples = log_weights.shape[-1]
         shape = log_weights.shape[:-1]
@@ -799,7 +801,7 @@ def psislw(log_weights, reff=1.0):
     # define kwargs
     func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "k_min": k_min, "out": out}
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
-    kwargs = {"input_core_dims": [["sample"]], "output_core_dims": [["sample"], []]}
+    kwargs = {"input_core_dims": [["__sample__"]], "output_core_dims": [["__sample__"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
         _psislw,
         log_weights,
@@ -808,7 +810,7 @@ def psislw(log_weights, reff=1.0):
         **kwargs,
     )
     if isinstance(log_weights, xr.DataArray):
-        log_weights = log_weights.rename("log_weights").rename(sample="sample")
+        log_weights = log_weights.rename("log_weights")
     if isinstance(pareto_shape, xr.DataArray):
         pareto_shape = pareto_shape.rename("pareto_shape")
     return log_weights, pareto_shape
@@ -1415,13 +1417,13 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
-    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs = {"input_core_dims": [["sample"]]}
+    kwargs = {"input_core_dims": [["__sample__"]]}
     lppd_i = _wrap_xarray_ufunc(
         _logsumexp,
         log_likelihood,
@@ -1431,7 +1433,7 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
         **kwargs,
     )
 
-    vars_lpd = log_likelihood.var(dim="sample")
+    vars_lpd = log_likelihood.var(dim="__sample__")
     warn_mg = False
     if np.any(vars_lpd > 0.4):
         warnings.warn(
@@ -1561,7 +1563,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
             raise ValueError(f"y must be of types array, DataArray or str, not {type(y)}")
         if isinstance(y_hat, str):
-            y_hat = idata.posterior_predictive[y_hat].stack(sample=("chain", "draw")).values
+            y_hat = idata.posterior_predictive[y_hat].stack(__sample__=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
             raise ValueError(f"y_hat must be of types array, DataArray or str, not {type(y_hat)}")
         if log_weights is None:
@@ -1572,10 +1574,10 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
                     log_likelihood = _get_log_likelihood(idata)
             else:
                 log_likelihood = _get_log_likelihood(idata)
-            log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+            log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
-            n_samples = len(log_likelihood.sample)
+            n_samples = len(log_likelihood.__sample__)
             ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
             reff = (
@@ -1608,7 +1610,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         )
 
     kwargs = {
-        "input_core_dims": [[], ["sample"], ["sample"]],
+        "input_core_dims": [[], ["__sample__"], ["__sample__"]],
         "output_core_dims": [[]],
         "join": "left",
     }

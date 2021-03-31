@@ -486,7 +486,7 @@ def test_loo_print(centered_eight, scale):
 def test_psislw(centered_eight):
     pareto_k = loo(centered_eight, pointwise=True, reff=0.7)["pareto_k"]
     log_likelihood = get_log_likelihood(centered_eight)
-    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
 
@@ -544,9 +544,9 @@ def test_loo_pit(centered_eight, args):
     y_hat = args.get("y_hat", None)
     log_weights = args.get("log_weights", None)
     y_arr = centered_eight.observed_data.obs
-    y_hat_arr = centered_eight.posterior_predictive.obs.stack(sample=("chain", "draw"))
-    log_like = get_log_likelihood(centered_eight).stack(sample=("chain", "draw"))
-    n_samples = len(log_like.sample)
+    y_hat_arr = centered_eight.posterior_predictive.obs.stack(__sample__=("chain", "draw"))
+    log_like = get_log_likelihood(centered_eight).stack(__sample__=("chain", "draw"))
+    n_samples = len(log_like.__sample__)
     ess_p = ess(centered_eight.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
     log_weights_arr = psislw(-log_like, reff=reff)[0]
@@ -584,9 +584,9 @@ def test_loo_pit_multidim(multidim_models, args):
     log_weights = args.get("log_weights", None)
     idata = multidim_models.model_1
     y_arr = idata.observed_data.y
-    y_hat_arr = idata.posterior_predictive.y.stack(sample=("chain", "draw"))
-    log_like = get_log_likelihood(idata).stack(sample=("chain", "draw"))
-    n_samples = len(log_like.sample)
+    y_hat_arr = idata.posterior_predictive.y.stack(__sample__=("chain", "draw"))
+    log_like = get_log_likelihood(idata).stack(__sample__=("chain", "draw"))
+    n_samples = len(log_like.__sample__)
     ess_p = ess(idata.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
     log_weights_arr = psislw(-log_like, reff=reff)[0]
