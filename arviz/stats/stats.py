@@ -752,6 +752,9 @@ def psislw(log_weights, reff=1.0):
     """
     Pareto smoothed importance sampling (PSIS).
 
+    Note that psislw will only act on the last dimension if the log_weights input is an
+    xarray.dataarray without a `__sample__` dimension or if it is a numpy array.
+
     Parameters
     ----------
     log_weights: array
@@ -778,7 +781,9 @@ def psislw(log_weights, reff=1.0):
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
-           ...: log_likelihood = data.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+           ...: log_likelihood = data.sample_stats.log_likelihood.stack(
+           ...:     __sample__=("chain", "draw")
+           ...: )
            ...: az.psislw(-log_likelihood, reff=0.8)
 
     """
@@ -1537,7 +1542,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
         In [1]: T = data.observed_data.obs - data.posterior.mu.median(dim=("chain", "draw"))
            ...: T_hat = data.posterior_predictive.obs - data.posterior.mu
-           ...: T_hat = T_hat.stack(sample=("chain", "draw"))
+           ...: T_hat = T_hat.stack(__sample__=("chain", "draw"))
            ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
 
     """
