@@ -1,3 +1,4 @@
+docutils==0.16 # temporary fix due to incompatibility with 0.17
 ghp-import
 ipython
 numpydoc
