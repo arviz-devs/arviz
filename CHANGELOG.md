@@ -39,6 +39,7 @@
 * Add "Installation guide" page to the documentation ([1551](https://github.com/arviz-devs/arviz/pull/1551))
 * Improve documentation on experimental `SamplingWrapper` classes ([1582](https://github.com/arviz-devs/arviz/pull/1582))
 * Added example to `plot_hdi` using Inference Data ([1615](https://github.com/arviz-devs/arviz/pull/1615))
+* Removed `geweke` diagnostic from `numba` user guide ([1653](https://github.com/arviz-devs/arviz/pull/1653))
 
 ## v0.11.2 (2021 Feb 21)
 ### New features
@@ -52,7 +53,6 @@
 * Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
 * Added significant digits formatter to round rope values ([1569](https://github.com/arviz-devs/arviz/pull/1569))
 * Updated `from_cmdstan`. csv reader, dtype problem fixed and dtype kwarg added for manual dtype casting ([1565](https://github.com/arviz-devs/arviz/pull/1565))
-* Removed `geweke` diagnostic from `numba` user guide ([1653](https://github.com/arviz-devs/arviz/pull/1653))
 
 ### Deprecation
 * Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
