@@ -718,9 +718,9 @@ def test_plot_loo_pit_label(models, args):
     if args.get("y_hat") == "str":
         y_hat = "y"
     elif args.get("y_hat") == "DataArray":
-        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw"))
+        y_hat = models.model_1.posterior_predictive.y.stack(__sample__=("chain", "draw"))
     elif args.get("y_hat") == "ndarray":
-        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw")).values
+        y_hat = models.model_1.posterior_predictive.y.stack(__sample__=("chain", "draw")).values
     else:
         y_hat = None
 
