@@ -156,7 +156,7 @@ html_theme_options = {
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
-    "use_edit_page_button": True,
+    "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
 }
 html_context = {
     "github_user": "arviz-devs",
