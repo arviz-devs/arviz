@@ -106,6 +106,7 @@ if branch_name == "main":
 else:
     # The short X.Y version.
     version = arviz.__version__
+
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -142,8 +143,26 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 
 html_theme_options = {
-    "github_url": "https://github.com/arviz-devs/arviz",
-    "twitter_url": "https://twitter.com/arviz_devs",
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/arviz-devs/arviz",
+            "icon": "fab fa-github-square",
+        },
+        {
+            "name": "Twitter",
+            "url": "https://twitter.com/arviz_devs",
+            "icon": "fab fa-twitter-square",
+        },
+    ],
+    "navbar_start": ["navbar-logo", "navbar-version"],
+    "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
+}
+html_context = {
+    "github_user": "arviz-devs",
+    "github_repo": "arviz",
+    "github_version": "main",
+    "doc_path": "doc/source/",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
