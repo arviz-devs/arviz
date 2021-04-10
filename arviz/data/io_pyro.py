@@ -110,7 +110,7 @@ class PyroConverter:
         if self.model is not None:
             trace = pyro.poutine.trace(self.model).get_trace(*self._args, **self._kwargs)
             observations = {
-                name: site["value"]
+                name: site["value"].cpu()
                 for name, site in trace.nodes.items()
                 if site["type"] == "sample" and site["is_observed"]
             }
