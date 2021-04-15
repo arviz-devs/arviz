@@ -1036,3 +1036,40 @@ def histogram(data, bins, range_hist=None):
     hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
     hist_dens = hist / (hist.sum() * np.diff(bin_edges))
     return hist, hist_dens, bin_edges
+
+
+def _find_hpd_contours(density, hpd_levels):
+    """
+    Find contours enclosing regions of highest posterior density.
+
+    Parameters
+    ----------
+    density : array-like
+        A gridded 2D KDE.
+    hpd_levels : array-like
+        An array of highest posterior density confidence levels.
+
+    Returns
+    -------
+    contour_levels : array
+        The contour levels corresponding to the given HPD levels.
+    """
+    # Calculate normalisation
+    norm = density.sum()
+
+    # Flatten and sort the 2D probability density
+    sorted_density = np.sort(density, axis=None)
+
+    # Calculate cumulative density
+    cum_density = sorted_density.cumsum()
+
+    # Find index of contour levels
+    contour_inds = np.empty_like(hpd_levels, dtype=int)
+    for idx, hpd_level in enumerate(hpd_levels):
+        if hpd_level == 0:
+            contour_inds[idx] = cum_density.shape[0] - 1
+        else:
+            contour_inds[idx] = np.argmax(cum_density >= (1 - hpd_level) * norm)
+
+    # Return contour levels
+    return sorted_density[contour_inds]
