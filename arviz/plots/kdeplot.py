@@ -4,7 +4,7 @@ import xarray as xr
 
 from ..data import InferenceData
 from ..rcparams import rcParams
-from ..stats.density_utils import _fast_kde_2d, kde, _find_hpd_contours
+from ..stats.density_utils import _fast_kde_2d, kde, _find_hdi_contours
 from .plot_utils import get_plotting_function
 
 
@@ -278,7 +278,7 @@ def plot_kde(
                 hpd_levels.append(1)
 
             # Calculate contour levels and sort for matplotlib
-            contour_levels = _find_hpd_contours(density, levels)
+            contour_levels = _find_hdi_contours(density, levels)
             contour_levels.sort()
 
             # Add keyword arguments to contour, contourf

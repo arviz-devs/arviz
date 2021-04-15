@@ -1038,7 +1038,7 @@ def histogram(data, bins, range_hist=None):
     return hist, hist_dens, bin_edges
 
 
-def _find_hpd_contours(density, hdi_levels):
+def _find_hdi_contours(density, hdi_levels):
     """
     Find contours enclosing regions of highest posterior density.
 
