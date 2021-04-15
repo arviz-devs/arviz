@@ -20,7 +20,7 @@ def plot_kde(
     quantiles=None,
     rotated=False,
     contour=True,
-    hpd_levels=None,
+    levels=None,
     fill_last=False,
     figsize=None,
     textsize=None,
@@ -75,8 +75,8 @@ def plot_kde(
     contour : bool
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
         Defaults to True.
-    hpd_levels : list
-        Confidence levels for contours of highest posterior density in a 2D KDE.
+    levels : list
+        Confidence levels for highest density interval contours of a 2D KDE.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to False.
     figsize : tuple
@@ -264,11 +264,11 @@ def plot_kde(
         gridsize = (128, 128) if contour else (256, 256)
         density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
 
-        if hpd_levels is not None:
-            # Check hpd levels are within bounds [0, 1]
-            if min(hpd_levels) < 0 or max(hpd_levels) > 1:
+        if levels is not None:
+            # Check hdi levels are within bounds [0, 1]
+            if min(levels) < 0 or max(levels) > 1:
                 raise ValueError(
-                    "Highest posterior density confidence levels must be between 0 and 1"
+                    "Highest density interval confidence levels must be between 0 and 1"
                 )
 
             # Need to include 0 & 1 if not included so that contours plot as expected
@@ -278,7 +278,7 @@ def plot_kde(
                 hpd_levels.append(1)
 
             # Calculate contour levels and sort for matplotlib
-            contour_levels = _find_hpd_contours(density, hpd_levels)
+            contour_levels = _find_hpd_contours(density, levels)
             contour_levels.sort()
 
             # Add keyword arguments to contour, contourf
