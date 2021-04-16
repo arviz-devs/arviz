@@ -995,12 +995,12 @@ def r2_score(y_true, y_pred,dist=False):
 
     """
     _numba_flag = Numba.numba_flag
-    if y_pred.ndim == 1:
-        var_y_est = _numba_var(svar, np.var, y_pred)
-        var_e = _numba_var(svar, np.var, (y_true - y_pred))
-    else:
-        var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
-        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
+#     if y_pred.ndim == 1:
+#         var_y_est = _numba_var(svar, np.var, y_pred)
+#         var_e = _numba_var(svar, np.var, (y_true - y_pred))
+#     else:
+    var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
+    var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
     r_squared = var_y_est / (var_y_est + var_e)
     
     if(dist):
