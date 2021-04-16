@@ -968,17 +968,19 @@ def r2_score(y_true, y_pred,dist=False):
 
     Parameters
     ----------
-    y_true: array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_true: array-like of shape = (n_outputs,)
         Ground truth (correct) target values.
-    y_pred: array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_pred: array-like of shape = (n_posterior_samples, n_outputs)
         Estimated target values.
+    dist(defualt=False): Flag indicating whether to return all posterior samples of the Bayesian R² or only summary stats.
 
     Returns
     -------
     Pandas Series with the following indices:
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
-
+    Bayesian R² samples: if dist==True.
+    
     Examples
     --------
     Calculate R² for Bayesian regression models :
