@@ -963,7 +963,7 @@ def _gpinv(probs, kappa, sigma):
     return x
 
 
-def r2_score(y_true, y_pred):
+def r2_score(y_true, y_pred,dist=False):
     """R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
@@ -997,10 +997,12 @@ def r2_score(y_true, y_pred):
         var_y_est = _numba_var(svar, np.var, y_pred)
         var_e = _numba_var(svar, np.var, (y_true - y_pred))
     else:
-        var_y_est = _numba_var(svar, np.var, y_pred.mean(0))
-        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=0)
+        var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
     r_squared = var_y_est / (var_y_est + var_e)
-
+    
+    if(dist):
+        return r_squared
     return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
 
 
