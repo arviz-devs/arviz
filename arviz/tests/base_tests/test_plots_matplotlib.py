@@ -395,6 +395,9 @@ def test_plot_joint_bad(models):
         {"is_circular": "radians"},
         {"is_circular": "degrees"},
         {"adaptive": True},
+        {"levels": [0.3, 0.9, 0.6]},
+        {"levels": [0.3, 0.6, 0.9], "contourf_kwargs": {"cmap": "Blues"}},
+        {"levels": [0.9, 0.6, 0.3], "contour_kwargs": {"alpha": 0}},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -402,6 +405,20 @@ def test_plot_kde(continuous_model, kwargs):
     axes1 = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
     assert axes
     assert axes is axes1
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"levels": [1, 2, 3]},
+        {"levels": [-0.3, 0.6, 0.9]},
+        {"levels": [0, 0.3, 0.6]},
+        {"levels": [0.3, 0.6, 1]},
+    ],
+)
+def test_plot_kde_levels_bad(continuous_model, kwargs):
+    with pytest.raises(ValueError):
+        plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
 
 
 @pytest.mark.parametrize("shape", [(8,), (8, 8), (8, 8, 8)])
