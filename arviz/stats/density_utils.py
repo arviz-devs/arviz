@@ -1054,22 +1054,16 @@ def _find_hdi_contours(density, hdi_levels):
     contour_levels : array
         The contour levels corresponding to the given HDI levels.
     """
-    # Calculate normalisation
-    norm = density.sum()
+    # Using the algorithm from corner.py
+    sorted_density = np.sort(density, axis=None)[::-1]
+    sm = sorted_density.cumsum()
+    sm /= sm[-1]
 
-    # Flatten and sort the 2D probability density
-    sorted_density = np.sort(density, axis=None)
-
-    # Calculate cumulative density
-    cum_density = sorted_density.cumsum()
-
-    # Find index of contour levels
-    contour_inds = np.empty_like(hdi_levels, dtype=int)
+    contours = np.empty_like(hdi_levels)
     for idx, hdi_level in enumerate(hdi_levels):
-        if hdi_level == 0:
-            contour_inds[idx] = cum_density.shape[0] - 1
-        else:
-            contour_inds[idx] = np.argmax(cum_density >= (1 - hdi_level) * norm)
+        try:
+            contours[idx] = sorted_density[sm <= hdi_level][-1]
+        except IndexError:
+            contours[idx] = sorted_density[0]
 
-    # Return contour levels
-    return sorted_density[contour_inds]
+    return contours
