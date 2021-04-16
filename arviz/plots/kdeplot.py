@@ -265,31 +265,27 @@ def plot_kde(
         density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
 
         if levels is not None:
-            # Check hdi levels are within bounds [0, 1]
-            if min(levels) < 0 or max(levels) > 1:
+            # Check hdi levels are within bounds (0, 1)
+            if min(levels) <= 0 or max(levels) >= 1:
                 raise ValueError(
                     "Highest density interval confidence levels must be between 0 and 1"
                 )
-
-            # Need to include 0 & 1 if not included so that contours plot as expected
-            if 0 not in hpd_levels:
-                hpd_levels.append(0)
-            if 1 not in hpd_levels:
-                hpd_levels.append(1)
 
             # Calculate contour levels and sort for matplotlib
             contour_levels = _find_hdi_contours(density, levels)
             contour_levels.sort()
 
+            contour_level_list = [0] + list(contour_levels) + [density.max()]
+
             # Add keyword arguments to contour, contourf
             if contour_kwargs is None:
-                contour_kwargs = {"levels": contour_levels}
+                contour_kwargs = {"levels": contour_level_list}
             else:
-                contour_kwargs.setdefault("levels", contour_levels)
+                contour_kwargs.setdefault("levels", contour_level_list)
             if contourf_kwargs is None:
-                contourf_kwargs = {"levels": contour_levels}
+                contourf_kwargs = {"levels": contour_level_list}
             else:
-                contourf_kwargs.setdefault("levels", contour_levels)
+                contourf_kwargs.setdefault("levels", contour_level_list)
 
         lower, upper, density_q = [None] * 3
 
