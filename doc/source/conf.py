@@ -157,6 +157,7 @@ html_theme_options = {
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
     "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
+    "google_analytics_id": "G-GWE5WL77V9",
 }
 html_context = {
     "github_user": "arviz-devs",
