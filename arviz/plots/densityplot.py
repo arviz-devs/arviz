@@ -18,6 +18,7 @@ def plot_density(
     data_labels=None,
     var_names=None,
     filter_vars=None,
+    combine_dims=[],
     transform=None,
     hdi_prob=None,
     point_estimate="auto",
@@ -64,6 +65,8 @@ def plot_density(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
+    combine_dims : Optional[List[str]]
+        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
@@ -212,7 +215,7 @@ def plot_density(
         if not 1 >= hdi_prob > 0:
             raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
-    to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
+    to_plot = [list(xarray_var_iter(data, var_names, combined=True, skip_dims=set(combine_dims))) for data in datasets]
     all_labels = []
     length_plotters = []
     for plotters in to_plot:
