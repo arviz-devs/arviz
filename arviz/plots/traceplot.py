@@ -16,6 +16,7 @@ def plot_trace(
     filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
+    combine_dims=[],
     divergences: Optional[str] = "auto",
     kind: Optional[str] = "trace",
     figsize: Optional[Tuple[float, float]] = None,
@@ -61,6 +62,8 @@ def plot_trace(
         ``pandas.filter``.
     coords: dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
+    combine_dims : list
+        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     divergences: {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
     kind: {"trace", "rank_bars", "rank_vlines"}, optional
@@ -201,7 +204,7 @@ def plot_trace(
     if compact:
         skip_dims = set(coords_data.dims) - {"chain", "draw"}
     else:
-        skip_dims = set()
+        skip_dims = set(combine_dims)
 
     plotters = list(
         xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)

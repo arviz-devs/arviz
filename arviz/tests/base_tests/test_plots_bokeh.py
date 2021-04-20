@@ -199,6 +199,22 @@ def test_plot_trace_max_subplots_warning(models):
             axes = plot_trace(models.model_1, backend="bokeh", show=False)
     assert axes.shape
 
+def TEST_test_plot_trace(models, kwargs):
+    axes = plot_trace(models.model_1, combine_dims=[], backend="bokeh", show=False, **kwargs)
+    assert axes.shape
+
+
+def TEST_test_plot_trace_discrete(discrete_model):
+    axes = plot_trace(discrete_model, combine_dims=[], backend="bokeh", show=False)
+    assert axes.shape
+
+
+def TEST_test_plot_trace_max_subplots_warning(models):
+    with pytest.warns(UserWarning):
+        with rc_context(rc={"plot.max_subplots": 2}):
+            axes = plot_trace(models.model_1, combine_dims=[], backend="bokeh", show=False)
+    assert axes.shape
+
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -805,6 +821,11 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
         plot_parallel(df_trace, backend="bokeh", show=False)
 
 
+# def TEST_test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
+#     with pytest.raises(ValueError):
+#         plot_parallel(df_trace, backend="bokeh", show=False, combine_dims=[])
+
+
 @pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])
 def test_plot_parallel(models, norm_method):
     assert plot_parallel(
@@ -816,6 +837,18 @@ def test_plot_parallel(models, norm_method):
     )
 
 
+# @pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])
+# def test_plot_parallel(models, norm_method):
+#     assert plot_parallel(
+#         models.model_1,
+#         var_names=["mu", "tau"],
+#         combine_dims=[],
+#         norm_method=norm_method,
+#         backend="bokeh",
+#         show=False,
+#     )
+
+
 @pytest.mark.parametrize("var_names", [None, "mu", ["mu", "tau"]])
 def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
@@ -823,6 +856,15 @@ def test_plot_parallel_exception(models, var_names):
         assert plot_parallel(
             models.model_1, var_names=var_names, norm_method="foo", backend="bokeh", show=False
         )
+
+
+# @pytest.mark.parametrize("var_names", [None, "mu", ["mu", "tau"]])
+# def test_plot_parallel_exception(models, var_names):
+#     """Ensure that correct exception is raised when one variable is passed."""
+#     with pytest.raises(ValueError):
+#         assert plot_parallel(
+#             models.model_1, var_names=var_names, combine_dims=[], norm_method="foo", backend="bokeh", show=False
+#         )
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
@@ -846,6 +888,29 @@ def test_plot_violin_layout(models):
 
 def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model, backend="bokeh", show=False)
+    assert axes.shape
+
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def TEST_test_plot_violin(models, var_names):
+    axes = plot_violin(models.model_1, var_names=var_names, combine_dims=[], backend="bokeh", show=False)
+    assert axes.shape
+
+
+def TEST_test_plot_violin_ax(models):
+    ax = bkp.figure()
+    axes = plot_violin(models.model_1, var_names="mu", combine_dims=[], ax=ax, backend="bokeh", show=False)
+    assert axes.shape
+
+
+def TEST_test_plot_violin_layout(models):
+    axes = plot_violin(
+        models.model_1, var_names=["mu", "tau"], combine_dims=[], sharey=False, backend="bokeh", show=False
+    )
+    assert axes.shape
+
+
+def TEST_test_plot_violin_discrete(discrete_model):
+    axes = plot_violin(discrete_model, backend="bokeh", combine_dims=[], show=False)
     assert axes.shape
 
 
@@ -1041,6 +1106,10 @@ def test_plot_posterior_skipna():
 )
 def test_plot_rank(models, kwargs):
     axes = plot_rank(models.model_1, backend="bokeh", show=False, **kwargs)
+    assert axes.shape
+
+def TEST_test_plot_rank(models, kwargs):
+    axes = plot_rank(models.model_1, combine_dims=[], backend="bokeh", show=False, **kwargs)
     assert axes.shape
 
 

@@ -10,6 +10,7 @@ from .plot_utils import default_grid, filter_plotters_list, get_plotting_functio
 def plot_violin(
     data,
     var_names=None,
+    combine_dims=[],
     filter_vars=None,
     transform=None,
     quartiles=True,
@@ -45,6 +46,8 @@ def plot_violin(
     var_names: list of variable names, optional
         Variables to be plotted, if None all variable are plotted. Prefix the
         variables by ``~`` when you want to exclude them from the plot.
+    combine_dims : list
+        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
@@ -135,7 +138,10 @@ def plot_violin(
     var_names = _var_names(var_names, data, filter_vars)
 
     plotters = filter_plotters_list(
-        list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
+        list(
+            xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=set(combine_dims))
+        ),
+        "plot_violin",
     )
 
     rows, cols = default_grid(len(plotters), grid=grid)
