@@ -307,7 +307,7 @@ def test_normalize_angle(mean):
 def test_find_hdi_contours(mean, cov, contour_sigma):
     """Test `_find_hdi_contours()` against SciPy's multivariate normal distribution."""
     # Set up scipy distribution
-    rv = st.multivariate_normal(mean, cov)
+    prob_dist = st.multivariate_normal(mean, cov)
 
     # Find standard deviations and eigenvectors
     eigenvals, eigenvecs = np.linalg.eig(cov)
@@ -318,19 +318,19 @@ def test_find_hdi_contours(mean, cov, contour_sigma):
     extremes = np.empty((4, 2))
     for i in range(4):
         extremes[i] = mean + (-1) ** i * 7 * stdevs[i // 2] * eigenvecs[i // 2]
-    x_min, y_min = np.amin(extremes, axis=0)
-    x_max, y_max = np.amax(extremes, axis=0)
+    x_min, y_min = np.amin(extremes, axis=0)  # type: ignore
+    x_max, y_max = np.amax(extremes, axis=0)  # type: ignore
 
     # Create 256x256 grid
     x = np.linspace(x_min, x_max, 256)
     y = np.linspace(y_min, y_max, 256)
     grid = np.dstack(np.meshgrid(x, y))
 
-    density = rv.pdf(grid)
+    density = prob_dist.pdf(grid)
 
     contour_sp = np.empty(contour_sigma.shape)
     for idx, sigma in enumerate(contour_sigma):
-        contour_sp[idx] = rv.pdf(mean + sigma * stdevs[0] * eigenvecs[0])
+        contour_sp[idx] = prob_dist.pdf(mean + sigma * stdevs[0] * eigenvecs[0])
 
     hdi_probs = 1 - np.exp(-0.5 * contour_sigma ** 2)
     contour_az = _find_hdi_contours(density, hdi_probs)

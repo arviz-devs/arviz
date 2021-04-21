@@ -417,6 +417,7 @@ def test_plot_kde(continuous_model, kwargs):
     ],
 )
 def test_plot_kde_levels_bad(continuous_model, kwargs):
+    """Ensure invalid hdi probabilities are rejected."""
     with pytest.raises(ValueError):
         plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
 
