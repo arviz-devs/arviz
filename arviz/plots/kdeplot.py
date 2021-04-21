@@ -219,6 +219,16 @@ def plot_kde(
         ...     contour_kwargs={"levels":3}, contourf_kwargs={"levels":3}
         ... );
 
+    Plot 2d contour KDE with 30%, 60% and 90% HDI contours.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(
+        ...     mu_posterior, values2=tau_posterior,
+        ...     hdi_probs=[0.3, 0.6, 0.9]
+        ... );
+
     Plot 2d smooth KDE
 
     .. plot::
