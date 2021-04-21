@@ -395,9 +395,9 @@ def test_plot_joint_bad(models):
         {"is_circular": "radians"},
         {"is_circular": "degrees"},
         {"adaptive": True},
-        {"levels": [0.3, 0.9, 0.6]},
-        {"levels": [0.3, 0.6, 0.9], "contourf_kwargs": {"cmap": "Blues"}},
-        {"levels": [0.9, 0.6, 0.3], "contour_kwargs": {"alpha": 0}},
+        {"hdi_probs": [0.3, 0.9, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 0.9], "contourf_kwargs": {"cmap": "Blues"}},
+        {"hdi_probs": [0.9, 0.6, 0.3], "contour_kwargs": {"alpha": 0}},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -410,13 +410,13 @@ def test_plot_kde(continuous_model, kwargs):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"levels": [1, 2, 3]},
-        {"levels": [-0.3, 0.6, 0.9]},
-        {"levels": [0, 0.3, 0.6]},
-        {"levels": [0.3, 0.6, 1]},
+        {"hdi_probs": [1, 2, 3]},
+        {"hdi_probs": [-0.3, 0.6, 0.9]},
+        {"hdi_probs": [0, 0.3, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 1]},
     ],
 )
-def test_plot_kde_levels_bad(continuous_model, kwargs):
+def test_plot_kde_hdi_probs_bad(continuous_model, kwargs):
     """Ensure invalid hdi probabilities are rejected."""
     with pytest.raises(ValueError):
         plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
