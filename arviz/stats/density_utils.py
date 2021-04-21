@@ -1045,7 +1045,7 @@ def _find_hdi_contours(density, hdi_levels):
     Parameters
     ----------
     density : array-like
-        A gridded 2D KDE.
+        A 2D KDE on a grid with cells of equal area.
     hdi_levels : array-like
         An array of highest density interval confidence levels.
 
