@@ -318,8 +318,8 @@ def test_find_hdi_contours(mean, cov, contour_sigma):
     extremes = np.empty((4, 2))
     for i in range(4):
         extremes[i] = mean + (-1) ** i * 7 * stdevs[i // 2] * eigenvecs[i // 2]
-    x_min, y_min = np.amin(extremes, axis=0)  # type: ignore
-    x_max, y_max = np.amax(extremes, axis=0)  # type: ignore
+    x_min, y_min = np.amin(extremes, axis=0)
+    x_max, y_max = np.amax(extremes, axis=0)
 
     # Create 256x256 grid
     x = np.linspace(x_min, x_max, 256)
