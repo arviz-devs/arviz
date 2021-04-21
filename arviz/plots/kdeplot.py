@@ -76,7 +76,7 @@ def plot_kde(
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
         Defaults to True.
     levels : list
-        Confidence levels for highest density interval contours of a 2D KDE.
+        Confidence levels for highest density (2-dimensional) interval contours of a 2D KDE.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to False.
     figsize : tuple
