@@ -183,7 +183,7 @@ def plot_kde(
                 levels_scaled = np.linspace(0, 1, levels)
                 levels = _rescale_axis(levels_scaled, scaled_density_args)
             else:
-                levels_scaled_nonclip = _scale_axis(np.asarray(levels), scaled_density_args)
+                levels_scaled_nonclip, _, _ = _scale_axis(np.asarray(levels), scaled_density_args)
                 levels_scaled = np.clip(levels_scaled_nonclip, 0, 1)
 
             cmap = contourf_kwargs.pop("cmap", "viridis")
@@ -198,6 +198,7 @@ def plot_kde(
             contour_kwargs.setdefault("line_color", "black")
             contour_kwargs.setdefault("line_alpha", 0.25)
             contour_kwargs.setdefault("fill_alpha", 1)
+            contour_kwargs.pop("levels", None)
 
             for i, (level, level_upper, color) in enumerate(
                 zip(levels_scaled[:-1], levels_scaled[1:], colors[1:])
