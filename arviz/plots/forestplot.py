@@ -11,6 +11,7 @@ def plot_forest(
     kind="forestplot",
     model_names=None,
     var_names=None,
+    combine_dims=[],
     filter_vars=None,
     transform=None,
     coords=None,
@@ -55,6 +56,8 @@ def plot_forest(
     var_names: list[str], optional
         List of variables to plot (defaults to None, which results in all variables plotted)
         Prefix the variables by ``~`` when you want to exclude them from the plot.
+    combine_dims : list
+        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If None(default), interpret var_names as the real variables names. If "like", interpret
         var_names as substrings of the real variables names. If "regex", interpret var_names as
@@ -251,6 +254,7 @@ def plot_forest(
         ax=ax,
         datasets=datasets,
         var_names=var_names,
+        combine_dims=[],
         model_names=model_names,
         combined=combined,
         colors=colors,

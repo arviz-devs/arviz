@@ -16,7 +16,6 @@ def plot_trace(
     filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
-    combine_dims=[],
     divergences: Optional[str] = "auto",
     kind: Optional[str] = "trace",
     figsize: Optional[Tuple[float, float]] = None,
@@ -204,7 +203,7 @@ def plot_trace(
     if compact:
         skip_dims = set(coords_data.dims) - {"chain", "draw"}
     else:
-        skip_dims = set(combine_dims)
+        skip_dims = set()
 
     plotters = list(
         xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)

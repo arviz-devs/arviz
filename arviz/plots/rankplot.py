@@ -18,7 +18,6 @@ def plot_rank(
     filter_vars=None,
     transform=None,
     coords=None,
-    combine_dims=[],
     bins=None,
     kind="bars",
     colors="cycle",
@@ -174,7 +173,7 @@ def plot_rank(
     plotters = filter_plotters_list(
         list(
             xarray_var_iter(
-                posterior_data, var_names=var_names, combined=True, skip_dims=set(combine_dims)
+                posterior_data, var_names=var_names, combined=True,
             )
         ),
         "plot_rank",
