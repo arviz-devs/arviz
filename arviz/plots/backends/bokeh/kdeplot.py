@@ -172,18 +172,17 @@ def plot_kde(
                 x_x, y_y, scaled_density, None, True, 0
             )
 
+            levels = 9
+            if "levels" in contourf_kwargs:
+                levels = contourf_kwargs.pop("levels")
             if "levels" in contour_kwargs:
-                levels = contour_kwargs.get("levels")
-            elif "levels" in contourf_kwargs:
-                levels = contourf_kwargs.get("levels")
-            else:
-                levels = 11
+                levels = contour_kwargs.pop("levels")
 
             if isinstance(levels, Integral):
-                levels_scaled = np.linspace(0, 1, levels)
+                levels_scaled = np.linspace(0, 1, levels + 2)
                 levels = _rescale_axis(levels_scaled, scaled_density_args)
             else:
-                levels_scaled_nonclip = _scale_axis(np.asarray(levels), scaled_density_args)
+                levels_scaled_nonclip, *_ = _scale_axis(np.asarray(levels), scaled_density_args)
                 levels_scaled = np.clip(levels_scaled_nonclip, 0, 1)
 
             cmap = contourf_kwargs.pop("cmap", "viridis")
@@ -195,7 +194,6 @@ def plot_kde(
                 colors = cmap
 
             contour_kwargs.update(contourf_kwargs)
-            contour_kwargs.setdefault("line_color", "black")
             contour_kwargs.setdefault("line_alpha", 0.25)
             contour_kwargs.setdefault("fill_alpha", 1)
 
@@ -204,9 +202,17 @@ def plot_kde(
             ):
                 if not fill_last and (i == 0):
                     continue
+                contour_kwargs_ = contour_kwargs.copy()
+                contour_kwargs_.setdefault("line_color", color)
+                contour_kwargs_.setdefault("fill_color", color)
                 vertices, _ = contour_generator.create_filled_contour(level, level_upper)
                 for seg in vertices:
-                    patch = ax.patch(*seg.T, fill_color=color, **contour_kwargs)
+                    # ax.multi_polygon would be better, but input is
+                    # currently not suitable
+                    # seg is 1 line that defines an area
+                    # multi_polygon would need inner and outer edges
+                    # as a line
+                    patch = ax.patch(*seg.T, **contour_kwargs_)
                     glyphs.append(patch)
 
             if fill_last:
