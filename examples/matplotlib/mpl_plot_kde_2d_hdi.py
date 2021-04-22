@@ -2,8 +2,8 @@
 2d KDE
 ======
 
-_thumb: .1, .8
-_example_title: Plot KDE in two dimensions with HDI contours
+_thumb: .5, .8
+_example_title: 2d KDE with HDI Contours
 """
 import matplotlib.pyplot as plt
 import numpy as np
