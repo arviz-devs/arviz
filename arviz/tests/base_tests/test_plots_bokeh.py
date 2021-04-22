@@ -266,6 +266,8 @@ def test_plot_kde_1d(continuous_model):
         {"contour": True, "contourf_kwargs": {"cmap": "plasma"}},
         {"contour": False},
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+        {"contour": True, "contourf_kwargs": {"levels": 3}},
+        {"contour": True, "contourf_kwargs": {"levels": [0.1, 0.2, 0.3]}},
     ],
 )
 def test_plot_kde_2d(continuous_model, kwargs):
