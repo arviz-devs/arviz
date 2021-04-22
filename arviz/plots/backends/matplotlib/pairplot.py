@@ -1,5 +1,6 @@
 """Matplotlib pairplot."""
 import warnings
+from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -284,7 +285,7 @@ def plot_pair(
                             var1,
                             var2,
                             ax=ax[j, i],
-                            **kde_kwargs,
+                            **deepcopy(kde_kwargs),
                         )
 
                     if "hexbin" in kind:
