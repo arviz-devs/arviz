@@ -224,10 +224,7 @@ def plot_kde(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_kde(
-        ...     mu_posterior, values2=tau_posterior,
-        ...     hdi_probs=[0.3, 0.6, 0.9]
-        ... );
+        >>> az.plot_kde(mu_posterior, values2=tau_posterior, hdi_probs=[0.3, 0.6, 0.9])
 
     Plot 2d smooth KDE
 
