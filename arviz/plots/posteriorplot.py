@@ -11,6 +11,7 @@ def plot_posterior(
     data,
     var_names=None,
     filter_vars=None,
+    combine_dims=[],
     transform=None,
     coords=None,
     grid=None,
@@ -52,6 +53,8 @@ def plot_posterior(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
+    combine_dims : list
+        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
@@ -246,7 +249,7 @@ def plot_posterior(
         kind = rcParams["plot.density_kind"]
 
     plotters = filter_plotters_list(
-        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
+        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True, skip_dims=set(combine_dims))),
         "plot_posterior",
     )
     length_plotters = len(plotters)

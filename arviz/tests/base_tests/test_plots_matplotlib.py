@@ -166,6 +166,10 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(obj, filter_vars="bad_value")
 
+def combinedims_test_plot_density_discrete(discrete_model):
+    axes = plot_density(discrete_model, combine_dims=['school'], shade=0.9)
+    assert axes.size == 2
+
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -581,6 +585,50 @@ def test_plot_pair_overlaid(models, kwargs):
     assert ax is ax2
     assert ax.shape
 
+def combinedims_test_plot_pair(models, kwargs):
+    ax = plot_pair(models.model_1, combine_dims=["theta"], **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin", "colorbar": True}]
+)
+def combinedims_test_plot_pair_2var(discrete_model, fig_ax, kwargs):
+    _, ax = fig_ax
+    ax = plot_pair(discrete_model, combine_dims=["theta"], ax=ax, **kwargs)
+    assert ax
+
+
+def combinedims_test_plot_pair_bad(models):
+    with pytest.raises(ValueError):
+        plot_pair(models.model_1, combine_dims=["theta"], kind="bad_kind")
+    with pytest.raises(Exception):
+        plot_pair(models.model_1, var_names=["mu"], combine_dims=["theta"])
+
+
+@pytest.mark.parametrize("has_sample_stats", [True, False])
+def combinedims_test_plot_pair_divergences_warning(has_sample_stats):
+    data = load_arviz_data("centered_eight")
+    if has_sample_stats:
+        # sample_stats present, diverging field missing
+        data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
+    else:
+        # sample_stats missing
+        data = data.posterior  # pylint: disable=no-member
+    with pytest.warns(UserWarning):
+        ax = plot_pair(data, combine_dims=["tau"], divergences=True)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs", [{}, {"marginals": True}, {"marginals": True, "var_names": ["mu", "tau"]}]
+)
+def combinedims_test_plot_pair_overlaid(models, kwargs):
+    ax = plot_pair(models.model_1, combine_dims=["theta"], **kwargs)
+    ax2 = plot_pair(models.model_2, combine_dims=["theta"], ax=ax, **kwargs)
+    assert ax is ax2
+    assert ax.shape
+
 
 @pytest.mark.parametrize("marginals", [True, False])
 @pytest.mark.parametrize("max_subplots", [True, False])
@@ -833,6 +881,27 @@ def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model)
     assert axes.shape
 
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def combinedims_test_plot_violin(models, var_names):
+    axes = plot_violin(models.model_1, var_names=var_names, combine_dims=["school"])
+    assert axes.shape
+
+
+def combinedims_test_plot_violin_ax(models):
+    _, ax = plt.subplots(1)
+    axes = plot_violin(models.model_1, var_names="mu", combine_dims=["school"], ax=ax)
+    assert axes.shape
+
+
+def combinedims_test_plot_violin_layout(models):
+    axes = plot_violin(models.model_1, var_names=["mu", "tau"], combine_dims=["school"], sharey=False)
+    assert axes.shape
+
+
+def combinedims_test_plot_violin_discrete(discrete_model):
+    axes = plot_violin(discrete_model, combine_dims=["school"])
+    assert axes.shape
+
 
 def test_plot_autocorr_short_chain():
     """Check that logic for small chain defaulting doesn't cause exception"""
@@ -957,6 +1026,41 @@ def test_plot_posterior_skipna():
     with pytest.raises(ValueError):
         plot_posterior({"a": sample}, skipna=False)
 
+def combinedims_test_plot_posterior(models, kwargs):
+    axes = plot_posterior(models.model_1, combine_dims=["mu"], **kwargs)
+    if isinstance(kwargs.get("var_names"), str):
+        assert not isinstance(axes, np.ndarray)
+    else:
+        assert axes.shape
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
+def combinedims_test_plot_posterior_discrete(discrete_model, kwargs):
+    axes = plot_posterior(discrete_model, combine_dims=["mu"], **kwargs)
+    assert axes.shape
+
+
+def combinedims_test_plot_posterior_bad(models):
+    with pytest.raises(ValueError):
+        plot_posterior(models.model_1, combine_dims=["mu"], rope="bad_value")
+    with pytest.raises(ValueError):
+        plot_posterior(models.model_1, combine_dims=["mu"], ref_val="bad_value")
+    with pytest.raises(ValueError):
+        plot_posterior(models.model_1, combine_dims=["mu"], point_estimate="bad_value")
+
+
+@pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
+def combinedims_test_plot_posterior_point_estimates(models, point_estimate):
+    axes = plot_posterior(models.model_1, var_names=("mu", "tau"), combine_dims=["mu"], point_estimate=point_estimate)
+    assert axes.size == 2
+
+
+def combinedims_test_plot_posterior_skipna():
+    sample = np.linspace(0, 1)
+    sample[:10] = np.nan
+    plot_posterior({"a": sample}, combine_dims=["mu"], skipna=True)
+    with pytest.raises(ValueError):
+        plot_posterior({"a": sample}, combine_dims=["mu"], skipna=False)
 
 @pytest.mark.parametrize(
     "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
@@ -1398,6 +1502,23 @@ def test_plot_dist_comparison_different_vars():
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
 
+def combinedims_test_plot_dist_comparison(models, kwargs):
+    idata = models.model_1
+    ax = plot_dist_comparison(idata, combine_dims=["theta"], **kwargs)
+    assert np.all(ax)
+
+
+def combinedims_test_plot_dist_comparison_different_vars():
+    data = from_dict(
+        posterior={
+            "x": np.random.randn(4, 100, 30),
+        },
+        prior={"x_hat": np.random.randn(4, 100, 30)},
+    )
+    with pytest.raises(KeyError):
+        plot_dist_comparison(data, var_names="x", combine_dims=["theta"])
+    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]], combine_dims=["theta"])
+    assert np.all(ax)
 
 @pytest.mark.parametrize(
     "kwargs",
