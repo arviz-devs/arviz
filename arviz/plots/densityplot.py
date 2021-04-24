@@ -18,7 +18,7 @@ def plot_density(
     data_labels=None,
     var_names=None,
     filter_vars=None,
-    combine_dims=[],
+    combine_dims=None,
     transform=None,
     hdi_prob=None,
     point_estimate="auto",
@@ -65,7 +65,7 @@ def plot_density(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
-    combine_dims : Optional[List[str]]
+    combine_dims : set_like of str, optional
         List of dimensions to flatten. Defaults to flattening none of the dimensions.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
@@ -196,6 +196,9 @@ def plot_density(
         labeller = BaseLabeller()
 
     var_names = _var_names(var_names, datasets, filter_vars)
+    if combine_dims is None:
+        combine_dims = []
+
     n_data = len(datasets)
 
     if data_labels is None:

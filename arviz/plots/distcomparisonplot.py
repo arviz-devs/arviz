@@ -13,7 +13,7 @@ def plot_dist_comparison(
     textsize=None,
     var_names=None,
     coords=None,
-    combine_dims=[],
+    combine_dims=None,
     transform=None,
     legend=True,
     labeller=None,
@@ -51,7 +51,7 @@ def plot_dist_comparison(
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension.
-    combine_dims : list
+    combine_dims : set_like of str, optional
         List of dimensions to flatten. Defaults to flattening none of the dimensions.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
@@ -111,6 +111,9 @@ def plot_dist_comparison(
 
     if labeller is None:
         labeller = BaseLabeller()
+
+    if combine_dims is None:
+        combine_dims = []    
 
     datasets = []
     groups = []

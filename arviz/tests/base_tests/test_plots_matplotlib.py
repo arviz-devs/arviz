@@ -166,7 +166,7 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(obj, filter_vars="bad_value")
 
-def combinedims_test_plot_density_discrete(discrete_model):
+def test_plot_density_discrete_combinedims(discrete_model):
     axes = plot_density(discrete_model, combine_dims=['school'], shade=0.9)
     assert axes.size == 2
 
@@ -585,29 +585,32 @@ def test_plot_pair_overlaid(models, kwargs):
     assert ax is ax2
     assert ax.shape
 
-def combinedims_test_plot_pair(models, kwargs):
-    ax = plot_pair(models.model_1, combine_dims=["theta"], **kwargs)
+@pytest.mark.parametrize(
+    "kwargs", [{"var_names": ["mu", "theta"]}]
+)
+def test_plot_pair_combinedims(models, kwargs):
+    ax = plot_pair(models.model_1, combine_dims=["school"], **kwargs)
     assert np.all(ax)
 
 
 @pytest.mark.parametrize(
     "kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin", "colorbar": True}]
 )
-def combinedims_test_plot_pair_2var(discrete_model, fig_ax, kwargs):
+def test_plot_pair_2var_combinedims(discrete_model, fig_ax, kwargs):
     _, ax = fig_ax
-    ax = plot_pair(discrete_model, combine_dims=["theta"], ax=ax, **kwargs)
+    ax = plot_pair(discrete_model, combine_dims=["school"], ax=ax, **kwargs)
     assert ax
 
 
-def combinedims_test_plot_pair_bad(models):
+def test_plot_pair_bad_combinedims(models):
     with pytest.raises(ValueError):
-        plot_pair(models.model_1, combine_dims=["theta"], kind="bad_kind")
+        plot_pair(models.model_1, combine_dims=["school"], kind="bad_kind")
     with pytest.raises(Exception):
-        plot_pair(models.model_1, var_names=["mu"], combine_dims=["theta"])
+        plot_pair(models.model_1, var_names=["mu"], combine_dims=["school"])
 
 
 @pytest.mark.parametrize("has_sample_stats", [True, False])
-def combinedims_test_plot_pair_divergences_warning(has_sample_stats):
+def test_plot_pair_divergences_warning_combinedims(has_sample_stats):
     data = load_arviz_data("centered_eight")
     if has_sample_stats:
         # sample_stats present, diverging field missing
@@ -623,9 +626,9 @@ def combinedims_test_plot_pair_divergences_warning(has_sample_stats):
 @pytest.mark.parametrize(
     "kwargs", [{}, {"marginals": True}, {"marginals": True, "var_names": ["mu", "tau"]}]
 )
-def combinedims_test_plot_pair_overlaid(models, kwargs):
-    ax = plot_pair(models.model_1, combine_dims=["theta"], **kwargs)
-    ax2 = plot_pair(models.model_2, combine_dims=["theta"], ax=ax, **kwargs)
+def test_plot_pair_overlaid_combinedims(models, kwargs):
+    ax = plot_pair(models.model_1, combine_dims=["school"], **kwargs)
+    ax2 = plot_pair(models.model_2, combine_dims=["school"], ax=ax, **kwargs)
     assert ax is ax2
     assert ax.shape
 
@@ -882,23 +885,23 @@ def test_plot_violin_discrete(discrete_model):
     assert axes.shape
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-def combinedims_test_plot_violin(models, var_names):
+def test_plot_violin_combinedims(models, var_names):
     axes = plot_violin(models.model_1, var_names=var_names, combine_dims=["school"])
     assert axes.shape
 
 
-def combinedims_test_plot_violin_ax(models):
+def test_plot_violin_ax_combinedims(models):
     _, ax = plt.subplots(1)
     axes = plot_violin(models.model_1, var_names="mu", combine_dims=["school"], ax=ax)
     assert axes.shape
 
 
-def combinedims_test_plot_violin_layout(models):
+def test_plot_violin_layout_combinedims(models):
     axes = plot_violin(models.model_1, var_names=["mu", "tau"], combine_dims=["school"], sharey=False)
     assert axes.shape
 
 
-def combinedims_test_plot_violin_discrete(discrete_model):
+def test_plot_violin_discrete_combinedims(discrete_model):
     axes = plot_violin(discrete_model, combine_dims=["school"])
     assert axes.shape
 
@@ -1026,8 +1029,10 @@ def test_plot_posterior_skipna():
     with pytest.raises(ValueError):
         plot_posterior({"a": sample}, skipna=False)
 
-def combinedims_test_plot_posterior(models, kwargs):
-    axes = plot_posterior(models.model_1, combine_dims=["mu"], **kwargs)
+
+@pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "theta"]}])
+def test_plot_posterior_combinedims(models, kwargs):
+    axes = plot_posterior(models.model_1, combine_dims=["school"], **kwargs)
     if isinstance(kwargs.get("var_names"), str):
         assert not isinstance(axes, np.ndarray)
     else:
@@ -1035,12 +1040,12 @@ def combinedims_test_plot_posterior(models, kwargs):
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
-def combinedims_test_plot_posterior_discrete(discrete_model, kwargs):
+def test_plot_posterior_discrete_combinedims(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, combine_dims=["mu"], **kwargs)
     assert axes.shape
 
 
-def combinedims_test_plot_posterior_bad(models):
+def test_plot_posterior_bad_combinedims(models):
     with pytest.raises(ValueError):
         plot_posterior(models.model_1, combine_dims=["mu"], rope="bad_value")
     with pytest.raises(ValueError):
@@ -1050,12 +1055,12 @@ def combinedims_test_plot_posterior_bad(models):
 
 
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
-def combinedims_test_plot_posterior_point_estimates(models, point_estimate):
+def test_plot_posterior_point_estimates_combinedims(models, point_estimate):
     axes = plot_posterior(models.model_1, var_names=("mu", "tau"), combine_dims=["mu"], point_estimate=point_estimate)
     assert axes.size == 2
 
 
-def combinedims_test_plot_posterior_skipna():
+def test_plot_posterior_skipna_combinedims():
     sample = np.linspace(0, 1)
     sample[:10] = np.nan
     plot_posterior({"a": sample}, combine_dims=["mu"], skipna=True)
@@ -1502,13 +1507,13 @@ def test_plot_dist_comparison_different_vars():
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
 
-def combinedims_test_plot_dist_comparison(models, kwargs):
+def test_plot_dist_comparison_combinedims(models):
     idata = models.model_1
-    ax = plot_dist_comparison(idata, combine_dims=["theta"], **kwargs)
+    ax = plot_dist_comparison(idata, combine_dims=["school"])
     assert np.all(ax)
 
 
-def combinedims_test_plot_dist_comparison_different_vars():
+def test_plot_dist_comparison_different_vars_combinedims():
     data = from_dict(
         posterior={
             "x": np.random.randn(4, 100, 30),

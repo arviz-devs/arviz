@@ -149,69 +149,6 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2, backend="bokeh", show=False)
 
-def combinedims_test_plot_density_float(models, kwargs):
-    obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
-    axes = plot_density(obj, combine_dims=['school'], backend="bokeh", show=False, **kwargs)
-    assert axes.shape[0] >= 6
-    assert axes.shape[0] >= 3
-
-
-def combinedims_test_plot_density_discrete(discrete_model):
-    axes = plot_density(discrete_model, combine_dims=['school'], shade=0.9, backend="bokeh", show=False)
-    assert axes.shape[0] == 1
-
-
-def combinedims_test_plot_density_no_subset():
-    """Test plot_density works when variables are not subset of one another (#1093)."""
-    model_ab = from_dict(
-        {
-            "a": np.random.normal(size=200),
-            "b": np.random.normal(size=200),
-        }
-    )
-    model_bc = from_dict(
-        {
-            "b": np.random.normal(size=200),
-            "c": np.random.normal(size=200),
-        }
-    )
-    axes = plot_density([model_ab, model_bc], combine_dims=['school'], backend="bokeh", show=False)
-    assert axes.size == 3
-
-
-def combinedims_test_plot_density_one_var():
-    """Test plot_density works when there is only one variable (#1401)."""
-    model_ab = from_dict(
-        {
-            "a": np.random.normal(size=200),
-        }
-    )
-    model_bc = from_dict(
-        {
-            "a": np.random.normal(size=200),
-        }
-    )
-    axes = plot_density([model_ab, model_bc], combine_dims=['school'], backend="bokeh", show=False)
-    assert axes.size == 1
-
-
-def combinedims_test_plot_density_bad_kwargs(models):
-    obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
-    with pytest.raises(ValueError):
-        plot_density(obj, point_estimate="bad_value", combine_dims=['school'], backend="bokeh", show=False)
-
-    with pytest.raises(ValueError):
-        plot_density(
-            obj,
-            combine_dims=[],
-            data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)],
-            backend="bokeh",
-            show=False,
-        )
-
-    with pytest.raises(ValueError):
-        plot_density(obj, combine_dims=['school'], hdi_prob=2, backend="bokeh", show=False)
-
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -261,6 +198,7 @@ def test_plot_trace_max_subplots_warning(models):
         with rc_context(rc={"plot.max_subplots": 2}):
             axes = plot_trace(models.model_1, backend="bokeh", show=False)
     assert axes.shape
+
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -315,6 +253,7 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], backend="bokeh", show=False, **kwargs)
     assert axes
+
 
 def test_plot_kde_1d(continuous_model):
     axes = plot_kde(continuous_model["y"], backend="bokeh", show=False)
@@ -860,39 +799,6 @@ def test_plot_pair_divergences_warning(has_sample_stats):
         ax = plot_pair(data, divergences=True, backend="bokeh", show=False)
     assert np.any(ax)
 
-def combinedims_test_plot_pair(models, kwargs):
-    ax = plot_pair(models.model_1, combine_dims=["theta"], backend="bokeh", show=False, **kwargs)
-    assert np.any(ax)
-
-
-@pytest.mark.parametrize("kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin"}])
-def combinedims_test_plot_pair_2var(discrete_model, kwargs):
-    ax = plot_pair(
-        discrete_model, combine_dims=["theta"], ax=np.atleast_2d(bkp.figure()), backend="bokeh", show=False, **kwargs
-    )
-    assert ax
-
-
-def combinedims_test_plot_pair_bad(models):
-    with pytest.raises(ValueError):
-        plot_pair(models.model_1, combine_dims=["theta"], kind="bad_kind", backend="bokeh", show=False)
-    with pytest.raises(Exception):
-        plot_pair(models.model_1, var_names=["mu"], combine_dims=["theta"], backend="bokeh", show=False)
-
-
-@pytest.mark.parametrize("has_sample_stats", [True, False])
-def combinedims_test_plot_pair_divergences_warning(has_sample_stats):
-    data = load_arviz_data("centered_eight")
-    if has_sample_stats:
-        # sample_stats present, diverging field missing
-        data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
-    else:
-        # sample_stats missing
-        data = data.posterior  # pylint: disable=no-member
-    with pytest.warns(UserWarning):
-        ax = plot_pair(data, combine_dims=["theta"], divergences=True, backend="bokeh", show=False)
-    assert np.any(ax)
-
 
 def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
     with pytest.raises(ValueError):
@@ -909,6 +815,7 @@ def test_plot_parallel(models, norm_method):
         show=False,
     )
 
+
 @pytest.mark.parametrize("var_names", [None, "mu", ["mu", "tau"]])
 def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
@@ -916,6 +823,7 @@ def test_plot_parallel_exception(models, var_names):
         assert plot_parallel(
             models.model_1, var_names=var_names, norm_method="foo", backend="bokeh", show=False
         )
+
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_violin(models, var_names):
@@ -938,29 +846,6 @@ def test_plot_violin_layout(models):
 
 def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model, backend="bokeh", show=False)
-    assert axes.shape
-
-@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-def combinedims_test_plot_violin(models, var_names):
-    axes = plot_violin(models.model_1, var_names=var_names, combine_dims=['school'], backend="bokeh", show=False)
-    assert axes.shape
-
-
-def combinedims_test_plot_violin_ax(models):
-    ax = bkp.figure()
-    axes = plot_violin(models.model_1, var_names="theta", combine_dims=['school'], ax=ax, backend="bokeh", show=False)
-    assert axes.shape
-
-
-def combinedims_test_plot_violin_layout(models):
-    axes = plot_violin(
-        models.model_1, var_names=["theta"], combine_dims=['school'], sharey=False, backend="bokeh", show=False
-    )
-    assert axes.shape
-
-
-def combinedims_test_plot_violin_discrete(discrete_model):
-    axes = plot_violin(discrete_model, backend="bokeh", combine_dims=['school'], show=False)
     assert axes.shape
 
 
@@ -1131,46 +1016,6 @@ def test_plot_posterior_skipna():
     with pytest.raises(ValueError):
         plot_posterior({"a": sample}, backend="bokeh", show=False, skipna=False)
 
-def combinedims_test_plot_posterior(models, kwargs):
-    axes = plot_posterior(models.model_1, combine_dims=['school'], backend="bokeh", show=False, **kwargs)
-    assert axes.shape
-
-
-@pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
-def combinedims_test_plot_posterior_discrete(discrete_model, kwargs):
-    axes = plot_posterior(discrete_model, combine_dims=['school'], backend="bokeh", show=False, **kwargs)
-    assert axes.shape
-
-
-def combinedims_test_plot_posterior_bad(models):
-    with pytest.raises(ValueError):
-        plot_posterior(models.model_1, combine_dims=['school'], backend="bokeh", show=False, rope="bad_value")
-    with pytest.raises(ValueError):
-        plot_posterior(models.model_1, combine_dims=['school'], ref_val="bad_value", backend="bokeh", show=False)
-    with pytest.raises(ValueError):
-        plot_posterior(models.model_1, combine_dims=['school'], point_estimate="bad_value", backend="bokeh", show=False)
-
-
-@pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
-def combinedims_test_plot_posterior_point_estimates(models, point_estimate):
-    axes = plot_posterior(
-        models.model_1,
-        var_names=("mu", "tau"),
-        combine_dims=['school'], 
-        point_estimate=point_estimate,
-        backend="bokeh",
-        show=False,
-    )
-    assert axes.shape == (1, 2)
-
-
-def combinedims_test_plot_posterior_skipna():
-    sample = np.linspace(0, 1)
-    sample[:10] = np.nan
-    plot_posterior({"a": sample}, combine_dims=['school'], backend="bokeh", show=False, skipna=True)
-    with pytest.raises(ValueError):
-        plot_posterior({"a": sample}, combine_dims=['school'], backend="bokeh", show=False, skipna=False)
-
 
 @pytest.mark.parametrize(
     "kwargs",
@@ -1203,9 +1048,6 @@ def test_plot_dist_comparison_warn(models):
     with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib backend."):
         plot_dist_comparison(models.model_1, backend="bokeh")
 
-def combinedims_test_plot_dist_comparison_warn(models):
-    with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib backend."):
-        plot_dist_comparison(models.model_1, combine_dims=['mu'], backend="bokeh")
 
 @pytest.mark.parametrize(
     "kwargs",

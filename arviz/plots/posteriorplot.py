@@ -11,7 +11,7 @@ def plot_posterior(
     data,
     var_names=None,
     filter_vars=None,
-    combine_dims=[],
+    combine_dims=None,
     transform=None,
     coords=None,
     grid=None,
@@ -53,7 +53,7 @@ def plot_posterior(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
-    combine_dims : list
+    combine_dims : set_like of str, optional
         List of dimensions to flatten. Defaults to flattening none of the dimensions.
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
@@ -179,6 +179,13 @@ def plot_posterior(
         >>> coords = {"school": ["Choate","Phillips Exeter"]}
         >>> az.plot_posterior(data, var_names=["mu", "theta"], coords=coords)
 
+    Flatten data across non-draw, non-chain dimensions 
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_posterior(data, var_names=['theta'], combine_dims=['school'])
+
     Add reference lines
 
     .. plot::
@@ -233,6 +240,9 @@ def plot_posterior(
 
     if labeller is None:
         labeller = BaseLabeller()
+
+    if combine_dims is None:
+        combine_dims = []
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]

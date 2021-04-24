@@ -17,7 +17,7 @@ def plot_pair(
     group="posterior",
     var_names: Optional[List[str]] = None,
     filter_vars: Optional[str] = None,
-    combine_dims: Optional[List[str]] = [],
+    combine_dims: Optional[List[str]] = None,
     coords=None,
     marginals=False,
     figsize=None,
@@ -63,7 +63,7 @@ def plot_pair(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
-    combine_dims : list, optional
+    combine_dims : set_like of str, optional
         List of dimensions to flatten. Defaults to flattening none of the dimensions.
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
@@ -209,6 +209,9 @@ def plot_pair(
 
     if labeller is None:
         labeller = BaseLabeller()
+
+    if combine_dims is None:
+        combine_dims = []
 
     # Get posterior draws and combine chains
     dataset = convert_to_dataset(data, group=group)

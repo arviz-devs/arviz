@@ -10,7 +10,7 @@ from .plot_utils import default_grid, filter_plotters_list, get_plotting_functio
 def plot_violin(
     data,
     var_names=None,
-    combine_dims=[],
+    combine_dims=None,
     filter_vars=None,
     transform=None,
     quartiles=True,
@@ -46,7 +46,7 @@ def plot_violin(
     var_names: list of variable names, optional
         Variables to be plotted, if None all variable are plotted. Prefix the
         variables by ``~`` when you want to exclude them from the plot.
-    combine_dims : list
+    combine_dims : set_like of str, optional
         List of dimensions to flatten. Defaults to flattening none of the dimensions.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
@@ -131,6 +131,9 @@ def plot_violin(
     """
     if labeller is None:
         labeller = BaseLabeller()
+
+    if combine_dims is None:
+        combine_dims = []
 
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
