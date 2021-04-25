@@ -1,6 +1,6 @@
 """
-2d KDE
-======
+2d KDE with HDI Contours
+========================
 
 _thumb: .5, .8
 _example_title: 2d KDE with HDI Contours
