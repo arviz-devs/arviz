@@ -1,5 +1,7 @@
 # pylint: disable=unexpected-keyword-arg
 """One-dimensional kernel density estimate plots."""
+import warnings
+
 import xarray as xr
 
 from ..data import InferenceData
@@ -287,11 +289,24 @@ def plot_kde(
             if contour_kwargs is None:
                 contour_kwargs = {"levels": contour_level_list}
             else:
-                contour_kwargs.setdefault("levels", contour_level_list)
+                if "levels" in contour_kwargs:
+                    warnings.warn(
+                        "Both 'levels' in contour_kwargs and 'hdi_probs' have been specified."
+                        "Using 'hdi_probs' in favor of 'levels'.",
+                        UserWarning,
+                    )
+                contour_kwargs["levels"] = contour_level_list
+
             if contourf_kwargs is None:
                 contourf_kwargs = {"levels": contour_level_list}
             else:
-                contourf_kwargs.setdefault("levels", contour_level_list)
+                if "levels" in contourf_kwargs:
+                    warnings.warn(
+                        "Both 'levels' in contourf_kwargs and 'hdi_probs' have been specified."
+                        "Using 'hdi_probs' in favor of 'levels'.",
+                        UserWarning,
+                    )
+                contourf_kwargs["levels"] = contour_level_list
 
         lower, upper, density_q = [None] * 3
 
