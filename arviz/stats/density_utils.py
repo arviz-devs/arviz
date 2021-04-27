@@ -401,9 +401,7 @@ def _get_grid(
         Maximum value of the grid
     """
     # Set up number of bins.
-    if grid_len < 100:
-        grid_len = 100
-    grid_len = int(grid_len)
+    grid_len = max(int(grid_len), 100)
 
     # Set up domain
     if custom_lims is not None:
