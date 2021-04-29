@@ -6,7 +6,8 @@ from itertools import cycle
 import bokeh.plotting as bkp
 import matplotlib.pyplot as plt
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, DataRange1d, Span
+from bokeh.models import ColumnDataSource, DataRange1d, Span
+from bokeh.models.glyphs import Scatter
 from bokeh.models.annotations import Title
 
 from ...distplot import plot_dist
@@ -339,9 +340,11 @@ def plot_trace(
                         y_div_trace = value.max()
                     else:
                         y_div_trace = value.min()
-                    glyph_density = Dash(x="y", y=0.0, **div_density_kwargs)
+                    #glyph_density = Dash(x="y", y=0.0, **div_density_kwargs)
+                    glyph_density = Scatter(x="y", y=0.0,marker='dash', **div_density_kwargs)
                     if kind == "trace":
-                        glyph_trace = Dash(x="x", y=y_div_trace, **div_trace_kwargs)
+                        #glyph_trace = Dash(x="x", y=y_div_trace, **div_trace_kwargs)
+                        glyph_trace = Scatter(x="x", y=y_div_trace, marker='dash', **div_trace_kwargs)
                         axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
