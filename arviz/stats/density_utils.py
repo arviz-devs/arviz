@@ -522,6 +522,8 @@ def kde(x, circular=False, **kwargs):
     arviz.stats.density_utils.kde: Arviz KDE estimator
     """
     if circular:
+        if circular == "degrees":
+            x = np.radians(x)
         kde_fun = _kde_circular
     else:
         kde_fun = _kde_linear
@@ -662,7 +664,7 @@ def _kde_circular(
     ----------
     x : 1D numpy array
         Data used to calculate the density estimation.
-        Theoritically it is a random sample obtained from $f$,
+        Theoretically it is a random sample obtained from $f$,
         the true probability density function we aim to estimate.
     bw: int, float or str, optional
         If numeric, indicates the bandwidth and must be positive.
