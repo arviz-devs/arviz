@@ -163,7 +163,7 @@ def _plot_atomic_elpd(
     marker = _validate_bokeh_marker(plot_kwargs.get("marker"))
     marker_func = getattr(mk, marker)
     sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
-    glyph = Scatter(x="xdata", y="ydata", size="sizes", line_color=plot_kwargs.get("color", "black"), marker='cross')
+    glyph = Scatter(x="xdata", y="ydata", size="sizes", line_color=plot_kwargs.get("color", "black"), marker=marker)
     source = ColumnDataSource(dict(xdata=xdata, ydata=ydata, sizes=sizes))
     ax_.add_glyph(source, glyph)
     if threshold is not None:
