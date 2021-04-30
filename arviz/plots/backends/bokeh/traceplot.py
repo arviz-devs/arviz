@@ -342,10 +342,11 @@ def plot_trace(
                         y_div_trace = value.min()
                     glyph_density = Scatter(x="y", y=0.0,marker='dash', **div_density_kwargs)
                     if kind == "trace":
-                        glyph_trace = Scatter(x="x", 
-                                              y=y_div_trace, 
-                                              marker='dash', 
-                                              **div_trace_kwargs)
+                        glyph_trace = Scatter(x="x",
+                                              y=y_div_trace,
+                                              marker='dash',
+                                              **div_trace_kwargs
+                                            )
                         axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
