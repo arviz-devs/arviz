@@ -963,7 +963,7 @@ def _gpinv(probs, kappa, sigma):
     return x
 
 
-def r2_score(y_true, y_pred,dist=False):
+def r2_score(y_true, y_pred,summary=False):
     """R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
@@ -972,7 +972,7 @@ def r2_score(y_true, y_pred,dist=False):
         Ground truth (correct) target values.
     y_pred: array-like of shape = (n_posterior_samples, n_outputs)
         Estimated target values.
-    dist(defualt=False): Flag indicating whether to return all posterior samples of the Bayesian R² or only summary stats.
+    summary: If False return all posterior samples of the Bayesian R² if True only the mean and standard deviation. Defaults to False.
 
     Returns
     -------
@@ -995,17 +995,17 @@ def r2_score(y_true, y_pred,dist=False):
 
     """
     _numba_flag = Numba.numba_flag
-#     if y_pred.ndim == 1:
-#         var_y_est = _numba_var(svar, np.var, y_pred)
-#         var_e = _numba_var(svar, np.var, (y_true - y_pred))
-#     else:
-    var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
-    var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
-    r_squared = var_y_est / (var_y_est + var_e)
+    if y_pred.ndim == 1:
+        var_y_est = _numba_var(svar, np.var, y_pred)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred))
+    else:
+        var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
+        r_squared = var_y_est / (var_y_est + var_e)
     
-    if(dist):
-        return r_squared
-    return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
+    if summary:
+        return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
+    return r_squared
 
 
 def summary(
