@@ -102,7 +102,8 @@ def plot_dist(
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
         default input type is "radians". When this argument is present, it interprets the
         values passed are from a circular variable measured in radians and a circular KDE is
-        used. Only valid for 1D KDE. Defaults to False.
+        used. Inputs in "degrees" will undergo an internal conversion to radians. Only valid
+        for 1D KDE. Defaults to False.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional

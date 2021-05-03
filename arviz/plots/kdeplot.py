@@ -96,7 +96,8 @@ def plot_kde(
     is_circular : {False, True, "radians", "degrees"}. Default False.
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
         default input type is "radians". When this argument is present, it interprets `values`
-        is a circular variable measured in radians and a circular KDE is used.
+        is a circular variable measured in radians and a circular KDE is used. Inputs in
+        "degrees" will undergo an internal conversion to radians.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
