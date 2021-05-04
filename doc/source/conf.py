@@ -83,7 +83,7 @@ templates_path = ["../_templates"]
 
 # MyST related params
 jupyter_execute_notebooks = "auto"
-execution_excludepatterns = ['*.ipynb']
+execution_excludepatterns = ["*.ipynb"]
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
 
@@ -156,7 +156,7 @@ html_theme_options = {
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
     "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
-    # "google_analytics_id": "G-W1G68W77YV", TODO: Uncomment once pydata-sphinx-theme #387 is merged
+    "google_analytics_id": "G-W1G68W77YV",
 }
 html_context = {
     "github_user": "arviz-devs",
@@ -201,7 +201,7 @@ html_favicon = "_static/favicon.ico"
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements : Dict[str, str] = {
+latex_elements: Dict[str, str] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
