@@ -239,7 +239,7 @@ def test_plot_dist_comparison_warning(models):
     with pytest.warns(UserWarning):
         with rc_context(rc={"plot.max_subplots": 6}):
             axes = plot_dist_comparison(models.model_1)
-    assert axes.shape == (3,2)
+    assert axes.shape == (2, 3)
 
 
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
