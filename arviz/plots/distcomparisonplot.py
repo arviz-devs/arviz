@@ -134,15 +134,13 @@ def plot_dist_comparison(
         list(xarray_var_iter(data, var_names=var, combined=True))[:len_plots]
         for data, var in zip(datasets, var_names)
     ]
-
-    # max plots warning
-    if len(dc_plotters) > len_plots:
+    if len(dc_plotters) >= len_plots:
         warnings.warn(
-                    "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number " 
-                    "of variables to plot ({len_plotters}), generating only {max_plots} "
-                    "plots".format(max_plots=len_plots, len_plotters=len(dc_plotters)),
-                    UserWarning,
-                )
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(max_plots=len_plots, len_plotters=len(dc_plotters)),
+            UserWarning,
+        )
         dc_plotters = dc_plotters[:len_plots]
 
     nvars = len(dc_plotters[0])
