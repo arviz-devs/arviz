@@ -138,27 +138,12 @@ def plot_dist_comparison(
     # max plots warning
     if len(dc_plotters) > len_plots:
         warnings.warn(
-                    "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number " #to kanw commit etsi kai meta to allazo gia na exw parapano commits
+                    "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number " 
                     "of variables to plot ({len_plotters}), generating only {max_plots} "
                     "plots".format(max_plots=len_plots, len_plotters=len(dc_plotters)),
                     UserWarning,
                 )
         dc_plotters = dc_plotters[:len_plots]
-
-
-    # plotters = list(
-    #     xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)
-    # )
-    # max_plots = rcParams["plot.max_subplots"]
-    # max_plots = len(plotters) if max_plots is None else max(max_plots // 2, 1)
-    # if len(plotters) > max_plots:
-    #     warnings.warn(
-    #         "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-    #         "of variables to plot ({len_plotters}), generating only {max_plots} "
-    #         "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-    #         UserWarning,
-    #     )
-    #     plotters = plotters[:max_plots]
 
     nvars = len(dc_plotters[0])
     ngroups = len(groups)

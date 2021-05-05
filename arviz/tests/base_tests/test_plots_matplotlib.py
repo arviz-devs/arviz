@@ -237,7 +237,7 @@ def test_plot_trace_max_subplots_warning(models):
 
 def test_plot_dist_comparison_warning(models):
     with pytest.warns(UserWarning):
-        with rc_context(rc={"plot.max_subplots": 7}):
+        with rc_context(rc={"plot.max_subplots": 6}):
             axes = plot_dist_comparison(models.model_1)
     assert axes.shape == (3,2)
 
