@@ -235,6 +235,13 @@ def test_plot_trace_max_subplots_warning(models):
     assert axes.shape == (3, 2)
 
 
+def test_plot_dist_comparison_warning(models):
+    with pytest.warns(UserWarning):
+        with rc_context(rc={"plot.max_subplots": 7}):
+            axes = plot_dist_comparison(models.model_1)
+    assert axes.shape == (3,2)
+
+
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
 def test_plot_trace_invalid_varname_warning(models, kwargs):
     with pytest.warns(UserWarning, match="valid var.+should be provided"):
