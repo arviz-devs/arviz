@@ -16,7 +16,6 @@ def plot_kde(
     label=None,
     bw="default",
     adaptive=False,
-    circular=False,
     quantiles=None,
     rotated=False,
     contour=True,
@@ -56,16 +55,13 @@ def plot_kde(
     bw: float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
-        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
-        and "taylor" (for now) when `circular` is True.
+        one of "scott", "silverman", "isj" or "experimental" when `is_circular` is False
+        and "taylor" (for now) when `is_circular` is True.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
     adaptive: bool, optional.
         If True, an adaptative bandwidth is used. Only valid for 1D KDE.
         Defaults to False.
-    circular: bool, optional.
-        If True, it interprets `values` is a circular variable measured in radians
-        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     quantiles : list
         Quantiles in ascending order used to segment the KDE.
         Use [.25, .5, .75] for quartiles. Defaults to None.
@@ -99,7 +95,9 @@ def plot_kde(
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     is_circular : {False, True, "radians", "degrees"}. Default False.
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
-        default input type is "radians".
+        default input type is "radians". When this argument is present, it interprets `values`
+        is a circular variable measured in radians and a circular KDE is used. Inputs in
+        "degrees" will undergo an internal conversion to radians.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
@@ -169,7 +167,7 @@ def plot_kde(
         :context: close-figs
 
         >>> rvs = np.random.vonmises(mu=np.pi, kappa=2, size=500)
-        >>> az.plot_kde(rvs, circular=True)
+        >>> az.plot_kde(rvs, is_circular=True)
 
 
     Plot a cumulative distribution
@@ -242,12 +240,12 @@ def plot_kde(
     if values2 is None:
 
         if bw == "default":
-            if circular:
+            if is_circular:
                 bw = "taylor"
             else:
                 bw = "experimental"
 
-        grid, density = kde(values, circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
+        grid, density = kde(values, is_circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
         lower, upper = grid[0], grid[-1]
 
         if cumulative:

@@ -19,7 +19,6 @@ def plot_dist(
     rotated,
     rug,
     bw,
-    circular,
     quantiles,
     contour,
     fill_last,
@@ -98,7 +97,6 @@ def plot_dist(
             rug=rug,
             label=label,
             bw=bw,
-            circular=circular,
             quantiles=quantiles,
             rotated=rotated,
             contour=contour,
@@ -136,14 +134,14 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     elif is_circular:
         labels = [
-            r"0",
-            r"π/4",
-            r"π/2",
-            r"3π/4",
-            r"π",
-            r"5π/4",
-            r"3π/2",
-            r"7π/4",
+            "0",
+            f"{np.pi/4:.2f}",
+            f"{np.pi/2:.2f}",
+            f"{3*np.pi/4:.2f}",
+            f"{np.pi:.2f}",
+            f"{-3*np.pi/4:.2f}",
+            f"{-np.pi/2:.2f}",
+            f"{-np.pi/4:.2f}",
         ]
 
         ax.set_xticklabels(labels)
