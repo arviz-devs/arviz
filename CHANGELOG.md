@@ -32,6 +32,7 @@
 * Added type checking to raise an error whenever `InferenceData` object is passed using `io_pymc3`'s `trace` argument ([1629](https://github.com/arviz-devs/arviz/pull/1629))
 * Fix `xlabels` in `plot_elpd` ([1601](https://github.com/arviz-devs/arviz/pull/1601))
 * Renamed `sample` dim to `__sample__` when stacking `chain` and `draw` to avoid dimension collision ([1647](https://github.com/arviz-devs/arviz/pull/1647))
+* Removed the `circular` argument in `plot_dist` in favor of `is_circular` ([1681](https://github.com/arviz-devs/arviz/pull/1681))
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
