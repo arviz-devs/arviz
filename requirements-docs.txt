@@ -5,7 +5,7 @@ numpydoc
 pydocstyle
 Sphinx>=1.8.3
 pydata_sphinx_theme>=0.6.3
-myst-parser==0.13.7
+myst-parser
 myst-nb
 sphinx-panels
 sphinx-notfound-page
