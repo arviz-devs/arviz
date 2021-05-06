@@ -100,15 +100,15 @@ def plot_kde(
             if isinstance(cds_rug, dict):
                 for _cds_rug in cds_rug.values():
                     if not rotated:
-                        glyph = Scatter(x=rug_varname, y=0.0, marker='dash', **rug_kwargs)
+                        glyph = Scatter(x=rug_varname, y=0.0, marker="dash", **rug_kwargs)
                     else:
-                        glyph = Scatter(x=0.0, y=rug_varname,marker='dash', **rug_kwargs)
+                        glyph = Scatter(x=0.0, y=rug_varname, marker="dash", **rug_kwargs)
                     ax.add_glyph(_cds_rug, glyph)
             else:
                 if not rotated:
-                    glyph = Scatter(x=rug_varname, y=0.0, marker='dash', **rug_kwargs)
+                    glyph = Scatter(x=rug_varname, y=0.0, marker="dash", **rug_kwargs)
                 else:
-                    glyph = Scatter(x=0.0, y=rug_varname, marker='dash', **rug_kwargs)
+                    glyph = Scatter(x=0.0, y=rug_varname, marker="dash", **rug_kwargs)
                 ax.add_glyph(cds_rug, glyph)
             glyphs.append(glyph)
 

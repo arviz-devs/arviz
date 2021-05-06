@@ -161,7 +161,7 @@ def plot_mcse(
 
             ax_.renderers.append(hline)
 
-            glyph = Scatter(x="rug_x", y="rug_y", marker='dash', **_rug_kwargs)
+            glyph = Scatter(x="rug_x", y="rug_y", marker="dash", **_rug_kwargs)
             cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
             ax_.add_glyph(cds_rug, glyph)
 

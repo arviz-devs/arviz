@@ -10,6 +10,7 @@ from . import backend_kwarg_defaults, create_axes_grid
 from ...plot_utils import _scale_fig_size
 from bokeh.models.glyphs import Scatter
 
+
 def plot_ess(
     ax,
     plotters,
@@ -93,7 +94,7 @@ def plot_ess(
             rug_space = np.max(x) * rug_kwargs.pop("space")
             rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
 
-            glyph = Scatter(x="rug_x", y="rug_y", marker='dash',**_rug_kwargs)
+            glyph = Scatter(x="rug_x", y="rug_y", marker="dash", **_rug_kwargs)
             cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
             ax_.add_glyph(cds_rug, glyph)
 
