@@ -67,8 +67,8 @@ def compare(
 
     Parameters
     ----------
-    dataset_dict: dict[str] -> InferenceData
-        A dictionary of model names and InferenceData objects
+    dataset_dict: dict[str] -> InferenceData or ELPDData
+        A dictionary of model names and InferenceData or ELPDData objects
     ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
@@ -232,14 +232,18 @@ def compare(
 
     ics = pd.DataFrame()
     names = []
+    dataset_dict = deepcopy(dataset_dict)
     for name, dataset in dataset_dict.items():
         names.append(name)
-        try:
-            # Here is where the IC function is actually computed -- the rest of this
-            # function is argument processing and return value formatting
-            ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
-        except Exception as e:
-            raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
+        if not isinstance(dataset, ELPDData):
+            try:
+                # Here is where the IC function is actually computed -- the rest of this
+                # function is argument processing and return value formatting
+                ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
+            except Exception as e:
+                raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
+        else:
+            ics = ics.append(dataset)
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
