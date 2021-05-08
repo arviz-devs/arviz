@@ -68,7 +68,7 @@ def compare(
     Parameters
     ----------
     dataset_dict: dict[str] -> InferenceData or ELPDData
-        A dictionary of model names and InferenceData or ELPDData objects
+        A dictionary of model names and InferenceData 
     ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
@@ -157,34 +157,9 @@ def compare(
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
     """
-    names = list(dataset_dict.keys())
-    if scale is not None:
-        scale = cast(ScaleKeyword, scale.lower())
-    else:
-        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
-    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
-    if scale not in allowable:
-        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
-
-    if scale == "log":
-        scale_value = 1
-        ascending = False
-    else:
-        if scale == "negative_log":
-            scale_value = -1
-        else:
-            scale_value = -2
-        ascending = True
-
-    if ic is None:
-        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
-    else:
-        ic = cast(ICKeyword, ic.lower())
-    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
-    if ic not in allowable:
-        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
+    
+    (dataset_dict, scale, ic, ics_helper, name) = Calculate_ICS(data_dict, scale, ic)
     if ic == "loo":
-        ic_func: Callable = loo
         df_comp = pd.DataFrame(
             index=names,
             columns=[
@@ -202,7 +177,6 @@ def compare(
         )
         scale_col = "loo_scale"
     elif ic == "waic":
-        ic_func = waic
         df_comp = pd.DataFrame(
             index=names,
             columns=[
@@ -231,19 +205,7 @@ def compare(
     ic_i = f"{ic}_i"
 
     ics = pd.DataFrame()
-    names = []
-    dataset_dict = deepcopy(dataset_dict)
-    for name, dataset in dataset_dict.items():
-        names.append(name)
-        if not isinstance(dataset, ELPDData):
-            try:
-                # Here is where the IC function is actually computed -- the rest of this
-                # function is argument processing and return value formatting
-                ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
-            except Exception as e:
-                raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
-        else:
-            ics = ics.append(dataset)
+    ics = ics_helper
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
@@ -1841,3 +1803,98 @@ def apply_test_function(
         setattr(out, grp, out_group)
 
     return out
+
+
+def Calculate_ICS(
+    data_dict,
+    scale: Optional[ScaleKeyword] = None,
+    ic: Optional[ICKeyword] = None
+):
+
+"""
+Helper Function used to execute the loo and waic information criteria
+
+LOO is leave-one-out (PSIS-LOO `loo`) cross-validation and
+WAIC is the widely applicable information criterion.
+Read more theory here - in a paper by some of the leading authorities
+on model selection dx.doi.org/10.1111/1467-9868.00353
+
+Parameters
+----------
+
+dataset_dict :  dataset_dict: dict[str] -> InferenceData or ELPDData
+    A dictionary of model names and InferenceData or ELPDData objects
+scale: str, optional
+        Output scale for IC. Available options are:
+
+        - `log` : (default) log-score (after Vehtari et al. (2017))
+        - `negative_log` : -1 * (log-score)
+        - `deviance` : -2 * (log-score)
+
+        A higher log-score (or a lower deviance) indicates a model with better predictive
+        accuracy.
+ic: str, optional
+        Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
+        ``rcParams["stats.information_criterion"]``.
+
+Returns
+-------
+
+[WIP]
+
+"""
+    names = list(dataset_dict.keys())
+
+    if scale is not None:
+        scale = cast(ScaleKeyword, scale.lower())
+    else:
+        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
+    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
+    if scale not in allowable:
+        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
+    if scale == "log":
+            scale_value = 1
+            ascending = False
+        else:
+            if scale == "negative_log":
+                scale_value = -1
+            else:
+                scale_value = -2
+            ascending = True
+
+
+    if ic is None:
+        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
+    else:
+        ic = cast(ICKeyword, ic.lower())
+    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
+    if ic not in allowable:
+        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
+
+
+    # I have to return loo or waic in order for compare to create the df_comp and scale col
+
+
+    if ic == "loo":
+        ic_func: Callable = loo
+    elif ic == "waic":
+        ic_func = waic
+    else:
+        raise NotImplementedError(f"The information criterion {ic} is not supported.")
+    
+
+    names = []
+    dataset_dict = deepcopy(dataset_dict)
+    for name, dataset in dataset_dict.items():
+        names.append(name)
+        if not isinstance(dataset, ELPDData):
+            try:
+                dataset_dict[name] = ic_func(convert_to_inference_data(dataset), pointwise=True, scale=scale)
+            except Exception as e:
+                raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e    
+    ics = [elpd_data.index[0] for elpd_data in compare_dict.values()]
+    if not all(x == ics[0] for x in ics):
+        raise SyntaxError(
+            "All Information Criteria must be of the same kind, but both loo and waic data present"
+        )
+    return(dataset_dict, scale, ic, ics)
