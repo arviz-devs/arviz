@@ -149,7 +149,7 @@ def plot_dist_comparison(
             UserWarning,
         )
         for i in range(0, len(dc_plotters)):
-             dc_plotters[i] = dc_plotters[i][:len_plots]
+            dc_plotters[i] = dc_plotters[i][:len_plots]
 
     nvars = len(dc_plotters[0])
     ngroups = len(groups)
