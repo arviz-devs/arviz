@@ -74,7 +74,7 @@ disable=missing-docstring,
         no-member,
         #TODO: Remove this once todos are done
         fixme,
-        too-many-lines
+        consider-using-with
 
 
 # Enable the message, report, category or checker with the given id(s). You can
