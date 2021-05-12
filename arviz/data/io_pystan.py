@@ -1,4 +1,4 @@
-#  pylint: disable=too-many-instance-attributes
+#  pylint: disable=too-many-instance-attributes,too-many-lines
 """PyStan-specific conversion code."""
 import re
 import warnings
