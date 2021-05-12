@@ -65,9 +65,9 @@ class CmdStanPyConverter:
                     model_code = f_obj.read()
             else:
                 model_code = dtypes
-        elif instance(dtypes, cmdstanpy.CmdStanModel):
+            dtypes = infer_stan_dtypes(model_code)
+        elif isinstance(dtypes, cmdstanpy.CmdStanModel):
             model_code = dtypes.code()
-
             dtypes = infer_stan_dtypes(model_code)
 
         self.dtypes = dtypes
