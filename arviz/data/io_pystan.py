@@ -410,7 +410,7 @@ class PyStan3Converter:
         if isinstance(log_likelihood, (list, tuple)):
             log_likelihood = {name: name for name in log_likelihood}
         log_likelihood_draws = get_draws_stan3(
-            fit, model=model, variables=list(log_likelihood.values(), dtypes=self.dtypes)
+            fit, model=model, variables=list(log_likelihood.values()), dtypes=self.dtypes
         )
         data = {
             obs_var_name: log_likelihood_draws[log_like_name]
