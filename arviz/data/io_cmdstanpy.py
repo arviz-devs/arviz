@@ -54,6 +54,8 @@ class CmdStanPyConverter:
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
+        import cmdstanpy  # pylint: disable=import-error
+
         if dtypes is None:
             dtypes = {}
         elif isinstance(dtypes, str):
@@ -63,6 +65,8 @@ class CmdStanPyConverter:
                     model_code = f_obj.read()
             else:
                 model_code = dtypes
+        elif instance(dtypes, cmdstanpy.CmdStanModel):
+            model_code = dtypes.code()
 
             dtypes = infer_stan_dtypes(model_code)
 
@@ -81,8 +85,6 @@ class CmdStanPyConverter:
 
         if isinstance(self.log_likelihood, bool):
             self.log_likelihood = None
-
-        import cmdstanpy  # pylint: disable=import-error
 
         self.cmdstanpy = cmdstanpy
 
@@ -794,9 +796,10 @@ def from_cmdstanpy(
     save_warmup : bool
         Save warmup iterations into InferenceData object, if found in the input files.
         If not defined, use default defined by the rcParams.
-    dtypes: dict or str
+    dtypes: dict or str or cmdstanpy.CmdStanModel
         A dictionary containing dtype information (int, float) for parameters.
         If input is a string, it is assumed to be a model code or path to model code file.
+        Model code can extracted from cmdstanpy.CmdStanModel object.
 
     Returns
     -------
