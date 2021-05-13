@@ -1,5 +1,6 @@
 """Bokeh pairplot."""
 import warnings
+from copy import deepcopy
 from uuid import uuid4
 
 import bokeh.plotting as bkp
@@ -291,7 +292,7 @@ def plot_pair(
                         backend="bokeh",
                         backend_kwargs={},
                         show=False,
-                        **kde_kwargs,
+                        **deepcopy(kde_kwargs),
                     )
 
                 if "hexbin" in kind:
