@@ -245,7 +245,7 @@ def numpy_to_data_array(
         coords["draw"] = np.arange(index_origin, n_samples + index_origin)
 
     # filter coords based on the dims
-    coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}
+    coords = {key: xr.IndexVariable((key,), data=np.asarray(coords[key])) for key in dims}
     return xr.DataArray(ary, coords=coords, dims=dims)
 
 
