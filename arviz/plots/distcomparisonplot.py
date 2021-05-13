@@ -135,7 +135,9 @@ def plot_dist_comparison(
         for data, var in zip(datasets, var_names)
     ]
 
-    total_plots = sum(1 for _ in xarray_sel_iter(datasets[0], var_names=var_names[0], combined=True))
+    total_plots = sum(
+        1 for _ in xarray_sel_iter(datasets[0], var_names=var_names[0], combined=True)
+    )
     maxplots = len(dc_plotters[0]) * (len(groups) + 1)
 
     if total_plots > rcParams["plot.max_subplots"]:
