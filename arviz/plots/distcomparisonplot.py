@@ -4,7 +4,7 @@ from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
 from .plot_utils import get_plotting_function
-from ..sel_utils import xarray_var_iter
+from ..sel_utils import xarray_var_iter, xarray_sel_iter
 
 
 def plot_dist_comparison(
@@ -135,11 +135,8 @@ def plot_dist_comparison(
         for data, var in zip(datasets, var_names)
     ]
 
-    total_plots = sum(
-        sum(1 for _ in xarray_var_iter(data, var_names=var, combined=True))
-        for data, var in zip(datasets, var_names)
-    )
-    maxplots = sum(len(splot) for splot in dc_plotters)
+    total_plots = sum(1 for _ in xarray_sel_iter(datasets[0], var_names=var_names[0], combined=True))
+    maxplots = len(dc_plotters[0]) * (len(groups) + 1)
 
     if total_plots > rcParams["plot.max_subplots"]:
         warnings.warn(
@@ -148,8 +145,6 @@ def plot_dist_comparison(
             "plots".format(max_plots=maxplots, len_plotters=total_plots),
             UserWarning,
         )
-        for i in range(0, len(dc_plotters)):
-            dc_plotters[i] = dc_plotters[i][:len_plots]
 
     nvars = len(dc_plotters[0])
     ngroups = len(groups)
