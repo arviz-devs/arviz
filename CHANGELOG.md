@@ -12,6 +12,7 @@
 * Add more helpful error message for HDF5 problems reading `InferenceData` from NetCDF ([1637](https://github.com/arviz-devs/arviz/pull/1637))
 * Added `data.log_likelihood`, `stats.ic_compare_method` and `plot.density_kind` to `rcParams` ([1611](https://github.com/arviz-devs/arviz/pull/1611))
 * Improve error messages in `stats.compare()`, and `var_name` parameter. ([1616](https://github.com/arviz-devs/arviz/pull/1616))
+* Added ability to plot HDI contours to `plot_kde` with the new `hdi_probs` parameter. ([1665](https://github.com/arviz-devs/arviz/pull/1665))
 
 ### Maintenance and fixes
 * Fixed conversion of Pyro output fit using GPUs ([1659](https://github.com/arviz-devs/arviz/pull/1659))

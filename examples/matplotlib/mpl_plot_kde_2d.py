@@ -1,6 +1,6 @@
 """
-2d KDE
-======
+2d KDE (default style)
+======================
 
 _thumb: .1, .8
 _example_title: Plot KDE in two dimensions

@@ -1049,3 +1049,34 @@ def histogram(data, bins, range_hist=None):
     hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
     hist_dens = hist / (hist.sum() * np.diff(bin_edges))
     return hist, hist_dens, bin_edges
+
+
+def _find_hdi_contours(density, hdi_probs):
+    """
+    Find contours enclosing regions of highest posterior density.
+
+    Parameters
+    ----------
+    density : array-like
+        A 2D KDE on a grid with cells of equal area.
+    hdi_probs : array-like
+        An array of highest density interval confidence probabilities.
+
+    Returns
+    -------
+    contour_levels : array
+        The contour levels corresponding to the given HDI probabilities.
+    """
+    # Using the algorithm from corner.py
+    sorted_density = np.sort(density, axis=None)[::-1]
+    sm = sorted_density.cumsum()
+    sm /= sm[-1]
+
+    contours = np.empty_like(hdi_probs)
+    for idx, hdi_prob in enumerate(hdi_probs):
+        try:
+            contours[idx] = sorted_density[sm <= hdi_prob][-1]
+        except IndexError:
+            contours[idx] = sorted_density[0]
+
+    return contours

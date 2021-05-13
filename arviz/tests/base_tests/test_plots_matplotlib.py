@@ -395,6 +395,9 @@ def test_plot_joint_bad(models):
         {"is_circular": "radians"},
         {"is_circular": "degrees"},
         {"adaptive": True},
+        {"hdi_probs": [0.3, 0.9, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 0.9], "contourf_kwargs": {"cmap": "Blues"}},
+        {"hdi_probs": [0.9, 0.6, 0.3], "contour_kwargs": {"alpha": 0}},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -402,6 +405,35 @@ def test_plot_kde(continuous_model, kwargs):
     axes1 = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
     assert axes
     assert axes is axes1
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"hdi_probs": [1, 2, 3]},
+        {"hdi_probs": [-0.3, 0.6, 0.9]},
+        {"hdi_probs": [0, 0.3, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 1]},
+    ],
+)
+def test_plot_kde_hdi_probs_bad(continuous_model, kwargs):
+    """Ensure invalid hdi probabilities are rejected."""
+    with pytest.raises(ValueError):
+        plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"hdi_probs": [0.3, 0.6, 0.9], "contourf_kwargs": {"levels": [0, 0.5, 1]}},
+        {"hdi_probs": [0.3, 0.6, 0.9], "contour_kwargs": {"levels": [0, 0.5, 1]}},
+    ],
+)
+def test_plot_kde_hdi_probs_warning(continuous_model, kwargs):
+    """Ensure warning is raised when too many keywords are specified."""
+    with pytest.warns(UserWarning):
+        axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+    assert axes
 
 
 @pytest.mark.parametrize("shape", [(8,), (8, 8), (8, 8, 8)])
