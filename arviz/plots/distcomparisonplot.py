@@ -137,14 +137,16 @@ def plot_dist_comparison(
 
     total_plots = sum(
         1 for _ in xarray_sel_iter(datasets[0], var_names=var_names[0], combined=True)
-    )
+    ) * (len(groups) + 1)
     maxplots = len(dc_plotters[0]) * (len(groups) + 1)
 
     if total_plots > rcParams["plot.max_subplots"]:
         warnings.warn(
-            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-            "of variables to plot ({len_plotters}), generating only {max_plots} "
-            "plots".format(max_plots=maxplots, len_plotters=total_plots),
+            "rcParams['plot.max_subplots'] ({rcParam}) is smaller than the number "
+            "of subplots to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(
+                rcParam=rcParams["plot.max_subplots"], len_plotters=total_plots, max_plots=maxplots
+            ),
             UserWarning,
         )
 
