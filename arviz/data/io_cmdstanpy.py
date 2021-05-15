@@ -58,6 +58,9 @@ class CmdStanPyConverter:
 
         if dtypes is None:
             dtypes = {}
+        elif isinstance(dtypes, cmdstanpy.model.CmdStanModel):
+            model_code = dtypes.code()
+            dtypes = infer_stan_dtypes(model_code)
         elif isinstance(dtypes, str):
             dtypes_path = Path(dtypes)
             if dtypes_path.exists():
@@ -65,9 +68,6 @@ class CmdStanPyConverter:
                     model_code = f_obj.read()
             else:
                 model_code = dtypes
-            dtypes = infer_stan_dtypes(model_code)
-        elif isinstance(dtypes, cmdstanpy.CmdStanModel):
-            model_code = dtypes.code()
             dtypes = infer_stan_dtypes(model_code)
 
         self.dtypes = dtypes
