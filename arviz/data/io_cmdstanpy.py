@@ -723,19 +723,24 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup, dtypes):
         if shape_location is None:
             # reorder draw, chain -> chain, draw
             (i,) = column_locs[key]
-            sample[key] = np.swapaxes(data[..., i], 0, 1).astype(dtypes.get(key))
+            sample[key] = np.swapaxes(data[..., i], 0, 1)
             if save_warmup:
-                sample_warmup[key] = np.swapaxes(data_warmup[..., i], 0, 1).astype(dtypes.get(key))
+                sample_warmup[key] = np.swapaxes(data_warmup[..., i], 0, 1)
         else:
             for i, shape_loc in zip(column_locs[key], shape_location):
                 # location to insert extracted array
                 shape_loc = tuple([Ellipsis] + [j - 1 for j in shape_loc])
                 # reorder draw, chain -> chain, draw and insert to ndarray
-                sample[key][shape_loc] = np.swapaxes(data[..., i], 0, 1).astype(dtypes.get(key))
+                sample[key][shape_loc] = np.swapaxes(data[..., i], 0, 1)
                 if save_warmup:
-                    sample_warmup[key][shape_loc] = np.swapaxes(data_warmup[..., i], 0, 1).astype(
-                        dtypes.get(key)
-                    )
+                    sample_warmup[key][shape_loc] = np.swapaxes(data_warmup[..., i], 0, 1)
+
+    for key, dtype in dtypes.items():
+        if key in sample:
+            sample[key] = sample[key].astype(dtype)
+            if save_warmup:
+                if key in sample_warmup:
+                    sample_warmup[key] = sample_warmup[key].astype(dtype)
     return sample, sample_warmup
 
 
