@@ -8,21 +8,19 @@ import xarray as xr
 from ...data import from_dict
 from ...plots.backends.matplotlib import dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 from ...plots.plot_utils import (
+    compute_ranks,
     filter_plotters_list,
     format_sig_figs,
     get_plotting_function,
     make_2d,
     set_bokeh_circular_ticks_labels,
     vectorized_to_hex,
-    compute_ranks,
 )
-from ...sel_utils import xarray_to_ndarray, xarray_sel_iter
-
 from ...rcparams import rc_context
+from ...sel_utils import xarray_sel_iter, xarray_to_ndarray
 from ...stats.density_utils import get_bins
 from ...utils import get_coords
 from ..helpers import running_on_ci
-
 
 # Check if Bokeh is installed
 bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name

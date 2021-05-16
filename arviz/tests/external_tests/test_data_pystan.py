@@ -136,6 +136,7 @@ class TestDataPyStan:
             log_likelihood=False,
             prior_model=data.model,
             save_warmup=pystan_version() == 2,
+            dtypes={"eta": int},
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
@@ -221,6 +222,7 @@ class TestDataPyStan:
             )
         fails = check_multiple_attrs(test_dict, inference_data5)
         assert not fails
+        assert inference_data5.posterior.eta.dtype.kind == "i"
 
     def test_invalid_fit(self, data):
         if pystan_version() == 2:

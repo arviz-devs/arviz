@@ -6,7 +6,6 @@ from collections.abc import MutableMapping
 import numpy as np
 import pytest
 
-
 from arviz import InferenceData, from_dict
 
 from ..helpers import (  # pylint: disable=unused-import
@@ -14,8 +13,8 @@ from ..helpers import (  # pylint: disable=unused-import
     check_multiple_attrs,
     draws,
     eight_schools_params,
-    running_on_ci,
     importorskip,
+    running_on_ci,
 )
 
 zarr = importorskip("zarr")  # pylint: disable=invalid-name
