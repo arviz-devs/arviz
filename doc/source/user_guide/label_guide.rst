@@ -87,7 +87,7 @@ Sorting variable names
 
 .. tabbed:: xarray
 
-  In xarray, subsetting the Dataset with a sorted list of variable names will order the Dataset.
+  In xarray, subsetting the Datset with a sorted list of variable names will order the Dataset.
 
   .. ipython::
 
