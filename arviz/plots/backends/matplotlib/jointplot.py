@@ -63,7 +63,7 @@ def plot_joint(
     elif len(ax) == 3:
         axjoin, ax_hist_x, ax_hist_y = ax
     else:
-        raise ValueError("ax must be of lenght 3 but found {}".format(len(ax)))
+        raise ValueError("ax must be of length 3 but found {}".format(len(ax)))
 
     # Personalize axes
     ax_hist_x.tick_params(labelleft=False, labelbottom=False)

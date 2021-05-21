@@ -50,7 +50,7 @@ def plot_separation(
     textsize: int, optional
         Text size for labels. If None it will be autoscaled based on figsize.
     color : str, optional
-        Color to assign to the postive class. The negative class will be plotted using the
+        Color to assign to the positive class. The negative class will be plotted using the
         same color and an `alpha=0.3` transparency.
     legend : bool, optional
         Show the legend of the figure.
@@ -126,7 +126,7 @@ def plot_separation(
 
     if len(y) != len(y_hat):
         warnings.warn(
-            "y and y_hat must be the same lenght",
+            "y and y_hat must be the same length",
             UserWarning,
         )
 
