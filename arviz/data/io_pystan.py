@@ -884,7 +884,7 @@ def get_attrs_stan3(fit, model=None):
 def infer_dtypes(fit, model=None):
     """Infer dtypes from Stan model code.
 
-    Function strips out generated quantities block and searchs for `int`
+    Function strips out generated quantities block and searches for `int`
     dtypes after stripping out comments inside the block.
     """
     if model is None:

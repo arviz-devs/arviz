@@ -204,7 +204,7 @@ def load_arviz_data(dataset=None, data_home=None):
 
     Run with no parameters to get a list of all available models.
 
-    The directory to save to can also be set with the environement
+    The directory to save to can also be set with the environment
     variable `ARVIZ_HOME`. The checksum of the dataset is checked against a
     hardcoded value to watch for data corruption.
 

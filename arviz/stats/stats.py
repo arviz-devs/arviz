@@ -1147,7 +1147,7 @@ def summary(
     if index_origin is not None:
         warnings.warn(
             "index_origin has been deprecated. summary now shows coordinate values, "
-            "to change the label shown, modify the coordinate values before calling sumary",
+            "to change the label shown, modify the coordinate values before calling summary",
             DeprecationWarning,
         )
         index_origin = rcParams["data.index_origin"]
@@ -1326,13 +1326,13 @@ def summary(
         summary_df = pd.DataFrame(
             (np.full((cast(int, n_vars), n_metrics), np.nan)), columns=metric_names
         )
-        indexs = []
+        indices = []
         for i, (var_name, sel, isel, values) in enumerate(
             xarray_var_iter(joined, skip_dims={"metric"})
         ):
             summary_df.iloc[i] = values
-            indexs.append(labeller.make_label_flat(var_name, sel, isel))
-        summary_df.index = indexs
+            indices.append(labeller.make_label_flat(var_name, sel, isel))
+        summary_df.index = indices
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
         df.index = list(df.index)
@@ -1706,7 +1706,7 @@ def apply_test_function(
         kwargs passed to :func:`~arviz.wrap_xarray_ufunc`. By default, some suitable input_core_dims
         are used.
     inplace: bool, optional
-        If True, add the variables inplace, othewise, return a copy of idata with the variables
+        If True, add the variables inplace, otherwise, return a copy of idata with the variables
         added.
     overwrite: bool, optional
         Overwrite data in case ``out_name_data`` or ``out_name_pp`` are already variables in

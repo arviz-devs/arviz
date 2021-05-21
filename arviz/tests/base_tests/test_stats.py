@@ -639,7 +639,7 @@ def test_loo_pit_bad_input_type(centered_eight, arg):
 
 @pytest.mark.parametrize("incompatibility", ["y-y_hat1", "y-y_hat2", "y_hat-log_weights"])
 def test_loo_pit_bad_input_shape(incompatibility):
-    """Test shape incompatiblities."""
+    """Test shape incompatibilities."""
     y = np.random.random(8)
     y_hat = np.random.random((8, 200))
     log_weights = np.random.random((8, 200))

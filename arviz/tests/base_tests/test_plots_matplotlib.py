@@ -1291,7 +1291,7 @@ def test_plot_ess_evolution(models):
 
 
 def test_plot_ess_bad_kind(models):
-    """Test error when plot_ess recieves an invalid kind."""
+    """Test error when plot_ess receives an invalid kind."""
     idata = models.model_1
     with pytest.raises(ValueError, match="Invalid kind"):
         plot_ess(idata, kind="bad kind")

@@ -599,7 +599,7 @@ def _kde_linear(
     pdf : Numpy array for the density estimates.
     bw: optional, the estimated bandwidth.
     """
-    # Check `x` is from appropiate type
+    # Check `x` is from appropriate type
     try:
         x = _check_type(x)
     except ValueError as e:
@@ -935,7 +935,7 @@ def get_bins(values):
 
     Notes
     -----
-    Computes the width of the bins by taking the maximun of the Sturges and the Freedman-Diaconis
+    Computes the width of the bins by taking the maximum of the Sturges and the Freedman-Diaconis
     estimators. According to numpy `np.histogram` this provides good all around performance.
 
     The Sturges is a very simplistic estimator based on the assumption of normality of the data.

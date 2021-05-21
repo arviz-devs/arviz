@@ -201,7 +201,7 @@ def plot_kde(
         >>> az.plot_kde(mu_posterior, values2=tau_posterior)
 
 
-    Plot 2d contour KDE, without filling and countour lines using viridis cmap
+    Plot 2d contour KDE, without filling and contour lines using viridis cmap
 
     .. plot::
         :context: close-figs
