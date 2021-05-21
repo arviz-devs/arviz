@@ -204,7 +204,7 @@ def check_multiple_attrs(
     It is thought to first check if the parent object contains a given dataset,
     and then (if present) check the attributes of the dataset.
 
-    Given the ouput of the function, all missmatches between expectation and reality can
+    Given the output of the function, all mismatches between expectation and reality can
     be retrieved: a single string indicates a group mismatch and a tuple of strings
     ``(group, var)`` indicates a mismatch in the variable ``var`` of ``group``.
 
@@ -212,7 +212,7 @@ def check_multiple_attrs(
     ----------
     test_dict: dict of {str : list of str}
         Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`.
-        A ``~`` at the beggining of a dataset or variable name indicates the name NOT
+        A ``~`` at the beginning of a dataset or variable name indicates the name NOT
         being present must be asserted.
     parent: InferenceData
         InferenceData object on which to check the attributes.

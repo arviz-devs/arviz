@@ -51,8 +51,8 @@ def _verify_names(sampler, var_names, arg_names, slices):
         num_vars = ndim
     else:
         num_vars = len(slices)
-    indexs = utils.arange(ndim)
-    slicing_try = np.concatenate([utils.one_de(indexs[idx]) for idx in slices])
+    indices = utils.arange(ndim)
+    slicing_try = np.concatenate([utils.one_de(indices[idx]) for idx in slices])
     if len(set(slicing_try)) != ndim:
         warnings.warn(
             "Check slices: Not all parameters in chain captured. "

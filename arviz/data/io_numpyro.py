@@ -53,7 +53,7 @@ class NumPyroConverter:
             Dictionary containing constant data variables mapped to their values.
         predictions_constant_data: dict
             Constant data used for out-of-sample predictions.
-        index_origin : int, optinal
+        index_origin : int, optional
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
