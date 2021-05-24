@@ -122,7 +122,6 @@ There are two ways of sorting:
 .. tabbed:: ArviZ args
 
   Sort the coordinate values to pass them as a `coords` argument and choose the order of the rows.
-  To manually sort the schools, `sorted_schools`, define sorted_schools as a list.
 
   .. ipython::
 
