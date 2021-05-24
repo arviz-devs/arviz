@@ -25,7 +25,7 @@ keyword argument defaulting and plot behavior
 The convenience function ``get_plotting_function`` available in
 ``arviz.plots.get_plotting_function`` should be called to obtain
 the correct plotting function from the associated backend. If
-adding a new backend follow the pattern provided to programatically
+adding a new backend follow the pattern provided to programmatically
 call the correct backend
 
 Test Separation
