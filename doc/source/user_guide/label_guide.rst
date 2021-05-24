@@ -41,8 +41,8 @@ With this you can now identify issues for low ``tau`` values.
 Example: Using the labeller argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To create a report on Deerfield, Hotchkiss and Lawrenceville schools for the probability of ``theta > 5`` and use the labeller argument to customize labels. 
-Unlike the default labels that show ``theta``, not $\theta$ (generated from ``$\theta$`` using $\LaTeX$), the labeller argument presents the label with proper math notation.
+You can use the labeller argument to customize labels. 
+Unlike the default labels that show ``theta``, not $\theta$ (generated from ``$\theta$`` using $\LaTeX$), the labeller argument presents the labels with proper math notation.
 
 You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
 
@@ -104,6 +104,7 @@ Sorting coordinate values
 .........................
 
 To sort coordinate values you have to define the order, store it, and use the result to sort the coordinate values. 
+You can define the order by creating a list manually or by using xarray objects as illustrated in the example "Sorting out the schools by mean". 
 
 Example: Sorting the schools by mean
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
