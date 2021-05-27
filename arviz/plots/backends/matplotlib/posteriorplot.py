@@ -307,6 +307,11 @@ def _plot_posterior_op(
         )
         ax.spines["bottom"].set_color("0.5")
 
+    is_bool = values.dtype.kind == "b"
+    if is_bool:
+        values = values.astype(int)
+        hdi_prob = "hide"
+
     if kind == "kde" and values.dtype.kind == "f":
         kwargs.setdefault("linewidth", linewidth)
         plot_kde(
@@ -330,7 +335,10 @@ def _plot_posterior_op(
                 bins = "auto"
         kwargs.setdefault("align", "left")
         kwargs.setdefault("color", "C0")
-        ax.hist(values, bins=bins, alpha=0.35, **kwargs)
+        if is_bool:
+            ax.bar(["False", "True"], [len(values) - np.sum(values), np.sum(values)], alpha=0.35)
+        else:
+            ax.hist(values, bins=bins, alpha=0.35, **kwargs)
 
     plot_height = ax.get_ylim()[1]
 
