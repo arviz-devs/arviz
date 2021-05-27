@@ -28,6 +28,10 @@ else:
         save_warmup=None,
         density_dist_obs=True,
     ):
+        """Convert pymc3 data into an InferenceData object.
+
+        Placeholder for function moved to PyMC3.
+        """
         raise NotImplementedError(
             "The converter has been moved to PyMC3 codebase, use pymc3.to_inference_data"
         )
@@ -39,8 +43,12 @@ else:
         coords=None,
         dims=None,
         idata_orig=None,
-        inplace = False,
+        inplace=False,
     ):
+        """Translate out-of-sample predictions into ``InferenceData``.
+
+        Placeholder for function moved to PyMC3.
+        """
         raise NotImplementedError(
             "The converter has been moved to PyMC3 codebase, "
             "use pymc3.to_inference_data_predictions"
