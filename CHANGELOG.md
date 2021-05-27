@@ -41,6 +41,7 @@
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 
 ### Documentation
+* Language improvements of the first third of the "Label guide" ([1699](https://github.com/arviz-devs/arviz/pull/1699))
 * Added "Label guide" page and API section for `arviz.labels` module ([1201](https://github.com/arviz-devs/arviz/pull/1201) and [1635](https://github.com/arviz-devs/arviz/pull/1635))
 * Add "Installation guide" page to the documentation ([1551](https://github.com/arviz-devs/arviz/pull/1551))
 * Improve documentation on experimental `SamplingWrapper` classes ([1582](https://github.com/arviz-devs/arviz/pull/1582))

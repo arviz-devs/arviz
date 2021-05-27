@@ -4,42 +4,47 @@
 Label guide
 ===========
 
-Basic labeling
---------------
+Basic labelling
+---------------
 
-All ArviZ plotting functions and some stats functions take an optional ``labeller`` argument.
-By default, labels show the variable name and the coordinate value
-(for multidimensional variables only).
-The first example below uses this default labeling.
+All ArviZ plotting functions and some stats functions can take an optional ``labeller`` argument.
+By default, labels show the variable name.
+Multidimensional variables also show the coordinate value.
 
 .. ipython::
+
+Example: Default labelling
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   In [1]: import arviz as az
      ...: schools = az.load_arviz_data("centered_eight")
      ...: az.summary(schools)
 
-Thanks to being powered by xarray, ArviZ supports label based indexing.
-We can therefore use the labels we have seen in the summary to plot only a subset of the variables,
-the one we are interested in.
-Provided we know that the coordinate values shown for theta correspond to the `school` dimension,
-we can plot only ``tau`` to better inspect it's 1.03 :func:`~arviz.rhat` and
-``theta`` for ``Choate`` and ``St. Paul's``, the ones with higher means:
+ArviZ supports label based indexing powered by xarray.
+Through label based indexing you can use labels to plot a subset of selected variables.
+
+Example: Label based indexing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For a case where the coordinate values shown for the ``theta`` variable coordinate to the ``school`` dimension
+you can indicate ArviZ to plot ``tau`` by including it in the ``var_names`` argument to inspect its 1.03 :func:`~arviz.rhat` value.
+To inspect the ``theta`` values for the ``Choate`` and ``St. Paul's`` coordinates, you can include ``theta`` in ``var_names`` and use the ``coords`` argument to select only these two coordinate values.
+You can generate this plot with the following command:
 
 .. ipython:: python
 
     @savefig label_guide_plot_trace.png
     az.plot_trace(schools, var_names=["tau", "theta"], coords={"school": ["Choate", "St. Paul's"]}, compact=False);
 
-So far so good, we can identify some issues for low ``tau`` values which is great start.
-But say we want to make a report on Deerfield, Hotchkiss and Lawrenceville schools to
-see the probability of ``theta > 5`` and we have to present it somewhere with math notation.
-Our default labels show ``theta``, not $\theta$ (generated from ``$\theta$`` using $\LaTeX$).
+With this you can now identify issues for low ``tau`` values.
 
-Fear not, we can use the labeller argument to customize the labels.
-The ``arviz.labels`` module contains some classes that cover some common customization classes.
+Example: Using the labeller argument
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this case, we can use :class:`~arviz.labels.MapLabeller` and
-tell it to rename the variable name ``theta`` to ``$\theta$``, like so:
+You can use the labeller argument to customize labels. 
+Unlike the default labels that show ``theta``, not $\theta$ (generated from ``$\theta$`` using $\LaTeX$), the labeller argument presents the labels with proper math notation.
+
+You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
 
 .. ipython::
 
@@ -50,24 +55,26 @@ tell it to rename the variable name ``theta`` to ``$\theta$``, like so:
     @savefig label_guide_plot_posterior.png
     In [1]: az.plot_posterior(schools, var_names="theta", coords=coords, labeller=labeller, ref_val=5);
 
-You can see the labellers available in ArviZ at :ref:`their API reference page <labeller_api>`.
-Their names aim to be descriptive and they all have examples in their docstring.
-For further customization continue reading this guide.
+.. seealso::
+
+- For a list of labellers available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
 
 Sorting labels
 --------------
 
-Labels in ArviZ can generally be sorted in two ways,
-using the arguments passed to ArviZ plotting functions or
-sorting the underlying xarray Dataset.
-The first one is more convenient for single time ordering
-whereas the second is better if you want plots consistently sorted that way and
-is also more flexible, using ArviZ args is more limited.
+ArviZ allows labels to be sorted in two ways:
 
-Both alternatives have an important limitation though.
-Multidimensional variables are always together.
-We can sort ``theta, mu, tau`` in any order, and within ``theta`` we can sort the schools in any order,
-but it's not possible to show half the schools, then ``mu`` and ``tau`` and then the rest of the schools.
+- Using the arguments passed to ArviZ plotting functions 
+- Sorting the underlying :class:`xarray.Dataset`
+
+The first option is more suitable for single time ordering whereas the second option is more suitable for sorting plots consistently.
+
+.. note::
+
+  Both ways are limited.
+  Multidimensional variables can not be separated. 
+  For example, it is possible to sort ``theta, mu,`` or ``tau`` in any order, and within ``theta`` to sort the schools in any order, but it is not possible to sort half of the schools, then ``mu`` and ``tau`` and then the rest of the schools.
+
 
 Sorting variable names
 ......................
@@ -78,8 +85,7 @@ Sorting variable names
 
 .. tabbed:: ArviZ args
 
-  We can pass a list with the variable names sorted to modify the order in which they appear
-  when calling ArviZ functions
+  For variable names to appear sorted when calling ArviZ functions, pass a list of the variable names with the variable names sorted.
 
   .. ipython::
 
@@ -87,7 +93,7 @@ Sorting variable names
 
 .. tabbed:: xarray
 
-  In xarray, subsetting the Datset with a sorted list of variable names will order the Dataset.
+  In xarray, subsetting the Dataset with a sorted list of variable names will order the Dataset.
 
   .. ipython::
 
@@ -97,22 +103,25 @@ Sorting variable names
 Sorting coordinate values
 .........................
 
-We may also want to sort the schools by their mean.
-To do so we first have to get the means of each school:
+To sort coordinate values you have to define the order, store it, and use the result to sort the coordinate values. 
+You can define the order by creating a list manually or by using xarray objects as illustrated in the example "Sorting out the schools by mean". 
+
+Example: Sorting the schools by mean
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) Locate the means of each school by using the following command:
 
 .. ipython::
 
     In [1]: school_means = schools.posterior["theta"].mean(("chain", "draw"))
        ...: school_means
 
-We can then use this DataArray result to sort the coordinate values for ``theta``.
-Again we have two alternatives:
+2) You can use the DataArray result to sort the coordinate values for ``theta``.
+There are two ways of sorting:
 
 .. tabbed:: ArviZ args
 
-  Here the first step is to sort the coordinate values so we can pass them as `coords` argument and
-  choose the order of the rows.
-  If we want to manually sort the schools, `sorted_schools` can be defined straight away as a list
+  Sort the coordinate values to pass them as a `coords` argument and choose the order of the rows.
 
   .. ipython::
 
@@ -121,7 +130,7 @@ Again we have two alternatives:
 
 .. tabbed:: xarray
 
-  We can use the :meth:`~xarray.Dataset.sortby` method to order our coordinate values straight at the source
+  You can use the :meth:`~xarray.Dataset.sortby` method to order our coordinate values directly at the source.
 
   .. ipython::
 
