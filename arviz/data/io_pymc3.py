@@ -7,12 +7,12 @@ __all__ = ["from_pymc3", "from_pymc3_predictions"]
 
 try:
     pymc3_version = pkg_resources.get_distribution("pymc3").version
-    pymc3_v4 = packaging.version.parse(pymc3_version) >= packaging.version.parse("4.0")
+    PYMC3_V4 = packaging.version.parse(pymc3_version) >= packaging.version.parse("4.0")
 except pkg_resources.DistributionNotFound:
-    pymc3_v4 = False
+    PYMC3_V4 = False
 
 
-if not pymc3_v4:
+if not PYMC3_V4:
     from .io_pymc3_3x import from_pymc3, from_pymc3_predictions
 else:
 
