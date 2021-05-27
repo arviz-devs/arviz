@@ -5,9 +5,14 @@ import packaging
 
 __all__ = ["from_pymc3", "from_pymc3_predictions"]
 
-pymc3_version = pkg_resources.get_distribution("pymc3").version
+try:
+    pymc3_version = pkg_resources.get_distribution("pymc3").version
+    pymc3_v4 = packaging.version.parse(pymc3_version) >= packaging.version.parse("4.0")
+except pkg_resources.DistributionNotFound:
+    pymc3_v4 = False
 
-if packaging.version.parse(pymc3_version) < packaging.version.parse("4.0"):
+
+if not pymc3_v4:
     from .io_pymc3_3x import from_pymc3, from_pymc3_predictions
 else:
 
