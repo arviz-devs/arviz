@@ -11,10 +11,10 @@ All ArviZ plotting functions and some stats functions can take an optional ``lab
 By default, labels show the variable name.
 Multidimensional variables also show the coordinate value.
 
-.. ipython::
-
 Example: Default labelling
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. ipython::
 
   In [1]: import arviz as az
      ...: schools = az.load_arviz_data("centered_eight")
@@ -57,7 +57,7 @@ You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` 
 
 .. seealso::
 
-- For a list of labellers available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
+   For a list of labellers available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
 
 Sorting labels
 --------------
