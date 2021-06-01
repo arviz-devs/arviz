@@ -71,7 +71,8 @@ def plot_hdi(
     backend : {"matplotlib","bokeh"}, optional
         Select plotting backend.
     backend_kwargs : bool, optional
-        These are kwargs specific to the backend being used, passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
+        These are kwargs specific to the backend being used, passed to 
+        :meth:`mpl:matplotlib.axes.Axes.plot` or
         :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
     show : bool, optional
         Call backend show function.
