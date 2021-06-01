@@ -1,5 +1,4 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
-from arviz.data import inference_data
 import numpy as np
 import pytest
 
