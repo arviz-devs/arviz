@@ -160,8 +160,9 @@ def compare(
 
     References
     ----------
-    .. [1] Using Advanced Plot Types in Kaluza: Comparison Plots for Visualization of the TCR V
-        Beta Repertoire, see https://www.beckman.com/flow-cytometry/software/kaluza/learning-center/comparison-plot
+    .. [1] Vehtari, A., Gelman, A. & Gabry, J. Practical Bayesian model evaluation using
+        leave-one-out cross-validation and WAIC. Stat Comput 27, 1413–1432 (2017)
+        see https://doi.org/10.1007/s11222-016-9696-4
 
     """
     names = list(dataset_dict.keys())
