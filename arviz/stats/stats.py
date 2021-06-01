@@ -156,6 +156,13 @@ def compare(
     --------
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
+    plot_compare : Summary plot for model comparison.
+
+    References
+    ----------
+    .. [1] Using Advanced Plot Types in Kaluza: Comparison Plots for Visualization of the TCR V
+        Beta Repertoire, see https://www.beckman.com/flow-cytometry/software/kaluza/learning-center/comparison-plot
+
     """
     names = list(dataset_dict.keys())
     if scale is not None:
