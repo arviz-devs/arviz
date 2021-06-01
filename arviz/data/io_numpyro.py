@@ -124,7 +124,9 @@ class NumPyroConverter:
 
         observations = {}
         if self.model is not None:
-            seeded_model = numpyro.handlers.seed(self.model, jax.random.PRNGKey(0))
+            seeded_model = numpyro.handlers.substitute(
+                numpyro.handlers.seed(self.model, jax.random.PRNGKey(0)),
+                substitute_fn=numpyro.infer.init_to_sample)
             trace = numpyro.handlers.trace(seeded_model).get_trace(*self._args, **self._kwargs)
             observations = {
                 name: site["value"]
