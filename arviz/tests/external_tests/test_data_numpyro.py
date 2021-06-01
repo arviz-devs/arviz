@@ -1,4 +1,5 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
+from arviz.data import inference_data
 import numpy as np
 import pytest
 
@@ -253,3 +254,17 @@ class TestDataNumPyro:
 
         inference_data = from_numpyro(mcmc)
         assert inference_data.posterior["loc"].shape == (nchains, 400 // thin)
+
+    def test_mcmc_improper_uniform(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            x = numpyro.sample("x", dist.ImproperUniform(dist.constraints.positive, (), ()))
+            return numpyro.sample("y", dist.Normal(x, 1), obs=1.0)
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(mcmc)
+        assert inference_data.observed_data
