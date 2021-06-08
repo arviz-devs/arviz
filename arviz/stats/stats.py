@@ -1569,6 +1569,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
                 "all 3 y, y_hat and log_weights must be array or DataArray when idata is None "
                 f"but they are of types {[type(arg) for arg in (y, y_hat, log_weights)]}"
             )
+        if isinstance(y, xr.DataArray):
+            y = y.values
 
     else:
         if y_hat is None and isinstance(y, str):
@@ -1578,6 +1580,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         if isinstance(y, str):
             y_str = y
             y = idata.observed_data[y].values
+        elif isinstance(y, xr.DataArray):
+            y = y.values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
             raise ValueError(f"y must be of types array, DataArray or str, not {type(y)}")
         if isinstance(y_hat, str):
@@ -1627,34 +1631,17 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             f"{y_hat.shape,} and {log_weights.shape}"
         )
 
-    kwargs = {
-        "input_core_dims": [[], ["__sample__"], ["__sample__"]],
-        "output_core_dims": [[]],
-        "join": "left",
-    }
-    ufunc_kwargs = {"n_dims": 1}
-
+    if y.ndim == 2:
+        y = y.T[None, :]
+    y_hat = y_hat.T
     if y.dtype.kind == "i" or y_hat.dtype.kind == "i":
         y, y_hat = smooth_data(y, y_hat)
 
-    return _wrap_xarray_ufunc(
-        _loo_pit,
-        y,
-        y_hat,
-        log_weights,
-        ufunc_kwargs=ufunc_kwargs,
-        **kwargs,
-    )
+    mlw = np.max(log_weights)
+    pits = np.exp(mlw + np.log(np.sum(np.exp(log_weights.T - mlw) * (y_hat <= y), axis=0)))
+    pits = np.minimum(1, pits)
 
-
-def _loo_pit(y, y_hat, log_weights):
-    """Compute LOO-PIT values."""
-    sel = y_hat <= y
-    if np.sum(sel) > 0:
-        value = np.exp(_logsumexp(log_weights[sel]))
-        return min(1, value)
-    else:
-        return 0
+    return pits
 
 
 def apply_test_function(
