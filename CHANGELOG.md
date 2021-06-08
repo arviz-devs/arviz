@@ -16,6 +16,7 @@
 * Add dtype parsing and setting in all Stan converters ([1632](https://github.com/arviz-devs/arviz/pull/1632))
 
 ### Maintenance and fixes
+* Fix conversion for numpyro models with ImproperUniform latent sites ([1713](https://github.com/arviz-devs/arviz/pull/1713))
 * Fixed conversion of Pyro output fit using GPUs ([1659](https://github.com/arviz-devs/arviz/pull/1659))
 * Enforced using coordinate values as default labels ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 * Integrate `index_origin` with all the library ([1201](https://github.com/arviz-devs/arviz/pull/1201))
