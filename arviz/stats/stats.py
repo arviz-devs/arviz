@@ -156,6 +156,14 @@ def compare(
     --------
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
+    plot_compare : Summary plot for model comparison.
+
+    References
+    ----------
+    .. [1] Vehtari, A., Gelman, A. & Gabry, J. Practical Bayesian model evaluation using
+        leave-one-out cross-validation and WAIC. Stat Comput 27, 1413–1432 (2017)
+        see https://doi.org/10.1007/s11222-016-9696-4
+
     """
     names = list(dataset_dict.keys())
     if scale is not None:
