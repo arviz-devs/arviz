@@ -124,6 +124,7 @@ class NumPyroConverter:
 
         observations = {}
         if self.model is not None:
+            # we need to use an init strategy to generate random samples for ImproperUniform sites
             seeded_model = numpyro.handlers.substitute(
                 numpyro.handlers.seed(self.model, jax.random.PRNGKey(0)),
                 substitute_fn=numpyro.infer.init_to_sample,
