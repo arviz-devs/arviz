@@ -528,17 +528,17 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
 
 def from_pymc3(
-    trace: Optional[MultiTrace] = None,
+    trace=None,
     *,
-    prior: Optional[Dict[str, Any]] = None,
-    posterior_predictive: Optional[Dict[str, Any]] = None,
-    log_likelihood: Union[bool, Iterable[str], None] = None,
-    coords: Optional[CoordSpec] = None,
-    dims: Optional[DimSpec] = None,
-    model: Optional[Model] = None,
-    save_warmup: Optional[bool] = None,
-    density_dist_obs: bool = True,
-) -> InferenceData:
+    prior=None,
+    posterior_predictive=None,
+    log_likelihood=None,
+    coords=None,
+    dims=None,
+    model=None,
+    save_warmup=None,
+    density_dist_obs=True,
+):
     """Convert pymc3 data into an InferenceData object.
 
     All three of them are optional arguments, but at least one of ``trace``,
@@ -596,13 +596,13 @@ def from_pymc3(
 ### perhaps we should have an inplace argument?
 def from_pymc3_predictions(
     predictions,
-    posterior_trace: Optional[MultiTrace] = None,
-    model: Optional[Model] = None,
+    posterior_trace=None,
+    model=None,
     coords=None,
     dims=None,
-    idata_orig: Optional[InferenceData] = None,
-    inplace: bool = False,
-) -> InferenceData:
+    idata_orig=None,
+    inplace=False,
+):
     """Translate out-of-sample predictions into ``InferenceData``.
 
     Parameters

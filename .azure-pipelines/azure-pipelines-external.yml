@@ -128,9 +128,9 @@ jobs:
       python -m black --check arviz examples asv_benchmarks
     displayName: 'black'
 
-  # - script: |
-  #     python -m mypy .
-  #   displayName: 'mypy'
+  - script: |
+      python -m mypy .
+    displayName: 'mypy'
 
   - script: |
       python -m typing_copilot.cli tighten --error-if-can-tighten
