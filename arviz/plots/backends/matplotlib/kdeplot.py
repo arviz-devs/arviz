@@ -144,11 +144,13 @@ def plot_kde(
         else:
             fill_kwargs.setdefault("alpha", 0)
             if fill_kwargs.get("alpha") == 0:
-                ax.plot(x, density, label=label, **plot_kwargs)
+                label = plot_kwargs.setdefault("label", label)
+                ax.plot(x, density, **plot_kwargs)
                 fill_func(fill_x, fill_y, **fill_kwargs)
             else:
+                label = fill_kwargs.setdefault("label", label)
                 ax.plot(x, density, **plot_kwargs)
-                fill_func(fill_x, fill_y, label=label, **fill_kwargs)
+                fill_func(fill_x, fill_y, **fill_kwargs)
         if legend and label:
             ax.legend()
     else:

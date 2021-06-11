@@ -147,6 +147,8 @@ def plot_kde(
                     patch = ax.patch(patch_y, patch_x, **fill_kwargs)
                 glyphs.append(patch)
 
+            if label is not None:
+                plot_kwargs.setdefault("legend_label", label)
             if not rotated:
                 line = ax.line(x, density, **plot_kwargs)
             else:
