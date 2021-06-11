@@ -24,8 +24,16 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     load_cached_models,
 )
 
-# Skip all tests if pymc3 not installed
-pm = importorskip("pymc3")
+# Skip all tests unless running on pymc3 v3
+try:
+    pymc3_version = pkg_resources.get_distribution("pymc3").version
+    PYMC3_V4 = packaging.version.parse(pymc3_version) >= packaging.version.parse("4.0")
+    PYMC3_installed = True
+except pkg_resources.DistributionNotFound:
+    PYMC3_V4 = False
+    PYMC3_installed = False
+
+pytestmark = pytest.mark.skipif(not PYMC3_installed or PYMC3_V4)
 
 
 class TestDataPyMC3:
