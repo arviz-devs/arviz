@@ -2,6 +2,7 @@
 """General utilities."""
 import functools
 import importlib
+import packaging
 import re
 import warnings
 from functools import lru_cache
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pkg_resources
 from numpy import newaxis
+import xarray as xr
 
 from .rcparams import rcParams
 
@@ -619,23 +621,28 @@ def get_coords(data, coords):
         xarray.DataSet or xarray.DataArray object, same type as input
     """
     if not isinstance(data, (list, tuple)):
-        try:
+        if packaging.version.parse(xr.__version__) > packaging.version.parse("0.18.2"):
             return data.sel(**coords)
+        else:
+            # keep our tweaked improved errors for a while
+            # TODO: eventually delegate errors to xarray completely
+            try:
+                return data.sel(**coords)
 
-        except ValueError as err:
-            invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError(
-                "Coords {} are invalid coordinate keys".format(invalid_coords)
-            ) from err
+            except ValueError as err:
+                invalid_coords = set(coords.keys()) - set(data.coords.keys())
+                raise ValueError(
+                    "Coords {} are invalid coordinate keys".format(invalid_coords)
+                ) from err
 
-        except KeyError as err:
-            raise KeyError(
-                (
-                    "Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
-                    "Check that coords structure is correct and"
-                    " dimensions are valid. {}"
-                ).format(err)
-            ) from err
+            except KeyError as err:
+                raise KeyError(
+                    (
+                        "Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
+                        "Check that coords structure is correct and"
+                        " dimensions are valid. {}"
+                    ).format(err)
+                ) from err
     if not isinstance(coords, (list, tuple)):
         coords = [coords] * len(data)
     data_subset = []
