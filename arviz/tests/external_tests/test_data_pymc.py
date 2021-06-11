@@ -3,6 +3,7 @@ from sys import version_info
 from typing import Dict, Tuple
 
 import numpy as np
+import pkg_resources
 import packaging
 import pandas as pd
 import pytest
@@ -29,6 +30,7 @@ try:
     pymc3_version = pkg_resources.get_distribution("pymc3").version
     PYMC3_V4 = packaging.version.parse(pymc3_version) >= packaging.version.parse("4.0")
     PYMC3_installed = True
+    import pymc3 as pm
 except pkg_resources.DistributionNotFound:
     PYMC3_V4 = False
     PYMC3_installed = False
