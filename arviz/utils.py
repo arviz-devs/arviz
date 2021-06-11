@@ -621,7 +621,11 @@ def get_coords(data, coords):
         xarray.DataSet or xarray.DataArray object, same type as input
     """
     if not isinstance(data, (list, tuple)):
-        if packaging.version.parse(xr.__version__) > packaging.version.parse("0.18.2"):
+        min_version = packaging.version.parse("0.18.2")
+        xr_version = packaging.version.parse(xr.__version__)
+        if (xr_version > min_version) or (
+            ("dev" in xr.__version__) and (xr_version == min_version)
+        ):
             return data.sel(**coords)
         else:
             # keep our tweaked improved errors for a while
