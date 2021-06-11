@@ -35,7 +35,10 @@ except pkg_resources.DistributionNotFound:
     PYMC3_V4 = False
     PYMC3_installed = False
 
-pytestmark = pytest.mark.skipif(not PYMC3_installed or PYMC3_V4)
+pytestmark = pytest.mark.skipif(
+    not PYMC3_installed or PYMC3_V4,
+    reason="Run tests only if pymc3 installed and its version is <4.0",
+)
 
 
 class TestDataPyMC3:
