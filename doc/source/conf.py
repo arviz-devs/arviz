@@ -60,6 +60,7 @@ extensions = [
     "myst_nb",
     "sphinx_panels",
     "notfound.extension",
+    "sphinx_copybutton",
 ]
 
 # ipython directive configuration
@@ -161,8 +162,9 @@ html_context = {
     "github_version": "main",
     "doc_path": "doc/source/",
 }
-html_sidebars : Dict[str, Any] = {
-  "community": []
+html_sidebars: Dict[str, Any] = {
+    "community": [],
+    "about_us": [],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

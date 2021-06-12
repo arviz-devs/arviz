@@ -75,8 +75,8 @@ The PPLs that integrate with ArviZ are:
 Moreover, there are other libraries that use ArviZ for visualization and diagnostics
 and/or that are compatible with `InfereceData` objects:
 
-* Bambi
-* corner.py
+* [Bambi](https://bambinos.github.io/bambi/)
+* [corner.py](https://corner.readthedocs.io/en/latest/)
 
 # Community educational resources
 ArviZ is a transversal and backend agnostic project. One can use ArviZ with _any_ PPL,
