@@ -34,7 +34,7 @@ from .plots import *
 from .plots.backends import *
 from .stats import *
 from .rcparams import rc_context, rcParams
-from .utils import Numba, Dask, interactive_backend
+from .utils import Numba, Dask, interactive_backend, extract_dataset
 from .wrappers import *
 
 # add ArviZ's styles to matplotlib's styles
