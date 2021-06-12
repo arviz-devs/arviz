@@ -99,7 +99,7 @@ using:
 
 
 The `intersphinx_mappings`
-defined for ArviZ can be seen in [`conf.py`](https://github.com/arviz-devs/arviz/blob/main/doc/conf.py).
+defined for ArviZ can be seen in [`conf.py`](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py).
 Moreover, the intersphinx key is optional. Thus, the pattern to get sphinx to generate links is:
 
 ````{tabbed} rST
