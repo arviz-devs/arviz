@@ -50,6 +50,7 @@
 * Improve documentation on experimental `SamplingWrapper` classes ([1582](https://github.com/arviz-devs/arviz/pull/1582))
 * Added example to `plot_hdi` using Inference Data ([1615](https://github.com/arviz-devs/arviz/pull/1615))
 * Removed `geweke` diagnostic from `numba` user guide ([1653](https://github.com/arviz-devs/arviz/pull/1653))
+* Restructured the documentation sections to improve community and about us information ([1587](https://github.com/arviz-devs/arviz/pull/1587))
 
 ## v0.11.2 (2021 Feb 21)
 ### New features
