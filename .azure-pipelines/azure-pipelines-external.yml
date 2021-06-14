@@ -89,7 +89,7 @@ jobs:
           # Pip installation is failing for some reason. This is the same thing
           git clone https://github.com/pymc-devs/pymc3
           cd pymc3
-          git checkout v3
+          git checkout v4
           cd ..
           pip install $PWD/pymc3
           # python -m pip --no-cache-dir --log log.txt install git+https://github.com/pymc-devs/pymc3
