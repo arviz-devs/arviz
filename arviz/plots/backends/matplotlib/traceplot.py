@@ -499,7 +499,6 @@ def _plot_chains_mpl(
                     backend="matplotlib",
                     show=False,
                     is_circular=circ_var_units,
-                    circular=circular,
                 )
 
     if kind == "rank_bars" and idy:
@@ -522,6 +521,5 @@ def _plot_chains_mpl(
                 backend="matplotlib",
                 show=False,
                 is_circular=circ_var_units,
-                circular=circular,
             )
     return axes

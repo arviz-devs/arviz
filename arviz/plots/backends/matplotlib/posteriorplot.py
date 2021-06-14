@@ -312,7 +312,7 @@ def _plot_posterior_op(
         plot_kde(
             values,
             bw=bw,
-            circular=circular,
+            is_circular=circular,
             fill_kwargs={"alpha": kwargs.pop("fill_alpha", 0)},
             plot_kwargs=kwargs,
             ax=ax,

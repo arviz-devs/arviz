@@ -99,9 +99,9 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
   Example Gallery<examples/index>
   user_guide/index
   api/index
-  usage
-  contributing/index
-  about
+  community
+  Contributing<contributing/index>
+  about_us
 
 
 .. raw:: html

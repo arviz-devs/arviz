@@ -15,7 +15,7 @@ def plot_separation(
     figsize,
     textsize,
     color,
-    legend,  # pylint: disable=unused-argument
+    legend,
     locs,
     width,
     ax,
@@ -53,6 +53,13 @@ def plot_separation(
     exp_events_kwargs.setdefault("color", "black")
     exp_events_kwargs.setdefault("size", 15)
 
+    if legend:
+        y_hat_line_kwargs.setdefault("legend_label", label_y_hat)
+        exp_events_kwargs.setdefault(
+            "legend_label",
+            "Expected events",
+        )
+
     figsize, *_ = _scale_fig_size(figsize, textsize)
 
     idx = np.argsort(y_hat)
@@ -79,7 +86,6 @@ def plot_separation(
         ax.line(
             np.linspace(0, 1, len(y_hat)),
             y_hat[idx],
-            legend_label=label_y_hat,
             **y_hat_line_kwargs,
         )
 
@@ -88,7 +94,6 @@ def plot_separation(
         ax.triangle(
             y_hat[idx][len(y_hat) - expected_events - 1],
             0,
-            legend_label="Expected events",
             **exp_events_kwargs,
         )
 

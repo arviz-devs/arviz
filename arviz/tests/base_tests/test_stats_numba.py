@@ -45,6 +45,6 @@ def test_numba_stats():
     Numba.enable_numba()
     with_numba = r2_score(set_1, set_2)
     with_numba_one_dimensional = r2_score(set_3, set_4)
-    assert state == Numba.numba_flag  # Ensure that inital state = final state
+    assert state == Numba.numba_flag  # Ensure that initial state = final state
     assert np.allclose(non_numba, with_numba)
     assert np.allclose(non_numba_one_dimensional, with_numba_one_dimensional)

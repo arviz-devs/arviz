@@ -83,7 +83,7 @@ def plot_forest(
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically chose a color per model from the matplotlibs
         cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used for all
-        models. Defauls to 'cycle'.
+        models. Defaults to 'cycle'.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
