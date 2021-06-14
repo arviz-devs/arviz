@@ -136,16 +136,18 @@ def test_xarray_sel_data_array(sample_dataset):  # pylint: disable=invalid-name
 
 class TestCoordsExceptions:
     # test coord exceptions on datasets
-    @pytest.mark.skipif(
-        True, reason="Skip test until we figure out how to handle the new xarray errors"
-    )
     def test_invalid_coord_name(self, sample_dataset):  # pylint: disable=invalid-name
         """Assert that nicer exception appears when user enters wrong coords name"""
         _, _, data = sample_dataset
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match="Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords(data, coords)
 
@@ -168,16 +170,18 @@ class TestCoordsExceptions:
             get_coords(data, coords)
 
     # test coord exceptions on dataset list
-    @pytest.mark.skipif(
-        True, reason="Skip test until we figure out how to handle the new xarray errors"
-    )
     def test_invalid_coord_name_list(self, sample_dataset):  # pylint: disable=invalid-name
         """Assert that nicer exception appears when user enters wrong coords name"""
         _, _, data = sample_dataset
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match=r"data\[1\]:.+Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"data\[1\]:.+Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords((data, data), ({"draw": [0, 1]}, coords))
 
