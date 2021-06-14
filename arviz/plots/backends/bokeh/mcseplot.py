@@ -1,6 +1,7 @@
 """Bokeh mcseplot."""
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Span
+from bokeh.models.glyphs import Scatter
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
@@ -160,7 +161,7 @@ def plot_mcse(
 
             ax_.renderers.append(hline)
 
-            glyph = Dash(x="rug_x", y="rug_y", **_rug_kwargs)
+            glyph = Scatter(x="rug_x", y="rug_y", marker="dash", **_rug_kwargs)
             cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
             ax_.add_glyph(cds_rug, glyph)
 
