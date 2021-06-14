@@ -39,6 +39,7 @@
 * Fix `legend` argument in `plot_separation` ([1701](https://github.com/arviz-devs/arviz/pull/1701))
 * Removed testing dependency on http download for radon dataset ([1717](https://github.com/arviz-devs/arviz/pull/1717))
 * Fixed plot_kde to take labels with kwargs. ([1710](https://github.com/arviz-devs/arviz/pull/1710))
+* Fixed xarray related tests. ([1726](https://github.com/arviz-devs/arviz/pull/1726))
 * Fix Bokeh deprecation warnings ([1657](https://github.com/arviz-devs/arviz/pull/1657))
 
 ### Deprecation
