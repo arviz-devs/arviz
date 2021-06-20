@@ -66,8 +66,8 @@ def test_hdp():
 def test_hdp_2darray():
     normal_sample = np.random.randn(12000, 5)
     msg = (
-        r'hdi currently interprets 2d data as \(draw, shape\) but this will '
-        r'change in a future release to \(chain, draw\) for coherence with other functions'
+        r"hdi currently interprets 2d data as \(draw, shape\) but this will "
+        r"change in a future release to \(chain, draw\) for coherence with other functions"
     )
     with pytest.warns(FutureWarning, match=msg):
         result = hdi(normal_sample)
