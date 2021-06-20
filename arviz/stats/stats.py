@@ -495,6 +495,7 @@ def hdi(
             "hdi currently interprets 2d data as (draw, shape) but this will change in "
             "a future release to (chain, draw) for coherence with other functions",
             FutureWarning,
+            stacklevel=2,
         )
         ary = np.expand_dims(ary, 0)
 
