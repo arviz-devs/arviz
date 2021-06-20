@@ -23,7 +23,7 @@ from .rankplot import plot_rank
 from .separationplot import plot_separation
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from .dotplot import plot_dots
+from .dotplot import plot_dot
 
 __all__ = [
     "plot_autocorr",
@@ -50,5 +50,5 @@ __all__ = [
     "plot_trace",
     "plot_violin",
     "plot_separation",
-    "plot_dots",
+    "plot_dot",
 ]

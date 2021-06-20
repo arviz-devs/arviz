@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 
 from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, create_axes_grid
-from .plotpointinterval import plot_point_interval
+from ...plot_utils import plot_point_interval
 
 
-def plot_dots(
+def plot_dot(
     values,
     binwidth,
     dotsize,
@@ -42,6 +42,7 @@ def plot_dots(
 
     if linewidth is None:
         linewidth = auto_linewidth
+    
 
     if markersize is None:
         markersize = auto_markersize
@@ -53,12 +54,35 @@ def plot_dots(
     _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
 
     ## Wilkinson's Algorithm
+    ax = wilkinson_algorithm(ax, values, quantiles, binwidth, dotsize, stackratio, plot_kwargs, rotated)
+
+    if point_interval:
+        ax = plot_point_interval(
+            ax, values, point_estimate, hdi_prob, linewidth, markersize, rotated, interval_kwargs
+        )
+
+    ax.set_aspect("equal", adjustable="box")
+    ax.autoscale()
+
+    return ax
+
+
+def wilkinson_algorithm(
+    ax, 
+    values, 
+    quantiles, 
+    binwidth, 
+    dotsize, 
+    stackratio,  
+    plot_kwargs, 
+    rotated):
+
     count = 0
 
     while count < quantiles:
         stack_first_dot = values[count]
         num_dots_stack = 0
-        while values[count] < (binwidth + stack_first_dot):
+        while values[count] <= (binwidth + stack_first_dot):
             num_dots_stack += 1
             count += 1
             if count == quantiles:
@@ -75,12 +99,5 @@ def plot_dots(
             else:
                 y_coord += binwidth + (stackratio - 1) * (binwidth)
 
-    if point_interval:
-        ax = plot_point_interval(
-            ax, values, point_estimate, hdi_prob, linewidth, markersize, rotated, interval_kwargs
-        )
-
-    ax.set_aspect("equal", adjustable="box")
-    ax.autoscale()
-
     return ax
+

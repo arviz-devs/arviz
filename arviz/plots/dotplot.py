@@ -5,20 +5,20 @@ from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
 
 
-def plot_dots(
+def plot_dot(
     values=None,
     binwidth=None,
     dotsize=1,
     stackratio=1,
     hdi_prob=None,
     rotated=False,
-    dotcolor="grey",
-    intervalcolor="red",
+    dotcolor="C7",
+    intervalcolor="C3",
     markersize=None,
     figsize=None,
     linewidth=None,
     point_estimate="auto",
-    quantiles=None,
+    quantiles=50,
     point_interval=None,
     plot_kwargs=None,
     interval_kwargs=None,
@@ -27,9 +27,12 @@ def plot_dots(
     **kwargs
 ):
 
-    """Plot distribution as dot plot.
+    """Plot distribution as dot plot or quantile dot plot.
 
-    If quantiles is specified then it will plot the quantile dot plot.
+    This function uses the Wilkinson's Algorithm
+    (https://www.cs.uic.edu/~wilkinson/Publications/dotplots.pdf)to allot dots to bins.
+    The quantile dot plots was inspired from the paper(When (ish) is My Bus?:
+    User-centered Visualizations of Uncertainty in Everyday).
 
     Parameters
     ----------
@@ -38,15 +41,15 @@ def plot_dots(
     binwidth : float
         Width of the bin for drawing the dot plot.
     dotsize : float
-        The size of the dots relative to the bin width. The default, 1, makes dots be 
+        The size of the dots relative to the bin width. The default, 1, makes dots be
         just about as wide as the bin width.
     stackratio : float
-        The distance between the center of the dots in the same stack relative to the bin height. 
+        The distance between the center of the dots in the same stack relative to the bin height.
         The default, 1, makes dots in the same stack just touch each other.
     point_interval : bool
         Plots the point interval. Uses hdi_prob to plot the HDI interval
     point_estimate : Optional[str]
-        Plot point estimate per variable. Values should be ‘mean’, ‘median’, ‘mode’ or None. 
+        Plot point estimate per variable. Values should be ‘mean’, ‘median’, ‘mode’ or None.
         Defaults to ‘auto’ i.e. it falls back to default set in rcParams.
     dotcolor : string
         The color of the dots
@@ -57,7 +60,7 @@ def plot_dots(
     markersize : int
         Markersize throughout. If None it will be autoscaled based on figsize.
     hdi_prob : float
-        Valid only when point_interval is True. Plots HDI for chosen percentage of density. 
+        Valid only when point_interval is True. Plots HDI for chosen percentage of density.
         Defaults to 0.94.
     rotated : bool
         Whether to rotate the dot plot by 90 degrees.
@@ -85,7 +88,6 @@ def plot_dots(
     if values is None:
         raise ValueError("Please provide the values array for plotting")
 
-    values = np.asarray(values)
     values = np.sort(values)
 
     if hdi_prob is None:
@@ -99,18 +101,22 @@ def plot_dots(
     elif point_estimate not in {"mean", "median", "mode", None}:
         raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
 
-    if quantiles:
-        if quantiles >= values.shape[0]:
-            quantiles = values.shape[0]
-        else:
-            qlist = np.arange(100 / (2 * quantiles), 100, 100 / (quantiles))
-            values = np.percentile(values, qlist)
-    else:
+
+    if isinstance(quantiles, (bool, str)):
+        raise ValueError(
+            "quantiles must be of integer type, refer docs for further details"
+        )
+
+    
+    if quantiles >= values.shape[0]:
         quantiles = values.shape[0]
+    else:
+        qlist = np.linspace(1 / (2 * quantiles), 1 - 1 / (2*quantiles), quantiles)
+        values = np.quantile(values, qlist)
 
     if binwidth is None:
-        binwidth = math.sqrt(((((values[-1] - values[0]) ** 2) / 2) / quantiles) / np.pi)
-
+        binwidth = math.sqrt((values[-1] - values[0] + 1) ** 2 / (2 * quantiles * np.pi))
+    
     dot_plot_args = dict(
         values=values,
         binwidth=binwidth,
@@ -136,7 +142,7 @@ def plot_dots(
         backend = rcParams["plot.backend"]
     backend = backend.lower()
 
-    plot = get_plotting_function("plot_dots", "dotplot", backend)
+    plot = get_plotting_function("plot_dot", "dotplot", backend)
     ax = plot(**dot_plot_args)
 
     return ax
