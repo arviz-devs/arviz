@@ -14,7 +14,7 @@ import xarray as xr
 from xarray.core.options import OPTIONS
 from xarray.testing import assert_identical
 
-from arviz import (
+from ... import (
     InferenceData,
     clear_data_home,
     concat,

@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pytest
 
-from arviz import from_cmdstan
+from ... import from_cmdstan
 
 from ..helpers import check_multiple_attrs
 
