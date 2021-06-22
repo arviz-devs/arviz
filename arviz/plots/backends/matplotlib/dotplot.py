@@ -11,6 +11,7 @@ def plot_dot(
     dotsize,
     stackratio,
     hdi_prob,
+    quartiles,
     rotated,
     dotcolor,
     intervalcolor,
@@ -58,8 +59,13 @@ def plot_dot(
 
     if point_interval:
         ax = plot_point_interval(
-            ax, values, point_estimate, hdi_prob, linewidth, markersize, rotated, interval_kwargs
+            ax, values, point_estimate, hdi_prob, quartiles, linewidth, markersize, rotated, interval_kwargs, 'matplotlib'
         )
+
+    if rotated:
+        ax.tick_params(bottom=False, labelbottom=False)
+    else:
+        ax.tick_params(left=False, labelleft=False)
 
     ax.set_aspect("equal", adjustable="box")
     ax.autoscale()
@@ -75,7 +81,7 @@ def wilkinson_algorithm(
     dotsize, 
     stackratio,  
     plot_kwargs, 
-    rotated):
+    rotated=False):
 
     count = 0
 

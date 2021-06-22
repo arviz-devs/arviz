@@ -12,13 +12,14 @@ def plot_dot(
     stackratio=1,
     hdi_prob=None,
     rotated=False,
-    dotcolor="C7",
+    dotcolor="C0",
     intervalcolor="C3",
     markersize=None,
     figsize=None,
     linewidth=None,
     point_estimate="auto",
     quantiles=50,
+    quartiles = True,
     point_interval=None,
     plot_kwargs=None,
     interval_kwargs=None,
@@ -66,7 +67,10 @@ def plot_dot(
         Whether to rotate the dot plot by 90 degrees.
     quantiles : int
         Number of quantiles to plot, used for quantile dot plots
-        Defaults to None.
+        Defaults to 50.
+    quartiles : bool
+        If True then the quartile interval will be plotted with the HDI.
+        Defaults to True.
     figsize : tuple
         Figure size. If None it will be defined automatically.
     plot_kwargs : dict
@@ -123,6 +127,7 @@ def plot_dot(
         dotsize=dotsize,
         stackratio=stackratio,
         hdi_prob=hdi_prob,
+        quartiles=quartiles,
         rotated=rotated,
         dotcolor=dotcolor,
         intervalcolor=intervalcolor,

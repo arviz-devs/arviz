@@ -387,7 +387,7 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
 
 
 def plot_point_interval(
-    ax, values, point_estimate, hdi_prob, linewidth, markersize, rotated, interval_kwargs=None
+    ax, values, point_estimate, hdi_prob, quartiles, linewidth, markersize, rotated, interval_kwargs=None, backend='matplotlib'
 ):
 
     """ Plots point intervals
@@ -417,7 +417,10 @@ def plot_point_interval(
     """
 
     endpoint = 100 * (1 - hdi_prob) / 2
-    qlist_interval = [endpoint, 25, 75, 100 - endpoint]
+    if quartiles:
+        qlist_interval = [endpoint, 25, 75, 100 - endpoint]
+    else:
+        qlist_interval = [endpoint, 100 - endpoint]
     quantiles_interval = np.percentile(values, qlist_interval)
     quantiles_interval[0], quantiles_interval[-1] = hdi(
         values.flatten(), hdi_prob, multimodal=False
@@ -425,36 +428,64 @@ def plot_point_interval(
     mid = len(quantiles_interval) // 2
     param_iter = zip(np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid))
 
-    for width, j in param_iter:
-        if rotated:
-            ax.vlines(
-                0,
-                quantiles_interval[j],
-                quantiles_interval[-(j + 1)],
-                linewidth=width,
-                **interval_kwargs
-            )
-        else:
-            ax.hlines(
-                0,
-                quantiles_interval[j],
-                quantiles_interval[-(j + 1)],
-                linewidth=width,
-                **interval_kwargs
-            )
+    if backend == 'matplotlib':
+        for width, j in param_iter:
+            if rotated:
+                ax.vlines(
+                    0,
+                    quantiles_interval[j],
+                    quantiles_interval[-(j + 1)],
+                    linewidth=width,
+                    **interval_kwargs
+                )
+            else:
+                ax.hlines(
+                    0,
+                    quantiles_interval[j],
+                    quantiles_interval[-(j + 1)],
+                    linewidth=width,
+                    **interval_kwargs
+                )
 
-    if point_estimate:
-        point_value = calculate_point_estimate(point_estimate, values)
-        if rotated:
-            ax.plot(
-                0, point_value, "o", markersize=markersize, color="black",
-            )
-        else:
-            ax.plot(
-                point_value, 0, "o", markersize=markersize, color="black",
-            )
+        if point_estimate:
+            point_value = calculate_point_estimate(point_estimate, values)
+            if rotated:
+                ax.plot(
+                    0, point_value, "o", markersize=markersize, color="black",
+                )
+            else:
+                ax.plot(
+                    point_value, 0, "o", markersize=markersize, color="black",
+                )
+    else:
+        for width, j in param_iter:
+            if rotated:
+                ax.line(
+                    [0, 0],
+                    [quantiles_interval[j], quantiles_interval[-(j + 1)]],
+                    line_width=width,
+                    **interval_kwargs
+                )
+            else:
+                ax.line(
+                    [quantiles_interval[j], quantiles_interval[-(j + 1)]],
+                    [0, 0],
+                    line_width=width,
+                    **interval_kwargs
+                )
 
-        return ax
+        if point_estimate:
+            point_value = calculate_point_estimate(point_estimate, values)
+            if rotated:
+                ax.circle(
+                    x=0, y=point_value, size=markersize, fill_color='black',
+                )
+            else:
+                ax.circle(
+                    x=point_value, y=0, size=markersize, fill_color='black',
+                )
+
+    return ax
 
 
 def is_valid_quantile(value):
