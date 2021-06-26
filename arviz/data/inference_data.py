@@ -1874,7 +1874,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     msg = "Mismatch between the groups."
                     raise TypeError(msg)
             for group in arg._groups_all:
-                # handle data groups seperately
+                # handle data groups separately
                 if group not in ["observed_data", "constant_data", "predictions_constant_data"]:
                     # assert that groups are equal
                     if group not in arg0_groups:

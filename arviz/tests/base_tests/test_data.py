@@ -28,7 +28,7 @@ from arviz import (
     to_netcdf,
 )
 
-from ...data.base import dict_to_dataset, generate_dims_coords, make_attrs
+from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
 from ...data.datasets import LOCAL_DATASETS, REMOTE_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -329,6 +329,22 @@ def test_inference_concat_keeps_all_fields():
     assert not fails_c1
     fails_c2 = check_multiple_attrs(test_dict, idata_c2)
     assert not fails_c2
+
+
+@pytest.mark.parametrize(
+    "model_code,expected",
+    [
+        ("data {int y;} models {y ~ poisson(3);} generated quantities {int X;}", {"X": "int"}),
+        (
+            "data {real y;} models {y ~ normal(0,1);} generated quantities {int Y; real G;}",
+            {"Y": "int"},
+        ),
+    ],
+)
+def test_infer_stan_dtypes(model_code, expected):
+    """Test different examples for dtypes in Stan models."""
+    res = infer_stan_dtypes(model_code)
+    assert res == expected
 
 
 class TestInferenceData:  # pylint: disable=too-many-public-methods

@@ -8,21 +8,19 @@ import xarray as xr
 from ...data import from_dict
 from ...plots.backends.matplotlib import dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 from ...plots.plot_utils import (
+    compute_ranks,
     filter_plotters_list,
     format_sig_figs,
     get_plotting_function,
     make_2d,
     set_bokeh_circular_ticks_labels,
     vectorized_to_hex,
-    compute_ranks,
 )
-from ...sel_utils import xarray_to_ndarray, xarray_sel_iter
-
 from ...rcparams import rc_context
+from ...sel_utils import xarray_sel_iter, xarray_to_ndarray
 from ...stats.density_utils import get_bins
 from ...utils import get_coords
 from ..helpers import running_on_ci
-
 
 # Check if Bokeh is installed
 bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
@@ -144,7 +142,12 @@ class TestCoordsExceptions:
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match="Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords(data, coords)
 
@@ -173,7 +176,12 @@ class TestCoordsExceptions:
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match=r"data\[1\]:.+Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"data\[1\]:.+Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords((data, data), ({"draw": [0, 1]}, coords))
 

@@ -531,7 +531,7 @@ class rc_context:  # pylint: disable=invalid-name
     rc : dict, optional
         Mapping containing the rcParams to modify temporally.
     fname : str, optional
-        Filename of the file containig the rcParams to use inside the rc_context.
+        Filename of the file containing the rcParams to use inside the rc_context.
 
     Examples
     --------
