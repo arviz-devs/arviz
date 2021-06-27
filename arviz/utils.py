@@ -834,9 +834,7 @@ def Calculate_ICS(
     if ic not in allowable:
         raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
 
-
     # I have to return loo or waic in order for compare to create the df_comp and scale col
-
 
     if ic == "loo":
         ic_func: Callable = loo

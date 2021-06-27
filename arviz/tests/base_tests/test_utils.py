@@ -346,8 +346,11 @@ def test_calculate_ICS_on_Elpdata(centered_eight, non_centered_eight, notin, ic)
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
     with pytest.raises(ValueError):
         Calculate_ICS(model_dict, notin, ic)
+        
+@pytest.mark.parametrize("scale",["log", "negative_log", "deviance"])
+def test_Calculate_ICS_wrong_ic(centered_eight, non_centered_eight, scale, lo):
+    model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
+    with pytest.raises(NotImplementedError):
+        Calculate_ICS(model_dict, scale, lo)
 
-
-
-
-
+    

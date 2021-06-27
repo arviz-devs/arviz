@@ -34,7 +34,7 @@ def plot_elpd(
     compare_dict : mapping, str -> ELPDData or InferenceData
         A dictionary mapping the model name to the object containing inference data or the result
         of `loo`/`waic` functions.
-        Refer to az.convert_to_inference_data for details on possible dict items
+        Refer to az.convert_to_inference_data for details on possible dict items for inference data
     color : str or array_like, optional
         Colors of the scatter plot, if color is a str all dots will have the same color,
         if it is the size of the observations, each dot will have the specified color,
@@ -156,3 +156,4 @@ def plot_elpd(
     plot = get_plotting_function("plot_elpd", "elpdplot", backend)
     ax = plot(**elpd_plot_kwargs)
     return ax
+    
