@@ -16,6 +16,7 @@ from ...utils import (
     flatten_inference_data_to_dict,
     one_de,
     two_de,
+    Calculate_ICS,
 )
 
 
@@ -336,3 +337,17 @@ def test_find_hdi_contours(mean, cov, contour_sigma):
     contour_az = _find_hdi_contours(density, hdi_probs)
 
     np.testing.assert_allclose(contour_sp, contour_az, rtol=1e-2, atol=1e-4)
+
+
+#βρηκα διαφορετικές παραμέτρους και θα τις βάλω σε διαφορετικά τεστς
+
+@pytest.mark.parametrize("ic", ["loo", "waic"])
+def test_calculate_ICS_on_Elpdata(centered_eight, non_centered_eight, notin, ic):
+    model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
+    with pytest.raises(ValueError):
+        Calculate_ICS(model_dict, notin, ic)
+
+
+
+
+

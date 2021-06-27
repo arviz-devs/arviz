@@ -855,7 +855,7 @@ def Calculate_ICS(
                 dataset_dict[name] = ic_func(convert_to_inference_data(dataset), pointwise=True, scale=scale)
             except Exception as e:
                 raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e    
-    ics = [elpd_data.index[0] for elpd_data in compare_dict.values()]
+    ics = [elpd_data.index[0] for elpd_data in dataset_dict.values()]
     if not all(x == ics[0] for x in ics):
         raise SyntaxError(
             "All Information Criteria must be of the same kind, but both loo and waic data present"
