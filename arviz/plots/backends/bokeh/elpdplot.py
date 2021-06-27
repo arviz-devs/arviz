@@ -1,12 +1,11 @@
 """Bokeh ELPDPlot."""
 import warnings
 
-import bokeh.models.markers as mk
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
-
+from bokeh.models.glyphs import Scatter
 from ....rcparams import _validate_bokeh_marker, rcParams
 from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
 from .. import show_layout
@@ -161,10 +160,13 @@ def _plot_atomic_elpd(
     plot_kwargs,
 ):
     marker = _validate_bokeh_marker(plot_kwargs.get("marker"))
-    marker_func = getattr(mk, marker)
     sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
-    glyph = marker_func(
-        x="xdata", y="ydata", size="sizes", line_color=plot_kwargs.get("color", "black")
+    glyph = Scatter(
+        x="xdata",
+        y="ydata",
+        size="sizes",
+        line_color=plot_kwargs.get("color", "black"),
+        marker=marker,
     )
     source = ColumnDataSource(dict(xdata=xdata, ydata=ydata, sizes=sizes))
     ax_.add_glyph(source, glyph)

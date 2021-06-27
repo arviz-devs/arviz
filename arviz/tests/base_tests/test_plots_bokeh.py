@@ -266,6 +266,11 @@ def test_plot_kde_1d(continuous_model):
         {"contour": True, "contourf_kwargs": {"cmap": "plasma"}},
         {"contour": False},
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+        {"contour": True, "contourf_kwargs": {"levels": 3}},
+        {"contour": True, "contourf_kwargs": {"levels": [0.1, 0.2, 0.3]}},
+        {"hdi_probs": [0.3, 0.9, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 0.9], "contourf_kwargs": {"cmap": "Blues"}},
+        {"hdi_probs": [0.9, 0.6, 0.3], "contour_kwargs": {"alpha": 0}},
     ],
 )
 def test_plot_kde_2d(continuous_model, kwargs):
@@ -445,7 +450,7 @@ def test_plot_ess_evolution(models):
 
 
 def test_plot_ess_bad_kind(models):
-    """Test error when plot_ess recieves an invalid kind."""
+    """Test error when plot_ess receives an invalid kind."""
     idata = models.model_1
     with pytest.raises(ValueError, match="Invalid kind"):
         plot_ess(idata, kind="bad kind", backend="bokeh", show=False)
@@ -987,7 +992,7 @@ def test_plot_ppc_ax(models, kind):
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
         {"point_estimate": None},
-        {"hdi_prob": "hide"},
+        {"hdi_prob": "hide", "legend_label": ""},
         {"ref_val": 0},
         {"ref_val": None},
         {"ref_val": {"mu": [{"ref_val": 1}]}},

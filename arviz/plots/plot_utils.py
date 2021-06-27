@@ -263,7 +263,7 @@ def set_xticklabels(ax, coord_labels):
 
 
 def filter_plotters_list(plotters, plot_kind):
-    """Cut list of plotters so that it is at most of lenght "plot.max_subplots"."""
+    """Cut list of plotters so that it is at most of length "plot.max_subplots"."""
     max_plots = rcParams["plot.max_subplots"]
     max_plots = len(plotters) if max_plots is None else max_plots
     if len(plotters) > max_plots:
@@ -455,7 +455,7 @@ def set_bokeh_circular_ticks_labels(ax, hist, labels):
 
 
 def compute_ranks(ary):
-    """Compute ranks for continuos and discrete variables."""
+    """Compute ranks for continuous and discrete variables."""
     if ary.dtype.kind == "i":
         ary_shape = ary.shape
         ary = ary.flatten()

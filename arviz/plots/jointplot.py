@@ -124,7 +124,7 @@ def plot_joint(
         >>>                 kind='kde',
         >>>                 figsize=(6, 6))
 
-    Overlayed plots:
+    Overlaid plots:
 
     .. plot::
         :context: close-figs

@@ -9,8 +9,8 @@ from numpy.testing import assert_almost_equal
 
 from ...data import from_cmdstan, load_arviz_data
 from ...rcparams import rcParams
-from ...stats import bfmi, ess, mcse, rhat
 from ...sel_utils import xarray_var_iter
+from ...stats import bfmi, ess, mcse, rhat
 from ...stats.diagnostics import (
     _ess,
     _ess_quantile,
@@ -302,7 +302,7 @@ class TestDiagnostics:
             else:
                 ess_value = ess(data, method=method, relative=relative)
             assert not np.isnan(ess_value)
-        # test following only once tests are runned
+        # test following only once tests are run
         if (method == "bulk") and (not relative) and (chain is None) and (draw == 4):
             if use_nan:
                 assert np.isnan(_ess(data))
@@ -417,7 +417,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("draws", (3, 4, 100))
     @pytest.mark.parametrize("chains", (None, 1, 2))
     def test_multichain_summary_array(self, draws, chains):
-        """Test multichain statistics against invidual functions."""
+        """Test multichain statistics against individual functions."""
         if chains is None:
             ary = np.random.randn(draws)
         else:

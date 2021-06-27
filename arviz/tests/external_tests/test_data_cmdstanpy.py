@@ -1,6 +1,7 @@
 # pylint: disable=redefined-outer-name
 import os
 import sys
+import tempfile
 from glob import glob
 
 import numpy as np
@@ -134,6 +135,7 @@ class TestDataCmdStanPy:
     def data(self, filepaths):
         # Skip tests if cmdstanpy not installed
         cmdstanpy = importorskip("cmdstanpy")
+        CmdStanModel = cmdstanpy.CmdStanModel  # pylint: disable=invalid-name
         CmdStanMCMC = cmdstanpy.CmdStanMCMC  # pylint: disable=invalid-name
         RunSet = cmdstanpy.stanfit.RunSet  # pylint: disable=invalid-name
         CmdStanArgs = cmdstanpy.model.CmdStanArgs  # pylint: disable=invalid-name
@@ -163,6 +165,13 @@ class TestDataCmdStanPy:
             obj_warmup = CmdStanMCMC(runset_obj_warmup)
             obj_warmup.validate_csv_files()  # pylint: disable=protected-access
             obj_warmup._assemble_draws()  # pylint: disable=protected-access
+
+            _model_code = """model { real y; } generated quantities { int eta; int theta[N]; }"""
+            _tmp_dir = tempfile.TemporaryDirectory(prefix="arviz_tests_")
+            _stan_file = os.path.join(_tmp_dir.name, "stan_model_test.stan")
+            with open(_stan_file, "w") as f:
+                f.write(_model_code)
+            model = CmdStanModel(stan_file=_stan_file, compile=False)
 
         return Data
 
@@ -232,6 +241,7 @@ class TestDataCmdStanPy:
                 "theta": ["school"],
                 "log_lik": ["log_lik_dim"],
             },
+            dtypes=data.model,
         )
 
     def get_inference_data4(self, data, eight_schools_params):
@@ -245,6 +255,7 @@ class TestDataCmdStanPy:
             observed_data={"y": eight_schools_params["y"]},
             coords=None,
             dims=None,
+            dtypes={"eta": int, "theta": int},
         )
 
     def get_inference_data5(self, data, eight_schools_params):
@@ -258,6 +269,7 @@ class TestDataCmdStanPy:
             observed_data={"y": eight_schools_params["y"]},
             coords=None,
             dims=None,
+            dtypes=data.model.code(),
         )
 
     def get_inference_data_warmup_true_is_true(self, data, eight_schools_params):
@@ -341,7 +353,8 @@ class TestDataCmdStanPy:
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
         inference_data4 = self.get_inference_data4(data, eight_schools_params)
-        inference_data5 = self.get_inference_data4(data, eight_schools_params)
+        inference_data5 = self.get_inference_data5(data, eight_schools_params)
+
         # inference_data 1
         test_dict = {
             "posterior": ["theta"],
@@ -354,6 +367,7 @@ class TestDataCmdStanPy:
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
         assert not fails
+
         # inference_data 2
         test_dict = {
             "posterior_predictive": ["y_hat"],
@@ -368,6 +382,7 @@ class TestDataCmdStanPy:
         }
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
+
         # inference_data 3
         test_dict = {
             "posterior_predictive": ["y_hat"],
@@ -379,6 +394,9 @@ class TestDataCmdStanPy:
         }
         fails = check_multiple_attrs(test_dict, inference_data3)
         assert not fails
+        assert inference_data3.posterior.eta.dtype.kind == "i"  # pylint: disable=no-member
+        assert inference_data3.posterior.theta.dtype.kind == "i"  # pylint: disable=no-member
+
         # inference_data 4
         test_dict = {
             "posterior": ["eta", "mu", "theta"],
@@ -390,6 +408,9 @@ class TestDataCmdStanPy:
         assert len(inference_data4.posterior.theta.shape) == 3  # pylint: disable=no-member
         assert len(inference_data4.posterior.eta.shape) == 4  # pylint: disable=no-member
         assert len(inference_data4.posterior.mu.shape) == 2  # pylint: disable=no-member
+        assert inference_data4.posterior.eta.dtype.kind == "i"  # pylint: disable=no-member
+        assert inference_data4.posterior.theta.dtype.kind == "i"  # pylint: disable=no-member
+
         # inference_data 5
         test_dict = {
             "posterior": ["eta", "mu", "theta"],
@@ -397,6 +418,8 @@ class TestDataCmdStanPy:
             "log_likelihood": ["log_lik"],
         }
         fails = check_multiple_attrs(test_dict, inference_data5)
+        assert inference_data5.posterior.eta.dtype.kind == "i"  # pylint: disable=no-member
+        assert inference_data5.posterior.theta.dtype.kind == "i"  # pylint: disable=no-member
 
     def test_inference_data_warmup(self, data, eight_schools_params):
         inference_data_true_is_true = self.get_inference_data_warmup_true_is_true(

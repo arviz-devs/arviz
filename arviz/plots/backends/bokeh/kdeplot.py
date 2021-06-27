@@ -5,7 +5,8 @@ from numbers import Integral
 
 import matplotlib._contour as _contour
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Range1d
+from bokeh.models import ColumnDataSource, Range1d
+from bokeh.models.glyphs import Scatter
 from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
@@ -99,15 +100,15 @@ def plot_kde(
             if isinstance(cds_rug, dict):
                 for _cds_rug in cds_rug.values():
                     if not rotated:
-                        glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                        glyph = Scatter(x=rug_varname, y=0.0, marker="dash", **rug_kwargs)
                     else:
-                        glyph = Dash(x=0.0, y=rug_varname, **rug_kwargs)
+                        glyph = Scatter(x=0.0, y=rug_varname, marker="dash", **rug_kwargs)
                     ax.add_glyph(_cds_rug, glyph)
             else:
                 if not rotated:
-                    glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                    glyph = Scatter(x=rug_varname, y=0.0, marker="dash", **rug_kwargs)
                 else:
-                    glyph = Dash(x=0.0, y=rug_varname, **rug_kwargs)
+                    glyph = Scatter(x=0.0, y=rug_varname, marker="dash", **rug_kwargs)
                 ax.add_glyph(cds_rug, glyph)
             glyphs.append(glyph)
 
@@ -147,6 +148,8 @@ def plot_kde(
                     patch = ax.patch(patch_y, patch_x, **fill_kwargs)
                 glyphs.append(patch)
 
+            if label is not None:
+                plot_kwargs.setdefault("legend_label", label)
             if not rotated:
                 line = ax.line(x, density, **plot_kwargs)
             else:

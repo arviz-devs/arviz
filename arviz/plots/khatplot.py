@@ -40,7 +40,7 @@ def plot_khat(
 
     Parameters
     ----------
-    khats : ELPDData cointaining Pareto shapes information or array of
+    khats : ELPDData containing Pareto shapes information or array of
         Pareto tail indices.
     color : str or array_like, optional
         Colors of the scatter plot, if color is a str all dots will
