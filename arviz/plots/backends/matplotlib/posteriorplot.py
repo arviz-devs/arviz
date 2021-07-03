@@ -104,6 +104,7 @@ def plot_posterior(
     if backend_show(show):
         plt.show()
 
+    # plt.draw()
     return ax
 
 
@@ -319,18 +320,23 @@ def _plot_posterior_op(
             rug=False,
             show=False,
         )
-    else:
+    elif values.dtype.kind == "i" or (values.dtype.kind == "f" and kind == "hist"):
         if bins is None:
-            if values.dtype.kind == "i":
-                xmin = values.min()
-                xmax = values.max()
-                bins = get_bins(values)
-                ax.set_xlim(xmin - 0.5, xmax + 0.5)
-            else:
-                bins = "auto"
+            xmin = values.min()
+            xmax = values.max()
+            bins = get_bins(values)
+            ax.set_xlim(xmin - 0.5, xmax + 0.5)
         kwargs.setdefault("align", "left")
         kwargs.setdefault("color", "C0")
         ax.hist(values, bins=bins, alpha=0.35, **kwargs)
+    elif values.dtype.kind == "b":
+        if bins is None:
+            bins = "auto"
+        kwargs.setdefault("color", "C0")
+        ax.bar(["False", "True"], [(~values).sum(), values.sum()], alpha=0.35, **kwargs)
+        hdi_prob = "hide"
+    else:
+        raise TypeError("Values must be float, integer or boolean")
 
     plot_height = ax.get_ylim()[1]
 
