@@ -10,6 +10,10 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
+      Python_39:
+        python.version: 3.9
+        PyPIGithub: false
+        name: "Python 3.9"
       Python_38_preview:
         python.version: 3.8
         PyPIGithub: true
