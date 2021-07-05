@@ -50,7 +50,7 @@ class StanSamplingWrapper(SamplingWrapper):
         """
         raise NotImplementedError("sel_observations must be implemented on a model basis")
 
-    def get_inference_data(self, fitted_model): # pylint: disable=arguments-renamed
+    def get_inference_data(self, fitted_model):  # pylint: disable=arguments-renamed
         """Convert the fit object returned by ``self.sample`` to InferenceData."""
         if fitted_model.__class__.__name__ == "CmdStanMCMC":
             idata = from_cmdstanpy(posterior=fitted_model, **self.idata_kwargs)

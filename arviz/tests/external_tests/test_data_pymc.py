@@ -534,7 +534,7 @@ class TestDataPyMC3:
             "prior_predictive": ["obs"],
         }
         if use_context:
-            with model: # pylint: disable=not-context-manager
+            with model:  # pylint: disable=not-context-manager
                 inference_data = from_pymc3(prior=prior)
         else:
             inference_data = from_pymc3(prior=prior, model=model)
