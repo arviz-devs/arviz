@@ -1,4 +1,3 @@
-absolufy-imports
 astroid
 numpydoc
 pydocstyle

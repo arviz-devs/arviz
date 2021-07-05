@@ -129,10 +129,6 @@ jobs:
     displayName: 'black'
 
   - script: |
-      absolufy-imports $(find arviz -name '*.py') --never
-    displayName: 'Use relative imports'
-
-  - script: |
       python -m mypy .
     displayName: 'mypy'
 

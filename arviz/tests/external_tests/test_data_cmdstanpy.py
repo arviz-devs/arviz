@@ -7,7 +7,7 @@ from glob import glob
 import numpy as np
 import pytest
 
-from ... import from_cmdstanpy
+from arviz import from_cmdstanpy
 
 from ..helpers import (  # pylint: disable=unused-import
     chains,

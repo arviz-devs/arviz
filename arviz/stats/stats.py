@@ -17,7 +17,7 @@ try:
 except ImportError:
     NO_GET_ARGS = True
 
-from .. import _log
+from arviz import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams, ScaleKeyword, ICKeyword
 from ..utils import Numba, _numba_var, _var_names, get_coords

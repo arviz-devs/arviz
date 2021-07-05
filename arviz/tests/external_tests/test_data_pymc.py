@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from numpy import ma
 
-from ... import (  # pylint: disable=wrong-import-position
+from arviz import (  # pylint: disable=wrong-import-position
     InferenceData,
     from_dict,
     from_pymc3,

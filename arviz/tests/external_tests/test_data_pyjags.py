@@ -4,13 +4,13 @@ import typing as tp
 import numpy as np
 import pytest
 
-from ... import InferenceData, from_pyjags, waic
-from ...data.io_pyjags import (
+from arviz import InferenceData, from_pyjags, waic
+from arviz.data.io_pyjags import (
     _convert_arviz_dict_to_pyjags_dict,
     _convert_pyjags_dict_to_arviz_dict,
     _extract_arviz_dict_from_inference_data,
 )
-from ..helpers import check_multiple_attrs, eight_schools_params
+from arviz.tests.helpers import check_multiple_attrs, eight_schools_params
 
 PYJAGS_POSTERIOR_DICT = {
     "b": np.random.randn(3, 10, 3),

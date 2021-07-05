@@ -29,7 +29,7 @@ def test_utils_fixture(utils_with_numba_import_fail):
 
 def test_conditional_jit_numba_decorator_keyword(monkeypatch):
     """Checks else statement and JIT keyword argument"""
-    from ... import utils
+    from arviz import utils
 
     # Mock import lib to return numba with hit method which returns a function that returns kwargs
     numba_mock = Mock()

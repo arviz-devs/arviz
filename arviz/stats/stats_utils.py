@@ -11,7 +11,7 @@ from scipy.interpolate import CubicSpline
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 
-from .. import _log
+from arviz import _log
 from ..utils import conditional_jit, conditional_vect, conditional_dask
 from .density_utils import histogram as _histogram
 

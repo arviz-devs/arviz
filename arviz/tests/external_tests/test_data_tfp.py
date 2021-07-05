@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from ... import from_tfp
+from arviz import from_tfp
 
 from ..helpers import (  # pylint: disable=unused-import
     chains,

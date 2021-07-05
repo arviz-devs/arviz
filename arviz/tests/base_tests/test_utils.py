@@ -114,7 +114,7 @@ def utils_with_numba_import_fail(monkeypatch):
     failed_import = Mock()
     failed_import.side_effect = ImportError
 
-    from ... import utils
+    from arviz import utils
 
     monkeypatch.setattr(utils.importlib, "import_module", failed_import)
     return utils
@@ -154,7 +154,7 @@ def test_conditional_jit_numba_decorator():
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
     """
-    from ... import utils
+    from arviz import utils
 
     @utils.conditional_jit
     def func():
@@ -169,7 +169,7 @@ def test_conditional_vect_numba_decorator():
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
     """
-    from ... import utils
+    from arviz import utils
 
     @utils.conditional_vect
     def func(a_a, b_b):
@@ -182,7 +182,7 @@ def test_conditional_vect_numba_decorator():
 
 def test_conditional_vect_numba_decorator_keyword(monkeypatch):
     """Checks else statement and vect keyword argument"""
-    from ... import utils
+    from arviz import utils
 
     # Mock import lib to return numba with hit method which returns a function that returns kwargs
     numba_mock = Mock()
