@@ -2,7 +2,7 @@
 import warnings
 
 import matplotlib as mpl
-import matplotlib.cm as cm
+from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import to_rgba_array

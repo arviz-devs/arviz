@@ -1,6 +1,6 @@
 """Plot LOO-PIT predictive checks of inference data."""
 import numpy as np
-import scipy.stats as stats
+from scipy import stats
 
 from ..labels import BaseLabeller
 from ..rcparams import rcParams

@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from numbers import Integral
 
-import matplotlib._contour as _contour
+from matplotlib import _contour
 import numpy as np
 from bokeh.models import ColumnDataSource, Range1d
 from bokeh.models.glyphs import Scatter
