@@ -202,8 +202,8 @@ def plot_trace(
     while any(key == draw_name for key in cds_data[0]):
         draw_name += "w"
 
-    for chain_idx in cds_data:
-        cds_data[chain_idx][draw_name] = data.draw.values
+    for chain in cds_data.values():
+        chain[draw_name] = data.draw.values
 
     cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
