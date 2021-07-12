@@ -32,6 +32,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_separation,
     plot_trace,
     plot_violin,
+    plot_dot,
 )
 from ...rcparams import rc_context, rcParams  # pylint: disable=wrong-import-position
 from ...stats import compare, hdi, loo, waic  # pylint: disable=wrong-import-position
@@ -1104,3 +1105,67 @@ def test_plot_bpv_discrete():
         show=False,
     )
     assert axes.shape
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "binwidth": 0.5,
+            "stackratio": 2,
+            "nquantiles": 20,
+        },
+        {"point_interval": True},
+        {
+            "point_interval": True,
+            "dotsize": 1.2,
+            "point_estimate": "median",
+            "plot_kwargs": {"color": "grey"},
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "quartiles": False,
+            "linewidth": 2,
+        },
+    ],
+)
+def test_plot_dot(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs, backend="bokeh", show=False)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"rotated": True},
+        {
+            "point_interval": True,
+            "rotated": True,
+            "dotcolor": "grey",
+            "binwidth": 0.5,
+        },
+        {
+            "rotated": True,
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "dotsize": 0.8,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_dot_rotated(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs, backend="bokeh", show=False)
+    assert ax

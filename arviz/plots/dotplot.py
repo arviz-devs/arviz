@@ -1,4 +1,3 @@
-import math
 import numpy as np
 
 from ..rcparams import rcParams
@@ -15,14 +14,17 @@ def plot_dot(
     dotcolor="C0",
     intervalcolor="C3",
     markersize=None,
+    markercolor="C0",
+    marker="o",
     figsize=None,
     linewidth=None,
     point_estimate="auto",
-    quantiles=50,
-    quartiles = True,
+    nquantiles=50,
+    quartiles=True,
     point_interval=None,
+    ax=None,
+    show=None,
     plot_kwargs=None,
-    interval_kwargs=None,
     backend=None,
     backend_kwargs=None,
     **kwargs
@@ -31,9 +33,11 @@ def plot_dot(
     """Plot distribution as dot plot or quantile dot plot.
 
     This function uses the Wilkinson's Algorithm
-    (https://www.cs.uic.edu/~wilkinson/Publications/dotplots.pdf)to allot dots to bins.
-    The quantile dot plots was inspired from the paper(When (ish) is My Bus?:
-    User-centered Visualizations of Uncertainty in Everyday).
+    (Leland Wilkinson (1999) Dot Plots, The American Statistician, 53:3, 276-281,
+    DOI: 10.1080/00031305.1999.10474474)to allot dots to bins.
+    The quantile dot plots was inspired from the paper(Matthew Kay, Tara Kola, Jessica R. Hullman,
+    and Sean A. Munson. 2016. When (ish) is My Bus? User-centered Visualizations of Uncertainty in
+    Everyday, Mobile Predictive Systems. DOI:https://doi.org/10.1145/2858036.2858558).
 
     Parameters
     ----------
@@ -60,12 +64,17 @@ def plot_dot(
         Line width throughout. If None it will be autoscaled based on figsize.
     markersize : int
         Markersize throughout. If None it will be autoscaled based on figsize.
+    markercolor: string
+        The color of the marker when plot_interval is True
+    marker: string
+        The shape of the marker. Valid for matplotlib backend
+        Defaults to "o"
     hdi_prob : float
         Valid only when point_interval is True. Plots HDI for chosen percentage of density.
         Defaults to 0.94.
     rotated : bool
         Whether to rotate the dot plot by 90 degrees.
-    quantiles : int
+    nquantiles : int
         Number of quantiles to plot, used for quantile dot plots
         Defaults to 50.
     quartiles : bool
@@ -75,10 +84,12 @@ def plot_dot(
         Figure size. If None it will be defined automatically.
     plot_kwargs : dict
         Keywords passed for customizing the dots.
-    interval_kwargs : dict
-        Keyword passed to the point interval
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    ax : axes, optional
+        Matplotlib axes or bokeh figures.
+    show: bool, optional
+        Call backend show function.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
@@ -86,11 +97,17 @@ def plot_dot(
     Returns
     -------
     axes : matplotlib axes
-    
+
     """
 
     if values is None:
         raise ValueError("Please provide the values array for plotting")
+
+    if nquantiles == 0:
+        raise ValueError("Number of quantiles should be greater than 0")
+
+    if marker != "o" and backend == "bokeh":
+        raise ValueError("marker argument is valid only for matplotlib backend")
 
     values = np.sort(values)
 
@@ -105,22 +122,9 @@ def plot_dot(
     elif point_estimate not in {"mean", "median", "mode", None}:
         raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
 
+    if isinstance(nquantiles, (bool, str)):
+        raise ValueError("quantiles must be of integer type, refer to docs for further details")
 
-    if isinstance(quantiles, (bool, str)):
-        raise ValueError(
-            "quantiles must be of integer type, refer docs for further details"
-        )
-
-    
-    if quantiles >= values.shape[0]:
-        quantiles = values.shape[0]
-    else:
-        qlist = np.linspace(1 / (2 * quantiles), 1 - 1 / (2*quantiles), quantiles)
-        values = np.quantile(values, qlist)
-
-    if binwidth is None:
-        binwidth = math.sqrt((values[-1] - values[0] + 1) ** 2 / (2 * quantiles * np.pi))
-    
     dot_plot_args = dict(
         values=values,
         binwidth=binwidth,
@@ -132,14 +136,17 @@ def plot_dot(
         dotcolor=dotcolor,
         intervalcolor=intervalcolor,
         markersize=markersize,
+        markercolor=markercolor,
+        marker=marker,
         figsize=figsize,
         linewidth=linewidth,
         point_estimate=point_estimate,
-        quantiles=quantiles,
+        nquantiles=nquantiles,
         point_interval=point_interval,
+        ax=ax,
+        show=show,
         backend_kwargs=backend_kwargs,
         plot_kwargs=plot_kwargs,
-        interval_kwargs=interval_kwargs,
         **kwargs
     )
 
