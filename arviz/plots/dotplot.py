@@ -109,7 +109,8 @@ def plot_dot(
     if marker != "o" and backend == "bokeh":
         raise ValueError("marker argument is valid only for matplotlib backend")
 
-    values = np.sort(values)
+    values = np.ravel(values)
+    values.sort()
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
@@ -158,3 +159,38 @@ def plot_dot(
     ax = plot(**dot_plot_args)
 
     return ax
+
+
+def wilkinson_algorithm(values, binwidth):
+    """Uses wilkinson's algorithm to distribute dots into horizontal stacks"""
+
+    ndots = len(values)
+    count = 0
+    stack_locs, stack_counts = [], []
+
+    while count < ndots:
+        stack_first_dot = values[count]
+        num_dots_stack = 0
+        while values[count] < (binwidth + stack_first_dot):
+            num_dots_stack += 1
+            count += 1
+            if count == ndots:
+                break
+        stack_locs.append((stack_first_dot + values[count - 1]) / 2)
+        stack_counts.append(num_dots_stack)
+
+    return stack_locs, stack_counts
+
+
+def layout_stacks(stack_locs, stack_counts, binwidth, stackratio, rotated):
+    dotheight = stackratio * binwidth
+    binradius = binwidth / 2
+
+    x = np.repeat(stack_locs, stack_counts)
+    y = np.hstack(
+        np.array([dotheight * np.arange(count) + binradius for count in stack_counts], dtype=object)
+    )
+    if rotated:
+        x, y = y, x
+
+    return x, y

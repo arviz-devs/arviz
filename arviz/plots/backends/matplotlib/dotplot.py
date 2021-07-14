@@ -6,6 +6,7 @@ from matplotlib import _pylab_helpers
 from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, create_axes_grid, backend_show
 from ...plot_utils import plot_point_interval
+from ...dotplot import wilkinson_algorithm, layout_stacks
 
 
 def plot_dot(
@@ -88,7 +89,8 @@ def plot_dot(
         binwidth = math.sqrt((values[-1] - values[0] + 1) ** 2 / (2 * nquantiles * np.pi))
 
     ## Wilkinson's Algorithm
-    x, y = wilkinson_algorithm(values, nquantiles, binwidth, stackratio, rotated)
+    stack_locs, stack_count = wilkinson_algorithm(values, binwidth)
+    x, y = layout_stacks(stack_locs, stack_count, binwidth, stackratio, rotated)
 
     for (x_i, y_i) in zip(x, y):
         dot = plt.Circle((x_i, y_i), dotsize * binwidth / 2, **plot_kwargs)
@@ -106,34 +108,3 @@ def plot_dot(
         plt.show()
 
     return ax
-
-
-def wilkinson_algorithm(values, nquantiles, binwidth, stackratio, rotated):
-    """Uses wilkinson's algorithm to distribute dots into horizontal stacks"""
-
-    count = 0
-    x, y = [], []
-
-    while count < nquantiles:
-        stack_first_dot = values[count]
-        num_dots_stack = 0
-        while values[count] < (binwidth + stack_first_dot):
-            num_dots_stack += 1
-            count += 1
-            if count == nquantiles:
-                break
-        x_coord = (stack_first_dot + values[count - 1]) / 2
-        y_coord = binwidth / 2
-        if rotated:
-            x_coord, y_coord = y_coord, x_coord
-        x.append(x_coord)
-        y.append(y_coord)
-        for _ in range(num_dots_stack):
-            x.append(x_coord)
-            y.append(y_coord)
-            if rotated:
-                x_coord += binwidth + (stackratio - 1) * (binwidth)
-            else:
-                y_coord += binwidth + (stackratio - 1) * (binwidth)
-
-    return x, y

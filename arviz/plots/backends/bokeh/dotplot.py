@@ -5,7 +5,7 @@ from ...plot_utils import _scale_fig_size, vectorized_to_hex
 from .. import show_layout
 from . import create_axes_grid
 from ...plot_utils import plot_point_interval
-from ..matplotlib.dotplot import wilkinson_algorithm
+from ...dotplot import wilkinson_algorithm, layout_stacks
 
 
 def plot_dot(
@@ -86,7 +86,8 @@ def plot_dot(
         binwidth = math.sqrt((values[-1] - values[0] + 1) ** 2 / (2 * nquantiles * np.pi))
 
     ## Wilkinson's Algorithm
-    x, y = wilkinson_algorithm(values, nquantiles, binwidth, stackratio, rotated)
+    stack_locs, stack_count = wilkinson_algorithm(values, binwidth)
+    x, y = layout_stacks(stack_locs, stack_count, binwidth, stackratio, rotated)
 
     ax.circle(x, y, radius=dotsize * (binwidth / 2), **plot_kwargs, radius_dimension="y")
     if rotated:
