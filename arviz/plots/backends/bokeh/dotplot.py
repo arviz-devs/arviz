@@ -1,4 +1,5 @@
 import math
+import warnings
 import numpy as np
 
 from ...plot_utils import _scale_fig_size, vectorized_to_hex
@@ -77,6 +78,9 @@ def plot_dot(
         )
 
     if nquantiles > values.shape[0]:
+        warnings.warn(
+            "nquantiles must be less than or equal to the number of data points", UserWarning
+        )
         nquantiles = values.shape[0]
     else:
         qlist = np.linspace(1 / (2 * nquantiles), 1 - 1 / (2 * nquantiles), nquantiles)

@@ -96,7 +96,40 @@ def plot_dot(
 
     Returns
     -------
-    axes : matplotlib axes
+    axes : matplotlib axes or bokeh figures
+
+    Examples
+    --------
+    Plot dot plot for a set of data points
+
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import arviz as az
+        >>> values = np.random.normal(0, 1, 500)
+        >>> az.plot_dist(values)
+
+    Manually adjust number of quantiles to plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(values, nquantiles=100)
+
+    Add a point interval under the dot plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, point_interval=True)
+
+    Rotate the dot plots by 90 degrees i.e swap x and y axis
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, point_interval=True, rotated=True)
 
     """
 
@@ -123,8 +156,8 @@ def plot_dot(
     elif point_estimate not in {"mean", "median", "mode", None}:
         raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
 
-    if isinstance(nquantiles, (bool, str)):
-        raise ValueError("quantiles must be of integer type, refer to docs for further details")
+    if not isinstance(nquantiles, int):
+        raise TypeError("nquantiles must be of integer type, refer to docs for further details")
 
     dot_plot_args = dict(
         values=values,

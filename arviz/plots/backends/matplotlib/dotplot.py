@@ -1,4 +1,5 @@
 import math
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import _pylab_helpers
@@ -80,6 +81,9 @@ def plot_dot(
         )
 
     if nquantiles > values.shape[0]:
+        warnings.warn(
+            "nquantiles must be less than or equal to the number of data points", UserWarning
+        )
         nquantiles = values.shape[0]
     else:
         qlist = np.linspace(1 / (2 * nquantiles), 1 - 1 / (2 * nquantiles), nquantiles)
