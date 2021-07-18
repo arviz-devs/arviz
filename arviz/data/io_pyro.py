@@ -108,7 +108,9 @@ class PyroConverter:
 
         observations = {}
         if self.model is not None:
-            trace = pyro.poutine.trace(self.model).get_trace(*self._args, **self._kwargs)  # pylint: disable=not-callable
+            trace = pyro.poutine.trace(self.model).get_trace(
+                *self._args, **self._kwargs
+            )  # pylint: disable=not-callable
             observations = {
                 name: site["value"].cpu()
                 for name, site in trace.nodes.items()
