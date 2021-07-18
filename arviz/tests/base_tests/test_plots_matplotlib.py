@@ -1485,8 +1485,9 @@ def test_plot_lm_multidim(multidim_models):
         idata=idata,
         x=idata.observed_data["y"].coords["dim1"].values,
         y="y",
+        xjitter=True,
         plot_dim="dim1",
-        show=True,
+        show=False,
         figsize=(4, 16),
     )
     assert np.all(axes)
@@ -1528,4 +1529,4 @@ def test_plot_lm_bad_kwargs(models, multidim_models, val_err_kwargs, warn_kwargs
 
 def test_plot_lm_list():
     y = [1, 2, 3, 4, 5]
-    assert plot_lm(y=y, x=np.arange(len(y)), show=True)
+    assert plot_lm(y=y, x=np.arange(len(y)), show=False)

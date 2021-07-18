@@ -1111,6 +1111,7 @@ def test_plot_bpv_discrete():
     "kwargs",
     [
         {},
+        {"y_hat": "bad_name"},
         {"x": "x1"},
         {"x": ("x1", "x2")},
         {
@@ -1170,7 +1171,7 @@ def test_plot_lm_list():
         {"y_model": "bad_name"},
     ],
 )
-def test_plot_lm_bad_kind(models, multidim_models, val_err_kwargs, warn_kwargs):
+def test_plot_lm_bad_kwargs(models, multidim_models, val_err_kwargs, warn_kwargs):
     idata1 = models.model_1
     idata2 = multidim_models.model_1
     with pytest.raises(ValueError):
