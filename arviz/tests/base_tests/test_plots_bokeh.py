@@ -22,6 +22,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_joint,
     plot_kde,
     plot_khat,
+    plot_lm,
     plot_loo_pit,
     plot_mcse,
     plot_pair,
@@ -1104,3 +1105,88 @@ def test_plot_bpv_discrete():
         show=False,
     )
     assert axes.shape
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"x": "x1"},
+        {"x": ("x1", "x2")},
+        {
+            "x": ("x1", "x2"),
+            "y_kwargs": {"fill_color": "blue"},
+            "y_hat_plot_kwargs": {"fill_color": "orange"},
+            "legend": True,
+        },
+        {"x": ("x1", "x2"), "y_model_plot_kwargs": {"line_color": "red"}},
+        {
+            "x": ("x1", "x2"),
+            "kind_pp": "hdi",
+            "kind_model": "hdi",
+            "y_model_fill_kwargs": {"color": "red"},
+            "y_hat_fill_kwargs": {"color": "cyan"},
+        },
+    ],
+)
+def test_plot_lm(models, kwargs):
+    idata = models.model_1
+    if "constant_data" not in idata.groups():
+        y = idata.observed_data["y"]
+        x1data = y.coords[y.dims[0]]
+        idata.add_groups({"constant_data": {"_": x1data}})
+        idata.constant_data["x1"] = x1data
+        idata.constant_data["x2"] = x1data
+
+    axes = plot_lm(
+        idata=idata, y="y", y_model="eta", backend="bokeh", xjitter=True, show=False, **kwargs
+    )
+    assert np.all(axes)
+
+
+def test_plot_lm_multidim(multidim_models):
+    idata = multidim_models.model_1
+    axes = plot_lm(idata=idata, y="y", plot_dim="dim1", show=False, backend="bokeh")
+    assert np.any(axes)
+
+
+def test_plot_lm_list():
+    y = [1, 2, 3, 4, 5]
+    assert plot_lm(y=y, x=np.arange(len(y)), show=False, backend="bokeh")
+
+
+@pytest.mark.parametrize(
+    "val_err_kwargs",
+    [
+        {},
+        {"kind_pp": "bad_kind", "plot_dim": "dim1"},
+        {"kind_model": "bad_kind", "plot_dim": "dim1"},
+    ],
+)
+@pytest.mark.parametrize(
+    "warn_kwargs",
+    [
+        {"y_hat": "bad_name"},
+        {"y_model": "bad_name"},
+    ],
+)
+def test_plot_lm_bad_kind(models, multidim_models, val_err_kwargs, warn_kwargs):
+    idata1 = models.model_1
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_lm(idata=idata2, y="y", backend="bokeh", show=False, **val_err_kwargs)
+
+    with pytest.raises(TypeError):
+        plot_lm(idata=idata1, y="y", backend="bokeh", show=False, num_pp_samples=-1)
+
+    with pytest.warns(UserWarning):
+        plot_lm(
+            idata=from_dict(observed_data={"y": idata1.observed_data["y"].values}),
+            y="y",
+            backend="bokeh",
+            show=False,
+            **warn_kwargs,
+        )
+    with pytest.warns(UserWarning):
+        plot_lm(idata=idata1, y="y", backend="bokeh", show=False, **warn_kwargs)
+
