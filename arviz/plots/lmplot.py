@@ -171,7 +171,7 @@ def plot_lm(
         x = xr.DataArray(x)
         x_skip_dims = [x.dims[-1]]
 
-    #If posterior is present in idata and y_hat is there, get its values
+    # If posterior is present in idata and y_hat is there, get its values
     if isinstance(y_model, str):
         if "posterior" not in idata.groups():
             warnings.warn("Posterior not found in idata", UserWarning)
@@ -182,7 +182,7 @@ def plot_lm(
             warnings.warn("y_model not found in posterior", UserWarning)
             y_model = None
 
-    #If posterior_predictive is present in idata and y_hat is there, get its values
+    # If posterior_predictive is present in idata and y_hat is there, get its values
     if isinstance(y_hat, str):
         if "posterior_predictive" not in idata.groups():
             warnings.warn("posterior_predictive not found in idata", UserWarning)
@@ -193,8 +193,8 @@ def plot_lm(
             warnings.warn("y_hat not found in posterior_predictive", UserWarning)
             y_hat = None
 
-    #Check if num_pp_smaples is valid and generate num_pp_smaples number of random indexes.
-    #Only needed if kind_pp="samples" or kind_model="lines". Not req for plotting hdi
+    # Check if num_pp_smaples is valid and generate num_pp_smaples number of random indexes.
+    # Only needed if kind_pp="samples" or kind_model="lines". Not req for plotting hdi
     pp_sample_ix = None
     if (y_hat is not None and kind_pp == "samples") or (
         y_model is not None and kind_model == "lines"
@@ -216,7 +216,7 @@ def plot_lm(
 
         pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples, replace=False)
 
-    #crucial step in case of multidim y
+    # crucial step in case of multidim y
     if plot_dim is None:
         skip_dims = list(y.dims)
     elif isinstance(plot_dim, str):
@@ -224,9 +224,9 @@ def plot_lm(
     elif isinstance(plot_dim, tuple):
         skip_dims = list(plot_dim)
 
-    #Generate x axis plotters. 
+    # Generate x axis plotters.
     x = filter_plotters_list(
-        plotters = list(
+        plotters=list(
             xarray_var_iter(
                 x,
                 var_names=x_var_names,
@@ -234,19 +234,19 @@ def plot_lm(
                 combined=True,
             )
         ),
-        plot_kind = "plot_lm",
+        plot_kind="plot_lm",
     )
 
-    #Generate y axis plotters
+    # Generate y axis plotters
     y = filter_plotters_list(
-        plotters = list(
+        plotters=list(
             xarray_var_iter(
                 y,
                 skip_dims=set(skip_dims),
                 combined=True,
             )
         ),
-        plot_kind = "plot_lm",
+        plot_kind="plot_lm",
     )
 
     # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
@@ -256,7 +256,7 @@ def plot_lm(
     y = np.tile(y, (len_x, 1))
     x = np.tile(x, (len_y, 1))
 
-    #Filter out the required values to generate plotters
+    # Filter out the required values to generate plotters
     if y_hat is not None:
         if kind_pp == "samples":
             y_hat = y_hat.stack(sample=("chain", "draw"))[..., pp_sample_ix]
@@ -276,7 +276,7 @@ def plot_lm(
 
         y_hat = np.tile(y_hat, (len_x, 1))
 
-    #Filter out the required values to generate plotters
+    # Filter out the required values to generate plotters
     if y_model is not None:
         if kind_model == "lines":
             y_model = y_model.stack(sample=("chain", "draw"))[..., pp_sample_ix]

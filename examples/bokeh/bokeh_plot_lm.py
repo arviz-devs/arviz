@@ -1,5 +1,6 @@
 """
-Regression Plot
+Regression Plot.
+
 ==========================================
 _thumb: .6, .5
 """

@@ -1189,4 +1189,3 @@ def test_plot_lm_bad_kind(models, multidim_models, val_err_kwargs, warn_kwargs):
         )
     with pytest.warns(UserWarning):
         plot_lm(idata=idata1, y="y", backend="bokeh", show=False, **warn_kwargs)
-
