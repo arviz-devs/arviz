@@ -42,6 +42,8 @@ from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...stats.density_utils import kde as _kde
 from ...utils import _cov
+from ...plots.plot_utils import plot_point_interval
+from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
     create_model,
     create_multidimensional_model,
@@ -1506,3 +1508,34 @@ def test_plot_dot_rotated(continuous_model, kwargs):
     data = continuous_model["x"]
     ax = plot_dot(data, **kwargs)
     assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {
+            "point_estimate": "mean",
+            "hdi_prob": 0.95,
+            "quartiles": False,
+            "linewidth": 2,
+            "markersize": 2,
+            "markercolor": "red",
+            "marker": "o",
+            "rotated": False,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_point_interval(continuous_model, kwargs):
+    _, ax = plt.subplots()
+    data = continuous_model["x"]
+    values = np.sort(data)
+    ax = plot_point_interval(ax, values, **kwargs)
+    assert ax
+
+
+def test_wilkinson_algorithm(continuous_model):
+    data = continuous_model["x"]
+    values = np.sort(data)
+    _, stack_counts = wilkinson_algorithm(values, 0.5)
+    assert np.sum(stack_counts) == len(values)

@@ -108,28 +108,28 @@ def plot_dot(
         >>> import numpy as np
         >>> import arviz as az
         >>> values = np.random.normal(0, 1, 500)
-        >>> az.plot_dist(values)
+        >>> az.plot_dot(values)
 
     Manually adjust number of quantiles to plot
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_dist(values, nquantiles=100)
+        >>> az.plot_dot(values, nquantiles=100)
 
     Add a point interval under the dot plot
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_dist(b, point_interval=True)
+        >>> az.plot_dot(b, point_interval=True)
 
     Rotate the dot plots by 90 degrees i.e swap x and y axis
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_dist(b, point_interval=True, rotated=True)
+        >>> az.plot_dot(b, point_interval=True, rotated=True)
 
     """
 
