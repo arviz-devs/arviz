@@ -4,10 +4,10 @@ import gzip
 import importlib
 import logging
 import os
-import cloudpickle
 import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import cloudpickle
 import numpy as np
 import pytest
 from _pytest.outcomes import Skipped
