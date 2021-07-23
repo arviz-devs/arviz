@@ -1131,6 +1131,7 @@ def test_plot_bpv_discrete():
     ],
 )
 def test_plot_lm(models, kwargs):
+    """Test functionality for 1D data."""
     idata = models.model_1
     if "constant_data" not in idata.groups():
         y = idata.observed_data["y"]
@@ -1146,12 +1147,14 @@ def test_plot_lm(models, kwargs):
 
 
 def test_plot_lm_multidim(multidim_models):
+    """Test functionality for multidimentional data."""
     idata = multidim_models.model_1
     axes = plot_lm(idata=idata, y="y", plot_dim="dim1", show=False, backend="bokeh")
     assert np.any(axes)
 
 
 def test_plot_lm_list():
+    """Test the plots when input data is list or ndarray."""
     y = [1, 2, 3, 4, 5]
     assert plot_lm(y=y, x=np.arange(len(y)), show=False, backend="bokeh")
 
@@ -1172,6 +1175,7 @@ def test_plot_lm_list():
     ],
 )
 def test_plot_lm_bad_kwargs(models, multidim_models, val_err_kwargs, warn_kwargs):
+    """Test multiple types of errors."""
     idata1 = models.model_1
     idata2 = multidim_models.model_1
     with pytest.raises(ValueError):
