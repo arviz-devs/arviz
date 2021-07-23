@@ -20,8 +20,8 @@ jobs:
         emcee.version: "latest"
         name: "External latest"
 
-      Python_38_Special_versions:
-        python.version: 3.8
+      Python_39_Special_versions:
+        python.version: 3.9
         pystan.version: 2.19.1.1
         cmdstanpy.version: 0.9.67
         pymc3.version: "github"
