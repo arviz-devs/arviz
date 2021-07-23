@@ -1503,6 +1503,13 @@ def test_plot_lm_multidim(multidim_models):
         {"kind_model": "bad_kind"},
     ],
 )
+def test_plot_lm_valueerror(multidim_models, val_err_kwargs):
+    """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_lm(idata=idata2, y="y", **val_err_kwargs)
+
+
 @pytest.mark.parametrize(
     "warn_kwargs",
     [
@@ -1510,16 +1517,9 @@ def test_plot_lm_multidim(multidim_models):
         {"y_model": "bad_name"},
     ],
 )
-def test_plot_lm_bad_kwargs(models, multidim_models, val_err_kwargs, warn_kwargs):
-    """Test multiple types of errors."""
+def test_plot_lm_warning(models, warn_kwargs):
+    """Test Warning when needed groups or variables are not there in idata."""
     idata1 = models.model_1
-    idata2 = multidim_models.model_1
-    with pytest.raises(ValueError):
-        plot_lm(idata=idata2, y="y", **val_err_kwargs)
-
-    with pytest.raises(TypeError):
-        plot_lm(idata=idata1, y="y", num_pp_samples=-1)
-
     with pytest.warns(UserWarning):
         plot_lm(
             idata=from_dict(observed_data={"y": idata1.observed_data["y"].values}),
@@ -1528,6 +1528,13 @@ def test_plot_lm_bad_kwargs(models, multidim_models, val_err_kwargs, warn_kwargs
         )
     with pytest.warns(UserWarning):
         plot_lm(idata=idata1, y="y", **warn_kwargs)
+
+
+def test_plot_lm_typeerror(models):
+    """Test error when invalid value passed to num_pp_samples."""
+    idata1 = models.model_1
+    with pytest.raises(TypeError):
+        plot_lm(idata=idata1, y="y", num_pp_samples=-1)
 
 
 def test_plot_lm_list():
