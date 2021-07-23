@@ -131,18 +131,18 @@ jobs:
       absolufy-imports $(find arviz -name '*.py') --never
     displayName: 'Use relative imports'
 
-  - script: |
-      python -m mypy .
-    displayName: 'mypy'
-
-  - script: |
-      python -m typing_copilot.cli tighten --error-if-can-tighten
-    displayName: 'typing_copilot'
-
-  - script: |
-      python -m typing_copilot.cli tighten
-    condition: failed()
-    displayName: 'update mypy.ini with typing_copilot'
+#  - script: |
+#      python -m mypy .
+#    displayName: 'mypy'
+#
+#  - script: |
+#      python -m typing_copilot.cli tighten --error-if-can-tighten
+#    displayName: 'typing_copilot'
+#
+#  - script: |
+#      python -m typing_copilot.cli tighten
+#    condition: failed()
+#    displayName: 'update mypy.ini with typing_copilot'
 
   - task: PublishBuildArtifacts@1
     condition: failed()
