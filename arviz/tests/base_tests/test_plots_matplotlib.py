@@ -1539,3 +1539,6 @@ def test_wilkinson_algorithm(continuous_model):
     values = np.sort(data)
     _, stack_counts = wilkinson_algorithm(values, 0.5)
     assert np.sum(stack_counts) == len(values)
+    stack_locs, stack_counts = wilkinson_algorithm([0.0, 1.0, 1.8, 3.0, 5.0], 1.0)
+    assert stack_locs == [0.0, 1.4, 3.0, 5.0]
+    assert stack_counts == [1, 2, 1, 1]
