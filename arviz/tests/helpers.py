@@ -4,7 +4,7 @@ import gzip
 import importlib
 import logging
 import os
-import pickle
+import cloudpickle
 import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -591,13 +591,13 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
             with gzip.open(path, "wb") as buff:
                 try:
                     _log.info("Generating and caching %s", fname)
-                    pickle.dump(func(eight_schools_data, draws, chains), buff)
+                    cloudpickle.dump(func(eight_schools_data, draws, chains), buff)
                 except AttributeError as err:
-                    raise AttributeError(f"Failed chaching {library_name}") from err
+                    raise AttributeError(f"Failed caching {library_name}") from err
 
         with gzip.open(path, "rb") as buff:
             _log.info("Loading %s from cache", fname)
-            models[library.__name__] = pickle.load(buff)
+            models[library.__name__] = cloudpickle.load(buff)
 
     return models
 
