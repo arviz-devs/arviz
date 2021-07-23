@@ -23,6 +23,7 @@ Plots
     plot_kde
     plot_khat
     plot_loo_pit
+    plot_lm
     plot_mcse
     plot_pair
     plot_parallel
