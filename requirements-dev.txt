@@ -1,5 +1,6 @@
 absolufy-imports
 astroid
+madforhooks
 numpydoc
 pydocstyle
 pylint

@@ -1,6 +1,7 @@
 """Test Diagnostic methods"""
 # pylint: disable=redefined-outer-name, no-member, too-many-public-methods
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -161,7 +162,7 @@ class TestDiagnostics:
 
         # show print with pytests '-s' tag
         np.set_printoptions(16)
-        print(abs(reference - arviz_data).max())
+        print(abs(reference - arviz_data).max(), file=sys.stdout)
 
         # test absolute accuracy
         assert (abs(reference - arviz_data).values < 1e-8).all(None)

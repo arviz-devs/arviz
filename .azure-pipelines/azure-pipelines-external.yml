@@ -133,6 +133,10 @@ jobs:
     displayName: 'Use relative imports'
 
   - script: |
+      python -m madforhooks.no_print_statements $(find arviz -name '*.py')
+    displayName: 'Disallow debugging print statements (use `file=sys.stdout` if not debugging)'
+
+  - script: |
       python -m mypy .
     displayName: 'mypy'
 
