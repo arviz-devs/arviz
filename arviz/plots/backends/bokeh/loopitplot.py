@@ -103,7 +103,9 @@ def plot_loo_pit(
             fill_kwargs.setdefault(
                 "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
             )
-            fill_kwargs.setdefault("legend_label", "{:.3g}% credible interval".format(hdi_prob))
+            fill_kwargs.setdefault(
+                "legend_label", "{:.3g}% credible interval".format(hdi_prob * 100)
+            )
     elif use_hdi:
         if hdi_kwargs is None:
             hdi_kwargs = {}
