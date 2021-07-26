@@ -328,5 +328,4 @@ def plot_lm(
 
     plot = get_plotting_function("plot_lm", "lmplot", backend)
     ax = plot(**lmplot_kwargs)
-    print("cp2", type(ax))
     return ax
