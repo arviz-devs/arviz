@@ -243,7 +243,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
     class InferenceDataValuesView(ValuesView[xr.Dataset]):
         """ValuesView implementation for InferenceData, to allow it to implement Mapping."""
 
-        def __init__(self, parent: "InferenceData") -> None:
+        def __init__(
+            self, parent: "InferenceData"
+        ) -> None:  # pylint: disable=super-init-not-called
             """Create a new InferenceDataValuesView from an InferenceData object."""
             self.parent = parent
 
@@ -275,7 +277,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
     class InferenceDataItemsView(ItemsView[str, xr.Dataset]):
         """ItemsView implementation for InferenceData, to allow it to implement Mapping."""
 
-        def __init__(self, parent: "InferenceData") -> None:
+        def __init__(
+            self, parent: "InferenceData"
+        ) -> None:  # pylint: disable=super-init-not-called
             """Create a new InferenceDataItemsView from an InferenceData object."""
             self.parent = parent
 
