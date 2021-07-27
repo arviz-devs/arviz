@@ -1,4 +1,4 @@
-"""Plot linear regression figure."""
+"""Plot regression figure."""
 import warnings
 from numbers import Integral
 
@@ -36,15 +36,15 @@ def plot_lm(
     legend=True,
     grid=True,
 ):
-    """Plot linear regression figure to visualize uncertaininty in mean and ppc values.
+    """Posterior predictive and mean plots for regression-like data.
 
     Parameters
     ----------
     y : str or DataArray or ndarray
         If str, variable name from observed_data
-    idata : az.InferenceData object, Optional
-        Optional only if y is Sequence
-    x : str or tuple of strings or DataArray or array-like, Optional
+    idata : InferenceData, Optional
+        Optional only if y is not str
+    x : str, tuple of strings, DataArray or array-like, optional
         If str or tuple, variable name from constant_data
         If ndarray, could be 1D, or 2D for multiple plots
         If none, coords name of y (y should be DataArray).
@@ -55,20 +55,23 @@ def plot_lm(
         If str, variable name from posterior_predictive.
         Its dimensions should be same as y plus added chains and draws.
     num_pp_samples : int, Optional, Default 50
-    kind_pp : ["samples", "hdi"], Optional, Default "samples"
-    kind_model : ["lines", "hdi"], Optional, Default "lines"
+    kind_pp : {"samples", "hdi"}, Default "samples"
+    kind_model : {"lines", "hdi"}, Default "lines"
     plot_dim : str, Optional
         Necessary if y is multidimensional.
     backend : str, Optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     y_kwargs : dict, optional
-        Passed to plot() in matplotlib and circle() in bokeh
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        and :meth:`bokeh:bokeh.plotting.figure.Figure.circle` in bokeh
     y_hat_plot_kwargs : dict, optional
-        Passed to plot() in matplotlib and circle() in bokeh
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        and :meth:`bokeh:bokeh.plotting.figure.Figure.circle` in bokeh
     y_hat_fill_kwargs : dict, optional
         Passed to az.plot_hdi()
     y_model_plot_kwargs : dict, optional
-        Passed to plot() in matplotlib and line() in bokeh
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        and :meth:`bokeh:bokeh.plotting.figure.Figure.line` in bokeh
     y_model_fill_kwargs : dict, optional
         Passed to az.plot_hdi()
     backend_kwargs : dict, optional
@@ -100,7 +103,7 @@ def plot_lm(
         :context: close-figs
 
         >>> import arviz as az
-        >>> idata = az.load_arviz_data('regrssion1d')
+        >>> idata = az.load_arviz_data('regression1d')
         >>> x = xr.DataArray(np.linspace(0, 1, 100))
         >>> data.posterior["y_model"] = data.posterior["intercept"] + data.posterior["slope"]*x
         >>> az.plot_lm(idata=data, y="y", x="x")
