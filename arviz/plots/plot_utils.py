@@ -400,10 +400,9 @@ def plot_point_interval(
     intervalcolor,
     backend="matplotlib",
 ):
+    """Plot point intervals.
 
-    """Plots point intervals
-
-    Translates the data and represents them as point and interval summaries
+    Translates the data and represents them as point and interval summaries.
 
     Parameters
     ----------
@@ -434,7 +433,6 @@ def plot_point_interval(
     backend : string
         Matplotlib or Bokeh
     """
-
     endpoint = (1 - hdi_prob) / 2
     if quartiles:
         qlist_interval = [endpoint, 0.25, 0.75, 1 - endpoint]

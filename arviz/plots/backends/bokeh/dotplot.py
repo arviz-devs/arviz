@@ -32,7 +32,7 @@ def plot_dot(
     backend_kwargs,
     plot_kwargs,
 ):
-
+    """Bokeh dotplot."""
     if backend_kwargs is None:
         backend_kwargs = {}
 

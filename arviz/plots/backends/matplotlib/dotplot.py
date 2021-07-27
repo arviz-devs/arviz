@@ -33,7 +33,7 @@ def plot_dot(
     backend_kwargs,
     plot_kwargs,
 ):
-
+    """Matplotlib dotplot."""
     if backend_kwargs is None:
         backend_kwargs = {}
 

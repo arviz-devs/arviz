@@ -29,7 +29,6 @@ def plot_dot(
     backend_kwargs=None,
     **kwargs
 ):
-
     """Plot distribution as dot plot or quantile dot plot.
 
     This function uses the Wilkinson's Algorithm[1] to allot dots to bins.
@@ -136,7 +135,6 @@ def plot_dot(
         >>> az.plot_dot(b, point_interval=True, rotated=True)
 
     """
-
     if nquantiles == 0:
         raise ValueError("Number of quantiles should be greater than 0")
 
@@ -196,8 +194,7 @@ def plot_dot(
 
 
 def wilkinson_algorithm(values, binwidth):
-    """Uses wilkinson's algorithm to distribute dots into horizontal stacks"""
-
+    """wilkinson's algorithm to distribute dots into horizontal stacks."""
     ndots = len(values)
     count = 0
     stack_locs, stack_counts = [], []
@@ -217,6 +214,7 @@ def wilkinson_algorithm(values, binwidth):
 
 
 def layout_stacks(stack_locs, stack_counts, binwidth, stackratio, rotated):
+    """Use count and location of stacks to get coordinates of dots."""
     dotheight = stackratio * binwidth
     binradius = binwidth / 2
 
