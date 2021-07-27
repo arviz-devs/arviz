@@ -1,3 +1,4 @@
+"""Plot distribution as dot plot or quantile dot plot."""
 import numpy as np
 
 from ..rcparams import rcParams
@@ -194,7 +195,7 @@ def plot_dot(
 
 
 def wilkinson_algorithm(values, binwidth):
-    """wilkinson's algorithm to distribute dots into horizontal stacks."""
+    """Wilkinson's algorithm to distribute dots into horizontal stacks."""
     ndots = len(values)
     count = 0
     stack_locs, stack_counts = [], []
