@@ -410,28 +410,26 @@ def plot_point_interval(
         Matplotlib axes
     values : array-like
         Values to plot
-    point_estimate : Optional[str]
-        Plot point estimate per variable. Values should be ‘mean’, ‘median’, ‘mode’ or None.
-        Defaults to ‘auto’ i.e. it falls back to default set in rcParams.
+    point_estimate : str
+        Plot point estimate per variable. 
     linewidth : int
-        Line width throughout. If None it will be autoscaled based on figsize.
+        Line width throughout.
     quartiles : bool
         If True then the quartile interval will be plotted with the HDI.
     markersize : int
-        Markersize throughout. If None it will be autoscaled based on figsize.
+        Markersize throughout.
     markercolor: string
-        Color of the marker
+        Color of the marker.
     marker: string
-        Shape of the marker
+        Shape of the marker.
     hdi_prob : float
         Valid only when point_interval is True. Plots HDI for chosen percentage of density.
-        Defaults to 0.94.
     rotated : bool
         Whether to rotate the dot plot by 90 degrees.
     intervalcolor : string
-        Color of the interval
-    backend : string
-        Matplotlib or Bokeh
+        Color of the interval.
+    backend : string, optional
+        Matplotlib or Bokeh.
     """
     endpoint = (1 - hdi_prob) / 2
     if quartiles:

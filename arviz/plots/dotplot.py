@@ -32,8 +32,8 @@ def plot_dot(
 ):
     """Plot distribution as dot plot or quantile dot plot.
 
-    This function uses the Wilkinson's Algorithm[1] to allot dots to bins.
-    The quantile dot plots was inspired from the paper[2].
+    This function uses the Wilkinson's Algorithm [1]_ to allot dots to bins.
+    The quantile dot plots was inspired from the paper [2]_.
 
     Parameters
     ----------
@@ -67,7 +67,7 @@ def plot_dot(
         Defaults to "o"
     hdi_prob : float, optional
         Valid only when point_interval is True. Plots HDI for chosen percentage of density.
-        Defaults to 0.94.
+        Defaults to ``stats.hdi_prob`` rcParam.
     rotated : bool, optional
         Whether to rotate the dot plot by 90 degrees.
     nquantiles : int, optional
@@ -79,16 +79,18 @@ def plot_dot(
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     plot_kwargs : dict, optional
-        Keywords passed for customizing the dots.
+        Keywords passed for customizing the dots. Passed to :meth:`mpl:matplotlib.patches.Circle` 
+        in matplotlib and :meth:`bokeh:bokeh.plotting.figure.Figure.circle` in bokeh
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     ax : axes, optional
         Matplotlib axes or bokeh figures.
     show: bool, optional
         Call backend show function.
-    backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+    backend_kwargs: dict, optional
+        These are kwargs specific to the backend being used, passed to
+        :meth:`mpl:matplotlib.axes.Axes.plot` or
+        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
 
     Returns
     -------
