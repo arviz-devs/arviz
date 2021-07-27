@@ -99,8 +99,8 @@ def plot_dot(
     .. [1] Leland Wilkinson (1999) Dot Plots, The American Statistician, 53:3, 276-281,
         DOI: 10.1080/00031305.1999.10474474
     .. [2] Matthew Kay, Tara Kola, Jessica R. Hullman,
-        and Sean A. Munson. 2016. When (ish) is My Bus? User-centered Visualizations of Uncertainty in
-        Everyday, Mobile Predictive Systems. DOI:https://doi.org/10.1145/2858036.2858558
+        and Sean A. Munson. 2016. When (ish) is My Bus? User-centered Visualizations of Uncertainty
+        in Everyday, Mobile Predictive Systems. DOI:https://doi.org/10.1145/2858036.2858558
 
     Examples
     --------
