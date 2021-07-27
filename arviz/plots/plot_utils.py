@@ -411,7 +411,7 @@ def plot_point_interval(
     values : array-like
         Values to plot
     point_estimate : str
-        Plot point estimate per variable. 
+        Plot point estimate per variable.
     linewidth : int
         Line width throughout.
     quartiles : bool
