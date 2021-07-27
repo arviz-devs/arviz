@@ -5,7 +5,7 @@ from .plot_utils import get_plotting_function
 
 
 def plot_dot(
-    values=None,
+    values,
     binwidth=None,
     dotsize=1,
     stackratio=1,
@@ -32,57 +32,53 @@ def plot_dot(
 
     """Plot distribution as dot plot or quantile dot plot.
 
-    This function uses the Wilkinson's Algorithm
-    (Leland Wilkinson (1999) Dot Plots, The American Statistician, 53:3, 276-281,
-    DOI: 10.1080/00031305.1999.10474474)to allot dots to bins.
-    The quantile dot plots was inspired from the paper(Matthew Kay, Tara Kola, Jessica R. Hullman,
-    and Sean A. Munson. 2016. When (ish) is My Bus? User-centered Visualizations of Uncertainty in
-    Everyday, Mobile Predictive Systems. DOI:https://doi.org/10.1145/2858036.2858558).
+    This function uses the Wilkinson's Algorithm[1] to allot dots to bins.
+    The quantile dot plots was inspired from the paper[2].
 
     Parameters
     ----------
     values : array-like
         Values to plot
-    binwidth : float
+    binwidth : float, optional
         Width of the bin for drawing the dot plot.
-    dotsize : float
+    dotsize : float, optional
         The size of the dots relative to the bin width. The default, 1, makes dots be
         just about as wide as the bin width.
-    stackratio : float
+    stackratio : float, optional
         The distance between the center of the dots in the same stack relative to the bin height.
         The default, 1, makes dots in the same stack just touch each other.
-    point_interval : bool
+    point_interval : bool, optional
         Plots the point interval. Uses hdi_prob to plot the HDI interval
-    point_estimate : Optional[str]
+    point_estimate : str, optional
         Plot point estimate per variable. Values should be ‘mean’, ‘median’, ‘mode’ or None.
         Defaults to ‘auto’ i.e. it falls back to default set in rcParams.
-    dotcolor : string
-        The color of the dots
-    intervalcolor : string
-        The color of the interval
-    linewidth : int
+    dotcolor : string, optional
+        The color of the dots. Should be a valid matplotlib color.
+    intervalcolor : string, optional
+        The color of the interval. Should be a valid matplotlib color.
+    linewidth : int, optional
         Line width throughout. If None it will be autoscaled based on figsize.
-    markersize : int
+    markersize : int, optional
         Markersize throughout. If None it will be autoscaled based on figsize.
-    markercolor: string
-        The color of the marker when plot_interval is True
-    marker: string
+    markercolor: string, optional
+        The color of the marker when plot_interval is True. Should be a valid matplotlib color.
+    marker: string, optional
         The shape of the marker. Valid for matplotlib backend
         Defaults to "o"
-    hdi_prob : float
+    hdi_prob : float, optional
         Valid only when point_interval is True. Plots HDI for chosen percentage of density.
         Defaults to 0.94.
-    rotated : bool
+    rotated : bool, optional
         Whether to rotate the dot plot by 90 degrees.
-    nquantiles : int
+    nquantiles : int, optional
         Number of quantiles to plot, used for quantile dot plots
         Defaults to 50.
-    quartiles : bool
+    quartiles : bool, optional
         If True then the quartile interval will be plotted with the HDI.
         Defaults to True.
-    figsize : tuple
+    figsize : tuple, optional
         Figure size. If None it will be defined automatically.
-    plot_kwargs : dict
+    plot_kwargs : dict, optional
         Keywords passed for customizing the dots.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
@@ -97,6 +93,14 @@ def plot_dot(
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    References
+    ----------
+    .. [1] Leland Wilkinson (1999) Dot Plots, The American Statistician, 53:3, 276-281,
+        DOI: 10.1080/00031305.1999.10474474
+    .. [2] Matthew Kay, Tara Kola, Jessica R. Hullman,
+        and Sean A. Munson. 2016. When (ish) is My Bus? User-centered Visualizations of Uncertainty in
+        Everyday, Mobile Predictive Systems. DOI:https://doi.org/10.1145/2858036.2858558
 
     Examples
     --------
@@ -132,9 +136,6 @@ def plot_dot(
         >>> az.plot_dot(b, point_interval=True, rotated=True)
 
     """
-
-    if values is None:
-        raise ValueError("Please provide the values array for plotting")
 
     if nquantiles == 0:
         raise ValueError("Number of quantiles should be greater than 0")
