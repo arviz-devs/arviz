@@ -33,7 +33,7 @@ def plot_dot(
     """Plot distribution as dot plot or quantile dot plot.
 
     This function uses the Wilkinson's Algorithm [1]_ to allot dots to bins.
-    The quantile dot plots was inspired from the paper [2]_.
+    The quantile dot plots was inspired from the paper *When (ish) is My Bus?* [2]_.
 
     Parameters
     ----------
@@ -80,7 +80,7 @@ def plot_dot(
         Figure size. If None it will be defined automatically.
     plot_kwargs : dict, optional
         Keywords passed for customizing the dots. Passed to :meth:`mpl:matplotlib.patches.Circle`
-        in matplotlib and :meth:`bokeh:bokeh.plotting.figure.Figure.circle` in bokeh
+        in matplotlib and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     ax : axes, optional
@@ -90,7 +90,7 @@ def plot_dot(
     backend_kwargs: dict, optional
         These are kwargs specific to the backend being used, passed to
         :meth:`mpl:matplotlib.axes.Axes.plot` or
-        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
+        :meth:`bokeh:bokeh.plotting.figure`.
 
     Returns
     -------
