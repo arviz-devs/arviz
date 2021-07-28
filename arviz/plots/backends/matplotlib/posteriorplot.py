@@ -104,7 +104,6 @@ def plot_posterior(
     if backend_show(show):
         plt.show()
 
-    # plt.draw()
     return ax
 
 
