@@ -14,7 +14,7 @@ def plot_lm(
     y,
     y_model,
     y_hat,
-    num_pp_samples,
+    num_samples,
     kind_pp,
     kind_model,
     length_plotters,
@@ -85,7 +85,7 @@ def plot_lm(
             _, _, _, y_hat_plotters = y_hat[i]
             if kind_pp == "samples":
                 posterior_legend = []
-                for j in range(num_pp_samples):
+                for j in range(num_samples):
                     if xjitter is True:
                         jitter_scale = x_plotters[1] - x_plotters[0]
                         scale_high = jitter_scale * 0.2
@@ -120,7 +120,7 @@ def plot_lm(
             if kind_model == "lines":
 
                 model_legend = ax_i.multi_line(
-                    [np.tile(x_plotters, (num_pp_samples, 1))],
+                    [np.tile(x_plotters, (num_samples, 1))],
                     [np.transpose(y_model_plotters)],
                     **y_model_plot_kwargs,
                 )

@@ -12,7 +12,7 @@ def plot_lm(
     y,
     y_model,
     y_hat,
-    num_pp_samples,
+    num_samples,
     kind_pp,
     kind_model,
     xjitter,
@@ -90,7 +90,7 @@ def plot_lm(
         if y_hat is not None:
             _, _, _, y_hat_plotters = y_hat[i]
             if kind_pp == "samples":
-                for j in range(num_pp_samples):
+                for j in range(num_samples):
                     if xjitter is True:
                         jitter_scale = x_plotters[1] - x_plotters[0]
                         scale_high = jitter_scale * 0.2
@@ -110,7 +110,7 @@ def plot_lm(
         if y_model is not None:
             _, _, _, y_model_plotters = y_model[i]
             if kind_model == "lines":
-                for j in range(num_pp_samples):
+                for j in range(num_samples):
                     ax_i.plot(x_plotters, y_model_plotters[..., j], **y_model_plot_kwargs)
                 ax_i.plot([], **y_model_plot_kwargs, label="Uncertainty in mean")
 

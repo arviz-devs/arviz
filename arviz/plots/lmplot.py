@@ -17,7 +17,7 @@ def plot_lm(
     x=None,
     y_model=None,
     y_hat=None,
-    num_pp_samples=50,
+    num_samples=50,
     kind_pp="samples",
     kind_model="lines",
     xjitter=False,
@@ -54,27 +54,33 @@ def plot_lm(
     y_hat : str, Optional
         If str, variable name from posterior_predictive.
         Its dimensions should be same as y plus added chains and draws.
-    num_pp_samples : int, Optional, Default 50
+    num_samples : int, Optional, Default 50
+        Significant if `kind_pp` is "samples" or `kind_model` is "lines".
+        Number of samples to be drawn from posterior predictive or
     kind_pp : {"samples", "hdi"}, Default "samples"
+        Options to visualize uncertainty in data.
     kind_model : {"lines", "hdi"}, Default "lines"
+        Options to visualize uncertainty in mean of the data.
     plot_dim : str, Optional
         Necessary if y is multidimensional.
     backend : str, Optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     y_kwargs : dict, optional
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
-        and :meth:`bokeh:bokeh.plotting.figure.Figure.circle` in bokeh
+        and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
     y_hat_plot_kwargs : dict, optional
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
-        and :meth:`bokeh:bokeh.plotting.figure.Figure.circle` in bokeh
+        and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
     y_hat_fill_kwargs : dict, optional
         Passed to az.plot_hdi()
     y_model_plot_kwargs : dict, optional
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
-        and :meth:`bokeh:bokeh.plotting.figure.Figure.line` in bokeh
+        and :meth:`bokeh:bokeh.plotting.Figure.line` in bokeh
     y_model_fill_kwargs : dict, optional
-        Passed to az.plot_hdi()
+        Significant if `kind_model` is "hdi". Passed to :func:`~arviz.plot_hdi`
     backend_kwargs : dict, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
@@ -208,16 +214,16 @@ def plot_lm(
             total_pp_samples = y_model.sizes["chain"] * y_model.sizes["draw"]
 
         if (
-            not isinstance(num_pp_samples, Integral)
-            or num_pp_samples < 1
-            or num_pp_samples > total_pp_samples
+            not isinstance(num_samples, Integral)
+            or num_samples < 1
+            or num_samples > total_pp_samples
         ):
             raise TypeError(
-                "`num_pp_samples` must be an integer between 1 and "
+                "`num_samples` must be an integer between 1 and "
                 + "{limit}.".format(limit=total_pp_samples)
             )
 
-        pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples, replace=False)
+        pp_sample_ix = np.random.choice(total_pp_samples, size=num_samples, replace=False)
 
     # crucial step in case of multidim y
     if plot_dim is None:
@@ -304,7 +310,7 @@ def plot_lm(
         y=y,
         y_model=y_model,
         y_hat=y_hat,
-        num_pp_samples=num_pp_samples,
+        num_samples=num_samples,
         kind_pp=kind_pp,
         kind_model=kind_model,
         length_plotters=length_plotters,

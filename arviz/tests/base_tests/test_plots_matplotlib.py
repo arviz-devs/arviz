@@ -1531,10 +1531,10 @@ def test_plot_lm_warning(models, warn_kwargs):
 
 
 def test_plot_lm_typeerror(models):
-    """Test error when invalid value passed to num_pp_samples."""
+    """Test error when invalid value passed to num_samples."""
     idata1 = models.model_1
     with pytest.raises(TypeError):
-        plot_lm(idata=idata1, y="y", num_pp_samples=-1)
+        plot_lm(idata=idata1, y="y", num_samples=-1)
 
 
 def test_plot_lm_list():
