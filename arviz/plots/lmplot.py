@@ -72,15 +72,16 @@ def plot_lm(
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
         and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
     y_hat_fill_kwargs : dict, optional
-        Passed to az.plot_hdi()
+        Passed to {func}`~arviz.plot_hdi`
     y_model_plot_kwargs : dict, optional
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
         and :meth:`bokeh:bokeh.plotting.Figure.line` in bokeh
     y_model_fill_kwargs : dict, optional
         Significant if `kind_model` is "hdi". Passed to :func:`~arviz.plot_hdi`
     backend_kwargs : dict, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used. Passed to
+        :meth: `mpl:matplotlib.pyplot.subplots` or
+        :meth: `bokeh:bokeh.plotting.figure`
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
@@ -114,14 +115,14 @@ def plot_lm(
         >>> data.posterior["y_model"] = data.posterior["intercept"] + data.posterior["slope"]*x
         >>> az.plot_lm(idata=data, y="y", x="x")
 
-    Plot regression data and uncertainty in mean
+    Plot regression data and mean uncertainty
 
     .. plot:
         :context: close-figs
 
         >>> az.plot_lm(idata=data, y="y", x="x", y_model="y_model")
 
-    Plot regression data and uncertainty in hdi form
+    Plot regression data and mean uncertainty in hdi form
 
     .. plot:
         :context: close-figs
