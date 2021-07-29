@@ -269,8 +269,8 @@ def plot_lm(
     # Filter out the required values to generate plotters
     if y_hat is not None:
         if kind_pp == "samples":
-            y_hat = y_hat.stack(sample=("chain", "draw"))[..., pp_sample_ix]
-            skip_dims += ["sample"]
+            y_hat = y_hat.stack(__sample__=("chain", "draw"))[..., pp_sample_ix]
+            skip_dims += ["__sample__"]
 
         y_hat = [
             tup
@@ -289,7 +289,7 @@ def plot_lm(
     # Filter out the required values to generate plotters
     if y_model is not None:
         if kind_model == "lines":
-            y_model = y_model.stack(sample=("chain", "draw"))[..., pp_sample_ix]
+            y_model = y_model.stack(__sample__=("chain", "draw"))[..., pp_sample_ix]
 
         y_model = [
             tup
