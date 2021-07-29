@@ -1,5 +1,4 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name, unused-import
-import sys
 import typing as tp
 
 import numpy as np
@@ -104,7 +103,7 @@ class TestDataPyJAGSWithoutEstimation:
         prior_warmup_prefix = (
             "" if save_warmup and warmup_iterations > 0 and prior is not None else "~"
         )
-        print(f'posterior_warmup_prefix="{posterior_warmup_prefix}"', file=sys.stdout)
+        print(f'posterior_warmup_prefix="{posterior_warmup_prefix}"')
         test_dict = {
             f'{"~" if posterior is None else ""}posterior': ["b", "int"],
             f'{"~" if prior is None else ""}prior': ["b", "int"],
