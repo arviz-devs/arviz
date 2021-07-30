@@ -4,7 +4,7 @@ from .converters import convert_to_inference_data
 from .inference_data import InferenceData
 
 
-def from_netcdf(filename):
+def from_netcdf(filename, group_kwargs: dict = None):
     """Load netcdf file back into an arviz.InferenceData.
 
     Parameters
@@ -22,7 +22,7 @@ def from_netcdf(filename):
     of loaded into memory. This behaviour is regulated by the value of
     ``az.rcParams["data.load"]``.
     """
-    return InferenceData.from_netcdf(filename)
+    return InferenceData.from_netcdf(filename, group_kwargs)
 
 
 def to_netcdf(data, filename, *, group="posterior", coords=None, dims=None):

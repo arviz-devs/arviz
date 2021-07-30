@@ -314,7 +314,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         return InferenceData.InferenceDataItemsView(self)
 
     @staticmethod
-    def from_netcdf(filename: str, **kwargs) -> "InferenceData":
+    def from_netcdf(filename: str, group_kwargs: dict = None) -> "InferenceData":
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
@@ -326,20 +326,25 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         filename : str
             location of netcdf file
-        kwargs :
-            Keyword arguments to be passed into xarray.open_dataset
+        group_kwargs : dict of dict
+            Keyword arguments to be passed into each call of `xarray.open_dataset`.
 
         Returns
         -------
         InferenceData object
         """
         groups = {}
+
         try:
             with nc.Dataset(filename, mode="r") as data:
                 data_groups = list(data.groups)
 
             for group in data_groups:
-                with xr.open_dataset(filename, group=group, **kwargs) as data:
+                if group_kwargs is not None and group in group_kwargs:
+                    group_kws = group_kwargs[group]
+                else:
+                    group_kws = {}
+                with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
                     else:

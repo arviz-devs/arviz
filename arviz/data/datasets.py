@@ -199,7 +199,7 @@ def _sha256(path):
     return sha256hash.hexdigest()
 
 
-def load_arviz_data(dataset=None, data_home=None):
+def load_arviz_data(dataset=None, data_home=None, group_kwargs=None):
     """Load a local or remote pre-made dataset.
 
     Run with no parameters to get a list of all available models.
@@ -245,7 +245,7 @@ def load_arviz_data(dataset=None, data_home=None):
                 "file may be corrupted. Run `arviz.clear_data_home()` and try "
                 "again, or please open an issue.".format(file_path, checksum, remote.checksum)
             )
-        return from_netcdf(file_path)
+        return from_netcdf(file_path, group_kwargs)
     else:
         if dataset is None:
             return dict(itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()))
