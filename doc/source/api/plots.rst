@@ -14,6 +14,7 @@ Plots
     plot_density
     plot_dist
     plot_dist_comparison
+    plot_dot
     plot_elpd
     plot_energy
     plot_ess

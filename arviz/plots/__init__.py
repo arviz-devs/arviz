@@ -31,6 +31,7 @@ __all__ = [
     "plot_compare",
     "plot_density",
     "plot_dist",
+    "plot_dot",
     "plot_elpd",
     "plot_energy",
     "plot_ess",
@@ -50,5 +51,4 @@ __all__ = [
     "plot_trace",
     "plot_violin",
     "plot_separation",
-    "plot_dot",
 ]

@@ -18,6 +18,7 @@ from ...plots import (
     plot_density,
     plot_dist,
     plot_dist_comparison,
+    plot_dot,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -36,7 +37,6 @@ from ...plots import (
     plot_separation,
     plot_trace,
     plot_violin,
-    plot_dot,
 )
 from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic

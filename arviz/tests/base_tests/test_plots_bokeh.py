@@ -14,6 +14,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_density,
     plot_dist,
     plot_dist_comparison,
+    plot_dot,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -32,7 +33,6 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_separation,
     plot_trace,
     plot_violin,
-    plot_dot,
 )
 from ...rcparams import rc_context, rcParams  # pylint: disable=wrong-import-position
 from ...stats import compare, hdi, loo, waic  # pylint: disable=wrong-import-position
