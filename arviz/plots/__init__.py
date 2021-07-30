@@ -14,6 +14,7 @@ from .hdiplot import plot_hdi
 from .jointplot import plot_joint
 from .kdeplot import plot_kde
 from .khatplot import plot_khat
+from .lmplot import plot_lm
 from .loopitplot import plot_loo_pit
 from .mcseplot import plot_mcse
 from .pairplot import plot_pair
@@ -40,6 +41,7 @@ __all__ = [
     "plot_joint",
     "plot_kde",
     "plot_khat",
+    "plot_lm",
     "plot_loo_pit",
     "plot_mcse",
     "plot_pair",
