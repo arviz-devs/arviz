@@ -36,9 +36,9 @@ def _bw_silverman(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
 def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
     """Improved Sheather-Jones bandwidth estimation.
 
-    Improved Sheather and Jones method as explained in [1]_. This is an internal version to be used
-    by the KDE estimator. When used internally computation time is saved because things like
-    minimums, maximums and the grid are pre-computed.
+    Improved Sheather and Jones method as explained in [1]_. This method is used internally by the
+    KDE estimator, resulting in saved computation time as minimums, maximums and the grid are
+    pre-computed.
 
     References
     ----------
