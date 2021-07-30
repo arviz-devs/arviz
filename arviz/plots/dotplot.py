@@ -89,7 +89,7 @@ def plot_dot(
         Call backend show function.
     backend_kwargs: dict, optional
         These are kwargs specific to the backend being used, passed to
-        :meth:`mpl:matplotlib.axes.Axes.plot` or
+        :meth:`mpl:matplotlib.pyplot.subplots` or
         :meth:`bokeh:bokeh.plotting.figure`.
 
     Returns
