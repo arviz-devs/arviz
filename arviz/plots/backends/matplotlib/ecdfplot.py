@@ -46,13 +46,13 @@ def plot_ecdf(
             x = np.linspace(1 / granularity, 1, granularity)
             z = x
             values = (
-                distribution.cdf(values)
+                distribution(values)
                 if distribution
                 else compute_ecdf(values2, values) / len(values2)
             )
         else:
             x = np.linspace(values[0], values[-1], granularity)
-            z = distribution.cdf(x) if distribution else compute_ecdf(values2, x) / len(values2)
+            z = distribution(x) if distribution else compute_ecdf(values2, x) / len(values2)
 
         gamma = get_gamma(n, z, granularity, num_trials, alpha)
         lower, higher = get_lims(gamma, n, z)
@@ -75,7 +75,7 @@ def plot_ecdf(
                 f_x_i = compute_ecdf(values, x_i) / n - (
                     x_i
                     if pit
-                    else distribution.cdf(x_i)
+                    else distribution(x_i)
                     if distribution
                     else compute_ecdf(values2, x_i) / len(values2)
                 )
@@ -88,10 +88,10 @@ def plot_ecdf(
                 higher = higher / n - x
             else:
                 lower = lower / n - (
-                    distribution.cdf(x) if distribution else compute_ecdf(values2, x) / len(values2)
+                    distribution(x) if distribution else compute_ecdf(values2, x) / len(values2)
                 )
                 higher = higher / n - (
-                    distribution.cdf(x) if distribution else compute_ecdf(values2, x) / len(values2)
+                    distribution(x) if distribution else compute_ecdf(values2, x) / len(values2)
                 )
 
             if ecdf_fill:
@@ -102,7 +102,7 @@ def plot_ecdf(
     else:
         if pit:
             x = np.linspace(1 / granularity, 1, granularity)
-            values = distribution.cdf(values)
+            values = distribution(values)
         else:
             x = np.linspace(values[0], values[-1], granularity)
 
@@ -119,7 +119,7 @@ def plot_ecdf(
                 f_x_i = compute_ecdf(values, x_i) / n - (
                     x_i
                     if pit
-                    else distribution.cdf(x_i)
+                    else distribution(x_i)
                     if distribution
                     else compute_ecdf(values2, x_i) / len(values2)
                 )
