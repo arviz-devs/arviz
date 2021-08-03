@@ -5,6 +5,7 @@ from .compareplot import plot_compare
 from .densityplot import plot_density
 from .distcomparisonplot import plot_dist_comparison
 from .distplot import plot_dist
+from .dotplot import plot_dot
 from .elpdplot import plot_elpd
 from .energyplot import plot_energy
 from .essplot import plot_ess
@@ -31,6 +32,7 @@ __all__ = [
     "plot_compare",
     "plot_density",
     "plot_dist",
+    "plot_dot",
     "plot_elpd",
     "plot_energy",
     "plot_ess",

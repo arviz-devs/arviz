@@ -18,6 +18,7 @@ from ...plots import (
     plot_density,
     plot_dist,
     plot_dist_comparison,
+    plot_dot,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -42,6 +43,8 @@ from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...stats.density_utils import kde as _kde
 from ...utils import _cov
+from ...plots.plot_utils import plot_point_interval
+from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
     create_model,
     create_multidimensional_model,
@@ -1442,6 +1445,104 @@ def test_plot_bpv_discrete():
     fake_model = from_dict(posterior_predictive=fake_pp, observed_data=fake_obs)
     axes = plot_bpv(fake_model)
     assert not isinstance(axes, np.ndarray)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "binwidth": 0.5,
+            "stackratio": 2,
+            "nquantiles": 20,
+        },
+        {"point_interval": True},
+        {
+            "point_interval": True,
+            "dotsize": 1.2,
+            "point_estimate": "median",
+            "plot_kwargs": {"color": "grey"},
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "quartiles": False,
+            "linewidth": 2,
+        },
+    ],
+)
+def test_plot_dot(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"rotated": True},
+        {
+            "point_interval": True,
+            "rotated": True,
+            "dotcolor": "grey",
+            "binwidth": 0.5,
+        },
+        {
+            "rotated": True,
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "dotsize": 0.8,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_dot_rotated(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {
+            "point_estimate": "mean",
+            "hdi_prob": 0.95,
+            "quartiles": False,
+            "linewidth": 2,
+            "markersize": 2,
+            "markercolor": "red",
+            "marker": "o",
+            "rotated": False,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_point_interval(continuous_model, kwargs):
+    _, ax = plt.subplots()
+    data = continuous_model["x"]
+    values = np.sort(data)
+    ax = plot_point_interval(ax, values, **kwargs)
+    assert ax
+
+
+def test_wilkinson_algorithm(continuous_model):
+    data = continuous_model["x"]
+    values = np.sort(data)
+    _, stack_counts = wilkinson_algorithm(values, 0.5)
+    assert np.sum(stack_counts) == len(values)
+    stack_locs, stack_counts = wilkinson_algorithm([0.0, 1.0, 1.8, 3.0, 5.0], 1.0)
+    assert stack_locs == [0.0, 1.4, 3.0, 5.0]
+    assert stack_counts == [1, 2, 1, 1]
 
 
 @pytest.mark.parametrize(
