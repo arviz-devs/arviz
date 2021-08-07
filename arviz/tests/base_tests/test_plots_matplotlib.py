@@ -1515,6 +1515,38 @@ def test_plot_dot_rotated(continuous_model, kwargs):
 @pytest.mark.parametrize(
     "kwargs",
     [
+        {"y_holdout": "z"},
+        {"y_forecasts": "z"},
+    ],
+)
+def test_plot_ts(kwargs):
+    """Test timeseries plots basic functionality."""
+    nchains = 4
+    ndraws = 500
+    data = {
+        "y": 2 * np.arange(1, 9) + 3,
+        "z": 2 * np.arange(8, 12) + 3,
+    }
+
+    posterior_predictive = {
+        "y": np.random.normal((data["y"] * 1.2) - 3, size=(nchains, ndraws, len(data["y"]))),
+        "z": np.random.normal((data["z"] * 1.2) - 3, size=(nchains, ndraws, len(data["z"]))),
+    }
+
+    idata = from_dict(
+        observed_data=data,
+        posterior_predictive=posterior_predictive,
+        coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
+        dims={"y": ["obs_dim"], "z": ["pred_dim"]},
+    )
+
+    ax = plot_ts(idata=idata, y="y", show=True, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
         {
             "point_estimate": "mean",
             "hdi_prob": 0.95,
@@ -1643,3 +1675,46 @@ def test_plot_lm_list():
     """Test the plots when input data is list or ndarray."""
     y = [1, 2, 3, 4, 5]
     assert plot_lm(y=y, x=np.arange(len(y)), show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_holdout": "z", "holdout_dim": "holdout_dim1"},
+        {"y_forecasts": "z", "holdout_dim": "holdout_dim1"},
+    ],
+)
+def test_plot_ts_multidim(kwargs):
+    """Test timeseries plots multidim functionality."""
+    nchains = 4
+    ndraws = 500
+    ndim1 = 5
+    ndim2 = 7
+    data = {
+        "y": np.random.normal(size=(ndim1, ndim2)),
+        "z": np.random.normal(size=(ndim1, ndim2)),
+    }
+
+    posterior_predictive = {
+        "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+
+    idata = from_dict(
+        observed_data=data,
+        posterior_predictive=posterior_predictive,
+        dims={
+            "y": ["dim1", "dim2"],
+            "z": ["holdout_dim1", "holdout_dim2"],
+        },
+        coords={
+            "dim1": range(ndim1),
+            "dim2": range(ndim2),
+            "holdout_dim1": range(ndim1 - 1, ndim1 + 4),
+            "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
+        },
+    )
+
+    ax = plot_ts(idata=idata, y="y", plot_dim="dim1", show=True, **kwargs)
+    assert np.all(ax)
