@@ -1515,38 +1515,6 @@ def test_plot_dot_rotated(continuous_model, kwargs):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"y_holdout": "z"},
-        {"y_forecasts": "z"},
-    ],
-)
-def test_plot_ts(kwargs):
-    """Test timeseries plots basic functionality."""
-    nchains = 4
-    ndraws = 500
-    data = {
-        "y": 2 * np.arange(1, 9) + 3,
-        "z": 2 * np.arange(8, 12) + 3,
-    }
-
-    posterior_predictive = {
-        "y": np.random.normal((data["y"] * 1.2) - 3, size=(nchains, ndraws, len(data["y"]))),
-        "z": np.random.normal((data["z"] * 1.2) - 3, size=(nchains, ndraws, len(data["z"]))),
-    }
-
-    idata = from_dict(
-        observed_data=data,
-        posterior_predictive=posterior_predictive,
-        coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
-        dims={"y": ["obs_dim"], "z": ["pred_dim"]},
-    )
-
-    ax = plot_ts(idata=idata, y="y", show=True, **kwargs)
-    assert np.all(ax)
-
-
-@pytest.mark.parametrize(
-    "kwargs",
-    [
         {
             "point_estimate": "mean",
             "hdi_prob": 0.95,
@@ -1681,7 +1649,54 @@ def test_plot_lm_list():
     "kwargs",
     [
         {},
-        {"y_holdout": "z", "holdout_dim": "holdout_dim1"},
+        {"x": ("x", "x")},
+        {"y_holdout": "z"},
+        {"x": ("x", "x"), "y_holdout": "z", "x_holdout": ("x_pred", "x_pred")},
+        {"y_forecasts": "z"},
+    ],
+)
+def test_plot_ts(kwargs):
+    """Test timeseries plots basic functionality."""
+    nchains = 4
+    ndraws = 500
+    obs_data = {
+        "y": 2 * np.arange(1, 9) + 3,
+        "z": 2 * np.arange(8, 12) + 3,
+    }
+
+    posterior_predictive = {
+        "y": np.random.normal(
+            (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
+        ),
+        "z": np.random.normal(
+            (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
+        ),
+    }
+
+    const_data = {"x": np.arange(1, 9), "x_pred": np.arange(8, 12)}
+
+    idata = from_dict(
+        observed_data=obs_data,
+        posterior_predictive=posterior_predictive,
+        constant_data=const_data,
+        coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
+        dims={"y": ["obs_dim"], "z": ["pred_dim"]},
+    )
+
+    ax = plot_ts(idata=idata, y="y", show=True, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "y_holdout": "z",
+            "holdout_dim": "holdout_dim1",
+            "x": ("x", "x"),
+            "x_holdout": ("x_pred", "x_pred"),
+        },
         {"y_forecasts": "z", "holdout_dim": "holdout_dim1"},
     ],
 )
@@ -1701,9 +1716,12 @@ def test_plot_ts_multidim(kwargs):
         "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
     }
 
+    const_data = {"x": np.arange(1, 6), "x_pred": np.arange(5, 10)}
+
     idata = from_dict(
         observed_data=data,
         posterior_predictive=posterior_predictive,
+        constant_data=const_data,
         dims={
             "y": ["dim1", "dim2"],
             "z": ["holdout_dim1", "holdout_dim2"],

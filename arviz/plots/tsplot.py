@@ -1,9 +1,10 @@
 """Plot timeseries data."""
+import warnings
 import numpy as np
 
 from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
-from .plot_utils import get_plotting_function
+from .plot_utils import default_grid, get_plotting_function
 
 
 def plot_ts(
@@ -19,8 +20,14 @@ def plot_ts(
     num_samples=100,
     backend=None,
     backend_kwargs=None,
+    y_kwargs=None,
+    y_hat_plot_kwargs=None,
+    y_mean_plot_kwargs=None,
+    vline_kwargs=None,
     textsize=None,
     figsize=None,
+    legend=True,
+    grid=False,
     axes=None,
     show=None,
 ):
@@ -56,11 +63,10 @@ def plot_ts(
     -------
     axes: matplotlib axes or bokeh figures.
     """
-    if y_hat is None and isinstance(y, str):
-        y_hat = y
-
-    if y_forecasts is None and isinstance(y_holdout, str):
-        y_forecasts = y_holdout
+    # Assign default values if none is provided
+    y_hat = y if y_hat is None and isinstance(y, str) else y_hat
+    y_forecasts = y_holdout if y_forecasts is None and isinstance(y_holdout, str) else y_forecasts
+    holdout_dim = plot_dim if holdout_dim is None and plot_dim is not None else holdout_dim
 
     if isinstance(y, str):
         y = idata.observed_data[y]
@@ -68,8 +74,13 @@ def plot_ts(
     if len(y.dims) > 1 and plot_dim is None:
         raise ValueError("Argument plot_dim is needed in case of multidimensional data")
 
+    # Assigning values to x
+    x_var_names = None
     if isinstance(x, str):
         x = idata.constant_data[x]
+    elif isinstance(x, tuple):
+        x_var_names = x
+        x = idata.constant_data
     elif x is None:
         if plot_dim is None:
             x = y.coords[y.dims[0]]
@@ -78,11 +89,30 @@ def plot_ts(
     else:
         TypeError("Invalid datatype for x")
 
+    # If posterior_predictive is present in idata and y_hat is there, get its values
     if isinstance(y_hat, str):
-        y_hat = idata.posterior_predictive[y_hat]
+        if "posterior_predictive" not in idata.groups():
+            warnings.warn("posterior_predictive not found in idata", UserWarning)
+            y_hat = None
+        elif hasattr(idata.posterior_predictive, y_hat):
+            y_hat = idata.posterior_predictive[y_hat]
+        else:
+            warnings.warn("y_hat not found in posterior_predictive", UserWarning)
+            y_hat = None
 
+    # If posterior_predictive is present in idata and y_forecasts is there, get its values
+    x_holdout_var_names = None
     if isinstance(y_forecasts, str):
-        y_forecasts = idata.posterior_predictive[y_forecasts]
+        if "posterior_predictive" not in idata.groups():
+            warnings.warn("posterior_predictive not found in idata", UserWarning)
+            y_forecasts = None
+        elif hasattr(idata.posterior_predictive, y_forecasts):
+            y_forecasts = idata.posterior_predictive[y_forecasts]
+        else:
+            warnings.warn("y_hat not found in posterior_predictive", UserWarning)
+            y_forecasts = None
+
+        # Assign values to x_holdout
         if x_holdout is None:
             if holdout_dim is None:
                 x_holdout = y_forecasts.coords[y_forecasts.dims[-1]]
@@ -90,19 +120,29 @@ def plot_ts(
                 x_holdout = y_forecasts.coords[holdout_dim]
         elif isinstance(x_holdout, str):
             x_holdout = idata.constant_data[x_holdout]
+        elif isinstance(x_holdout, tuple):
+            x_holdout_var_names = x_holdout
+            x_holdout = idata.constant_data
 
+    # Assign values to y_holdout
     if isinstance(y_holdout, str):
         y_holdout = idata.observed_data[y_holdout]
-        if len(y.dims) > 1 and holdout_dim is None:
+        if len(y_holdout.dims) > 1 and holdout_dim is None:
             raise ValueError("Argument holdout_dim is needed in case of multidimentional data")
+
+        # Assign values to x_holdout
         if x_holdout is None:
             if holdout_dim is None:
-                x_holdout = y_holdout.coords[y_forecasts.dims[-1]]
+                x_holdout = y_holdout.coords[y_holdout.dims[-1]]
             else:
                 x_holdout = y_holdout.coords[holdout_dim]
         elif isinstance(x_holdout, str):
             x_holdout = idata.constant_data[x_holdout]
+        elif isinstance(x_holdout, tuple):
+            x_holdout_var_names = x_holdout
+            x_holdout = idata.constant_data
 
+    # Choose dims to generate y plotters
     if plot_dim is None:
         skip_dims = list(y.dims)
     elif isinstance(plot_dim, str):
@@ -110,6 +150,7 @@ def plot_ts(
     elif isinstance(plot_dim, tuple):
         skip_dims = list(plot_dim)
 
+    # Choose dims to generate y_holdout plotters
     if holdout_dim is None:
         if y_holdout is not None:
             skip_holdout_dims = list(y_holdout.dims)
@@ -131,14 +172,21 @@ def plot_ts(
     x_plotters = list(
         xarray_var_iter(
             x,
+            var_names=x_var_names,
             skip_dims=set(x.dims),
             combined=True,
         )
     )
-    x_plotters = np.tile(x_plotters, (len(y_plotters), 1))
+    # Necessary when multidim y
+    # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
+    len_y = len(y_plotters)
+    len_x = len(x_plotters)
+    length_plotters = len_x * len_y
+    y_plotters = np.tile(y_plotters, (len_x, 1))
+    x_plotters = np.tile(x_plotters, (len_y, 1))
 
+    # Generate plotters for all the available data
     y_mean_plotters = None
-    y_uncertainty_plotters = None
     if y_hat is not None:
         total_samples = y_hat.sizes["chain"] * y_hat.sizes["draw"]
         pp_sample_ix = np.random.choice(total_samples, size=num_samples, replace=False)
@@ -161,7 +209,11 @@ def plot_ts(
                 combined=True,
             )
         )
-        y_uncertainty_plotters = y_hat_plotters
+
+        # Necessary when multidim y
+        # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
+        y_hat_plotters = np.tile(y_hat_plotters, (len_x, 1))
+        y_mean_plotters = np.tile(y_mean_plotters, (len_x, 1))
 
     y_holdout_plotters = None
     x_holdout_plotters = None
@@ -177,11 +229,16 @@ def plot_ts(
         x_holdout_plotters = list(
             xarray_var_iter(
                 x_holdout,
+                var_names=x_holdout_var_names,
                 skip_dims=set(x_holdout.dims),
                 combined=True,
             )
         )
-        x_holdout_plotters = np.tile(x_holdout_plotters, (len(y_holdout_plotters), 1))
+
+        # Necessary when multidim y
+        # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
+        y_holdout_plotters = np.tile(y_holdout_plotters, (len_x, 1))
+        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))
 
     y_forecasts_plotters = None
     y_forecasts_mean_plotters = None
@@ -211,30 +268,42 @@ def plot_ts(
         x_holdout_plotters = list(
             xarray_var_iter(
                 x_holdout,
+                var_names=x_holdout_var_names,
                 skip_dims=set(x_holdout.dims),
                 combined=True,
             )
         )
-        x_holdout_plotters = np.tile(x_holdout_plotters, (len(y_forecasts_plotters), 1))
 
-    rows = len(y_plotters)
-    cols = 1
+        # Necessary when multidim y
+        # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
+        y_forecasts_mean_plotters = np.tile(y_forecasts_mean_plotters, (len_x, 1))
+        y_forecasts_plotters = np.tile(y_forecasts_plotters, (len_x, 1))
+        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))
+
+    rows, cols = default_grid(length_plotters)
 
     tsplot_kwargs = dict(
         x_plotters=x_plotters,
         y_plotters=y_plotters,
         y_mean_plotters=y_mean_plotters,
-        y_hat_plotters=y_uncertainty_plotters,
+        y_hat_plotters=y_hat_plotters,
         y_holdout_plotters=y_holdout_plotters,
         x_holdout_plotters=x_holdout_plotters,
         y_forecasts_plotters=y_forecasts_plotters,
         y_forecasts_mean_plotters=y_forecasts_mean_plotters,
         num_samples=num_samples,
+        length_plotters=length_plotters,
         rows=rows,
         cols=cols,
         backend_kwargs=backend_kwargs,
+        y_kwargs=y_kwargs,
+        y_hat_plot_kwargs=y_hat_plot_kwargs,
+        y_mean_plot_kwargs=y_mean_plot_kwargs,
+        vline_kwargs=vline_kwargs,
         textsize=textsize,
         figsize=figsize,
+        legend=legend,
+        grid=grid,
         axes=axes,
         show=show,
     )
