@@ -13,8 +13,8 @@ def plot_ts(
     x=None,
     y_hat=None,
     y_holdout=None,
-    x_holdout=None,
     y_forecasts=None,
+    x_holdout=None,
     plot_dim=None,
     holdout_dim=None,
     num_samples=100,
@@ -38,20 +38,35 @@ def plot_ts(
     idata : InferenceData
     y : str, variable name from observed_data
     x : str, Optional
-        If none, coords name of y dims
+        If none, coords of y dims
     y_hat : str, from posterior_predictive, optional
         Assumed to be of shape (chain, draw, *y.dims)
     y_holdout : str, from observed_data, optional
-    x_holdout : str, from constant_data or y_holdout coords, optional
+        Observed data after holdout
     y_forecasts : str, from posterior_predictive, optional
+        Assumed shape (chain, draw, *)
+    x_holdout : str, from constant_data or y_holdout coords, optional
+        If None, coords of y_holdout or coords of y_forecast is chosen.
     plot_dim: str, Optional
-        Necessary if y is multidimensional.
+        Necessary to choose x if x is None & if y is multidimensional.
     holdout_dim: str, Optional
-        Necessary if y_holdout or y_forecasts is multidimensional.
+        Necessary to choose x_holdout if x is None
+        and if y_holdout or y_forecasts is multidimensional.
     num_samples : int, Optional, Default 100
     backend : str, Optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    y_kwargs : dict, optional
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
+    y_hat_plot_kwargs : dict, optional
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+    y_mean_plot_kwargs : dict, optional
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+    vline_kwargs : dict, optional
+        Passed to :meth:`mpl:matplotlib.axes.Axes.axvline` in matplotlib
     backend_kwargs : dict, optional
+        These are kwargs specific to the backend being used. Passed to
+        :func: `mpl:matplotlib.pyplot.subplots` or
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
@@ -62,6 +77,87 @@ def plot_ts(
     Returns
     -------
     axes: matplotlib axes or bokeh figures.
+
+    Examples
+    --------
+    Plot timeseries default plot
+
+    ..plot::
+        :context: close figs
+
+        >>> import arviz as az
+        >>> nchains = 4
+        >>> ndraws = 500
+        >>> obs_data = {
+                "y": 2 * np.arange(1, 9) + 3,
+                "z": 2 * np.arange(8, 12) + 3,
+            }
+
+        >>> posterior_predictive = {
+                "y": np.random.normal(
+                    (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
+                ),
+                "z": np.random.normal(
+                    (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
+                ),
+            }
+
+        >>> idata = from_dict(
+                observed_data=obs_data,
+                posterior_predictive=posterior_predictive,
+                constant_data=const_data,
+                coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
+                dims={"y": ["obs_dim"], "z": ["pred_dim"]},
+            )
+
+        >>> ax = plot_ts(idata=idata, y="y", y_holdout="z", show=True, **kwargs)
+
+    Plot timeseries multidim plot
+
+    ..plot::
+        :context: close figs
+
+        >>> nchains = 4
+        >>> ndraws = 500
+        >>> ndim1 = 5
+        >>> ndim2 = 7
+        >>> data = {
+                "y": np.random.normal(size=(ndim1, ndim2)),
+                "z": np.random.normal(size=(ndim1, ndim2)),
+            }
+
+        >>> posterior_predictive = {
+                "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
+                "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
+            }
+
+        >>> const_data = {"x": np.arange(1, 6), "x_pred": np.arange(5, 10)}
+
+        >>> idata = from_dict(
+                observed_data=data,
+                posterior_predictive=posterior_predictive,
+                constant_data=const_data,
+                dims={
+                    "y": ["dim1", "dim2"],
+                    "z": ["holdout_dim1", "holdout_dim2"],
+                },
+                coords={
+                    "dim1": range(ndim1),
+                    "dim2": range(ndim2),
+                    "holdout_dim1": range(ndim1 - 1, ndim1 + 4),
+                    "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
+                },
+            )
+
+        >>> az.plot_ts(
+                idata=idata,
+                y="y",
+                plot_dim="dim1",
+                y_holdout="z",
+                holdout_dim="holdout_dim1",
+                show=True,
+                **kwargs
+            )
     """
     # Assign default values if none is provided
     y_hat = y if y_hat is None and isinstance(y, str) else y_hat
@@ -86,8 +182,6 @@ def plot_ts(
             x = y.coords[y.dims[0]]
         else:
             x = y.coords[plot_dim]
-    else:
-        TypeError("Invalid datatype for x")
 
     # If posterior_predictive is present in idata and y_hat is there, get its values
     if isinstance(y_hat, str):
@@ -113,16 +207,16 @@ def plot_ts(
             y_forecasts = None
 
         # Assign values to x_holdout
-        if x_holdout is None:
-            if holdout_dim is None:
-                x_holdout = y_forecasts.coords[y_forecasts.dims[-1]]
-            else:
-                x_holdout = y_forecasts.coords[holdout_dim]
-        elif isinstance(x_holdout, str):
-            x_holdout = idata.constant_data[x_holdout]
-        elif isinstance(x_holdout, tuple):
-            x_holdout_var_names = x_holdout
-            x_holdout = idata.constant_data
+        # if x_holdout is None:
+        #     if holdout_dim is None:
+        #         x_holdout = y_forecasts.coords[y_forecasts.dims[-1]]
+        #     else:
+        #         x_holdout = y_forecasts.coords[holdout_dim]
+        # elif isinstance(x_holdout, str):
+        #     x_holdout = idata.constant_data[x_holdout]
+        # elif isinstance(x_holdout, tuple):
+        #     x_holdout_var_names = x_holdout
+        #     x_holdout = idata.constant_data
 
     # Assign values to y_holdout
     if isinstance(y_holdout, str):
@@ -131,11 +225,29 @@ def plot_ts(
             raise ValueError("Argument holdout_dim is needed in case of multidimentional data")
 
         # Assign values to x_holdout
+        # if x_holdout is None:
+        #     if holdout_dim is None:
+        #         x_holdout = y_holdout.coords[y_holdout.dims[-1]]
+        #     else:
+        #         x_holdout = y_holdout.coords[holdout_dim]
+        # elif isinstance(x_holdout, str):
+        #     x_holdout = idata.constant_data[x_holdout]
+        # elif isinstance(x_holdout, tuple):
+        #     x_holdout_var_names = x_holdout
+        #     x_holdout = idata.constant_data
+
+    if y_holdout is not None or y_forecasts is not None:
         if x_holdout is None:
             if holdout_dim is None:
-                x_holdout = y_holdout.coords[y_holdout.dims[-1]]
+                if y_holdout is None:
+                    x_holdout = y_forecasts.coords[y_forecasts.dims[-1]]
+                else:
+                    x_holdout = y_holdout.coords[y_holdout.dims[-1]]
             else:
-                x_holdout = y_holdout.coords[holdout_dim]
+                if y_holdout is None:
+                    x_holdout = y_forecasts.coords[holdout_dim]
+                else:
+                    x_holdout = y_holdout.coords[holdout_dim]
         elif isinstance(x_holdout, str):
             x_holdout = idata.constant_data[x_holdout]
         elif isinstance(x_holdout, tuple):
@@ -187,6 +299,7 @@ def plot_ts(
 
     # Generate plotters for all the available data
     y_mean_plotters = None
+    y_hat_plotters = None
     if y_hat is not None:
         total_samples = y_hat.sizes["chain"] * y_hat.sizes["draw"]
         pp_sample_ix = np.random.choice(total_samples, size=num_samples, replace=False)
