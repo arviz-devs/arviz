@@ -1649,10 +1649,14 @@ def test_plot_lm_list():
     "kwargs",
     [
         {},
+        {"y_hat": "bad_name"},
+        {"x": "x"},
         {"x": ("x", "x")},
         {"y_holdout": "z"},
+        {"y_holdout": "z", "x_holdout": "x_pred"},
         {"x": ("x", "x"), "y_holdout": "z", "x_holdout": ("x_pred", "x_pred")},
         {"y_forecasts": "z"},
+        {"y_holdout": "z", "y_forecasts": "bad_name"},
     ],
 )
 def test_plot_ts(kwargs):
@@ -1736,3 +1740,11 @@ def test_plot_ts_multidim(kwargs):
 
     ax = plot_ts(idata=idata, y="y", plot_dim="dim1", show=True, **kwargs)
     assert np.all(ax)
+
+
+@pytest.mark.parametrize("val_err_kwargs", [{}, {"y_holdout": "y"}])
+def test_plot_ts_valueerror(multidim_models, val_err_kwargs):
+    """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_ts(idata=idata2, y="y", **val_err_kwargs)
