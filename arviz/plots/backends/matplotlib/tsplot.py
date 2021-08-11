@@ -27,7 +27,6 @@ def plot_ts(
     textsize,
     figsize,
     legend,
-    grid,
     axes,
     show,
 ):
@@ -114,8 +113,6 @@ def plot_ts(
 
         if legend:
             ax_i.legend(fontsize=xt_labelsize, loc="upper left")
-        if grid:
-            ax_i.grid(True)
 
     if backend_show(show):
         plt.show()

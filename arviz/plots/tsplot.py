@@ -27,46 +27,58 @@ def plot_ts(
     textsize=None,
     figsize=None,
     legend=True,
-    grid=False,
     axes=None,
     show=None,
 ):
-    """Plot timeseries and it's components.
+    """Plot timeseries data.
 
     Parameters
     ----------
     idata : InferenceData
-    y : str, variable name from observed_data
+        InferenceData object.
+    y : str
+        Variable name from observed_data.
+        Values to be plotted on y-axis before holdout.
     x : str, Optional
-        If none, coords of y dims
-    y_hat : str, from posterior_predictive, optional
-        Assumed to be of shape (chain, draw, *y.dims)
-    y_holdout : str, from observed_data, optional
-        Observed data after holdout
-    y_forecasts : str, from posterior_predictive, optional
-        Assumed shape (chain, draw, *)
-    x_holdout : str, from constant_data or y_holdout coords, optional
-        If None, coords of y_holdout or coords of y_forecast is chosen.
+        Values to be plotted on x-axis before holdout.
+        If none, coords of y dims is chosen.
+    y_hat : str, optional
+        Variable name from posterior_predictive. Assumed to be of shape (chain, draw, *y.dims).
+    y_holdout : str, optional
+        Variable name from observed_data. It represents the observed data after the holdout period.
+        Usefull while testing the model, when you want to compare
+        observed test data with predictions/forecasts.
+    y_forecasts : str, optional
+        Variable name from posterior_predictive.
+        It represents forecasts (posterior predictive) values after holdout preriod.
+        Usefull to compare observed vs predictions/forecasts.
+        Assumed shape (chain, draw, *).
+    x_holdout : str, Defaults to coords of y.
+        Variable name from constant_data.
+        If None, coords of y_holdout or
+        coords of y_forecast (either of the two available) is chosen.
     plot_dim: str, Optional
-        Necessary to choose x if x is None & if y is multidimensional.
+        Should be present in y.dims
+        Necessary for selection of x if x is None and y is multidimensional.
     holdout_dim: str, Optional
-        Necessary to choose x_holdout if x is None
-        and if y_holdout or y_forecasts is multidimensional.
-    num_samples : int, Optional, Default 100
-    backend : str, Optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Should be present in y_holdout.dims or y_forecats.dims.
+        Necessary to choose x_holdout if x is None and
+        if y_holdout or y_forecasts is multidimensional.
+    num_samples : int, default 100
+        Number of posterior predictive samples drawn from y_hat and y_forecasts.
+    backend : {"matplotlib","bokeh"}, default "matplotlib"
+        Select plotting backend.
     y_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
-        and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
     y_hat_plot_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
     y_mean_plot_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
     vline_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.axvline` in matplotlib
+        Passed to :meth:`mpl:matplotlib.axes.Axes.axvline` in matplotlib.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. Passed to
-        :func: `mpl:matplotlib.pyplot.subplots` or
+        :func: `mpl:matplotlib.pyplot.subplots`.
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
@@ -206,36 +218,13 @@ def plot_ts(
             warnings.warn("y_hat not found in posterior_predictive", UserWarning)
             y_forecasts = None
 
-        # Assign values to x_holdout
-        # if x_holdout is None:
-        #     if holdout_dim is None:
-        #         x_holdout = y_forecasts.coords[y_forecasts.dims[-1]]
-        #     else:
-        #         x_holdout = y_forecasts.coords[holdout_dim]
-        # elif isinstance(x_holdout, str):
-        #     x_holdout = idata.constant_data[x_holdout]
-        # elif isinstance(x_holdout, tuple):
-        #     x_holdout_var_names = x_holdout
-        #     x_holdout = idata.constant_data
-
     # Assign values to y_holdout
     if isinstance(y_holdout, str):
         y_holdout = idata.observed_data[y_holdout]
         if len(y_holdout.dims) > 1 and holdout_dim is None:
             raise ValueError("Argument holdout_dim is needed in case of multidimentional data")
 
-        # Assign values to x_holdout
-        # if x_holdout is None:
-        #     if holdout_dim is None:
-        #         x_holdout = y_holdout.coords[y_holdout.dims[-1]]
-        #     else:
-        #         x_holdout = y_holdout.coords[holdout_dim]
-        # elif isinstance(x_holdout, str):
-        #     x_holdout = idata.constant_data[x_holdout]
-        # elif isinstance(x_holdout, tuple):
-        #     x_holdout_var_names = x_holdout
-        #     x_holdout = idata.constant_data
-
+    #Assign values to x_holdout.
     if y_holdout is not None or y_forecasts is not None:
         if x_holdout is None:
             if holdout_dim is None:
@@ -273,6 +262,7 @@ def plot_ts(
     elif isinstance(holdout_dim, tuple):
         skip_holdout_dims = list(holdout_dim)
 
+    #Compulsory plotters
     y_plotters = list(
         xarray_var_iter(
             y,
@@ -281,6 +271,7 @@ def plot_ts(
         )
     )
 
+    #Compulsory plotters
     x_plotters = list(
         xarray_var_iter(
             x,
@@ -416,7 +407,6 @@ def plot_ts(
         textsize=textsize,
         figsize=figsize,
         legend=legend,
-        grid=grid,
         axes=axes,
         show=show,
     )
