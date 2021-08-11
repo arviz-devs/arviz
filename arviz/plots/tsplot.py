@@ -224,7 +224,7 @@ def plot_ts(
         if len(y_holdout.dims) > 1 and holdout_dim is None:
             raise ValueError("Argument holdout_dim is needed in case of multidimentional data")
 
-    #Assign values to x_holdout.
+    # Assign values to x_holdout.
     if y_holdout is not None or y_forecasts is not None:
         if x_holdout is None:
             if holdout_dim is None:
@@ -262,7 +262,7 @@ def plot_ts(
     elif isinstance(holdout_dim, tuple):
         skip_holdout_dims = list(holdout_dim)
 
-    #Compulsory plotters
+    # Compulsory plotters
     y_plotters = list(
         xarray_var_iter(
             y,
@@ -271,7 +271,7 @@ def plot_ts(
         )
     )
 
-    #Compulsory plotters
+    # Compulsory plotters
     x_plotters = list(
         xarray_var_iter(
             x,
