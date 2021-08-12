@@ -1742,13 +1742,7 @@ def test_plot_ts_multidim(kwargs):
     assert np.all(ax)
 
 
-@pytest.mark.parametrize(
-    "val_err_kwargs",
-    [
-        {},
-        {"plot_dim": "dim1", "y_holdout": "y"}
-    ]
-)
+@pytest.mark.parametrize("val_err_kwargs", [{}, {"plot_dim": "dim1", "y_holdout": "y"}])
 def test_plot_ts_valueerror(multidim_models, val_err_kwargs):
     """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
     idata2 = multidim_models.model_1
