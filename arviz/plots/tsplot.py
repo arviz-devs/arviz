@@ -174,13 +174,19 @@ def plot_ts(
     # Assign default values if none is provided
     y_hat = y if y_hat is None and isinstance(y, str) else y_hat
     y_forecasts = y_holdout if y_forecasts is None and isinstance(y_holdout, str) else y_forecasts
-    holdout_dim = plot_dim if holdout_dim is None and plot_dim is not None else holdout_dim
+    # holdout_dim = plot_dim if holdout_dim is None and plot_dim is not None else holdout_dim
 
     if isinstance(y, str):
         y = idata.observed_data[y]
 
+    if isinstance(y_holdout, str):
+        y_holdout = idata.observed_data[y_holdout]
+
     if len(y.dims) > 1 and plot_dim is None:
         raise ValueError("Argument plot_dim is needed in case of multidimensional data")
+
+    if y_holdout is not None and len(y_holdout.dims) > 1 and holdout_dim is None:
+        raise ValueError("Argument holdout_dim is needed in case of multidimensional data")
 
     # Assigning values to x
     x_var_names = None
@@ -221,8 +227,6 @@ def plot_ts(
     # Assign values to y_holdout
     if isinstance(y_holdout, str):
         y_holdout = idata.observed_data[y_holdout]
-        if len(y_holdout.dims) > 1 and holdout_dim is None:
-            raise ValueError("Argument holdout_dim is needed in case of multidimentional data")
 
     # Assign values to x_holdout.
     if y_holdout is not None or y_forecasts is not None:
