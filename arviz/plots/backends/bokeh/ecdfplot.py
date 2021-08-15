@@ -71,4 +71,3 @@ def plot_ecdf(
     show_layout(ax, show)
 
     return ax
-    

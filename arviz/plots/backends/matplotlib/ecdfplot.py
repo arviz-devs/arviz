@@ -68,4 +68,3 @@ def plot_ecdf(
         plt.show()
 
     return ax
-    
