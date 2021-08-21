@@ -1,4 +1,4 @@
-# **Issue Triaging**
+# Issue Triaging
 
 It is often intimidating to start contributing when you are new and don't know where to start. Or you would like to contribute but don't have the time to code but prefer helping out occasionally with issue triaging. 
 
