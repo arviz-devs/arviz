@@ -4,13 +4,17 @@ from .converters import convert_to_inference_data
 from .inference_data import InferenceData
 
 
-def from_netcdf(filename, group_kwargs: dict = None):
+def from_netcdf(filename, group_kwargs: dict = None, regex=False):
     """Load netcdf file back into an arviz.InferenceData.
 
     Parameters
     ----------
     filename : str
         name or path of the file to load trace
+    group_kwargs : dict of dict
+        Keyword arguments to be passed into each call of `xarray.open_dataset`.
+    regex : str
+        Specifies where regex search should be used to extend the keyword arguments.
 
     Returns
     -------
@@ -22,7 +26,7 @@ def from_netcdf(filename, group_kwargs: dict = None):
     of loaded into memory. This behaviour is regulated by the value of
     ``az.rcParams["data.load"]``.
     """
-    return InferenceData.from_netcdf(filename, group_kwargs)
+    return InferenceData.from_netcdf(filename, group_kwargs, regex)
 
 
 def to_netcdf(data, filename, *, group="posterior", coords=None, dims=None):

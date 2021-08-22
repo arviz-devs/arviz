@@ -9,6 +9,7 @@ from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
+import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -314,7 +315,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         return InferenceData.InferenceDataItemsView(self)
 
     @staticmethod
-    def from_netcdf(filename: str, group_kwargs: dict = None) -> "InferenceData":
+    def from_netcdf(filename: str, group_kwargs: dict = None,
+                    regex: bool = False) -> "InferenceData":
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
@@ -328,6 +330,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
             location of netcdf file
         group_kwargs : dict of dict
             Keyword arguments to be passed into each call of `xarray.open_dataset`.
+        regex : str
+            Specifies where regex search should be used to extend the keyword arguments.
 
         Returns
         -------
@@ -340,10 +344,18 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data_groups = list(data.groups)
 
             for group in data_groups:
-                if group_kwargs is not None and group in group_kwargs:
-                    group_kws = group_kwargs[group]
-                else:
-                    group_kws = {}
+                # if group_kwargs is not None and group in group_kwargs:
+                #     group_kws = group_kwargs[group]
+                # else:
+                #     group_kws = {}
+
+                group_kws = {}
+                if group_kwargs is not None and regex is False:
+                    group_kws = group_kwargs.get(group, {})
+                if group_kwargs is not None and regex is True:
+                    for key, kws in group_kwargs.items():
+                        if re.search(key, group):
+                            group_kws = kws
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
