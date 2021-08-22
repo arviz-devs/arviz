@@ -2,9 +2,9 @@
 
 It is often intimidating to start contributing when you are new and don't know where to start. Or you would like to contribute but don't have the time to code but prefer helping out occasionally with issue triaging. 
 
-The first step for you to get started would be to make sure you subscribe and get notifications of any new issue our team runs into. You can then chose to work on it at the moment or come back to it later. Staying subscribed will ensure you have real time and updated data on where we are with the issue. 
+The first step for you to get started would be to make sure you subscribe and get notifications of any new issue our team runs into. You can then chose to work on it at the moment or come back to it later. Staying subscribed will ensure you are notified whenever issues are created or updated and can therefore see where your help might be needed. 
 
-## How to subscribe to issue 
+## How to subscribe to ArviZ issues
 
 If you are not familiar on how to set up notifications on github, please check the following - [Setting Up Notifications on GitHub](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/setting-up-notifications).
 Once you are set up, you can [view your subscriptions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/viewing-your-subscriptions) and [manage your subscritions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/managing-your-subscriptions) to ensure you are not being inundated with the volume and are getting notiifcations only to issues of your interest. 
