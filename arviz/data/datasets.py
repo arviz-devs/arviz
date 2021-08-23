@@ -199,7 +199,7 @@ def _sha256(path):
     return sha256hash.hexdigest()
 
 
-def load_arviz_data(dataset=None, data_home=None, group_kwargs=None, regex=False):
+def load_arviz_data(dataset=None, data_home=None, regex=False, **kwargs):
     """Load a local or remote pre-made dataset.
 
     Run with no parameters to get a list of all available models.
@@ -218,9 +218,20 @@ def load_arviz_data(dataset=None, data_home=None, group_kwargs=None, regex=False
     data_home : str, optional
         Where to save remote datasets
 
+    regex : bool, optional
+        Specifies regex support for chunking information in
+        `arviz.io_netcdf.from_netcdf`. This feature is currently experimental.
+        See :meth:`arviz.io_netcdf.from_netcdf`
+
+    **kwargs : dict of {str: dict}, optional
+        Keyword arguments to be passed into arviz.io_netcdf.from_netcdf`.
+        This feature is currently experimental.
+        See :meth:`arviz.io_netcdf.from_netcdf`
+
     Returns
     -------
     xarray.Dataset
+
     """
     if dataset in LOCAL_DATASETS:
         resource = LOCAL_DATASETS[dataset]
@@ -245,7 +256,7 @@ def load_arviz_data(dataset=None, data_home=None, group_kwargs=None, regex=False
                 "file may be corrupted. Run `arviz.clear_data_home()` and try "
                 "again, or please open an issue.".format(file_path, checksum, remote.checksum)
             )
-        return from_netcdf(file_path, group_kwargs, regex)
+        return from_netcdf(file_path, regex, group_kwargs=kwargs)
     else:
         if dataset is None:
             return dict(itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()))

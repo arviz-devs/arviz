@@ -1271,37 +1271,6 @@ class TestDataNetCDF:
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
-    def test_dask_chunk_group_kwds(self):
-        from dask.distributed import Client
-        Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
-        client = Client(threads_per_worker=4, n_workers=2, memory_limit="2GB")
-        group_kwargs = {
-            'posterior': {'chunks': {'true_w_dim_0': 2, 'true_w_dim_0' : 2}},
-            'posterior_predictive': {'chunks': {'true_w_dim_0': 2, 'true_w_dim_0': 2}}
-        }
-        centered_data = az.load_arviz_data("regression10d", group_kwargs=group_kwargs)
-        exp = [('chain', (4,)),
-               ('draw', (500,)),
-               ('true_w_dim_0', (2, 2, 2, 2, 2)),
-               ('w_dim_0', (10,))]
-        self.assertListEqual(list(centered_data.chunks.items()), exp)
-        client.close()
-
-    def test_dask_chunk_group_regex(self):
-        from dask.distributed import Client
-        Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
-        client = Client(threads_per_worker=4, n_workers=2, memory_limit="2GB")
-        group_kwargs = {
-            "posterior.*": {'chunks': {'true_w_dim_0': 2, 'true_w_dim_0' : 2}}
-        }
-        centered_data = az.load_arviz_data("regression10d", group_kwargs=group_kwargs)
-        exp = [('chain', (4,)),
-               ('draw', (500,)),
-               ('true_w_dim_0', (2, 2, 2, 2, 2)),
-               ('w_dim_0', (10,))]
-        self.assertListEqual(list(centered_data.chunks.items()), exp)
-        client.close()
-
 
 class TestJSON:
     def test_json_converters(self, models):

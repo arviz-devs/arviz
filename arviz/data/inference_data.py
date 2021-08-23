@@ -315,8 +315,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         return InferenceData.InferenceDataItemsView(self)
 
     @staticmethod
-    def from_netcdf(filename: str, group_kwargs: dict = None,
-                    regex: bool = False) -> "InferenceData":
+    def from_netcdf(
+        filename: str, group_kwargs: dict = None, regex: bool = False
+    ) -> "InferenceData":
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
