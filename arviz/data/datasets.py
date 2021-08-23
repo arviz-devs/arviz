@@ -256,7 +256,7 @@ def load_arviz_data(dataset=None, data_home=None, regex=False, **kwargs):
                 "file may be corrupted. Run `arviz.clear_data_home()` and try "
                 "again, or please open an issue.".format(file_path, checksum, remote.checksum)
             )
-        return from_netcdf(file_path, regex, group_kwargs=kwargs)
+        return from_netcdf(file_path, kwargs, regex)
     else:
         if dataset is None:
             return dict(itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()))
