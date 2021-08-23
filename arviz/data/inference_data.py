@@ -328,8 +328,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         filename : str
             location of netcdf file
-        group_kwargs : dict of dict
-            Keyword arguments to be passed into each call of `xarray.open_dataset`.
+        group_kwargs : dict of {str: dict}, optional
+            Keyword arguments to be passed into each call of {func}`xarray.open_dataset`.
         regex : str
             Specifies where regex search should be used to extend the keyword arguments.
 
