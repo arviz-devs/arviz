@@ -300,7 +300,7 @@ class TestDataCmdStan:
             assert not fails
 
     def test_inference_data_observed_data1(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         All variables
         """
@@ -316,7 +316,7 @@ class TestDataCmdStan:
             assert inference_data.observed_data["Z"].shape == (4, 5)
 
     def test_inference_data_observed_data2(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         One variable as str
         """
@@ -331,7 +331,7 @@ class TestDataCmdStan:
             assert inference_data.observed_data["x"].shape == (1,)
 
     def test_inference_data_observed_data3(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         One variable as a list
         """
@@ -346,7 +346,7 @@ class TestDataCmdStan:
             assert inference_data.observed_data["x"].shape == (1,)
 
     def test_inference_data_observed_data4(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         Many variables as list
         """
