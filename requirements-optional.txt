@@ -2,5 +2,5 @@ numba
 bokeh>=1.4.0
 ujson
 dask
-"dask[distributed]"
+dask[distributed]
 zarr>=2.5.0
