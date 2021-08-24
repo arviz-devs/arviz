@@ -285,7 +285,6 @@ defaultParams = {  # pylint: disable=invalid-name
         "reset,pan,box_zoom,wheel_zoom,lasso_select,undo,save,hover",
         lambda x: x,
     ),
-    "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "stats.hdi_prob": (0.94, _validate_probability),
     "stats.information_criterion": (

@@ -18,8 +18,6 @@ def backend_kwarg_defaults(*args, **kwargs):
     # add needed default args from arviz.rcParams
     for key, arg in args:
         defaults.setdefault(key, rcParams[arg])
-    # add default args from rcParams
-    defaults.setdefault("constrained_layout", rcParams["plot.matplotlib.constrained_layout"])
     return defaults
 
 
