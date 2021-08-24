@@ -1,6 +1,9 @@
 # pylint: disable=too-many-lines
 """CmdStan-specific conversion code."""
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import logging
 import os
 import re
