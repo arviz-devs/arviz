@@ -850,7 +850,7 @@ def _read_data(path):
         key, values pairs from Rdump formatted data.
     """
     data = {}
-    with open(path, "r") as f_obj:
+    with open(path, "r", encoding="utf8") as f_obj:
         var = ""
         for line in f_obj:
             if "<-" in line:

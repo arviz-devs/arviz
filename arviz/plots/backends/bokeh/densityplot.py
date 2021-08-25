@@ -135,7 +135,7 @@ def _d_helper(
     ax,
 ):
 
-    extra = dict()
+    extra = {}
     plotted = []
 
     if vec.dtype.kind == "f":

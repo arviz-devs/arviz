@@ -70,7 +70,7 @@ def _create_test_data():
         }
     """
     stan_file = "stan_test_data.stan"
-    with open(stan_file, "w") as file_handle:
+    with open(stan_file, "w", encoding="utf8") as file_handle:
         print(model_code, file=file_handle)
     model = cmdstanpy.CmdStanModel(stan_file=stan_file)
     os.remove(stan_file)
@@ -169,7 +169,7 @@ class TestDataCmdStanPy:
             _model_code = """model { real y; } generated quantities { int eta; int theta[N]; }"""
             _tmp_dir = tempfile.TemporaryDirectory(prefix="arviz_tests_")
             _stan_file = os.path.join(_tmp_dir.name, "stan_model_test.stan")
-            with open(_stan_file, "w") as f:
+            with open(_stan_file, "w", encoding="utf8") as f:
                 f.write(_model_code)
             model = CmdStanModel(stan_file=_stan_file, compile=False)
 
