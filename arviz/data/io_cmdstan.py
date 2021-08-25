@@ -3,7 +3,10 @@
 try:
     import ujson as json
 except ImportError:
-    import json
+    # Can't find ujson using json
+    # mypy struggles with conditional imports expressed as catching ImportError:
+    # https://github.com/python/mypy/issues/1153
+    import json  # type: ignore
 import logging
 import os
 import re
