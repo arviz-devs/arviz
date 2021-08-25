@@ -857,7 +857,7 @@ def _read_data(path):
         key, values pairs from Rdump/JSON formatted data.
     """
     data = {}
-    with open(path, "r") as f_obj:
+    with open(path, "r", encoding="utf8") as f_obj:
         if path.lower().endswith(".json"):
             return json.load(f_obj)
         var = ""

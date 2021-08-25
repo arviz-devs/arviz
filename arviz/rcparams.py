@@ -458,7 +458,7 @@ def read_rcfile(fname):
     _error_details_fmt = 'line #%d\n\t"%s"\n\tin file "%s"'
 
     config = RcParams()
-    with open(fname, "r") as rcfile:
+    with open(fname, "r", encoding="utf8") as rcfile:
         try:
             multiline = False
             for line_no, line in enumerate(rcfile, 1):
