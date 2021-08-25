@@ -151,7 +151,6 @@ class TestDataCmdStanPy:
             runset_obj = RunSet(args)
             runset_obj._csv_files = filepaths["nowarmup"]  # pylint: disable=protected-access
             obj = CmdStanMCMC(runset_obj)
-            obj.validate_csv_files()  # pylint: disable=protected-access
             obj._assemble_draws()  # pylint: disable=protected-access
 
             args_warmup = CmdStanArgs(
@@ -163,7 +162,6 @@ class TestDataCmdStanPy:
             runset_obj_warmup = RunSet(args_warmup)
             runset_obj_warmup._csv_files = filepaths["warmup"]  # pylint: disable=protected-access
             obj_warmup = CmdStanMCMC(runset_obj_warmup)
-            obj_warmup.validate_csv_files()  # pylint: disable=protected-access
             obj_warmup._assemble_draws()  # pylint: disable=protected-access
 
             _model_code = """model { real y; } generated quantities { int eta; int theta[N]; }"""
