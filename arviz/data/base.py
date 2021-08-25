@@ -421,7 +421,7 @@ def _extend_xr_method(func, doc="", description="", examples="", see_also=""):
 
 def _make_json_serializable(data: dict) -> dict:
     """Convert `data` with numpy.ndarray-like values to JSON-serializable form."""
-    ret = dict()
+    ret = {}
     for key, value in data.items():
         try:
             json.dumps(value)

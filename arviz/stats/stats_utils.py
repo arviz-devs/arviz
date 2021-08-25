@@ -376,7 +376,7 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
 
     if check_nan:
         if nan_kwargs is None:
-            nan_kwargs = dict()
+            nan_kwargs = {}
 
         isnan = np.isnan(ary)
         axis = nan_kwargs.get("axis", None)
@@ -392,7 +392,7 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
         shape = ary.shape
 
         if shape_kwargs is None:
-            shape_kwargs = dict()
+            shape_kwargs = {}
 
         min_chains = shape_kwargs.get("min_chains", 2)
         min_draws = shape_kwargs.get("min_draws", 4)
