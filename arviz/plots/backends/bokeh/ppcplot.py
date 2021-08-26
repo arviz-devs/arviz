@@ -23,7 +23,7 @@ def plot_ppc(
     pp_sample_ix,
     kind,
     alpha,
-    color,
+    colors,
     textsize,
     mean,
     observed,
@@ -48,7 +48,7 @@ def plot_ppc(
         **backend_kwargs,
     }
 
-    color = vectorized_to_hex(color)
+    colors = vectorized_to_hex(colors)
 
     (figsize, *_, linewidth, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
     if ax is None:
@@ -95,7 +95,11 @@ def plot_ppc(
         pp_sampled_vals = pp_vals[pp_sample_ix]
 
         if kind == "kde":
-            plot_kwargs = {"line_color": color, "line_alpha": alpha, "line_width": 0.5 * linewidth}
+            plot_kwargs = {
+                "line_color": colors[0],
+                "line_alpha": alpha,
+                "line_width": 0.5 * linewidth,
+            }
 
             pp_densities = []
             pp_xs = []
@@ -127,7 +131,7 @@ def plot_ppc(
                 if dtype == "f":
                     _, glyph = plot_kde(
                         obs_vals,
-                        plot_kwargs={"line_color": "black", "line_width": linewidth},
+                        plot_kwargs={"line_color": colors[1], "line_width": linewidth},
                         fill_kwargs={"alpha": 0},
                         ax=ax_i,
                         backend="bokeh",
@@ -143,7 +147,7 @@ def plot_ppc(
                     step = ax_i.step(
                         bin_edges,
                         hist,
-                        line_color="black",
+                        line_color=colors[1],
                         line_width=linewidth,
                         mode="center",
                     )
@@ -164,7 +168,7 @@ def plot_ppc(
                     line = ax_i.line(
                         new_x,
                         new_d.mean(0),
-                        color=color,
+                        color=colors[2],
                         line_dash="dashed",
                         line_width=linewidth,
                     )
@@ -177,7 +181,7 @@ def plot_ppc(
                     step = ax_i.step(
                         bin_edges,
                         hist,
-                        line_color=color,
+                        line_color=colors[2],
                         line_width=linewidth,
                         line_dash="dashed",
                         mode="center",
@@ -193,7 +197,7 @@ def plot_ppc(
                 if dtype == "f":
                     glyph = ax_i.line(
                         *_empirical_cdf(obs_vals),
-                        line_color="black",
+                        line_color=colors[1],
                         line_width=linewidth,
                     )
                     glyph.level = "overlay"
@@ -202,7 +206,7 @@ def plot_ppc(
                 else:
                     step = ax_i.step(
                         *_empirical_cdf(obs_vals),
-                        line_color="black",
+                        line_color=colors[1],
                         line_width=linewidth,
                         mode="center",
                     )
@@ -217,7 +221,7 @@ def plot_ppc(
                 list(pp_densities[::2]),
                 list(pp_densities[1::2]),
                 line_alpha=alpha,
-                line_color=color,
+                line_color=colors[0],
                 line_width=linewidth,
             )
             legend_it.append(("{} predictive".format(group.capitalize()), [multi_line]))
@@ -225,7 +229,7 @@ def plot_ppc(
                 label = "{} predictive mean".format(group.capitalize())
                 line = ax_i.line(
                     *_empirical_cdf(pp_vals.flatten()),
-                    color=color,
+                    color=colors[2],
                     line_dash="dashed",
                     line_width=linewidth,
                 )
@@ -238,7 +242,7 @@ def plot_ppc(
                     _, glyph = plot_kde(
                         pp_vals.flatten(),
                         plot_kwargs={
-                            "line_color": color,
+                            "line_color": colors[2],
                             "line_dash": "dashed",
                             "line_width": linewidth,
                         },
@@ -257,7 +261,7 @@ def plot_ppc(
                     step = ax_i.step(
                         bin_edges,
                         hist,
-                        color=color,
+                        color=colors[2],
                         line_width=linewidth,
                         line_dash="dashed",
                         mode="center",
@@ -279,7 +283,8 @@ def plot_ppc(
                 glyph = ax_i.circle(
                     obs_vals,
                     obs_yvals,
-                    fill_color="black",
+                    line_color=colors[1],
+                    fill_color=colors[1],
                     size=markersize,
                     line_alpha=alpha,
                 )
@@ -293,7 +298,12 @@ def plot_ppc(
                 if jitter:
                     yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
                 scatter = ax_i.scatter(
-                    vals, yvals, fill_color=color, size=markersize, fill_alpha=alpha
+                    vals,
+                    yvals,
+                    line_color=colors[0],
+                    fill_color=colors[0],
+                    size=markersize,
+                    fill_alpha=alpha,
                 )
                 all_scatter.append(scatter)
 

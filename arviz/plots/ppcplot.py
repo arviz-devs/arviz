@@ -19,7 +19,7 @@ def plot_ppc(
     alpha=None,
     mean=True,
     observed=True,
-    color="C0",
+    colors=None,
     grid=None,
     figsize=None,
     textsize=None,
@@ -58,8 +58,10 @@ def plot_ppc(
         Whether or not to plot the mean posterior/prior predictive distribution. Defaults to True
     observed: bool, default True
         Whether or not to plot the observed data.
-    color: str
-        Valid matplotlib color. Defaults to C0
+    color: list
+        List with valid matplotlib colors corresponding to the posterior/prior predictive
+        distribution, observed data and mean of the posterior/prior predictive distribution.
+        Defaults to ["C0", "k", "C1"]
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
@@ -208,6 +210,9 @@ def plot_ppc(
     if kind.lower() not in ("kde", "cumulative", "scatter"):
         raise TypeError("`kind` argument must be either `kde`, `cumulative`, or `scatter`")
 
+    if colors is None:
+        colors = ["C0", "k", "C1"]
+
     if data_pairs is None:
         data_pairs = {}
 
@@ -308,7 +313,7 @@ def plot_ppc(
         pp_sample_ix=pp_sample_ix,
         kind=kind,
         alpha=alpha,
-        color=color,
+        colors=colors,
         jitter=jitter,
         textsize=textsize,
         mean=mean,

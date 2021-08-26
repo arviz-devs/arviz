@@ -150,6 +150,7 @@ def plot_kde(
 
             if label is not None:
                 plot_kwargs.setdefault("legend_label", label)
+            print(plot_kwargs)
             if not rotated:
                 line = ax.line(x, density, **plot_kwargs)
             else:
