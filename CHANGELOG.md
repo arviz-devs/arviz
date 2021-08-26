@@ -42,6 +42,7 @@
 * Fixed xarray related tests. ([1726](https://github.com/arviz-devs/arviz/pull/1726))
 * Fix Bokeh deprecation warnings ([1657](https://github.com/arviz-devs/arviz/pull/1657))
 * Fix credible inteval percentage in legend in `plot_loo_pit` ([1745](https://github.com/arviz-devs/arviz/pull/1745))
+* Fix plots in Jupyter Notebooks appearing when `show=False`
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))

@@ -3,7 +3,7 @@
 import matplotlib as mpl
 
 from matplotlib.cbook import normalize_kwargs
-from matplotlib.pyplot import subplots
+from matplotlib.figure import Figure
 from numpy import ndenumerate
 
 from ....rcparams import rcParams
@@ -54,7 +54,8 @@ def create_axes_grid(length_plotters, rows=1, cols=1, backend_kwargs=None):
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
 
-    fig, axes = subplots(rows, cols, **backend_kwargs)
+    fig = Figure()
+    ax = fig.subplots(rows, cols, **backend_kwargs)
     extra = (rows * cols) - length_plotters
     if extra > 0:
         for (row, col), ax in ndenumerate(axes):
