@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "ArviZ"
+url: "https://github.com/arviz-devs/arviz"
+preferred-citation:
+  type: article
+  authors:
+    -
+      family-names: Kumar
+      given-names: Ravin
+      orcid: "https://orcid.org/0000-0003-0501-6098"
+    -
+      family-names: Carroll
+      given-names: Colin
+      orcid: "https://orcid.org/0000-0001-6977-0861"
+    -
+      family-names: Hartikainen
+      given-names: Ari
+      orcid: "https://orcid.org/0000-0002-4569-569X"
+    -
+      family-names: Osvaldo
+      given-names: Martin
+      orcid: "https://orcid.org/0000-0001-7419-8978"
+  doi: "10.21105/joss.01143"
+  journal: "Journal of Open Source Software"
+  title: "ArviZ a unified library for exploratory analysis of Bayesian models in Python"
