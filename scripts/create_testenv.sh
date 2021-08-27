@@ -101,9 +101,3 @@ pip install --no-cache-dir -r requirements-dev.txt
 pip install --no-cache-dir -r requirements-docs.txt
 pip install --no-cache-dir -r requirements-external.txt
 pip install --no-cache-dir -r requirements-optional.txt
-
-
-conda install -y geckodriver firefox jupyterlab ipywidgets nodejs --channel conda-forge
-
-jupyter nbextension enable --py widgetsnbextension
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
