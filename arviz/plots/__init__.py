@@ -24,6 +24,7 @@ from .ppcplot import plot_ppc
 from .rankplot import plot_rank
 from .separationplot import plot_separation
 from .traceplot import plot_trace
+from .tsplot import plot_ts
 from .violinplot import plot_violin
 
 __all__ = [
@@ -51,6 +52,7 @@ __all__ = [
     "plot_dist_comparison",
     "plot_rank",
     "plot_trace",
+    "plot_ts",
     "plot_violin",
     "plot_separation",
 ]
