@@ -204,7 +204,7 @@ tools:
 # Developing in Docker
 
 We have provided a Dockerfile which helps for isolating build problems, and local development.
-Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
+Install [Docker](https://www.docker.com/) for your operating system, clone [this](https://github.com/arviz-devs/arviz) repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
 ## container.sh & container.ps1
 
@@ -214,6 +214,7 @@ User can use one or multiple flags.
 
 They are executed on the following order: clear-cache, build, test, docs, shell, notebook, lab
 
+### For Linux and macOS
     $ ./scripts/container.sh --clear-cache
     $ ./scripts/container.sh --build
 
@@ -223,7 +224,7 @@ They are executed on the following order: clear-cache, build, test, docs, shell,
     $ ./scripts/container.sh --notebook
     $ ./scripts/container.sh --lab
 
-
+### For Windows
     $ powershell.exe -File ./scripts/container.ps1 --clear-cache
     $ powershell.exe -File ./scripts/container.ps1 --build
 
@@ -235,9 +236,9 @@ They are executed on the following order: clear-cache, build, test, docs, shell,
 
 ## Testing in Docker
 Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
-First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
+First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on [TravisCI](https://travis-ci.org/).
 
-NOTE: If you run into errors due to `__pycache__` files (i.e. while testing in
+**NOTE**: If you run into errors due to `__pycache__` files (i.e. while testing in
 docker after testing locally or installing with pip after testing with
 docker), try running `./scripts/container.sh --clear-cache` before the errored
 command.
@@ -245,13 +246,10 @@ command.
 ## Using the Docker image interactively
 Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. Therefore, code can be edited and executed using the docker container, but modifying directly the working directory of the host machine.
 
+### For Linux and macOS
 To start a bash shell inside Docker, run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ -it arviz bash
-
-and for Windows, use %CD% on cmd.exe and $pwd.Path on powershell.
-
-    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ -it arviz bash
 
 Alternatively, to start a jupyter notebook, there are two steps, first run:
 
@@ -259,7 +257,12 @@ Alternatively, to start a jupyter notebook, there are two steps, first run:
     $ docker exec jupyter-dock bash -c "pip install jupyter"
     $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
 
-and the same on Windows
+### For Windows
+For Windows, use %CD% on cmd.exe and $pwd.Path on powershell.
+
+    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ -it arviz bash
+
+For running a jupyter notebook, run:
 
     $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
     $ docker exec jupyter-dock bash -c "pip install jupyter"
