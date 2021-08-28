@@ -33,6 +33,7 @@
 * Add dtype parsing and setting in all Stan converters ([1632](https://github.com/arviz-devs/arviz/pull/1632))
 * Add option to specify colors for each element in ppc_plot  ([1769](https://github.com/arviz-devs/arviz/pull/1769))
 * Enable dask chunking information to be passed to `InferenceData.from_netcdf` ([1749](https://github.com/arviz-devs/arviz/pull/1749))
+* Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 
 ### Maintenance and fixes
 * Fix conversion for numpyro models with ImproperUniform latent sites ([1713](https://github.com/arviz-devs/arviz/pull/1713))
