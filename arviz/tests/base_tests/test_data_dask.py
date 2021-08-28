@@ -25,6 +25,7 @@ class TestDataDask:
                ('draw', (500,)),
                ('true_w_dim_0', (2, 2, 2, 2, 2)),
                ('w_dim_0', (2, 2, 2, 2, 2))]
+        print(list(centered_data.posterior.chunks.items()))
         assert list(centered_data.posterior.chunks.items()) ==  exp
         client.close()
 
@@ -40,5 +41,6 @@ class TestDataDask:
                ('draw', (500,)),
                ('true_w_dim_0', (2, 2, 2, 2, 2)),
                ('w_dim_0', (2, 2, 2, 2, 2))]
+        print(list(centered_data.posterior.chunks.items()))
         assert list(centered_data.posterior.chunks.items()) == exp
         client.close()
