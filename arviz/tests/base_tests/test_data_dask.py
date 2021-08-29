@@ -7,7 +7,7 @@ import pytest
 
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("dask") is None) and not running_on_ci(),
+    importlib.util.find_spec("dask") is None,
     reason="test requires dask which is not installed",
 )
 
