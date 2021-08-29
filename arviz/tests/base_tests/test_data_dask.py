@@ -1,9 +1,9 @@
 # pylint: disable=redefined-outer-name, no-member
+import pytest
 import importlib
 import dask
 import arviz as az
 from arviz.utils import Dask
-import pytest
 
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
