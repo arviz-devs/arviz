@@ -13,33 +13,32 @@ pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
 class TestDataDask:
 
     def test_dask_chunk_group_kwds(self):
-        from dask.distributed import Client
+
         Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
-        client = Client(threads_per_worker=1, n_workers=1, memory_limit="2GB")
-        group_kwargs = {
-            'posterior': {'chunks': {'w_dim_0': 2, 'true_w_dim_0' : 2}},
-            'posterior_predictive': {'chunks': {'w_dim_0': 2, 'true_w_dim_0': 2}}
-        }
-        centered_data = az.load_arviz_data("regression10d", **group_kwargs)
-        exp = [('chain', (4,)),
-               ('draw', (500,)),
-               ('true_w_dim_0', (10)),
-               ('w_dim_0', (10))]
-        print(list(centered_data.posterior.chunks.items()))
-        assert list(centered_data.posterior.chunks.items()) ==  exp
-        client.close()
+        with dask.config.set(scheduler="synchronous")
+            group_kwargs = {
+                'posterior': {'chunks': {'w_dim_0': 2, 'true_w_dim_0' : 2}},
+                'posterior_predictive': {'chunks': {'w_dim_0': 2, 'true_w_dim_0': 2}}
+            }
+            centered_data = az.load_arviz_data("regression10d", **group_kwargs)
+            exp = [('chain', (4,)),
+                   ('draw', (500,)),
+                   ('true_w_dim_0', (10)),
+                   ('w_dim_0', (10))]
+            print(list(centered_data.posterior.chunks.items()))
+            assert list(centered_data.posterior.chunks.items()) ==  exp
+
 
     def test_dask_chunk_group_regex(self):
-        from dask.distributed import Client
+        with dask.config.set(scheduler="synchronous")
         Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
-        client = Client(threads_per_worker=1, n_workers=1, memory_limit="2GB")
-        group_kwargs = {
-            "posterior.*": {'chunks': {'w_dim_0': 10, 'true_w_dim_0' : 10}}
-        }
-        centered_data = az.load_arviz_data("regression10d", regex=True, **group_kwargs)
-        exp = [('chain', (4,)),
-               ('draw', (500,)),
-               ('true_w_dim_0', (10)),
-               ('w_dim_0', (10))]
-        assert list(centered_data.posterior.chunks.items()) == exp
-        client.close()
+            client = Client(threads_per_worker=1, n_workers=1, memory_limit="2GB")
+            group_kwargs = {
+                "posterior.*": {'chunks': {'w_dim_0': 10, 'true_w_dim_0' : 10}}
+            }
+            centered_data = az.load_arviz_data("regression10d", regex=True, **group_kwargs)
+            exp = [('chain', (4,)),
+                   ('draw', (500,)),
+                   ('true_w_dim_0', (10)),
+                   ('w_dim_0', (10))]
+            assert list(centered_data.posterior.chunks.items()) == exp
