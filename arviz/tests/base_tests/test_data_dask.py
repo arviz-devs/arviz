@@ -1,5 +1,6 @@
 # pylint: disable=redefined-outer-name, no-member
 import importlib
+import dask
 import arviz as az
 from arviz.utils import Dask
 import pytest
@@ -15,7 +16,7 @@ class TestDataDask:
     def test_dask_chunk_group_kwds(self):
 
         Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
-        with dask.config.set(scheduler="synchronous")
+        with dask.config.set(scheduler="synchronous"):
             group_kwargs = {
                 'posterior': {'chunks': {'w_dim_0': 2, 'true_w_dim_0' : 2}},
                 'posterior_predictive': {'chunks': {'w_dim_0': 2, 'true_w_dim_0': 2}}
@@ -23,22 +24,21 @@ class TestDataDask:
             centered_data = az.load_arviz_data("regression10d", **group_kwargs)
             exp = [('chain', (4,)),
                    ('draw', (500,)),
-                   ('true_w_dim_0', (10)),
-                   ('w_dim_0', (10))]
+                   ('true_w_dim_0', (2, 2, 2, 2, 2,)),
+                   ('w_dim_0', (2, 2, 2, 2, 2,))]
             print(list(centered_data.posterior.chunks.items()))
             assert list(centered_data.posterior.chunks.items()) ==  exp
 
 
     def test_dask_chunk_group_regex(self):
-        with dask.config.set(scheduler="synchronous")
-        Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
-            client = Client(threads_per_worker=1, n_workers=1, memory_limit="2GB")
+        with dask.config.set(scheduler="synchronous"):
+            Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
             group_kwargs = {
                 "posterior.*": {'chunks': {'w_dim_0': 10, 'true_w_dim_0' : 10}}
             }
             centered_data = az.load_arviz_data("regression10d", regex=True, **group_kwargs)
             exp = [('chain', (4,)),
                    ('draw', (500,)),
-                   ('true_w_dim_0', (10)),
-                   ('w_dim_0', (10))]
+                   ('true_w_dim_0', (10,)),
+                   ('w_dim_0', (10,))]
             assert list(centered_data.posterior.chunks.items()) == exp
