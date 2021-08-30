@@ -60,6 +60,12 @@ The required dependencies for installing ArviZ are:
 
 .. literalinclude:: ../../../requirements.txt
 
+and
+
+.. code:: bash
+
+    python>=3.6
+
 .. _Optional-dependencies:
 
 Optional dependencies
