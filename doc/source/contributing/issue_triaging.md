@@ -12,8 +12,8 @@ Once you are set up, you can [view your subscriptions](https://docs.github.com/e
 ## Contribution Guidelines
 
 - Make sure the issue contains a minimal working example, if relevant. Sometimes, the issue don't contain an example, however, it is still clear about the problem. In that scenario, someone other than the ‘issue author’ can generate an example.
-- Make sure the issue is clear and has references, if needed. If an issue is not completely clear, the issue triagers can comment by asking for clarifications or adding extra references so the issue is clear enough for someone else to start working on. ~For example - Ensure dimension order can be anything #1693         (whole discussion), Posterior plot errors with boolean array #1694 (comment)~
-- Suggest fixes or workarounds. In some cases, even show that the issue has already been fixed on the development version but the fix is not yet released. For example - az.summary ignores the parameter coords #1732 (fixed in main but not on release), Using Arviz with Pymc3 and Tkinter #1692 (requires triage permissions, label issues)
+- Make sure the issue is clear and has references, if needed. If an issue is not completely clear, the issue triagers can comment by asking for clarifications or adding extra references so the issue is clear enough for someone else to start working on. ~For example - Ensure dimension order can be anything #1693 (whole discussion), Posterior plot errors with boolean array #1694 (comment)~
+- Suggest fixes or workarounds. In some cases, even show that the issue has already been fixed on the development version but the fix is not yet released. ``For example - az.summary ignores the parameter coords #1732 (fixed in main but not on release), Using Arviz with Pymc3 and Tkinter #1692 (requires triage permissions, label issues).~
 
 
 
