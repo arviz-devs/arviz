@@ -94,7 +94,7 @@ def plot_ts(
     --------
     Plot timeseries default plot
 
-    ..plot::
+    .. plot::
         :context: close-figs
 
         >>> import arviz as az
@@ -121,7 +121,7 @@ def plot_ts(
 
     Plot timeseries multidim plot
 
-    ..plot::
+    .. plot::
         :context: close-figs
 
         >>> ndim1, ndim2 = (5, 7)
