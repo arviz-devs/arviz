@@ -209,8 +209,8 @@ Install [Docker](https://www.docker.com/) for your operating system, clone [this
 ## container.sh & container.ps1
 
 Predefined docker commands can be run with a `./scripts/container.sh` (on Linux and macOS)
-and with `./scripts/container.ps1`. The scripts enables developer easily to call predefined docker commands.
-User can use one or multiple flags.
+and with `./scripts/container.ps1`. The scripts enable developers easily to call predefined docker commands.
+Users can use one or multiple flags.
 
 They are executed on the following order: clear-cache, build, test, docs, shell, notebook, lab
 
@@ -271,7 +271,7 @@ For running a jupyter notebook, run:
 This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
 
 ## Building documentation with Docker
-The documentation can be build with Docker by running `./scripts/container.sh
+The documentation can be built with Docker by running `./scripts/container.sh
 --docs`. The docker image contains by default all dependencies needed
 for building the documentation. After having build the docs in the Docker
 container, they can be checked at `doc/build` and viewed in the browser from `doc/build/index.html`. To rebuild the docs re-run `./scripts/container.sh --docs` after making changes.
