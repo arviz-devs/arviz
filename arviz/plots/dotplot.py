@@ -111,8 +111,8 @@ def plot_dot(
     .. plot::
         :context: close-figs
 
-        >>> import numpy as np
         >>> import arviz as az
+        >>> import numpy as np
         >>> values = np.random.normal(0, 1, 500)
         >>> az.plot_dot(values)
 
@@ -128,14 +128,14 @@ def plot_dot(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_dot(b, point_interval=True)
+        >>> az.plot_dot(values, point_interval=True)
 
     Rotate the dot plots by 90 degrees i.e swap x and y axis
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_dot(b, point_interval=True, rotated=True)
+        >>> az.plot_dot(values, point_interval=True, rotated=True)
 
     """
     if nquantiles == 0:
