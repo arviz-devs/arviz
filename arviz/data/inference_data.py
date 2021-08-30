@@ -486,7 +486,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             self.to_dict(groups=groups, filter_groups=filter_groups)
         )
 
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding="utf8") as file:
             json.dump(idata_dict, file, **kwargs)
 
         return filename
@@ -1450,6 +1450,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         -------
         groups: list
         """
+        if filter_groups not in {None, "like", "regex"}:
+            raise ValueError(
+                f"'filter_groups' can only be None, 'like', or 'regex', got: '{filter_groups}'"
+            )
+
         all_groups = self._groups_all
         if groups is None:
             return all_groups
@@ -1818,7 +1823,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     if dim is None:
         arg0 = args[0]
         arg0_groups = ccopy(arg0._groups_all)
-        args_groups = dict()
+        args_groups = {}
         # check if groups are independent
         # Concat over unique groups
         for arg in args[1:]:
@@ -1928,7 +1933,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     if hasattr(group_data, "attrs"):
                         group_attrs = getattr(group_data, "attrs")
                     else:
-                        group_attrs = dict()
+                        group_attrs = {}
 
                     # gather attrs results to group0_attrs
                     for attr_key, attr_values in group_attrs.items():
@@ -2006,7 +2011,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     if hasattr(group_data, "attrs"):
                         group_attrs = getattr(group_data, "attrs")
                     else:
-                        group_attrs = dict()
+                        group_attrs = {}
 
                     # gather attrs results to group0_attrs
                     for attr_key, attr_values in group_attrs.items():

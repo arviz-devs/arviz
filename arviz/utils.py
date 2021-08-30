@@ -34,6 +34,11 @@ def _var_names(var_names, data, filter_vars=None):
     -------
     var_name: list or None
     """
+    if filter_vars not in {None, "like", "regex"}:
+        raise ValueError(
+            f"'filter_vars' can only be None, 'like', or 'regex', got: '{filter_vars}'"
+        )
+
     if var_names is not None:
         if isinstance(data, (list, tuple)):
             all_vars = []
