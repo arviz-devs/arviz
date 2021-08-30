@@ -43,7 +43,7 @@ def plot_ts(
         Values to be plotted on x-axis before holdout.
         If none, coords of y dims is chosen.
     y_hat : str, optional
-        Variable name from posterior_predictive. Assumed to be of shape (chain, draw, *y.dims).
+        Variable name from posterior_predictive. Assumed to be of shape ``(chain, draw, *y_dims)``.
     y_holdout : str, optional
         Variable name from observed_data. It represents the observed data after the holdout period.
         Usefull while testing the model, when you want to compare
@@ -52,7 +52,7 @@ def plot_ts(
         Variable name from posterior_predictive.
         It represents forecasts (posterior predictive) values after holdout preriod.
         Usefull to compare observed vs predictions/forecasts.
-        Assumed shape (chain, draw, *).
+        Assumed shape ``(chain, draw, *shape)``.
     x_holdout : str, Defaults to coords of y.
         Variable name from constant_data.
         If None, coords of y_holdout or
@@ -66,7 +66,7 @@ def plot_ts(
         if y_holdout or y_forecasts is multidimensional.
     num_samples : int, default 100
         Number of posterior predictive samples drawn from y_hat and y_forecasts.
-    backend : {"matplotlib","bokeh"}, default "matplotlib"
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     y_kwargs : dict, optional
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
@@ -100,23 +100,23 @@ def plot_ts(
         >>> import arviz as az
         >>> nchains, ndraws = (4, 500)
         >>> obs_data = {
-                "y": 2 * np.arange(1, 9) + 3,
-                "z": 2 * np.arange(8, 12) + 3,
-            }
+        ...     "y": 2 * np.arange(1, 9) + 3,
+        ...     "z": 2 * np.arange(8, 12) + 3,
+        ... }
         >>> posterior_predictive = {
-                "y": np.random.normal(
-                    (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
-                ),
-                "z": np.random.normal(
-                    (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
-                ),
-            }
+        ...     "y": np.random.normal(
+        ...         (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
+        ...     ),
+        ...     "z": np.random.normal(
+        ...         (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
+        ...     ),
+        ...  }
         >>> idata = az.from_dict(
-                observed_data=obs_data,
-                posterior_predictive=posterior_predictive,
-                coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
-                dims={"y": ["obs_dim"], "z": ["pred_dim"]},
-            )
+        ...     observed_data=obs_data,
+        ...     posterior_predictive=posterior_predictive,
+        ...     coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
+        ...     dims={"y": ["obs_dim"], "z": ["pred_dim"]},
+        ... )
         >>> ax = az.plot_ts(idata=idata, y="y", y_holdout="z")
 
     Plot timeseries multidim plot
@@ -126,36 +126,36 @@ def plot_ts(
 
         >>> ndim1, ndim2 = (5, 7)
         >>> data = {
-                "y": np.random.normal(size=(ndim1, ndim2)),
-                "z": np.random.normal(size=(ndim1, ndim2)),
-            }
+        ...     "y": np.random.normal(size=(ndim1, ndim2)),
+        ...     "z": np.random.normal(size=(ndim1, ndim2)),
+        ... }
         >>> posterior_predictive = {
-                "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
-                "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
-            }
+        ...     "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        ...     "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        ... }
         >>> const_data = {"x": np.arange(1, 6), "x_pred": np.arange(5, 10)}
         >>> idata = az.from_dict(
-                observed_data=data,
-                posterior_predictive=posterior_predictive,
-                constant_data=const_data,
-                dims={
-                    "y": ["dim1", "dim2"],
-                    "z": ["holdout_dim1", "holdout_dim2"],
-                },
-                coords={
-                    "dim1": range(ndim1),
-                    "dim2": range(ndim2),
-                    "holdout_dim1": range(ndim1 - 1, ndim1 + 4),
-                    "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
-                },
-            )
+        ...     observed_data=data,
+        ...     posterior_predictive=posterior_predictive,
+        ...     constant_data=const_data,
+        ...     dims={
+        ...         "y": ["dim1", "dim2"],
+        ...         "z": ["holdout_dim1", "holdout_dim2"],
+        ...     },
+        ...     coords={
+        ...         "dim1": range(ndim1),
+        ...         "dim2": range(ndim2),
+        ...         "holdout_dim1": range(ndim1 - 1, ndim1 + 4),
+        ...         "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
+        ...     },
+        ... )
         >>> az.plot_ts(
-                idata=idata,
-                y="y",
-                plot_dim="dim1",
-                y_holdout="z",
-                holdout_dim="holdout_dim1",
-            )
+        ...     idata=idata,
+        ...     y="y",
+        ...     plot_dim="dim1",
+        ...     y_holdout="z",
+        ...     holdout_dim="holdout_dim1",
+        ... )
 
     """
     # Assign default values if none is provided

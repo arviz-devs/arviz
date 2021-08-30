@@ -115,14 +115,14 @@ def plot_lm(
         >>> idata = az.load_arviz_data('regression1d')
         >>> x = xr.DataArray(np.linspace(0, 1, 100))
         >>> idata.posterior["y_model"] = idata.posterior["intercept"] + idata.posterior["slope"]*x
-        >>> az.plot_lm(idata=idata, y="y", x="x")
+        >>> az.plot_lm(idata=idata, y="y", x=x)
 
     Plot regression data and mean uncertainty
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_lm(idata=idata, y="y", x="x", y_model="y_model")
+        >>> az.plot_lm(idata=idata, y="y", x=x, y_model="y_model")
 
     Plot regression data and mean uncertainty in hdi form
 
@@ -130,7 +130,7 @@ def plot_lm(
         :context: close-figs
 
         >>> az.plot_lm(
-        ...     idata=idata, y="y", x="x", y_model="y_model", kind_pp="hdi", kind_model="hdi"
+        ...     idata=idata, y="y", x=x, y_model="y_model", kind_pp="hdi", kind_model="hdi"
         ... )
 
     Plot regression data for multi-dimensional y using plot_dim
