@@ -1450,6 +1450,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         -------
         groups: list
         """
+        if filter_groups not in {None, "like", "regex"}:
+            raise ValueError(
+                f"'filter_groups' can only be None, 'like', or 'regex', got: '{filter_groups}'"
+            )
+
         all_groups = self._groups_all
         if groups is None:
             return all_groups

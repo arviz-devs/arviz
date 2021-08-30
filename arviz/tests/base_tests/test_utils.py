@@ -101,6 +101,15 @@ def test_var_names_filter(var_args):
     assert _var_names(var_names, data, filter_vars) == expected
 
 
+def test_var_names_filter_invalid_argument():
+    """Check invalid argument raises."""
+    samples = np.random.randn(10)
+    data = dict_to_dataset({"alpha": samples})
+    msg = r"^\'filter_vars\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+    with pytest.raises(ValueError, match=msg):
+        assert _var_names(["alpha"], data, filter_vars="foo")
+
+
 def test_subset_list_negation_not_found():
     """Check there is a warning if negation pattern is ignored"""
     names = ["mu", "theta"]
