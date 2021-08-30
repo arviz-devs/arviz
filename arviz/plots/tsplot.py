@@ -95,16 +95,14 @@ def plot_ts(
     Plot timeseries default plot
 
     ..plot::
-        :context: close figs
+        :context: close-figs
 
         >>> import arviz as az
-        >>> nchains = 4
-        >>> ndraws = 500
+        >>> nchains, ndraws = (4, 500)
         >>> obs_data = {
                 "y": 2 * np.arange(1, 9) + 3,
                 "z": 2 * np.arange(8, 12) + 3,
             }
-
         >>> posterior_predictive = {
                 "y": np.random.normal(
                     (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
@@ -113,39 +111,30 @@ def plot_ts(
                     (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
                 ),
             }
-
-        >>> idata = from_dict(
+        >>> idata = az.from_dict(
                 observed_data=obs_data,
                 posterior_predictive=posterior_predictive,
-                constant_data=const_data,
                 coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
                 dims={"y": ["obs_dim"], "z": ["pred_dim"]},
             )
-
-        >>> ax = plot_ts(idata=idata, y="y", y_holdout="z", show=True, **kwargs)
+        >>> ax = az.plot_ts(idata=idata, y="y", y_holdout="z")
 
     Plot timeseries multidim plot
 
     ..plot::
-        :context: close figs
+        :context: close-figs
 
-        >>> nchains = 4
-        >>> ndraws = 500
-        >>> ndim1 = 5
-        >>> ndim2 = 7
+        >>> ndim1, ndim2 = (5, 7)
         >>> data = {
                 "y": np.random.normal(size=(ndim1, ndim2)),
                 "z": np.random.normal(size=(ndim1, ndim2)),
             }
-
         >>> posterior_predictive = {
                 "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
                 "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
             }
-
         >>> const_data = {"x": np.arange(1, 6), "x_pred": np.arange(5, 10)}
-
-        >>> idata = from_dict(
+        >>> idata = az.from_dict(
                 observed_data=data,
                 posterior_predictive=posterior_predictive,
                 constant_data=const_data,
@@ -160,16 +149,14 @@ def plot_ts(
                     "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
                 },
             )
-
         >>> az.plot_ts(
                 idata=idata,
                 y="y",
                 plot_dim="dim1",
                 y_holdout="z",
                 holdout_dim="holdout_dim1",
-                show=True,
-                **kwargs
             )
+
     """
     # Assign default values if none is provided
     y_hat = y if y_hat is None and isinstance(y, str) else y_hat
