@@ -28,8 +28,10 @@ class TestDataDask:
                    ('draw', (500,)),
                    ('true_w_dim_0', (2, 2, 2, 2, 2,)),
                    ('w_dim_0', (2, 2, 2, 2, 2,))]
-            print(list(centered_data.posterior.chunks.items()))
-            assert list(centered_data.posterior.chunks.items()) ==  exp
+            res = list(centered_data.posterior.chunks.items())
+            res.sort()
+            exp.sort()
+            assert res ==  exp
 
 
     def test_dask_chunk_group_regex(self):
@@ -43,4 +45,7 @@ class TestDataDask:
                    ('draw', (500,)),
                    ('true_w_dim_0', (10,)),
                    ('w_dim_0', (10,))]
-            assert list(centered_data.posterior.chunks.items()) == exp
+            res = list(centered_data.posterior.chunks.items())
+            res.sort()
+            exp.sort()
+            assert res == exp
