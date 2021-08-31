@@ -10,3 +10,4 @@ myst-nb
 sphinx-panels
 sphinx-notfound-page
 sphinx-copybutton
+bokeh

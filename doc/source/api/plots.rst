@@ -33,4 +33,5 @@ Plots
     plot_rank
     plot_separation
     plot_trace
+    plot_ts
     plot_violin

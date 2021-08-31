@@ -110,35 +110,37 @@ def plot_lm(
         :context: close-figs
 
         >>> import arviz as az
+        >>> import numpy as np
+        >>> import xarray as xr
         >>> idata = az.load_arviz_data('regression1d')
         >>> x = xr.DataArray(np.linspace(0, 1, 100))
-        >>> data.posterior["y_model"] = data.posterior["intercept"] + data.posterior["slope"]*x
-        >>> az.plot_lm(idata=data, y="y", x="x")
+        >>> idata.posterior["y_model"] = idata.posterior["intercept"] + idata.posterior["slope"]*x
+        >>> az.plot_lm(idata=idata, y="y", x=x)
 
     Plot regression data and mean uncertainty
 
-    .. plot:
+    .. plot::
         :context: close-figs
 
-        >>> az.plot_lm(idata=data, y="y", x="x", y_model="y_model")
+        >>> az.plot_lm(idata=idata, y="y", x=x, y_model="y_model")
 
     Plot regression data and mean uncertainty in hdi form
 
-    .. plot:
+    .. plot::
         :context: close-figs
 
         >>> az.plot_lm(
-        ...     idata=data, y="y", x="x", y_model="y_model", kind_pp="hdi", kind_model="hdi"
+        ...     idata=idata, y="y", x=x, y_model="y_model", kind_pp="hdi", kind_model="hdi"
         ... )
 
     Plot regression data for multi-dimensional y using plot_dim
 
-    .. plot:
+    .. plot::
         :context: close-figs
 
         >>> data = az.from_dict(
         ...     observed_data = { "y": np.random.normal(size=(5, 7)) },
-        ...     posterior_predictive = {"y": np.random.randn(4, 1000, 5, 7) / 2}
+        ...     posterior_predictive = {"y": np.random.randn(4, 1000, 5, 7) / 2},
         ...     dims={"y": ["dim1", "dim2"]},
         ...     coords={"dim1": range(5), "dim2": range(7)}
         ... )

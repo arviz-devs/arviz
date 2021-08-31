@@ -41,7 +41,7 @@ With this you can now identify issues for low ``tau`` values.
 Example: Using the labeller argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the labeller argument to customize labels. 
+You can use the labeller argument to customize labels.
 Unlike the default labels that show ``theta``, not $\theta$ (generated from ``$\theta$`` using $\LaTeX$), the labeller argument presents the labels with proper math notation.
 
 You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
@@ -64,7 +64,7 @@ Sorting labels
 
 ArviZ allows labels to be sorted in two ways:
 
-- Using the arguments passed to ArviZ plotting functions 
+- Using the arguments passed to ArviZ plotting functions
 - Sorting the underlying :class:`xarray.Dataset`
 
 The first option is more suitable for single time ordering whereas the second option is more suitable for sorting plots consistently.
@@ -72,12 +72,12 @@ The first option is more suitable for single time ordering whereas the second op
 .. note::
 
   Both ways are limited.
-  Multidimensional variables can not be separated. 
+  Multidimensional variables can not be separated.
   For example, it is possible to sort ``theta, mu,`` or ``tau`` in any order, and within ``theta`` to sort the schools in any order, but it is not possible to sort half of the schools, then ``mu`` and ``tau`` and then the rest of the schools.
 
 
 Sorting variable names
-......................
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. ipython::
 
@@ -101,10 +101,10 @@ Sorting variable names
          ...: az.summary(schools)
 
 Sorting coordinate values
-.........................
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To sort coordinate values you have to define the order, store it, and use the result to sort the coordinate values. 
-You can define the order by creating a list manually or by using xarray objects as illustrated in the example "Sorting out the schools by mean". 
+To sort coordinate values you have to define the order, store it, and use the result to sort the coordinate values.
+You can define the order by creating a list manually or by using xarray objects as illustrated in the example "Sorting out the schools by mean".
 
 Example: Sorting the schools by mean
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,7 +138,7 @@ There are two ways of sorting:
          ...: az.summary(schools, var_names="theta")
 
 Sorting dimensions
-..................
+~~~~~~~~~~~~~~~~~~
 
 In some cases, our multidimensional variables may not have only a length ``n`` dimension
 (in addition to the ``chain`` and ``draw`` ones)

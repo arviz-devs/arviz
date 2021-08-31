@@ -2,7 +2,6 @@ jobs:
 - job: BuildDocs
   dependsOn:
     - BaseTests
-    - ExternalTests
   condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Reason'], 'PullRequest')))
   pool:
     vmImage: 'ubuntu-latest'
@@ -47,11 +46,7 @@ jobs:
       python -m pip install --upgrade pip
       python -m pip install wheel
       python -m pip install --no-cache-dir -r requirements.txt
-      python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-docs.txt
-      # install emcee
-      python -m pip install emcee
       python -m pip install .
     displayName: 'Install requirements'
 
