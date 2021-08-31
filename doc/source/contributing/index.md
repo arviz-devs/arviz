@@ -35,5 +35,6 @@ Further information on how to contribute to ArviZ can be found at the specific p
 
 issue_reports
 contributing_prs
+developing_in_docker
 developer_guide
 ```
