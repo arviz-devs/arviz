@@ -1,5 +1,6 @@
 """Posterior/Prior predictive plot."""
 import logging
+import warnings
 from numbers import Integral
 
 import numpy as np
@@ -19,6 +20,7 @@ def plot_ppc(
     alpha=None,
     mean=True,
     observed=True,
+    color=None,
     colors=None,
     grid=None,
     figsize=None,
@@ -58,6 +60,8 @@ def plot_ppc(
         Whether or not to plot the mean posterior/prior predictive distribution. Defaults to True
     observed: bool, default True
         Whether or not to plot the observed data.
+    color: str
+        Valid matplotlib color. Defaults to C0
     color: list
         List with valid matplotlib colors corresponding to the posterior/prior predictive
         distribution, observed data and mean of the posterior/prior predictive distribution.
@@ -212,6 +216,10 @@ def plot_ppc(
 
     if colors is None:
         colors = ["C0", "k", "C1"]
+
+    if color is not None:
+        warnings.warn("color has been deprecated in favor of colors", FutureWarning)
+        colors[0] = color
 
     if data_pairs is None:
         data_pairs = {}
