@@ -361,9 +361,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         groups[group] = data.load()
                     else:
                         groups[group] = data
-                    print('DEBUG : group chunks', groups.chunks)
+                    print('DEBUG : group chunks', data.chunks)
             res = InferenceData(**groups)
-            print('DEBUG : chunks', res.chunks)
             return res
         except OSError as e:  # pylint: disable=invalid-name
             if e.errno == -101:
