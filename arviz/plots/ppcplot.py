@@ -217,6 +217,12 @@ def plot_ppc(
     if colors is None:
         colors = ["C0", "k", "C1"]
 
+    if isinstance(colors, str):
+        raise TypeError("colors should be a list with 3 items.")
+
+    if len(colors) != 3:
+        raise ValueError("colors should be a list with 3 items.")
+
     if color is not None:
         warnings.warn("color has been deprecated in favor of colors", FutureWarning)
         colors[0] = color
