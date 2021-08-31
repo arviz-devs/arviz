@@ -24,7 +24,7 @@ Use the below pip command to install ArviZ with all of its :ref:`Optional-depend
 
 .. code:: bash
 
-    pip install arviz all
+    pip install arviz[all]
 
 Using conda-forge
 =================
