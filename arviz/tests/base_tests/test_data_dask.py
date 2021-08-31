@@ -1,6 +1,6 @@
 # pylint: disable=redefined-outer-name, no-member
-import pytest
 import importlib
+import pytest
 import dask
 import arviz as az
 from arviz.utils import Dask
@@ -15,7 +15,7 @@ class TestDataDask:
 
     def test_dask_chunk_group_kwds(self):
 
-        Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
+        Dask.enable_dask(dask_kwargs={"output_dtypes": [float]})
         with dask.config.set(scheduler="synchronous"):
             group_kwargs = {
                 'posterior': {'chunks': {'w_dim_0': 2, 'true_w_dim_0' : 2}},
@@ -32,7 +32,7 @@ class TestDataDask:
 
     def test_dask_chunk_group_regex(self):
         with dask.config.set(scheduler="synchronous"):
-            Dask.enable_dask(dask_kwargs={"dask": "parallelized", "output_dtypes": [float]})
+            Dask.enable_dask(dask_kwargs={"output_dtypes": [float]})
             group_kwargs = {
                 "posterior.*": {'chunks': {'w_dim_0': 10, 'true_w_dim_0' : 10}}
             }
