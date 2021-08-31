@@ -36,6 +36,7 @@ def plot_elpd(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+    backend_kwargs.setdefault("constrained_layout", not xlabels)
 
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
 
