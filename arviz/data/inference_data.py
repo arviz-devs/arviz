@@ -347,10 +347,6 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data_groups = list(data.groups)
 
             for group in data_groups:
-                # if group_kwargs is not None and group in group_kwargs:
-                #     group_kws = group_kwargs[group]
-                # else:
-                #     group_kws = {}
 
                 group_kws = {}
                 if group_kwargs is not None and regex is False:
@@ -359,12 +355,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     for key, kws in group_kwargs.items():
                         if re.search(key, group):
                             group_kws = kws
+                print('DEBUG : group_kws', group_kws)
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
                     else:
                         groups[group] = data
-            return InferenceData(**groups)
+                    print('DEBUG : group chunks', groups.chunks)
+            res = InferenceData(**groups)
+            print('DEBUG : chunks', res.chunks)
+            return res
         except OSError as e:  # pylint: disable=invalid-name
             if e.errno == -101:
                 raise type(e)(

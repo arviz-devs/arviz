@@ -4,7 +4,6 @@ import pytest
 import dask
 import arviz as az
 from arviz.utils import Dask
-import xarray
 
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
@@ -15,8 +14,6 @@ pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
 class TestDataDask:
 
     def test_dask_chunk_group_kwds(self):
-        print(dask.__version__)
-        print(xarray.__version__)
         Dask.enable_dask(dask_kwargs={"output_dtypes": [float]})
         with dask.config.set(scheduler="synchronous"):
             group_kwargs = {
