@@ -54,7 +54,10 @@ def create_axes_grid(length_plotters, rows=1, cols=1, backend_kwargs=None):
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
 
-    fig = Figure()
+    subplots_kws = {"nrows", "ncols", "sharex", "sharey", "squeeze", "subplot_kw", "gridspec_kw"}
+    fig_kwargs = {key: backend_kwargs[key] for key in backend_kwargs.keys() - subplots_kws}
+    backend_kwargs = {key: backend_kwargs[key] for key in backend_kwargs.keys() & subplots_kws} 
+    fig = Figure(**fig_kwargs)
     axes = fig.subplots(rows, cols, **backend_kwargs)
     extra = (rows * cols) - length_plotters
     if extra > 0:
