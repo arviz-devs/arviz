@@ -35,8 +35,7 @@ They are executed on the following order: clear-cache, build, test, docs, shell,
 
 ## Testing in Docker
 Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
-First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on [TravisCI](https://travis-ci.org/).
-
+First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`.
 **NOTE**: If you run into errors due to `__pycache__` files (i.e. while testing in
 docker after testing locally or installing with pip after testing with
 docker), try running `./scripts/container.sh --clear-cache` before the errored
