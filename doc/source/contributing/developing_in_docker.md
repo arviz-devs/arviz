@@ -34,8 +34,15 @@ They are executed on the following order: clear-cache, build, test, docs, shell,
     $ powershell.exe -File ./scripts/container.ps1 --lab
 
 ## Testing in Docker
-Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
-First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`.
+Testing the code using docker consists of executing the same file(`./scripts/container.ps1`) 3 times (you may need root privileges to run it).
+1. First run `./scripts/container.sh --clear-cache`.
+2. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`.
+3. Finally, run the tests with `./scripts/container.sh --test`.
+
+The `./scripts/container.sh --build` command needs to be executed only once to build the docker image. If you have already built the docker image, and want to test your new changes, then it is a 2 step process.
+1. Run `./scripts/container.sh --clear-cache` because the cache generated locally is not valid for docker.
+2. Run `./scripts/container.sh --test` to test with docker.
+
 **NOTE**: If you run into errors due to `__pycache__` files (i.e. while testing in
 docker after testing locally or installing with pip after testing with
 docker), try running `./scripts/container.sh --clear-cache` before the errored
@@ -72,4 +79,6 @@ This will output something similar to `http://(<docker container id> or <ip>):88
 The documentation can be built with Docker by running `./scripts/container.sh
 --docs`. The docker image contains by default all dependencies needed
 for building the documentation. After having build the docs in the Docker
-container, they can be checked at `doc/build` and viewed in the browser from `doc/build/index.html`. To rebuild the docs re-run `./scripts/container.sh --docs` after making changes.
+container, they can be checked at `doc/build` and viewed in the browser from `doc/build/index.html`.
+
+To update any file, go to the specific file(`.md`, `.rst`, or `.ipynb`) and make your changes. In order to check the results, you will have to rebuild only the docs, using the same command `./scripts/container.sh --docs`. The resulting docs will be saved in the doc/build directory as HTML files. Open your corresponding file and check the results.
