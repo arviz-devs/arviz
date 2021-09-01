@@ -11,7 +11,7 @@ Predefined docker commands can be run with a `./scripts/container.sh` (on Linux 
 and with `./scripts/container.ps1`. The scripts enable developers easily to call predefined docker commands.
 Users can use one or multiple flags.
 
-They are executed on the following order: clear-cache, build, test, docs, shell, notebook, lab
+They are executed in the following order: clear-cache, build, test, docs, shell, notebook, lab
 
 ### For Linux and macOS
     $ ./scripts/container.sh --clear-cache
