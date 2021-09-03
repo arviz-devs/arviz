@@ -44,7 +44,6 @@ plot.bokeh.tools             : reset,pan,box_zoom,wheel_zoom,lasso_select,undo,s
                                            # pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover
 
 # matplotlib specific rcParams
-plot.matplotlib.constrained_layout : true  # One of "true", "false"
 plot.matplotlib.show         : false       # call plt.show. One of "true", "false"
 
 ### STATS ###

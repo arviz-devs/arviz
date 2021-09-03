@@ -43,6 +43,8 @@
 * Fix Bokeh deprecation warnings ([1657](https://github.com/arviz-devs/arviz/pull/1657))
 * Fix credible inteval percentage in legend in `plot_loo_pit` ([1745](https://github.com/arviz-devs/arviz/pull/1745))
 * Arguments `filter_vars` and `filter_groups` now raise `ValueError` if illegal arguments are passed ([1772](https://github.com/arviz-devs/arviz/pull/1772))
+* Remove constrained_layout from arviz rcparams ([1764](https://github.com/arviz-devs/arviz/pull/1764))
+
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))

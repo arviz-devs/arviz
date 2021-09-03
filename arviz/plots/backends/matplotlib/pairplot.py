@@ -48,7 +48,6 @@ def plot_pair(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    backend_kwargs.pop("constrained_layout")
 
     scatter_kwargs = matplotlib_kwarg_dealiaser(scatter_kwargs, "scatter")
 
