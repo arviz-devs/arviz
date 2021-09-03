@@ -1,5 +1,6 @@
 """Posterior/Prior predictive plot."""
 import logging
+import warnings
 from numbers import Integral
 
 import numpy as np
@@ -19,7 +20,8 @@ def plot_ppc(
     alpha=None,
     mean=True,
     observed=True,
-    color="C0",
+    color=None,
+    colors=None,
     grid=None,
     figsize=None,
     textsize=None,
@@ -60,6 +62,10 @@ def plot_ppc(
         Whether or not to plot the observed data.
     color: str
         Valid matplotlib color. Defaults to C0
+    color: list
+        List with valid matplotlib colors corresponding to the posterior/prior predictive
+        distribution, observed data and mean of the posterior/prior predictive distribution.
+        Defaults to ["C0", "k", "C1"]
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
@@ -208,6 +214,19 @@ def plot_ppc(
     if kind.lower() not in ("kde", "cumulative", "scatter"):
         raise TypeError("`kind` argument must be either `kde`, `cumulative`, or `scatter`")
 
+    if colors is None:
+        colors = ["C0", "k", "C1"]
+
+    if isinstance(colors, str):
+        raise TypeError("colors should be a list with 3 items.")
+
+    if len(colors) != 3:
+        raise ValueError("colors should be a list with 3 items.")
+
+    if color is not None:
+        warnings.warn("color has been deprecated in favor of colors", FutureWarning)
+        colors[0] = color
+
     if data_pairs is None:
         data_pairs = {}
 
@@ -308,7 +327,7 @@ def plot_ppc(
         pp_sample_ix=pp_sample_ix,
         kind=kind,
         alpha=alpha,
-        color=color,
+        colors=colors,
         jitter=jitter,
         textsize=textsize,
         mean=mean,
