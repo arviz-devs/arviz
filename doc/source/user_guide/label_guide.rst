@@ -109,14 +109,14 @@ You can define the order by creating a list manually or by using xarray objects 
 Example: Sorting the schools by mean
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#. Locate the means of each school by using the following command:
+* Locate the means of each school by using the following command:
 
 .. ipython::
 
     In [1]: school_means = schools.posterior["theta"].mean(("chain", "draw"))
        ...: school_means
 
-#. You can use the ``DataArray`` result to sort the coordinate values for ``theta``.
+* You can use the ``DataArray`` result to sort the coordinate values for ``theta``.
 
 There are two ways of sorting:
 
