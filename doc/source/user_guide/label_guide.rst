@@ -21,7 +21,7 @@ Example: Default labelling
      ...: az.summary(schools)
 
 ArviZ supports label based indexing powered by xarray.
-Through label based indexing you can use labels to plot a subset of selected variables.
+Through label based indexing, you can use labels to plot a subset of selected variables.
 
 Example: Label based indexing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
