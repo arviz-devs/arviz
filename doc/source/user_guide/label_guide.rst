@@ -196,9 +196,9 @@ Now, to get the desired result, we need to modify the underlying xarray object.
 Labeling with indexes
 ---------------------
 
-As you may have seen, there are labellers with ``Idx`` in their name:
-:class:`~arviz.labels.IdxLabeller` and  :class:`~arviz.labels.DimIdxLabeller`,
-which show the positional index of the values instead of their corresponding coordinate value.
+As you may have seen, there are some `labeller`s with ``Idx`` in their name:
+:class:`~arviz.labels.IdxLabeller` and  :class:`~arviz.labels.DimIdxLabeller`.
+They show the positional index of the values instead of their corresponding coordinate value.
 
 We have seen before that we can use the ``coords`` argument or
 the :meth:`~arviz.InferenceData.sel` method to select data based on the coordinate values.
@@ -208,7 +208,7 @@ Similarly, we can use the :meth:`~arviz.InferenceData.isel` method to select dat
 
     az.summary(schools, labeller=azl.IdxLabeller())
 
-After seeing this summary, we use ``isel`` to generate the summary of a subset only.
+After seeing the above summary, let's use ``isel`` method to generate the summary of a subset only.
 
 .. ipython:: python
 
@@ -218,25 +218,25 @@ After seeing this summary, we use ``isel`` to generate the summary of a subset o
 
   Positional indexing is NOT label based indexing with numbers!
 
-The positional indexes shown will correspond to the ordinal position *in the subsetted object*.
+The positional indexes shown will correspond to the ordinal position in the *subsetted object*.
 If you are not subsetting the object, you can use these indexes with ``isel`` without problem.
 However, if you are subsetting the data (either directly or with the ``coords`` argument)
 and want to use the positional indexes shown, you need to use them on the corresponding subset.
 
-An example. If you use a dict named ``coords`` when calling a plotting function,
+**Example**: If you use a dict named ``coords`` when calling a plotting function,
 for ``isel`` to work it has to be called on
 ``original_idata.sel(**coords).isel(<desired positional idxs>)`` and
-not on ``original_idata.isel(<desired positional idxs>)``
+not on ``original_idata.isel(<desired positional idxs>)``.
 
 Labeller mixtures
 -----------------
 
-In some cases, none of the available labellers will do the right job.
-One case where this is bound to happen is with ``plot_forest``.
+In some cases, none of the available `labeller`s do the right job.
+For example, one case where this is bound to happen is with ``plot_forest``.
 When setting ``legend=True`` it does not really make sense to add the model name to the tick labels.
 ``plot_forest`` knows that, and if no ``labeller`` is passed, it uses either
 :class:`~arviz.labels.BaseLabeller` or :class:`~arviz.labels.NoModelLabeller` depending on the value of ``legend``.
-If we do want to use the ``labeller`` argument however, we have to make sure to enforce this default ourselves:
+However, if we do want to use the ``labeller`` argument, we have to enforce this default ourselves:
 
 .. ipython:: python
 
@@ -253,11 +253,12 @@ If we do want to use the ``labeller`` argument however, we have to make sure to 
     );
 
 There is a lot of repeated information now.
-The variable names, dims and coords are shown for both models and
-the models are labeled both in the legend and in the labels of the y axis.
-For cases like this, ArviZ provides a convenience function :func:`~arviz.labels.mix_labellers`
+The variable names, `dims` and `coords` are shown for both models.
+Moreover, the models are labeled both in the legend and in the labels of the y axis.
+For such cases, ArviZ provides a convenience function :func:`~arviz.labels.mix_labellers`
 that combines labeller classes for some extra customization.
-Labeller classes aim to split labeling into atomic tasks and have a method per task to maximize extensibility.
+
+**Labeller classes** aim to split labeling into atomic tasks and have a method per task to maximize extensibility.
 Thus, many new labellers can be created with this mixer function alone without needing to write a new class from scratch.
 There are more usage examples of :func:`~arviz.labels.mix_labellers` in its docstring page, click on
 it to go there.
@@ -278,18 +279,18 @@ it to go there.
 
 Custom labellers
 ----------------
-So far we have managed to customize the labels in the plots without having to write a new class
-from scratch all by ourselves. However, there could be cases where we have to customize our labels
+So far we have managed to customize the labels in the plots without writing a new class
+from scratch. However, there could be cases where we have to customize our labels
 further than what these sample labellers allow. In such cases, we have to subclass one of the
-labellers in ``arviz.labels`` and override some of its methods.
+labellers in {ref}`arviz.labels <labeller_api>` and override some of its methods.
 
-One case where we might need to do this is when non indexing coordinates are present.
+One case where we might need to do use this approach is when non indexing coordinates are present.
 This happens for example after doing pointwise selection on multiple dimensions,
-but we can also add extra dimensions to our models manually, as shown in TBD.
+but we can also add extra dimensions to our models manually.
 For this example, let's use pointwise selection.
-Say for example one of the variables in the posterior represents a covariance matrix, and we want
+Let's say one of the variables in the posterior represents a covariance matrix, and we want
 to keep it as is for other post-processing tasks instead of extracting the sub diagonal triangular
-matrix with no repeated info as a flattened array. Or any other pointwise selection really.
+matrix with no repeated info as a flattened array. Or any other pointwise selection.
 
 Here is our data:
 
@@ -311,8 +312,8 @@ Here is our data:
     )
     idata.posterior
 
-To select a non rectangular slice with xarray and get the result flattened and without nans, we can
-use DataArrays indexed with a dimension which is not present in our current dataset:
+To select a non rectangular slice with xarray and to get the result flattened and without NaNs, we can
+use `DataArray`s indexed with a dimension that is not present in our current dataset:
 
 .. ipython:: python
 
@@ -327,19 +328,19 @@ use DataArrays indexed with a dimension which is not present in our current data
     idata.posterior.sel(coords)
 
 We see now that ``subject`` and ``subject bis`` are no longer indexing coordinates, and
-therefore won't be available to the labeller:
+therefore won't be available to the `labeller`:
 
 .. ipython:: python
 
     @savefig default_plot_posterior.png
     az.plot_posterior(idata, coords=coords);
 
-To get around this limitation, we will store the coords used for pointwise selection
-as a Dataset which we will pass to the labeller so it can use the info it has available
-(``pointwise_sel`` and its position in this case) to subset this coords Dataset
+To get around this limitation, we will store the `coords` used for pointwise selection
+as a Dataset. We will pass this Dataset to the `labeller` so it can use the info it has available
+(``pointwise_sel`` and its position in this case) to subset this `coords` Dataset
 and use that instead to label.
 One option is to format these non-indexing coordinates as a dictionary whose
-keys are dimension names and values coordinate labels and pass that to the parent's
+keys are dimension names and values are coordinate labels and pass that to the parent's
 ``sel_to_str`` method:
 
 .. ipython:: python
@@ -359,12 +360,13 @@ keys are dimension names and values coordinate labels and pass that to the paren
     @savefig custom_plot_posterior1.png
     az.plot_posterior(idata, coords=coords, labeller=labeller);
 
-This has the advantage of requiring very little extra code and to allow to combine
-our newly created ``NonIdxCoordLabeller`` with other labellers like we did in
+This has the following advantages:
+* It very little extra code.
+* It allows to combine our newly created ``NonIdxCoordLabeller`` with other `labeller`s as we did in
 the previous section.
 
 Another option is to go for a much more customized look, and handle everything
-on ``make_label_vert`` to get labels like "Correlation between subjects x and y".
+on :class:`~arviz.labels.IdxLabeller.make_label_vert` to get labels like "Correlation between subjects x and y".
 
 .. ipython:: python
 
@@ -383,8 +385,8 @@ on ``make_label_vert`` to get labels like "Correlation between subjects x and y"
     @savefig custom_plot_posterior2.png
     az.plot_posterior(idata, coords=coords, labeller=labeller);
 
-This won't combine properly with other labellers, but it serves its function, and
+This won't combine properly with other `labeller`s, but it serves its function and
 achieves complete customization of the labels, so we probably won't want to combine
-it with other labellers either. The main drawback is that we have only overridden
+it with other `labeller`s either. The main drawback is that we have only overridden
 ``make_label_vert``, so functions like ``plot_forest`` or ``summary`` who
-use ``make_label_flat`` will still fall back to the methods defined by ``BaseLabeller``.
+use :class:`~arviz.labels.IdxLabeller.make_label_flat` will still fall back to the methods defined by ``BaseLabeller``.
