@@ -41,8 +41,8 @@ Using the above command, you can now identify issues for low ``tau`` values.
 Example: Using the labeller argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the `labeller` argument to customize labels.
-Unlike the default labels that show ``theta``, not `$\theta$` (generated from ``$\theta$`` using $\LaTeX$), the `labeller` argument presents the labels with proper math notation.
+You can use the ``labeller`` argument to customize labels.
+Unlike the default labels that show ``theta``, not ``$\theta$`` (generated from ``$\theta$`` using $\LaTeX$), the ``labeller`` argument presents the labels with proper math notation.
 
 You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
 
@@ -57,7 +57,7 @@ You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` 
 
 .. seealso::
 
-   For a list of `labeller`s available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
+   For a list of ``labeller``s available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
 
 Sorting labels
 --------------
@@ -116,7 +116,7 @@ Example: Sorting the schools by mean
     In [1]: school_means = schools.posterior["theta"].mean(("chain", "draw"))
        ...: school_means
 
-#. You can use the `DataArray` result to sort the coordinate values for ``theta``.
+#. You can use the ``DataArray`` result to sort the coordinate values for ``theta``.
 
 There are two ways of sorting:
 
@@ -125,7 +125,7 @@ Sorting the coordinate values
 
 .. tabbed:: ArviZ args
 
-  Sort the coordinate values to pass them as a `coords` argument and choose the order of the rows.
+  Sort the coordinate values to pass them as a ``coords`` argument and choose the order of the rows.
 
   .. ipython::
 
@@ -231,7 +231,7 @@ not on ``original_idata.isel(<desired positional idxs>)``.
 Labeller mixtures
 -----------------
 
-In some cases, none of the available `labeller`s do the right job.
+In some cases, none of the available ``labeller``s do the right job.
 For example, one case where this is bound to happen is with ``plot_forest``.
 When setting ``legend=True`` it does not really make sense to add the model name to the tick labels.
 ``plot_forest`` knows that, and if no ``labeller`` is passed, it uses either
@@ -253,7 +253,7 @@ However, if we do want to use the ``labeller`` argument, we have to enforce this
     );
 
 There is a lot of repeated information now.
-The variable names, `dims` and `coords` are shown for both models.
+The variable names, ``dims`` and ``coords`` are shown for both models.
 Moreover, the models are labeled both in the legend and in the labels of the y axis.
 For such cases, ArviZ provides a convenience function :func:`~arviz.labels.mix_labellers`
 that combines labeller classes for some extra customization.
@@ -335,9 +335,9 @@ therefore won't be available to the `labeller`:
     @savefig default_plot_posterior.png
     az.plot_posterior(idata, coords=coords);
 
-To get around this limitation, we will store the `coords` used for pointwise selection
-as a Dataset. We will pass this Dataset to the `labeller` so it can use the info it has available
-(``pointwise_sel`` and its position in this case) to subset this `coords` Dataset
+To get around this limitation, we will store the ``coords`` used for pointwise selection
+as a Dataset. We will pass this Dataset to the ``labeller`` so it can use the info it has available
+(``pointwise_sel`` and its position in this case) to subset this ``coords`` Dataset
 and use that instead to label.
 One option is to format these non-indexing coordinates as a dictionary whose
 keys are dimension names and values are coordinate labels and pass that to the parent's
