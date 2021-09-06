@@ -26,7 +26,7 @@ Through label based indexing, you can use labels to plot a subset of selected va
 Example: Label based indexing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For a case where the coordinate values shown for the ``theta`` variable coordinate to the ``school`` dimension
+For a case where the coordinate values shown for the ``theta`` variable coordinate to the ``school`` dimension,
 you can indicate ArviZ to plot ``tau`` by including it in the ``var_names`` argument to inspect its 1.03 :func:`~arviz.rhat` value.
 To inspect the ``theta`` values for the ``Choate`` and ``St. Paul's`` coordinates, you can include ``theta`` in ``var_names`` and use the ``coords`` argument to select only these two coordinate values.
 You can generate this plot with the following command:
@@ -36,13 +36,13 @@ You can generate this plot with the following command:
     @savefig label_guide_plot_trace.png
     az.plot_trace(schools, var_names=["tau", "theta"], coords={"school": ["Choate", "St. Paul's"]}, compact=False);
 
-With this you can now identify issues for low ``tau`` values.
+Using the above command, you can now identify issues for low ``tau`` values.
 
 Example: Using the labeller argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the labeller argument to customize labels.
-Unlike the default labels that show ``theta``, not $\theta$ (generated from ``$\theta$`` using $\LaTeX$), the labeller argument presents the labels with proper math notation.
+You can use the `labeller` argument to customize labels.
+Unlike the default labels that show ``theta``, not `$\theta$` (generated from ``$\theta$`` using $\LaTeX$), the `labeller` argument presents the labels with proper math notation.
 
 You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
 
@@ -57,15 +57,15 @@ You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` 
 
 .. seealso::
 
-   For a list of labellers available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
+   For a list of `labeller`s available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
 
 Sorting labels
 --------------
 
 ArviZ allows labels to be sorted in two ways:
 
-- Using the arguments passed to ArviZ plotting functions
-- Sorting the underlying :class:`xarray.Dataset`
+1. Using the arguments passed to ArviZ plotting functions
+2. Sorting the underlying :class:`xarray.Dataset`
 
 The first option is more suitable for single time ordering whereas the second option is more suitable for sorting plots consistently.
 
@@ -85,7 +85,7 @@ Sorting variable names
 
 .. tabbed:: ArviZ args
 
-  For variable names to appear sorted when calling ArviZ functions, pass a list of the variable names with the variable names sorted.
+  For variable names to appear sorted when calling ArviZ functions, pass a sorted list of the variable names.
 
   .. ipython::
 
@@ -103,21 +103,25 @@ Sorting variable names
 Sorting coordinate values
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To sort coordinate values you have to define the order, store it, and use the result to sort the coordinate values.
-You can define the order by creating a list manually or by using xarray objects as illustrated in the example "Sorting out the schools by mean".
+For sorting coordinate values, first, define the order, then store it, and use the result to sort the coordinate values.
+You can define the order by creating a list manually or by using xarray objects as illustrated in the below example "Sorting out the schools by mean".
 
 Example: Sorting the schools by mean
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1) Locate the means of each school by using the following command:
+#. Locate the means of each school by using the following command:
 
 .. ipython::
 
     In [1]: school_means = schools.posterior["theta"].mean(("chain", "draw"))
        ...: school_means
 
-2) You can use the DataArray result to sort the coordinate values for ``theta``.
+#. You can use the `DataArray` result to sort the coordinate values for ``theta``.
+
 There are two ways of sorting:
+
+Sorting the coordinate values
+~~~~~~~~~~~~~~~~~~
 
 .. tabbed:: ArviZ args
 
@@ -140,13 +144,13 @@ There are two ways of sorting:
 Sorting dimensions
 ~~~~~~~~~~~~~~~~~~
 
-In some cases, our multidimensional variables may not have only a length ``n`` dimension
-(in addition to the ``chain`` and ``draw`` ones)
-but could also have multiple dimensions.
+In some cases, our multidimensional variables may not have only one more dimension (a length ``n`` dimension
+in addition to the ``chain`` and ``draw`` ones)
+but could have multiple dimensions.
 Let's imagine we have performed a set of fixed experiments on several days to multiple subjects,
 three data dimensions overall.
 
-We will create a fake inference data with data mimicking this situation to show how to sort dimensions.
+We will create fake inference data with data mimicking this situation to show how to sort dimensions.
 To keep things short and not clutter the guide too much with unnecessary output lines,
 we will stick to a posterior of a single variable and the dimension sizes will be ``2, 3, 4``.
 
@@ -166,7 +170,7 @@ we will stick to a posterior of a single variable and the dimension sizes will b
        ...: )
        ...: experiments.posterior
 
-Given how we have constructed our dataset, the default order is ``experiment, subject, date``
+Given how we have constructed our dataset, the default order is ``experiment, subject, date``.
 
 .. dropdown:: Click to see the default summary
 
@@ -174,8 +178,8 @@ Given how we have constructed our dataset, the default order is ``experiment, su
 
       In [1]: az.summary(experiments)
 
-However, we actually want to have the dimensions in this order: ``subject, date, experiment``.
-And in this case, we need to modify the underlying xarray object in order to get the desired result:
+However, the order we want is: ``subject, date, experiment``.
+Now, to get the desired result, we need to modify the underlying xarray object.
 
 .. ipython:: python
 
@@ -183,9 +187,11 @@ And in this case, we need to modify the underlying xarray object in order to get
     experiments = experiments.posterior.transpose(*dim_order)
     az.summary(experiments)
 
-Note however that we don't need to overwrite or store the modified xarray object.
-Doing ``az.summary(experiments.posterior.transpose(*dim_order))`` would work just the same
-if we only want to use this order once.
+.. note::
+
+    However, we don't need to overwrite or store the modified xarray object.
+    Doing ``az.summary(experiments.posterior.transpose(*dim_order))`` would work just the same
+    if we only want to use this order once.
 
 Labeling with indexes
 ---------------------
