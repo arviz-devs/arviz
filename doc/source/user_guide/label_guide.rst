@@ -57,7 +57,7 @@ You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` 
 
 .. seealso::
 
-   For a list of ``labeller``s available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
+   For a list of labellers available in ArviZ, see the :ref:`the API reference page <labeller_api>`.
 
 Sorting labels
 --------------
@@ -196,7 +196,7 @@ Now, to get the desired result, we need to modify the underlying xarray object.
 Labeling with indexes
 ---------------------
 
-As you may have seen, there are some `labeller`s with ``Idx`` in their name:
+As you may have seen, there are some ``labeller``s with ``Idx`` in their name:
 :class:`~arviz.labels.IdxLabeller` and  :class:`~arviz.labels.DimIdxLabeller`.
 They show the positional index of the values instead of their corresponding coordinate value.
 
@@ -231,7 +231,7 @@ not on ``original_idata.isel(<desired positional idxs>)``.
 Labeller mixtures
 -----------------
 
-In some cases, none of the available ``labeller``s do the right job.
+In some cases, none of the available labellers do the right job.
 For example, one case where this is bound to happen is with ``plot_forest``.
 When setting ``legend=True`` it does not really make sense to add the model name to the tick labels.
 ``plot_forest`` knows that, and if no ``labeller`` is passed, it uses either
@@ -313,7 +313,7 @@ Here is our data:
     idata.posterior
 
 To select a non rectangular slice with xarray and to get the result flattened and without NaNs, we can
-use `DataArray`s indexed with a dimension that is not present in our current dataset:
+use ``DataArray``s indexed with a dimension that is not present in our current dataset:
 
 .. ipython:: python
 
@@ -361,8 +361,9 @@ keys are dimension names and values are coordinate labels and pass that to the p
     az.plot_posterior(idata, coords=coords, labeller=labeller);
 
 This has the following advantages:
-* It very little extra code.
-* It allows to combine our newly created ``NonIdxCoordLabeller`` with other `labeller`s as we did in
+
+- It very little extra code.
+- It allows to combine our newly created ``NonIdxCoordLabeller`` with other labellers as we did in
 the previous section.
 
 Another option is to go for a much more customized look, and handle everything
@@ -385,8 +386,8 @@ on :class:`~arviz.labels.IdxLabeller.make_label_vert` to get labels like "Correl
     @savefig custom_plot_posterior2.png
     az.plot_posterior(idata, coords=coords, labeller=labeller);
 
-This won't combine properly with other `labeller`s, but it serves its function and
+This won't combine properly with other labellers, but it serves its function and
 achieves complete customization of the labels, so we probably won't want to combine
-it with other `labeller`s either. The main drawback is that we have only overridden
+it with other labellers either. The main drawback is that we have only overridden
 ``make_label_vert``, so functions like ``plot_forest`` or ``summary`` who
 use :class:`~arviz.labels.IdxLabeller.make_label_flat` will still fall back to the methods defined by ``BaseLabeller``.
