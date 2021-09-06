@@ -196,7 +196,7 @@ Now, to get the desired result, we need to modify the underlying xarray object.
 Labeling with indexes
 ---------------------
 
-As you may have seen, there are some ``labeller``s with ``Idx`` in their name:
+As you may have seen, there are some labellers with ``Idx`` in their name:
 :class:`~arviz.labels.IdxLabeller` and  :class:`~arviz.labels.DimIdxLabeller`.
 They show the positional index of the values instead of their corresponding coordinate value.
 
@@ -282,7 +282,7 @@ Custom labellers
 So far we have managed to customize the labels in the plots without writing a new class
 from scratch. However, there could be cases where we have to customize our labels
 further than what these sample labellers allow. In such cases, we have to subclass one of the
-labellers in {ref}`arviz.labels <labeller_api>` and override some of its methods.
+labellers in :ref:`arviz.labels <labeller_api>` and override some of its methods.
 
 One case where we might need to do use this approach is when non indexing coordinates are present.
 This happens for example after doing pointwise selection on multiple dimensions,
@@ -313,7 +313,7 @@ Here is our data:
     idata.posterior
 
 To select a non rectangular slice with xarray and to get the result flattened and without NaNs, we can
-use ``DataArray``s indexed with a dimension that is not present in our current dataset:
+use ``DataArray`` s indexed with a dimension that is not present in our current dataset:
 
 .. ipython:: python
 
@@ -328,7 +328,7 @@ use ``DataArray``s indexed with a dimension that is not present in our current d
     idata.posterior.sel(coords)
 
 We see now that ``subject`` and ``subject bis`` are no longer indexing coordinates, and
-therefore won't be available to the `labeller`:
+therefore won't be available to the ``labeller``:
 
 .. ipython:: python
 
