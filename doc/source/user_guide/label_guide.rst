@@ -20,7 +20,7 @@ Example: Default labelling
      ...: schools = az.load_arviz_data("centered_eight")
      ...: az.summary(schools)
 
-ArviZ supports label based indexing powered by xarray.
+ArviZ supports label based indexing powered by [xarray](http://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html).
 Through label based indexing, you can use labels to plot a subset of selected variables.
 
 Example: Label based indexing
@@ -232,7 +232,7 @@ Labeller mixtures
 -----------------
 
 In some cases, none of the available labellers do the right job.
-For example, one case where this is bound to happen is with ``plot_forest``.
+For example, one case where this is bound to happen is with :func:`~arviz.plot_forest`.
 When setting ``legend=True`` it does not really make sense to add the model name to the tick labels.
 ``plot_forest`` knows that, and if no ``labeller`` is passed, it uses either
 :class:`~arviz.labels.BaseLabeller` or :class:`~arviz.labels.NoModelLabeller` depending on the value of ``legend``.
@@ -288,9 +288,9 @@ One case where we might need to do use this approach is when non indexing coordi
 This happens for example after doing pointwise selection on multiple dimensions,
 but we can also add extra dimensions to our models manually.
 For this example, let's use pointwise selection.
-Let's say one of the variables in the posterior represents a covariance matrix, and we want
-to keep it as is for other post-processing tasks instead of extracting the sub diagonal triangular
-matrix with no repeated info as a flattened array. Or any other pointwise selection.
+Let's say one of the variables in the posterior represents a [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix), and we want
+to keep it as is for other post-processing tasks instead of extracting the sub diagonal [triangular
+matrix](https://en.wikipedia.org/wiki/Triangular_matrix) with no repeated info as a flattened array. Or any other pointwise selection.
 
 Here is our data:
 
