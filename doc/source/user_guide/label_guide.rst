@@ -120,8 +120,8 @@ Example: Sorting the schools by mean
 
 There are two ways of sorting:
 
-Sorting the coordinate values
-~~~~~~~~~~~~~~~~~~
+#. Arviz args
+#. xarray
 
 .. tabbed:: ArviZ args
 
@@ -146,7 +146,7 @@ Sorting dimensions
 
 In some cases, our multidimensional variables may not have only one more dimension (a length ``n`` dimension
 in addition to the ``chain`` and ``draw`` ones)
-but could have multiple dimensions.
+but could have multiple more dimensions.
 Let's imagine we have performed a set of fixed experiments on several days to multiple subjects,
 three data dimensions overall.
 
@@ -362,9 +362,8 @@ keys are dimension names and values are coordinate labels and pass that to the p
 
 This has the following advantages:
 
-- It very little extra code.
-- It allows to combine our newly created ``NonIdxCoordLabeller`` with other labellers as we did in
-the previous section.
+- It requires very little extra code.
+- It allows to combine our newly created ``NonIdxCoordLabeller`` with other labellers as we did in the previous section.
 
 Another option is to go for a much more customized look, and handle everything
 on :class:`~arviz.labels.IdxLabeller.make_label_vert` to get labels like "Correlation between subjects x and y".
