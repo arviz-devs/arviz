@@ -17,7 +17,7 @@ Currently there are **two beta implementations** of this design:
   - [Turing.jl](https://turing.ml/dev/) and indirectly any package using [MCMCChains.jl](https://github.com/TuringLang/MCMCChains.jl) to store results
 
 ## Terminology
-The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the InferenceData case :ref:`InferenceData <creating_InferenceData>` {ref}`InferenceData <creating_InferenceData>`.
+The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the {ref}`InferenceData <creating_InferenceData>` case.
 
 * **Variable**: NetCDF-like variables are multidimensional labeled arrays representing a single quantity. Variables and their dimensions must be named. They can also have attributes describing it. Relevant terms related to InferenceData variables are: *variable_name*, *values* (its data), *dimensions*, *coordinates*, and *attributes*.
 * **Dimension**: The dimensions of an object are its named axes. A variable containing 3D data can have dimensions `[chain, draw, dim0]`, thus, its `0th`-dimension is `chain`, its `1st`-dimension is `draw`, and so on. Every dimension present in an InferenceData variable must share names with a *coordinate*. Given that dimensions must be named, dimension and dimension name are used equivalents.
@@ -28,16 +28,21 @@ The terminology used in this specification is based on [xarray's terminology](ht
 * **Matching variables**: Two groups with matching variables are groups that conceptually share variables, variable dimensions and coordinates of the variable dimensions but do not necessarily share variable names nor sample dimensions. Variable dimensions are the ones intrinsic to the data and model as opposed to sample dimensions which are the ones relative to the sampling process. When talking about specific variables, this same idea is expressed as one variable being the counterpart of the other.
 
 ## Current design
-`InferenceData` stores all quantities relevant to fulfilling its goals in different groups. Different groups generally distinguish conceptually different quantities in Bayesian inference, however, convenience in creation and usage of InferenceData objects also plays a role. In general, each quantity (such as posterior distribution or observed data) will be represented by several multidimensional labeled variables.
+`InferenceData` stores all quantities relevant to fulfilling its goals in different groups. Different groups generally distinguish conceptually different quantities in Bayesian inference, however, convenience in {ref}`creation <creating_InferenceData>` and {ref}`usage <working_with_InferenceData>` usage of InferenceData objects also plays a role. In general, each quantity (such as posterior distribution or observed data) will be represented by several multidimensional labeled variables.
 
-Each group should have one entry per variable and each variable should be named. When relevant, the first two dimensions of each variable should be the sample identifier (`chain`, `draw`). For groups like `observed_data` or `constant_data` these two initial dimensions are omitted. Dimensions must be named and share name with a coordinate specifying the index values, called coordinate values. Coordinate values can be repeated and should not necessarily be numerical values. Variables must not share names with dimensions.
+### Rules
 
-Moreover, each group contains the following attributes:
-* `created_at`: the date of creation of the group.
-* `inference_library`: the library used to run the inference.
-* `inference_library_version`: version of the inference library used.
+* Each group should have one entry per variable and each variable should be named.
+* When relevant, the first two dimensions of each variable should be the sample identifier (`chain`, `draw`).
+* For groups like `observed_data` or `constant_data` the two initial dimensions(`chain`, `draw`) are omitted.
+* Dimensions must be named and share name with a coordinate specifying the index values, called coordinate values.
+* Coordinate values can be repeated and should not necessarily be numerical values. Variables must not share names with dimensions.
+* Moreover, each group contains the following attributes:
+  - `created_at`: the date of creation of the group.
+  - `inference_library`: the library used to run the inference.
+  - `inference_library_version`: version of the inference library used.
 
-`InferenceData` data objects contain any combination the groups described below. There are some relations (detailed below) between the variables and dimensions of different groups. Hence, whenever related groups are present they should comply with this relations.
+`InferenceData` data objects contain any combination of the groups described below. There are also some relations (detailed below) between the variables and dimensions of different groups. Hence, whenever related groups are present they should comply with these relations.
 
 ### `posterior`
 Samples from the posterior distribution p(theta|y).
@@ -47,15 +52,15 @@ Information and diagnostics for each `posterior` sample, provided by the inferen
 backend. It may vary depending on the algorithm used by the backend (i.e. an affine
 invariant sampler has no energy associated). Therefore none of these parameters
 should be assumed to be present in the `sample_stats` group. The convention
-below serves to ensure that _if_ a variable is present with one of these names
-it will correspond to the definition included here.
+below serves to ensure that if a variable is present with one of these names
+it will correspond to the definition given in front of it.
 
 The name convention used for `sample_stats` variables is the following:
 
 * `lp`: The joint log posterior density for the model (up to an additive constant).
 * `acceptance_rate`: The average acceptance probabilities of all possible samples in the proposed tree.
 * `step_size`: The current integration step size.
-* `step_size_nom`: The nominal integration step size. The `step_size` may differ from this, for example if the step size is jittered. Should only be present if `step_size` is also present and it varies between samples (i.e. step size is jittered).
+* `step_size_nom`: The nominal integration step size. The `step_size` may differ from this for example, if the step size is jittered. It should only be present if `step_size` is also present and it varies between samples (i.e. step size is jittered).
 * `tree_depth`: The number of tree doublings in the balanced binary tree.
 * `n_steps`: The number of leapfrog steps computed. It is related to `tree_depth` with `n_steps <=
   2^tree_dept`.
@@ -85,7 +90,7 @@ Observed data on which the `posterior` is conditional. It should only contain da
 Model constants, data included in the model which is not modeled as a random variable. It should be the data used to generate samples in all the groups except the `predictions` groups.
 
 ### `prior`
-Samples from the prior distribution p(theta). Samples need not match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. It should have matching variables with the `posterior` group.
+Samples from the prior distribution p(theta). Samples do not need to match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. It should have matching variables with the `posterior` group.
 
 ### `sample_stats_prior`
 Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in `sample_stats`.
