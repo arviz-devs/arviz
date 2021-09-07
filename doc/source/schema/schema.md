@@ -1,8 +1,11 @@
 (schema)=
 # InferenceData schema specification
-The `InferenceData` schema scheme defines a data structure compatible with [NetCDF](https://www.unidata.ucar.edu/software/netcdf/) having 3 goals in mind: usefulness in the analysis of Bayesian inference results, reproducibility of Bayesian inference analysis and interoperability between different inference backends and programming languages.
+The `InferenceData` schema defines a data structure compatible with [NetCDF](https://www.unidata.ucar.edu/software/netcdf/). It aims to achieve the following three goals: 
+1. Usefulness in the analysis of Bayesian inference results.
+2. Reproducibility of Bayesian inference analysis.
+3. Interoperability between different inference backends and programming languages.
 
-Currently there are 2 beta implementations of this design:
+Currently there are **two beta implementations** of this design:
 * [ArviZ](https://arviz-devs.github.io/arviz/) in Python which integrates with:
   - [emcee](https://emcee.readthedocs.io/en/stable/)
   - [PyMC3](https://docs.pymc.io)
@@ -14,14 +17,14 @@ Currently there are 2 beta implementations of this design:
   - [Turing.jl](https://turing.ml/dev/) and indirectly any package using [MCMCChains.jl](https://github.com/TuringLang/MCMCChains.jl) to store results
 
 ## Terminology
-The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the InferenceData case.
+The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the InferenceData case :ref:`InferenceData <creating_InferenceData>` {ref}`InferenceData <creating_InferenceData>`.
 
 * **Variable**: NetCDF-like variables are multidimensional labeled arrays representing a single quantity. Variables and their dimensions must be named. They can also have attributes describing it. Relevant terms related to InferenceData variables are: *variable_name*, *values* (its data), *dimensions*, *coordinates*, and *attributes*.
-* **Dimension**: The dimensions of an object are its named axes. A variable containing 3D data can have dimensions `[chain, draw, dim0]`, thus, its `0th`-dimension is `chain`, its `1st`-dimension is `draw` and so on. Every dimension present in an InferenceData variable must share names with a *coordinate*. Given that dimensions must be named, dimension and dimension name are used equivalents.
-* **Coordinate**: A named array that labels a dimension. A coordinate named `chain` with values `[0, 1, 2, 3]` would label the `chain` dimension. Coordinate names and values can be loosely though of as labels and tick labels along a dimension.
-* **Attributes**: An ordered dictionary that can store arbitrary metadata.
+* **Dimension**: The dimensions of an object are its named axes. A variable containing 3D data can have dimensions `[chain, draw, dim0]`, thus, its `0th`-dimension is `chain`, its `1st`-dimension is `draw`, and so on. Every dimension present in an InferenceData variable must share names with a *coordinate*. Given that dimensions must be named, dimension and dimension name are used equivalents.
+* **Coordinate**: A named array that labels a dimension. A coordinate named `chain` with values `[0, 1, 2, 3]` would label the `chain` dimension. Coordinate names and values can be loosely thought of as labels and tick labels along a dimension.
+* **Attribute**: An ordered dictionary that can store arbitrary metadata.
 * **Group**: Dataset containing one or several variables with a conceptual link between them. Variables inside a group will generally share some dimensions too. For example, the `posterior` group contains a representation of the posterior distribution conditioned on the observations in the `observed_data` group.
-* **Matching samples**: Two variables (or groups) whose samples match are those that have been generated with the same set of samples. Therefore, they will share dimensions and coordinates corresponding to sampling process. Sample dimensions (generally `(chain, draw)`) are the ones introduced by the sampling process.
+* **Matching samples**: Two variables (or groups) will be called to have matching samples if they are generated with the same set of samples. Therefore, they will share dimensions and coordinates corresponding to the sampling process. Sample dimensions (generally `(chain, draw)`) are the ones introduced by the sampling process.
 * **Matching variables**: Two groups with matching variables are groups that conceptually share variables, variable dimensions and coordinates of the variable dimensions but do not necessarily share variable names nor sample dimensions. Variable dimensions are the ones intrinsic to the data and model as opposed to sample dimensions which are the ones relative to the sampling process. When talking about specific variables, this same idea is expressed as one variable being the counterpart of the other.
 
 ## Current design
