@@ -1083,6 +1083,7 @@ def test_kde_cumulative(limits):
         {"color": "obs_dim", "legend": True},
         {"ic": "loo", "color": "blue", "coords": {"obs_dim": slice(2, 5)}},
         {"color": np.random.uniform(size=8), "threshold": 0.1},
+        {"threshold": 2},
     ],
 )
 @pytest.mark.parametrize("add_model", [False, True])

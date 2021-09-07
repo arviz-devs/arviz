@@ -346,7 +346,9 @@ def test_plot_compare_no_ic(models):
     assert "['loo', 'waic']" in str(err.value)
 
 
-@pytest.mark.parametrize("kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}])
+@pytest.mark.parametrize(
+    "kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}, {"threshold": 2}]
+)
 @pytest.mark.parametrize("add_model", [False, True])
 @pytest.mark.parametrize("use_elpddata", [False, True])
 def test_plot_elpd(models, add_model, use_elpddata, kwargs):
