@@ -88,7 +88,7 @@ def plot_elpd(
             bool_ary = diff_abs > threshold * ydata.std()
             if coord_labels is None:
                 coord_labels = xdata.astype(str)
-            outliers = np.argwhere(bool_ary).squeeze()
+            outliers = np.nonzero(bool_ary)[0]
             for outlier in outliers:
                 label = coord_labels[outlier]
                 ax.text(
@@ -159,7 +159,7 @@ def plot_elpd(
                     bool_ary = diff_abs > threshold * ydata.std()
                     if coord_labels is None:
                         coord_labels = xdata.astype(str)
-                    outliers = np.argwhere(bool_ary).squeeze()
+                    outliers = np.nonzero(bool_ary)[0]
                     for outlier in outliers:
                         label = coord_labels[outlier]
                         ax[j, i].text(
