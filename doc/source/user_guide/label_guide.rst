@@ -42,7 +42,7 @@ Example: Using the labeller argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can use the ``labeller`` argument to customize labels.
-Unlike the default labels that show ``theta``, not :math:`\theta` (generated from ``\theta`` using :math:`\LaTeX`), the ``labeller`` argument presents the labels with proper math notation.
+Unlike the default labels that show ``theta``, not :math:`\theta` (generated from ``$\theta$`` using :math:`\LaTeX`), the ``labeller`` argument presents the labels with proper math notation.
 
 
 You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
