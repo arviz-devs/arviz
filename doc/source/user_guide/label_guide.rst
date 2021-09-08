@@ -288,9 +288,9 @@ One case where we might need to do use this approach is when non indexing coordi
 This happens for example after doing pointwise selection on multiple dimensions,
 but we can also add extra dimensions to our models manually, as shown in TBD.
 For this example, let's use pointwise selection.
-Let's say one of the variables in the posterior represents a [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix), and we want
-to keep it as is for other post-processing tasks instead of extracting the sub diagonal [triangular
-matrix](https://en.wikipedia.org/wiki/Triangular_matrix) with no repeated info as a flattened array. Or any other pointwise selection.
+Let's say one of the variables in the posterior represents a `covariance matrix <https://en.wikipedia.org/wiki/Covariance_matrix>`_ , and we want
+to keep it as is for other post-processing tasks instead of extracting the sub diagonal `triangular
+matrix <https://en.wikipedia.org/wiki/Triangular_matrix)>`_ with no repeated info as a flattened array. Or any other pointwise selection.
 
 Here is our data:
 
@@ -366,7 +366,7 @@ This has the following advantages:
 - It allows to combine our newly created ``NonIdxCoordLabeller`` with other labellers as we did in the previous section.
 
 Another option is to go for a much more customized look, and handle everything
-on :class:`~arviz.labels.IdxLabeller.make_label_vert` to get labels like "Correlation between subjects x and y".
+on :meth:`~arviz.labels.BaseLabeller.make_label_vert` to get labels like "Correlation between subjects x and y".
 
 .. ipython:: python
 
@@ -389,4 +389,4 @@ This won't combine properly with other labellers, but it serves its function and
 achieves complete customization of the labels, so we probably won't want to combine
 it with other labellers either. The main drawback is that we have only overridden
 ``make_label_vert``, so functions like ``plot_forest`` or ``summary`` who
-use :class:`~arviz.labels.IdxLabeller.make_label_flat` will still fall back to the methods defined by ``BaseLabeller``.
+use :meth:`~arviz.labels.BaseLabeller.make_label_flat` will still fall back to the methods defined by ``BaseLabeller``.
