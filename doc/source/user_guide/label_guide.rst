@@ -286,7 +286,7 @@ labellers in :ref:`arviz.labels <labeller_api>` and override some of its methods
 
 One case where we might need to do use this approach is when non indexing coordinates are present.
 This happens for example after doing pointwise selection on multiple dimensions,
-but we can also add extra dimensions to our models manually.
+but we can also add extra dimensions to our models manually, as shown in TBD.
 For this example, let's use pointwise selection.
 Let's say one of the variables in the posterior represents a [covariance matrix](https://en.wikipedia.org/wiki/Covariance_matrix), and we want
 to keep it as is for other post-processing tasks instead of extracting the sub diagonal [triangular
