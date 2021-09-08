@@ -48,13 +48,13 @@ Following are a few rules which should be followed:
   - `inference_library`: the library used to run the inference.
   - `inference_library_version`: version of the inference library used.
 
-## Relations
+### Relations
 `InferenceData` data objects contain any combination of the groups described below. There are also some relations (detailed below) between the variables and dimensions of different groups. Hence, whenever related groups are present they should comply with these relations.
 
-### `posterior`
+#### `posterior`
 Samples from the posterior distribution p(theta|y).
 
-### `sample_stats`
+#### `sample_stats`
 Information and diagnostics for each `posterior` sample, provided by the inference
 backend. It may vary depending on the algorithm used by the backend (i.e. an affine
 invariant sampler has no energy associated). Therefore none of these parameters
@@ -73,42 +73,42 @@ The name convention used for `sample_stats` variables is the following:
   2^tree_dept`.
 * `diverging`: (boolean) Indicates the presence of leapfrog transitions with large energy deviation
   from starting and subsequent termination of the trajectory. "large" is defined as `max_energy_error` going over a threshold.
-* `energy`: The value of the [Hamiltonian energy](https://en.wikipedia.org/wiki/Hamiltonian_(quantum_mechanics)) for the accepted proposal (up to an
+* `energy`: The value of the Hamiltonian energy for the accepted proposal (up to an
 additive constant).
 * `energy_error`: The difference in the Hamiltonian energy between the initial point and
 the accepted proposal.
 * `max_energy_error`: The maximum absolute difference in Hamiltonian energy between the initial point and all possible samples in the proposed tree.
-* `int_time`: The total integration time (static [HMC sampler](https://www.mathworks.com/help/stats/hamiltoniansampler-class.html))
+* `int_time`: The total integration time (static HMC sampler)
 
 
-### `log_likelihood`
+#### `log_likelihood`
 Pointwise log likelihood data. Samples should match with `posterior` ones and its variables
 should match `observed_data` variables. The `observed_data` counterpart variable
 may have a different name. Moreover, some cases such as a multivariate normal
 may require some dimensions or coordinates to be different.
 
-### `posterior_predictive`
+#### `posterior_predictive`
 Posterior predictive samples p(y|y) corresponding to the posterior predictive distribution evaluated at the `observed_data`. Samples should match with `posterior` ones and its variables should match `observed_data` variables. The `observed_data` counterpart variable may have a different name.
 
-### `observed_data`
+#### `observed_data`
 Observed data on which the `posterior` is conditional. It should only contain data which is modeled as a random variable. Each variable should have a counterpart in `posterior_predictive`, however, the `posterior_predictive` counterpart variable may have a different name.
 
-### `constant_data`
+#### `constant_data`
 Model constants, data included in the model which is not modeled as a random variable. It should be the data used to generate samples in all the groups except the `predictions` groups.
 
-### `prior`
+#### `prior`
 Samples from the prior distribution p(theta). Samples do not need to match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. It should have matching variables with the `posterior` group.
 
-### `sample_stats_prior`
+#### `sample_stats_prior`
 Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in `sample_stats`.
 
-### `prior_predictive`
+#### `prior_predictive`
 Samples from the prior predictive distribution. Samples should match `prior` samples and each variable should have a counterpart in `posterior_predictive`/`observed_data`.
 
-### `predictions`
+#### `predictions`
 Out of sample posterior predictive samples p(y'|y). Samples should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` can have different coordinate values.
 
-### `predictions_constant_data`
+#### `predictions_constant_data`
 Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` can have different coordinate values.
 
 ## Planned features
