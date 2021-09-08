@@ -73,12 +73,12 @@ The name convention used for `sample_stats` variables is the following:
   2^tree_dept`.
 * `diverging`: (boolean) Indicates the presence of leapfrog transitions with large energy deviation
   from starting and subsequent termination of the trajectory. "large" is defined as `max_energy_error` going over a threshold.
-* `energy`: The value of the Hamiltonian energy for the accepted proposal (up to an
+* `energy`: The value of the [Hamiltonian energy](https://en.wikipedia.org/wiki/Hamiltonian_(quantum_mechanics)) for the accepted proposal (up to an
 additive constant).
 * `energy_error`: The difference in the Hamiltonian energy between the initial point and
 the accepted proposal.
 * `max_energy_error`: The maximum absolute difference in Hamiltonian energy between the initial point and all possible samples in the proposed tree.
-* `int_time`: The total integration time (static HMC sampler)
+* `int_time`: The total integration time (static [HMC sampler](https://www.mathworks.com/help/stats/hamiltoniansampler-class.html))
 
 
 ### `log_likelihood`
