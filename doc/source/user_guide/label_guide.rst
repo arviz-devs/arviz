@@ -42,7 +42,8 @@ Example: Using the labeller argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can use the ``labeller`` argument to customize labels.
-Unlike the default labels that show ``theta``, not ``$\theta$`` (generated from ``$\theta$`` using $\LaTeX$), the ``labeller`` argument presents the labels with proper math notation.
+Unlike the default labels that show ``theta``, not :math:`\theta` (generated from ``$\theta$`` using :math:`\LaTeX`), the ``labeller`` argument presents the labels with proper math notation.
+
 
 You can use :class:`~arviz.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
 
@@ -288,7 +289,7 @@ One case where we might need to do use this approach is when non indexing coordi
 This happens for example after doing pointwise selection on multiple dimensions,
 but we can also add extra dimensions to our models manually, as shown in TBD.
 For this example, let's use pointwise selection.
-Let's say one of the variables in the posterior represents a `covariance matrix <https://en.wikipedia.org/wiki/Covariance_matrix>`_ , and we want
+Let's say one of the variables in the posterior represents a `covariance matrix <https://en.wikipedia.org/wiki/Covariance_matrix>`_, and we want
 to keep it as is for other post-processing tasks instead of extracting the sub diagonal `triangular
 matrix <https://en.wikipedia.org/wiki/Triangular_matrix)>`_ with no repeated info as a flattened array. Or any other pointwise selection.
 
