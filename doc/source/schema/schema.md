@@ -48,6 +48,7 @@ Following are a few rules which should be followed:
   - `inference_library`: the library used to run the inference.
   - `inference_library_version`: version of the inference library used.
 
+## Relations
 `InferenceData` data objects contain any combination of the groups described below. There are also some relations (detailed below) between the variables and dimensions of different groups. Hence, whenever related groups are present they should comply with these relations.
 
 ### `posterior`
