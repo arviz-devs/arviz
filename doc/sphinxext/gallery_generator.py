@@ -280,7 +280,7 @@ class ExampleGenerator:
 
     @property
     def sphinxtag(self):
-        return self.modulename
+        return f"example_{self.basename}"
 
     @property
     def pagetitle(self):
