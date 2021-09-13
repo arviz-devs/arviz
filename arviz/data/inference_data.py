@@ -1394,7 +1394,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 )
             dataset = getattr(other, group)
             setattr(self, group, dataset)
-            if not hasattr(self, group):
+            if group not in self._groups and self._groups_warmup:
                 if group.startswith(WARMUP_TAG):
                     self._groups_warmup.append(group)
                 else:
