@@ -17,7 +17,7 @@ Currently there are **two beta implementations** of this design:
   - [Turing.jl](https://turing.ml/dev/) and indirectly any package using [MCMCChains.jl](https://github.com/TuringLang/MCMCChains.jl) to store results
 
 ## Terminology
-The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the {ref}`InferenceData <creating_InferenceData>` case.
+The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the {ref}`InferenceData <xarray_for_arviz>` case.
 
 * **Variable**: NetCDF-like variables are multidimensional labeled arrays representing a single quantity. Variables and their dimensions must be named. They can also have attributes describing it. Relevant terms related to `InferenceData` variables are following:
   - *variable_name*
