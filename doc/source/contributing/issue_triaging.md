@@ -1,19 +1,24 @@
 # Issue Triaging
 
 
-As a community- driven, open source collective, we value all user contributions. 
-A central part of reporting issues is triaging. If you wish to contribute but cannot do so on a regular basis; you can consider helping with issue triaging. Traiging allows you the flexibility to do this around your other responsibilities, or scheduling some time for it on a regular basis
+As a community- driven, open source collective, we value all user contributions at Arviz. While most users tend to look for ways to contribute code via PRs, we welcome users wanting to help with issue traiging. 
 
-The first step for you to get started would be to make sure you subscribe and get notifications of any new issue our team runs into. You can then chose to work on it at the moment or come back to it later. Staying subscribed will ensure you are notified whenever issues are created or updated and can, therefore, see where your help might be needed. 
+We consider isssue triaging a central part of reporting issues. And the benefits with traiging are -
+- Flexibility : Since it is not as time consuming as coding, you can do this around your other responsibilities, or scheduling some time for it on a regular basis. 
+- Also most traige issues require minimimal to no coding; making it less time consuming.
+
+If you wish to get started as an issue traiger with Arviz, you will need subscribe to Arviz issues and follow community contributing guidelines. 
 
 ## How to subscribe to ArviZ issues
 
+The first step for you to get started would be to make sure you subscribe and get notifications of any new issue our team runs into. You can then chose to work on it at the moment or come back to it later. Staying subscribed will ensure you are notified whenever issues are created or updated and can, therefore, see where your help might be needed. 
+
 If you are not familiar on how to set up notifications on github, please check the following - [Setting Up Notifications on GitHub](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
-Once you are set up, you can [view your subscriptions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/viewing-your-subscriptions) and [manage your subscritions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/managing-your-subscriptions) to ensure you are not being inundated with the volume and are getting notiifcations only to issues of your interest. ,
+Once you are set up, you can [view your subscriptions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/viewing-your-subscriptions) and [manage your subscritions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/managing-your-subscriptions) to ensure you are not being inundated with the volume and are getting notiifcations only to issues of your interest.
 
 ## Contribution Guidelines
 
-As an occasional contributor, you may not have all access or permissions when you contribute with issue triaging. However, here are some guidlenies to help ensure you are following our community practices.
+As a occasional contributor, you will not have all-access or permissions. However,it is important to note that,a majority of our issues can be resolved without seeking exrta permissions. 
 
 - Make sure the issue contains a minimal working example, if relevant. Sometimes, the issue doesn't contain an example, however, it is still clear about the problem. In that scenario, someone other than the ‘issue author’ can generate an example.
 - Make sure the issue is clear and has references, if needed. If an issue is not completely clear, the issue triagers can comment by asking for clarifications or adding extra references so the issue is clear enough for someone else to start working on. For example - Ensure dimension order can be anything #1693 (whole discussion), Posterior plot errors with boolean array #1694 (comment)
