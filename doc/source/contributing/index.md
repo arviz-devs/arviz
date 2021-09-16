@@ -3,12 +3,12 @@
 As a scientific, community-driven, open source software project,
 ArviZ welcomes contributions from interested individuals or groups.
 These guidelines are provided to give potential contributors information
-to make their contribution compliant with the conventions of the ArviZ project,
+to make their contributions compliant with the conventions of the ArviZ project,
 and maximize the probability of such contributions to be merged as quickly
 and efficiently as possible.
 
 Even though contributing code or documentation by sending pull requests on
-the main ArviZ GitHub repository is the most common way of contributing and
+the main [ArviZ GitHub repository](https://github.com/arviz-devs/arviz) is the most common way of contributing and
 therefore also what this guide dedicates more resources, ArviZ welcomes
 any kind of contributions.
 As a clear proof, you can become a core contributor and participate in
