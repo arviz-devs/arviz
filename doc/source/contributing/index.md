@@ -23,9 +23,9 @@ There are 4 main ways of contributing to the ArviZ _codebase_
 (in descending order of difficulty or scope):
 
 1. Adding new or improved functionality to the existing codebase.
-2. Fixing outstanding issues (bugs) with the existing codebase. They range from low-level software bugs to higher-level design problems.
-3. Contributing or improving the documentation (`docs`) or examples (`arviz/examples`).
-4. Submitting issues related to bugs or desired enhancements. Check the details at {doc}`issue_reports`.
+2. Fixing outstanding [issues](https://github.com/arviz-devs/arviz/issues) (bugs) with the existing codebase. They range from low-level software bugs to higher-level design problems.
+3. Contributing or improving the documentation (`docs`) or examples {doc}`examples <_example_gallery>` {doc}`_example_gallery` {doc}`example_gallery` (`arviz/examples`).
+4. [Submitting issues](https://github.com/arviz-devs/arviz/issues/new/choose) related to bugs or desired enhancements. Check the details at {doc}`issue_reports`.
 
 Further information on how to contribute to ArviZ can be found on these specific pages:
 
