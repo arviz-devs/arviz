@@ -18,18 +18,18 @@ Before starting work on a pull request double-check that no one else
 is working on the ticket in both issue tickets and pull requests.
 
 ArviZ is a community-driven project and always has multiple people working
-on it at the same time. These guidelines define a set of rules to ensure
+on it simultaneously. These guidelines define a set of rules to ensure
 that we all make the most of our time and we don't have two contributors
-working on the same changes.
+working on the same changes. LEt's see what to do when you encounter the following scenarios:
 
 ### If an issue ticket exists
-If an issue exists check the ticket to ensure no one else has started work. If first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
+If an issue exists check the ticket to ensure no one else has started working on it. If you are first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
 
 ### If an issue ticket doesn't exist
 Open an issue ticket for the issue and state that you'll be solving the issue with a pull request. Optionally create a pull request and add `[WIP]` in the title to indicate Work in Progress.
 
 ### In the event of a conflict
-In the event of two or more people working on the same issue, the general precedence will go to the person who first commented in the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though, and the core contributors will make the best judgment call if needed.
+In the event of two or more people working on the same issue, the general precedence will go to the person who first commented on the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though, and the core contributors will make the best judgment call if needed.
 
 ### If the issue ticket has someone assigned to it
 If the issue is assigned then precedence goes to the assignee. However, if there has been no activity for 2 weeks from the assignment date, the ticket is open for all again and can be unassigned.
@@ -38,9 +38,8 @@ If the issue is assigned then precedence goes to the assignee. However, if there
 # Development process - summary
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/),
-clone it to your local machine, and develop on a feature branch.
-
-For some more instructions see the {ref}`pr_checklist`, for a detailed
+clone it to your local machine, and develop on a feature branch. the details of this process are listed on
+{ref}`pr_checklist`. For a detailed
 description of the recommended development process, see {ref}`developer_guide`.
 
 ## Code Formatting
@@ -72,8 +71,7 @@ however contributions including them are welcome.
 If changes are made to a method documented in the
 [ArviZ API Guide](https://numpydoc.readthedocs.io/en/latest/format.html)
 please consider adding inline documentation examples.
-`az.plot_posterior` is a particularly
-{func}`good example <arviz.plot_posterior>`.
+You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
 
 ## Tests
 Section in construction
@@ -82,15 +80,29 @@ Section in construction
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
-2. Clone your fork of the ArviZ repo from your GitHub account to your local disk, and add the base repository as a remote:
+2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
    ```bash
    $ git clone git@github.com:<your GitHub handle>/arviz.git
+   ```
+   or
+    ```bash
+   $ git clone https://github.com/<your GitHub handle>/arviz.git
+   ```
+
+3. Navigate to your arviz directory and add the base repository as a remote:
+
+   ```bash
    $ cd arviz
    $ git remote add upstream git@github.com:arviz-devs/arviz.git
    ```
+   or
+    ```bash
+   $ cd arviz
+   $ git remote add upstream https://github.com/arviz-devs/arviz
+   ```
 
-3. Create a ``feature`` branch to hold your development changes:
+4. Create a ``feature`` branch to hold your development changes:
 
    ```bash
    $ git checkout -b my-feature
@@ -98,7 +110,7 @@ Section in construction
 
    Always use a ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
 
-4. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
+5. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
 
    ```bash
    $ pip install -r requirements.txt
@@ -106,10 +118,9 @@ Section in construction
    $ pip install -r requirements-docs.txt  # to generate docs locally
    ```
 
-   Alternatively, there is a script to create a docker environment for development.
-   See: {ref}`developing_in_docker`
+   Alternatively, for developing the project in [Docker](https://docs.docker.com/), there is a script to setup the Docker environment for development. See {ref}`developing_in_docker`.
 
-5. Develop the feature on your feature branch. Add changed files using ``git add`` and then ``git commit`` files:
+5. Develop the feature on your feature branch. Add your changes using git commands, ``git add`` and then ``git commit``, like:
 
    ```bash
    $ git add modified_files
@@ -129,7 +140,7 @@ Section in construction
    $ git push -u origin my-feature
    ```
 
-6. Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
+7. Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
 
 (pr_checklist)=
 # Pull request checklist
