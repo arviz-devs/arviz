@@ -20,7 +20,7 @@ is working on the ticket in both issue tickets and pull requests.
 ArviZ is a community-driven project and always has multiple people working
 on it simultaneously. These guidelines define a set of rules to ensure
 that we all make the most of our time and we don't have two contributors
-working on the same changes. LEt's see what to do when you encounter the following scenarios:
+working on the same changes. Let's see what to do when you encounter the following scenarios:
 
 ### If an issue ticket exists
 If an issue exists check the ticket to ensure no one else has started working on it. If you are first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
