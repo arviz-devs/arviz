@@ -94,7 +94,7 @@ class CmdStanConverter:
         elif isinstance(dtypes, str):
             dtypes_path = Path(dtypes)
             if dtypes_path.exists():
-                with dtypes_path.open("r") as f_obj:
+                with dtypes_path.open("r", encoding="UTF-8") as f_obj:
                     model_code = f_obj.read()
             else:
                 model_code = dtypes
