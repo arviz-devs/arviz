@@ -629,9 +629,7 @@ def get_coords(data, coords):
 
         except ValueError as err:
             invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError(
-                f"Coords {invalid_coords} are invalid coordinate keys"
-            ) from err
+            raise ValueError(f"Coords {invalid_coords} are invalid coordinate keys") from err
 
         except KeyError as err:
             raise KeyError(

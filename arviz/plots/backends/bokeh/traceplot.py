@@ -381,7 +381,7 @@ def _plot_chains_bokeh(
                 x=x_name,
                 y=y_name,
                 source=cds,
-                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
+                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx),
             )
             if marker:
                 ax_trace.circle(
@@ -390,7 +390,7 @@ def _plot_chains_bokeh(
                     source=cds,
                     radius=0.30,
                     alpha=0.5,
-                    **dealiase_sel_kwargs({}, chain_prop, chain_idx)
+                    **dealiase_sel_kwargs({}, chain_prop, chain_idx),
                 )
         if not combined:
             rug_kwargs["cds"] = cds

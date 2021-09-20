@@ -332,9 +332,7 @@ def plot_pair(
                 if j != vars_to_plot - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax[j, i].set_xlabel(
-                        f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True
-                    )
+                    ax[j, i].set_xlabel(f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True)
                 if i != 0:
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:

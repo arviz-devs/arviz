@@ -96,7 +96,7 @@ def plot_joint(
             backend="bokeh",
             backend_kwargs={},
             show=False,
-            **joint_kwargs
+            **joint_kwargs,
         )
     else:
         if gridsize == "auto":
@@ -115,7 +115,7 @@ def plot_joint(
             backend="bokeh",
             backend_kwargs={},
             show=False,
-            **marginal_kwargs
+            **marginal_kwargs,
         )
 
     show_layout([[ax_hist_x, None], [axjoin, ax_hist_y]], show, force_layout=True)

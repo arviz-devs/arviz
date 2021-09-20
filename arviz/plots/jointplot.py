@@ -163,9 +163,7 @@ def plot_joint(
     plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
 
     if len(plotters) != 2:
-        raise Exception(
-            f"Number of variables to be plotted must 2 (you supplied {len(plotters)})"
-        )
+        raise Exception(f"Number of variables to be plotted must 2 (you supplied {len(plotters)})")
 
     plot_joint_kwargs = dict(
         ax=ax,

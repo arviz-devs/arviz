@@ -120,9 +120,7 @@ def plot_separation(
             label_y_hat = y_hat
             y_hat = idata.posterior_predictive[y_hat].mean(dim=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
-            raise ValueError(
-                f"y_hat must be of types array, DataArray or str, not {type(y_hat)}"
-            )
+            raise ValueError(f"y_hat must be of types array, DataArray or str, not {type(y_hat)}")
 
     if len(y) != len(y_hat):
         warnings.warn(

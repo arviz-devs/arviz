@@ -397,9 +397,7 @@ def plot_trace(
                 else:
                     line_values = np.atleast_1d(vlines).ravel()
                     if not np.issubdtype(line_values.dtype, np.number):
-                        raise ValueError(
-                            f"line-positions should be numeric, found {line_values}"
-                        )
+                        raise ValueError(f"line-positions should be numeric, found {line_values}")
                 if idy:
                     ax.hlines(
                         line_values,

@@ -314,9 +314,7 @@ def get_plotting_function(plot_name, plot_module, backend):
 
     # Perform import of plotting method
     # TODO: Convert module import to top level for all plots
-    module = importlib.import_module(
-        f"arviz.plots.backends.{backend}.{plot_module}"
-    )
+    module = importlib.import_module(f"arviz.plots.backends.{backend}.{plot_module}")
 
     plotting_method = getattr(module, plot_name)
 

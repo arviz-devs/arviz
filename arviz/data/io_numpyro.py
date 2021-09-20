@@ -35,7 +35,7 @@ class NumPyroConverter:
         coords=None,
         dims=None,
         pred_dims=None,
-        num_chains=1
+        num_chains=1,
     ):
         """Convert NumPyro data into an InferenceData object.
 
@@ -92,8 +92,7 @@ class NumPyroConverter:
                 # (e.g. f(x) = x ** 2)
                 tree_flatten_samples = jax.tree_util.tree_flatten(samples)[0]
                 samples = {
-                    f"Param:{i}": jax.device_get(v)
-                    for i, v in enumerate(tree_flatten_samples)
+                    f"Param:{i}": jax.device_get(v) for i, v in enumerate(tree_flatten_samples)
                 }
             self._samples = samples
             self.nchains, self.ndraws = (
@@ -333,7 +332,7 @@ def from_numpyro(
     coords=None,
     dims=None,
     pred_dims=None,
-    num_chains=1
+    num_chains=1,
 ):
     """Convert NumPyro data into an InferenceData object.
 

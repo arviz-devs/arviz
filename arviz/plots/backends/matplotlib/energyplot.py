@@ -91,7 +91,7 @@ def plot_energy(
                 alpha=alpha,
                 label=label,
                 color=color,
-                **plot_kwargs
+                **plot_kwargs,
             )
 
     else:

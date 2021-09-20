@@ -577,9 +577,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                                     (f"{name}[{','.join(map(str, idxs))}]", *coords)
                                 )
                             else:
-                                tuple_columns.append(
-                                    f"{name}[{','.join(map(str, idxs))}]"
-                                )
+                                tuple_columns.append(f"{name}[{','.join(map(str, idxs))}]")
                         else:
                             tuple_columns.append((name, *coords))
 
@@ -1801,7 +1799,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
             )
 
     if dim is not None and dim.lower() not in {"group", "chain", "draw"}:
-        msg = f"Invalid `dim`: {dim}. Valid `dim` are {{\"group\", \"chain\", \"draw\"}}"
+        msg = f'Invalid `dim`: {dim}. Valid `dim` are {{"group", "chain", "draw"}}'
         raise TypeError(msg)
     dim = dim.lower() if dim is not None else dim
 

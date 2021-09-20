@@ -225,7 +225,7 @@ def plot_ppc(
                     linewidth=linewidth,
                     label="Observed",
                     drawstyle=drawstyle,
-                    zorder=3
+                    zorder=3,
                 )
             if animated:
                 animate, init = _set_animation(
@@ -250,7 +250,7 @@ def plot_ppc(
                     alpha=alpha,
                     color=colors[0],
                     drawstyle=drawstyle,
-                    linewidth=linewidth
+                    linewidth=linewidth,
                 )
             ax_i.plot([], color=colors[0], label="Posterior predictive")
             if mean:
@@ -260,7 +260,7 @@ def plot_ppc(
                     linestyle="--",
                     linewidth=linewidth * 1.5,
                     drawstyle=drawstyle,
-                    label="Posterior predictive mean"
+                    label="Posterior predictive mean",
                 )
             ax_i.set_yticks([0, 0.5, 1])
 

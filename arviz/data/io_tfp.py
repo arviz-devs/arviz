@@ -23,7 +23,7 @@ class TfpConverter:
         chain_dim=None,
         observed=None,
         coords=None,
-        dims=None
+        dims=None,
     ):
 
         self.posterior = posterior
@@ -195,7 +195,7 @@ def from_tfp(
     chain_dim=None,
     observed=None,
     coords=None,
-    dims=None
+    dims=None,
 ):
     """Convert tfp data into an InferenceData object."""
     return TfpConverter(

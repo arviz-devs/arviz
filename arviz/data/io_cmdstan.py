@@ -31,9 +31,7 @@ def check_glob(path, group, disable_glob):
         path_glob = glob(path)
         if path_glob:
             path = sorted(path_glob)
-            msg = "\n".join(
-                f"{i}: {os.path.normpath(fpath)}" for i, fpath in enumerate(path, 1)
-            )
+            msg = "\n".join(f"{i}: {os.path.normpath(fpath)}" for i, fpath in enumerate(path, 1))
             len_p = len(path)
             _log.info("glob found %d files for '%s':\n%s", len_p, group, msg)
     return path

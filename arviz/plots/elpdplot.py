@@ -144,9 +144,7 @@ def plot_elpd(
     if coords is None:
         coords = {}
 
-    pointwise_data = [
-        get_coords(compare_dict[model][f"{ic}_i"], coords) for model in models
-    ]
+    pointwise_data = [get_coords(compare_dict[model][f"{ic}_i"], coords) for model in models]
     xdata = np.arange(pointwise_data[0].size)
     coord_labels = format_coords_as_labels(pointwise_data[0]) if xlabels else None
 

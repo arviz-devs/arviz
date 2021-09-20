@@ -207,9 +207,7 @@ def plot_ppc(
 
     for groups in (f"{group}_predictive", "observed_data"):
         if not hasattr(data, groups):
-            raise TypeError(
-                f'`data` argument must have the group "{groups}" for ppcplot'
-            )
+            raise TypeError(f'`data` argument must have the group "{groups}" for ppcplot')
 
     if kind.lower() not in ("kde", "cumulative", "scatter"):
         raise TypeError("`kind` argument must be either `kde`, `cumulative`, or `scatter`")
@@ -279,8 +277,7 @@ def plot_ppc(
         or num_pp_samples > total_pp_samples
     ):
         raise TypeError(
-            "`num_pp_samples` must be an integer between 1 and "
-            + f"{total_pp_samples}."
+            "`num_pp_samples` must be an integer between 1 and " + f"{total_pp_samples}."
         )
 
     pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples, replace=False)
