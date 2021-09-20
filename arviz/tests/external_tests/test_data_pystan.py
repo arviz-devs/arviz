@@ -294,7 +294,7 @@ class TestDataPyStan:
                     if "[" in key:
                         name, *shape = key.replace("]", "").split("[")
                         shape = [str(int(item) - 1) for items in shape for item in items.split(",")]
-                        key = name + "[{}]".format(",".join(shape))
+                        key = name + f"[{','.join(shape)}]"
                     new_chains[key] = np.full_like(values, fill_value=float(i))
                 setattr(holder, "chains", new_chains)
             fit.sim["fnames_oi"] = list(fit.sim["samples"][0].chains.keys())

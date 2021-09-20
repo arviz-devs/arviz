@@ -169,7 +169,7 @@ def plot_dist(
         )
 
     if kind not in ["auto", "kde", "hist"]:
-        raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
+        raise TypeError(f'Invalid "kind":{kind}. Select from {{"auto","kde","hist"}}')
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else rcParams["plot.density_kind"]

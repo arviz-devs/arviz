@@ -164,7 +164,7 @@ def plot_joint(
 
     if len(plotters) != 2:
         raise Exception(
-            "Number of variables to be plotted must 2 (you supplied {})".format(len(plotters))
+            f"Number of variables to be plotted must 2 (you supplied {len(plotters)})"
         )
 
     plot_joint_kwargs = dict(

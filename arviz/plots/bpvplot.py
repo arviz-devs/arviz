@@ -170,9 +170,9 @@ def plot_bpv(
     if group not in ("posterior", "prior"):
         raise TypeError("`group` argument must be either `posterior` or `prior`")
 
-    for groups in ("{}_predictive".format(group), "observed_data"):
+    for groups in (f"{group}_predictive", "observed_data"):
         if not hasattr(data, groups):
-            raise TypeError('`data` argument must have the group "{group}"'.format(group=groups))
+            raise TypeError(f'`data` argument must have the group "{groups}"')
 
     if kind.lower() not in ("t_stat", "u_value", "p_value"):
         raise TypeError("`kind` argument must be either `t_stat`, `u_value`, or `p_value`")

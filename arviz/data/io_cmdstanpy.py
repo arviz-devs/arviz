@@ -638,7 +638,7 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
             col_idxs = fit.sampler_vars_cols[item]
             raw_draws = draws[..., col_idxs[0]]
         else:
-            raise ValueError("fit data, unknown variable: {}".format(item))
+            raise ValueError(f"fit data, unknown variable: {item}")
         raw_draws = raw_draws.astype(dtypes.get(item))
         if save_warmup:
             sample_warmup[item] = raw_draws[:, :num_warmup, ...]

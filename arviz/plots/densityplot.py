@@ -184,7 +184,7 @@ def plot_density(
 
     if data_labels is None:
         if n_data > 1:
-            data_labels = ["{}".format(idx) for idx in range(n_data)]
+            data_labels = [f"{idx}" for idx in range(n_data)]
         else:
             data_labels = [""]
     elif len(data_labels) != n_data:

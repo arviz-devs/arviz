@@ -173,7 +173,7 @@ def plot_ess(
     valid_kinds = ("local", "quantile", "evolution")
     kind = kind.lower()
     if kind not in valid_kinds:
-        raise ValueError("Invalid kind, kind must be one of {} not {}".format(valid_kinds, kind))
+        raise ValueError(f"Invalid kind, kind must be one of {valid_kinds} not {kind}")
 
     if coords is None:
         coords = {}

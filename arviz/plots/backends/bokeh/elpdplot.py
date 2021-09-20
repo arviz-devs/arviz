@@ -201,5 +201,5 @@ def _plot_atomic_elpd(
         ax_.xaxis.minor_tick_line_color = None
         ax_.xaxis.major_label_text_font_size = "0pt"
     title = Title()
-    title.text = "{} - {}".format(model1, model2)
+    title.text = f"{model1} - {model2}"
     ax_.title = title

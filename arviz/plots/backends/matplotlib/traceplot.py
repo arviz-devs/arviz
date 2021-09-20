@@ -271,7 +271,7 @@ def plot_trace(
                 legend_labels = format_coords_as_labels(sub_data, skip_dims=("chain", "draw"))
                 legend_title = ", ".join(
                     [
-                        "{}".format(coord_name)
+                        f"{coord_name}"
                         for coord_name in sub_data.coords
                         if coord_name not in {"chain", "draw"}
                     ]
@@ -398,7 +398,7 @@ def plot_trace(
                     line_values = np.atleast_1d(vlines).ravel()
                     if not np.issubdtype(line_values.dtype, np.number):
                         raise ValueError(
-                            "line-positions should be numeric, found {}".format(line_values)
+                            f"line-positions should be numeric, found {line_values}"
                         )
                 if idy:
                     ax.hlines(

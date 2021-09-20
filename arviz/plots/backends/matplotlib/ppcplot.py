@@ -125,7 +125,7 @@ def plot_ppc(
             plot_kwargs = {"color": colors[0], "alpha": alpha, "linewidth": 0.5 * linewidth}
             if dtype == "i":
                 plot_kwargs["drawstyle"] = "steps-pre"
-            ax_i.plot([], color=colors[0], label="{} predictive".format(group.capitalize()))
+            ax_i.plot([], color=colors[0], label=f"{group.capitalize()} predictive")
             if observed:
                 if dtype == "f":
                     plot_kde(
@@ -178,7 +178,7 @@ def plot_ppc(
                         ax_i.plot(x_s, y_s, **plot_kwargs)
 
             if mean:
-                label = "{} predictive mean".format(group.capitalize())
+                label = f"{group.capitalize()} predictive mean"
                 if dtype == "f":
                     rep = len(pp_densities)
                     len_density = len(pp_densities[0])

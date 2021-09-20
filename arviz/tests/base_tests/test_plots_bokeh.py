@@ -142,7 +142,7 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(
             obj,
-            data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)],
+            data_labels=[f"bad_value_{i}" for i in range(len(obj) + 10)],
             backend="bokeh",
             show=False,
         )
@@ -541,7 +541,7 @@ def test_plot_forest_bad(models, model_fits):
     with pytest.raises(ValueError):
         plot_forest(
             obj,
-            model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)],
+            model_names=[f"model_name_{i}" for i in range(len(obj) + 10)],
             backend="bokeh",
             show=False,
         )

@@ -176,7 +176,7 @@ def plot_elpd(
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
                 ax[j, i].set_title(
-                    "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
+                    f"{models[i]} - {models[j + 1]}", fontsize=titlesize, wrap=True
                 )
         if xlabels:
             for i in range(len(ax)):

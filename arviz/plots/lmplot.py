@@ -223,7 +223,7 @@ def plot_lm(
         ):
             raise TypeError(
                 "`num_samples` must be an integer between 1 and "
-                + "{limit}.".format(limit=total_pp_samples)
+                + f"{total_pp_samples}."
             )
 
         pp_sample_ix = np.random.choice(total_pp_samples, size=num_samples, replace=False)

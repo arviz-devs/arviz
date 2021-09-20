@@ -263,11 +263,11 @@ def list_datasets():
     for name, resource in itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()):
 
         if isinstance(resource, LocalFileMetadata):
-            location = "local: {}".format(resource.filename)
+            location = f"local: {resource.filename}"
         elif isinstance(resource, RemoteFileMetadata):
-            location = "remote: {}".format(resource.url)
+            location = f"remote: {resource.url}"
         else:
             location = "unknown"
-        lines.append("{}\n{}\n{}\n{}".format(name, "=" * len(name), resource.description, location))
+        lines.append(f"{name}\n{'=' * len(name)}\n{resource.description}\n{location}")
 
-    return "\n\n{}\n\n".format(10 * "-").join(lines)
+    return f"\n\n{10 * '-'}\n\n".join(lines)

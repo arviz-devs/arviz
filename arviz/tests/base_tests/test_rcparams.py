@@ -288,7 +288,7 @@ def test_stats_information_criterion(models):
 
 def test_http_type_request(monkeypatch):
     def _urlretrive(url, _):
-        raise Exception("URL Retrieved: {}".format(url))
+        raise Exception(f"URL Retrieved: {url}")
 
     # Hijack url retrieve to inspect url passed
     monkeypatch.setattr(datasets, "urlretrieve", _urlretrive)

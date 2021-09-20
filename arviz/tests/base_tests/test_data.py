@@ -676,7 +676,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             if groups == "posterior":
                 if kwargs.get("include_coords", True) and kwargs.get("include_index", True):
                     assert any(
-                        "[{},".format(kwargs.get("index_origin", 0)) in item[0]
+                        f"[{kwargs.get('index_origin', 0)}," in item[0]
                         for item in test_data.columns
                         if isinstance(item, tuple)
                     )

@@ -47,7 +47,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
         try:
             value = typeof(value)
         except (ValueError, TypeError) as err:
-            raise ValueError("Could not convert to {}".format(typeof.__name__)) from err
+            raise ValueError(f"Could not convert to {typeof.__name__}") from err
         if isinstance(value, str):
             value = value.lower()
 
@@ -174,7 +174,7 @@ def _validate_bokeh_marker(value):
         "X",
     )
     if value not in all_markers:
-        raise ValueError("{} is not one of {}".format(value, all_markers))
+        raise ValueError(f"{value} is not one of {all_markers}")
     return value
 
 
@@ -210,7 +210,7 @@ def make_iterable_validator(scalar_validator, length=None, allow_none=False, all
         if np.iterable(value) and not isinstance(value, (set, frozenset)):
             val = tuple(scalar_validator(v) for v in value)
             if length is not None and len(val) != length:
-                raise ValueError("Iterable must be of length: {}".format(length))
+                raise ValueError(f"Iterable must be of length: {length}")
             return val
         raise ValueError("Only ordered iterable values are valid")
 
@@ -325,7 +325,7 @@ class RcParams(MutableMapping):
             try:
                 cval = self.validate[key](val)
             except ValueError as verr:
-                raise ValueError("Key %s: %s" % (key, str(verr))) from verr
+                raise ValueError(f"Key {key}: {str(verr)}") from verr
             self._underlying_storage[key] = cval
         except KeyError as err:
             raise KeyError(
@@ -375,7 +375,7 @@ class RcParams(MutableMapping):
             width=80 - indent,
         ).split("\n")
         repr_indented = ("\n" + " " * indent).join(repr_split)
-        return "{}({})".format(class_name, repr_indented)
+        return f"{class_name}({repr_indented})"
 
     def __str__(self):
         """Customize str/print of RcParams objects."""
@@ -491,7 +491,7 @@ def read_rcfile(fname):
                 except ValueError as verr:
                     error_details = _error_details_fmt % (line_no, line, fname)
                     raise ValueError(
-                        "Bad val {} on {}\n\t{}".format(val, error_details, str(verr))
+                        f"Bad val {val} on {error_details}\n\t{str(verr)}"
                     ) from verr
 
         except UnicodeDecodeError:

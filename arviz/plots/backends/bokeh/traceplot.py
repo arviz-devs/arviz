@@ -376,7 +376,7 @@ def _plot_chains_bokeh(
     for chain_idx, cds in data.items():
         if kind == "trace":
             if legend:
-                trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
+                trace_kwargs["legend_label"] = f"chain {chain_idx}"
             ax_trace.line(
                 x=x_name,
                 y=y_name,
@@ -395,7 +395,7 @@ def _plot_chains_bokeh(
         if not combined:
             rug_kwargs["cds"] = cds
             if legend:
-                plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
+                plot_kwargs["legend_label"] = f"chain {chain_idx}"
             plot_dist(
                 cds.data[y_name],
                 ax=ax_density,

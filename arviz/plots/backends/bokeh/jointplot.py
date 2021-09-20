@@ -71,7 +71,7 @@ def plot_joint(
         ax_hist_x, _ = ax[0]
         axjoin, ax_hist_y = ax[1]
     else:
-        raise ValueError("ax must be of length 3 but found {}".format(len(ax)))
+        raise ValueError(f"ax must be of length 3 but found {len(ax)}")
 
     # Set labels for axes
     x_var_name = make_label(plotters[0][0], plotters[0][1])

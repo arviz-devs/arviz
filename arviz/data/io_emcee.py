@@ -61,13 +61,13 @@ def _verify_names(sampler, var_names, arg_names, slices):
         )
     if len(slicing_try) != len(set(slicing_try)):
         warnings.warn(
-            "Overlapping slices. Check the index present: {}".format(slicing_try), UserWarning
+            f"Overlapping slices. Check the index present: {slicing_try}", UserWarning
         )
 
     if var_names is None:
-        var_names = ["var_{}".format(idx) for idx in range(num_vars)]
+        var_names = [f"var_{idx}" for idx in range(num_vars)]
     if arg_names is None:
-        arg_names = ["arg_{}".format(idx) for idx in range(num_args)]
+        arg_names = [f"arg_{idx}" for idx in range(num_args)]
 
     if len(var_names) != num_vars:
         raise ValueError(

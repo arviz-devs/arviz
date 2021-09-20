@@ -287,7 +287,7 @@ class DictConverter:
     def data_to_xarray(self, data, group, dims=None):
         """Convert data to xarray."""
         if not isinstance(data, dict):
-            raise TypeError("DictConverter.{} is not a dictionary".format(group))
+            raise TypeError(f"DictConverter.{group} is not a dictionary")
         if dims is None:
             dims = {} if self.dims is None else self.dims
         return dict_to_dataset(

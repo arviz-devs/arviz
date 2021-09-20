@@ -205,10 +205,10 @@ def plot_ppc(
     if group not in ("posterior", "prior"):
         raise TypeError("`group` argument must be either `posterior` or `prior`")
 
-    for groups in ("{}_predictive".format(group), "observed_data"):
+    for groups in (f"{group}_predictive", "observed_data"):
         if not hasattr(data, groups):
             raise TypeError(
-                '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
+                f'`data` argument must have the group "{groups}" for ppcplot'
             )
 
     if kind.lower() not in ("kde", "cumulative", "scatter"):
@@ -280,7 +280,7 @@ def plot_ppc(
     ):
         raise TypeError(
             "`num_pp_samples` must be an integer between 1 and "
-            + "{limit}.".format(limit=total_pp_samples)
+            + f"{total_pp_samples}."
         )
 
     pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples, replace=False)

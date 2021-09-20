@@ -220,8 +220,8 @@ def plot_pair(
                 reference_values_copy[flat_var_names[1]],
                 **reference_values_kwargs,
             )
-        ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
-        ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
+        ax.set_xlabel(f"{flat_var_names[0]}", fontsize=ax_labelsize, wrap=True)
+        ax.set_ylabel(f"{flat_var_names[1]}", fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
 
     else:
@@ -333,13 +333,13 @@ def plot_pair(
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
                     ax[j, i].set_xlabel(
-                        "{}".format(flat_var_names[i]), fontsize=ax_labelsize, wrap=True
+                        f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True
                     )
                 if i != 0:
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
                     ax[j, i].set_ylabel(
-                        "{}".format(flat_var_names[j + not_marginals]),
+                        f"{flat_var_names[j + not_marginals]}",
                         fontsize=ax_labelsize,
                         wrap=True,
                     )

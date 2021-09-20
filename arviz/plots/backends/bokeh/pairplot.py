@@ -171,10 +171,10 @@ def plot_pair(
     if len(flat_var_names) == len(list(set(flat_var_names))):
         source_dict = dict(zip(flat_var_names, [list(post[-1].flatten()) for post in plotters]))
     else:
-        tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
+        tmp_flat_var_names = [f"{name}__{str(uuid4())}" for name in flat_var_names]
         source_dict = dict(zip(tmp_flat_var_names, [list(post[-1].flatten()) for post in plotters]))
     if divergences:
-        divergenve_name = "divergences_{}".format(str(uuid4()))
+        divergenve_name = f"divergences_{str(uuid4())}"
         source_dict[divergenve_name] = np.array(diverging_mask).astype(bool).astype(int).astype(str)
 
     source = ColumnDataSource(data=source_dict)
@@ -224,8 +224,8 @@ def plot_pair(
                 backend_kwargs_copy = backend_kwargs.copy()
                 if "scatter" in kind:
                     tooltips = [
-                        (var2, "@{{{}}}".format(var2)),
-                        (var1, "@{{{}}}".format(var1)),
+                        (var2, f"@{{{var2}}}"),
+                        (var1, f"@{{{var1}}}"),
                     ]
                     backend_kwargs_copy.setdefault("tooltips", tooltips)
                 else:

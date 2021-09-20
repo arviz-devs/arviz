@@ -31,7 +31,7 @@ class TfpConverter:
         if var_names is None:
             self.var_names = []
             for i in range(0, len(posterior)):
-                self.var_names.append("var_{0}".format(i))
+                self.var_names.append(f"var_{i}")
         else:
             self.var_names = var_names
 
