@@ -151,33 +151,33 @@ We recommend that your contribution complies with the following guidelines befor
 
 * All public methods must have informative docstrings with sample usage when appropriate.
 
-* Please prefix the title of incomplete contributions with `[WIP]` (to indicate a work in progress). WIPs may be useful to (1) indicate you are working on something to avoid duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
+* Please prefix the title of incomplete contributions with `[WIP]` (to indicate a work in progress). WIPs may be useful to (1) indicate you are working on something to avoid duplicated work, (2) request a broad review of functionality or API, or (3) seek collaborators.
 
 * All other tests pass when everything is rebuilt from scratch.
 See {ref}`developing_in_docker` for information on running the test suite locally.
 
-* When adding additional plotting functionality, provide at least one example script in the ``arviz/examples/`` folder. Have a look at other examples for reference. Examples should demonstrate why the new functionality is useful in practice and, if possible, compare it to other methods available in ArviZ.
+* When adding additional plotting functionality, provide at least one example script in the [arviz/examples/](https://github.com/arviz-devs/arviz/tree/main/examples) folder. Have a look at other examples for reference. Examples should demonstrate why the new functionality is useful in practice and, if possible, compare it to other methods available in ArviZ.
 
-* Added tests follow the [pytest fixture pattern](https://docs.pytest.org/en/latest/fixture.html#fixture)
+* Added tests follow the [pytest fixture pattern](https://docs.pytest.org/en/latest/fixture.html#fixture).
 
 * Documentation and high-coverage tests are necessary for enhancements to be accepted.
 
-* Documentation follows Numpy style guide
+* Documentation follows Numpy style guide.
 
 * Run any of the pre-existing examples in ``docs/source/notebooks`` that contain analyses that would be affected by your changes to ensure that nothing breaks. This is a useful opportunity to not only check your work for bugs that might not be revealed by unit test, but also to show how your contribution improves ArviZ for end users.
 
-* If modifying a plot, render your plot to inspect for changes and copy image in the pull request message on Github
+* If modifying a plot, render your plot to inspect for changes and copy image in the pull request message on Github.
 
 You can also check for common programming errors with the following
 tools:
 
-* Save plots as part of tests. Plots will save to a directory named test_images by default
+* Save plots as part of tests. Plots will be saved to a directory named `test_images` by default.
 
   ```bash
   $ pytest arviz/tests/base_tests/<name of test>.py --save
   ```
 
-* Optionally save plots to a user named directory. This is useful for comparing changes across branches
+* Optionally save plots to a user named directory. This is useful for comparing changes across branches.
 
   ```bash
   $ pytest arviz/tests/base_tests/<name of test>.py --save user_defined_directory
