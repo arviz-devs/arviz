@@ -64,7 +64,7 @@ def plot_autocorr(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_config: dict, optional
-        Currently specifies the bounds to use for bokeh axes. Defaults to value set in :class:`rcParams`.
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in :class:`arviz.RcParams`.
     backend_kwargs: dict, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
