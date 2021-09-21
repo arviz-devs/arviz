@@ -86,6 +86,13 @@ jupyter_execute_notebooks = "auto"
 execution_excludepatterns = ["*.ipynb"]
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
+myst_enable_extensions = [
+    "colon_fence",
+    # "deflist",
+    "dollarmath",
+    "amsmath"
+]
+
 
 # The base toctree document.
 master_doc = "index"
