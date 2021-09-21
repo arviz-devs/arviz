@@ -246,7 +246,7 @@ def format_coords_as_labels(dataarray, skip_dims=None):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])
         coord_labels[:] = [fmt.format(*x) for x in coord_labels]
     else:
-        coord_labels[:] = ["{}".format(s) for s in coord_labels]
+        coord_labels[:] = [f"{s}" for s in coord_labels]
     return coord_labels
 
 
@@ -314,11 +314,7 @@ def get_plotting_function(plot_name, plot_module, backend):
 
     # Perform import of plotting method
     # TODO: Convert module import to top level for all plots
-    module = importlib.import_module(
-        "arviz.plots.backends.{backend}.{plot_module}".format(
-            backend=backend, plot_module=plot_module
-        )
-    )
+    module = importlib.import_module(f"arviz.plots.backends.{backend}.{plot_module}")
 
     plotting_method = getattr(module, plot_name)
 

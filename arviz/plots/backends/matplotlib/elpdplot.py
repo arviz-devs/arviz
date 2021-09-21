@@ -175,9 +175,7 @@ def plot_elpd(
                     ax[j, i].set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
-                ax[j, i].set_title(
-                    "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
-                )
+                ax[j, i].set_title(f"{models[i]} - {models[j + 1]}", fontsize=titlesize, wrap=True)
         if xlabels:
             for i in range(len(ax)):
                 set_xticklabels(ax[-1, i], coord_labels)

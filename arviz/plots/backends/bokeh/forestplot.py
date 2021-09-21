@@ -219,7 +219,7 @@ class PlotHandler:
 
         if model_names is None:
             if len(self.data) > 1:
-                model_names = ["Model {}".format(idx) for idx, _ in enumerate(self.data)]
+                model_names = [f"Model {idx}" for idx, _ in enumerate(self.data)]
             else:
                 model_names = [""]
         elif len(model_names) != len(self.data):
@@ -544,7 +544,7 @@ class PlotHandler:
                     )
                 )
         _title = Title()
-        _title.text = "{:.1%} HDI".format(hdi_prob)
+        _title.text = f"{hdi_prob:.1%} HDI"
         ax.title = _title
 
         return ax

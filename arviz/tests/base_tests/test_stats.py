@@ -310,7 +310,7 @@ def test_summary_labels():
     column_order = []
     for coord1 in coords1:
         for coord2 in coords2:
-            column_order.append("a[{}, {}]".format(coord1, coord2))
+            column_order.append(f"a[{coord1}, {coord2}]")
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
 
@@ -645,7 +645,7 @@ def test_loo_pit_bad_input_type(centered_eight, arg):
     """Test wrong input type (not None, str not DataArray."""
     kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
     kwargs[arg] = 2  # use int instead of array-like
-    with pytest.raises(ValueError, match="not {}".format(type(2))):
+    with pytest.raises(ValueError, match=f"not {type(2)}"):
         loo_pit(idata=centered_eight, **kwargs)
 
 

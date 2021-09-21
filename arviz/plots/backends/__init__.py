@@ -208,7 +208,7 @@ def _copy_docstring(lib, function):
         func = getattr(module, function)
         doc = func.__doc__
     except ImportError:
-        doc = "Failed to import function {} from {}".format(function, lib)
+        doc = f"Failed to import function {function} from {lib}"
 
     if not isinstance(doc, str):
         doc = ""

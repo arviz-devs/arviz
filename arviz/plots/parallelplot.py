@@ -146,7 +146,7 @@ def plot_parallel(
         elif norm_method == "rank":
             _posterior = rankdata(_posterior, axis=1, method="average")
         else:
-            raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
+            raise ValueError(f"{norm_method} is not supported. Use normal, minmax or rank.")
 
     parallel_kwargs = dict(
         ax=ax,
