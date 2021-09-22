@@ -1,6 +1,6 @@
 (wrapper_guide)=
 # Sampling wrappers
-Sampling wrappers allow ArviZ to call [PPL](## "Probabilistic programming library")s [PPL](a "Probabilistic programming library")s in order to perform a limited
+Sampling wrappers allow ArviZ to call PPLs in order to perform a limited
 subset of their capabilities and calculate stats and diagnostics that require
 refitting the model on different data.
 
