@@ -90,6 +90,26 @@ Section in construction
    $ git clone https://github.com/<your GitHub handle>/arviz.git
    ```
 
+::::{tab-set}
+
+:::{tab-item} SSH
+:sync: ssh
+
+   ```bash
+   $ git clone git@github.com:<your GitHub handle>/arviz.git
+   ```
+:::
+
+:::{tab-item} HTTPS
+:sync: https
+
+   ```bash
+   $ git clone https://github.com/<your GitHub handle>/arviz.git
+   ```
+:::
+
+::::
+
 3. Navigate to your arviz directory and add the base repository as a remote:
 
    ```bash
@@ -101,6 +121,28 @@ Section in construction
    $ cd arviz
    $ git remote add upstream https://github.com/arviz-devs/arviz
    ```
+
+::::{tab-set}
+
+:::{tab-item} SSH
+:sync: ssh
+
+   ```bash
+   $ cd arviz
+   $ git remote add upstream git@github.com:arviz-devs/arviz.git
+   ```
+:::
+
+:::{tab-item} HTTPS
+:sync: https
+
+   ```bash
+   $ cd arviz
+   $ git remote add upstream https://github.com/arviz-devs/arviz
+   ```
+:::
+
+::::
 
 4. Create a ``feature`` branch to hold your development changes:
 
