@@ -80,32 +80,6 @@ Section in construction
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
-::::{tab-set}
-
-:::{tab-item} Label1
-Content 1
-:::
-
-:::{tab-item} Label2
-Content 2
-:::
-
-::::
-
-
-okay 2nd try
-
-::::{tab-set}
-
-   :::{tab-item} Label1
-      Content 1
-   :::
-
-   :::{tab-item} Label2
-      Content 2
-   :::
-
-::::
 
 2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
@@ -117,21 +91,16 @@ okay 2nd try
    $ git clone https://github.com/<your GitHub handle>/arviz.git
    ```
 
-::::{tab-set}
-
-:::{tab-item} SSH
-:sync: ssh
-
-this is it
-:::
-
-:::{tab-item} HTTPS
-:sync: https
-
-v well
-:::
-
-::::
+````{tabbed} SSH
+```
+$ git clone git@github.com:<your GitHub handle>/arviz.git
+```
+````
+````{tabbed} HTTPS
+```
+   $ git clone https://github.com/<your GitHub handle>/arviz.git
+```
+````
 
 3. Navigate to your arviz directory and add the base repository as a remote:
 
@@ -145,27 +114,17 @@ v well
    $ git remote add upstream https://github.com/arviz-devs/arviz
    ```
 
-::::{tab-set}
-
-:::{tab-item} SSH
-:sync: ssh
-
-   ```bash
-   $ cd arviz
-   $ git remote add upstream git@github.com:arviz-devs/arviz.git
-   ```
-:::
-
-:::{tab-item} HTTPS
-:sync: https
-
-   ```bash
-   $ cd arviz
-   $ git remote add upstream https://github.com/arviz-devs/arviz
-   ```
-:::
-
-::::
+````{tabbed} SSH
+$ cd arviz
+$ git remote add upstream git@github.com:arviz-devs/arviz.git
+```
+````
+````{tabbed} HTTPS
+```
+$ cd arviz
+$ git remote add upstream https://github.com/arviz-devs/arviz
+```
+````
 
 4. Create a ``feature`` branch to hold your development changes:
 
