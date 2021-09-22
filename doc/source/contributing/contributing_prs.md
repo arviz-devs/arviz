@@ -83,14 +83,6 @@ Section in construction
 
 2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
-   ```bash
-   $ git clone git@github.com:<your GitHub handle>/arviz.git
-   ```
-   or
-    ```bash
-   $ git clone https://github.com/<your GitHub handle>/arviz.git
-   ```
-
 ````{tabbed} SSH
 ```
 $ git clone git@github.com:<your GitHub handle>/arviz.git
@@ -98,23 +90,14 @@ $ git clone git@github.com:<your GitHub handle>/arviz.git
 ````
 ````{tabbed} HTTPS
 ```
-   $ git clone https://github.com/<your GitHub handle>/arviz.git
+$ git clone https://github.com/<your GitHub handle>/arviz.git
 ```
 ````
 
 3. Navigate to your arviz directory and add the base repository as a remote:
 
-   ```bash
-   $ cd arviz
-   $ git remote add upstream git@github.com:arviz-devs/arviz.git
-   ```
-   or
-    ```bash
-   $ cd arviz
-   $ git remote add upstream https://github.com/arviz-devs/arviz
-   ```
-
 ````{tabbed} SSH
+```
 $ cd arviz
 $ git remote add upstream git@github.com:arviz-devs/arviz.git
 ```
