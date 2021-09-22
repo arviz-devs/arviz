@@ -29,8 +29,12 @@ If relevant, also include the complete error messages and tracebacks.
 To avoid cluttering the issue body, you can optionally use the `details`
 html tag in GitHub to create a simple dropdown, like so:
 
-```
+````
 <details><summary>Click to see full traceback</summary>
-long and barely comprehensible error traceback
-</details>
+
 ```
+long and barely comprehensible error traceback
+```
+
+</details>
+````
