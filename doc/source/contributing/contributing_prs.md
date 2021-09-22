@@ -80,6 +80,33 @@ Section in construction
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
+::::{tab-set}
+
+:::{tab-item} Label1
+Content 1
+:::
+
+:::{tab-item} Label2
+Content 2
+:::
+
+::::
+
+
+okay 2nd try
+
+::::{tab-set}
+
+   :::{tab-item} Label1
+      Content 1
+   :::
+
+   :::{tab-item} Label2
+      Content 2
+   :::
+
+::::
+
 2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
    ```bash
@@ -95,17 +122,13 @@ Section in construction
 :::{tab-item} SSH
 :sync: ssh
 
-   ```bash
-   $ git clone git@github.com:<your GitHub handle>/arviz.git
-   ```
+this is it
 :::
 
 :::{tab-item} HTTPS
 :sync: https
 
-   ```bash
-   $ git clone https://github.com/<your GitHub handle>/arviz.git
-   ```
+v well
 :::
 
 ::::
