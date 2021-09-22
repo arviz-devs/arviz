@@ -88,7 +88,7 @@ myst_heading_anchors = 3
 panels_add_bootstrap_css = False
 myst_enable_extensions = [
     "colon_fence",
-    # "deflist",
+    "deflist",
     "dollarmath",
     "amsmath"
 ]

@@ -27,7 +27,7 @@ The first step for you to get started would be to make sure you subscribe and ge
 If you are not familiar on how to set up notifications on GitHub, please check the following - [Setting Up Notifications on GitHub](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
 Once you are set up, you can [view your subscriptions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/viewing-your-subscriptions) and [manage your subscritions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/managing-your-subscriptions) to ensure you are not being inundated with the volume and are getting notifications only to issues of your interest.
 
-## Contribution Guidelines
+## Triage guidelines and suggestions
 
 Similarly to contributing code via PRs, most tasks related to issue triaging don't require any
 specific permissions. Anyone with a GitHub account can help with issue triaging.
@@ -40,24 +40,21 @@ If you think it will make the issue more clear, or help the person who posted or
 working on it but it's not listed below do not worry, try it out anyways.
 :::
 
-- Make sure the issue contains a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example), if relevant.
-
-  Sometimes, the issue doesn't contain an example, however, it can still be clear about the problem.
+Make sure the issue contains a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example), if relevant.
+: Sometimes, the issue doesn't contain an example, however, it can still be clear about the problem.
   In that scenario, someone other than the person who posted the issue can generate an example.
   Issues with a reproducible example allow contributors to focus on fixing the bug or testing the
   proposed enhancement directly instead of having to first understand and reproduce the issue. This
   therefore makes things easier for contributors, but at the same time will reduce the time it takes
   to answer or fix an issue, helping issue posters directly too.
 
-- Make sure the issue is clear and has references, if needed.
-
-  If an issue is not completely clear, you can comment by asking for clarifications or
+Make sure the issue is clear and has references, if needed.
+: If an issue is not completely clear, you can comment by asking for clarifications or
   adding extra references so the issue is clear enough for someone else to start working on.
   One example would be [#1694 (comment)](https://github.com/arviz-devs/arviz/issues/1694#issuecomment-840683745)
 
-- Suggest fixes or workarounds.
-
-  In some cases, the issue might be a usage question more than an issue (for example
+Suggest fixes or workarounds.
+: In some cases, the issue might be a usage question more than an issue (for example
   [#1758](https://github.com/arviz-devs/arviz/issues/1758)), in which case it can be answered directly,
   in some other cases it might be a version mismatch (i.e. users expecting a fresh out of the oven
   feature to be present in the latest version when it's only available on GitHub development
@@ -65,9 +62,8 @@ working on it but it's not listed below do not worry, try it out anyways.
   Or there may even be a not ideal yet acceptable workaround for users to avoid the issue
   before it's fixed (for example [#1467](https://github.com/arviz-devs/arviz/issues/1467)).
 
-- Guide newcomers
-
-  It is also important to introduce people who comment on ArviZ issues for the first time to the
+Guide newcomers
+: It is also important to introduce people who comment on ArviZ issues for the first time to the
   community, as well as helping people find issues to work on that match their interest
   and abilities.
 
