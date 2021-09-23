@@ -61,6 +61,7 @@ extensions = [
     "sphinx_panels",
     "notfound.extension",
     "sphinx_copybutton",
+    "sphinx_design",
 ]
 
 # ipython directive configuration
