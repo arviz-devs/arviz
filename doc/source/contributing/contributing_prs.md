@@ -78,51 +78,6 @@ Section in construction
 
 # Steps
 
-````
-::::{tab-set}
-
-:::{tab-item} SSH
-:sync: ssh
-
-```
-$ git clone git@github.com:<your GitHub handle>/arviz.git
-```
-:::
-
-:::{tab-item} HTTPS
-:sync: https
-
-```
-$ git clone https://github.com/<your GitHub handle>/arviz.git
-```
-:::
-
-::::
-
-::::{tab-set}
-
-:::{tab-item} SSH
-:sync: ssh
-
-```
-$ cd arviz
-$ git remote add upstream git@github.com:arviz-devs/arviz.git
-```
-:::
-
-:::{tab-item} HTTPS
-:sync: https
-
-```
-$ cd arviz
-$ git remote add upstream https://github.com/arviz-devs/arviz
-```
-:::
-
-::::
-````
-
-
 2nd try
 
 ::::{tab-set}
