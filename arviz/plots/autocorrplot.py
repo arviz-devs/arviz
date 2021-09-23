@@ -31,7 +31,7 @@ def plot_autocorr(
     ----------
     data: obj
         Any object that can be converted to an :class:`arviz.InferenceData` object
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details
+        refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names, optional
         Variables to be plotted, if None all variables are plotted. Prefix the
         variables by ``~`` when you want to exclude them from the plot. Vector-value
@@ -39,12 +39,12 @@ def plot_autocorr(
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. A
+        interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
     max_lag: int, optional
         Maximum lag to calculate autocorrelation. Defaults to 100 or num draws, whichever is smaller.
-    combined: bool
-        Flag for combining multiple chains into a single chain. If False (default), chains will be
+    combined: bool, default=False
+        Flag for combining multiple chains into a single chain. If False, chains will be
         plotted separately.
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
@@ -64,7 +64,7 @@ def plot_autocorr(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_config: dict, optional
-        Currently specifies the bounds to use for bokeh axes. Defaults to value set in :class:`arviz.RcParams`.
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
     backend_kwargs: dict, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
