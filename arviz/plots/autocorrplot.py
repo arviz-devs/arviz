@@ -66,8 +66,9 @@ def plot_autocorr(
     backend_config: dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
     backend_kwargs: dict, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :meth:`mpl:matplotlib.axes.Axes.plot` or
+        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
     show: bool, optional
         Call backend show function.
 
