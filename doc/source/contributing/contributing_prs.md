@@ -83,31 +83,35 @@ Section in construction
 
 2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
-````{tabbed} SSH
-```
-$ git clone git@github.com:<your GitHub handle>/arviz.git
-```
-````
-````{tabbed} HTTPS
-```
-$ git clone https://github.com/<your GitHub handle>/arviz.git
-```
-````
+  ````{tabbed} SSH
+  :sync: ssh
+  ```
+  $ git clone git@github.com:<your GitHub handle>/arviz.git
+  ```
+  ````
+  ````{tabbed} HTTPS
+  :sync: https
+  ```
+  $ git clone https://github.com/<your GitHub handle>/arviz.git
+  ```
+  ````
 
 3. Navigate to your arviz directory and add the base repository as a remote:
 
-````{tabbed} SSH
-```
-$ cd arviz
-$ git remote add upstream git@github.com:arviz-devs/arviz.git
-```
-````
-````{tabbed} HTTPS
-```
-$ cd arviz
-$ git remote add upstream https://github.com/arviz-devs/arviz
-```
-````
+  ````{tabbed} SSH
+  :sync: ssh
+  ```
+  $ cd arviz
+  $ git remote add upstream git@github.com:arviz-devs/arviz.git
+  ```
+  ````
+  ````{tabbed} HTTPS
+  :sync: https
+  ```
+  $ cd arviz
+  $ git remote add upstream https://github.com/arviz-devs/arviz
+  ```
+  ````
 
 4. Create a ``feature`` branch to hold your development changes:
 
