@@ -68,8 +68,7 @@ require functions to include type hints
 however contributions including them are welcome.
 
 ## Documentation for user facing methods
-If changes are made to a method documented in the
-[ArviZ API Guide](https://numpydoc.readthedocs.io/en/latest/format.html)
+If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
 please consider adding inline documentation examples.
 You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
 
