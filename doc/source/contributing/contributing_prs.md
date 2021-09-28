@@ -77,55 +77,55 @@ Section in construction
 
 # Steps
 
-* Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
+1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
-* Clone your fork of the ArviZ repo from your GitHub account to your local disk.
+2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
-::::{tab-set}
+   ::::{tab-set}
 
-:::{tab-item} SSH
-:sync: ssh
+   :::{tab-item} SSH
+   :sync: ssh
 
-```
-$ git clone git@github.com:<your GitHub handle>/arviz.git
-```
-:::
+   ```
+   $ git clone git@github.com:<your GitHub handle>/arviz.git
+   ```
+   :::
 
-:::{tab-item} HTTPS
-:sync: https
+   :::{tab-item} HTTPS
+   :sync: https
 
-```
-$ git clone https://github.com/<your GitHub handle>/arviz.git
-```
-:::
+   ```
+   $ git clone https://github.com/<your GitHub handle>/arviz.git
+   ```
+   :::
 
-::::
+   ::::
 
-* Navigate to your arviz directory and add the base repository as a remote:
+3. Navigate to your arviz directory and add the base repository as a remote:
 
-::::{tab-set}
+   ::::{tab-set}
 
-:::{tab-item} SSH
-:sync: ssh
+   :::{tab-item} SSH
+   :sync: ssh
 
-```
-$ cd arviz
-$ git remote add upstream git@github.com:arviz-devs/arviz.git
-```
-:::
+   ```
+   $ cd arviz
+   $ git remote add upstream git@github.com:arviz-devs/arviz.git
+   ```
+   :::
 
-:::{tab-item} HTTPS
-:sync: https
+   :::{tab-item} HTTPS
+   :sync: https
 
-```
-$ cd arviz
-$ git remote add upstream https://github.com/arviz-devs/arviz
-```
-:::
+   ```
+   $ cd arviz
+   $ git remote add upstream https://github.com/arviz-devs/arviz
+   ```
+   :::
 
-::::
+   ::::
 
-* Create a ``feature`` branch to hold your development changes:
+4. Create a ``feature`` branch to hold your development changes:
 
    ```bash
    $ git checkout -b my-feature
@@ -133,7 +133,7 @@ $ git remote add upstream https://github.com/arviz-devs/arviz
 
    Always use a ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
 
-* Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
+5. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
 
    ```bash
    $ pip install -r requirements.txt
@@ -143,7 +143,7 @@ $ git remote add upstream https://github.com/arviz-devs/arviz
 
    Alternatively, for developing the project in [Docker](https://docs.docker.com/), there is a script to setup the Docker environment for development. See {ref}`developing_in_docker`.
 
-* Develop the feature on your feature branch. Add your changes using git commands, ``git add`` and then ``git commit``, like:
+6. Develop the feature on your feature branch. Add your changes using git commands, ``git add`` and then ``git commit``, like:
 
    ```bash
    $ git add modified_files
@@ -163,7 +163,7 @@ $ git remote add upstream https://github.com/arviz-devs/arviz
    $ git push -u origin my-feature
    ```
 
-* Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
+7. Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
 
 (pr_checklist)=
 # Pull request checklist
