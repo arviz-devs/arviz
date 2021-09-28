@@ -58,10 +58,10 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
     "myst_nb",
+    "sphinx_design",
     "sphinx_panels",
     "notfound.extension",
     "sphinx_copybutton",
-    "sphinx_design",
 ]
 
 # ipython directive configuration
