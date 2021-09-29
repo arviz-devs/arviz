@@ -38,8 +38,8 @@ See [tests.test_plots_matplotlib](https://github.com/arviz-devs/arviz/blob/main/
 
 ### Gallery Examples
 Gallery examples are not required but encouraged. Examples are
-compiled into the arviz documentation website. The [examples](https://github.com/arviz-devs/arviz/tree/main/examples) directory
-can be found in the root of the arviz git repository.
+compiled into the ArviZ documentation website. The [examples](https://github.com/arviz-devs/arviz/tree/main/examples) directory
+can be found in the root of the ArviZ git repository.
 
 
 ## Documentation
