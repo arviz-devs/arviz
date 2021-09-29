@@ -236,7 +236,7 @@ def plot_kde(
 
     See Also
     --------
-    plot_kde : Compute and plot a kernel density estimate.
+    kde : One dimensional density estimation.
 
     """
     if isinstance(values, xr.Dataset):
