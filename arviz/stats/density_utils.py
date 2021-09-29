@@ -401,80 +401,80 @@ def kde(x, circular=False, **kwargs):
     .. plot::
         :context: close-figs
 
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> from arviz import kde
-    >>>
-    >>> rvs = np.random.gamma(shape=1.8, size=1000)
-    >>> grid, pdf = kde(rvs)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> from arviz import kde
+        >>>
+        >>> rvs = np.random.gamma(shape=1.8, size=1000)
+        >>> grid, pdf = kde(rvs)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for linear data with Silverman's rule bandwidth
     .. plot::
         :context: close-figs
 
-    >>> grid, pdf = kde(rvs, bw="silverman")
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> grid, pdf = kde(rvs, bw="silverman")
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for linear data with scaled bandwidth
     .. plot::
         :context: close-figs
 
-    >>> # bw_fct > 1 means more smoothness.
-    >>> grid, pdf = kde(rvs, bw_fct=2.5)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> # bw_fct > 1 means more smoothness.
+        >>> grid, pdf = kde(rvs, bw_fct=2.5)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Default density estimation for linear data with extended limits
     .. plot::
         :context: close-figs
 
-    >>> grid, pdf = kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> grid, pdf = kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Default density estimation for linear data with custom limits
     .. plot::
         :context: close-figs
     # It accepts tuples and lists of length 2.
-    >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 10))
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 10))
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Default density estimation for circular data
     .. plot::
         :context: close-figs
 
-    >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
-    >>> grid, pdf = kde(rvs, circular=True)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+        >>> grid, pdf = kde(rvs, circular=True)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for circular data with scaled bandwidth
     .. plot::
         :context: close-figs
 
-    >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
-    >>> # bw_fct > 1 means less smoothness.
-    >>> grid, pdf = kde(rvs, circular=True, bw_fct=3)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+        >>> # bw_fct > 1 means less smoothness.
+        >>> grid, pdf = kde(rvs, circular=True, bw_fct=3)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for circular data with custom limits
     .. plot::
         :context: close-figs
-    >>> # This is still experimental, does not always work.
-    >>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
-    >>> grid, pdf = kde(rvs, circular=True, custom_lims=(-1, 1))
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+
+        >>> # This is still experimental, does not always work.
+        >>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
+        >>> grid, pdf = kde(rvs, circular=True, custom_lims=(-1, 1))
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     See Also
     --------
     plot_kde : Compute and plot a kernel density estimate.
-    arviz.stats.density_utils.kde: Arviz KDE estimator
     """
     x = x[np.isfinite(x)]
     if x.size == 0 or np.all(x == x[0]):
