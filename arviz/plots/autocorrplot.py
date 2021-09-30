@@ -76,6 +76,10 @@ def plot_autocorr(
     -------
     axes: matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    autocorr : Compute autocovariance estimates for every lag for the input array.
+
     Examples
     --------
     Plot default autocorrelation
