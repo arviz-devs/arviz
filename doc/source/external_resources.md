@@ -2,7 +2,7 @@
 :column: col-lg-4 col-md-4 col-sm-6 col-xs-12
 
 ---
-:img-top: https://raw.githubusercontent.com/pymc-devs/pymc3/master/docs/logos/PyMC3.png
+:img-top: https://raw.githubusercontent.com/pymc-devs/pymc3/master/docs/logos/PyMC.png
 :img-top-cls: pl-5 pr-5
 
 
