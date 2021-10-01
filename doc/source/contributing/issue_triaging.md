@@ -2,9 +2,9 @@
 # Issue Triaging
 
 
-As a community-driven, open source collective, we value all user contributions at ArviZ. While most users tend to look for ways to contribute code via PRs, we welcome and encourage helping with issue traiging.
+As a community-driven, open source collective, we value all user contributions at ArviZ. While most users often tend to look for ways to contribute code via PRs, we welcome and encourage help with issue traiging.
 
-We consider isssue triaging a central part of the library development. It is the main communication
+We consider isssue triaging an integral part of the library development. It is the main communication
 channel between contributors and users of ArviZ. Moreover, it is a task that gives contributors
 more flexibility than contributing code.
 
@@ -22,9 +22,9 @@ issue triaging.
 
 ## How to subscribe to ArviZ issues
 
-The first step for you to get started would be to make sure you subscribe and get notifications of any new issue published on ArviZ's GitHub repo. You can then chose to work on it at the moment or come back to it later. Staying subscribed will ensure you are notified whenever issues are created or updated and can, therefore, see where your help might be needed.
+The first step for you to get started would be to make sure you subscribe and get notifications of any new issue published on ArviZ's GitHub repo. You can then chose to work on it at the moment or come back to it later. Staying subscribed will ensure you are notified whenever issues are created or updated and therefore, see where your help might be needed.
 
-If you are not familiar on how to set up notifications on GitHub, please check the following - [Setting Up Notifications on GitHub](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository)
+If you are not familiar on how to set up notifications on GitHub, please check the following - [Setting Up Notifications on GitHub](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository).
 Once you are set up, you can [view your subscriptions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/viewing-your-subscriptions) and [manage your subscritions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/managing-your-subscriptions) to ensure you are not being inundated with the volume and are getting notifications only to issues of your interest.
 
 ## Triage guidelines and suggestions
@@ -34,7 +34,7 @@ specific permissions. Anyone with a GitHub account can help with issue triaging.
 
 :::{important}
 The bullet points below list some ideas and examples of what issue triaging entails, *but they are
-not exhaustive (nor aim to be!)*. You should make the task yours.
+not exhaustive (nor aim to be!)*. We encourage taking ownershipship of tasks. 
 
 If you think it will make the issue more clear, or help the person who posted or the contributors
 working on it but it's not listed below do not worry, try it out anyways.
