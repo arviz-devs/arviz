@@ -398,6 +398,7 @@ def kde(x, circular=False, **kwargs):
     Examples
     --------
     Default density estimation for linear data
+
     .. plot::
         :context: close-figs
 
@@ -411,6 +412,7 @@ def kde(x, circular=False, **kwargs):
         >>> plt.show()
 
     Density estimation for linear data with Silverman's rule bandwidth
+
     .. plot::
         :context: close-figs
 
@@ -419,6 +421,7 @@ def kde(x, circular=False, **kwargs):
         >>> plt.show()
 
     Density estimation for linear data with scaled bandwidth
+
     .. plot::
         :context: close-figs
 
@@ -428,6 +431,7 @@ def kde(x, circular=False, **kwargs):
         >>> plt.show()
 
     Default density estimation for linear data with extended limits
+
     .. plot::
         :context: close-figs
 
@@ -436,6 +440,7 @@ def kde(x, circular=False, **kwargs):
         >>> plt.show()
 
     Default density estimation for linear data with custom limits
+
     .. plot::
         :context: close-figs
     # It accepts tuples and lists of length 2.
@@ -444,6 +449,7 @@ def kde(x, circular=False, **kwargs):
         >>> plt.show()
 
     Default density estimation for circular data
+
     .. plot::
         :context: close-figs
 
@@ -453,6 +459,7 @@ def kde(x, circular=False, **kwargs):
         >>> plt.show()
 
     Density estimation for circular data with scaled bandwidth
+
     .. plot::
         :context: close-figs
 
@@ -463,6 +470,7 @@ def kde(x, circular=False, **kwargs):
         >>> plt.show()
 
     Density estimation for circular data with custom limits
+
     .. plot::
         :context: close-figs
 
