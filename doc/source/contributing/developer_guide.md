@@ -60,7 +60,7 @@ part of the docstring or from the _See also_ section.
 Sphinx is configured to ease referencing libraries ArviZ relies heavily on by
 using [intersphinx](https://docs.readthedocs.io/en/stable/guides/intersphinx.html).
 See guidance on the reference about how to link to objects from external
-libraries and the value of [intersphinx_mapping](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L270) in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L270) for the complete and up to
+libraries and the value of intersphinx_mapping in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py) for the complete and up to
 date list of libraries that can be referenced. Note that the `:key:` before
 the reference must match the kind of object that is being referenced, it
 generally will not be `:ref:` nor `:doc:`. For
