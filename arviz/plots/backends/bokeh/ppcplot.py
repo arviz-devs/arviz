@@ -118,13 +118,13 @@ def plot_ppc(
 
             if dtype == "f":
                 multi_line = ax_i.multi_line(pp_xs, pp_densities, **plot_kwargs)
-                legend_it.append(("{} predictive".format(group.capitalize()), [multi_line]))
+                legend_it.append((f"{group.capitalize()} predictive", [multi_line]))
             else:
                 all_steps = []
                 for x_s, y_s in zip(pp_xs, pp_densities):
                     step = ax_i.step(x_s, y_s, **plot_kwargs)
                     all_steps.append(step)
-                legend_it.append(("{} predictive".format(group.capitalize()), all_steps))
+                legend_it.append((f"{group.capitalize()} predictive", all_steps))
 
             if observed:
                 label = "Observed"
@@ -154,7 +154,7 @@ def plot_ppc(
                     legend_it.append((label, [step]))
 
             if mean:
-                label = "{} predictive mean".format(group.capitalize())
+                label = f"{group.capitalize()} predictive mean"
                 if dtype == "f":
                     rep = len(pp_densities)
                     len_density = len(pp_densities[0])
@@ -224,9 +224,9 @@ def plot_ppc(
                 line_color=colors[0],
                 line_width=linewidth,
             )
-            legend_it.append(("{} predictive".format(group.capitalize()), [multi_line]))
+            legend_it.append((f"{group.capitalize()} predictive", [multi_line]))
             if mean:
-                label = "{} predictive mean".format(group.capitalize())
+                label = f"{group.capitalize()} predictive mean"
                 line = ax_i.line(
                     *_empirical_cdf(pp_vals.flatten()),
                     color=colors[2],
@@ -237,7 +237,7 @@ def plot_ppc(
 
         elif kind == "scatter":
             if mean:
-                label = "{} predictive mean".format(group.capitalize())
+                label = f"{group.capitalize()} predictive mean"
                 if dtype == "f":
                     _, glyph = plot_kde(
                         pp_vals.flatten(),
@@ -307,7 +307,7 @@ def plot_ppc(
                 )
                 all_scatter.append(scatter)
 
-            legend_it.append(("{} predictive".format(group.capitalize()), all_scatter))
+            legend_it.append((f"{group.capitalize()} predictive", all_scatter))
             ax_i.yaxis.major_tick_line_color = None
             ax_i.yaxis.minor_tick_line_color = None
             ax_i.yaxis.major_label_text_font_size = "0pt"

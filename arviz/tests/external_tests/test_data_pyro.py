@@ -116,27 +116,27 @@ class TestDataPyro:
         inference_data = from_pyro(prior=prior)
         test_dict = {"prior": ["mu", "tau", "eta"]}
         fails = check_multiple_attrs(test_dict, inference_data)
-        assert not fails, "only prior: {}".format(fails)
+        assert not fails, f"only prior: {fails}"
         # only posterior_predictive
         inference_data = from_pyro(posterior_predictive=posterior_predictive)
         test_dict = {"posterior_predictive": ["obs"]}
         fails = check_multiple_attrs(test_dict, inference_data)
-        assert not fails, "only posterior_predictive: {}".format(fails)
+        assert not fails, f"only posterior_predictive: {fails}"
         # only predictions
         inference_data = from_pyro(predictions=predictions)
         test_dict = {"predictions": ["obs"]}
         fails = check_multiple_attrs(test_dict, inference_data)
-        assert not fails, "only predictions: {}".format(fails)
+        assert not fails, f"only predictions: {fails}"
         # only constant_data
         inference_data = from_pyro(constant_data=constant_data)
         test_dict = {"constant_data": ["J", "sigma"]}
         fails = check_multiple_attrs(test_dict, inference_data)
-        assert not fails, "only constant_data: {}".format(fails)
+        assert not fails, f"only constant_data: {fails}"
         # only predictions_constant_data
         inference_data = from_pyro(predictions_constant_data=predictions_constant_data)
         test_dict = {"predictions_constant_data": ["J", "sigma"]}
         fails = check_multiple_attrs(test_dict, inference_data)
-        assert not fails, "only predictions_constant_data: {}".format(fails)
+        assert not fails, f"only predictions_constant_data: {fails}"
         # prior and posterior_predictive
         idata = from_pyro(
             prior=prior,
@@ -146,7 +146,7 @@ class TestDataPyro:
         )
         test_dict = {"posterior_predictive": ["obs"], "prior": ["mu", "tau", "eta", "obs"]}
         fails = check_multiple_attrs(test_dict, idata)
-        assert not fails, "prior and posterior_predictive: {}".format(fails)
+        assert not fails, f"prior and posterior_predictive: {fails}"
 
     def test_inference_data_only_posterior(self, data):
         idata = from_pyro(data.obj)

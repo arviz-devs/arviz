@@ -91,15 +91,15 @@ def plot_energy(
                 alpha=alpha,
                 label=label,
                 color=color,
-                **plot_kwargs
+                **plot_kwargs,
             )
 
     else:
-        raise ValueError("Plot type {} not recognized.".format(kind))
+        raise ValueError(f"Plot type {kind} not recognized.")
 
     if bfmi:
         for idx, val in enumerate(e_bfmi(energy)):
-            ax.plot([], label="chain {:>2} BFMI = {:.2f}".format(idx, val), alpha=0)
+            ax.plot([], label=f"chain {idx:>2} BFMI = {val:.2f}", alpha=0)
     if legend:
         ax.legend()
 

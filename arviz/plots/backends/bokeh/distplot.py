@@ -112,7 +112,7 @@ def plot_dist(
             show=False,
         )
     else:
-        raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
+        raise TypeError(f'Invalid "kind":{kind}. Select from {{"auto","kde","hist"}}')
 
     show_layout(ax, show)
 

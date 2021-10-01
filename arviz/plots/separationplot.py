@@ -114,15 +114,13 @@ def plot_separation(
         if isinstance(y, str):
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
-            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+            raise ValueError(f"y must be of types array, DataArray or str, not {type(y)}")
 
         if isinstance(y_hat, str):
             label_y_hat = y_hat
             y_hat = idata.posterior_predictive[y_hat].mean(dim=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
-            raise ValueError(
-                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
-            )
+            raise ValueError(f"y_hat must be of types array, DataArray or str, not {type(y_hat)}")
 
     if len(y) != len(y_hat):
         warnings.warn(

@@ -17,3 +17,4 @@ Stats
     r2_score
     summary
     waic
+    kde
