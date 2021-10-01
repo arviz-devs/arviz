@@ -42,7 +42,8 @@ def plot_autocorr(
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
     max_lag: int, optional
-        Maximum lag to calculate autocorrelation. Defaults to 100 or num draws, whichever is smaller.
+        Maximum lag to calculate autocorrelation. Defaults to 100 or num draws,
+        whichever is smaller.
     combined: bool, default=False
         Flag for combining multiple chains into a single chain. If False, chains will be
         plotted separately.
