@@ -79,7 +79,8 @@ def plot_autocorr(
 
     See Also
     --------
-    autocorr : Compute autocovariance estimates for every lag for the input array.
+    autocov : Compute autocovariance estimates for every lag for the input array.
+    autocorr : Compute autocorrelation using FFT for every lag for the input array.
 
     Examples
     --------
