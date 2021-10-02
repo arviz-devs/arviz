@@ -33,13 +33,10 @@ Similar to contributing code via PRs, most issue triaging tasks don't require an
 specific permissions. Anyone with a GitHub account can help with issue triaging.
 
 :::{important}
-The list below provides ideas and examples of issue triaging entails. However, it is not comprehnsive. We encourage taking ownershipship of tasks. 
-
-If you think it will make the issue more clear, or help the person who posted or the contributors
-working on it but it's not listed below do not worry, try it out anyways.
+The list below provides ideas and examples of issue triaging entails. However, it is not a comprehnsive compliation. Often users encounter issues not forseen or experienced by developers. We encourage users go ahead and take ownership and bring these to the attention of the person who have posted or the contributors working on it. 
 :::
 
-  - Make sure the issue contains a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example), if relevant.
+Make sure the issue contains a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example), if relevant.
 : Sometimes, the issue doesn't contain an example, however, it can still be clear about the problem.
   In that scenario, someone other than the person who posted the issue can generate an example.
   Issues with a reproducible example allow contributors to focus on fixing the bug or testing the
@@ -47,12 +44,12 @@ working on it but it's not listed below do not worry, try it out anyways.
   therefore makes things easier for contributors, but at the same time will reduce the time it takes
   to answer or fix an issue, helping issue posters directly too.
 
-  - Ensure the issue is clear and has references, if needed.
+Ensure the issue is clear and has references, if needed.
 : If an issue is not completely clear, you can comment by asking for clarifications or
   adding extra references so the issue is clear enough for someone else to start working on.
   One example would be [#1694 (comment)](https://github.com/arviz-devs/arviz/issues/1694#issuecomment-840683745)
 
-   - Suggest fixes or workarounds.
+Suggest fixes or workarounds.
 : In some cases, the issue might be a usage question more than an issue (for example
   [#1758](https://github.com/arviz-devs/arviz/issues/1758)), in which case it can be answered directly,
   in some other cases it might be a version mismatch (i.e. users expecting a fresh out of the oven
