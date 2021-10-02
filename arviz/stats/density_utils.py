@@ -563,10 +563,9 @@ def _kde_linear(
         raise ValueError(f"`bw_fct` must be a positive number, not {bw_fct}.")
 
     # Preliminary calculations
-    x_len = len(x)
     x_min = x.min()
     x_max = x.max()
-    x_std = (((x ** 2).sum() / x_len) - (x.sum() / x_len) ** 2) ** 0.5
+    x_std = np.std(x)
     x_range = x_max - x_min
 
     # Determine grid

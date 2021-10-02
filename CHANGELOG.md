@@ -4,6 +4,7 @@
 ### New features
 
 ### Maintenance and fixes
+* Fix standard deviation code in density utils by replacing it with `np.std`. ([1833](https://github.com/arviz-devs/arviz/pull/1833))
 
 ### Deprecation
 
