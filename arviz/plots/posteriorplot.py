@@ -43,7 +43,7 @@ def plot_posterior(
     ----------
     data: obj
         Any object that can be converted to an :class:`arviz.InferenceData` object
-        refer to documentation of :func:`arviz.convert_to_dataset` for details
+        Refer to the documentation of :func:`arviz.convert_to_dataset` for details
         Any object that can be converted to an :class:`arviz.InferenceData` object.
     var_names: list of variable names
         Variables to be plotted, two variables are required. Prefix the variables with ``~``
