@@ -124,7 +124,7 @@ def plot_posterior(
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :func:`matplotlib.pyplot.hist` or :func:`matplotlib.pyplot.plot` function depending on the value of `kind`.
 
     Returns
     -------
