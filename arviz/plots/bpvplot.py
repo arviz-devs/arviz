@@ -41,8 +41,9 @@ def plot_bpv(
 
     Parameters
     ----------
-    data : az.InferenceData object
-        InferenceData object containing the observed and posterior/prior predictive data.
+    data : :class:`arviz.InferenceData` object
+        :class:`arviz.InferenceData` object containing the observed and posterior/prior
+        predictive data.
     kind : str
         Type of plot to display ("p_value", "u_value", "t_stat"). Defaults to u_value.
         For "p_value" we compute p := p(y* ≤ y | y). This is the probability of the data y being
@@ -74,7 +75,7 @@ def plot_bpv(
         Number of reference distributions to sample when `reference=samples`. Defaults to 100.
     hdi_prob: float, optional
         Probability for the highest density interval for the analytical reference distribution when
-        computing u_values. Should be in the interval (0, 1]. Defaults to
+        computing u_values. Should be in the interval (0, 1). Defaults to
         0.94.
     color : str
         Matplotlib color
@@ -97,16 +98,16 @@ def plot_bpv(
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
     labeller : labeller instance, optional
-        Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     var_names : list of variable names
-        Variables to be plotted, if `None` all variable are plotted. Prefix the variables by `~`
+        Variables to be plotted, if `None` all variable are plotted. Prefix the variables by ``~``
         when you want to exclude them from the plot.
     filter_vars : {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
@@ -128,20 +129,27 @@ def plot_bpv(
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     plot_ref_kwargs :  dict, optional
-        Extra keyword arguments to control how reference is represented. Passed to `plt.plot` or
-        `plt.axhspan`(when `kind=u_value` and `reference=analytical`).
+        Extra keyword arguments to control how reference is represented. Passed to ``plt.plot`` or
+        ``plt.axhspan``(when `kind=u_value` and `reference=analytical`).
     backend_kwargs : bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
     group : {"prior", "posterior"}, optional
-        Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
-        Other value can be 'prior'.
+        Specifies which :class:`arviz.InferenceData` group should be plotted.
+        Defaults to 'posterior'. Other value can be 'prior'.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_ppc : Plot for posterior/prior predictive checks.
+    plot_loo_pit : Plot Leave-One-Out (LOO) probability integral transformation
+    (PIT) predictive checks.
+    plot_dist_comparison : Plot to compare fitted and unfitted distributions.
 
     References
     ----------
