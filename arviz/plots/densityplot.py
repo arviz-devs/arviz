@@ -120,8 +120,8 @@ def plot_density(
 
     See Also
     --------
-    plot_posterior :Plot Posterior densities in the style of John K. Kruschke’s book.
-    plot_density :Generate KDE plots for continuous variables and histograms for discrete ones.
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book. 
+    plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
     Examples
     --------
     Plot default density plot
