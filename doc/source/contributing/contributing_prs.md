@@ -130,8 +130,11 @@ Section in construction
    ```bash
    $ git checkout -b my-feature
    ```
-  > :warning: Always create a new ``feature`` branch before making any changes. Make your chnages
-    in the ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
+
+   ```{warning}
+   Always create a new ``feature`` branch before making any changes. Make your chnages
+   in the ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
+   ```
 
 5. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
 
