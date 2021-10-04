@@ -43,14 +43,14 @@ def plot_density(
     Parameters
     ----------
     data : Union[Object, Iterator[Object]]
-        Any object that can be converted to an :class:`arviz.InferenceData` object, 
-        or an Iterator returning a sequence of such objects.
+        Any object that can be converted to an :class:`arviz.InferenceData` object,or an Iterator
+        returning a sequence of such objects.
         Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.
     group: Optional[str]
-        Specifies which class:`arviz.InferenceData` group should be plotted. 
-         Defaults to 'posterior'.
+        Specifies which :class:`arviz.InferenceData` group should be plotted.
+        Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
-        class:`arviz.InferenceData`.
+        :class:`arviz.InferenceData`.
     data_labels : Optional[List[str]]
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
@@ -61,11 +61,11 @@ def plot_density(
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
-        Probability for the highest density interval. Should be in the interval (0, 1].
+        Probability for the highest density interval. Should be in the interval (0, 1).
         Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
-        Defaults to 'auto' i.e. it falls back to default set in `rcParams`.
+        Defaults to 'auto' i.e. it falls back to default set in ``rcParams``.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
@@ -108,9 +108,8 @@ def plot_density(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-        These are kwargs specific to the backend being used, passed to :func:`matplotlib.pyplot.subplots`
-         or  :func:`bokeh.plotting.figure`.
-
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
 
@@ -120,9 +119,8 @@ def plot_density(
 
     See Also
     --------
-    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book. 
-    plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
-    
+    plot_dist : Plot distribution as histogram or kernel density estimates.
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book.
     Examples
     --------
     Plot default density plot
