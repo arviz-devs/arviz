@@ -65,8 +65,8 @@ def plot_dist(
     bw: Optional[float or str]
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
-        one of "scott", "silverman", "isj" or "experimental" when `is_circular` is False
-        and "taylor" (for now) when `is_circular` is True.
+        one of "scott", "silverman", "isj" or "experimental" when ``is_circular`` is False
+        and "taylor" (for now) when ``is_circular`` is True.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
     quantiles : list
@@ -88,14 +88,14 @@ def plot_dist(
         Ignored for 2D KDE
     rug_kwargs : dict
         Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE
-        Use `space` keyword (float) to control the position of the rugplot. The larger this number
+        Use ``space`` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
         Keywords passed to the contourplot. Ignored for 1D KDE.
     contourf_kwargs : dict
-        Keywords passed to ax.contourf. Ignored for 1D KDE.
+        Keywords passed to :func:`ax.contourf`. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
-        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
+        Keywords passed to :func:`ax.pcolormesh`. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
     is_circular : {False, True, "radians", "degrees"}. Default False.
@@ -117,6 +117,12 @@ def plot_dist(
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book.
+    plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
+    plot_kde : 1D or 2D KDE plot taking into account boundary conditions.
 
     Examples
     --------
