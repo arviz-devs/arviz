@@ -108,7 +108,7 @@ def plot_density(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
-        For additional documentation check the plotting method of the backend.   
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
