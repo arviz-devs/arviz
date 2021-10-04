@@ -61,7 +61,7 @@ def plot_density(
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
-        Probability for the highest density interval. Should be in the interval (0, 1).
+        Probability for the highest density interval. Should be in the interval (0, 1].
         Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
