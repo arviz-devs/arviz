@@ -146,8 +146,7 @@ def plot_bpv(
     See Also
     --------
     plot_ppc : Plot for posterior/prior predictive checks.
-    plot_loo_pit : Plot Leave-One-Out (LOO) probability integral transformation
-    (PIT) predictive checks.
+    plot_loo_pit : Plot Leave-One-Out (LOO) probability integral transformation (PIT) predictive checks.
     plot_dist_comparison : Plot to compare fitted and unfitted distributions.
 
     References
