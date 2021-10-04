@@ -61,7 +61,7 @@ def plot_density(
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
-        Probability for the highest density interval. Should be in the interval (0, 1).
+        Probability for the highest density interval. Should be in the interval (0, 1].
         Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
@@ -106,10 +106,9 @@ def plot_density(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.   
     show : bool, optional
         Call backend show function.
 
