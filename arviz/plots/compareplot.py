@@ -36,7 +36,7 @@ def plot_compare(
     Parameters
     ----------
     comp_df : pd.DataFrame
-        Result of the `az.compare()` method
+        Result of the :func:`arviz.compare` method
     insample_dev : bool, optional
         Plot in-sample deviance, that is the value of the information criteria without the
         penalization given by the effective number of parameters (pIC). Defaults to True
@@ -51,9 +51,10 @@ def plot_compare(
         If None, size is (6, num of models) inches
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
     labeller : labeller instance, optional
-        Class providing the method `model_name_to_str` to generate the labels in the plot.
+        Class providing the method ``model_name_to_str`` to generate the labels in
+        the plot.
         Read the :ref:`label_guide` for more details and usage examples.
     plot_kwargs : dict, optional
         Optional arguments for plot elements. Currently accepts 'color_ic',
@@ -73,6 +74,12 @@ def plot_compare(
     -------
     axes : matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+    waic : Compute the widely applicable information criterion.
 
     Examples
     --------
