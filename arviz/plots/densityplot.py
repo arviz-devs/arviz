@@ -40,16 +40,17 @@ def plot_density(
     Plots are truncated at their 100*(1-alpha)% highest density intervals. Plots are grouped per
     variable and colors assigned to models.
 
-    Parameters
+Parameters
     ----------
     data : Union[Object, Iterator[Object]]
-        Any object that can be converted to an az.InferenceData object, or an Iterator returning
-        a sequence of such objects.
-        Refer to documentation of az.convert_to_dataset for details about such objects.
+        Any object that can be converted to an :class:`arviz.InferenceData` object, 
+        or an Iterator returning a sequence of such objects.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.
     group: Optional[str]
-        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
+        Specifies which class:`arviz.InferenceData` group should be plotted. 
+         Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
-        InferenceData.
+        class:`arviz.InferenceData`.
     data_labels : Optional[List[str]]
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
@@ -64,7 +65,7 @@ def plot_density(
         Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
-        Defaults to 'auto' i.e. it falls back to default set in rcParams.
+        Defaults to 'auto' i.e. it falls back to default set in `rcParams`.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
@@ -95,9 +96,9 @@ def plot_density(
         Figure size. If None it will be defined automatically.
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
@@ -107,6 +108,8 @@ def plot_density(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to :func:`matplotlib.pyplot.subplots`
+         or  :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
 
@@ -114,6 +117,10 @@ def plot_density(
     -------
     axes : matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book. 
+    plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
     Examples
     --------
     Plot default density plot
