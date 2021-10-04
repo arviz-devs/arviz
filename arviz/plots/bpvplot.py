@@ -143,6 +143,13 @@ def plot_bpv(
     -------
     axes: matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    plot_ppc : Plot for posterior/prior predictive checks.
+    plot_loo_pit : Plot Leave-One-Out (LOO) probability integral transformation
+    (PIT) predictive checks.
+    plot_dist_comparison : Plot to compare fitted and unfitted distributions.
+
     References
     ----------
     * Gelman et al. (2013) see http://www.stat.columbia.edu/~gelman/book/ pages 151-153 for details
