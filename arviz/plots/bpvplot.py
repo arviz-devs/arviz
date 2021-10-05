@@ -129,11 +129,13 @@ def plot_bpv(
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     plot_ref_kwargs :  dict, optional
-        Extra keyword arguments to control how reference is represented. Passed to ``plt.plot`` or
-        ``plt.axhspan``(when `kind=u_value` and `reference=analytical`).
+        Extra keyword arguments to control how reference is represented. Passed to
+        :func:`plt.plot` or
+        :func:`plt.axhspan`(when `kind=u_value` and `reference=analytical`).
     backend_kwargs : bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     group : {"prior", "posterior"}, optional
         Specifies which :class:`arviz.InferenceData` group should be plotted.
         Defaults to 'posterior'. Other value can be 'prior'.
