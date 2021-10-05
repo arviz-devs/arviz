@@ -152,7 +152,8 @@ html_theme_options = {
             "icon": "fab fa-twitter-square",
         },
     ],
-    "navbar_start": ["navbar-logo", "navbar-version"],
+    "navbar_start": ["navbar-logo", "navbar-version", "search-field.html"],
+    "navbar_end": ["navbar-icon-links.html", "search-field.html"],
     "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
     "google_analytics_id": "G-W1G68W77YV",
 }
@@ -164,7 +165,6 @@ html_context = {
 }
 html_sidebars: Dict[str, Any] = {
     "community": [],
-    "about_us": [],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
