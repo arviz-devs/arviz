@@ -43,7 +43,7 @@ ArviZ is a Python package for exploratory analysis of Bayesian models. Includes 
 
 .. raw:: html
 
-    <div class="navbar"> 
+    <div class="searchbar"> 
         <ul>
             <li class="searchbar">
                 <i class="fa fa-search" aria-hidden="true"></i>
