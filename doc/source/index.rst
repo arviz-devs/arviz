@@ -39,6 +39,17 @@ ArviZ is a Python package for exploratory analysis of Bayesian models. Includes 
 
     <form class="bd-search align-items-center" action="search.html" method="get">
       <input type="search" class="form-control search-front-page" name="q" id="search-input" placeholder="&#128269; Search the docs ..." aria-label="Search the docs ..." autocomplete="off">
+      <div class="navbar"> 
+        <ul>
+            <li class="searchbar">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <div class="togglesearch">
+                    <input type="text" placeholder=""/>
+                    <input type="button" value="Search"/>
+                </div>
+            </li>
+        </ul>
+      </div>
     </form>
 
 The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python,

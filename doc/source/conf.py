@@ -173,6 +173,7 @@ html_sidebars: Dict[str, Any] = {
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_static_path = ["_static", thumb_directory]
 
+
 # use additional pages to add a 404 page
 html_additional_pages = {
     "404": "404.html",
