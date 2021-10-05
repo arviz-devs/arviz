@@ -50,7 +50,8 @@ def plot_forest(
     kind: str
         Choose kind of plot for main axis. Supports "forestplot" or "ridgeplot".
     model_names: list[str], optional
-        List with names for the models in the list of data. Useful when plotting more that one dataset.
+        List with names for the models in the list of data.
+        Useful when plotting more that one dataset.
     var_names: list[str], optional
         List of variables to plot (defaults to None, which results in all variables plotted)
         Prefix the variables by ``~`` when you want to exclude them from the plot.
@@ -63,10 +64,11 @@ def plot_forest(
     coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`.
     combined: bool
-        Flag for combining multiple chains into a single chain. If ``False`` (default), chains will be
-        plotted separately.
+        Flag for combining multiple chains into a single chain. If ``False`` (default),
+        chains will be plotted separately.
     hdi_prob: float, optional
-        Plots highest posterior density interval for chosen percentage of density. Defaults to `0.94`.
+        Plots highest posterior density interval for chosen percentage of density.
+        Defaults to `0.94`.
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list with one interval
         only is provided, the ROPE will be displayed across the y-axis. If more than one interval is
@@ -84,8 +86,8 @@ def plot_forest(
         cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used for all
         models. Defaults to 'cycle'.
     textsize: float
-        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled based
-        on ``figsize``.
+        Text size scaling factor for labels, titles and lines.
+        If ``None``, it will be autoscaled based on ``figsize``.
     linewidth: int
         Line width throughout. If ``None`` it will be autoscaled based on ``figsize``.
     markersize: int
