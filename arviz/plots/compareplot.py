@@ -44,7 +44,7 @@ def plot_compare(
         Plot the standard error of the information criteria estimate. Defaults to True
     plot_ic_diff : bool, optional
         Plot standard error of the difference in information criteria between each model
-         and the top-ranked model. Defaults to True
+        and the top-ranked model. Defaults to True
     order_by_rank : bool
         If True (default) ensure the best model is used as reference.
     figsize : tuple, optional
