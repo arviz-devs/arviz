@@ -378,15 +378,15 @@ def _get_grid(
 def kde(x, circular=False, **kwargs):
     """One dimensional density estimation.
 
-    It is a wrapper around `kde_linear()` and `kde_circular()`.
+    It is a wrapper around ``kde_linear()`` and ``kde_circular()``.
 
     Parameters
     ----------
     x: 1D numpy array
         Data used to calculate the density estimation.
     circular: bool, optional
-        Whether `x` is a circular variable or not. Defaults to False.
-    **kwargs: Arguments passed to `kde_linear()` and `kde_circular()`.
+        Whether ``x`` is a circular variable or not. Defaults to False.
+    **kwargs: Arguments passed to ``kde_linear()`` and ``kde_circular()``.
         See their documentation for more info.
 
     Returns
