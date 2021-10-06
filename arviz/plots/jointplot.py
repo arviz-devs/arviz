@@ -31,6 +31,9 @@ def plot_joint(
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
+    .. deprecated:: 0.9.0
+        Use :func:`arviz.plot_pair` instead.
+
     Parameters
     ----------
     data: obj
@@ -91,9 +94,6 @@ def plot_joint(
     See Also
     --------
     plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
-
-    .. deprecated:: 0.9.0
-        Use :func:`arviz.plot_pair` instead.
 
     Examples
     --------
