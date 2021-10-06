@@ -244,3 +244,4 @@ def plot_density(
     plot = get_plotting_function("plot_density", "densityplot", backend)
     ax = plot(**plot_density_kwargs)
     return ax
+    
