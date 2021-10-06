@@ -38,20 +38,19 @@ def plot_ess(
     **kwargs,
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
-
     Parameters
     ----------
     idata: obj
-        Any object that can be converted to an :class:`arviz.InferenceData` object
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     var_names: list of variable names, optional
-        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
+        Variables to be plotted. Prefix the variables by `~` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        ``pandas.filter``.
+        `pandas.filter`.
     kind: str, optional
         Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
     relative: bool
@@ -78,7 +77,7 @@ def plot_ess(
     min_ess: int
         Minimum number of ESS desired.
     labeller : labeller instance, optional
-        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
@@ -97,84 +96,60 @@ def plot_ess(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`.
-        For additional documentation check the plotting method of the backend.
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
-
     Returns
     -------
     axes: matplotlib axes or bokeh figures
-
-    See Also
-    --------
-    ess: Calculate estimate of the effective sample size.
-
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-
     Examples
     --------
     Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check
     that there are enough samples for all the explored regions of parameter space. Checking
     local and quantile ESS is particularly relevant when working with HDI intervals as
     opposed to ESS bulk, which is relevant for point estimates.
-
     .. plot::
         :context: close-figs
-
         >>> import arviz as az
         >>> idata = az.load_arviz_data("centered_eight")
         >>> coords = {"school": ["Choate", "Lawrenceville"]}
         >>> az.plot_ess(
         ...     idata, kind="local", var_names=["mu", "theta"], coords=coords
         ... )
-
     Plot quantile ESS and exclude variables with partial naming
-
     .. plot::
         :context: close-figs
-
         >>> az.plot_ess(
         ...     idata, kind="quantile", var_names=['~thet'], filter_vars="like", coords=coords
         ... )
-
     Plot ESS evolution as the number of samples increase. When the model is converging properly,
     both lines in this plot should be roughly linear.
-
     .. plot::
         :context: close-figs
-
         >>> az.plot_ess(
         ...     idata, kind="evolution", var_names=["mu", "theta"], coords=coords
         ... )
-
     Customize local ESS plot to look like reference paper.
-
     .. plot::
         :context: close-figs
-
         >>> az.plot_ess(
         ...     idata, kind="local", var_names=["mu"], drawstyle="steps-mid", color="k",
         ...     linestyle="-", marker=None, rug=True, rug_kwargs={"color": "r"}
         ... )
-
     Customize ESS evolution plot to look like reference paper.
-
     .. plot::
         :context: close-figs
-
         >>> extra_kwargs = {"color": "lightsteelblue"}
         >>> az.plot_ess(
         ...     idata, kind="evolution", var_names=["mu"],
         ...     color="royalblue", extra_kwargs=extra_kwargs
         ... )
-
     """
     valid_kinds = ("local", "quantile", "evolution")
     kind = kind.lower()
