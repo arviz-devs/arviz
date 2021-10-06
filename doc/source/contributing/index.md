@@ -33,6 +33,7 @@ Further information on how to contribute to ArviZ can be found on these specific
 :maxdepth: 2
 
 issue_reports
+issue_triaging
 contributing_prs
 developing_in_docker
 developer_guide
