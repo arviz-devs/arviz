@@ -50,7 +50,7 @@ def plot_joint(
     transform: callable
         Function to transform data (defaults to None i.e. the identity function)
     coords: mapping, optional
-        Coordinates of var_names to be plotted, passed to :func:`xarray:xarray.Dataset.sel`
+        Coordinates of var_names to be plotted, passed to :meth:`xarray.Dataset.sel`
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -91,6 +91,9 @@ def plot_joint(
     See Also
     --------
     plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
+
+    .. deprecated:: 0.9.0
+        Use :func:`arviz.plot_pair` instead.
 
     Examples
     --------
