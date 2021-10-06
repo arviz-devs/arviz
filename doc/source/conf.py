@@ -152,7 +152,8 @@ html_theme_options = {
             "icon": "fab fa-twitter-square",
         },
     ],
-    "navbar_start": ["navbar-logo", "navbar-version", "searchbar"],
+    "navbar_start": ["navbar-logo", "navbar-version"],
+    "navbar_end": ["searchbar"],
     "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
     "google_analytics_id": "G-W1G68W77YV",
 }
