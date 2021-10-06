@@ -38,9 +38,10 @@ def plot_joint(
     ----------
     data: obj
         Any object that can be converted to an :class:`arviz.InferenceData` object
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     group: str, optional
-        Specifies which :class:`arviz.InferenceData` group should be plotted. Defaults to "posterior".
+        Specifies which :class:`arviz.InferenceData` group should be plotted.
+        Defaults to "posterior".
     var_names: str or iterable of str
         Variables to be plotted. Iterable of two variables or one variable (with subset
         having exactly 2 dimensions) are required. Prefix the variables by ``~`` when you
@@ -62,8 +63,8 @@ def plot_joint(
     kind: str
         Type of plot to display ("scatter", "kde" or "hexbin")
     gridsize: int or (int, int), optional.
-        The number of hexagons in the x-direction. Ignored when hexbin is False. See :func:`matplotlib.pyplot.hexbin`
-        for details
+        The number of hexagons in the x-direction. Ignored when hexbin is False.
+        See :func:`matplotlib.pyplot.hexbin` for details.
     contour: bool
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
     fill_last: bool
