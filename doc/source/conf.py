@@ -58,6 +58,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
     "myst_nb",
+    "sphinx_design",
     "sphinx_panels",
     "notfound.extension",
     "sphinx_copybutton",
@@ -86,6 +87,13 @@ jupyter_execute_notebooks = "auto"
 execution_excludepatterns = ["*.ipynb"]
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
+
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "amsmath"
+]
 
 # The base toctree document.
 master_doc = "index"
