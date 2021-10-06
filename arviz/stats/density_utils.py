@@ -386,7 +386,7 @@ def kde(x, circular=False, **kwargs):
         Data used to calculate the density estimation.
     circular: bool, optional
         Whether ``x`` is a circular variable or not. Defaults to False.
-    **kwargs: Arguments passed to ``kde_linear()`` and ``kde_circular()``.
+    **kwargs: Arguments passed to kde_linear() and kde_circular().
         See their documentation for more info.
 
     Returns
