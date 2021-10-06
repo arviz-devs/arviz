@@ -37,7 +37,7 @@ def plot_joint(
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details
     group: str, optional
-        Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
+        Specifies which :class:`arviz.InferenceData` group should be plotted. Defaults to "posterior".
     var_names: str or iterable of str
         Variables to be plotted. Iterable of two variables or one variable (with subset
         having exactly 2 dimensions) are required. Prefix the variables by ``~`` when you
@@ -50,7 +50,7 @@ def plot_joint(
     transform: callable
         Function to transform data (defaults to None i.e. the identity function)
     coords: mapping, optional
-        Coordinates of var_names to be plotted, passed to :func:`xarray.Dataset.sel`
+        Coordinates of var_names to be plotted, passed to :func:`xarray:xarray.Dataset.sel`
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -73,7 +73,7 @@ def plot_joint(
         Tuple containing (ax_joint, ax_hist_x, ax_hist_y). If None, a new figure and axes
         will be created. Matplotlib axes or bokeh figures.
     backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Select plotting backend {"matplotlib","bokeh"}. Defaults to "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.figure` or
