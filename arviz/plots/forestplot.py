@@ -46,7 +46,7 @@ def plot_forest(
     ----------
     data: obj or list[obj]
         Any object that can be converted to an :class:`arviz.InferenceData` object
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     kind: str
         Choose kind of plot for main axis. Supports "forestplot" or "ridgeplot".
     model_names: list[str], optional
@@ -77,7 +77,7 @@ def plot_forest(
         Flag for plotting the interquartile range, in addition to the hdi_prob intervals.
         Defaults to ``True``.
     r_hat: bool, optional
-        Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
+        Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to ``False``.
     ess: bool, optional
         Flag for plotting the effective sample size. Defaults to ``False``.
     colors: list or string, optional
