@@ -35,7 +35,7 @@ def plot_density(
     backend_kwargs=None,
     show=None,
 ):
-"""Generate KDE plots for continuous variables and histograms for discrete ones.
+    """Generate KDE plots for continuous variables and histograms for discrete ones.
 
     Plots are truncated at their 100*(1-alpha)% highest density intervals. Plots are grouped per
     variable and colors assigned to models.
@@ -116,11 +116,11 @@ def plot_density(
 
     Examples
     --------
-
     Plot default density plot
 
     .. plot::
         :context: close-figs
+
         >>> import arviz as az
         >>> centered = az.load_arviz_data('centered_eight')
         >>> non_centered = az.load_arviz_data('non_centered_eight')
