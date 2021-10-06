@@ -376,24 +376,25 @@ def _get_grid(
 
 
 def kde(x, circular=False, **kwargs):
-    """One dimensional density estimation.
+    """
+    One dimensional density estimation.
 
     It is a wrapper around ``kde_linear()`` and ``kde_circular()``.
 
     Parameters
     ----------
-    x : 1D numpy array
+    x: 1D numpy array
         Data used to calculate the density estimation.
-    circular : bool, optional
+    circular: bool, optional
         Whether ``x`` is a circular variable or not. Defaults to False.
-    **kwargs : Arguments passed to kde_linear() and kde_circular().
+    **kwargs: Arguments passed to kde_linear() and kde_circular().
         See their documentation for more info.
 
     Returns
     -------
-    grid : Gridded numpy array for the x values.
-    pdf : Numpy array for the density estimates.
-    bw : optional, the estimated bandwidth.
+    grid: Gridded numpy array for the x values.
+    pdf: Numpy array for the density estimates.
+    bw: optional, the estimated bandwidth.
 
     Examples
     --------
@@ -484,6 +485,7 @@ def kde(x, circular=False, **kwargs):
     See Also
     --------
     plot_kde : Compute and plot a kernel density estimate.
+
     """
     x = x[np.isfinite(x)]
     if x.size == 0 or np.all(x == x[0]):
