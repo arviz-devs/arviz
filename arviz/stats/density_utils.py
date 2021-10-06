@@ -382,7 +382,7 @@ def kde(x, circular=False, **kwargs):
 
     Parameters
     ----------
-    x : 1D numpy array
+    x: 1D numpy array
         Data used to calculate the density estimation.
     circular: bool, optional
         Whether `x` is a circular variable or not. Defaults to False.
@@ -391,8 +391,8 @@ def kde(x, circular=False, **kwargs):
 
     Returns
     -------
-    grid : Gridded numpy array for the x values.
-    pdf : Numpy array for the density estimates.
+    grid: Gridded numpy array for the x values.
+    pdf: Numpy array for the density estimates.
     bw: optional, the estimated bandwidth.
 
     Examples
