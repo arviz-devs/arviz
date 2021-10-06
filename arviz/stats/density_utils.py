@@ -388,7 +388,7 @@ def kde(x, circular=False, **kwargs):
     circular : bool, optional
         Whether ``x`` is a circular variable or not. Defaults to False.
     **kwargs
-        Arguments passed to kde_linear() and kde_circular().
+        Arguments passed to ``kde_linear()`` and ``kde_circular()``.
         See their documentation for more info.
 
     Returns
