@@ -36,8 +36,10 @@ def plot_density(
     show=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
+
     Plots are truncated at their 100*(1-alpha)% highest density intervals. Plots are grouped per
     variable and colors assigned to models.
+
     Parameters
     ----------
     data : Union[Object, Iterator[Object]]
@@ -107,41 +109,63 @@ def plot_density(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
+
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
     Examples
     --------
     Plot default density plot
+
     .. plot::
         :context: close-figs
+
         >>> import arviz as az
         >>> centered = az.load_arviz_data('centered_eight')
         >>> non_centered = az.load_arviz_data('non_centered_eight')
         >>> az.plot_density([centered, non_centered])
+
     Plot variables in a 4x5 grid
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_density([centered, non_centered], grid=(4, 5))
+
     Plot subset variables by specifying variable name exactly
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_density([centered, non_centered], var_names=["mu"])
+
     Plot a specific `az.InferenceData` group
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_density([centered, non_centered], var_names=["mu"], group="prior")
+
     Specify highest density interval
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_density([centered, non_centered], var_names=["mu"], hdi_prob=.5)
+
     Shade plots and/or remove outlines
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_density([centered, non_centered], var_names=["mu"], outline=False, shade=.8)
+
     Specify binwidth for kernel density estimation
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
     if not isinstance(data, (list, tuple)):
@@ -244,4 +268,3 @@ def plot_density(
     plot = get_plotting_function("plot_density", "densityplot", backend)
     ax = plot(**plot_density_kwargs)
     return ax
-    

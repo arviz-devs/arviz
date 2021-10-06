@@ -38,6 +38,7 @@ def plot_ess(
     **kwargs,
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
+
     Parameters
     ----------
     idata: obj
@@ -102,54 +103,72 @@ def plot_ess(
         Call backend show function.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+
     Examples
     --------
     Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check
     that there are enough samples for all the explored regions of parameter space. Checking
     local and quantile ESS is particularly relevant when working with HDI intervals as
     opposed to ESS bulk, which is relevant for point estimates.
+
     .. plot::
         :context: close-figs
+
         >>> import arviz as az
         >>> idata = az.load_arviz_data("centered_eight")
         >>> coords = {"school": ["Choate", "Lawrenceville"]}
         >>> az.plot_ess(
         ...     idata, kind="local", var_names=["mu", "theta"], coords=coords
         ... )
+
     Plot quantile ESS and exclude variables with partial naming
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_ess(
         ...     idata, kind="quantile", var_names=['~thet'], filter_vars="like", coords=coords
         ... )
+
     Plot ESS evolution as the number of samples increase. When the model is converging properly,
     both lines in this plot should be roughly linear.
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_ess(
         ...     idata, kind="evolution", var_names=["mu", "theta"], coords=coords
         ... )
+
     Customize local ESS plot to look like reference paper.
+
     .. plot::
         :context: close-figs
+
         >>> az.plot_ess(
         ...     idata, kind="local", var_names=["mu"], drawstyle="steps-mid", color="k",
         ...     linestyle="-", marker=None, rug=True, rug_kwargs={"color": "r"}
         ... )
+
     Customize ESS evolution plot to look like reference paper.
+
     .. plot::
         :context: close-figs
+
         >>> extra_kwargs = {"color": "lightsteelblue"}
         >>> az.plot_ess(
         ...     idata, kind="evolution", var_names=["mu"],
         ...     color="royalblue", extra_kwargs=extra_kwargs
         ... )
+
     """
     valid_kinds = ("local", "quantile", "evolution")
     kind = kind.lower()
