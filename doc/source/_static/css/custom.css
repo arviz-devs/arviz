@@ -43,86 +43,15 @@ ul li p {
   background-color: #d1ecf1;
 }
 
-.searchbar {
-  width: 100%;
-  background: #12698A;
-  display: inline-block;
-  padding: 10px;
-}
-.searchbar ul{
-  list-style: none;
-  margin: 0 auto;
-  padding:0;
-}
-
-.searchbar ul li{
-  color: #fff;
-  float: left;
-  line-height: 50px;
+#toggle-search {
+  background-color: #12698A;
+  border: none;
+  color: white;
+  padding: 12px 10px;
   text-align: center;
-  cursor: pointer;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-family: Arial;
-  transition: 0.5s;
-  position: relative;
-  padding:0 20px;
-  background: #12698A;
-}
-
-.searchbar ul li:hover:not(.active){
-  background: #12698A;
-}
-
-
-.togglesearch{
-  background: #E8E8E4;
-  position: absolute;
-  top: 54px;
-  right: 28.7%;
-  width: 350px;
-  height: 60px;
-  line-height: 60px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  border-top:4px solid #12698A;
-  display: none;
-}
-
-.togglesearch:before{
-  content: "";
-  position: absolute;
-  top: -32px;
-  right: 13px;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-top: 14px solid transparent;
-  border-bottom: 14px solid #12698A;
-}
-
-.togglesearch input[type="text"]{
-  width: 200px;
-  padding: 5px 10px;
-  margin-left: 23px;
-  border: 1px solid #12698A;
-  outline: none;
-}
-
-.togglesearch input[type="button"]{
-  width: 80px;
-  padding: 5px 0;
-  background: #12698A;
-  color: #fff;
-  margin-left: -6px;
-  border: 1px solid #12698A;
-  outline: none;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
   cursor: pointer;
 }
-
-@media only screen and (min-width:240px) and (max-width: 768px){
-  .navbar ul li{
-      float:none;
-      display:block;
-      text-align:center;
-      margin:0 auto;
-  }
-} 

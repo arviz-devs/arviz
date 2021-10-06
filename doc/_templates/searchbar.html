@@ -1,12 +1,4 @@
-
-<div class="searchbar"> 
-    <ul>
-        <li class="searchbar">
-            <i class="fa fa-search" aria-hidden="true"></i>
-            <div class="togglesearch">
-                <input type="text" placeholder=""/>
-                <input type="button" value="Search" onclick="search.html"/>
-            </div>
-        </li>
-    </ul>
-    </div>
+<button id="toggle-search" onclick="getElementById('search-input').style.display='block'"><i class="fa fa-search"></i></button>
+<form action="search.html" method="get">
+    <input type="search" class="form-control rounded search-front-page" name="q" id="search-input" placeholder="&#128269; Search the docs ..." aria-label="Search the docs ..." style="display: none;" autocomplete="off">
+</form>
