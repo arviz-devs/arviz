@@ -67,7 +67,7 @@ The PPLs that integrate with ArviZ are:
 
 * [PyMC3](https://docs.pymc.io)
 * [Stan](https://mc-stan.org/users/documentation/)
-*  MCX
+* [MCX](https://github.com/rlouf/mcx)
 * [Pyro](https://pyro.ai/) and [NumPyro](https://pyro.ai/numpyro/)
 * [PyJAGS](https://pypi.org/project/pyjags/)
 * [TensorFlow Probability](https://www.tensorflow.org/probability)
