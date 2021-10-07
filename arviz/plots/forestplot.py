@@ -114,7 +114,7 @@ def plot_forest(
     figsize: tuple
         Figure size. If None, it will be defined automatically.
     ax: axes, optional
-        :class:`matplotlib.Axes` or :class:`bokeh.plotting.Figure`.
+        :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Defaults to "matplotlib".
     backend_config: dict, optional
