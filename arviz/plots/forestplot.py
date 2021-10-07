@@ -64,14 +64,15 @@ def plot_forest(
     coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`.
     combined: bool
-        Flag for combining multiple chains into a single chain. If ``False``` (default), chains will be
-        plotted separately.
+        Flag for combining multiple chains into a single chain. If ``False``(default), chains will
+        be plotted separately.
     hdi_prob: float, optional
-        Plots highest posterior density interval for chosen percentage of density. Defaults to `0.94`.
+        Plots highest posterior density interval for chosen percentage of density.
+        Defaults to `0.94`.
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list with one interval
-        only is provided, the **rope** will be displayed across the y-axis. If more than one interval is
-        provided the length of the list should match the number of variables.
+        only is provided, the **rope** will be displayed across the y-axis. If more than one
+        interval is provided the length of the list should match the number of variables.
     quartiles: bool, optional
         Flag for plotting the interquartile range, in addition to the hdi_prob intervals.
         Defaults to ``True``.
@@ -120,7 +121,7 @@ def plot_forest(
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in r``cParams``.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`. 
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
