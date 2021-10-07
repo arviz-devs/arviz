@@ -112,13 +112,13 @@ def plot_forest(
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
         Defaults to ``None``.
     figsize: tuple
-        Figure size. If ``None`` it will be defined automatically.
+        Figure size. If ``None``, it will be defined automatically.
     ax: axes, optional
         :class:`matplotlib.axes` or :class:`bokeh.plotting.figure`.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default to "matplotlib".
     backend_config: dict, optional
-        Currently specifies the bounds to use for bokeh axes. Defaults to value set in r``cParams``.
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
