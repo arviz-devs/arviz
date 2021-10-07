@@ -29,47 +29,54 @@ def plot_energy(
 
     Parameters
     ----------
-    data : xarray dataset, or object that can be converted (must represent
-           `sample_stats` and have an `energy` variable)
+    data : obj
+        :class:`xarray.Dataset`, or any object that can be converted (must represent
+        ``sample_stats`` and have an ``energy`` variable).
     kind : str
-        Type of plot to display {"kde", "hist")
+        Type of plot to display ("kde", "hist").
     bfmi : bool
         If True add to the plot the value of the estimated Bayesian fraction of missing information
     figsize : tuple
         Figure size. If None it will be defined automatically.
     legend : bool
-        Flag for plotting legend (defaults to True)
+        Flag for plotting legend. Defaults to True.
     fill_alpha : tuple of floats
         Alpha blending value for the shaded area under the curve, between 0
-        (no shade) and 1 (opaque). Defaults to (1, .75)
+        (no shade) and 1 (opaque). Defaults to (1, .75).
     fill_color : tuple of valid matplotlib color
         Color for Marginal energy distribution and Energy transition distribution.
-        Defaults to ('C0', 'C5')
+        Defaults to ('C0', 'C5').
     bw: float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
-        one of "scott", "silverman", "isj" or "experimental". Defaults to "experimental"
-        Only works if `kind='kde'`
+        one of "scott", "silverman", "isj" or "experimental". Defaults to "experimental".
+        Only works if ``kind='kde'``.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     fill_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` (to control the shade)
+        Additional keywords passed to :func:`arviz.plot_kde` (to control the shade).
     plot_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` or `plt.hist` (if type='hist')
+        Additional keywords passed to :func:`arviz.plot_kde` or :func:`matplotlib.pyplot.hist`
+        (if ``type='hist'``).
     ax: axes, optional
-        Matplotlib axes or bokeh figures.
+        :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
     backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Select plotting backend {"matplotlib", "bokeh"}. Defaults to "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    bfmi : Calculate the estimated Bayesian fraction of missing information (BFMI).
 
     Examples
     --------
