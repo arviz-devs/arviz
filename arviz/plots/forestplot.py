@@ -62,7 +62,7 @@ def plot_forest(
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: dict, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`.
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
     combined: bool
         Flag for combining multiple chains into a single chain. If ``False``(default), chains will
         be plotted separately.
@@ -74,7 +74,7 @@ def plot_forest(
         only is provided, the **rope** will be displayed across the y-axis. If more than one
         interval is provided the length of the list should match the number of variables.
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the hdi_prob intervals.
+        Flag for plotting the interquartile range, in addition to the ``hdi_prob`` intervals.
         Defaults to ``True``.
     r_hat: bool, optional
         Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
@@ -94,7 +94,7 @@ def plot_forest(
         Markersize throughout. If None it will be autoscaled based on ``figsize``.
     legend : bool, optional
         Show a legend with the color encoded model information.
-        Defaults to ``True`` if there are multiple models
+        Defaults to ``True`` if there are multiple models.
     labeller : labeller instance, optional
         Class providing the method ``make_model_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
@@ -105,18 +105,18 @@ def plot_forest(
         Overlap height for ridgeplots.
     ridgeplot_kind: string
         By default ("auto") continuous variables are plotted using KDEs and discrete ones using
-        histograms. To override this use "hist" to plot histograms and "density" for KDEs
+        histograms. To override this use "hist" to plot histograms and "density" for KDEs.
     ridgeplot_truncate: bool
-        Whether to truncate densities according to the value of hdi_prop. Defaults to ``True``.
+        Whether to truncate densities according to the value of ``hdi_prop``. Defaults to ``True``.
     ridgeplot_quantiles: list
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
         Defaults to ``None``.
     figsize: tuple
         Figure size. If ``None``, it will be defined automatically.
     ax: axes, optional
-        :class:`matplotlib.axes` or :class:`bokeh.plotting.figure`.
+        :class:`matplotlib.Axes` or :class:`bokeh.plotting.Figure`.
     backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default to "matplotlib".
+        Select plotting backend {"matplotlib","bokeh"}. Defaults to "matplotlib".
     backend_config: dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
     backend_kwargs: bool, optional
