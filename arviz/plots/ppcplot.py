@@ -157,6 +157,7 @@ def plot_ppc(
     axes: matplotlib axes or bokeh figures
 
     See Also
+    --------
     plot_bvp: Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
     Examples
