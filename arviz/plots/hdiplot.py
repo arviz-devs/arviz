@@ -38,7 +38,7 @@ def plot_hdi(
         Values to plot.
     y : array-like, optional
         Values from which to compute the HDI. Assumed shape ``(chain, draw, \*shape)``.
-        Only optional if hdi_data is present.
+        Only optional if ``hdi_data`` is present.
     hdi_data : array_like, optional
         Precomputed HDI values to use. Assumed shape is ``(*x.shape, 2)``.
     hdi_prob : float, optional
@@ -46,7 +46,7 @@ def plot_hdi(
     color : str, optional
         Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
     circular : bool, optional
-        Whether to compute the HDI taking into account `x` is a circular variable
+        Whether to compute the HDI taking into account ``x`` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
     smooth : boolean, optional
         If True the result will be smoothed by first computing a linear interpolation of the data
@@ -59,11 +59,11 @@ def plot_hdi(
         Figure size. If None it will be defined automatically.
     fill_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.fill_between`
-        (use fill_kwargs={'alpha': 0} to disable fill) or to
-        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
+        (use ``fill_kwargs={'alpha': 0}`` to disable fill) or to
+        :meth:`bokeh.plotting.Figure.patch`.
     plot_kwargs : dict, optional
         HDI limits keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
-        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
+        :meth:`bokeh.plotting.Figure.patch`.
     hdi_kwargs : dict, optional
         Keyword arguments passed to :func:`~arviz.hdi`. Ignored if ``hdi_data`` is present.
     ax : axes, optional
@@ -73,7 +73,7 @@ def plot_hdi(
     backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :meth:`mpl:matplotlib.axes.Axes.plot` or
-        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
+        :meth:`bokeh.plotting.Figure.patch`.
     show : bool, optional
         Call backend show function.
 
