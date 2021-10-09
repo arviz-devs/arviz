@@ -11,10 +11,10 @@ Stats
     apply_test_function
     compare
     hdi
+    kde
     loo
     loo_pit
     psislw
     r2_score
     summary
     waic
-    kde
