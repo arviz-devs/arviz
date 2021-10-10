@@ -9,3 +9,4 @@ User Guide
   data_structures
   computation
   sampling_wrappers
+  plotting_guide
