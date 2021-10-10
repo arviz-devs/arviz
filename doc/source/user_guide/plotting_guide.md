@@ -50,6 +50,6 @@ az.plot_autocorr(data, var_names=['~thet'], filter_vars="like", combined=True)
 Plot one variable by setting `var_names=var1`
 
 ```{code-cell}
-:tags: remove-input
+:tags: [remove-input]
 az.plot_autocorr(data, var_names=['mu'])
 ```
