@@ -31,6 +31,7 @@ az.plot_autocorr(data)
 Plot all the variables by keeping var_names=None
 
 ```{code-cell}
+:tags: [remove-stdout,remove-stderr]
 az.plot_autocorr(data, var_names=None )
 ```
 
@@ -49,6 +50,6 @@ az.plot_autocorr(data, var_names=['~thet'], filter_vars="like", combined=True)
 Plot one variable by setting `var_names=var1`
 
 ```{code-cell}
-:var_names: 'mu'
+:tags: remove-input
 az.plot_autocorr(data, var_names=['mu'])
 ```
