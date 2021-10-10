@@ -44,10 +44,10 @@ def plot_elpd(
     figsize : figure size tuple, optional
         If None, size is (8 + numvars, 8 + numvars).
     textsize: int, optional
-        Text size for labels. If None it will be autoscaled based on figsize.
+        Text size for labels. If None it will be autoscaled based on ``figsize``.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
-        a subset can be plotted for convenience.
+        subset can be plotted for convenience.
     legend : bool, optional
         Include a legend to the plot. Only taken into account when color argument is a dim name.
     threshold : float
