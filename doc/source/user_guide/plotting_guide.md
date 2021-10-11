@@ -115,12 +115,6 @@ Plot variables in a 4x5 grid
 az.plot_density([data, non_centered], grid=(4, 5));
 ```
 
-Plot variables in a 4x5 grid
-
-```{code-cell}
-az.plot_posterior([data, non_centered], grid=(4, 5));
-```
-
 Plot variables using the default value, `None`
 
 ```{code-cell}
