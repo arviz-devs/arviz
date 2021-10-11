@@ -8,7 +8,7 @@
 ### Deprecation
 
 ### Documentation
-
+* Added docs references to `plot_mcse` docstring [1855](https://github.com/arviz-devs/arviz/issues/1855)
 
 ## v0.11.4 (2021 Oct 3)
 
