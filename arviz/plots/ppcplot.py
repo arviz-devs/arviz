@@ -49,8 +49,8 @@ def plot_ppc(
 
     Parameters
     ----------
-    data: :class:`arviz.InferenceData` object
-        InferenceData object containing the observed and posterior/prior predictive data.
+    data: az.InferenceData object
+        :class:`arviz.InferenceData` object containing the observed and posterior/prior predictive data.
     kind: str
         Type of plot to display ("kde", "cumulative", or "scatter"). Defaults to `kde`.
     alpha: float
