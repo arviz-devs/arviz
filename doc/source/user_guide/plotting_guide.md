@@ -20,7 +20,6 @@ Most of the plotting functions have common arguments which are explained below w
 
 Variables to be plotted, if None all variables are plotted. Prefix the variables by ~ when you want to exclude them from the plot. Vector-value stochastics are handled automatically.
 
-(var_names_examples)=
 #### Examples
 
 Plot default autocorrelation
@@ -40,7 +39,7 @@ az.plot_posterior(data, var_names=None);
 Plot one variable by setting `var_names=var1`
 
 ```{code-cell}
-az.plot_autocorr(data, var_names=['mu']);
+az.plot_posterior(data, var_names=['mu']);
 ```
 
 Plot subset variables by specifying variable name exactly
@@ -52,4 +51,46 @@ az.plot_posterior(data, var_names=['mu', 'tau']);
 Plot variables with regular expressions
 ```{code-cell}
 az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex");
+```
+
+(common_figsize)=
+### `figsize`
+
+`figsize` is short for figure size. If None it will be defined automatically.
+
+(common_filter_vars)=
+### `filter_vars`
+If None (default), interpret `var_names` as the real variables names.
+
+Plot using the default value of `filter_vars` which is `None`
+
+```{code-cell}
+az.plot_posterior(data, var_names=['mu']);
+```
+
+If “like”, interpret `var_names` as substrings of the real variables names.
+
+Plot using `filter_vars="like"`
+
+```{code-cell}
+az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="like");
+```
+
+If “regex”, interpret `var_names` as regular expressions on the real variables names. A la `pandas.filter`.
+
+Plot using `filter_vars="regex"`
+
+```{code-cell}
+az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex");
+```
+
+(common_coords)=
+### `coords`
+Dictionary mapping dimensions to selected coordinates to be plotted. Dimensions without a mapping specified will include all coordinates for that dimension. Defaults to including all coordinates for all dimensions if None.
+
+Using coords argument to plot only a subset of data
+
+```{code-cell}
+coords = {"school": ["Choate","Phillips Exeter"]}
+az.plot_posterior(data, var_names=["mu", "theta"], coords=coords)
 ```
