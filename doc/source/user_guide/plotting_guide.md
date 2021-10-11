@@ -91,6 +91,37 @@ Dictionary mapping dimensions to selected coordinates to be plotted. Dimensions 
 Using coords argument to plot only a subset of data
 
 ```{code-cell}
-coords = {"school": ["Choate","Phillips Exeter"]}
-az.plot_posterior(data, var_names=["mu", "theta"], coords=coords)
+coords = {"school": ["Choate","Phillips Exeter"]};
+az.plot_posterior(data, var_names=["mu", "theta"], coords=coords);
+```
+
+Using coords argument to plot all data
+
+```{code-cell}
+coords = None;
+az.plot_posterior(data, var_names=["mu", "theta"], coords=coords);
+```
+
+
+
+(common_grid)=
+### `grid`
+Number of rows and columns. Defaults to None, the rows and columns are automatically inferred.
+
+Plot variables in a 4x5 grid
+
+```{code-cell}
+az.plot_density([centered, non_centered], grid=(4, 5));
+```
+
+Plot variables in a 4x5 grid
+
+```{code-cell}
+az.plot_posterior([centered, non_centered], grid=(4, 5));
+```
+
+Plot variables using the default value, `None`
+
+```{code-cell}
+az.plot_posterior([centered, non_centered], grid=None);
 ```
