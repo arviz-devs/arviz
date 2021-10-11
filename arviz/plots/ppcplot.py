@@ -55,14 +55,14 @@ def plot_ppc(
         Type of plot to display ("kde", "cumulative", or "scatter"). Defaults to `kde`.
     alpha: float
         Opacity of posterior/prior predictive density curves.
-        Defaults to `0.2` for ``kind`` = kde and cumulative, for scatter defaults to `0.7`.
+        Defaults to `0.2` for ``kind = kde`` and cumulative, for scatter defaults to `0.7`.
     mean: bool
         Whether or not to plot the mean posterior/prior predictive distribution.
         Defaults to ``True``.
-    observed: bool, default ``True``
+    observed: bool, default True
         Whether or not to plot the observed data.
     color: str
-        Valid matplotlib ``color``. Defaults to `C0`.
+        Valid matplotlib ``color``. Defaults to ``C0``.
     color: list
         List with valid matplotlib colors corresponding to the posterior/prior predictive
         distribution, observed data and mean of the posterior/prior predictive distribution.
@@ -106,7 +106,7 @@ def plot_ppc(
         across the coordinates specified in the ``coords`` argument. Defaults to flattening all
         of the dimensions. Dimensions should match flatten excluding dimensions for ``data_pairs``
         parameters. If ``flatten`` is defined and ``flatten_pp`` is None, then
-        ``flatten_pp`` = `flatten`.
+        ``flatten_pp = flatten``.
     num_pp_samples: int
         The number of posterior/prior predictive samples to plot. For ``kind`` = 'scatter' and
         `animation` = ``False`` if defaults to a maximum of 5 samples and will set jitter to `0.7`.
@@ -158,7 +158,7 @@ def plot_ppc(
 
     See Also
     --------
-    plot_bvp: Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+    plot_bpv: Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
     Examples
     --------
@@ -179,7 +179,7 @@ def plot_ppc(
         >>> az.plot_ppc(data, kind='cumulative')
 
     Use the ``coords`` and ``flatten`` parameters to plot selected variable dimensions
-    across multiple plots. We will now modify the dimension `obs_id` to contain
+    across multiple plots. We will now modify the dimension ``obs_id`` to contain
     indicate the name of the county where the measure was taken. The change has to
     be done on both ``posterior_predictive`` and ``observed_data`` groups, which is
     why we will use :meth:`~arviz.InferenceData.map` to apply the same function to
