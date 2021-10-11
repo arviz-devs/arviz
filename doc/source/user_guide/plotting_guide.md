@@ -27,6 +27,7 @@ Plot default autocorrelation
 ```{code-cell}
 import arviz as az
 data = az.load_arviz_data('centered_eight');
+non_centered = az.load_arviz_data('non_centered_eight');
 az.plot_posterior(data);
 ```
 
@@ -111,17 +112,17 @@ Number of rows and columns. Defaults to None, the rows and columns are automatic
 Plot variables in a 4x5 grid
 
 ```{code-cell}
-az.plot_density([centered, non_centered], grid=(4, 5));
+az.plot_density([data, non_centered], grid=(4, 5));
 ```
 
 Plot variables in a 4x5 grid
 
 ```{code-cell}
-az.plot_posterior([centered, non_centered], grid=(4, 5));
+az.plot_posterior([data, non_centered], grid=(4, 5));
 ```
 
 Plot variables using the default value, `None`
 
 ```{code-cell}
-az.plot_posterior([centered, non_centered], grid=None);
+az.plot_posterior([data, non_centered], grid=None);
 ```
