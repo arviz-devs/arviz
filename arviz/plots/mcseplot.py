@@ -39,10 +39,10 @@ def plot_mcse(
     Parameters
     ----------
     idata: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names, optional
-        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
@@ -50,7 +50,7 @@ def plot_mcse(
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: dict, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel <xarray:xarray.Dataset.sel>`
     errorbar: bool, optional
         Plot quantile value +/- mcse instead of plotting mcse.
     grid : tuple
@@ -78,21 +78,23 @@ def plot_mcse(
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     rug_kwargs: dict
-        kwargs passed to rug plot.
+        kwargs passed to rug plot in
+        :meth:`mpl:matplotlib.axes.Axes.plot` or :class:`bokeh:bokeh.models.glyphs.Scatter`
     extra_kwargs: dict, optional
-        kwargs passed to ax.plot for extra methods lines.
+        kwargs passed as extra method lines in
+        :meth:`mpl:matplotlib.axes.Axes.axhline` or :class:`bokeh:bokeh.models.Span` 
     text_kwargs: dict, optional
-        kwargs passed to ax.annotate for extra methods lines labels. It accepts the additional
-        key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
+        kwargs passed to :meth:`mpl:matplotlib.axes.Axes.annotate` for extra methods lines labels.
+        It accepts the additional key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being passed to
+        :func:`matplotlib.create_axes_grid` or :func:`bokeh.create_axes_grid`
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib depending on the value of `kind`.
 
     Returns
     -------
