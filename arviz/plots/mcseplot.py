@@ -100,6 +100,10 @@ def plot_mcse(
     -------
     axes: matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    :func:`arviz.mcse`: Calculate Markov Chain Standard Error statistic.
+
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
