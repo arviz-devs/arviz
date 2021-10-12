@@ -425,9 +425,9 @@ def tfp_schools_model(num_schools, treatment_stddevs):
 
 def tfp_noncentered_schools(data, draws, chains):
     """Non-centered eight schools implementation for tfp."""
+    import edward2 as ed
     import tensorflow as tf
     import tensorflow_probability as tfp
-    import tensorflow_probability.python.edward2 as ed
 
     if int(tf.__version__[0]) > 1:
         import tensorflow.compat.v1 as tf  # pylint: disable=import-error
