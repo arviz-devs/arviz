@@ -129,7 +129,7 @@ def plot_ppc(
         `animation_kwargs({'blit':False}) or changing the matplotlib's backend (e.g. to TkAgg)
         If you run the animation from a script write `ax, ani = az.plot_ppc(.)`
     animation_kwargs : dict
-        Keywords passed to `animation.FuncAnimation`. Ignored with matploblib backend.
+        Keywords passed to :class:`matplotlib.animation.FuncAnimation`. Ignored with matploblib backend.
     legend : bool
         Add legend to figure. By default True.
     labeller : labeller instance, optional
