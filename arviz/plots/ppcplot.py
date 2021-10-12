@@ -110,7 +110,7 @@ def plot_ppc(
         ``flatten_pp = flatten``.
     num_pp_samples: int
         The number of posterior/prior predictive samples to plot. For ``kind`` = 'scatter' and
-        `animation` = ``False`` if defaults to a maximum of 5 samples and will set jitter to 0.7.
+        ``animation = False`` if defaults to a maximum of 5 samples and will set jitter to 0.7.
         unless defined. Otherwise it defaults to all provided samples.
     random_seed: int
         Random number generator seed passed to ``numpy.random.seed`` to allow
