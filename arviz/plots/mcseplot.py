@@ -90,7 +90,7 @@ def plot_mcse(
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being passed to
-        :func:`matplotlib.create_axes_grid` or :func:`bokeh.create_axes_grid`
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
     **kwargs
