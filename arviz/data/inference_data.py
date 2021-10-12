@@ -355,13 +355,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     for key, kws in group_kwargs.items():
                         if re.search(key, group):
                             group_kws = kws
-                print('DEBUG : group_kws', group_kws)
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
                     else:
                         groups[group] = data
-                    print('DEBUG : group chunks', data.chunks)
             res = InferenceData(**groups)
             return res
         except OSError as e:  # pylint: disable=invalid-name
