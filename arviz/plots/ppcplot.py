@@ -56,7 +56,7 @@ def plot_ppc(
         Type of plot to display ("kde", "cumulative", or "scatter"). Defaults to `kde`.
     alpha: float
         Opacity of posterior/prior predictive density curves.
-        Defaults to `0.2` for ``kind = kde`` and cumulative, for scatter defaults to `0.7`.
+        Defaults to 0.2 for ``kind = kde`` and cumulative, for scatter defaults to 0.7.
     mean: bool
         Whether or not to plot the mean posterior/prior predictive distribution.
         Defaults to ``True``.
@@ -100,7 +100,7 @@ def plot_ppc(
         that dimension. Defaults to including all coordinates for all
         dimensions if None.
     flatten: list
-        List of dimensions to flatten in observed_data. Only flattens across the coordinates
+        List of dimensions to flatten in ``observed_data``. Only flattens across the coordinates
         specified in the ``coords`` argument. Defaults to flattening all of the dimensions.
     flatten_pp: list
         List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
@@ -110,7 +110,7 @@ def plot_ppc(
         ``flatten_pp = flatten``.
     num_pp_samples: int
         The number of posterior/prior predictive samples to plot. For ``kind`` = 'scatter' and
-        `animation` = ``False`` if defaults to a maximum of 5 samples and will set jitter to `0.7`.
+        `animation` = ``False`` if defaults to a maximum of 5 samples and will set jitter to 0.7.
         unless defined. Otherwise it defaults to all provided samples.
     random_seed: int
         Random number generator seed passed to ``numpy.random.seed`` to allow
@@ -119,7 +119,7 @@ def plot_ppc(
         by ``num_pp_samples``.
     jitter: float
         If ``kind`` is "scatter", jitter will add random uniform noise to the height
-        of the ppc samples and observed data. By default `0`.
+        of the ppc samples and observed data. By default 0.
     animated: bool
         Create an animation of one posterior/prior predictive sample per frame.
         Defaults to ``False``. Only works with matploblib backend.
@@ -132,7 +132,7 @@ def plot_ppc(
         `animation_kwargs({'blit':False}) or changing the matplotlib's backend (e.g. to TkAgg)
         If you run the animation from a script write `ax, ani = az.plot_ppc(.)`
     animation_kwargs : dict
-        Keywords passed to ``animation.FuncAnimation``. Ignored with matplotlib backend.
+        Keywords passed to  :class:`matplotlib.animation.FuncAnimation`. Ignored with matplotlib backend.
     legend : bool
         Add legend to figure. By default ``True``.
     labeller : labeller instance, optional
@@ -148,8 +148,8 @@ def plot_ppc(
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     group: {"prior", "posterior"}, optional
-        Specifies which InferenceData group should be plotted. Defaults to `'posterior'`.
-        Other value can be `'prior'`.
+        Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
+        Other value can be 'prior'.
     show: bool, optional
         Call backend show function.
 
