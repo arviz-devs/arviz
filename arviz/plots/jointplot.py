@@ -31,36 +31,40 @@ def plot_joint(
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
+    .. deprecated:: 0.9.0
+        Use :func:`arviz.plot_pair` instead.
+
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     group: str, optional
-        Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
+        Specifies which :class:`arviz.InferenceData` group should be plotted.
+        Defaults to "posterior".
     var_names: str or iterable of str
         Variables to be plotted. Iterable of two variables or one variable (with subset
-        having exactly 2 dimensions) are required. Prefix the variables by `~` when you
+        having exactly 2 dimensions) are required. Prefix the variables by ``~`` when you
         want to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     transform: callable
         Function to transform data (defaults to None i.e. the identity function)
     coords: mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted, passed to :meth:`xarray.Dataset.sel`
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     kind: str
-        Type of plot to display (scatter, kde or hexbin)
+        Type of plot to display ("scatter", "kde" or "hexbin")
     gridsize: int or (int, int), optional.
-        The number of hexagons in the x-direction. Ignored when hexbin is False. See `plt.hexbin`
-        for details
+        The number of hexagons in the x-direction. Ignored when hexbin is False.
+        See :func:`matplotlib.pyplot.hexbin` for details.
     contour: bool
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
     fill_last: bool
@@ -73,10 +77,11 @@ def plot_joint(
         Tuple containing (ax_joint, ax_hist_x, ax_hist_y). If None, a new figure and axes
         will be created. Matplotlib axes or bokeh figures.
     backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Select plotting backend {"matplotlib","bokeh"}. Defaults to "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.figure` or
+        :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
 
@@ -86,6 +91,10 @@ def plot_joint(
         ax_joint: joint (central) distribution
         ax_hist_x: x (top) distribution
         ax_hist_y: y (right) distribution
+
+    See Also
+    --------
+    plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
 
     Examples
     --------

@@ -9,6 +9,12 @@
 
 ### Documentation
 
+
+## v0.11.4 (2021 Oct 3)
+
+### Maintenance and fixes
+* Fix standard deviation code in density utils by replacing it with `np.std`. ([1833](https://github.com/arviz-devs/arviz/pull/1833))
+
 ## v0.11.3 (2021 Oct 1)
 ### New features
 * Added `labeller` argument to enable label customization in plots and summary ([1201](https://github.com/arviz-devs/arviz/pull/1201))

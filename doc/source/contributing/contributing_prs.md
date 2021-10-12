@@ -14,34 +14,33 @@ functionality and open a "Feature Request" issue before starting to work
 on the new feature.
 
 ## Steps before starting work
-Before starting a work on a pull request double check that no one else
+Before starting work on a pull request double-check that no one else
 is working on the ticket in both issue tickets and pull requests.
 
 ArviZ is a community-driven project and always has multiple people working
-on it at the same time. This guidelines define a set of rules to ensure
+on it simultaneously. These guidelines define a set of rules to ensure
 that we all make the most of our time and we don't have two contributors
-working on the same changes.
+working on the same changes. Let's see what to do when you encounter the following scenarios:
 
 ### If an issue ticket exists
-If an issue exists check the ticket to ensure no one else has started work. If first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
+If an issue exists check the ticket to ensure no one else has started working on it. If you are first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
 
 ### If an issue ticket doesn't exist
 Open an issue ticket for the issue and state that you'll be solving the issue with a pull request. Optionally create a pull request and add `[WIP]` in the title to indicate Work in Progress.
 
 ### In the event of a conflict
-In the event of two or more people working on the same issue, the general precedence will go to the person who first commented in the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though, and the core contributors will make the best judgement call if needed.
+In the event of two or more people working on the same issue, the general precedence will go to the person who first commented on the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though, and the core contributors will make the best judgment call if needed.
 
 ### If the issue ticket has someone assigned to it
-If the issue is assigned then precedence goes to the assignee. However if there has been no activity for 2 weeks from assignment date the ticket is open for all again and can be unassigned.
+If the issue is assigned then precedence goes to the assignee. However, if there has been no activity for 2 weeks from the assignment date, the ticket is open for all again and can be unassigned.
 
 (dev_summary)=
 # Development process - summary
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/),
-clone it to your local machine, and develop on a feature branch.
-
-For some more instructions see the {ref}`pr_checklist`, for a detailed
-description of the recommended development process, see {ref}`developer_guide`
+clone it to your local machine, and develop on a feature branch. the details of this process are listed on
+{ref}`pr_checklist`. For a detailed
+description of the recommended development process, see {ref}`developer_guide`.
 
 ## Code Formatting
 For code generally follow the
@@ -69,11 +68,9 @@ require functions to include type hints
 however contributions including them are welcome.
 
 ## Documentation for user facing methods
-If changes are made to a method documented in the
-[ArviZ API Guide](https://numpydoc.readthedocs.io/en/latest/format.html)
+If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
 please consider adding inline documentation examples.
-`az.plot_posterior` is a particularly
-{func}`good example <arviz.plot_posterior>`.
+You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
 
 ## Tests
 Section in construction
@@ -82,23 +79,64 @@ Section in construction
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
-2. Clone your fork of the ArviZ repo from your GitHub account to your local disk, and add the base repository as a remote:
+2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
-   ```bash
+   ::::{tab-set}
+
+   :::{tab-item} SSH
+   :sync: ssh
+
+   ```
    $ git clone git@github.com:<your GitHub handle>/arviz.git
+   ```
+   :::
+
+   :::{tab-item} HTTPS
+   :sync: https
+
+   ```
+   $ git clone https://github.com/<your GitHub handle>/arviz.git
+   ```
+   :::
+
+   ::::
+
+3. Navigate to your arviz directory and add the base repository as a remote:
+
+   ::::{tab-set}
+
+   :::{tab-item} SSH
+   :sync: ssh
+
+   ```
    $ cd arviz
    $ git remote add upstream git@github.com:arviz-devs/arviz.git
    ```
+   :::
 
-3. Create a ``feature`` branch to hold your development changes:
+   :::{tab-item} HTTPS
+   :sync: https
+
+   ```
+   $ cd arviz
+   $ git remote add upstream https://github.com/arviz-devs/arviz
+   ```
+   :::
+
+   ::::
+
+4. Create a ``feature`` branch to hold your development changes:
 
    ```bash
    $ git checkout -b my-feature
    ```
 
-   Always use a ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
+   ```{warning}
+   Always create a new ``feature`` branch before making any changes. Make your chnages
+   in the ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
+   ```
 
-4. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
+5. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
 
    ```bash
    $ pip install -r requirements.txt
@@ -106,10 +144,9 @@ Section in construction
    $ pip install -r requirements-docs.txt  # to generate docs locally
    ```
 
-   Alternatively, there is a script to create a docker environment for development.
-   See: {ref}`developing_in_docker`
+   Alternatively, for developing the project in [Docker](https://docs.docker.com/), there is a script to setup the Docker environment for development. See {ref}`developing_in_docker`.
 
-5. Develop the feature on your feature branch. Add changed files using ``git add`` and then ``git commit`` files:
+6. Develop the feature on your feature branch. Add your changes using git commands, ``git add`` and then ``git commit``, like:
 
    ```bash
    $ git add modified_files
@@ -129,7 +166,7 @@ Section in construction
    $ git push -u origin my-feature
    ```
 
-6. Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
+7. Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
 
 (pr_checklist)=
 # Pull request checklist
@@ -140,33 +177,33 @@ We recommend that your contribution complies with the following guidelines befor
 
 * All public methods must have informative docstrings with sample usage when appropriate.
 
-* Please prefix the title of incomplete contributions with `[WIP]` (to indicate a work in progress). WIPs may be useful to (1) indicate you are working on something to avoid duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
+* Please prefix the title of incomplete contributions with `[WIP]` (to indicate a work in progress). WIPs may be useful to (1) indicate you are working on something to avoid duplicated work, (2) request a broad review of functionality or API, or (3) seek collaborators.
 
 * All other tests pass when everything is rebuilt from scratch.
 See {ref}`developing_in_docker` for information on running the test suite locally.
 
-* When adding additional plotting functionality, provide at least one example script in the ``arviz/examples/`` folder. Have a look at other examples for reference. Examples should demonstrate why the new functionality is useful in practice and, if possible, compare it to other methods available in ArviZ.
+* When adding additional plotting functionality, provide at least one example script in the [arviz/examples/](https://github.com/arviz-devs/arviz/tree/main/examples) folder. Have a look at other examples for reference. Examples should demonstrate why the new functionality is useful in practice and, if possible, compare it to other methods available in ArviZ.
 
-* Added tests follow the [pytest fixture pattern](https://docs.pytest.org/en/latest/fixture.html#fixture)
+* Added tests follow the [pytest fixture pattern](https://docs.pytest.org/en/latest/fixture.html#fixture).
 
 * Documentation and high-coverage tests are necessary for enhancements to be accepted.
 
-* Documentation follows Numpy style guide
+* Documentation follows Numpy style guide.
 
 * Run any of the pre-existing examples in ``docs/source/notebooks`` that contain analyses that would be affected by your changes to ensure that nothing breaks. This is a useful opportunity to not only check your work for bugs that might not be revealed by unit test, but also to show how your contribution improves ArviZ for end users.
 
-* If modifying a plot, render your plot to inspect for changes and copy image in the pull request message on Github
+* If modifying a plot, render your plot to inspect for changes and copy image in the pull request message on Github.
 
 You can also check for common programming errors with the following
 tools:
 
-* Save plots as part of tests. Plots will save to a directory named test_images by default
+* Save plots as part of tests. Plots will be saved to a directory named `test_images` by default.
 
   ```bash
   $ pytest arviz/tests/base_tests/<name of test>.py --save
   ```
 
-* Optionally save plots to a user named directory. This is useful for comparing changes across branches
+* Optionally save plots to a user named directory. This is useful for comparing changes across branches.
 
   ```bash
   $ pytest arviz/tests/base_tests/<name of test>.py --save user_defined_directory
@@ -208,4 +245,4 @@ To run the **benchmark tests** do the following:
     $ cd arviz
     $ asv run
 
-**This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/main/CONTRIBUTING.md)**
+**This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/main/CONTRIBUTING.md)**.
