@@ -33,48 +33,53 @@ def plot_elpd(
     ----------
     compare_dict : mapping, str -> ELPDData or InferenceData
         A dictionary mapping the model name to the object containing inference data or the result
-        of `loo`/`waic` functions.
-        Refer to az.convert_to_inference_data for details on possible dict items
+        of :func:`arviz.loo` or :func:`arviz.waic` functions.
+        Refer to :func:`arviz.convert_to_inference_data` for details on possible dict items.
     color : str or array_like, optional
-        Colors of the scatter plot, if color is a str all dots will have the same color,
-        if it is the size of the observations, each dot will have the specified color,
-        otherwise, it will be interpreted as a list of the dims to be used for the color code
+        Colors of the scatter plot. If color is a str all dots will have the same color.
+        If it is the size of the observations, each dot will have the specified color.
+        Otherwise, it will be interpreted as a list of the dims to be used for the color code.
     xlabels : bool, optional
-        Use coords as xticklabels
+        Use coords as xticklabels. Defaults to False.
     figsize : figure size tuple, optional
-        If None, size is (8 + numvars, 8 + numvars)
+        If None, size is (8 + numvars, 8 + numvars).
     textsize: int, optional
-        Text size for labels. If None it will be autoscaled based on figsize.
+        Text size for labels. If None it will be autoscaled based on ``figsize``.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
-        a subset can be plotted for convenience.
+        subset can be plotted for convenience.
     legend : bool, optional
         Include a legend to the plot. Only taken into account when color argument is a dim name.
     threshold : float
-        If some elpd difference is larger than `threshold * elpd.std()`, show its label. If
+        If some elpd difference is larger than ``threshold * elpd.std()``, show its label. If
         `None`, no observations will be highlighted.
     ic : str, optional
-        Information Criterion (PSIS-LOO `loo`, WAIC `waic`) used to compare models. Defaults to
-        ``rcParams["stats.information_criterion"]``.
-        Only taken into account when input is InferenceData.
+        Information Criterion ("loo" for PSIS-LOO, "waic" for WAIC) used to compare models.
+        Defaults to ``rcParams["stats.information_criterion"]``.
+        Only taken into account when input is :class:`arviz.InferenceData`.
     scale : str, optional
-        scale argument passed to az.loo or az.waic, see their docs for details. Only taken
-        into account when input is InferenceData.
+        Scale argument passed to :func:`arviz.loo` or :func:`arviz.waic`, see their docs for
+        details. Only taken into account when input is :class:`arviz.InferenceData`.
     plot_kwargs : dicts, optional
-        Additional keywords passed to ax.scatter
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter`.
     ax: axes, optional
-        Matplotlib axes or bokeh figures.
+        :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
     backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Select plotting backend {"matplotlib", "bokeh"}. Defaults to "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_compare : Summary plot for model comparison.
 
     Examples
     --------
