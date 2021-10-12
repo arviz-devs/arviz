@@ -44,9 +44,9 @@ class TfpConverter:
         self.coords = coords
         self.dims = dims
 
+        import edward2 as ed
         import tensorflow as tf
         import tensorflow_probability as tfp
-        import tensorflow_probability.python.edward2 as ed
 
         self.tfp = tfp
         self.tf = tf  # pylint: disable=invalid-name
