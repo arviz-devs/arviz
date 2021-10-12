@@ -26,6 +26,8 @@ def from_netcdf(filename, group_kwargs: dict = None, regex=False):
     of loaded into memory. This behaviour is regulated by the value of
     ``az.rcParams["data.load"]``.
     """
+    if group_kwargs is None:
+        group_kwargs = {}
     return InferenceData.from_netcdf(filename, group_kwargs, regex)
 
 
