@@ -4,7 +4,7 @@ from .converters import convert_to_inference_data
 from .inference_data import InferenceData
 
 
-def from_netcdf(filename, group_kwargs: dict = None, regex=False):
+def from_netcdf(filename, group_kwargs=None, regex=False):
     """Load netcdf file back into an arviz.InferenceData.
 
     Parameters

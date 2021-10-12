@@ -316,7 +316,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
     @staticmethod
     def from_netcdf(
-        filename: str, group_kwargs: dict = None, regex: bool = False
+            filename, group_kwargs=None, regex=False
     ) -> "InferenceData":
         """Initialize object from a netcdf file.
 
