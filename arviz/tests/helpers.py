@@ -403,8 +403,8 @@ def numpyro_schools_model(data, draws, chains):
 
 def tfp_schools_model(num_schools, treatment_stddevs):
     """Non-centered eight schools model for tfp."""
+    import edward2 as ed
     import tensorflow as tf
-    import tensorflow_probability.python.edward2 as ed
 
     if int(tf.__version__[0]) > 1:
         import tensorflow.compat.v1 as tf  # pylint: disable=import-error
