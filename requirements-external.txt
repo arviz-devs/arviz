@@ -5,5 +5,5 @@ pystan
 cmdstanpy
 pyro-ppl>=1.0.0
 tensorflow
-tensorflow-probability==0.11.0
+tensorflow-probability~=0.14.1
 numpyro>=0.2.1
