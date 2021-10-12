@@ -28,7 +28,6 @@ jobs:
         pyro.version: 1.2
         pytorch.version: 1.4
         emcee.version: 2
-        tensorflow.version: 1
         name: "External special"
 
   steps:
