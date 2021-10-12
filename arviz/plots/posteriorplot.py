@@ -280,3 +280,4 @@ def plot_posterior(
     plot = get_plotting_function("plot_posterior", "posteriorplot", backend)
     ax = plot(**posteriorplot_kwargs)
     return ax
+    
