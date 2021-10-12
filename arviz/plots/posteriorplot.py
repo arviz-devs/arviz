@@ -55,7 +55,7 @@ def plot_posterior(
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
@@ -105,11 +105,11 @@ def plot_posterior(
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
         Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
-        Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
+        Controls the number of bins, accepts the same keywords :func:`matplotlib.pyplot.hist` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
