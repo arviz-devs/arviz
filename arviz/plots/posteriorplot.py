@@ -105,9 +105,9 @@ def plot_posterior(
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
         Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
-        Controls the number of bins, accepts the same keywords :func:`matplotlib.pyplot.hist` does. Only
-        works if `kind == hist`. If None (default) it will use `auto` for continuous variables and
-        `range(xmin, xmax + 1)` for discrete variables.
+        Controls the number of bins,accepts the same keywords :func:`matplotlib.pyplot.hist` does.
+        Only works if `kind == hist`. If None (default) it will use `auto` for continuous variables
+        and `range(xmin, xmax + 1)` for discrete variables.
     labeller : labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
@@ -117,12 +117,12 @@ def plot_posterior(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used, passed to :func:`matplotlib.pyplot.subplots` 
-        or :func:`bokeh.plotting.figure`
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to :func:`matplotlib.pyplot.hist` or :func:`matplotlib.pyplot.plot` function 
+        Passed as-is to :func:`matplotlib.pyplot.hist` or :func:`matplotlib.pyplot.plot` function
         depending on the value of `kind`.
 
     Returns
