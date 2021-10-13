@@ -161,6 +161,9 @@ def plot_ppc(
     See Also
     --------
     plot_bpv: Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+    plot_lm: Posterior predictive and mean plots for regression-like data.
+    plot_ppc: plot for posterior/prior predictive checks.
+    plot_ts: Plot timeseries data.
 
     Examples
     --------
