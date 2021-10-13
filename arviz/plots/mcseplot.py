@@ -85,7 +85,8 @@ def plot_mcse(
         :meth:`mpl:matplotlib.axes.Axes.axhline` or :class:`bokeh:bokeh.models.Span` 
     text_kwargs: dict, optional
         kwargs passed to :meth:`mpl:matplotlib.axes.Axes.annotate` for extra methods lines labels.
-        It accepts the additional key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
+        It accepts the additional key ``x`` to set ``xy=(text_kwargs["x"], mcse)``. 
+        text_kwargs are ignored for the bokeh plotting backend.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
