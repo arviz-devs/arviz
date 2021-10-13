@@ -116,6 +116,11 @@ def plot_ppc(
         pp_var_name, _, _, pp_vals = pp_plotters[i]
         dtype = predictive_dataset[pp_var_name].dtype.kind
 
+        if dtype not in ["i", "f"]:
+            raise ValueError(
+                f"The data type of the predictive data must be one of 'i' or 'f', but is '{dtype}'"
+            )
+
         # flatten non-specified dimensions
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
