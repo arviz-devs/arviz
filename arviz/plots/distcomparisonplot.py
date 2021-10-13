@@ -32,7 +32,7 @@ def plot_dist_comparison(
 
     Parameters
     ----------
-    data : az.InferenceData object
+    data : arviz.InferenceData object
         InferenceData object containing the posterior/prior data.
     kind : str
         kind of plot to display {"latent", "observed"}, defaults to 'latent'.
