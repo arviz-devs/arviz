@@ -105,7 +105,7 @@ def plot_posterior(
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
         Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
-        Controls the number of bins, accepts the same keywords :func:`matplotlib.pyplot.hist` does. Only 
+        Controls the number of bins, accepts the same keywords :func:`matplotlib.pyplot.hist` does. Only
         works if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
     labeller : labeller instance, optional
