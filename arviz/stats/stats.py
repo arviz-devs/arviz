@@ -1372,8 +1372,8 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an :class:`az.InferenceData object`. Refer to documentation of
-        :func:`az.convert_to_inference_data` for details
+        Any object that can be converted to an :class:`arviz.InferenceData object`. Refer to documentation of
+        :func:`arviz.convert_to_inference_data` for details
     pointwise: bool
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
