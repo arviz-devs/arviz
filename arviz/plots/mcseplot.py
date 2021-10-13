@@ -50,7 +50,7 @@ def plot_mcse(
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: dict, optional
-        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel <xarray:xarray.Dataset.sel>`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     errorbar: bool, optional
         Plot quantile value +/- mcse instead of plotting mcse.
     grid : tuple
@@ -82,7 +82,7 @@ def plot_mcse(
         :meth:`mpl:matplotlib.axes.Axes.plot` or :class:`bokeh:bokeh.models.glyphs.Scatter`
     extra_kwargs: dict, optional
         kwargs passed as extra method lines in
-        :meth:`mpl:matplotlib.axes.Axes.axhline` or :class:`bokeh:bokeh.models.Span` 
+        :meth:`mpl:matplotlib.axes.Axes.axhline` or :class:`bokeh:bokeh.models.Span`
     text_kwargs: dict, optional
         kwargs passed to :meth:`mpl:matplotlib.axes.Axes.annotate` for extra methods lines labels.
         It accepts the additional key ``x`` to set ``xy=(text_kwargs["x"], mcse)``. 
@@ -95,7 +95,8 @@ def plot_mcse(
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib depending on the value of `kind`.
+        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or
+        :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib depending on the value of `kind`.
 
     Returns
     -------
