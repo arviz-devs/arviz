@@ -1372,8 +1372,8 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an :class:`arviz.InferenceData object`. Refer to documentation of
-        :func:`arviz.convert_to_inference_data` for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object. 
+        Refer to documentation of :func:`arviz.convert_to_inference_data` for details.
     pointwise: bool
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
@@ -1407,8 +1407,8 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
 
     See Also
     --------
-    arviz.loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
-    arviz.compare : Compare models based on PSIS-LOO-CV or WAIC.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+    compare : Compare models based on PSIS-LOO-CV or WAIC.
     plot_compare : Summary plot for model comparison.
 
     Examples
