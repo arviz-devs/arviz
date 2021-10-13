@@ -1408,7 +1408,7 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     See Also
     --------
     arviz.loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
-    arviz_compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
+    arviz.compare : Compare models based on PSIS-LOO-CV or WAIC.
     plot_compare : Summary plot for model comparison.
 
     Examples
