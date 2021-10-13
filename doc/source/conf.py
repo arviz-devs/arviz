@@ -177,10 +177,7 @@ html_context = {
     "github_version": "main",
     "doc_path": "doc/source/",
 }
-html_sidebars: Dict[str, Any] = {
-    "community": [],
-    "about_us": [],
-}
+html_sidebars: Dict[str, Any] = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
