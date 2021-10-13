@@ -117,11 +117,13 @@ def plot_posterior(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used, passed to :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`
+        These are kwargs specific to the backend being used, passed to :func:`matplotlib.pyplot.subplots` 
+        or :func:`bokeh.plotting.figure`
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to :func:`matplotlib.pyplot.hist` or :func:`matplotlib.pyplot.plot` function depending on the value of `kind`.
+        Passed as-is to :func:`matplotlib.pyplot.hist` or :func:`matplotlib.pyplot.plot` function 
+        depending on the value of `kind`.
 
     Returns
     -------
