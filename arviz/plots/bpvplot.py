@@ -41,7 +41,7 @@ def plot_bpv(
 
     Parameters
     ----------
-    data : arviz.InferenceData
+    data : arviz.InferenceData object
         InferenceData object containing the observed and posterior/prior predictive data.
     kind : str
         Type of plot to display ("p_value", "u_value", "t_stat"). Defaults to u_value.
