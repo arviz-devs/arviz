@@ -78,6 +78,12 @@ autosummary_generate = True
 numpydoc_show_class_members = False
 numpydoc_xref_param_type = True
 
+numpydoc_xref_aliases = {
+    'InferenceData': ':class:`arviz.InferenceData`',
+}
+
+numpydoc_xref_ignore="all",
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates"]
 #
