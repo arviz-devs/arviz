@@ -76,7 +76,6 @@ plot_html_show_source_link = False
 # Generate API documentation when building
 autosummary_generate = True
 numpydoc_show_class_members = False
-numpydoc_xref_param_type = True
 
 numpydoc_xref_aliases = {
     'InferenceData': ':class:`arviz.InferenceData`'
