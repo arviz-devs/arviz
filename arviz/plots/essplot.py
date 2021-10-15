@@ -57,7 +57,7 @@ def plot_ess(
     relative: bool
         Show relative ess in plot ``ress = ess / N``.
     coords: dict, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
@@ -98,13 +98,14 @@ def plot_ess(
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or
+        :meth:`mpl:matplotlib.axes.Axes.plot` function depending on the
+        value of ``kind``.
 
     Returns
     -------
