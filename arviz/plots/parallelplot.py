@@ -41,8 +41,8 @@ def plot_parallel(
         Any object that can be converted to an :class:`arviz.InferenceData` object
         refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names
-        Variables to be plotted, if `None` all variables are plotted. Can be used to change the order
-        of the plotted variables. Prefix the variables by ``~`` when you want to exclude
+        Variables to be plotted, if `None` all variables are plotted. Can be used to change the
+        order of the plotted variables. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
@@ -76,7 +76,8 @@ def plot_parallel(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_config: dict, optional
-        Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
+        Currently specifies the bounds to use for bokeh axes.
+        Defaults to value set in ``rcParams``.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
@@ -91,7 +92,8 @@ def plot_parallel(
     See Also
     --------
     plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
-    plot_trace : Plot distribution (histogram or kernel density estimates) and sampled values or rank plot.plot
+    plot_trace : Plot distribution (histogram or kernel density estimates) and sampled values
+    or rank plot.plot
 
     Examples
     --------
