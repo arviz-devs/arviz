@@ -147,6 +147,9 @@ def plot_bpv(
     --------
     plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
     plot_trace : Plot distribution (histogram or kernel density estimates) and sampled values or rank plot
+    plot_trace : Plot distribution (histogram or kernel density estimates) and
+                 sampled values or rank plot
+
 
 
     References
