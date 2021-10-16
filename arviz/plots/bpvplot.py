@@ -143,6 +143,12 @@ def plot_bpv(
     -------
     axes: matplotlib axes or bokeh figures
 
+     See Also
+    --------
+    plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
+    plot_trace : Plot distribution (histogram or kernel density estimates) and sampled values or rank plot
+
+
     References
     ----------
     * Gelman et al. (2013) see http://www.stat.columbia.edu/~gelman/book/ pages 151-153 for details
