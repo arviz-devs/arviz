@@ -50,7 +50,8 @@ def plot_parallel(
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
     coords: mapping, optional
-        Coordinates of ``var_names`` to be plotted. Passed to ``Dataset.sel``
+        Coordinates of ``var_names`` to be plotted.
+        Passed to :meth:`xarray.Dataset.sel`.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -93,7 +94,7 @@ def plot_parallel(
     --------
     plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
     plot_trace : Plot distribution (histogram or kernel density estimates) and sampled values
-    or rank plot.plot
+    or rank plot
 
     Examples
     --------
