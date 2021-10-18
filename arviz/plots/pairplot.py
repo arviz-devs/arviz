@@ -119,12 +119,12 @@ def plot_pair(
         Additional keywords passed to :meth:`matplotlib.axes.Axes.axvline`,
         :meth:`matplotlib.axes.Axes.axhline` (matplotlib) or ``ax.square``, ``Span`` (bokeh)
     point_estimate_marker_kwargs: dict, optional
-        Additional keywords passed to ax.scatter in point estimate plot. Not available in bokeh
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter` in point estimate plot. Not available in bokeh
     reference_values: dict, optional
         Reference values for the plotted variables. The Reference values will be plotted
         using a scatter marker
     reference_values_kwargs: dict, optional
-        Additional keywords passed to ``ax.plot`` or ``ax.circle`` in reference values plot
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot` or :meth:`bokeh:bokeh.plotting.Figure.circle` in reference values plot
     show: bool, optional
         Call backend show function.
 
