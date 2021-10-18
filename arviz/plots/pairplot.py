@@ -116,7 +116,8 @@ def plot_pair(
         Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be
         plotted using a scatter marker and vertical/horizontal lines.
     point_estimate_kwargs: dict, optional
-        Additional keywords passed to :meth:`matplotlib.axes.Axes.axvline`, :meth:`matplotlib.axes.Axes.axhline` (matplotlib) or ``ax.square``, ``Span`` (bokeh)
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.axvline`, 
+        :meth:`matplotlib.axes.Axes.axhline` (matplotlib) or ``ax.square``, ``Span`` (bokeh)
     point_estimate_marker_kwargs: dict, optional
         Additional keywords passed to ax.scatter in point estimate plot. Not available in bokeh
     reference_values: dict, optional
