@@ -52,7 +52,7 @@ def plot_trace(
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: str or list of str, optional
-        One or more variables to be plotted. Prefix the variables by `~` when you want
+        One or more variables to be plotted. Prefix the variables by ``~`` when you want
         to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
