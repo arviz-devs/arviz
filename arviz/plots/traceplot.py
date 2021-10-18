@@ -78,7 +78,7 @@ def plot_trace(
     circ_var_names : str or list of str, optional
         List of circular variables to account for when plotting KDE.
     circ_var_units : str
-        Whether the variables in `circ_var_names` are in "degrees" or "radians".
+        Whether the variables in ``circ_var_names`` are in "degrees" or "radians".
     compact: bool, optional
         Plot multidimensional variables in a single plot.
     compact_prop: str or dict {str: array_like}, optional
