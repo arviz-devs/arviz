@@ -60,7 +60,7 @@ def plot_trace(
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: dict of {str: slice or array_like}, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     divergences: {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
     kind: {"trace", "rank_bar", "rank_vlines"}, optional
