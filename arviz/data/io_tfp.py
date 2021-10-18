@@ -23,7 +23,7 @@ class TfpConverter:
         chain_dim=None,
         observed=None,
         coords=None,
-        dims=None
+        dims=None,
     ):
 
         self.posterior = posterior
@@ -31,7 +31,7 @@ class TfpConverter:
         if var_names is None:
             self.var_names = []
             for i in range(0, len(posterior)):
-                self.var_names.append("var_{0}".format(i))
+                self.var_names.append(f"var_{i}")
         else:
             self.var_names = var_names
 
@@ -195,7 +195,7 @@ def from_tfp(
     chain_dim=None,
     observed=None,
     coords=None,
-    dims=None
+    dims=None,
 ):
     """Convert tfp data into an InferenceData object."""
     return TfpConverter(

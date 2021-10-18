@@ -100,7 +100,7 @@ def plot_elpd(
                         ax_first = bkp.figure(
                             width=int(figsize[0] / (numvars - 1) * dpi),
                             height=int(figsize[1] / (numvars - 1) * dpi),
-                            **backend_kwargs
+                            **backend_kwargs,
                         )
                         ax_row.append(ax_first)
                     elif row < col:
@@ -112,7 +112,7 @@ def plot_elpd(
                                 height=int(figsize[1] / (numvars - 1) * dpi),
                                 x_range=ax_first.x_range,
                                 y_range=ax_first.y_range,
-                                **backend_kwargs
+                                **backend_kwargs,
                             )
                         )
                 ax.append(ax_row)
@@ -201,5 +201,5 @@ def _plot_atomic_elpd(
         ax_.xaxis.minor_tick_line_color = None
         ax_.xaxis.major_label_text_font_size = "0pt"
     title = Title()
-    title.text = "{} - {}".format(model1, model2)
+    title.text = f"{model1} - {model2}"
     ax_.title = title

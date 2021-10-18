@@ -67,11 +67,11 @@ SUPPORTED_GROUPS = [
 WARMUP_TAG = "warmup_"
 
 SUPPORTED_GROUPS_WARMUP = [
-    "{}posterior".format(WARMUP_TAG),
-    "{}posterior_predictive".format(WARMUP_TAG),
-    "{}predictions".format(WARMUP_TAG),
-    "{}sample_stats".format(WARMUP_TAG),
-    "{}log_likelihood".format(WARMUP_TAG),
+    f"{WARMUP_TAG}posterior",
+    f"{WARMUP_TAG}posterior_predictive",
+    f"{WARMUP_TAG}predictions",
+    f"{WARMUP_TAG}sample_stats",
+    f"{WARMUP_TAG}log_likelihood",
 ]
 
 SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
@@ -138,7 +138,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             if key not in SUPPORTED_GROUPS_ALL:
                 key_list.append(key)
                 warnings.warn(
-                    "{} group is not defined in the InferenceData scheme".format(key), UserWarning
+                    f"{key} group is not defined in the InferenceData scheme", UserWarning
                 )
         for key in key_list:
             dataset = kwargs[key]
@@ -162,7 +162,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     self._groups_warmup.append(key)
             if save_warmup and dataset_warmup is not None:
                 if dataset_warmup:
-                    key = "{}{}".format(WARMUP_TAG, key)
+                    key = f"{WARMUP_TAG}{key}"
                     setattr(self, key, dataset_warmup)
                     self._groups_warmup.append(key)
 
@@ -172,7 +172,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             options="\n\t> ".join(self._groups)
         )
         if self._groups_warmup:
-            msg += "\n\nWarmup iterations saved ({}*).".format(WARMUP_TAG)
+            msg += f"\n\nWarmup iterations saved ({WARMUP_TAG}*)."
         return msg
 
     def _repr_html_(self) -> str:
@@ -200,7 +200,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     HtmlTemplate.html_template.format(elements)
                 )
                 css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
-                html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
+                html_repr = f"{locals()['formatted_html_template']}{locals()['css_template']}"
         except:  # pylint: disable=bare-except
             html_repr = f"<pre>{escape(repr(self))}</pre>"
         return html_repr
@@ -540,14 +540,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if index_origin is None:
             index_origin = rcParams["data.index_origin"]
         if index_origin not in [0, 1]:
-            raise TypeError("index_origin must be 0 or 1, saw {}".format(index_origin))
+            raise TypeError(f"index_origin must be 0 or 1, saw {index_origin}")
 
         group_names = list(
             filter(lambda x: "data" not in x, self._group_names(groups, filter_groups))
         )
 
         if not group_names:
-            raise TypeError("No valid groups found: {}".format(groups))
+            raise TypeError(f"No valid groups found: {groups}")
 
         dfs = {}
         for group in group_names:
@@ -574,12 +574,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
                                 idxs.append(coords_to_idx[coordname][coorditem])
                             if include_coords:
                                 tuple_columns.append(
-                                    ("{}[{}]".format(name, ",".join(map(str, idxs))), *coords)
+                                    (f"{name}[{','.join(map(str, idxs))}]", *coords)
                                 )
                             else:
-                                tuple_columns.append(
-                                    "{}[{}]".format(name, ",".join(map(str, idxs)))
-                                )
+                                tuple_columns.append(f"{name}[{','.join(map(str, idxs))}]")
                         else:
                             tuple_columns.append((name, *coords))
 
@@ -1329,11 +1327,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise ValueError("One of group_dict or kwargs must be provided.")
         repeated_groups = [group for group in group_dict.keys() if group in self._groups]
         if repeated_groups:
-            raise ValueError("{} group(s) already exists.".format(repeated_groups))
+            raise ValueError(f"{repeated_groups} group(s) already exists.")
         for group, dataset in group_dict.items():
             if group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
-                    "The group {} is not defined in the InferenceData scheme".format(group),
+                    f"The group {group} is not defined in the InferenceData scheme",
                     UserWarning,
                 )
             if dataset is None:
@@ -1387,14 +1385,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if not isinstance(other, InferenceData):
             raise ValueError("Extending is possible between two InferenceData objects only.")
         if join not in ("left", "right"):
-            raise ValueError("join must be either 'left' or 'right', found {}".format(join))
+            raise ValueError(f"join must be either 'left' or 'right', found {join}")
         for group in other._groups_all:  # pylint: disable=protected-access
             if hasattr(self, group):
                 if join == "left":
                     continue
             if group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
-                    "{} group is not defined in the InferenceData scheme".format(group), UserWarning
+                    f"{group} group is not defined in the InferenceData scheme", UserWarning
                 )
             dataset = getattr(other, group)
             setattr(self, group, dataset)
@@ -1801,7 +1799,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
             )
 
     if dim is not None and dim.lower() not in {"group", "chain", "draw"}:
-        msg = "Invalid `dim`: {}. Valid `dim` are {}".format(dim, '{"group", "chain", "draw"}')
+        msg = f'Invalid `dim`: {dim}. Valid `dim` are {{"group", "chain", "draw"}}'
         raise TypeError(msg)
     dim = dim.lower() if dim is not None else dim
 
@@ -1916,7 +1914,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                             raise TypeError(msg)
 
                         if dim not in var_dims or dim not in var0_dims:
-                            msg = "Dimension {} missing.".format(dim)
+                            msg = f"Dimension {dim} missing."
                             raise TypeError(msg)
 
                     # xr.concat
@@ -1962,7 +1960,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                             group0_attrs["previous_created_at"].append(attr_values)
 
                         elif attr_key in group0_attrs:
-                            combined_key = "combined_{}".format(attr_key)
+                            combined_key = f"combined_{attr_key}"
                             if combined_key not in group0_attrs:
                                 group0_attrs[combined_key] = [group0_attr_values]
                             group0_attrs[combined_key].append(attr_values)
@@ -2040,7 +2038,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                             group0_attrs["previous_created_at"].append(attr_values)
 
                         elif attr_key in group0_attrs:
-                            combined_key = "combined_{}".format(attr_key)
+                            combined_key = f"combined_{attr_key}"
                             if combined_key not in group0_attrs:
                                 group0_attrs[combined_key] = [group0_attr_values]
                             group0_attrs[combined_key].append(attr_values)

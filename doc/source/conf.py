@@ -58,6 +58,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
     "myst_nb",
+    "sphinx_design",
     "sphinx_panels",
     "notfound.extension",
     "sphinx_copybutton",
@@ -86,6 +87,20 @@ jupyter_execute_notebooks = "auto"
 execution_excludepatterns = ["*.ipynb"]
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "amsmath"
+]
+
+
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "amsmath"
+]
 
 # The base toctree document.
 master_doc = "index"
@@ -162,10 +177,7 @@ html_context = {
     "github_version": "main",
     "doc_path": "doc/source/",
 }
-html_sidebars: Dict[str, Any] = {
-    "community": [],
-    "about_us": [],
-}
+html_sidebars: Dict[str, Any] = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

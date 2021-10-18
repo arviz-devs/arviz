@@ -20,7 +20,7 @@ Example: Default labelling
      ...: schools = az.load_arviz_data("centered_eight")
      ...: az.summary(schools)
 
-ArviZ supports label based indexing powered by [xarray](http://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html).
+ArviZ supports label based indexing powered by `xarray <http://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html>`_.
 Through label based indexing, you can use labels to plot a subset of selected variables.
 
 Example: Label based indexing

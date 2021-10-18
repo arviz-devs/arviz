@@ -117,7 +117,7 @@ def plot_mcse(
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+                raise ValueError(f"InferenceData does not contain {rug_kind} data")
             rug_kwargs.setdefault("marker", "|")
             rug_kwargs.setdefault("linestyle", rug_kwargs.pop("ls", "None"))
             rug_kwargs.setdefault("color", rug_kwargs.pop("c", kwargs.get("color", "C0")))
@@ -150,7 +150,7 @@ def plot_mcse(
             yticks = ax_.get_yticks()
             yticks = yticks[(yticks >= y_min) & (yticks < y_max)]
             ax_.set_yticks(yticks)
-            ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
+            ax_.set_yticklabels([f"{ytick:.3g}" for ytick in yticks])
         elif not errorbar:
             ax_.set_ylim(bottom=0)
 

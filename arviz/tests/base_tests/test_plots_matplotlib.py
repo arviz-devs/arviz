@@ -63,7 +63,7 @@ def clean_plots(request, save_figs):
 
     def fin():
         if save_figs is not None:
-            plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
+            plt.savefig(f"{os.path.join(save_figs, request.node.name)}.png")
         plt.close("all")
 
     request.addfinalizer(fin)
@@ -159,7 +159,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, point_estimate="bad_value")
 
     with pytest.raises(ValueError):
-        plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
+        plot_density(obj, data_labels=[f"bad_value_{i}" for i in range(len(obj) + 10)])
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
@@ -324,7 +324,7 @@ def test_plot_forest_bad(models, model_fits):
         plot_forest(obj, kind="bad_kind")
 
     with pytest.raises(ValueError):
-        plot_forest(obj, model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)])
+        plot_forest(obj, model_names=[f"model_name_{i}" for i in range(len(obj) + 10)])
 
 
 @pytest.mark.parametrize("kind", ["kde", "hist"])
@@ -714,7 +714,7 @@ def test_plot_ppc_save_animation(models, kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)
@@ -743,7 +743,7 @@ def test_plot_ppc_discrete_save_animation(kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_discrete_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_discrete_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)

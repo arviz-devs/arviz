@@ -122,7 +122,7 @@ def plot_energy(
             )
 
     else:
-        raise ValueError("Plot type {} not recognized.".format(kind))
+        raise ValueError(f"Plot type {kind} not recognized.")
 
     if bfmi:
         for idx, val in enumerate(e_bfmi(energy)):
@@ -131,7 +131,7 @@ def plot_energy(
                 y=int(figsize[1] * dpi * 0.73) - 20 * idx,
                 x_units="screen",
                 y_units="screen",
-                text="chain {:>2} BFMI = {:.2f}".format(idx, val),
+                text=f"chain {idx:>2} BFMI = {val:.2f}",
                 render_mode="css",
                 border_line_color=None,
                 border_line_alpha=0.0,
