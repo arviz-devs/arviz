@@ -105,9 +105,9 @@ def plot_dist(
         the following extra keywords are also supported:
 
         * ``color``: replaces the ``fill_color`` and ``line_color`` of the ``quad`` method
-        * ``bins``: taken from ``hist_kwargs`` and passed to :meth:`numpy.histogram` instead
+        * ``bins``: taken from ``hist_kwargs`` and passed to ``numpy.histogram`` instead
         * ``density``: normalize histogram to represent a probability density function,
-            Defaults to ``True``
+        Defaults to ``True``
         * ``cumulative``: plot the cumulative counts. Defaults to ``False``
 
     is_circular : {False, True, "radians", "degrees"}. Default False.
