@@ -96,7 +96,7 @@ def plot_trace(
     trace_kwargs: dict, optional
         Extra keyword arguments passed to :meth:`matplotlib.axes.Axes.plot`
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     rank_kwargs : dict, optional
         Extra keyword arguments passed to :func:`arviz.plot_rank`
