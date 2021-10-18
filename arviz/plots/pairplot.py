@@ -50,18 +50,18 @@ def plot_pair(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`az.InferenceData` object
+        refer to documentation of :func:`az.convert_to_dataset` for details
     group: str, optional
         Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
     var_names: list of variable names, optional
         Variables to be plotted, if None all variable are plotted. Prefix the
-        variables by `~` when you want to exclude them from the plot.
+        variables by ``~`` when you want to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
-        If `None` (default), interpret var_names as the real variables names. If "like",
+        If ``None`` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     marginals: bool, optional
@@ -95,33 +95,33 @@ def plot_pair(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     divergences_kwargs: dicts, optional
-        Additional keywords passed to ax.scatter for divergences
+        Additional keywords passed to ``ax.scatter`` for divergences
     scatter_kwargs:
-        Additional keywords passed to ax.plot when using scatter kind
+        Additional keywords passed to ``ax.plot`` when using scatter kind
     kde_kwargs: dict, optional
-        Additional keywords passed to az.plot_kde when using kde kind
+        Additional keywords passed to :func:`az.plot_kde` when using kde kind
     hexbin_kwargs: dict, optional
-        Additional keywords passed to ax.hexbin when using hexbin kind
+        Additional keywords passed to ``ax.hexbin`` when using hexbin kind
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
     marginal_kwargs: dict, optional
-        Additional keywords passed to az.plot_dist, modifying the marginal distributions
+        Additional keywords passed to :func:`az.plot_dist`, modifying the marginal distributions
         plotted in the diagonal.
     point_estimate: str, optional
         Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be
         plotted using a scatter marker and vertical/horizontal lines.
     point_estimate_kwargs: dict, optional
-        Additional keywords passed to ax.vline, ax.hline (matplotlib) or ax.square, Span (bokeh)
+        Additional keywords passed to ``ax.vline``, ``ax.hline`` (matplotlib) or ``ax.square``, ``Span`` (bokeh)
     point_estimate_marker_kwargs: dict, optional
         Additional keywords passed to ax.scatter in point estimate plot. Not available in bokeh
     reference_values: dict, optional
         Reference values for the plotted variables. The Reference values will be plotted
         using a scatter marker
     reference_values_kwargs: dict, optional
-        Additional keywords passed to ax.plot or ax.circle in reference values plot
+        Additional keywords passed to ``ax.plot`` or ``ax.circle`` in reference values plot
     show: bool, optional
         Call backend show function.
 
