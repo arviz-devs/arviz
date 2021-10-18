@@ -53,7 +53,7 @@ def plot_violin(
     transform: callable
         Function to transform data (defaults to None i.e. the identity function).
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the hdi_prob*100%
+        Flag for plotting the interquartile range, in addition to the ``hdi_prob``*100%
         intervals. Defaults to ``True``.
     rug: bool
         If ``True`` adds a jittered rugplot. Defaults to ``False``.
@@ -91,7 +91,7 @@ def plot_violin(
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     shade_kwargs: dicts, optional
-        Additional keywords passed to ``fill_between``, or ``barh`` to control the shade.
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.fill_between`, or :meth:`matplotlib.axes.Axes.barh` to control the shade.
     rug_kwargs: dict
         Keywords passed to the rug plot. If true only the right half side of the violin will be
         plotted.
