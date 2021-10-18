@@ -117,6 +117,10 @@ def plot_trace(
     -------
     axes: matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    plot_rank : Plot rank order statistics of chains.
+
     Examples
     --------
     Plot a subset variables and select them with partial naming
