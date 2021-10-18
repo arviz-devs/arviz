@@ -49,8 +49,8 @@ def plot_trace(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: str or list of str, optional
         One or more variables to be plotted. Prefix the variables by `~` when you want
         to exclude them from the plot.
@@ -107,8 +107,9 @@ def plot_trace(
     backend_config: dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: dict, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
 
