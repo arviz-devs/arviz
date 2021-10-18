@@ -92,14 +92,14 @@ def plot_trace(
     legend: bool, optional
         Add a legend to the figure with the chain color code.
     plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs: dict, optional
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
+        Extra keyword arguments passed to :func:`arviz.plot_dist`. Only affects continuous variables.
     trace_kwargs: dict, optional
         Extra keyword arguments passed to `plt.plot`
     labeller : labeller instance, optional
         Class providing the method `make_label_vert` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     rank_kwargs : dict, optional
-        Extra keyword arguments passed to `arviz.plot_rank`
+        Extra keyword arguments passed to :func:`arviz.plot_rank`
     axes: axes, optional
         Matplotlib axes or bokeh figures.
     backend: {"matplotlib", "bokeh"}, optional
