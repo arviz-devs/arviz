@@ -108,6 +108,7 @@ def plot_dist(
         * ``bins``: taken from ``hist_kwargs`` and passed to ``numpy.histogram`` instead
         * ``density``: normalize histogram to represent a probability density function,
         Defaults to ``True``
+
         * ``cumulative``: plot the cumulative counts. Defaults to ``False``
 
     is_circular : {False, True, "radians", "degrees"}. Default False.
