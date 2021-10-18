@@ -90,6 +90,11 @@ def plot_ts(
     -------
     axes: matplotlib axes or bokeh figures.
 
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+    plot_ppc : Plot for posterior/prior predictive checks.
+
     Examples
     --------
     Plot timeseries default plot
