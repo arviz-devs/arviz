@@ -92,7 +92,8 @@ def plot_trace(
     legend: bool, optional
         Add a legend to the figure with the chain color code.
     plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs: dict, optional
-        Extra keyword arguments passed to :func:`arviz.plot_dist`. Only affects continuous variables.
+        Extra keyword arguments passed to :func:`arviz.plot_dist`. Only affects continuous
+        variables.
     trace_kwargs: dict, optional
         Extra keyword arguments passed to :meth:`matplotlib.axes.Axes.plot`
     labeller : labeller instance, optional
