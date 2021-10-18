@@ -58,7 +58,7 @@ def plot_trace(
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     divergences: {"bottom", "top", None}, optional
