@@ -135,7 +135,11 @@ def plot_bpv(
         check the plotting method of the backend.
     group : {"prior", "posterior"}, optional
         Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
-        Other value can be 'prior'.
+        Other value can be 'prior'. :class:`bokeh:bokeh.models.Span`
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter`
+        or :meth:`bokeh:bokeh.plotting.Figure.square`
+        :meth:`numpy.histogram`
+        in point estimate plot.
     show : bool, optional
         Call backend show function.
         * ``bins``: taken from ``hist_kwargs`` and passed to :func:`numpy.histogram` instead
