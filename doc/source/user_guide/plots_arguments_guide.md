@@ -8,11 +8,12 @@ kernelspec:
 ---
 
 (plots_arguments_guide)=
-# Plots' parameters guide
+# Plots' arguments guide
 
 Arviz {ref}`plots <plot_api>` module is used for plotting data. It consists of lot of functions that serves different purposes.
 Most of these plotting functions have common arguments. These common arguments are explained below with the examples.
 
+## Arguments
 
 (common_figsize)=
 ### `figsize`
@@ -104,3 +105,15 @@ Plot variables in a 4x5 grid
 ```{code-cell}
 az.plot_density([data, non_centered], grid=(4, 5));
 ```
+
+(common_ax)=
+### `ax`
+
+(common_color)=
+### `color`
+
+(common_backend_kwargs)=
+### `backend_kwargs`
+
+(common_show)=
+### `show`
