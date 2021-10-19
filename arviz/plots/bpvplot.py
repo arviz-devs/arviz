@@ -138,6 +138,7 @@ def plot_bpv(
         Other value can be 'prior'.
     show : bool, optional
         Call backend show function.
+        * ``bins``: taken from ``hist_kwargs`` and passed to :func:`numpy.histogram` instead
 
     Returns
     -------
