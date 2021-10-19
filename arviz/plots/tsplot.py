@@ -35,6 +35,7 @@ def plot_ts(
     Parameters
     ----------
     idata : InferenceData
+        InferenceData object.
     y : str
         Variable name from ``observed_data``.
         Values to be plotted on y-axis before holdout.
@@ -59,7 +60,7 @@ def plot_ts(
         If None, coordinates of ``y_holdout`` or
         coordinates of ``y_forecast`` (either of the two available) is chosen.
     plot_dim: str, Optional
-        Should be present in ``y.dims``
+        Should be present in ``y.dims``.
         Necessary for selection of ``x`` if ``x`` is None and ``y`` is multidimensional.
     holdout_dim: str, Optional
         Should be present in ``y_holdout.dims`` or ``y_forecats.dims``.
