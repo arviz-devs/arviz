@@ -15,10 +15,36 @@ Most of these plotting functions have common arguments. These common arguments a
 
 ## Arguments
 
-(common_figsize)=
-### `figsize`
+(common_data)=
+### `data`
 
-`figsize` is short for figure size. If None it will be defined automatically.
+(common_var_names)=
+### `var_names`
+
+Variables to be plotted, if None all variables are plotted. Prefix the variables by ~ when you want to exclude them from the plot. Let's see the examples.
+
+Plot default autocorrelation
+
+```{code-cell}
+az.plot_posterior(data);
+```
+
+Plot one variable by setting `var_names=var1`
+
+```{code-cell}
+az.plot_posterior(data, var_names=['mu']);
+```
+
+Plot subset variables by specifying variable name exactly
+
+```{code-cell}
+az.plot_posterior(data, var_names=['mu', 'tau']);
+```
+
+Plot variables with regular expressions
+```{code-cell}
+az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex");
+```
 
 (common_filter_vars)=
 ### `filter_vars`
@@ -49,34 +75,14 @@ Plot using `filter_vars="regex"`
 az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex");
 ```
 
-(common_var_names)=
-### `var_names`
+(common_kind)=
+### `kind`
 
-Variables to be plotted, if None all variables are plotted. Prefix the variables by ~ when you want to exclude them from the plot. Let's see the examples.
+(common_hdi_prob)=
+### `hdi_prob`
 
-Plot default autocorrelation
-
-```{code-cell}
-az.plot_posterior(data);
-```
-
-Plot one variable by setting `var_names=var1`
-
-```{code-cell}
-az.plot_posterior(data, var_names=['mu']);
-```
-
-Plot subset variables by specifying variable name exactly
-
-```{code-cell}
-az.plot_posterior(data, var_names=['mu', 'tau']);
-```
-
-Plot variables with regular expressions
-```{code-cell}
-az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex");
-```
-
+(common_color)=
+### `color`
 
 (common_coords)=
 ### `coords`
@@ -95,7 +101,6 @@ Using the deafult value of coords argument to plot which is `None`.
 az.plot_posterior(data, var_names=["mu", "theta"]);
 ```
 
-
 (common_grid)=
 ### `grid`
 Number of rows and columns. Defaults to None, the rows and columns are automatically inferred.
@@ -106,11 +111,19 @@ Plot variables in a 4x5 grid
 az.plot_density([data, non_centered], grid=(4, 5));
 ```
 
+(common_figsize)=
+### `figsize`
+
+`figsize` is short for figure size. If None it will be defined automatically.
+
+(common_textsize)=
+### `textsize`
+
+(common_legend)=
+### `legend`
+
 (common_ax)=
 ### `ax`
-
-(common_color)=
-### `color`
 
 (common_backend_kwargs)=
 ### `backend_kwargs`
