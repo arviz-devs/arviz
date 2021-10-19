@@ -44,7 +44,7 @@ def plot_ts(
     y_hat : str, optional
         Variable name from ``posterior_predictive``. Assumed to be of shape ``(chain, draw, *y_dims)``.
     y_holdout : str, optional
-        Variable name from observed_data. It represents the observed data after the holdout period.
+        Variable name from ``observed_data``. It represents the observed data after the holdout period.
         Useful while testing the model, when you want to compare
         observed test data with predictions/forecasts.
     y_forecasts : str, optional
