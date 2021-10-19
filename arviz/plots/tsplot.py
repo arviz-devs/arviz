@@ -35,26 +35,25 @@ def plot_ts(
     Parameters
     ----------
     idata : InferenceData
-        InferenceData object.
     y : str
-        Variable name from observed_data.
+        Variable name from ``observed_data``.
         Values to be plotted on y-axis before holdout.
     x : str, Optional
         Values to be plotted on x-axis before holdout.
-        If none, coordinates of ``y`` dims is chosen.
+        If None, coordinates of ``y`` dims is chosen.
     y_hat : str, optional
-        Variable name from posterior_predictive. Assumed to be of shape ``(chain, draw, *y_dims)``.
+        Variable name from ``posterior_predictive``. Assumed to be of shape ``(chain, draw, *y_dims)``.
     y_holdout : str, optional
         Variable name from observed_data. It represents the observed data after the holdout period.
         Useful while testing the model, when you want to compare
         observed test data with predictions/forecasts.
     y_forecasts : str, optional
-        Variable name from posterior_predictive.
-        It represents forecasts (posterior predictive) values after holdout preriod.
+        Variable name from ``posterior_predictive``.
+        It represents forecasts (posterior predictive) values after holdout period.
         Useful to compare observed vs predictions/forecasts.
         Assumed shape ``(chain, draw, *shape)``.
     x_holdout : str, Defaults to coordinates of ``y``.
-        Variable name from constant_data.
+        Variable name from ``constant_data``.
         If None, coordinates of ``y_holdout`` or
         coordinates of ``y_forecast`` (either of the two available) is chosen.
     plot_dim: str, Optional
@@ -80,9 +79,9 @@ def plot_ts(
         These are kwargs specific to the backend being used. Passed to
         :func: `mpl:matplotlib.pyplot.subplots`.
     figsize : tuple, optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If None, it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If None it will be
+        Text size scaling factor for labels, titles and lines. If None, it will be
         autoscaled based on ``figsize``.
 
 
