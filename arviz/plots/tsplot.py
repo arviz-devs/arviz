@@ -41,31 +41,31 @@ def plot_ts(
         Values to be plotted on y-axis before holdout.
     x : str, Optional
         Values to be plotted on x-axis before holdout.
-        If none, coords of y dims is chosen.
+        If none, coordinates of ``y`` dims is chosen.
     y_hat : str, optional
         Variable name from posterior_predictive. Assumed to be of shape ``(chain, draw, *y_dims)``.
     y_holdout : str, optional
         Variable name from observed_data. It represents the observed data after the holdout period.
-        Usefull while testing the model, when you want to compare
+        Useful while testing the model, when you want to compare
         observed test data with predictions/forecasts.
     y_forecasts : str, optional
         Variable name from posterior_predictive.
         It represents forecasts (posterior predictive) values after holdout preriod.
-        Usefull to compare observed vs predictions/forecasts.
+        Useful to compare observed vs predictions/forecasts.
         Assumed shape ``(chain, draw, *shape)``.
-    x_holdout : str, Defaults to coords of y.
+    x_holdout : str, Defaults to coordinates of ``y``.
         Variable name from constant_data.
-        If None, coords of y_holdout or
-        coords of y_forecast (either of the two available) is chosen.
+        If None, coordinates of ``y_holdout`` or
+        coordinates of ``y_forecast`` (either of the two available) is chosen.
     plot_dim: str, Optional
-        Should be present in y.dims
-        Necessary for selection of x if x is None and y is multidimensional.
+        Should be present in ``y.dims``
+        Necessary for selection of ``x`` if ``x`` is None and ``y`` is multidimensional.
     holdout_dim: str, Optional
-        Should be present in y_holdout.dims or y_forecats.dims.
-        Necessary to choose x_holdout if x is None and
-        if y_holdout or y_forecasts is multidimensional.
+        Should be present in ``y_holdout.dims`` or ``y_forecats.dims``.
+        Necessary to choose ``x_holdout`` if ``x`` is None and
+        if ``y_holdout`` or ``y_forecasts`` is multidimensional.
     num_samples : int, default 100
-        Number of posterior predictive samples drawn from y_hat and y_forecasts.
+        Number of posterior predictive samples drawn from ``y_hat`` and ``y_forecasts``.
     backend : {"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     y_kwargs : dict, optional
@@ -83,7 +83,7 @@ def plot_ts(
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on figsize.
+        autoscaled based on ``figsize``.
 
 
     Returns
