@@ -7,6 +7,7 @@ kernelspec:
   name: python3
 ---
 
+(plots_arguments_guide)=
 # Plots' parameters guide
 
 Arviz {ref}`plots <plot_api>` module is used for plotting data. It consists of lot of functions that serves different purposes.
