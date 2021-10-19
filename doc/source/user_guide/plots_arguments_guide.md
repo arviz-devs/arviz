@@ -9,11 +9,9 @@ kernelspec:
 
 # Plots' parameters guide
 
-ArviZ provides multiple plotting functions for different functionalities. You can check all the functions in the {ref}`plots <plot_api>` module and {ref}`example gallery <example_styles>`.
+Arviz {ref}`plots <plot_api>` module is used for plotting data. It consists of lot of functions that serves different purposes.
+Most of these plotting functions have common arguments. These common arguments are explained below with the examples.
 
-(common_arguments)=
-## Arguments
-Most of the plotting functions have common arguments which are explained below with the examples.
 
 (common_figsize)=
 ### `figsize`
