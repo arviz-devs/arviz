@@ -8,5 +8,5 @@ User Guide
 
   data_structures
   computation
-  plots_arguments_guide
+  plotting_guide
   sampling_wrappers
