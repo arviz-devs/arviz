@@ -15,6 +15,12 @@ Most of these plotting functions have common arguments. These common arguments a
 
 ## Arguments
 
+```{code-cell}
+import arviz as az
+data = az.load_arviz_data('centered_eight');
+non_centered = az.load_arviz_data('non_centered_eight');
+```
+
 (common_data)=
 ### `data`
 
@@ -53,9 +59,6 @@ If None (default), interpret `var_names` as the real variables names.
 Plot using the default value of `filter_vars` which is `None`
 
 ```{code-cell}
-import arviz as az
-data = az.load_arviz_data('centered_eight');
-non_centered = az.load_arviz_data('non_centered_eight');
 az.plot_posterior(data, var_names=['mu']);
 ```
 
