@@ -786,6 +786,10 @@ def psislw(log_weights, reff=1.0):
     References
     ----------
     * Vehtari et al. (2015) see https://arxiv.org/abs/1507.02646
+    
+    See Also
+    --------
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
     Examples
     --------
