@@ -35,7 +35,7 @@ def plot_ts(
     Parameters
     ----------
     idata : InferenceData
-         :class:`arviz.InferenceData` object.
+        :class:`arviz.InferenceData` object.
     y : str
         Variable name from ``observed_data``.
         Values to be plotted on y-axis before holdout.
