@@ -35,13 +35,13 @@ def plot_ts(
     Parameters
     ----------
     idata : InferenceData
-        InferenceData object.
+         :class:`arviz.InferenceData` object.
     y : str
         Variable name from ``observed_data``.
         Values to be plotted on y-axis before holdout.
     x : str, Optional
         Values to be plotted on x-axis before holdout.
-        If None, coordinates of ``y`` dims is chosen.
+        If None, coords of ``y`` dims is chosen.
     y_hat : str, optional
         Variable name from ``posterior_predictive``.
         Assumed to be of shape ``(chain, draw, *y_dims)``.
@@ -55,10 +55,10 @@ def plot_ts(
         It represents forecasts (posterior predictive) values after holdout period.
         Useful to compare observed vs predictions/forecasts.
         Assumed shape ``(chain, draw, *shape)``.
-    x_holdout : str, Defaults to coordinates of ``y``.
+    x_holdout : str, Defaults to coords of ``y``.
         Variable name from ``constant_data``.
-        If None, coordinates of ``y_holdout`` or
-        coordinates of ``y_forecast`` (either of the two available) is chosen.
+        If None, coords of ``y_holdout`` or
+        coords of ``y_forecast`` (either of the two available) is chosen.
     plot_dim: str, Optional
         Should be present in ``y.dims``.
         Necessary for selection of ``x`` if ``x`` is None and ``y`` is multidimensional.
@@ -71,16 +71,16 @@ def plot_ts(
     backend : {"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     y_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.plot` in matplotlib.
     y_hat_plot_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.plot` in matplotlib.
     y_mean_plot_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.plot` in matplotlib.
     vline_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.axvline` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.axvline` in matplotlib.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. Passed to
-        :func: `mpl:matplotlib.pyplot.subplots`.
+        :func: `matplotlib.pyplot.subplots`.
     figsize : tuple, optional
         Figure size. If None, it will be defined automatically.
     textsize : float, optional
