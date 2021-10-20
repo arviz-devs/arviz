@@ -58,7 +58,8 @@ def plot_violin(
     rug: bool
         If ``True`` adds a jittered rugplot. Defaults to ``False``.
     hdi_prob: float, optional
-        Plots highest posterior density interval for chosen percentage of density. Defaults to 0.94.
+        Plots highest posterior density interval for chosen percentage of density.
+        Defaults to 0.94.
     shade: float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0.
