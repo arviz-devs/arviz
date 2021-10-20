@@ -774,7 +774,7 @@ def psislw(log_weights, reff=1.0):
     log_weights: array
         Array of size (n_observations, n_samples)
     reff: float
-        relative MCMC efficiency, `ess / n`
+        relative MCMC efficiency, ``ess / n``
 
     Returns
     -------
