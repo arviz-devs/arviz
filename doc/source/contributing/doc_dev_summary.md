@@ -26,7 +26,7 @@ For previewing documentation changes, take the following steps:
 5. Check the preview of your changes on that page.
 
 
-```{admonition} Here's my title
+```{admonition} Note
 :class: note
 
 The preview version of ArviZ docs will have a warning box that says "This page was created from a pull request (#Your PR number)." It shows the PR number whose changes have been implemented.
@@ -34,7 +34,7 @@ The preview version of ArviZ docs will have a warning box that says "This page w
 
 For example, a warning box will look like this:
 
-```{admonition} Here's my title
+```{admonition} Warning
 :class: warning
 
 This page was created from a pull request (#1903).
