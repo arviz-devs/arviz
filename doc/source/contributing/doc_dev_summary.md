@@ -8,7 +8,7 @@ clone it to your local machine, and develop on a feature branch. For a detailed 
 If you are using Docker, see {ref}`building_doc_with_docker`.
 
 ## Code Formatting
-Arviz documentation conists of a lot of code snippets to demonstrate the examples. For adding code blocks, generally follow the
+Arviz documentation consists of a lot of code snippets to demonstrate the examples. For adding code blocks, generally follow the
 [TensorFlow's style guide](https://www.tensorflow.org/community/contribute/code_style)
 or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md).
 Both more or less follow PEP 8.
