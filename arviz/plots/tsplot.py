@@ -80,7 +80,7 @@ def plot_ts(
         Passed to :meth:`matplotlib.axes.Axes.axvline` in matplotlib.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. Passed to
-        :func: `matplotlib.pyplot.subplots`.
+        :func:`matplotlib.pyplot.subplots`.
     figsize : tuple, optional
         Figure size. If None, it will be defined automatically.
     textsize : float, optional
