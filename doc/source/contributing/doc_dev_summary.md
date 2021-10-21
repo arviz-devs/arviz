@@ -1,5 +1,5 @@
 (doc_dev_summary)=
-## Development process - summary
+# Development process - summary
 
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/),
