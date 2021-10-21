@@ -1,6 +1,6 @@
 (doc_guide)=
 
-## Documentation Guide
+# Documentation Guide
 
 ArviZ documentation is built using a Python documentation tool, [Sphinx](https://www.sphinx-doc.org/en/master/). Sphinx converts `rst`(restructured text) files into HTML websites. There are different extensions availabel for converting other types of files into HTML websites like markdown, jupyter notebooks, etc.
 
@@ -19,7 +19,7 @@ clone it to your local machine, and develop on a feature branch. For a detailed 
 If you are using Docker, see {ref}`building_doc_with_docker`.
 
 ## Code Formatting
-For code generally follow the
+Documentation conists of a lot of code snippets to demonstrate the examples. For adding code blocks, generally follow the
 [TensorFlow's style guide](https://www.tensorflow.org/community/contribute/code_style)
 or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md).
 Both more or less follow PEP 8.
@@ -48,9 +48,6 @@ If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
 please consider adding inline documentation examples.
 You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
 
-
-### Docstring style
-See the corresponding section in the {ref}`contributing guide <dev_summary>`.
 
 ### Hyperlinks
 Complementary functions such as {func}`arviz.compare` and {func}`arviz.plot_compare` should reference
