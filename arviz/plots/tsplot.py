@@ -55,7 +55,7 @@ def plot_ts(
         It represents forecasts (posterior predictive) values after holdout period.
         Useful to compare observed vs predictions/forecasts.
         Assumed shape ``(chain, draw, *shape)``.
-    x_holdout : str, Defaults to coords of ``y``.
+    x_holdout : str, Defaults to coords of y.
         Variable name from ``constant_data``.
         If None, coords of ``y_holdout`` or
         coords of ``y_forecast`` (either of the two available) is chosen.
