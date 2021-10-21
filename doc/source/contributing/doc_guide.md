@@ -1,6 +1,52 @@
 (doc_guide)=
 
-## Documentation
+## Documentation Guide
+
+ArviZ documentation is built using a Python documentation tool, [Sphinx](https://www.sphinx-doc.org/en/master/). Sphinx converts `rst`(restructured text) files into HTML websites. There are different extensions availabel for converting other types of files into HTML websites like markdown, jupyter notebooks, etc.
+Arviz [docs](https://github.com/arviz-devs/arviz/tree/main/doc/source) consist of `.rst`, `.md` and `.ipynb` files. It uses `myst-parser` and `myst-nb` for `.md` and `.ipynb` files, respectively.[Myst-parser](https://myst-parser.readthedocs.io/en/latest/sphinx/intro.html) parses all `.md` files as MyST(Markedly Structured Text).
+Apart from `/doc`, ArviZ documentation also consists of docstrings. Docstrings are used in the `.py` files to explain the functions parameters and return values.
+
+ArviZ docs also uses sphinx extensions for style, layout, navbar and putting code in the documentation. We will explore all the things one by one. Let's start!
+
+
+(dev_summary)=
+# Development process - summary
+The preferred workflow for contributing to ArviZ is to fork
+the [GitHub repository](https://github.com/arviz-devs/arviz/),
+clone it to your local machine, and develop on a feature branch. the details of this process are listed on
+{ref}`pr_checklist`. For a detailed
+description of the recommended development process, see {ref}`building_doc_with_docker`.
+
+## Code Formatting
+For code generally follow the
+[TensorFlow's style guide](https://www.tensorflow.org/community/contribute/code_style)
+or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md).
+Both more or less follow PEP 8.
+
+Final formatting is done with [black](https://github.com/ambv/black).
+
+
+## Docstring formatting and type hints
+Docstrings should follow the
+[numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html).
+Extra guidance can also be found in
+[pandas docstring guide](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
+Please reasonably document any additions or changes to the codebase,
+when in doubt, add a docstring.
+
+The different formatting and aim between numpydoc style type description and
+[type hints](https://docs.python.org/3/library/typing.html)
+should be noted. numpydoc style targets docstrings and aims to be human
+readable whereas type hints target function definitions and `.pyi` files and
+aim to help third party tools such as type checkers or IDEs. ArviZ does not
+require functions to include type hints
+however contributions including them are welcome.
+
+## Documentation for user facing methods
+If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
+please consider adding inline documentation examples.
+You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
+
 
 ### Docstring style
 See the corresponding section in the {ref}`contributing guide <dev_summary>`.

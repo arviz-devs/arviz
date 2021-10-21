@@ -75,6 +75,7 @@ For running a jupyter notebook, run:
 
 This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
 
+(building_doc_with_docker)=
 ## Building documentation with Docker
 The documentation can be built with Docker by running `./scripts/container.sh
 --docs`. The docker image contains by default all dependencies needed
