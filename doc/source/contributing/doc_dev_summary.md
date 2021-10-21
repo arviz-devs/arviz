@@ -22,7 +22,8 @@ For previewing documentation changes, take the following steps:
 1. Go to the checks of your PR. Wait for the `docs/readthedocs.org:arviz` to complete. The green tick indicates that the given check has been built successfully.
 2. Click the `Details` button next to it.
 3. It will take to you the preview of ArviZ docs of your PR.
-4. Go to the webpage you are working on and check the preview of your changes on that page.
+4. Go to the webpage of the file you are working on.
+5. Check the preview of your changes on that page.
 
 
 ```{admonition} Here's my title
