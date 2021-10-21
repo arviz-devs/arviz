@@ -21,11 +21,11 @@ For previewing documentation changes, take the following steps:
 
 1. Go to the checks of your PR. Wait for the `docs/readthedocs.org:arviz` to complete.
 
-    ```{admonition} Note
-    :class: note
+   ```{admonition} Note
+   :class: note
 
-    The green tick indicates that the given check has been built successfully.
-    ```
+   The green tick indicates that the given check has been built successfully.
+   ```
 
 2. Click the `Details` button next to it.
 3. It will take to you the preview of ArviZ docs of your PR.
