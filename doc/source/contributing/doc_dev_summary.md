@@ -1,4 +1,4 @@
-(dev_summary)=
+(doc_dev_summary)=
 ## Development process - summary
 
 The preferred workflow for contributing to ArviZ is to fork
