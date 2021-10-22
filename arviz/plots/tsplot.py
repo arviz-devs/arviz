@@ -35,60 +35,67 @@ def plot_ts(
     Parameters
     ----------
     idata : InferenceData
-        InferenceData object.
+        :class:`arviz.InferenceData` object.
     y : str
-        Variable name from observed_data.
+        Variable name from ``observed_data``.
         Values to be plotted on y-axis before holdout.
     x : str, Optional
         Values to be plotted on x-axis before holdout.
-        If none, coords of y dims is chosen.
+        If None, coords of ``y`` dims is chosen.
     y_hat : str, optional
-        Variable name from posterior_predictive. Assumed to be of shape ``(chain, draw, *y_dims)``.
+        Variable name from ``posterior_predictive``.
+        Assumed to be of shape ``(chain, draw, *y_dims)``.
     y_holdout : str, optional
-        Variable name from observed_data. It represents the observed data after the holdout period.
-        Usefull while testing the model, when you want to compare
+        Variable name from ``observed_data``.
+        It represents the observed data after the holdout period.
+        Useful while testing the model, when you want to compare
         observed test data with predictions/forecasts.
     y_forecasts : str, optional
-        Variable name from posterior_predictive.
-        It represents forecasts (posterior predictive) values after holdout preriod.
-        Usefull to compare observed vs predictions/forecasts.
+        Variable name from ``posterior_predictive``.
+        It represents forecasts (posterior predictive) values after holdout period.
+        Useful to compare observed vs predictions/forecasts.
         Assumed shape ``(chain, draw, *shape)``.
     x_holdout : str, Defaults to coords of y.
-        Variable name from constant_data.
-        If None, coords of y_holdout or
-        coords of y_forecast (either of the two available) is chosen.
+        Variable name from ``constant_data``.
+        If None, coords of ``y_holdout`` or
+        coords of ``y_forecast`` (either of the two available) is chosen.
     plot_dim: str, Optional
-        Should be present in y.dims
-        Necessary for selection of x if x is None and y is multidimensional.
+        Should be present in ``y.dims``.
+        Necessary for selection of ``x`` if ``x`` is None and ``y`` is multidimensional.
     holdout_dim: str, Optional
-        Should be present in y_holdout.dims or y_forecats.dims.
-        Necessary to choose x_holdout if x is None and
-        if y_holdout or y_forecasts is multidimensional.
+        Should be present in ``y_holdout.dims`` or ``y_forecats.dims``.
+        Necessary to choose ``x_holdout`` if ``x`` is None and
+        if ``y_holdout`` or ``y_forecasts`` is multidimensional.
     num_samples : int, default 100
-        Number of posterior predictive samples drawn from y_hat and y_forecasts.
+        Number of posterior predictive samples drawn from ``y_hat`` and ``y_forecasts``.
     backend : {"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     y_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.plot` in matplotlib.
     y_hat_plot_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.plot` in matplotlib.
     y_mean_plot_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.plot` in matplotlib.
     vline_kwargs : dict, optional
-        Passed to :meth:`mpl:matplotlib.axes.Axes.axvline` in matplotlib.
+        Passed to :meth:`matplotlib.axes.Axes.axvline` in matplotlib.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. Passed to
-        :func: `mpl:matplotlib.pyplot.subplots`.
+        :func:`matplotlib.pyplot.subplots`.
     figsize : tuple, optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If None, it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on figsize.
+        Text size scaling factor for labels, titles and lines. If None, it will be
+        autoscaled based on ``figsize``.
 
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures.
+
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+    plot_ppc : Plot for posterior/prior predictive checks.
 
     Examples
     --------
