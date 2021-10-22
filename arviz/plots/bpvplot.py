@@ -61,7 +61,7 @@ def plot_bpv(
         as a float (or str) in the interval (0, 1). Finally a user defined function is also
         acepted, see examples section for details.
     bpv : bool
-        If True (default) add the bayesian p_value to the legend when ``kind = t_stat``.
+        If True (default) add the Bayesian p_value to the legend when ``kind = t_stat``.
     plot_mean : bool
         Whether or not to plot the mean T statistic. Defaults to True.
     reference : str
