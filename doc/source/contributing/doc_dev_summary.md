@@ -21,9 +21,7 @@ For previewing documentation changes, take the following steps:
 
 1. Go to the checks of your PR. Wait for the `docs/readthedocs.org:arviz` to complete.
 
-   ```{admonition} Note
-   :class: note
-
+   ```{note}
    The green tick indicates that the given check has been built successfully.
    ```
 
@@ -32,17 +30,12 @@ For previewing documentation changes, take the following steps:
 4. Go to the webpage of the file you are working on.
 5. Check the preview of your changes on that page.
 
-
-```{admonition} Note
-:class: note
-
+```{note} Note
 The preview version of ArviZ docs will have a warning box that says "This page was created from a pull request (#Your PR number)." It shows the PR number whose changes have been implemented.
 ```
 
 For example, a warning box will look like this:
 
-```{admonition} Warning
-:class: warning
-
-This page was created from a pull request (#1903).
+```{warning}
+This page was created from a pull request (#PR Number).
 ```
