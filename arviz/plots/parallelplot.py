@@ -38,24 +38,25 @@ def plot_parallel(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names
-        Variables to be plotted, if `None` all variable are plotted. Can be used to change the order
-        of the plotted variables. Prefix the variables by `~` when you want to exclude
+        Variables to be plotted, if `None` all variables are plotted. Can be used to change the
+        order of the plotted variables. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of ``var_names`` to be plotted.
+        Passed to :meth:`xarray.Dataset.sel`.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
     legend: bool
         Flag for plotting legend (defaults to True)
     colornd: valid matplotlib color
@@ -66,7 +67,7 @@ def plot_parallel(
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
@@ -76,16 +77,24 @@ def plot_parallel(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_config: dict, optional
-        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
+        Currently specifies the bounds to use for bokeh axes.
+        Defaults to value set in ``rcParams``.
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
+    plot_trace : Plot distribution (histogram or kernel density estimates) and sampled values
+                 or rank plot
 
     Examples
     --------
