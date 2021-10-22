@@ -53,10 +53,10 @@ def plot_bpv(
         This is also known as marginal p_value. The ideal distribution is uniform. This is similar
         to the LOO-pit calculation/plot, the difference is than in LOO-pit plot we compute
         pi = p(yi* r ≤ yi | y-i ), where y-i, is all other data except yi.
-        For "t_stat" we compute := p(T(y)* ≤ T(y) | y) where T is any T statistic. See t_stat
+        For "t_stat" we compute := p(T(y)* ≤ T(y) | y) where T is any test statistic. See t_stat
         argument below for details of available options.
     t_stat : str, float, or callable
-        T statistics to compute from the observations and predictive distributions. Allowed strings
+        Test statistics to compute from the observations and predictive distributions. Allowed strings
         are "mean", "median" or "std". Defaults to "median". Alternative a quantile can be passed
         as a float (or str) in the interval (0, 1). Finally a user defined function is also
         acepted, see examples section for details.
