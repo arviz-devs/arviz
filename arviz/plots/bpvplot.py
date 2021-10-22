@@ -63,7 +63,7 @@ def plot_bpv(
     bpv : bool
         If True (default) add the Bayesian p_value to the legend when ``kind = t_stat``.
     plot_mean : bool
-        Whether or not to plot the mean T statistic. Defaults to True.
+        Whether or not to plot the mean test statistic. Defaults to True.
     reference : str
         How to compute the distributions used as reference for u_values or p_values. Allowed values
         are "analytical" (default) and "samples". Use `None` to do not plot any reference.
