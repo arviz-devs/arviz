@@ -34,6 +34,28 @@ In the event of two or more people working on the same issue, the general preced
 ### If the issue ticket has someone assigned to it
 If the issue is assigned then precedence goes to the assignee. However, if there has been no activity for 2 weeks from the assignment date, the ticket is open for all again and can be unassigned.
 
+(dev_summary)=
+# Development process - summary
+The preferred workflow for contributing to ArviZ is to fork
+the [GitHub repository](https://github.com/arviz-devs/arviz/),
+clone it to your local machine, and develop on a feature branch. The details of this process are listed on
+{ref}`pr_checklist`. For a detailed
+description of the recommended development process, see {ref}`developer_guide`.
+
+## Code Formatting
+For code generally follow the
+[TensorFlow's style guide](https://www.tensorflow.org/community/contribute/code_style)
+or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md).
+Both more or less follow PEP 8.
+
+Final formatting is done with [black](https://github.com/ambv/black).
+
+
+## Documentation for user facing methods
+If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
+please consider adding inline documentation examples.
+You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
+
 ## Tests
 Section in construction
 
