@@ -56,9 +56,10 @@ def plot_bpv(
         For "t_stat" we compute := p(T(y)* ≤ T(y) | y) where T is any test statistic. See t_stat
         argument below for details of available options.
     t_stat : str, float, or callable
-        Test statistics to compute from the observations and predictive distributions. Allowed strings
-        are "mean", "median" or "std". Defaults to "median". Alternative a quantile can be passed
-        as a float (or str) in the interval (0, 1). Finally a user defined function is also
+        Test statistics to compute from the observations and predictive distributions.
+        Allowed strings are "mean", "median" or "std". Defaults to "median".
+        Alternative a quantile can be passed as a float (or str) in the
+        interval (0, 1). Finally a user defined function is also
         acepted, see examples section for details.
     bpv : bool
         If True (default) add the Bayesian p_value to the legend when ``kind = t_stat``.
