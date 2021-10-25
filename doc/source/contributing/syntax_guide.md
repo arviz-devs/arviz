@@ -5,29 +5,47 @@
 Adding custom targets or anchors to the headings is really helpful for cross-referencing. They allow us to link to the heading using a simple syntax.
 They are defined using this syntax:
 
-````{tabbed} rST
+::::{tab-set}
+
+:::{tab-item} rST
+:sync: rst
+
 ```
 .. _mytarget:
 ```
-````
-````{tabbed} MyST (Markdown)
+:::
+
+:::{tab-item} MyST (Markdown)
+:sync: myst
+
 ```
 (mytarget)=
 ```
-````
+:::
+
+::::
 
 They are referred using this syntax:
 
-````{tabbed} rST
+::::{tab-set}
+
+:::{tab-item} rST
+:sync: rst
+
 ```
 :ref:`mytarget`
 ```
-````
-````{tabbed} MyST (Markdown)
+:::
+
+:::{tab-item} MyST (Markdown)
+:sync: myst
+
 ```
 {ref}`mytarget`
 ```
-````
+:::
+
+::::
 
 ## Adding references
 
