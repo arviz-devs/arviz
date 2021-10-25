@@ -1,11 +1,5 @@
-(reference_guide)=
-# Reference Guide
-
-## Documentation for user facing methods
-If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
-please consider adding inline documentation examples.
-You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
-
+(syntax_guide)=
+# Syntax Guide
 
 ### Hyperlinks
 Complementary functions such as {func}`arviz.compare` and {func}`arviz.plot_compare` should reference
