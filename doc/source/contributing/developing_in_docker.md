@@ -77,9 +77,10 @@ This will output something similar to `http://(<docker container id> or <ip>):88
 
 (building_doc_with_docker)=
 ## Building documentation with Docker
-The documentation can be built with Docker by running `./scripts/container.sh
---docs`. The docker image contains by default all dependencies needed
+The documentation can be built with Docker by running `./scripts/container.sh --docs`. The
+`./scripts/container.sh --build` needs to be executed once before running the doc build command.
+The docker image contains by default all dependencies needed
 for building the documentation. After having build the docs in the Docker
 container, they can be checked at `doc/build` and viewed in the browser from `doc/build/index.html`.
 
-To update any file, go to the specific file(`.md`, `.rst`, or `.ipynb`) and make your changes. In order to check the results, you will have to rebuild only the docs, using the same command `./scripts/container.sh --docs`. The resulting docs will be saved in the doc/build directory as HTML files. Open your corresponding file and check the results.
+To update any file, go to the specific file(`.md`, `.rst`, or `.ipynb`) and make your changes. In order to check the results, you can either check the {ref}`preview_change` or rebuild the docs with Docker. For the latter option, You need to only rebuild the docs, using the same command `./scripts/container.sh --docs`. The resulting docs will be saved in the `doc/build` directory as HTML files. Open your corresponding file and check the results.

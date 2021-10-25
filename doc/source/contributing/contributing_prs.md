@@ -117,7 +117,7 @@ Section in construction
    ```
 
    ```{warning}
-   Always create a new ``feature`` branch before making any changes. Make your chnages
+   Always create a new ``feature`` branch before making any changes. Make your changes
    in the ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
    ```
 

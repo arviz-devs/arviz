@@ -1,5 +1,5 @@
 (doc_dev_summary)=
-# Building Docs
+# Building the documentation
 
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/),
@@ -7,6 +7,11 @@ clone it to your local machine, and develop on a feature branch. For a detailed 
 
 If you are using Docker, see {ref}`building_doc_with_docker`.
 
+## Pull request
+
+
+
+(preview_change)=
 ## Previewing doc changes
 
 There is an easy way to check the preview of docs by using GitHub. Open the PR and GitHub actions will automatically build the documentation.

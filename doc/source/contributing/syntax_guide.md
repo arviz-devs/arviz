@@ -1,6 +1,11 @@
 (syntax_guide)=
 # Syntax Guide
 
+## Adding anchors
+
+
+## References
+
 ### Hyperlinks
 Complementary functions such as {func}`arviz.compare` and {func}`arviz.plot_compare` should reference
 each other in their docstrings using a hyperlink, not only by name. The same
