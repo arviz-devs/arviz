@@ -69,14 +69,14 @@ def plot_pair(
     figsize: figure size tuple
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int
-        Text size for labels. If None it will be autoscaled based on figsize.
+        Text size for labels. If None it will be autoscaled based on ``figsize``.
     kind : str or List[str]
         Type of plot to display (scatter, kde and/or hexbin)
     gridsize: int or (int, int), optional
-        Only works for kind=hexbin.
-        The number of hexagons in the x-direction. The corresponding number of hexagons in the
-        y-direction is chosen such that the hexagons are approximately regular.
-        Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
+        Only works for ``kind=hexbin``. The number of hexagons in the x-direction.
+        The corresponding number of hexagons in the y-direction is chosen
+        such that the hexagons are approximately regular. Alternatively, gridsize
+        can be a tuple with two elements specifying the number of hexagons
         in the x-direction and the y-direction.
     contour : bool, optional, deprecated, Defaults to True.
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
@@ -101,7 +101,8 @@ def plot_pair(
     kde_kwargs: dict, optional
         Additional keywords passed to :func:`arviz.plot_kde` when using kde kind
     hexbin_kwargs: dict, optional
-        Additional keywords passed to :meth:`matplotlib.axes.Axes.hexbin` when using hexbin kind
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.hexbin` when
+        using hexbin kind
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
