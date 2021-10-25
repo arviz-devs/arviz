@@ -1,10 +1,35 @@
 (syntax_guide)=
 # Syntax Guide
 
-## Adding anchors
+## Adding targets
+Adding custom targets or anchors to the headings is really helpful for cross-referencing. They allow us to link to the heading using a simple syntax.
+They are defined using this syntax:
 
+````{tabbed} rST
+```
+.. _mytarget:
+```
+````
+````{tabbed} MyST (Markdown)
+```
+(mytarget)=
+```
+````
 
-## References
+They are referred using this syntax:
+
+````{tabbed} rST
+```
+:ref:`mytarget`
+```
+````
+````{tabbed} MyST (Markdown)
+```
+{ref}`mytarget`
+```
+````
+
+## Adding references
 
 ### Hyperlinks
 Complementary functions such as {func}`arviz.compare` and {func}`arviz.plot_compare` should reference
