@@ -88,7 +88,7 @@ def plot_pair(
         or 'posterior'.
     colorbar: bool
         If True a colorbar will be included as part of the plot (Defaults to False).
-        Only works when kind=hexbin
+        Only works when ``kind=hexbin``
     labeller : labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
