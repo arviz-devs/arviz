@@ -42,7 +42,8 @@ def plot_bpv(
     Parameters
     ----------
     data : az.InferenceData object
-        InferenceData object containing the observed and posterior/prior predictive data.
+        :class:`arviz.InferenceData` object containing the observed and
+        posterior/prior predictive data.
     kind : str
         Type of plot to display ("p_value", "u_value", "t_stat"). Defaults to u_value.
         For "p_value" we compute p := p(y* ≤ y | y). This is the probability of the data y being
@@ -52,17 +53,18 @@ def plot_bpv(
         This is also known as marginal p_value. The ideal distribution is uniform. This is similar
         to the LOO-pit calculation/plot, the difference is than in LOO-pit plot we compute
         pi = p(yi* r ≤ yi | y-i ), where y-i, is all other data except yi.
-        For "t_stat" we compute := p(T(y)* ≤ T(y) | y) where T is any T statistic. See t_stat
+        For "t_stat" we compute := p(T(y)* ≤ T(y) | y) where T is any test statistic. See t_stat
         argument below for details of available options.
     t_stat : str, float, or callable
-        T statistics to compute from the observations and predictive distributions. Allowed strings
-        are "mean", "median" or "std". Defaults to "median". Alternative a quantile can be passed
-        as a float (or str) in the interval (0, 1). Finally a user defined function is also
+        Test statistics to compute from the observations and predictive distributions.
+        Allowed strings are "mean", "median" or "std". Defaults to "median".
+        Alternative a quantile can be passed as a float (or str) in the
+        interval (0, 1). Finally a user defined function is also
         acepted, see examples section for details.
     bpv : bool
-        If True (default) add the bayesian p_value to the legend when kind = t_stat.
+        If True (default) add the Bayesian p_value to the legend when ``kind = t_stat``.
     plot_mean : bool
-        Whether or not to plot the mean T statistic. Defaults to True.
+        Whether or not to plot the mean test statistic. Defaults to True.
     reference : str
         How to compute the distributions used as reference for u_values or p_values. Allowed values
         are "analytical" (default) and "samples". Use `None` to do not plot any reference.
@@ -71,7 +73,7 @@ def plot_bpv(
         Show scaled mean square error between uniform distribution and marginal p_value
         distribution. Defaults to False.
     n_ref : int, optional
-        Number of reference distributions to sample when `reference=samples`. Defaults to 100.
+        Number of reference distributions to sample when ``reference=samples``. Defaults to 100.
     hdi_prob: float, optional
         Probability for the highest density interval for the analytical reference distribution when
         computing u_values. Should be in the interval (0, 1]. Defaults to
@@ -85,7 +87,7 @@ def plot_bpv(
         Figure size. If None it will be defined automatically.
     textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on figsize.
+        autoscaled based on ``figsize``.
     data_pairs : dict
         Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
@@ -93,20 +95,20 @@ def plot_bpv(
         - key = data var_name
         - value = posterior/prior predictive var_name
 
-        For example, `data_pairs = {'y' : 'y_hat'}`
+        For example, ``data_pairs = {'y' : 'y_hat'}``
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
     labeller : labeller instance, optional
-        Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     var_names : list of variable names
-        Variables to be plotted, if `None` all variable are plotted. Prefix the variables by `~`
+        Variables to be plotted, if `None` all variable are plotted. Prefix the variables by ``~``
         when you want to exclude them from the plot.
     filter_vars : {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
@@ -119,7 +121,7 @@ def plot_bpv(
         List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
         across the coordinates specified in the coords argument. Defaults to flattening all
         of the dimensions. Dimensions should match flatten excluding dimensions for data_pairs
-        parameters. If flatten is defined and flatten_pp is None, then `flatten_pp=flatten`.
+        parameters. If flatten is defined and flatten_pp is None, then ``flatten_pp=flatten``.
     legend : bool
         Add legend to figure. By default True.
     ax : numpy array-like of matplotlib axes or bokeh figures, optional
@@ -128,10 +130,14 @@ def plot_bpv(
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     plot_ref_kwargs :  dict, optional
-        Extra keyword arguments to control how reference is represented. Passed to `plt.plot` or
-        `plt.axhspan`(when `kind=u_value` and `reference=analytical`).
+        Extra keyword arguments to control how reference is represented.
+        Passed to :meth:`matplotlib.axes.Axes.plot` or
+        :meth:`matplotlib.axes.Axes.axhspan` (when ``kind=u_value``
+        and ``reference=analytical``).
     backend_kwargs : bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     group : {"prior", "posterior"}, optional
         Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
@@ -142,6 +148,12 @@ def plot_bpv(
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_ppc : Plot for posterior/prior predictive checks.
+    plot_loo_pit : Plot Leave-One-Out probability integral transformation (PIT) predictive checks.
+    plot_dist_comparison : Plot to compare fitted and unfitted distributions.
 
     References
     ----------
@@ -158,7 +170,7 @@ def plot_bpv(
         >>> data = az.load_arviz_data("regression1d")
         >>> az.plot_bpv(data, kind="p_value")
 
-    Plot custom t statistic comparison.
+    Plot custom test statistic comparison.
 
     .. plot::
         :context: close-figs
