@@ -47,6 +47,50 @@ They are referred using this syntax:
 
 ::::
 
+For adding anchors in `.ipynb` files, Markdown syntax will be used in the markdown cells of `.ipynb` files.
+
+## Backticks for highlighting code keywords
+
+For highlighting inline code keywords or file names, backticks are used. In Markdown single backticks are used while in rST double backticks are used. For example, for highlighting the file name `conf.py`, we will use this syntax:
+
+````{tabbed} rST
+```
+``conf.py``
+```
+````
+````{tabbed} MyST (Markdown)
+```
+`conf.py`
+```
+````
+
+## Table of content tree
+
+You might have noticed that ArviZ docs maintain a hierarchy to keep the documentation organized. Table of content tree is added in all the main pages to make the website easy to navigate.
+
+Follow this syntax for adding the table of content:
+
+````{tabbed} rST
+```
+.. toctree::
+  developer_guide
+  doc_guide
+
+```
+````
+````{tabbed} MyST (Markdown)
+```
+
+```{toctree}
+developer_guide
+doc_guide
+```
+
+```
+````
+
+Read more about the [Sphinx toctree directive](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#table-of-contents).
+
 ## Adding references
 
 ### Hyperlinks
