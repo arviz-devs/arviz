@@ -17,7 +17,10 @@ require functions to include type hints
 however contributions including them are welcome.
 
 
-## Backend Kwargs
+## Kwargs parameters
+All the kwargs parameters are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed to must be mentioned. The process for checking those functions is similar for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs`.
+
+### Backend Kwargs
 
 Most of the functions contain `backend_kwargs` as an argument. It is required to add the references of functions to which they are passed as arguments. To add the related functions in `backend_kwargs` of a specific function, do the following steps:
 
@@ -44,7 +47,7 @@ For adding the _See Also_ docstring section, you just need to add the function n
 automatically add links to other ArviZ objects and functions listed in the _See Also_
 section.
 
-For example, let's add `:func:`~arviz.loo` and `:func:`~arvix.plot_ppc` in the _See Also_ section.
+For example, let's add :func:`~arviz.hdi` and :func:`~arviz.plot_ppc` in the _See Also_ section.
 
 ```
     See Also
