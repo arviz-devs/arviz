@@ -70,21 +70,26 @@ You might have noticed that ArviZ docs maintain a hierarchy to keep the document
 
 Follow this syntax for adding the table of content:
 
-````{tabbed} rST
-```
-.. toctree::
-  developer_guide
-  doc_guide
-```
-````
-````{tabbed} MyST (Markdown)
-```
+rST:
+
+.. raw:: html
+
+<pre>
+    .. toctree::
+    developer_guide
+    doc_guide
+</pre>
+
+MyST (Markdown):
+
+.. raw:: html
+
+<pre>
 ```{toctree}
 developer_guide
 doc_guide
-\`\`\`
 ```
-````
+</pre>
 
 Read more about the [Sphinx toctree directive](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#table-of-contents).
 
