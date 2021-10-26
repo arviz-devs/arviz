@@ -66,7 +66,7 @@ For highlighting inline code keywords or file names, backticks are used. In Mark
 
 ## Table of content tree
 
-You might have noticed that ArviZ docs maintain a hierarchy to keep the documentation organized. Table of content tree is added in all the main pages to make the website easy to navigate.
+You might have noticed that ArviZ docs maintain a hierarchy to keep the documentation organized. Table of content tree is added in all the main pages to make the website easy to navigate. Adding the table of content tree provides the the list of all pages in the left side bar. It also enables navigation to the **Previous** and **Next** pages in the footer.
 
 Follow this syntax for adding the table of content:
 
@@ -81,7 +81,8 @@ Follow this syntax for adding the table of content:
 ```
 ```{toctree}
 developer_guide
-doc_guide```
+doc_guide
+\`\`\`
 ```
 ````
 
