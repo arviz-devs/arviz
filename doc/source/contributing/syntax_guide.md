@@ -75,21 +75,27 @@ Follow this syntax for adding the table of content:
 .. toctree::
   developer_guide
   doc_guide
-
 ```
 ````
 ````{tabbed} MyST (Markdown)
 ```
-
 ```{toctree}
 developer_guide
 doc_guide
 ```
-
 ```
 ````
 
 Read more about the [Sphinx toctree directive](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#table-of-contents).
+
+## Code tabs
+
+
+
+### Synchronised Tabs
+ArviZ docs are using `sphinx-design` extension for adding sync code tabs in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L61). You can check the syntax and more info about it
+at [Synchronised Tabs](https://sphinx-design.readthedocs.io/en/sbt-theme/tabs.html#synchronised-tabs). Using this extension saves us from a lot of raw-html code. Sphinx provides this extension to make our work easy and or code more concise.
+
 
 ## Adding references
 
