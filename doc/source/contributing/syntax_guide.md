@@ -71,19 +71,13 @@ You might have noticed that ArviZ docs maintain a hierarchy to keep the document
 Follow this syntax for adding the table of content:
 
 rST:
-
-.. raw:: html
-
 <pre>
-    .. toctree::
+.. toctree::
     developer_guide
     doc_guide
 </pre>
 
 MyST (Markdown):
-
-.. raw:: html
-
 <pre>
 ```{toctree}
 developer_guide
@@ -95,12 +89,11 @@ Read more about the [Sphinx toctree directive](https://www.sphinx-doc.org/en/mas
 
 ## Code tabs
 
-You will find code tabs in ArviZ docs on every other page.
+You will find code tabs on every other page in ArviZ docs.
 
 ### Synchronised Tabs
 ArviZ docs are using `sphinx-design` extension for adding sync code tabs in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L61). You can check the syntax and more info about it
 at [Synchronised Tabs](https://sphinx-design.readthedocs.io/en/sbt-theme/tabs.html#synchronised-tabs). Using this extension saves us from a lot of raw-html code. Sphinx provides this extension to make our work easy and or code more concise.
-
 
 ## Adding references
 
