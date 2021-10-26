@@ -89,7 +89,7 @@ Read more about the [Sphinx toctree directive](https://www.sphinx-doc.org/en/mas
 
 ## Code tabs
 
-You will find code tabs on every other page in ArviZ docs.
+You will find code tabs on every other page in ArviZ docs. As we have two main types of files, i.e, `.rst` and `.md`, we often use two code tabs to show the functionailites in both rST and Markdown.
 
 ### Synchronised Tabs
 ArviZ docs are using `sphinx-design` extension for adding sync code tabs in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L61). You can check the syntax and more info about it
@@ -172,7 +172,3 @@ The same can be done to refer to ArviZ functions, in which case,
 ``:func:`arviz.loo` `` is enough, there is no need to use intersphinx.
 Moreover, using ``:func:`~arviz.loo` `` will only show ``loo`` as link text
 due to the preceding ``~``.
-
-In addition, the _See also_ docstring section is also available. Sphinx will
-automatically add links to other ArviZ objects listed in the _See also_
-section.

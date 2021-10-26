@@ -1,5 +1,5 @@
 (docstrings)=
-## Docstring formatting and type hints
+# Docstring formatting and type hints
 
 Docstrings should follow the
 [numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html).
@@ -15,3 +15,22 @@ readable whereas type hints target function definitions and `.pyi` files and
 aim to help third party tools such as type checkers or IDEs. ArviZ does not
 require functions to include type hints
 however contributions including them are welcome.
+
+
+## Backend Kwargs
+
+
+
+## See Also
+For adding the _See Also_ docstring section, you just need to add the function name. Sphinx will
+automatically add links to other ArviZ objects and functions listed in the _See Also_
+section.
+
+For example, let's add `:func:`~arviz.loo` and `:func:`~arvix.plot_ppc` in the _See Also_ section.
+
+```
+ See Also
+    --------
+    hdi : Calculate highest density interval (HDI) of array for given probability.
+    plot_ppc : plot for posterior/prior predictive checks.
+```
