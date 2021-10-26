@@ -72,17 +72,21 @@ Follow this syntax for adding the table of content:
 
 ````{tabbed} rST
 ```
+
 .. toctree::
   developer_guide
   doc_guide
+
 ```
 ````
 ````{tabbed} MyST (Markdown)
 ```
+
 ```{toctree}
 developer_guide
 doc_guide
-```
+ ```
+
 ```
 ````
 
