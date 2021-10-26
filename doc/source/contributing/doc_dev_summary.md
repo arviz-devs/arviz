@@ -9,19 +9,19 @@ If you are using Docker, see {ref}`building_doc_with_docker`.
 
 ## Pull request checks
 
-Every PR has a list of checks that check if the your changes follow the rules being followed by ArviZ docs.
+Every PR has a list of checks that check if your changes follow the rules being followed by ArviZ docs.
 You can check why a specific test is failing by clicking the `Details` next to it. It will take you to errors and warning page. This page shows the details of errors, for example:
 
 `arviz/plots/pairplot.py:127:0: C0301: Line too long (142/100) (line-too-long)`.
 
-It means the line 127 of the file `pairplot.py` is too long.
+It means line 127 of the file `pairplot.py` is too long.
 
 ### Docstring
 
-Docstring follow the pylint rules. Don't forget to check the following points before opening your PR:
+Docstrings follow the pylint rules. Don't forget to check the following points before opening your PR:
 
-* The maximum number of charcaters allowed in a line is 100. If a line consits of more than 100 characters, tests will fail.
-* If there is any trailing white space, tests will fail. If you are using visual stuido code, you can enable the [Trailing Spaces](https://marketplace.visualstudio.com/items?itemName=shardulm94.trailing-spaces) extension to visualize the trailing spaces.
+* The maximum number of characters allowed in a line is 100. If a line consists of more than 100 characters, tests will fail.
+* If there is any trailing white space, tests will fail. If you are using visual studio code, you can enable the [Trailing Spaces](https://marketplace.visualstudio.com/items?itemName=shardulm94.trailing-spaces) extension to visualize the trailing spaces.
 
 (preview_change)=
 ## Previewing doc changes
@@ -36,7 +36,7 @@ For previewing documentation changes, take the following steps:
    ```
 
 2. Click the `Details` button next to it.
-3. It will take to you the preview of ArviZ docs of your PR.
+3. It will take you to the preview of ArviZ docs of your PR.
 4. Go to the webpage of the file you are working on.
 5. Check the preview of your changes on that page.
 

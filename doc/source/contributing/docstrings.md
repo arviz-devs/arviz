@@ -18,11 +18,11 @@ however contributions including them are welcome.
 
 
 ## Kwargs parameters
-All the kwargs parameters in `plots` modules are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed to must be mentioned. The process for checking those functions is similar for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs`.
+All the kwargs parameters in `plots` modules are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed must be mentioned. The process for checking those functions is similar for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs`.
 
 ### Backend Kwargs
 
-Almost all the fucntions as `backend_kwargs` argument. Take the following steps to add the related functions:
+Almost all the functions have `backend_kwargs` as an argument. Take the following steps to add the related functions:
 
 1. Go to [arviz/plots/backends](https://github.com/arviz-devs/arviz/tree/main/arviz/plots/backends) directory. It consists of two folders, i.e., `matplotlib` and `bokeh`.
 
@@ -30,14 +30,14 @@ Almost all the fucntions as `backend_kwargs` argument. Take the following steps 
 
 3. Go to your function file in [matplotlib directory](https://github.com/arviz-devs/arviz/tree/main/arviz/plots/backends/matplotlib).
 
-4. First of all, search the keyword `backend_kwargs` in the `.py` file. Now, check the function to which it is being passed to as an argument. If you hover over the function, it will turn yellow and clicking on the function will take you to the function definition points.
+4. First of all, search the keyword `backend_kwargs` in the `.py` file. Now, check the function to which it is being passed as an argument. If you hover over the function, it will turn yellow and clicking on the function will take you to the function definition points.
 For example, in the case of `plot_autocorr`, we will search `backend_kwrags` in [matplotlib/autocorrplot.py](https://github.com/arviz-devs/arviz/blob/main/arviz/plots/backends/matplotlib/autocorrplot.py). `backend_kwargs` are being passed to the `create_axis_grid()` function on [line 46](https://github.com/arviz-devs/arviz/blob/main/arviz/plots/backends/matplotlib/autocorrplot.py#L46), if we click on `create_axes_grid`, we can see the two places where it is defined, i.e., `bokeh/__init__.py` and `matplotlib/__init__.py`.
 
 5. Go to the files where the function is defined one by one, and search again `backend_kwargs`. For example, in case of `plot_autocorr`, we will go to [matplotlib/__init__.py](https://github.com/arviz-devs/arviz/blob/a934308e8d8f63b2b6b06b3badf7c93a88112c97/arviz/plots/backends/matplotlib/__init__.py#L31) and [bokeh/__init__.py](https://github.com/arviz-devs/arviz/blob/a934308e8d8f63b2b6b06b3badf7c93a88112c97/arviz/plots/backends/bokeh/__init__.py#L34). If we search `backend_kwargs` in these files, we will see that it is being passed to `subplots()` and `figure()` in [matplotlib/__init__.py on line 55](https://github.com/arviz-devs/arviz/blob/a934308e8d8f63b2b6b06b3badf7c93a88112c97/arviz/plots/backends/matplotlib/__init__.py#L55) and [bokeh/__init__.py on line 111](https://github.com/arviz-devs/arviz/blob/a934308e8d8f63b2b6b06b3badf7c93a88112c97/arviz/plots/backends/bokeh/__init__.py#L111), respectively.
 
 6. Repeat steps # 4 and 5 for [backends/bokeh](https://github.com/arviz-devs/arviz/tree/a934308e8d8f63b2b6b06b3badf7c93a88112c97/arviz/plots/backends/bokeh).
 
-7. Now, we got the related functions. The next step is to add the references to these functions.
+7. Now, we got the related functions. The next step is to add references to these functions.
    Use the following syntax to add the function.
    ```
    :func:`function_name`

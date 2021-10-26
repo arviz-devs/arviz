@@ -66,7 +66,7 @@ For highlighting inline code keywords or file names, backticks are used. In Mark
 
 ## Table of content tree
 
-You might have noticed that ArviZ docs maintain a hierarchy to keep the documentation organized. Table of content tree is added in all the main pages to make the website easy to navigate. Adding the table of content tree provides the the list of all pages in the left side bar. It also enables navigation to the **Previous** and **Next** pages in the footer.
+You might have noticed that ArviZ docs maintain a hierarchy to keep the documentation organized. A table of content tree is added to all the main pages to make the website easy to navigate. Adding the table of content tree provides the list of all pages in the left sidebar. It also enables navigation to the **Previous** and **Next** pages in the footer.
 
 Follow this syntax for adding the table of content:
 
@@ -89,7 +89,7 @@ Read more about the [Sphinx toctree directive](https://www.sphinx-doc.org/en/mas
 
 ## Code tabs
 
-You will find code tabs on every other page in ArviZ docs. As we have two main types of files, i.e, `.rst` and `.md`, we often use two code tabs to show the functionailites in both rST and Markdown.
+You will find code tabs on every other page in ArviZ docs. As we have two main types of files, i.e, `.rst` and `.md`, we often use two code tabs to show the functionalities in both rST and Markdown.
 
 ### Synchronised Tabs
 ArviZ docs are using `sphinx-design` extension for adding sync code tabs in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L61). You can check the syntax and more info about it
