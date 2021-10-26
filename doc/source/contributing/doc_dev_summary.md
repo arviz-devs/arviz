@@ -7,9 +7,16 @@ clone it to your local machine, and develop on a feature branch. For a detailed 
 
 If you are using Docker, see {ref}`building_doc_with_docker`.
 
-## Pull request
+## Pull request checks
 
+Every PR has a list of checks that check if the your changes follow the rules being followed by ArviZ docs.
 
+### Docstring
+
+Don't forget to check the following points before opening your PR:
+
+* The maximum number of charcaters allowed in a line is 100. IF a line consits of more than 100 characters, tests will fail.
+* IF there is any trailing white space, tests will fail. IF you are using visual stuido code, you can enable the [Trailing Spaces](https://marketplace.visualstudio.com/items?itemName=shardulm94.trailing-spaces) extension to visualize the trailing spaces.
 
 (preview_change)=
 ## Previewing doc changes
