@@ -90,7 +90,7 @@ def plot_rank(
     figsize: tuple
         Figure size. If None it will be defined automatically.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        A 2D array of locations into which to plot the densities. If not supplied, ArviZ will create
         its own array of plot areas (and return it).
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
