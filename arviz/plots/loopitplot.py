@@ -38,13 +38,13 @@ def plot_loo_pit(
     Parameters
     ----------
     idata : InferenceData
-        InferenceData object.
+        :class:`arviz.InferenceData` object.
     y : array, DataArray or str
-        Observed data. If str, idata must be present and contain the observed data group
+        Observed data. If str, ``idata`` must be present and contain the observed data group
     y_hat : array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
-        None, idata must contain the posterior predictive group. If None, y_hat is taken
+        None, ``idata`` must contain the posterior predictive group. If None, ``y_hat`` is taken
         equal to y, thus, y must be str too.
     log_weights : array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
@@ -67,9 +67,9 @@ def plot_loo_pit(
     figsize : figure size tuple, optional
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int, optional
-        Text size for labels. If None it will be autoscaled based on figsize.
+        Text size for labels. If None it will be autoscaled based on ``figsize``.
     labeller : labeller instance, optional
-        Class providing the method `make_pp_label` to generate the labels in the plot titles.
+        Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     color : str or array_like, optional
         Color of the LOO-PIT estimated pdf plot. If ``plot_unif_kwargs`` has no "color" key,
@@ -80,18 +80,20 @@ def plot_loo_pit(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     plot_kwargs : dict, optional
-        Additional keywords passed to ax.plot for LOO-PIT line (kde or ECDF)
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot` for LOO-PIT line (kde or ECDF)
     plot_unif_kwargs : dict, optional
-        Additional keywords passed to ax.plot for overlaid uniform distributions or
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot` for overlaid uniform distributions or
         for beta credible interval lines if ``ecdf=True``
     hdi_kwargs : dict, optional
-        Additional keywords passed to ax.axhspan
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.axhspan`
     fill_kwargs : dict, optional
-        Additional kwargs passed to ax.fill_between
+        Additional kwargs passed to :meth:`matplotlib.axes.Axes.fill_between`
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
@@ -99,6 +101,11 @@ def plot_loo_pit(
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_bvp : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+    loo_pit : Compute leave one out (PSIS-LOO) probability integral transform (PIT) values.
 
     References
     ----------
