@@ -18,7 +18,7 @@ however contributions including them are welcome.
 
 ## References
 Docstrings follow the same guide for adding references as the other docs.
-For referencing ArviZ objects, follow {ref}`reference_arviz_objects`. For adding refernces to external libraries functions and objects, see {ref}`reference_external_libs`.
+For adding refernces to external libraries functions and objects, see {ref}`reference_external_libs`. For referencing ArviZ objects, follow {ref}`reference_arviz_objects`.
 
 ## See Also
 For adding the _See Also_ docstring section, you just need to add the function name. Sphinx will
