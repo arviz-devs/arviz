@@ -196,4 +196,4 @@ at [Synchronised Tabs](https://sphinx-design.readthedocs.io/en/sbt-theme/tabs.ht
 
 
 ## Extensions
-Sphinx supports a lot of extensions to improve and customize the doc features. ArviZ makes use of these builtin and external extensions to add extra roles. See the [Extensions in ArviZ and PyMC](https://sphinx-primer.readthedocs.io/en/latest/extensions/used_extensions.html).
+Sphinx supports a lot of extensions to improve and customize the doc features. ArviZ makes use of these builtin and external extensions to add extra roles. See the {doc}`Built in extensions <sphinx-primer:extensions/used_extensions>`.
