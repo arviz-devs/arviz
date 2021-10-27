@@ -281,7 +281,7 @@ intersphinx_mapping = {
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
     "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
-    "numpy": ("https://numpy.org/doc/",None),
+     "numpy": ("https://numpy.org/doc/stable/", None),
     "pyhton": ("https://docs.python.org/3/", None),
     "sphinx-primer": ("https://sphinx-primer.readthedocs.io/en/latest/", None)
 }
