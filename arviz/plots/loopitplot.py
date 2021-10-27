@@ -56,7 +56,7 @@ def plot_loo_pit(
         for large S and ECDF values not vary close to 0 nor 1. For more information, see
         `Vehtari et al. (2019)`, `Appendix G <https://avehtari.github.io/rhat_ess/rhat_ess.html>`_.
     ecdf_fill : bool, optional
-        Use fill_between to mark the area inside the credible interval. Otherwise, plot the
+        Use :meth:`matplotlib.axes.Axes.fill_between` to mark the area inside the credible interval. Otherwise, plot the
         border lines.
     n_unif : int, optional
         Number of datasets to simulate and overlay from the uniform distribution.
