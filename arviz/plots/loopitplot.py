@@ -107,7 +107,7 @@ def plot_loo_pit(
 
     See Also
     --------
-    plot_bvp : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+    plot_bpv : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
     loo_pit : Compute leave one out (PSIS-LOO) probability integral transform (PIT) values.
 
     References
