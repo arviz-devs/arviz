@@ -10,7 +10,7 @@ If you are using Docker, see {ref}`building_doc_with_docker`.
 ## Pull request checks
 
 Every PR has a list of checks that check if your changes follow the rules being followed by ArviZ docs.
-You can check why a specific test is failing by clicking the `Details` next to it. It will take you to errors and warning page. This page shows the details of errors, for example:
+You can check why a specific test is failing by clicking the `Details` next to it. It will take you to errors and warning page. This page shows the details of errors, for example in case of docstrings:
 
 `arviz/plots/pairplot.py:127:0: C0301: Line too long (142/100) (line-too-long)`.
 

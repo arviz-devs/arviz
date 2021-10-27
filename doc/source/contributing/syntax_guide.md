@@ -193,3 +193,7 @@ You will find code tabs on every other page in ArviZ docs. As we have two main t
 ### Synchronised Tabs
 ArviZ docs are using `sphinx-design` extension for adding sync code tabs in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L61). You can check the syntax and more info about it
 at [Synchronised Tabs](https://sphinx-design.readthedocs.io/en/sbt-theme/tabs.html#synchronised-tabs). Using this extension saves us from a lot of raw-html code. Sphinx provides this extension to make our work easy and or code more concise.
+
+
+## Extensions
+Sphinx supports a lot of extensions to improve and customize the doc features. ArviZ makes use of these builtin and external extensions to add extra roles. See the [Extensions in ArviZ and PyMC](https://sphinx-primer.readthedocs.io/en/latest/extensions/used_extensions.html).
