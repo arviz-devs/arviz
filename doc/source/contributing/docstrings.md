@@ -16,6 +16,23 @@ aim to help third party tools such as type checkers or IDEs. ArviZ does not
 require functions to include type hints
 however contributions including them are welcome.
 
+## References
+Docstrings follow the same guide for adding references as the other docs.
+For referencing ArviZ objects, follow {ref}`reference_arviz_objects`. For adding refernces to external libraries functions and objects, see {ref}`reference_external_libs`.
+
+## See Also
+For adding the _See Also_ docstring section, you just need to add the function name. Sphinx will
+automatically add links to other ArviZ objects and functions listed in the _See Also_
+section.
+
+For example, let's add {func}`~arviz.hdi` and {func}`~arviz.plot_ppc` in the _See Also_ section.
+
+```
+    See Also
+    --------
+    hdi : Calculate highest density interval (HDI) of array for given probability.
+    plot_ppc : plot for posterior/prior predictive checks.
+```
 
 ## Kwargs parameters
 All the kwargs parameters in {ref}`plots <plot_api>` modules are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed must be mentioned. The process for checking those functions is similar for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs`.
@@ -49,18 +66,3 @@ For example, in the case of `plot_autocorr`, we will search `backend_kwrags` in 
    ```
 
    You can also go to [matplotlib documentation](https://matplotlib.org/stable/contents.html) and [bokeh documentation](https://docs.bokeh.org/en/latest/index.html) to search these functions.
-
-
-## See Also
-For adding the _See Also_ docstring section, you just need to add the function name. Sphinx will
-automatically add links to other ArviZ objects and functions listed in the _See Also_
-section.
-
-For example, let's add {func}`~arviz.hdi` and {func}`~arviz.plot_ppc` in the _See Also_ section.
-
-```
-    See Also
-    --------
-    hdi : Calculate highest density interval (HDI) of array for given probability.
-    plot_ppc : plot for posterior/prior predictive checks.
-```

@@ -95,6 +95,7 @@ You will find code tabs on every other page in ArviZ docs. As we have two main t
 ArviZ docs are using `sphinx-design` extension for adding sync code tabs in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py#L61). You can check the syntax and more info about it
 at [Synchronised Tabs](https://sphinx-design.readthedocs.io/en/sbt-theme/tabs.html#synchronised-tabs). Using this extension saves us from a lot of raw-html code. Sphinx provides this extension to make our work easy and or code more concise.
 
+(adding_references)=
 ## Adding references
 
 ### Hyperlinks
@@ -105,6 +106,7 @@ clear example of this situation are docstrings on `kwargs` passed to bokeh or
 matplotlib methods. This section covers how to reference functions from any
 part of the docstring.
 
+(reference_external_libs)=
 #### Reference external libraries
 
 Sphinx is configured to ease referencing libraries ArviZ relies heavily on by
@@ -112,9 +114,8 @@ using [intersphinx](https://docs.readthedocs.io/en/stable/guides/intersphinx.htm
 See guidance on the reference about how to link to objects from external
 libraries and the value of intersphinx_mapping in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py) for the complete and up to date list of libraries that can be referenced.
 
-In ArviZ docs, you can add references to `matplotlib`, `bokeh`, `xarray`, etc functions and objects following the simple syntax.
-For example, the code for adding {meth}`xarray.Dataset.sel`, {func}`matplotlib.pyplot.subplots` and
-{func}`bokeh.plotting.figure` is given below.
+In ArviZ docs, you can add references to functions and objects of `matplotlib`, `bokeh`, `xarray`, etc following the simple syntax. Let's try adding a function of few libraries, i.e., {meth}`xarray.Dataset.sel`, {func}`matplotlib.pyplot.subplots` and
+{func}`bokeh.plotting.figure`.
 
 ````{tabbed} rST
 ```
@@ -166,7 +167,6 @@ using:
 ```
 ````
 
-
 The `intersphinx_mappings`
 defined for ArviZ can be seen in `conf.py`.
 Moreover, the intersphinx key is optional. Thus, the pattern to get sphinx to generate links is:
@@ -186,6 +186,7 @@ with the part between brackets being optional. See the docstring on
 {meth}`~arviz.InferenceData.to_dataframe` and
 [its source](https://arviz-devs.github.io/arviz/_modules/arviz/data/inference_data.html#InferenceData.to_dataframe) for an example.
 
+(reference_arviz_objects)=
 #### Referencing ArviZ objects
 
 The same can be done to refer to ArviZ functions, in which case,
