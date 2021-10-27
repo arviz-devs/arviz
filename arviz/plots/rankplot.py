@@ -53,7 +53,7 @@ def plot_rank(
     ----------
     data: obj
         Any object that can be converted to an :class:`arviz.InferenceData` object.
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details
+        Refer to documentation of  :func:`arviz.convert_to_dataset` for details
     var_names: string or list of variable names
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
