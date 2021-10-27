@@ -18,7 +18,7 @@ however contributions including them are welcome.
 
 
 ## Kwargs parameters
-All the kwargs parameters in `plots` modules are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed must be mentioned. The process for checking those functions is similar for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs`.
+All the kwargs parameters in {ref}`plots <plot_api>` modules are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed must be mentioned. The process for checking those functions is similar for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs`.
 
 ### Backend Kwargs
 

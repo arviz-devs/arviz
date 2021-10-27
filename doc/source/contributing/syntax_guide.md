@@ -103,15 +103,35 @@ each other in their docstrings using a hyperlink, not only by name. The same
 should happen with external functions whose usage is assumed to be known; a
 clear example of this situation are docstrings on `kwargs` passed to bokeh or
 matplotlib methods. This section covers how to reference functions from any
-part of the docstring or from the _See also_ section.
+part of the docstring.
 
 #### Reference external libraries
 
 Sphinx is configured to ease referencing libraries ArviZ relies heavily on by
 using [intersphinx](https://docs.readthedocs.io/en/stable/guides/intersphinx.html).
 See guidance on the reference about how to link to objects from external
-libraries and the value of intersphinx_mapping in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py) for the complete and up to
-date list of libraries that can be referenced. Note that the `:key:` before
+libraries and the value of intersphinx_mapping in [conf.py](https://github.com/arviz-devs/arviz/blob/main/doc/source/conf.py) for the complete and up to date list of libraries that can be referenced.
+
+In ArviZ docs, you can add references to `matplotlib`, `bokeh`, `xarray`, etc functions and objects following the simple syntax.
+For example, the code for adding {meth}`xarray.Dataset.sel`, {func}`matplotlib.pyplot.subplots` and
+{func}`bokeh.plotting.figure` is given below.
+
+````{tabbed} rST
+```
+:meth:`xarray.Dataset.sel`
+:func:`matplotlib.pyplot.subplots`
+:func:`bokeh.plotting.figure`
+```
+````
+````{tabbed} MyST (Markdown)
+```
+{meth}`xarray.Dataset.sel`
+{func}`matplotlib.pyplot.subplots`
+{func}`bokeh.plotting.figure`
+```
+````
+
+Note that the `:key:` before
 the reference must match the kind of object that is being referenced, it
 generally will not be `:ref:` nor `:doc:`. For
 example, for functions `:func:` has to be used and for class methods
