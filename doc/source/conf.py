@@ -282,5 +282,6 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
     "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
     "numpy": ("https://numpy.org/doc/",None),
-    "pyhton": ("https://docs.python.org/3/", None)
+    "pyhton": ("https://docs.python.org/3/", None),
+    "sphinx-primer": ("https://sphinx-primer.readthedocs.io/en/latest/", None)
 }

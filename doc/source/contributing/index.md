@@ -37,3 +37,7 @@ contributing_prs
 developing_in_docker
 developer_guide
 ```
+
+
+## Extensions
+Sphinx supports a lot of extensions to improve and customize the doc features. ArviZ makes use of these builtin and external extensions to add extra roles. See the {doc}`Built in extensions <sphinx-primer:extensions/used_extensions>` or  [Extensions in ArviZ and PyMC](https://sphinx-primer.readthedocs.io/en/latest/extensions/used_extensions.html).
