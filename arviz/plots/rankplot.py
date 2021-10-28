@@ -68,7 +68,7 @@ def plot_rank(
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     bins: None or passed to np.histogram
         Binning strategy used for histogram. By default uses twice the result of Sturges' formula.
-        See `np.histogram` documentation for, other available arguments.
+        See :func:`numpy.histogram` documentation for, other available arguments.
     kind: string
         If bars (defaults), ranks are represented as stacked histograms (one per chain). If vlines
         ranks are represented as vertical lines above or below `ref_line`.
