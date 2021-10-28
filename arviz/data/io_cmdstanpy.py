@@ -72,7 +72,10 @@ class CmdStanPyConverter:
 
         self.dtypes = dtypes
 
-        if hasattr(self.posterior, "stan_vars_cols"):
+        if hasattr(self.posterior, "metadata"):
+            if self.log_likelihood is True and "log_lik" in self.posterior.metadata.stan_vars_cols:
+                self.log_likelihood = ["log_lik"]
+        elif hasattr(self.posterior, "stan_vars_cols"):
             if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
         else:
@@ -91,10 +94,13 @@ class CmdStanPyConverter:
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
-        if not hasattr(self.posterior, "stan_vars_cols"):
+        if not (hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols")):
             return self.posterior_to_xarray_pre_v_0_9_68()
 
-        items = list(self.posterior.stan_vars_cols.keys())
+        if hasattr(self.posterior, "metadata"):
+            items = list(self.posterior.metadata.stan_vars_cols.keys())
+        else:
+            items = list(self.posterior.stan_vars_cols.keys())
         if self.posterior_predictive is not None:
             try:
                 items = _filter(items, self.posterior_predictive)
@@ -113,7 +119,10 @@ class CmdStanPyConverter:
 
         valid_cols = []
         for item in items:
-            valid_cols.extend(self.posterior.stan_vars_cols[item])
+            if hasattr(self.posterior, "metadata"):
+                valid_cols.extend(self.posterior.metadata.stan_vars_cols[item])
+            else:
+                valid_cols.extend(self.posterior.stan_vars_cols[item])
 
         data, data_warmup = _unpack_fit(
             self.posterior,
@@ -218,7 +227,7 @@ class CmdStanPyConverter:
         """Convert predictive samples to xarray."""
         predictive = _as_set(names)
 
-        if hasattr(fit, "stan_vars_cols"):
+        if hasattr(fit, "metadata") or hasattr(fit, "stan_vars_cols"):
             data, data_warmup = _unpack_fit(
                 fit,
                 predictive,
@@ -258,7 +267,7 @@ class CmdStanPyConverter:
         """Convert out of sample predictions samples to xarray."""
         predictions = _as_set(self.predictions)
 
-        if hasattr(self.posterior, "stan_vars_cols"):
+        if hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols"):
             data, data_warmup = _unpack_fit(
                 self.posterior,
                 predictions,
@@ -299,7 +308,7 @@ class CmdStanPyConverter:
         """Convert elementwise log likelihood samples to xarray."""
         log_likelihood = _as_set(self.log_likelihood)
 
-        if hasattr(self.posterior, "stan_vars_cols"):
+        if hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols"):
             data, data_warmup = _unpack_fit(
                 self.posterior,
                 log_likelihood,
@@ -345,8 +354,11 @@ class CmdStanPyConverter:
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        if hasattr(self.prior, "stan_vars_cols"):
-            items = list(self.prior.stan_vars_cols.keys())
+        if hasattr(self.posterior, "metadata") or hasattr(self.prior, "stan_vars_cols"):
+            if hasattr(self.posterior, "metadata"):
+                items = list(self.prior.metadata.stan_vars_cols.keys())
+            else
+                items = list(self.prior.stan_vars_cols.keys())
             if self.prior_predictive is not None:
                 try:
                     items = _filter(items, self.prior_predictive)
@@ -623,10 +635,11 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
     draws = np.swapaxes(fit.draws(inc_warmup=save_warmup), 0, 1)
     sample = {}
     sample_warmup = {}
-
+    
+    stan_vars_cols = fit.metadata.stan_vars_cols if hasattr(fit, "metadata") else fit.stan_vars_cols
     for item in items:
-        if item in fit.stan_vars_cols:
-            col_idxs = fit.stan_vars_cols[item]
+        if item in stan_vars_cols:
+            col_idxs = stan_vars_cols[item]
             if len(col_idxs) == 1:
                 raw_draws = draws[..., col_idxs[0]]
             else:
