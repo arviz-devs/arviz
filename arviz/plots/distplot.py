@@ -105,7 +105,7 @@ def plot_dist(
         the following extra keywords are also supported:
 
         * ``color``: replaces the ``fill_color`` and ``line_color`` of the ``quad`` method
-        * ``bins``: taken from ``hist_kwargs`` and passed to ``numpy.histogram`` instead
+        * ``bins``: taken from ``hist_kwargs`` and passed to :func:`numpy.histogram` instead
         * ``density``: normalize histogram to represent a probability density function,
         Defaults to ``True``
 
