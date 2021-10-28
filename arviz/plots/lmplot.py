@@ -47,8 +47,8 @@ def plot_lm(
     x : str, tuple of strings, DataArray or array-like, optional
         If str or tuple, variable name from ``constant_data``.
         If ndarray, could be 1D, or 2D for multiple plots.
-    y_model : str or Sequence, Optional
         If None, coords name of ``y`` (``y`` should be DataArray).
+    y_model : str or Sequence, Optional
         If str, variable name from ``posterior``.
         Its dimensions should be same as ``y`` plus added chains and draws.
     y_hat : str, Optional
@@ -104,8 +104,8 @@ def plot_lm(
 
     See Also
     --------
-    plot_ts: Plot timeseries data
-    plot_ppc: Plot for posterior/prior predictive checks
+    plot_ts : Plot timeseries data
+    plot_ppc : Plot for posterior/prior predictive checks
 
     Examples
     --------
