@@ -164,7 +164,7 @@ class CmdStanPyConverter:
 
     def stats_to_xarray(self, fit):
         """Extract sample_stats from fit."""
-        if not hasattr(fit, "sampler_vars_cols"):
+        if not (hasattr(fit, "metadata") or hasattr(fit, "sampler_vars_cols")):
             return self.sample_stats_to_xarray_pre_v_0_9_68(fit)
 
         dtypes = {
@@ -173,7 +173,10 @@ class CmdStanPyConverter:
             "treedepth__": np.int64,
             **self.dtypes,
         }
-        items = list(fit.sampler_vars_cols.keys())
+        if hasattr(fit, "metadata"):
+            items = list(fit.metadata._method_vars_cols.keys())  # pylint: disable=protected-access
+        else:
+            items = list(fit.sampler_vars_cols.keys())
         rename_dict = {
             "divergent": "diverging",
             "n_leapfrog": "n_steps",
@@ -637,6 +640,11 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
     sample_warmup = {}
 
     stan_vars_cols = fit.metadata.stan_vars_cols if hasattr(fit, "metadata") else fit.stan_vars_cols
+    sampler_vars_cols = (
+        fit.metadata._method_vars_cols  # pylint: disable=protected-access
+        if hasattr(fit, "metadata")
+        else fit.sampler_vars_cols
+    )
     for item in items:
         if item in stan_vars_cols:
             col_idxs = stan_vars_cols[item]
@@ -647,8 +655,8 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
                 raw_draws = np.swapaxes(
                     raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
                 )
-        elif item in fit.sampler_vars_cols:
-            col_idxs = fit.sampler_vars_cols[item]
+        elif item in sampler_vars_cols:
+            col_idxs = sampler_vars_cols[item]
             raw_draws = draws[..., col_idxs[0]]
         else:
             raise ValueError(f"fit data, unknown variable: {item}")
