@@ -357,7 +357,7 @@ class CmdStanPyConverter:
         if hasattr(self.posterior, "metadata") or hasattr(self.prior, "stan_vars_cols"):
             if hasattr(self.posterior, "metadata"):
                 items = list(self.prior.metadata.stan_vars_cols.keys())
-            else
+            else:
                 items = list(self.prior.stan_vars_cols.keys())
             if self.prior_predictive is not None:
                 try:
@@ -635,7 +635,7 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
     draws = np.swapaxes(fit.draws(inc_warmup=save_warmup), 0, 1)
     sample = {}
     sample_warmup = {}
-    
+
     stan_vars_cols = fit.metadata.stan_vars_cols if hasattr(fit, "metadata") else fit.stan_vars_cols
     for item in items:
         if item in stan_vars_cols:
