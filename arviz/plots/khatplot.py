@@ -85,8 +85,9 @@ def plot_khat(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
     kwargs :
@@ -95,7 +96,7 @@ def plot_khat(
     Returns
     -------
     axes : matplotlib axes or bokeh figures
-    
+
     See Also
     --------
     psislw : Pareto smoothed importance sampling (PSIS).
