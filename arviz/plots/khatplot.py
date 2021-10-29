@@ -91,7 +91,8 @@ def plot_khat(
     show : bool, optional
         Call backend show function.
     kwargs :
-        Additional keywords passed to ax.scatter.
+        Additional keywords passed to
+        :func:`matplotlib.axes.Axes.scatter`.
 
     Returns
     -------
