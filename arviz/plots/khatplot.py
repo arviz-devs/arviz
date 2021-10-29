@@ -95,6 +95,10 @@ def plot_khat(
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+    
+    See Also
+    --------
+    psislw : Pareto smoothed importance sampling (PSIS).
 
     Examples
     --------
