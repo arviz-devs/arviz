@@ -1,7 +1,7 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Span
 from bokeh.models.annotations import Legend, Title
 from scipy.stats import rankdata
 
