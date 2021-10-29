@@ -132,7 +132,6 @@ def plot_energy(
                 x_units="screen",
                 y_units="screen",
                 text=f"chain {idx:>2} BFMI = {val:.2f}",
-                render_mode="css",
                 border_line_color=None,
                 border_line_alpha=0.0,
                 background_fill_color="white",
