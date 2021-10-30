@@ -82,7 +82,7 @@ def plot_khat(
         Matplotlib axes or bokeh figures.
     hlines_kwargs: dictionary, optional
         Additional keywords passed to
-        :func:`matplotlib.axes.Axes.hlines`.
+       :meth:`matplotlib.axes.Axes.hlines`.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
