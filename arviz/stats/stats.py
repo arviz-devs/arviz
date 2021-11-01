@@ -600,8 +600,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation of
-        az.convert_to_inference_data for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of
+        :func:`arviz.convert_to_dataset` for details.
     pointwise: bool, optional
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
@@ -609,21 +610,21 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
         The name of the variable in log_likelihood groups storing the pointwise log
         likelihood data to use for loo computation.
     reff: float, optional
-        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by the number
+        Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples divided by the number
         of actual samples. Computed from trace by default.
     scale: str
         Output scale for loo. Available options are:
 
-        - `log` : (default) log-score
-        - `negative_log` : -1 * log-score
-        - `deviance` : -2 * log-score
+        - ``log`` : (default) log-score
+        - ``negative_log`` : -1 * log-score
+        - ``deviance`` : -2 * log-score
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
 
     Returns
     -------
-    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
     loo: approximated expected log pointwise predictive density (elpd)
     loo_se: standard error of loo
     p_loo: effective number of parameters
@@ -635,6 +636,14 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     loo_scale: scale of the loo results
 
         The returned object has a custom print method that overrides pd.Series method.
+
+    See Also
+    --------
+    compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
+    waic : Compute the widely applicable information criterion.
+    plot_compare : Summary plot for model comparison.
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    plot_khat : Plot Pareto tail indices for diagnosing convergence.
 
     Examples
     --------
