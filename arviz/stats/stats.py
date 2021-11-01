@@ -617,7 +617,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
         - ``log`` : (default) log-score
         - ``negative_`log`` : -1 * log-score
-        - ``deviance` : -2 * log-score
+        - ``deviance`` : -2 * log-score
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
