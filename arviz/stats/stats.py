@@ -1529,9 +1529,9 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     Parameters
     ----------
     idata: InferenceData
-        InferenceData object.
+        :class:`arviz.InferenceData` object.
     y: array, DataArray or str
-        Observed data. If str, idata must be present and contain the observed data group
+        Observed data. If str, ``idata`` must be present and contain the observed data group
     y_hat: array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
@@ -1546,6 +1546,15 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     -------
     loo_pit: array or DataArray
         Value of the LOO-PIT at each observed data point.
+
+    See Also
+    --------
+    loo : Compute Pareto-smoothed importance sampling leave-one-out
+          cross-validation (PSIS-LOO-CV).
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    plot_khat : Plot Pareto tail indices for diagnosing convergence.
+    plot_loo_pit : Plot Leave-One-Out probability integral transformation (PIT) predictive checks.
+
 
     Examples
     --------
