@@ -639,7 +639,6 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
     See Also
     --------
-
     compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
     waic : Compute the widely applicable information criterion.
     plot_compare : Summary plot for model comparison.
