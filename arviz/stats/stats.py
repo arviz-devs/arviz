@@ -1535,7 +1535,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     y_hat: array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
-        None, idata must contain the posterior predictive group. If None, y_hat is taken
+        None, ``idata`` must contain the posterior predictive group. If None, y_hat is taken
         equal to y, thus, y must be str too.
     log_weights: array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
