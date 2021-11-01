@@ -600,8 +600,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an :class:`arviz.InferenceData` object. Refer to documentation of
-       :func:`arviz.convert_to_dataset` for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of
+       :func:`arviz.convert_to_dataset` for details.
     pointwise: bool, optional
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
