@@ -41,28 +41,28 @@ def plot_lm(
     Parameters
     ----------
     y : str or DataArray or ndarray
-        If str, variable name from observed_data
+        If str, variable name from ``observed_data``.
     idata : InferenceData, Optional
-        Optional only if y is not str
+        Optional only if ``y`` is not str.
     x : str, tuple of strings, DataArray or array-like, optional
-        If str or tuple, variable name from constant_data
-        If ndarray, could be 1D, or 2D for multiple plots
-        If none, coords name of y (y should be DataArray).
+        If str or tuple, variable name from ``constant_data``.
+        If ndarray, could be 1D, or 2D for multiple plots.
+        If None, coords name of ``y`` (``y`` should be DataArray).
     y_model : str or Sequence, Optional
-        If str, variable name from posterior.
-        Its dimensions should be same as y plus added chains and draws.
+        If str, variable name from ``posterior``.
+        Its dimensions should be same as ``y`` plus added chains and draws.
     y_hat : str, Optional
-        If str, variable name from posterior_predictive.
-        Its dimensions should be same as y plus added chains and draws.
+        If str, variable name from ``posterior_predictive``.
+        Its dimensions should be same as ``y`` plus added chains and draws.
     num_samples : int, Optional, Default 50
-        Significant if `kind_pp` is "samples" or `kind_model` is "lines".
+        Significant if ``kind_pp`` is "samples" or ``kind_model`` is "lines".
         Number of samples to be drawn from posterior predictive or
     kind_pp : {"samples", "hdi"}, Default "samples"
         Options to visualize uncertainty in data.
     kind_model : {"lines", "hdi"}, Default "lines"
         Options to visualize uncertainty in mean of the data.
     plot_dim : str, Optional
-        Necessary if y is multidimensional.
+        Necessary if ``y`` is multidimensional.
     backend : str, Optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     y_kwargs : dict, optional
@@ -72,21 +72,21 @@ def plot_lm(
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
         and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
     y_hat_fill_kwargs : dict, optional
-        Passed to {func}`~arviz.plot_hdi`
+        Passed to :func:`arviz.plot_hdi`
     y_model_plot_kwargs : dict, optional
         Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
         and :meth:`bokeh:bokeh.plotting.Figure.line` in bokeh
     y_model_fill_kwargs : dict, optional
-        Significant if `kind_model` is "hdi". Passed to :func:`~arviz.plot_hdi`
+        Significant if ``kind_model`` is "hdi". Passed to :func:`arviz.plot_hdi`
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. Passed to
-        :meth: `mpl:matplotlib.pyplot.subplots` or
-        :meth: `bokeh:bokeh.plotting.figure`
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on figsize.
+        autoscaled based on ``figsize``.
     axes : numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -101,6 +101,11 @@ def plot_lm(
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_ts : Plot timeseries data
+    plot_ppc : Plot for posterior/prior predictive checks
 
     Examples
     --------
