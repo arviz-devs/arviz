@@ -123,8 +123,8 @@ def plot_dist(
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
-        :meth:`mpl:matplotlib.axes.Axes.plot` or
-        :meth:`bokeh.plotting.Figure.patch`. For additional documentation
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        For additional documentation
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
