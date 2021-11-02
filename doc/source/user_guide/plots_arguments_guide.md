@@ -10,10 +10,10 @@ kernelspec:
 (plots_arguments_guide)=
 # Plots' arguments guide
 
-Arviz {ref}`plots <plot_api>` module is used for plotting data. It consists of lot of functions that serves different purposes.
+Arviz {ref}`plot <plot_api>` module is used for plotting data. It consists of lot of functions that serves different purposes.
 Most of these plotting functions have common arguments. These common arguments are explained below with the examples.
 
-## Arguments
+<!--- TODO: use names like centered, non_centered, rugby, radon... -->
 
 ```{code-cell}
 import arviz as az
@@ -21,11 +21,11 @@ data = az.load_arviz_data('centered_eight');
 non_centered = az.load_arviz_data('non_centered_eight');
 ```
 
-(common_data)=
-### `data`
+:::{warning} Page in construction
+:::
 
 (common_var_names)=
-### `var_names`
+## `var_names`
 
 Variables to be plotted, if None all variables are plotted. Prefix the variables by ~ when you want to exclude them from the plot. Let's see the examples.
 
@@ -53,7 +53,7 @@ az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex");
 ```
 
 (common_filter_vars)=
-### `filter_vars`
+## `filter_vars`
 If None (default), interpret `var_names` as the real variables names.
 
 Plot using the default value of `filter_vars` which is `None`
@@ -78,17 +78,8 @@ Plot using `filter_vars="regex"`
 az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex");
 ```
 
-(common_kind)=
-### `kind`
-
-(common_hdi_prob)=
-### `hdi_prob`
-
-(common_color)=
-### `color`
-
 (common_coords)=
-### `coords`
+## `coords`
 Dictionary mapping dimensions to selected coordinates to be plotted. Dimensions without a mapping specified will include all coordinates for that dimension. Defaults to including all coordinates for all dimensions if None.
 
 Using coords argument to plot only a subset of data
@@ -98,14 +89,14 @@ coords = {"school": ["Choate","Phillips Exeter"]};
 az.plot_posterior(data, var_names=["mu", "theta"], coords=coords);
 ```
 
-Using the deafult value of coords argument to plot which is `None`.
+(common_hdi_prob)=
+## `hdi_prob`
 
-```{code-cell}
-az.plot_posterior(data, var_names=["mu", "theta"]);
-```
+(common_color)=
+## `color`
 
 (common_grid)=
-### `grid`
+## `grid`
 Number of rows and columns. Defaults to None, the rows and columns are automatically inferred.
 
 Plot variables in a 4x5 grid
@@ -115,21 +106,21 @@ az.plot_density([data, non_centered], grid=(4, 5));
 ```
 
 (common_figsize)=
-### `figsize`
+## `figsize`
 
 `figsize` is short for figure size. If None it will be defined automatically.
 
 (common_textsize)=
-### `textsize`
+## `textsize`
 
 (common_legend)=
-### `legend`
+## `legend`
 
 (common_ax)=
-### `ax`
+## `ax`
 
 (common_backend_kwargs)=
-### `backend_kwargs`
+## `backend_kwargs`
 
 (common_show)=
-### `show`
+## `show`

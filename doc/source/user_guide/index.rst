@@ -6,7 +6,7 @@ User Guide
 .. toctree::
   :maxdepth: 2
 
+  plotting
   data_structures
   computation
-  plotting_guide
   sampling_wrappers
