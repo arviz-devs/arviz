@@ -1549,12 +1549,11 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
     See Also
     --------
+    plot_loo_pit : Plot Leave-One-Out probability integral transformation (PIT) predictive checks.
     loo : Compute Pareto-smoothed importance sampling leave-one-out
           cross-validation (PSIS-LOO-CV).
     plot_elpd : Plot pointwise elpd differences between two or more models.
     plot_khat : Plot Pareto tail indices for diagnosing convergence.
-    plot_loo_pit : Plot Leave-One-Out probability integral transformation (PIT) predictive checks.
-
 
     Examples
     --------
