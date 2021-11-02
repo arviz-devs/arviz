@@ -29,25 +29,25 @@ non_centered_eight = az.load_arviz_data('non_centered_eight');
 
 Variables to be plotted, if None all variables are plotted. Prefix the variables by ~ when you want to exclude them from the plot. Let's see the examples.
 
-Plot default autocorrelation
+Plot all variables, which is the default behavior:
 
 ```{code-cell}
 az.plot_posterior(centered_eight);
 ```
 
-Plot one variable by setting `var_names=var1`
+Plot one variable by setting `var_names=var1`:
 
 ```{code-cell}
 az.plot_posterior(centered_eight, var_names=['mu']);
 ```
 
-Plot subset variables by specifying variable name exactly
+Plot subset variables by specifying variable name exactly:
 
 ```{code-cell}
 az.plot_posterior(centered_eight, var_names=['mu', 'tau']);
 ```
 
-Plot variables with regular expressions
+Plot variables with regular expressions:
 ```{code-cell}
 az.plot_posterior(centered_eight, var_names=['mu', '^the'], filter_vars="regex");
 ```
@@ -56,7 +56,7 @@ az.plot_posterior(centered_eight, var_names=['mu', '^the'], filter_vars="regex")
 ## `filter_vars`
 If None (default), interpret `var_names` as the real variables names.
 
-Plot using the default value of `filter_vars` which is `None`
+Plot using the default value of `filter_vars` which is `None`:
 
 ```{code-cell}
 az.plot_posterior(centered_eight, var_names=['mu']);
@@ -64,7 +64,7 @@ az.plot_posterior(centered_eight, var_names=['mu']);
 
 If “like”, interpret `var_names` as substrings of the real variables names.
 
-Plot using `filter_vars="like"`
+Plot using `filter_vars="like"`:
 
 ```{code-cell}
 az.plot_posterior(centered_eight, var_names=['mu', 'the'], filter_vars="like");
@@ -72,7 +72,7 @@ az.plot_posterior(centered_eight, var_names=['mu', 'the'], filter_vars="like");
 
 If “regex”, interpret `var_names` as regular expressions on the real variables names. A la `pandas.filter`.
 
-Plot using `filter_vars="regex"`
+Plot using `filter_vars="regex"`:
 
 ```{code-cell}
 az.plot_posterior(centered_eight, var_names=['mu', '^the'], filter_vars="regex");
@@ -82,7 +82,7 @@ az.plot_posterior(centered_eight, var_names=['mu', '^the'], filter_vars="regex")
 ## `coords`
 Dictionary mapping dimensions to selected coordinates to be plotted. Dimensions without a mapping specified will include all coordinates for that dimension. Defaults to including all coordinates for all dimensions if None.
 
-Using coords argument to plot only a subset of data
+Using coords argument to plot only a subset of data:
 
 ```{code-cell}
 coords = {"school": ["Choate","Phillips Exeter"]};
@@ -130,16 +130,36 @@ az.plot_pair(non_centered_eight, var_names=["theta", "mu"], combine_dims={"schoo
 ## `hdi_prob`
 
 Probability for the highest density interval. Defaults to ``stats.hdi_prob`` rcParam.
-    
+
+
+Plot the 80% HDI interval of simulated regression data using `y` argument:
+
+```{code-cell}
+x_data = np.random.normal(0, 1, 100)
+y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
+az.plot_hdi(x_data, y_data, hdi_prob=0.8)
+```    
+
 
 (common_color)=
 ## `color`
+
+Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
+
+Plot the 80% HDI interval of simulated regression data using `y` argument:
+
+```{code-cell}
+x_data = np.random.normal(0, 1, 100)
+y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
+az.plot_hdi(x_data, y_data, color="red")
+``` 
+
 
 (common_grid)=
 ## `grid`
 Number of rows and columns. Defaults to None, the rows and columns are automatically inferred.
 
-Plot variables in a 4x5 grid
+Plot variables in a 4x5 grid:
 
 ```{code-cell}
 az.plot_density([centered_eight, non_centered_eight], grid=(4, 5));
@@ -150,17 +170,44 @@ az.plot_density([centered_eight, non_centered_eight], grid=(4, 5));
 
 `figsize` is short for figure size. If None it will be defined automatically.
 
+
 (common_textsize)=
 ## `textsize`
+
+Text size scaling factor for labels, titles and lines. If None it will be autoscaled based on ``figsize``.
+
+Plot with a specified text scaling factor `textsize`:
+
+```{code-cell}
+az.plot_posterior(data, var_names=["mu"]);
+```
+
+Plot with an increased text scaling factor based on `textsize`:
+
+```{code-cell}
+az.plot_posterior(data, var_names=["mu"], textsize=3);
+```
+
 
 (common_legend)=
 ## `legend`
 
+Show a legend with the color encoded model information. Defaults to True, if there are multiple models.
+
+
 (common_ax)=
 ## `ax`
+
+:class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
 
 (common_backend_kwargs)=
 ## `backend_kwargs`
 
+These are kwargs specific to the backend being used, passed to
+:func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`. For additional documentation check the plotting method of the backend.
+
+
 (common_show)=
 ## `show`
+
+Call backend show function.
