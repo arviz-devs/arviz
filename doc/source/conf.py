@@ -62,7 +62,24 @@ extensions = [
     "sphinx_panels",
     "notfound.extension",
     "sphinx_copybutton",
+    "sphinx_codeautolink",
 ]
+
+from IPython.core.inputtransformer2 import TransformerManager
+
+def ipython_cell_transform(source):
+    out = TransformerManager().transform_cell(source)
+    return source, out
+
+# codeautolink
+codeautolink_custom_blocks = {
+    "ipython3": ipython_cell_transform,
+    # "ipython": ipython_cell_transform
+}
+codeautolink_global_preface = """
+import arviz as az
+import xarray as xr
+"""
 
 # ipython directive configuration
 ipython_warning_is_error = False
@@ -113,12 +130,15 @@ author = "ArviZ devs"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
-if branch_name == "main":
-    version = "dev"
+version = arviz.__version__
+if os.environ.get("READTHEDOCS", False):
+    rtd_version = os.environ.get("READTHEDOCS_VERSION", "")
+    if "." not in rtd_version and rtd_version.lower() != "stable":
+        version = "dev"
 else:
-    # The short X.Y version.
-    version = arviz.__version__
+    branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
+    if branch_name == "main":
+        version = "dev"
 
 # The full version, including alpha/beta/rc tags.
 release = version
