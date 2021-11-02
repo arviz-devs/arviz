@@ -10,8 +10,8 @@ kernelspec:
 (plots_arguments_guide)=
 # Plots' arguments guide
 
-Arviz {ref}`plot <plot_api>` module is used for plotting data. It consists of lot of functions that serves different purposes.
-Most of these plotting functions have common arguments. These common arguments are explained below with the examples.
+Arviz {ref}`plot <plot_api>` module is used for plotting data. It consists many functions that each serve different purposes.
+Most of these plotting functions have common arguments. These common arguments are explained in the following examples.
 
 <!--- TODO: use names like centered, non_centered, rugby, radon... -->
 
@@ -128,6 +128,9 @@ az.plot_pair(non_centered_eight, var_names=["theta", "mu"], combine_dims={"schoo
 
 (common_hdi_prob)=
 ## `hdi_prob`
+
+Probability for the highest density interval. Defaults to ``stats.hdi_prob`` rcParam.
+    
 
 (common_color)=
 ## `color`
