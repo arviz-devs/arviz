@@ -17,8 +17,12 @@ Most of these plotting functions have common arguments. These common arguments a
 
 ```{code-cell}
 import arviz as az
-centered_eight = az.load_arviz_data('centered_eight');
-non_centered_eight = az.load_arviz_data('non_centered_eight');
+centered_eight = az.load_arviz_data('centered_eight')
+non_centered_eight = az.load_arviz_data('non_centered_eight')
+
+import numpy as np
+x_data = np.random.normal(0, 1, 100)
+y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
 ```
 
 :::{warning} Page in construction
@@ -126,6 +130,32 @@ az.plot_pair(
 az.plot_pair(non_centered_eight, var_names=["theta", "mu"], combine_dims={"school"})
 ```
 
+
+(common_compact)=
+## `compact`
+
+Plot multidimensional variables in a single plot.
+
+
+
+(common_combined)=
+## `combined`
+
+Flag for combining multiple chains into a single chain. If False(default), chains will be plotted separately.
+
+Plot each chain separately (the default behavior):
+
+```{code-cell}
+az.plot_trace(centered_eight, var_names=["mu"])
+```
+
+Plot all chains collapsed into a single chain:
+
+```{code-cell}
+az.plot_trace(centered_eight, var_names=["mu"], combined=True)
+```
+
+
 (common_hdi_prob)=
 ## `hdi_prob`
 
@@ -135,24 +165,8 @@ Probability for the highest density interval. Defaults to ``stats.hdi_prob`` rcP
 Plot the 80% HDI interval of simulated regression data using `y` argument:
 
 ```{code-cell}
-x_data = np.random.normal(0, 1, 100)
-y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
 az.plot_hdi(x_data, y_data, hdi_prob=0.8)
 ```    
-
-
-(common_color)=
-## `color`
-
-Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
-
-Plot the 80% HDI interval of simulated regression data using `y` argument:
-
-```{code-cell}
-x_data = np.random.normal(0, 1, 100)
-y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
-az.plot_hdi(x_data, y_data, color="red")
-``` 
 
 
 (common_grid)=
@@ -188,6 +202,17 @@ Plot with an increased text scaling factor based on `textsize`:
 az.plot_posterior(data, var_names=["mu"], textsize=3);
 ```
 
+(common_color)=
+## `color`
+
+Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
+
+Plot the HDI interval of simulated regression data using `y` argument, in red:
+
+```{code-cell}
+az.plot_hdi(x_data, y_data, color="red")
+``` 
+
 
 (common_legend)=
 ## `legend`
@@ -195,16 +220,26 @@ az.plot_posterior(data, var_names=["mu"], textsize=3);
 Show a legend with the color encoded model information. Defaults to True, if there are multiple models.
 
 
+(common_model_names)=
+List with names for the models in the list of data. Useful when plotting more that one dataset.
+
+
 (common_ax)=
 ## `ax`
 
-:class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
+`matplotlib.axes.Axes` or `bokeh.plotting.Figure`.
+
+
+(common_backend)=
+## `backend`
+
+Select plotting backend {"matplotlib","bokeh"}. Defaults to "matplotlib".
+
 
 (common_backend_kwargs)=
 ## `backend_kwargs`
 
-These are kwargs specific to the backend being used, passed to
-:func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`. For additional documentation check the plotting method of the backend.
+These are kwargs specific to the backend being used, passed to `matplotlib.pyplot.subplots` or `bokeh.plotting.figure`. For additional documentation check the plotting method of the backend.
 
 
 (common_show)=
