@@ -1,4 +1,4 @@
-(doc_dev_summary)=
+(sphinx_doc_build)=
 # Building the documentation
 
 The preferred workflow for contributing to ArviZ is to fork

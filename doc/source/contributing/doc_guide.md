@@ -12,7 +12,7 @@ ArviZ docs also uses sphinx extensions for style, layout, navbar and putting cod
 ```{toctree}
 :maxdepth: 2
 
-doc_dev_summary
+sphinx_doc_build
 docstrings
 syntax_guide
 ```
