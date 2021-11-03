@@ -322,4 +322,5 @@ intersphinx_mapping = {
     "dask": ("https://docs.dask.org/en/latest/", None),
     "sphinx-primer": ("https://sphinx-primer.readthedocs.io/en/latest/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None)
 }
