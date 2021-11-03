@@ -85,7 +85,7 @@ doc_guide
 ```
 </pre>
 
-Read more about the [Sphinx toctree directive](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#table-of-contents).
+Read more about the {ref}`Sphinx toctree directive <table-of-contents>`.
 
 (adding_references)=
 ## Adding references
