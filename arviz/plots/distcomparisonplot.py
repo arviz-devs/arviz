@@ -84,7 +84,7 @@ def plot_dist_comparison(
 
     See Also
     --------
-    plot_bvp : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+    plot_bpv : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
     Examples
     --------
