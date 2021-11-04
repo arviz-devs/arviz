@@ -87,20 +87,23 @@ def plot_kde(
         Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`
         or :meth:`bokeh:bokeh.plotting.Figure.line` for a description of accepted values.
     fill_kwargs : dict
-        Keywords passed to the fill under the line (use ``fill_kwargs={'alpha': 0}`` to disable fill).
-        Ignored for 2D KDE
+        Keywords passed to the fill under the line (use ``fill_kwargs={'alpha': 0}``
+        to disable fill). Ignored for 2D KDE. Passed to
+        :meth:`bokeh.plotting.Figure.patch`.
     rug_kwargs : dict
         Keywords passed to the rug plot. Ignored if ``rug=False`` or for 2D KDE
         Use ``space`` keyword (float) to control the position of the rugplot. The larger this number
-        the lower the rugplot.
+        the lower the rugplot. Passed to :class:`bokeh:bokeh.models.glyphs.Scatter`.
     contour_kwargs : dict
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contour`
-        to draw contour lines. Ignored for 1D KDE.
+        to draw contour lines or :meth:`bokeh.plotting.Figure.patch`.
+        Ignored for 1D KDE.
     contourf_kwargs : dict
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contourf`
         to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
-        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.pcolormesh`
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.pcolormesh` or
+        :meth:`bokeh.plotting.Figure.image`.
         Ignored for 1D KDE.
     is_circular : {False, True, "radians", "degrees"}. Default False.
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
