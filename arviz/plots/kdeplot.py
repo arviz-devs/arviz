@@ -82,26 +82,29 @@ def plot_kde(
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize. Not implemented for bokeh backend.
+        on ``figsize``. Not implemented for bokeh backend.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`
-        or :meth:`bokeh:bokeh.plotting.figure.Figure.line` for a description of accepted values.
+        or :meth:`bokeh:bokeh.plotting.Figure.line` for a description of accepted values.
     fill_kwargs : dict
-        Keywords passed to the fill under the line (use fill_kwargs={'alpha': 0} to disable fill).
+        Keywords passed to the fill under the line (use ``fill_kwargs={'alpha': 0}`` to disable fill).
         Ignored for 2D KDE
     rug_kwargs : dict
-        Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE
-        Use `space` keyword (float) to control the position of the rugplot. The larger this number
+        Keywords passed to the rug plot. Ignored if ``rug=False`` or for 2D KDE
+        Use ``space`` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
-        Keywords passed to ax.contour to draw contour lines. Ignored for 1D KDE.
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contour`
+        to draw contour lines. Ignored for 1D KDE.
     contourf_kwargs : dict
-        Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contourf`
+        to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
-        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.pcolormesh`
+        Ignored for 1D KDE.
     is_circular : {False, True, "radians", "degrees"}. Default False.
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
-        default input type is "radians". When this argument is present, it interprets `values`
+        default input type is "radians". When this argument is present, it interprets ``values``
         is a circular variable measured in radians and a circular KDE is used. Inputs in
         "degrees" will undergo an internal conversion to radians.
     ax: axes, optional
@@ -111,7 +114,9 @@ def plot_kde(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.figure` or
+        :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
@@ -124,6 +129,11 @@ def plot_kde(
         Object containing the kde plot
     glyphs : list, optional
         Bokeh glyphs present in plot.  Only provided if ``return_glyph`` is True.
+
+    See Also
+    --------
+    kde : One dimensional density estimation.
+    plot_dist : Plot distribution as histogram or kernel density estimates.
 
     Examples
     --------
@@ -233,10 +243,6 @@ def plot_kde(
         :context: close-figs
 
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
-
-    See Also
-    --------
-    kde : One dimensional density estimation.
 
     """
     if isinstance(values, xr.Dataset):
