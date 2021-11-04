@@ -118,7 +118,7 @@ def plot_kde(
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.figure` or
+        :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
