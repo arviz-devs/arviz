@@ -76,10 +76,10 @@ def ess(
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an ``az.InferenceData`` object.
-        Refer to documentation of ``az.convert_to_dataset`` for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+        For n-dimensional ndarray transform first to dataset with :func:`arviz.convert_to_dataset`.
     var_names : str or list of str
         Names of variables to include in the return value Dataset.
     method : str, optional, default "bulk"
