@@ -42,22 +42,22 @@ def plot_ess(
     Parameters
     ----------
     idata: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names, optional
-        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     kind: str, optional
         Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
     relative: bool
         Show relative ess in plot ``ress = ess / N``.
     coords: dict, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
@@ -78,7 +78,7 @@ def plot_ess(
     min_ess: int
         Minimum number of ESS desired.
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
@@ -97,16 +97,23 @@ def plot_ess(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or
+        :meth:`mpl:matplotlib.axes.Axes.plot` function depending on the
+        value of ``kind``.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    ess: Calculate estimate of the effective sample size.
 
     References
     ----------
