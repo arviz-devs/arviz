@@ -132,6 +132,13 @@ def ess(
       Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
 
+    See Also
+    --------
+    arviz.rhat : Compute estimate of rank normalized splitR-hat for a set of traces.
+    arviz.mcse : Calculate Markov Chain Standard Error statistic.
+    plot_ess : Plot quantile, local or evolution of effective sample sizes (ESS).
+    arviz.summary : Create a data frame with summary statistics.
+
     Examples
     --------
     Calculate the effective_sample_size using the default arguments:
