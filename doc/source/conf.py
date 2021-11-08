@@ -86,10 +86,12 @@ def ipython_directive_transform(source):
 # codeautolink
 codeautolink_custom_blocks = {
     "ipython3": ipython_cell_transform,
-    "ipython": ipython_directive_transform
+    # "ipython": ipython_directive_transform
 }
 codeautolink_autodoc_inject = False
-codeautolink_search_css_classes = ["highlight-default notranslate"]
+codeautolink_search_css_classes = [
+    "highlight-default notranslate", "doctest highlight-default notranslate", "highlight-default"
+]
 codeautolink_concat_default = True
 
 # ipython directive configuration
