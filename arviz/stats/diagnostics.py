@@ -98,7 +98,7 @@ def ess(
         - "local"
     relative : bool
         Return relative ess
-        `ress = ess / n`
+        ``ress = ess / n``
     prob : float, or tuple of two floats, optional
         probability value for "tail", "quantile" or "local" ess functions.
     dask_kwargs : dict, optional
