@@ -68,7 +68,7 @@ def compare(
     Parameters
     ----------
     dataset_dict: dict[str] -> InferenceData
-        A dictionary of model names and InferenceData objects
+        A dictionary of model names and :class:`arviz.InferenceData` objects
     ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
@@ -93,7 +93,7 @@ def compare(
     seed: int or np.random.RandomState instance, optional
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
-        np.random state is used.
+        :func:`numpy.random` state is used.
     scale: str, optional
         Output scale for IC. Available options are:
 
@@ -380,8 +380,8 @@ def hdi(
     ----------
     ary: obj
         object containing posterior samples.
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     hdi_prob: float, optional
         Prob for which the highest density interval will be computed. Defaults to
         ``stats.hdi_prob`` rcParam.
@@ -398,14 +398,14 @@ def hdi(
         Specifies which InferenceData group should be used to calculate hdi.
         Defaults to 'posterior'
     var_names: list, optional
-        Names of variables to include in the hdi report. Prefix the variables by `~`
+        Names of variables to include in the hdi report. Prefix the variables by ``~``
         when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
-        (see `az.summary` for more details).
+        (see :func:`arviz.summary` for more details).
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: mapping, optional
         Specifies the subset over to calculate hdi.
     max_modes: int, optional
@@ -1001,6 +1001,10 @@ def r2_score(y_true, y_pred):
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
 
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+
     Examples
     --------
     Calculate R² for Bayesian regression models :
@@ -1049,17 +1053,17 @@ def summary(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list
-        Names of variables to include in summary. Prefix the variables by `~` when you
+        Names of variables to include in summary. Prefix the variables by ``~`` when you
         want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
         examples below).
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: Dict[str, List[Any]], optional
         Coordinate subset for which to calculate the summary.
     group: str
@@ -1082,7 +1086,7 @@ def summary(
 
         The functions will be given one argument, the samples for a variable as an nD array,
         The functions should be in the style of a ufunc and return a single number. For example,
-        `np.mean`, or `scipy.stats.var` would both work.
+        :func:`numpy.mean`, or :func:`scipy.stats.var` would both work.
     extend: boolean
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
@@ -1112,6 +1116,15 @@ def summary(
         `r_hat`.
         `r_hat` is only computed for traces with 2 or more chains.
 
+    See Also
+    --------
+    waic : Compute the widely applicable information criterion.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out
+          cross-validation (PSIS-LOO-CV).
+    ess : Calculate estimate of the effective sample size (ess).
+    rhat : Compute estimate of rank normalized splitR-hat for a set of traces.
+    mcse : Calculate Markov Chain Standard Error statistic.
+
     Examples
     --------
     .. ipython::
@@ -1120,15 +1133,15 @@ def summary(
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.summary(data, var_names=["mu", "tau"])
 
-    You can use `filter_vars` to select variables without having to specify all the exact
-    names. Use `filter_vars="like"` to select based on partial naming:
+    You can use ``filter_vars`` to select variables without having to specify all the exact
+    names. Use ``filter_vars="like"`` to select based on partial naming:
 
     .. ipython::
 
         In [1]: az.summary(data, var_names=["the"], filter_vars="like")
 
-    Use `filter_vars="regex"` to select based on regular expressions, and prefix the variables
-    you want to exclude by `~`. Here, we exclude from the summary all the variables
+    Use ``filter_vars="regex"`` to select based on regular expressions, and prefix the variables
+    you want to exclude by ``~``. Here, we exclude from the summary all the variables
     starting with the letter t:
 
     .. ipython::
@@ -1407,13 +1420,13 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
 
     Returns
     -------
-    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
     waic: approximated expected log pointwise predictive density (elpd)
     waic_se: standard error of waic
     p_waic: effective number parameters
     var_warn: bool
         True if posterior variance of the log predictive densities exceeds 0.4
-    waic_i: xarray.DataArray with the pointwise predictive accuracy, only if pointwise=True
+    waic_i: :class:`xarray.DataArray` with the pointwise predictive accuracy, only if pointwise=True
     waic_scale: scale of the reported waic results
 
         The returned object has a custom print method that overrides pd.Series method.
@@ -1708,7 +1721,7 @@ def apply_test_function(
     Parameters
     ----------
     idata: InferenceData
-        InferenceData object on which to apply the test function. This function will add
+        :class:`arviz.InferenceData` object on which to apply the test function. This function will add
         new variables to the InferenceData object to store the result without modifying the
         existing ones.
     func: callable
@@ -1754,6 +1767,10 @@ def apply_test_function(
         Output InferenceData object. If ``inplace=True``, it is the same input object modified
         inplace.
 
+    See Also
+    --------
+    plot_bpv :  Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+
     Notes
     -----
     This function is provided for convenience to wrap scalar or functions working on low
@@ -1762,7 +1779,7 @@ def apply_test_function(
 
     Examples
     --------
-    Use ``apply_test_function`` to wrap ``np.min`` for illustration purposes. And plot the
+    Use ``apply_test_function`` to wrap :func:`numpy.min` for illustration purposes. And plot the
     results.
 
     .. plot::
