@@ -3,13 +3,22 @@
 
 Docstrings should follow the
 [numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html). Read more about it {ref}`docstring_formatting`.
+In ArviZ docs, docstrings consit of six main sections, i.e.,
+1. Short summary
+2. Extended Summary
+3. Parameters
+4. Returns
+5. See Also
+6. References
+7. Examples
 
 ## References
+While adding description of parameters, examples, etc, it is important to add refernces to external libraries and ArviZ.
 Docstrings follow the same guide for adding references as the other docs.
-For adding refernces to external libraries functions and objects, see {ref}`reference_external_libs`. For referencing ArviZ objects, follow {ref}`reference_arviz_objects`.
+For adding references to external libraries functions and objects, see {ref}`reference_external_libs`. For referencing ArviZ objects, follow {ref}`reference_arviz_objects`.
 
 ## See Also
-For adding the _See Also_ docstring section, you just need to add the function name. Sphinx will
+For adding the _See Also_ docstring section, you just need to add the function name and its short summary. Sphinx will
 automatically add links to other ArviZ objects and functions listed in the _See Also_
 section.
 
