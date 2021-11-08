@@ -15,13 +15,8 @@ You can check why a specific test is failing by clicking the `Details` next to i
 `arviz/plots/pairplot.py:127:0: C0301: Line too long (142/100) (line-too-long)`.
 
 It means line 127 of the file `pairplot.py` is too long.
+For running tests locally, see the {ref}`pr_checklist`.
 
-### Docstring
-
-Docstrings follow the pylint rules. Don't forget to check the following points before opening your PR:
-
-* The maximum number of characters allowed in a line is 100. If a line consists of more than 100 characters, tests will fail.
-* If there is any trailing white space, tests will fail. If you are using visual studio code, you can enable the [Trailing Spaces](https://marketplace.visualstudio.com/items?itemName=shardulm94.trailing-spaces) extension to visualize the trailing spaces.
 
 (preview_change)=
 ## Previewing doc changes
