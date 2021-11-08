@@ -17,7 +17,10 @@ While adding description of parameters, examples, etc, it is important to add re
 Docstrings follow the same guide for adding references as the other docs.
 For adding references to external libraries functions and objects, see {ref}`reference_external_libs`. For referencing ArviZ objects, follow {ref}`reference_arviz_objects`.
 
+hat must be present because we have a lot of interconnected functions both within the library and with external libraries like xarray for example and we have seen that users have a hard time finding the functions they are searching for. But I would not focus too much (or at all) on how to format it as numpydoc already does that, we could for example explain things that are not covered in the numpydoc style guide like how both arviz.plot_hdi and plot_hdi work and link to the same place but show different text for the hyperlink
+
 ## See Also
+In ArviZ docs, we have a lot of interconnected functions both within the library and with external libraries and it can take a lot of time to search for the related functions. It is cruical to add the See Also section to save users time.
 For adding the _See Also_ docstring section, you just need to add the function name and its short summary. Sphinx will
 automatically add links to other ArviZ objects and functions listed in the _See Also_
 section.
@@ -32,11 +35,11 @@ For example, let's add {func}`~arviz.hdi` and {func}`~arviz.plot_ppc` in the _Se
 ```
 
 ## Kwargs parameters
-All the kwargs parameters in {ref}`plots <plot_api>` modules are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed must be mentioned. The process for checking those functions is similar for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs`.
+All the kwargs parameters in {ref}`plots <plot_api>` modules are passed to the matplotlib or bokeh functions. While writing their description, the functions to which they are being passed must be mentioned. In order to check or add those functions, the process is the same for all the kwargs arguments. Let's read the step-by-step guide for `backend_kwargs` as an example.
 
 ### Backend Kwargs
 
-Almost all the functions have `backend_kwargs` as an argument. Take the following steps to add the related functions:
+Take the following steps to add the related functions:
 
 1. Go to [arviz/plots/backends](https://github.com/arviz-devs/arviz/tree/main/arviz/plots/backends) directory. It consists of two folders, i.e., `matplotlib` and `bokeh`.
 
