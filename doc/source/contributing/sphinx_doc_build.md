@@ -26,7 +26,7 @@ Docstrings follow the pylint rules. Don't forget to check the following points b
 (preview_change)=
 ## Previewing doc changes
 
-There is an easy way to check the preview of docs by using GitHub. Open the PR and GitHub actions will automatically build the documentation.
+There is an easy way to check the preview of docs by opening a PR on GitHub. ArviZ uses `readthedocs` to automatically build the documentation.
 For previewing documentation changes, take the following steps:
 
 1. Go to the checks of your PR. Wait for the `docs/readthedocs.org:arviz` to complete.
