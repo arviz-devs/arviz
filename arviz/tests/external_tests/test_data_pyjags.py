@@ -40,7 +40,6 @@ def verify_equality_of_numpy_values_dictionaries(
     return True
 
 
-@pytest.mark.skip("Crashes Python")
 class TestDataPyJAGSWithoutEstimation:
     def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(self):
         arviz_samples_dict_from_pyjags_samples_dict = _convert_pyjags_dict_to_arviz_dict(

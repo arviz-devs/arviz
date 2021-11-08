@@ -16,7 +16,7 @@ from ..helpers import (  # pylint: disable=unused-import
 # Skip all tests if tensorflow_probability not installed
 importorskip("tensorflow_probability")
 
-
+@pytest.mark.skip("Crashes Python")
 class TestDataTfp:
     @pytest.fixture(scope="class")
     def data(self, eight_schools_params, draws, chains):
