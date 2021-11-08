@@ -47,7 +47,7 @@ They are referred using this syntax:
 
 ::::
 
-For adding anchors in `.ipynb` files, Markdown syntax will be used in the markdown cells of `.ipynb` files.
+For adding anchors in `.ipynb` files, Markdown syntax will be used in the markdown cells of `.ipynb` files. Read more about it [here](https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#ref-role).
 
 ## Backticks for highlighting code keywords
 
@@ -98,7 +98,7 @@ each other in their docstrings using a hyperlink, not only by name. The same
 should happen with external functions whose usage is assumed to be known; a
 clear example of this situation are docstrings on `kwargs` passed to bokeh or
 matplotlib methods. This section covers how to reference functions from any
-part of the docstring.
+part of the docstring. Read more about it [here](https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html).
 
 (reference_external_libs)=
 #### Reference external libraries
