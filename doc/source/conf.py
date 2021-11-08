@@ -66,20 +66,29 @@ extensions = [
 ]
 
 from IPython.core.inputtransformer2 import TransformerManager
+import re
 
 def ipython_cell_transform(source):
     out = TransformerManager().transform_cell(source)
     return source, out
 
+def ipython_directive_transform(source):
+    """Ignore lines starting with 'In[]:' or '...:'."""
+    lines = []
+    for line in source.split("\n"):
+        (line, num_subs) = re.subn(r"^\s*(In\s*\[[0-9]+\]|\.{3,})\:\s", "", line)
+        if num_subs==1:
+            lines.append(line)
+    return ipython_cell_transform("\n".join(lines))
+
 # codeautolink
 codeautolink_custom_blocks = {
     "ipython3": ipython_cell_transform,
-    # "ipython": ipython_cell_transform
+    "ipython": ipython_directive_transform
 }
-codeautolink_global_preface = """
-import arviz as az
-import xarray as xr
-"""
+codeautolink_autodoc_inject = False
+codeautolink_search_css_classes = ["highlight-default notranslate"]
+codeautolink_concat_default = True
 
 # ipython directive configuration
 ipython_warning_is_error = False
