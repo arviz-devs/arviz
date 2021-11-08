@@ -93,7 +93,7 @@ def compare(
     seed: int or np.random.RandomState instance, optional
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
-        :func:`numpy.random` state is used.
+        ``numpy.random`` state is used.
     scale: str, optional
         Output scale for IC. Available options are:
 
@@ -1086,7 +1086,7 @@ def summary(
 
         The functions will be given one argument, the samples for a variable as an nD array,
         The functions should be in the style of a ufunc and return a single number. For example,
-        :func:`numpy.mean`, or :func:`scipy.stats.var` would both work.
+        :func:`numpy.mean`, or ``scipy.stats.var`` would both work.
     extend: boolean
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
@@ -1426,7 +1426,7 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     p_waic: effective number parameters
     var_warn: bool
         True if posterior variance of the log predictive densities exceeds 0.4
-    waic_i: :class:`xarray.DataArray` with the pointwise predictive accuracy, only if pointwise=True
+    waic_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy, only if pointwise=True
     waic_scale: scale of the reported waic results
 
         The returned object has a custom print method that overrides pd.Series method.
@@ -1779,7 +1779,7 @@ def apply_test_function(
 
     Examples
     --------
-    Use ``apply_test_function`` to wrap :func:`numpy.min` for illustration purposes. And plot the
+    Use ``apply_test_function`` to wrap ``numpy.min`` for illustration purposes. And plot the
     results.
 
     .. plot::
