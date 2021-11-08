@@ -79,6 +79,8 @@ def ipython_directive_transform(source):
         (line, num_subs) = re.subn(r"^\s*(In\s*\[[0-9]+\]|\.{3,})\:\s", "", line)
         if num_subs==1:
             lines.append(line)
+        else:
+            lines.append(f"# {line}")
     return ipython_cell_transform("\n".join(lines))
 
 # codeautolink
