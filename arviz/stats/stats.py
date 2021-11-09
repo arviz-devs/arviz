@@ -93,7 +93,7 @@ def compare(
     seed: int or np.random.RandomState instance, optional
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
-        ``numpy.random`` state is used.
+        :mod:`numpy.random` state is used.
     scale: str, optional
         Output scale for IC. Available options are:
 
