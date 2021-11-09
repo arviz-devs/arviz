@@ -2,9 +2,9 @@
 # Issue Triaging
 
 
-As a community-driven, open source collective, we value all user contributions at ArviZ. While most users often tend to look for ways to contribute code via PRs, we welcome and encourage help with issue traiging.
+As a community-driven, open source collective, we value all user contributions at ArviZ. While most users often tend to look for ways to contribute code via PRs, we welcome and encourage help with issue triaging.
 
-We consider isssue triaging an integral part of the library development. It is the main communication
+We consider issue triaging an integral part of the library development. It is the main communication
 channel between contributors and users of ArviZ. Moreover, it is a task that gives contributors
 more flexibility than contributing code.
 
@@ -33,7 +33,7 @@ Similar to contributing code via PRs, most issue triaging tasks don't require an
 specific permissions. Anyone with a GitHub account can help with issue triaging.
 
 :::{important}
-The list below provides ideas and examples of issue triaging entails. However, it is not a comprehnsive compliation. Often users encounter issues not forseen or experienced by developers. We encourage users go ahead and take ownership and bring these to the attention of the person who have posted or the contributors working on it. 
+The list below provides ideas and examples of issue triaging entails. However, it is not a comprehensive compilation. Often users encounter issues not foreseen or experienced by developers. We encourage users go ahead and take ownership and bring these to the attention of the person who have posted or the contributors working on it.
 :::
 
 Make sure the issue contains a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example), if relevant.

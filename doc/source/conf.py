@@ -59,10 +59,38 @@ extensions = [
     "gallery_generator",
     "myst_nb",
     "sphinx_design",
-    "sphinx_panels",
     "notfound.extension",
     "sphinx_copybutton",
+    "sphinx_codeautolink",
 ]
+
+from IPython.core.inputtransformer2 import TransformerManager
+import re
+
+def ipython_cell_transform(source):
+    out = TransformerManager().transform_cell(source)
+    return source, out
+
+def ipython_directive_transform(source):
+    """Ignore lines starting with 'In[]:' or '...:'."""
+    lines = []
+    for line in source.split("\n"):
+        (line, num_subs) = re.subn(r"^\s*(In\s*\[[0-9]+\]|\.{3,})\:\s", "", line)
+        if num_subs==1:
+            lines.append(line)
+        else:
+            lines.append(f"# {line}")
+    return ipython_cell_transform("\n".join(lines))
+
+# codeautolink
+codeautolink_custom_blocks = {
+    "ipython3": ipython_cell_transform,
+    # ipython commented out because code and output are added in the same block and breaks autolink
+    # "ipython": ipython_directive_transform
+}
+codeautolink_autodoc_inject = False
+codeautolink_search_css_classes = ["highlight-default notranslate"]
+codeautolink_concat_default = True
 
 # ipython directive configuration
 ipython_warning_is_error = False
@@ -113,12 +141,15 @@ author = "ArviZ devs"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
-if branch_name == "main":
-    version = "dev"
+version = arviz.__version__
+if os.environ.get("READTHEDOCS", False):
+    rtd_version = os.environ.get("READTHEDOCS_VERSION", "")
+    if "." not in rtd_version and rtd_version.lower() != "stable":
+        version = "dev"
 else:
-    # The short X.Y version.
-    version = arviz.__version__
+    branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
+    if branch_name == "main":
+        version = "dev"
 
 # The full version, including alpha/beta/rc tags.
 release = version

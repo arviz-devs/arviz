@@ -1,115 +1,140 @@
-```{panels}
-:column: col-lg-3 col-md-4 col-sm-4 col-xs-6 p-2
+:::::{grid} 2 3 3 4
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/23738400
 
 Oriol Abril-Pla
 
-[{fa}`style=fab,github`](https://github.com/oriolabril)
-[{fa}`style=fab,twitter`](https://twitter.com/OriolAbril)
-[{fa}`globe`](https://oriolabril.github.io/oriol_unraveled)
+[{fab}`github`](https://github.com/oriolabril)
+[{fab}`twitter`](https://twitter.com/OriolAbril)
+[{fas}`globe`](https://oriolabril.github.io/oriol_unraveled)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/8028618
 
 Agustina Arroyuelo
 
-[{fa}`style=fab,github`](https://github.com/agustinaarroyuelo)
-[{fa}`style=fab,twitter`](https://twitter.com/AgustinaArroyu1)
+[{fab}`github`](https://github.com/agustinaarroyuelo)
+[{fab}`twitter`](https://twitter.com/AgustinaArroyu1)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/30447180
 
 Alex Andorra
 
-[{fa}`style=fab,github`](https://github.com/AlexAndorra)
-[{fa}`style=fab,twitter`](https://twitter.com/alex_andorra)
-[{fa}`globe`](https://www.learnbayesstats.com/)
+[{fab}`github`](https://github.com/AlexAndorra)
+[{fab}`twitter`](https://twitter.com/alex_andorra)
+[{fas}`globe`](https://www.learnbayesstats.com/)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/8673634
 
 Seth Axen
 
-[{fa}`style=fab,github`](https://github.com/sethaxen)
-[{fa}`style=fab,twitter`](https://twitter.com/sethaxen)
-[{fa}`globe`](https://sethaxen.com/)
+[{fab}`github`](https://github.com/sethaxen)
+[{fab}`twitter`](https://twitter.com/sethaxen)
+[{fas}`globe`](https://sethaxen.com/)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/2295568
 
 Colin Carroll
 
-[{fa}`style=fab,github`](https://github.com/ColCarroll)
-[{fa}`style=fab,twitter`](https://twitter.com/colindcarroll)
-[{fa}`globe`](https://colindcarroll.com/)
+[{fab}`github`](https://github.com/ColCarroll)
+[{fab}`twitter`](https://twitter.com/colindcarroll)
+[{fas}`globe`](https://colindcarroll.com/)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/20489158
 
 Piyush Gautam
 
-[{fa}`style=fab,github`](https://github.com/percygautam)
-[{fa}`style=fab,twitter`](https://twitter.com/percygautam)
+[{fab}`github`](https://github.com/percygautam)
+[{fab}`twitter`](https://twitter.com/percygautam)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/3274
 
 Robert P. Goldman
 
-[{fa}`style=fab,github`](https://github.com/rpgoldman)
+[{fab}`github`](https://github.com/rpgoldman)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/13161958
 
 Ari Hartikainen
 
-[{fa}`style=fab,github`](https://github.com/ahartikainen)
-[{fa}`style=fab,twitter`](https://twitter.com/a_hartikainen)
+[{fab}`github`](https://github.com/ahartikainen)
+[{fab}`twitter`](https://twitter.com/a_hartikainen)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/7213793
 
 Ravin Kumar
 
-[{fa}`style=fab,github`](https://github.com/canyon289)
-[{fa}`style=fab,twitter`](https://twitter.com/canyon289)
-[{fa}`globe`](http://ravinkumar.com)
+[{fab}`github`](https://github.com/canyon289)
+[{fab}`twitter`](https://twitter.com/canyon289)
+[{fas}`globe`](http://ravinkumar.com)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/1338958
 
 Osvaldo Martin
 
-[{fa}`style=fab,github`](https://github.com/aloctavodia)
-[{fa}`style=fab,twitter`](https://twitter.com/aloctavodia)
-[{fa}`globe`](https://aloctavodia.github.io/)
+[{fab}`github`](https://github.com/aloctavodia)
+[{fab}`twitter`](https://twitter.com/aloctavodia)
+[{fas}`globe`](https://aloctavodia.github.io/)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/5466612
 
 Mitzi Morris
 
-[{fa}`style=fab,github`](https://github.com/mitzimorris)
-[{fa}`style=fab,twitter`](https://twitter.com/searchbooster_)
+[{fab}`github`](https://github.com/mitzimorris)
+[{fab}`twitter`](https://twitter.com/searchbooster_)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/4736342
 
 Du Phan
 
-[{fa}`style=fab,github`](https://github.com/fehiepsi)
-[{fa}`style=fab,twitter`](https://twitter.com/fehiepsi)
-[{fa}`globe`](http://fehiepsi.github.io/)
+[{fab}`github`](https://github.com/fehiepsi)
+[{fab}`twitter`](https://twitter.com/fehiepsi)
+[{fas}`globe`](http://fehiepsi.github.io/)
+::::
 
----
+::::{grid-item-card}
+:class-item: p-2
 :img-top: https://avatars.githubusercontent.com/u/6705400
 
 Aki Vehtari
 
-[{fa}`style=fab,github`](https://github.com/avehtari)
-[{fa}`style=fab,twitter`](https://twitter.com/avehtari)
-[{fa}`globe`](https://users.aalto.fi/~ave/)
+[{fab}`github`](https://github.com/avehtari)
+[{fab}`twitter`](https://twitter.com/avehtari)
+[{fas}`globe`](https://users.aalto.fi/~ave/)
+::::
 
-```
+:::::

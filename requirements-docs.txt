@@ -12,3 +12,4 @@ sphinx-notfound-page
 sphinx-copybutton
 bokeh
 sphinx_design
+sphinx-codeautolink

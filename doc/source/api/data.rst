@@ -20,7 +20,6 @@ Inference library converters
    from_pymc3_predictions
    from_pyro
    from_pystan
-   from_tfp
 
 
 IO / General conversion

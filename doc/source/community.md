@@ -1,3 +1,4 @@
+(community)=
 # Community
 ArviZ is a community-driven open source project committed to host an open,
 inclusive and positive community. Read the

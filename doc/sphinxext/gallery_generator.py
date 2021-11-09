@@ -32,27 +32,28 @@ MPL_RST_TEMPLATE = """
 
 **API documentation:** {api_name}
 
-.. tabbed:: Matplotlib
+.. tab-set::
+    .. tab-item:: Matplotlib
 
-    .. image:: {img_file}
+        .. image:: {img_file}
 
-    **Python source code:** :download:`[download source: {fname}]<{fname}>`
+        **Python source code:** :download:`[download source: {fname}]<{fname}>`
 
-    .. literalinclude:: {fname}
-        :lines: {end_line}-
+        .. literalinclude:: {fname}
+            :lines: {end_line}-
 
 """
 
 BOKEH_RST_TEMPLATE = """
-.. tabbed:: Bokeh
+    .. tab-item:: Bokeh
 
-    .. bokeh-plot:: {absfname}
-        :source-position: none
+        .. bokeh-plot:: {absfname}
+            :source-position: none
 
-    **Python source code:** :download:`[download source: {fname}]<{fname}>`
+        **Python source code:** :download:`[download source: {fname}]<{fname}>`
 
-    .. literalinclude:: {fname}
-        :lines: {end_line}-
+        .. literalinclude:: {fname}
+            :lines: {end_line}-
 """
 
 RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
