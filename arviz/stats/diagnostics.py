@@ -25,9 +25,10 @@ def bfmi(data):
 
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
-    values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
-    change. See `pystan_workflow <http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html>`_  for more
-    information.
+    values smaller than 0.3 indicate poor sampling. However, this threshold is
+    provisional and may change. See
+    `pystan_workflow <http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html>`_
+    for more information.
 
     Parameters
     ----------
