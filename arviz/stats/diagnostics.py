@@ -76,10 +76,10 @@ def ess(
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an ``az.InferenceData`` object.
-        Refer to documentation of ``az.convert_to_dataset`` for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+        For n-dimensional ndarray transform first to dataset with :func:`arviz.convert_to_dataset`.
     var_names : str or list of str
         Names of variables to include in the return value Dataset.
     method : str, optional, default "bulk"
@@ -98,7 +98,7 @@ def ess(
         - "local"
     relative : bool
         Return relative ess
-        `ress = ess / n`
+        ``ress = ess / n``
     prob : float, or tuple of two floats, optional
         probability value for "tail", "quantile" or "local" ess functions.
     dask_kwargs : dict, optional
@@ -131,6 +131,13 @@ def ess(
     * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
       Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
+
+    See Also
+    --------
+    arviz.rhat : Compute estimate of rank normalized splitR-hat for a set of traces.
+    arviz.mcse : Calculate Markov Chain Standard Error statistic.
+    plot_ess : Plot quantile, local or evolution of effective sample sizes (ESS).
+    arviz.summary : Create a data frame with summary statistics.
 
     Examples
     --------
