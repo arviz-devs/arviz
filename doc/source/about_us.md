@@ -51,19 +51,14 @@ The ArviZ project will make the decisions on how to best use any funds received
 to serve the priorities outlined in our
 [Roadmap](https://github.com/arviz-devs/arviz/wiki/ArviZ-2021-roadmap).
 
-```{raw} html
-<div class="sphinx-bs docutils">
-  <div class="row justify-content-md-center docutils">
-    <div class="d-flex col-lg-6 col-md-6 col-sm-6 col-xs-12 p-2 docutils">
-      <div class="card w-100 bg-info shadow docutils">
-        <div class="card-body text-center docutils">
-          <p class="card-text"><a class="sphinx-bs btn text-wrap btn-link text-light stretched-link font-weight-bold reference external" href="https://numfocus.org/donate-to-arviz" title="Donate to ArviZ"><span>Donate</span></a></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-```
+::::{div} sd-d-flex-row sd-align-major-center
+:::{button-link} https://numfocus.org/donate-to-arviz
+:color: primary
+:class: btn-lg
+
+Donate to ArviZ
+:::
+::::
 
 ### Cite
 If you use ArviZ in your scientific work, you can cite it using [![DOI](http://joss.theoj.org/papers/10.21105/joss.01143/status.svg)](https://doi.org/10.21105/joss.01143)
@@ -97,14 +92,13 @@ to deliver commercial support and maintenance for the open source dependencies
 you use to build your applications.
 Save time, reduce risk, and improve code health, while contributing financially to ArviZ.
 
-```{raw} html
-<style>.centered {text-align: center;}</style>
-<p><div class="centered">
-<a href="https://tidelift.com/subscription/pkg/pypi-arviz?utm_source=pypi-arviz&utm_medium=referral&utm_campaign=enterprise">
-  <button class="sphinx-bs btn-lg btn btn-warning">Learn more</button>
-</a>
-</div></p>
-```
+::::{div} sd-d-flex-row sd-align-major-center
+:::{button-link} https://tidelift.com/subscription/pkg/pypi-arviz?utm_source=pypi-arviz&utm_medium=referral&utm_campaign=enterprise
+:color: warning
+
+Learn more
+:::
+::::
 
 #### Enterprise-ready open source software — managed for you
 
@@ -128,14 +122,13 @@ Your subscription includes:
 
 The end result? All of the capabilities you expect from commercial-grade software, for the full breadth of open source you use. That means less time grappling with esoteric open source trivia, and more time building your own applications — and your business.
 
-```{raw} html
-<style>.centered {text-align: center;}</style>
-<p><div class="centered">
-<a href="https://tidelift.com/subscription/pkg/pypi-arviz?utm_source=pypi-arviz&utm_medium=referral&utm_campaign=enterprise">
-  <button class="sphinx-bs btn-lg btn btn-warning">Learn more</button>
-</a>
-</div></p>
-```
+::::{div} sd-d-flex-row sd-align-major-center
+:::{button-link} https://tidelift.com/subscription/pkg/pypi-arviz?utm_source=pypi-arviz&utm_medium=referral&utm_campaign=enterprise
+:color: warning
+
+Learn more
+:::
+::::
 
 ## Sponsors
 [![NumFOCUS](https://www.numfocus.org/wp-content/uploads/2017/07/NumFocus_LRG.png)](https://numfocus.org)
