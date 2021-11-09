@@ -84,22 +84,24 @@ Sorting variable names
 
     In [1]: var_order = ["theta", "mu", "tau"]
 
-.. tabbed:: ArviZ args
+.. tab-set::
 
-  For variable names to appear sorted when calling ArviZ functions, pass a sorted list of the variable names.
+    .. tab-item:: ArviZ args
 
-  .. ipython::
+        For variable names to appear sorted when calling ArviZ functions, pass a sorted list of the variable names.
 
-      In [1]: az.summary(schools, var_names=var_order)
+        .. ipython::
 
-.. tabbed:: xarray
+            In [1]: az.summary(schools, var_names=var_order)
 
-  In xarray, subsetting the Dataset with a sorted list of variable names will order the Dataset.
+    .. tab-item:: xarray
 
-  .. ipython::
+        In xarray, subsetting the Dataset with a sorted list of variable names will order the Dataset.
 
-      In [1]: schools.posterior = schools.posterior[var_order]
-         ...: az.summary(schools)
+        .. ipython::
+
+            In [1]: schools.posterior = schools.posterior[var_order]
+               ...: az.summary(schools)
 
 Sorting coordinate values
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,23 +126,25 @@ There are two ways of sorting:
 #. Arviz args
 #. xarray
 
-.. tabbed:: ArviZ args
+.. tab-set::
 
-  Sort the coordinate values to pass them as a ``coords`` argument and choose the order of the rows.
+    .. tab-item:: ArviZ args
 
-  .. ipython::
+        Sort the coordinate values to pass them as a ``coords`` argument and choose the order of the rows.
 
-      In [1]: sorted_schools = schools.posterior["school"].sortby(school_means)
-         ...: az.summary(schools, var_names="theta", coords={"school": sorted_schools})
+        .. ipython::
 
-.. tabbed:: xarray
+            In [1]: sorted_schools = schools.posterior["school"].sortby(school_means)
+               ...: az.summary(schools, var_names="theta", coords={"school": sorted_schools})
 
-  You can use the :meth:`~xarray.Dataset.sortby` method to order our coordinate values directly at the source.
+    .. tab-item:: xarray
 
-  .. ipython::
+        You can use the :meth:`~xarray.Dataset.sortby` method to order our coordinate values directly at the source.
 
-      In [1]: schools.posterior = schools.posterior.sortby(school_means)
-         ...: az.summary(schools, var_names="theta")
+        .. ipython::
+
+            In [1]: schools.posterior = schools.posterior.sortby(school_means)
+               ...: az.summary(schools, var_names="theta")
 
 Sorting dimensions
 ~~~~~~~~~~~~~~~~~~

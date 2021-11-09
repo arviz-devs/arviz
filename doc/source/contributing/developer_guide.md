@@ -84,32 +84,36 @@ Remote inventory found.
 We can therefore link to matplotlib docs on `Axes.plot` from any docstring
 using:
 
-````{tabbed} rST
+:::::{tab-set}
+::::{tab-item} rST
 ```
-:meth:`mpl:matplotlib.axes.Axes.plot`
+:meth:`matplotlib.axes.Axes.plot`
 ```
-````
-````{tabbed} MyST (Markdown)
+::::
+::::{tab-item} MyST (Markdown)
 ```
-{meth}`mpl:matplotlib.axes.Axes.plot`
+{meth}`matplotlib.axes.Axes.plot`
 ```
-````
+::::
+:::::
 
 
 The `intersphinx_mappings`
 defined for ArviZ can be seen in `conf.py`.
 Moreover, the intersphinx key is optional. Thus, the pattern to get sphinx to generate links is:
 
-````{tabbed} rST
+:::::{tab-set}
+::::{tab-item} rST
 ```
 :type_id:`(intersphinx_key:)object_id`
 ```
-````
-````{tabbed} MyST (Markdown)
+::::
+::::{tab-item} MyST (Markdown)
 ```
 {type_id}`(intersphinx_key:)object_id`
 ```
-````
+::::
+:::::
 
 with the part between brackets being optional. See the docstring on
 {meth}`~arviz.InferenceData.to_dataframe` and
