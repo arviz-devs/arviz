@@ -35,14 +35,14 @@ In the event of two or more people working on the same issue, the general preced
 If the issue is assigned then precedence goes to the assignee. However, if there has been no activity for 2 weeks from the assignment date, the ticket is open for all again and can be unassigned.
 
 (dev_summary)=
-# Development process - summary
+## Development process - summary
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/),
 clone it to your local machine, and develop on a feature branch. the details of this process are listed on
 {ref}`pr_checklist`. For a detailed
 description of the recommended development process, see {ref}`developer_guide`.
 
-## Code Formatting
+### Code Formatting
 For code generally follow the
 [TensorFlow's style guide](https://www.tensorflow.org/community/contribute/code_style)
 or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md).
@@ -51,7 +51,7 @@ Both more or less follow PEP 8.
 Final formatting is done with [black](https://github.com/ambv/black).
 
 
-## Docstring formatting and type hints
+### Docstring formatting and type hints
 Docstrings should follow the
 [numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html).
 Extra guidance can also be found in
@@ -67,7 +67,7 @@ aim to help third party tools such as type checkers or IDEs. ArviZ does not
 require functions to include type hints
 however contributions including them are welcome.
 
-## Documentation for user facing methods
+### Documentation for user facing methods
 If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
 please consider adding inline documentation examples.
 You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
@@ -75,7 +75,7 @@ You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good exa
 ## Tests
 Section in construction
 
-# Steps
+## Steps
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
@@ -169,7 +169,7 @@ Section in construction
 7. Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
 
 (pr_checklist)=
-# Pull request checklist
+## Pull request checklist
 
 We recommend that your contribution complies with the following guidelines before you submit a pull request:
 
@@ -237,7 +237,7 @@ tools:
   $ ./scripts/lint.sh
   ```
 
-# Running the benchmark tests
+## Running the benchmark tests
 
 To run the **benchmark tests** do the following:
 
