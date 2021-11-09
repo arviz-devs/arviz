@@ -1426,7 +1426,8 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     p_waic: effective number parameters
     var_warn: bool
         True if posterior variance of the log predictive densities exceeds 0.4
-    waic_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy, only if pointwise=True
+    waic_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy,
+            only if pointwise=True
     waic_scale: scale of the reported waic results
 
         The returned object has a custom print method that overrides pd.Series method.
@@ -1721,9 +1722,9 @@ def apply_test_function(
     Parameters
     ----------
     idata: InferenceData
-        :class:`arviz.InferenceData` object on which to apply the test function. This function will add
-        new variables to the InferenceData object to store the result without modifying the
-        existing ones.
+        :class:`arviz.InferenceData` object on which to apply the test function.
+        This function will add new variables to the InferenceData object
+        to store the result without modifying the existing ones.
     func: callable
         Callable that calculates the test function. It must have the following call signature
         ``func(y, theta, *args, **kwargs)`` (where ``y`` is the observed data or posterior
