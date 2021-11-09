@@ -222,9 +222,7 @@ def layout_stacks(stack_locs, stack_counts, binwidth, stackratio, rotated):
     binradius = binwidth / 2
 
     x = np.repeat(stack_locs, stack_counts)
-    y = np.hstack(
-        np.array([dotheight * np.arange(count) + binradius for count in stack_counts], dtype=object)
-    )
+    y = np.hstack([dotheight * np.arange(count) + binradius for count in stack_counts])
     if rotated:
         x, y = y, x
 

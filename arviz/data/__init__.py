@@ -14,7 +14,6 @@ from .io_pyjags import from_pyjags
 from .io_pymc3 import from_pymc3, from_pymc3_predictions
 from .io_pyro import from_pyro
 from .io_pystan import from_pystan
-from .io_tfp import from_tfp
 
 __all__ = [
     "InferenceData",
@@ -37,7 +36,6 @@ __all__ = [
     "from_json",
     "from_pyro",
     "from_numpyro",
-    "from_tfp",
     "from_netcdf",
     "to_netcdf",
     "CoordSpec",

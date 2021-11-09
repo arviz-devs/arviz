@@ -80,7 +80,7 @@ jobs:
       fi
 
       if [ "$(emcee.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install emcee
+          python -m pip --no-cache-dir install emcee h5py
       else
           python -m pip --no-cache-dir install "emcee<3"
       fi
