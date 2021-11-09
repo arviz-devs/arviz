@@ -129,7 +129,7 @@ def plot_ppc(
         If switching back and forth between matplotlib's backend, you may need to run twice the cell
         with the animation.
         If you experience problems rendering the animation try setting
-        `animation_kwargs({'blit':False}) or changing the matplotlib's backend (e.g. to TkAgg)
+        `animation_kwargs({'blit':False}`) or changing the matplotlib's backend (e.g. to TkAgg)
         If you run the animation from a script write `ax, ani = az.plot_ppc(.)`
     animation_kwargs : dict
         Keywords passed to  :class:`matplotlib.animation.FuncAnimation`. Ignored with

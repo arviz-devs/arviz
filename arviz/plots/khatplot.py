@@ -145,7 +145,7 @@ def plot_khat(
     importance sampling can be estimated based on the fractional
     number of finite moments of the importance ratio distribution. GPD
     is fitted to the largest importance ratios and the estimated shape
-    parameter ``k``, i.e., ``\hat{k}` can then be used as a diagnostic
+    parameter ``k``, i.e., ``\hat{k}`` can then be used as a diagnostic
     (most importantly if ``\hat{k} > 0.7``, then the convergence rate
     is impractically low). See [1]_.
 
