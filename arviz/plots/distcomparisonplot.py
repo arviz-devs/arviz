@@ -79,7 +79,7 @@ def plot_dist_comparison(
 
     Returns
     -------
-    axes : a numpy 2d array of matplotlib axes. Returned object will have shape (nvars, 3),
+    axes : a numpy 2D array of matplotlib axes. Returned object will have shape (nvars, 3),
     where the last column is the combined plot and the first columns are the single plots.
 
     See Also
