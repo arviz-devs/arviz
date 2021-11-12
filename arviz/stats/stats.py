@@ -1663,7 +1663,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     ufunc_kwargs = {"n_dims": 1}
 
     if y.dtype.kind == "i" or y_hat.dtype.kind == "i":
-        y, y_hat = smooth_data(y, y_hat)
+        y, y_hat = smooth_data(y, y_hat, axis=0)
 
     return _wrap_xarray_ufunc(
         _loo_pit,
