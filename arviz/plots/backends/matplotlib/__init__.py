@@ -111,7 +111,6 @@ from .energyplot import plot_energy
 from .essplot import plot_ess
 from .forestplot import plot_forest
 from .hdiplot import plot_hdi
-from .jointplot import plot_joint
 from .kdeplot import plot_kde
 from .khatplot import plot_khat
 from .loopitplot import plot_loo_pit

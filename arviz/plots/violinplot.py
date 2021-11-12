@@ -53,7 +53,7 @@ def plot_violin(
     transform: callable
         Function to transform data (defaults to None i.e. the identity function).
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the ``hdi_prob`` *100%
+        Flag for plotting the interquartile range, in addition to the ``hdi_prob`` * 100%
         intervals. Defaults to ``True``.
     rug: bool
         If ``True`` adds a jittered rugplot. Defaults to ``False``.
@@ -124,13 +124,6 @@ def plot_violin(
         >>> import arviz as az
         >>> data = az.load_arviz_data('centered_eight')
         >>> az.plot_violin(data)
-
-    Show a default violin plot, but with a transformation applied to the data
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
     if labeller is None:

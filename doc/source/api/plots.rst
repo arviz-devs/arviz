@@ -20,7 +20,6 @@ Plots
     plot_ess
     plot_forest
     plot_hdi
-    plot_joint
     plot_kde
     plot_khat
     plot_loo_pit
