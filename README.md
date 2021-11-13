@@ -156,7 +156,7 @@ python setup.py install
 
 ## Dependencies
 
-ArviZ is tested on Python 3.6, 3.7 and 3.8, and depends on NumPy, SciPy, xarray, and Matplotlib.
+ArviZ is tested on Python 3.8, 3.9 and 3.10, and depends on NumPy, SciPy, xarray, and Matplotlib.
 
 
 ## Citation
