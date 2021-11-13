@@ -137,7 +137,7 @@ def plot_forest(
 
     Examples
     --------
-    Forestpĺot
+    Forestplot
 
     .. plot::
         :context: close-figs
@@ -167,7 +167,7 @@ def plot_forest(
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools models')
 
-    Forestpĺot with ropes
+    Forestplot with ropes
 
     .. plot::
         :context: close-figs

@@ -9,6 +9,7 @@
 ### Deprecation
 
 ### Documentation
+* Fixed typo in `Forestplot` documentation
 
 
 ## v0.11.4 (2021 Oct 3)
