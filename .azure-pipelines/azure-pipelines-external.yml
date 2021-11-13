@@ -11,7 +11,7 @@ jobs:
   strategy:
     matrix:
       Python_39_Latest:
-        python.version: 3.9
+        python.version: "3.9"
         pystan.version: "latest"
         cmdstanpy.version: "latest"
         pymc3.version: "latest"
@@ -19,7 +19,7 @@ jobs:
         name: "External latest"
 
       Python_39_Special_versions:
-        python.version: 3.9
+        python.version: "3.9"
         pystan.version: 2.19.1.1
         cmdstanpy.version: 0.9.67
         pymc3.version: "github"

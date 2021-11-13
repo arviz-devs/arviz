@@ -6,7 +6,7 @@ jobs:
   strategy:
     matrix:
       Python_39:
-        python.version: 3.9
+        python.version: "3.9"
         name: "Python 3.9 - benchmarks"
 
   steps:

@@ -11,19 +11,19 @@ jobs:
   strategy:
     matrix:
       Python_39:
-        python.version: 3.9
+        python.version: "3.9"
         PyPIGithub: false
         name: "Python 3.9"
       Python_39_preview:
-        python.version: 3.9
+        python.version: "3.9"
         PyPIGithub: true
         name: "Python 3.9"
       Python_38:
-        python.version: 3.8
+        python.version: "3.8"
         PyPIGithub: false
         name: "Python 3.8"
       Python_37:
-        python.version: 3.7
+        python.version: "3.7"
         PyPIGithub: false
         name: "Python 3.7"
 
