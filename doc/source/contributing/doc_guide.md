@@ -14,5 +14,6 @@ ArviZ docs also uses sphinx extensions for style, layout, navbar and putting cod
 
 sphinx_doc_build
 docstrings
+how_to_start
 syntax_guide
 ```
