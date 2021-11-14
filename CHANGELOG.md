@@ -2,6 +2,7 @@
 
 ## v0.x.x Unreleased
 ### New features
+* [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 
 ### Maintenance and fixes
 * Bokeh 3 compatibility. ([1919](https://github.com/arviz-devs/arviz/pull/1919))
