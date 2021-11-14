@@ -192,7 +192,7 @@ def wrap_xarray_ufunc(
     Parameters
     ----------
     ufunc : callable
-    datasets : xarray.dataset
+    *datasets : xarray.Dataset
     ufunc_kwargs : dict
         Keyword arguments passed to `make_ufunc`.
             - 'n_dims', int, by default 2
@@ -207,13 +207,13 @@ def wrap_xarray_ufunc(
             - 'out_shape', int, by default None
     dask_kwargs : dict
         Dask related kwargs passed to :func:`xarray:xarray.apply_ufunc`.
-        Use :meth:`~arviz.Dask.enable_dask` to set default kwargs.
+        Use ``enable_dask`` method of :class:`arviz.Dask` to set default kwargs.
     **kwargs
-        Passed to xarray.apply_ufunc.
+        Passed to :func:`xarray.apply_ufunc`.
 
     Returns
     -------
-    xarray.dataset
+    xarray.Dataset
     """
     if ufunc_kwargs is None:
         ufunc_kwargs = {}
