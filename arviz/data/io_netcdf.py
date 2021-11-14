@@ -11,8 +11,11 @@ def from_netcdf(filename, group_kwargs=None, regex=False):
     ----------
     filename : str
         name or path of the file to load trace
-    group_kwargs : dict of dict
-        Keyword arguments to be passed into each call of `xarray.open_dataset`.
+    group_kwargs : dict of {str: dict}
+        Keyword arguments to be passed into each call of :func:`xarray.open_dataset`.
+        The keys of the higher level should be group names or regex matching group
+        names, the inner dicts re passed to ``open_dataset``.
+        This feature is currently experimental
     regex : str
         Specifies where regex search should be used to extend the keyword arguments.
 

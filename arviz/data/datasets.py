@@ -220,13 +220,11 @@ def load_arviz_data(dataset=None, data_home=None, regex=False, **kwargs):
 
     regex : bool, optional
         Specifies regex support for chunking information in
-        `arviz.io_netcdf.from_netcdf`. This feature is currently experimental.
-        See :meth:`arviz.io_netcdf.from_netcdf`
+        :func:`arviz.from_netcdf`. This feature is currently experimental.
 
     **kwargs : dict of {str: dict}, optional
-        Keyword arguments to be passed into arviz.io_netcdf.from_netcdf`.
+        Keyword arguments to be passed to :func:`arviz.from_netcdf`.
         This feature is currently experimental.
-        See :meth:`arviz.io_netcdf.from_netcdf`
 
     Returns
     -------

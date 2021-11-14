@@ -328,7 +328,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         filename : str
             location of netcdf file
         group_kwargs : dict of {str: dict}, optional
-            Keyword arguments to be passed into each call of {func}`xarray.open_dataset`.
+            Keyword arguments to be passed into each call of :func:`xarray.open_dataset`.
+            The keys of the higher level should be group names or regex matching group
+            names, the inner dicts re passed to ``open_dataset``
             This feature is currently experimental.
         regex : bool, default False
             Specifies where regex search should be used to extend the keyword arguments.
