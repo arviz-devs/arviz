@@ -4,6 +4,7 @@
 ### New features
 
 ### Maintenance and fixes
+* Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
 * Bokeh 3 compatibility. ([1919](https://github.com/arviz-devs/arviz/pull/1919))
 
 ### Deprecation
