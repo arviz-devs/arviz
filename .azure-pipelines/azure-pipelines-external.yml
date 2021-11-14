@@ -10,25 +10,20 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_38_Latest:
-        python.version: 3.8
+      Python_39_Latest:
+        python.version: "3.9"
         pystan.version: "latest"
         cmdstanpy.version: "latest"
         pymc3.version: "latest"
-        pyro.version: "latest"
-        pytorch.version: "latest"
         emcee.version: "latest"
         name: "External latest"
 
-      Python_38_Special_versions:
-        python.version: 3.8
+      Python_39_Special_versions:
+        python.version: "3.9"
         pystan.version: 2.19.1.1
         cmdstanpy.version: 0.9.67
         pymc3.version: "github"
-        pyro.version: 1.2
-        pytorch.version: 1.4
         emcee.version: 2
-        tensorflow.version: 1
         name: "External special"
 
   steps:
@@ -51,11 +46,7 @@ jobs:
       python -m pip install --upgrade pip
       python -m pip install wheel
 
-      if [ "$(pytorch.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
-      else
-          python -m pip --no-cache-dir install torch=="$(pytorch.version)" -f https://download.pytorch.org/whl/cpu/torch_stable.html
-      fi
+      python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
 
       if [ "$(pystan.version)" = "latest" ]; then
           python -m pip --no-cache-dir install pystan
@@ -73,12 +64,6 @@ jobs:
           python -m pip --no-cache-dir install cmdstanpy=="$(cmdstanpy.version)"
       fi
 
-      if [ "$(pyro.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install pyro-ppl
-      else
-          python -m pip --no-cache-dir install pyro-ppl=="$(pyro.version)"
-      fi
-
       if [ "$(emcee.version)" = "latest" ]; then
           python -m pip --no-cache-dir install emcee h5py
       else
@@ -92,7 +77,8 @@ jobs:
           python -m pip --no-cache-dir install pymc3
       fi
 
-      grep -Ev '^pystan|^cmdstanpy|^pyro|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
+      grep -Ev '^pystan|^cmdstanpy|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
+
     displayName: 'Install packages'
 
   - script: |
