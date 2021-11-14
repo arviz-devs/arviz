@@ -11,7 +11,6 @@ from .energyplot import plot_energy
 from .essplot import plot_ess
 from .forestplot import plot_forest
 from .hdiplot import plot_hdi
-from .jointplot import plot_joint
 from .kdeplot import plot_kde
 from .khatplot import plot_khat
 from .lmplot import plot_lm
@@ -39,7 +38,6 @@ __all__ = [
     "plot_ess",
     "plot_forest",
     "plot_hdi",
-    "plot_joint",
     "plot_kde",
     "plot_khat",
     "plot_lm",

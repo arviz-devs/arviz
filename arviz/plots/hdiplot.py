@@ -95,7 +95,7 @@ def plot_hdi(
         >>> import numpy as np
         >>> import arviz as az
         >>> x_data = np.random.normal(0, 1, 100)
-        >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
+        >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, size=(2, 50, 100))
         >>> az.plot_hdi(x_data, y_data)
 
     ``plot_hdi`` can also be given precalculated values with the argument ``hdi_data``. This example
@@ -118,7 +118,7 @@ def plot_hdi(
         :context: close-figs
 
         >>> X = np.random.normal(0,1,100)
-        >>> Y = np.random.normal(2 + X * 0.5, 0.5, (10,100))
+        >>> Y = np.random.normal(2 + X * 0.5, 0.5, size=(2,10,100))
         >>> idata = az.from_dict(posterior={"y": Y}, constant_data={"x":X})
         >>> x_data = idata.constant_data.x
         >>> y_data = idata.posterior.y

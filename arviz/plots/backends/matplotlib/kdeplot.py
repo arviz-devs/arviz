@@ -158,6 +158,7 @@ def plot_kde(
         contour_kwargs.setdefault("colors", "0.5")
         contourf_kwargs = matplotlib_kwarg_dealiaser(contourf_kwargs, "contour")
         pcolormesh_kwargs = matplotlib_kwarg_dealiaser(pcolormesh_kwargs, "pcolormesh")
+        pcolormesh_kwargs.setdefault("shading", "auto")
 
         g_s = complex(gridsize[0])
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
