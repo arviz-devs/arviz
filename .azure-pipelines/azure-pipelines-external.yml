@@ -62,8 +62,6 @@ jobs:
           python -m pip --no-cache-dir install cmdstanpy=="$(cmdstanpy.version)"
       fi
 
-      python -m pip --no-cache-dir install pyro-ppl
-
       if [ "$(emcee.version)" = "latest" ]; then
           python -m pip --no-cache-dir install emcee h5py
       else
@@ -77,7 +75,7 @@ jobs:
           python -m pip --no-cache-dir install pymc3
       fi
 
-      grep -Ev '^pystan|^cmdstanpy|^pyro|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
+      grep -Ev '^pystan|^cmdstanpy|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
 
     displayName: 'Install packages'
 
