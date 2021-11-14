@@ -24,7 +24,6 @@ from ...plots import (
     plot_ess,
     plot_forest,
     plot_hdi,
-    plot_joint,
     plot_kde,
     plot_khat,
     plot_lm,
@@ -352,35 +351,6 @@ def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
         assert plot_parallel(models.model_1, var_names=var_names, norm_method="foo")
-
-
-@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, kind):
-    axjoin, _, _ = plot_joint(models.model_1, var_names=("mu", "tau"), kind=kind)
-    assert axjoin
-
-
-def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(models.model_1, var_names=("mu", "tau"))
-    axjoin, _, _ = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax)
-    assert axjoin
-
-
-def test_plot_joint_discrete(discrete_model):
-    axjoin, _, _ = plot_joint(discrete_model)
-    assert axjoin
-
-
-def test_plot_joint_bad(models):
-    with pytest.raises(ValueError):
-        plot_joint(models.model_1, var_names=("mu", "tau"), kind="bad_kind")
-
-    with pytest.raises(Exception):
-        plot_joint(models.model_1, var_names=("mu", "tau", "eta"))
-
-    with pytest.raises(ValueError, match="ax.+3.+5"):
-        _, axes = plt.subplots(5, 1)
-        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes)
 
 
 @pytest.mark.parametrize(

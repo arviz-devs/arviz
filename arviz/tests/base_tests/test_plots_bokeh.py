@@ -20,7 +20,6 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_ess,
     plot_forest,
     plot_hdi,
-    plot_joint,
     plot_kde,
     plot_khat,
     plot_lm,
@@ -566,39 +565,6 @@ def test_plot_hdi(models, data, kwargs):
     else:
         axis = plot_hdi(data["y"], y_data, backend="bokeh", show=False, **kwargs)
     assert axis
-
-
-@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, kind):
-    axes = plot_joint(
-        models.model_1, var_names=("mu", "tau"), kind=kind, backend="bokeh", show=False
-    )
-    assert axes[1, 0]
-
-
-def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(models.model_1, var_names=("mu", "tau"), backend="bokeh", show=False)
-    axes = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax, backend="bokeh", show=False)
-    assert axes[1, 0]
-
-
-def test_plot_joint_discrete(discrete_model):
-    axes = plot_joint(discrete_model, backend="bokeh", show=False)
-    assert axes[1, 0]
-
-
-def test_plot_joint_bad(models):
-    with pytest.raises(ValueError):
-        plot_joint(
-            models.model_1, var_names=("mu", "tau"), kind="bad_kind", backend="bokeh", show=False
-        )
-
-    with pytest.raises(Exception):
-        plot_joint(models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh", show=False)
-
-    with pytest.raises(ValueError):
-        _, axes = list(range(5))
-        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(
