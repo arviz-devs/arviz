@@ -79,3 +79,7 @@ doc/source/getting_started/sample_data/
 
 # MyST related
 doc/jupyter_execute
+
+# Dask related
+mydask.png
+**/dask-worker-space/*
