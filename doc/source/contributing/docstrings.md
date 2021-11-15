@@ -3,14 +3,13 @@
 
 Docstrings should follow the
 [numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html). Read more about it {ref}`docstring_formatting`.
-In ArviZ docs, docstrings consit of six main sections, i.e.,
+In ArviZ docs, docstrings consit of five main sections, i.e.,
 1. Short summary
-2. Extended Summary
-3. Parameters
-4. Returns
-5. See Also
-6. References
-7. Examples
+2. Parameters
+3. Returns
+4. See Also
+5. Examples
+Extended summary is strongly encouraged and references is required when relevant in order to cite the papers proposing or explaining the algorithms that are implemented. All other sections can also be used when convenient.
 
 ## References
 While adding description of parameters, examples, etc, it is important to add references to external libraries and ArviZ.
