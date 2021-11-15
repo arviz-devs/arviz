@@ -58,6 +58,7 @@ setup(
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     include_package_data=True,
+    python_requires='>=3.7',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Matplotlib",
