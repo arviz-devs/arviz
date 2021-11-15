@@ -53,16 +53,18 @@ For adding anchors in `.ipynb` files, Markdown syntax will be used in the markdo
 
 For highlighting inline code keywords or file names, backticks are used. In Markdown single backticks are used while in rST double backticks are used. For example, for highlighting the file name `conf.py`, we will use this syntax:
 
-````{tabbed} rST
+:::::{tab-set}
+::::{tab-item} rST
 ```
 ``conf.py``
 ```
-````
-````{tabbed} MyST (Markdown)
+::::
+::::{tab-item} MyST (Markdown)
 ```
 `conf.py`
 ```
-````
+::::
+:::::
 
 ## Table of content tree
 
@@ -111,20 +113,22 @@ libraries and the value of intersphinx_mapping in [conf.py](https://github.com/a
 In ArviZ docs, you can add references to functions and objects of `matplotlib`, `bokeh`, `xarray`, etc following the simple syntax. Let's try adding a function of few libraries, i.e., {meth}`xarray.Dataset.sel`, {func}`matplotlib.pyplot.subplots` and
 {func}`bokeh.plotting.figure`.
 
-````{tabbed} rST
+:::::{tab-set}
+::::{tab-item} rST
 ```
 :meth:`xarray.Dataset.sel`
 :func:`matplotlib.pyplot.subplots`
 :func:`bokeh.plotting.figure`
 ```
-````
-````{tabbed} MyST (Markdown)
+::::
+::::{tab-item} MyST (Markdown)
 ```
 {meth}`xarray.Dataset.sel`
 {func}`matplotlib.pyplot.subplots`
 {func}`bokeh.plotting.figure`
 ```
-````
+::::
+:::::
 
 Note that the `:key:` before
 the reference must match the kind of object that is being referenced, it
@@ -150,31 +154,35 @@ Remote inventory found.
 We can therefore link to matplotlib docs on `Axes.plot` from any docstring
 using:
 
-````{tabbed} rST
+:::::{tab-set}
+::::{tab-item} rST
 ```
 :meth:`mpl:matplotlib.axes.Axes.plot`
 ```
-````
-````{tabbed} MyST (Markdown)
+::::
+::::{tab-item} MyST (Markdown)
 ```
 {meth}`mpl:matplotlib.axes.Axes.plot`
 ```
-````
+::::
+:::::
 
 The `intersphinx_mappings`
 defined for ArviZ can be seen in `conf.py`.
 Moreover, the intersphinx key is optional. Thus, the pattern to get sphinx to generate links is:
 
-````{tabbed} rST
+:::::{tab-set}
+::::{tab-item} rST
 ```
 :type_id:`(intersphinx_key:)object_id`
 ```
-````
-````{tabbed} MyST (Markdown)
+::::
+::::{tab-item} MyST (Markdown)
 ```
 {type_id}`(intersphinx_key:)object_id`
 ```
-````
+::::
+:::::
 
 with the part between brackets being optional. See the docstring on
 {meth}`~arviz.InferenceData.to_dataframe` and
