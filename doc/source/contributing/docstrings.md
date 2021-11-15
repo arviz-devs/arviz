@@ -19,7 +19,7 @@ For adding references to external libraries functions and objects, see {ref}`ref
 
 ## See Also
 In ArviZ docs, we have a lot of interconnected functions both within the library and with external libraries and it can take a lot of time to search for the related functions. It is cruical to add the See Also section to save users time.
-For adding the _See Also_ docstring section, you just need to add the function name and its short summary. Sphinx will
+For adding the _See Also_ docstring section, you just need to add the function name. Sphinx will
 automatically add links to other ArviZ objects and functions listed in the _See Also_
 section.
 

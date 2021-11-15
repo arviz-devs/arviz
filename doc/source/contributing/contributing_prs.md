@@ -76,7 +76,7 @@ You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good exa
 ## Tests
 Section in construction
 
-(build_steps)=
+(pr_steps)=
 # Steps
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.

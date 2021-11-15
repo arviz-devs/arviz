@@ -92,7 +92,7 @@ Read more about the {ref}`Sphinx toctree directive <table-of-contents>`.
 (adding_references)=
 ## Adding references
 
-In ArviZ docs, we use [intersphinx mapping](https://docs.readthedocs.io/en/stable/guides/intersphinx.html) to add references to other libraies functions and objects. The [intersphinx extension](https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html) ensures us that cross-references to the target project exist. It raises a warning if the target references are changed or removed. This way we don't need to add the long exact links. It saves a lot of time and effort.
+In ArviZ docs, we use [intersphinx mapping](https://docs.readthedocs.io/en/stable/guides/intersphinx.html) to add references to other libraies functions and objects. The [intersphinx extension](https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html) ensures us that cross-references to the target project exist. It is the only way to link for multiversioned docs to link to themselves. It raises a warning if the target references are changed or removed. This way we don't need to add the long exact links. It saves a lot of time and effort.
 
 ### Hyperlinks
 Complementary functions such as {func}`arviz.compare` and {func}`arviz.plot_compare` should reference
