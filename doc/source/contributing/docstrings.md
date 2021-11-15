@@ -13,11 +13,9 @@ In ArviZ docs, docstrings consit of six main sections, i.e.,
 7. Examples
 
 ## References
-While adding description of parameters, examples, etc, it is important to add refernces to external libraries and ArviZ.
+While adding description of parameters, examples, etc, it is important to add references to external libraries and ArviZ.
 Docstrings follow the same guide for adding references as the other docs.
 For adding references to external libraries functions and objects, see {ref}`reference_external_libs`. For referencing ArviZ objects, follow {ref}`reference_arviz_objects`.
-
-hat must be present because we have a lot of interconnected functions both within the library and with external libraries like xarray for example and we have seen that users have a hard time finding the functions they are searching for. But I would not focus too much (or at all) on how to format it as numpydoc already does that, we could for example explain things that are not covered in the numpydoc style guide like how both arviz.plot_hdi and plot_hdi work and link to the same place but show different text for the hyperlink
 
 ## See Also
 In ArviZ docs, we have a lot of interconnected functions both within the library and with external libraries and it can take a lot of time to search for the related functions. It is cruical to add the See Also section to save users time.

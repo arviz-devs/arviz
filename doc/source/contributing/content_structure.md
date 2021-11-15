@@ -1,5 +1,5 @@
-(how_to_start)=
-# How to start
+(content_structure)=
+# Content hierarchy and goals
 
 For adding new docs or guides, we follow the [diataxis](https://diataxis.fr/) framework. Let's suppose you want to write a new guide and not sure where to place it in ArviZ docs, you can check the diataxis' four modes of documentation and place it accordingly.
 
