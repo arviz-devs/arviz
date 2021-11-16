@@ -7,6 +7,7 @@
 ### Maintenance and fixes
 * Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
 * Bokeh 3 compatibility. ([1919](https://github.com/arviz-devs/arviz/pull/1919))
+* Remove manual setting of 2d KDE limits ([1939](https://github.com/arviz-devs/arviz/pull/1939))
 
 ### Deprecation
 

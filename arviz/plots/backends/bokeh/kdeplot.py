@@ -11,7 +11,7 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, _init
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -224,8 +224,8 @@ def plot_kde(
             ax.xgrid.grid_line_color = None
             ax.ygrid.grid_line_color = None
 
-            ax.x_range = Range1d(xmin, xmax)
-            ax.y_range = Range1d(ymin, ymax)
+            # ax.x_range = Range1d(xmin, xmax)
+            # ax.y_range = Range1d(ymin, ymax)
 
         else:
 
