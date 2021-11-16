@@ -164,8 +164,6 @@ def plot_kde(
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
 
         ax.grid(False)
-        ax.set_xlim(xmin, xmax)
-        ax.set_ylim(ymin, ymax)
         if contour:
             qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
             qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
