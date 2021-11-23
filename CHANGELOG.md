@@ -36,6 +36,7 @@
 * Add option to specify colors for each element in ppc_plot  ([1769](https://github.com/arviz-devs/arviz/pull/1769))
 
 ### Maintenance and fixes
+* Change order of regularization in psislw ([1943](https://github.com/arviz-devs/arviz/pull/1943))
 * Fix conversion for numpyro models with ImproperUniform latent sites ([1713](https://github.com/arviz-devs/arviz/pull/1713))
 * Fixed conversion of Pyro output fit using GPUs ([1659](https://github.com/arviz-devs/arviz/pull/1659))
 * Enforced using coordinate values as default labels ([1201](https://github.com/arviz-devs/arviz/pull/1201))
