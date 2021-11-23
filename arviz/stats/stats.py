@@ -952,8 +952,8 @@ def _gpdfit(ary):
     # estimate for k
     k_post = np.log1p(-b_post * ary).mean()  # pylint: disable=invalid-unary-operand-type,no-member
     # add prior for k_post
-    k_post = (n * k_post + prior_k * 0.5) / (n + prior_k)
     sigma = -k_post / b_post
+    k_post = (n * k_post + prior_k * 0.5) / (n + prior_k)
 
     return k_post, sigma
 
