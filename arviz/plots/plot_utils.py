@@ -595,3 +595,19 @@ def compute_ranks(ary):
     ranks = rankdata(ary, method="average").reshape(ary.shape)
 
     return ranks
+
+def _init_kwargs_dict(kwargs):
+    """Initialize kwargs dict.
+
+    If the input is a dictionary, it returns
+    a copy of the dictionary, otherwise it
+    returns an empty dictionary.
+
+    Parameters
+    ----------
+    kwargs : dict or None
+        kwargs dict to initialize
+    """
+    if kwargs is None:
+        return {}
+    return kwargs.copy()

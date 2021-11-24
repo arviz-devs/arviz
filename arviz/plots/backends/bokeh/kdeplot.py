@@ -11,7 +11,7 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from ...plot_utils import _scale_fig_size, _init
+from ...plot_utils import _scale_fig_size, _init_kwargs_dict
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -50,8 +50,7 @@ def plot_kde(
     return_glyph,
 ):
     """Bokeh kde plot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
@@ -70,20 +69,15 @@ def plot_kde(
 
     glyphs = []
     if values2 is None:
-        if plot_kwargs is None:
-            plot_kwargs = {}
+        plot_kwargs = _init_kwargs_dict(plot_kwargs)
         plot_kwargs.setdefault("line_color", mpl_rcParams["axes.prop_cycle"].by_key()["color"][0])
 
-        if fill_kwargs is None:
-            fill_kwargs = {}
-
+        fill_kwargs = _init_kwargs_dict(fill_kwargs)
         fill_kwargs.setdefault("fill_color", mpl_rcParams["axes.prop_cycle"].by_key()["color"][0])
 
         if rug:
-            if rug_kwargs is None:
-                rug_kwargs = {}
+            rug_kwargs = _init_kwargs_dict(rug_kwargs)
 
-            rug_kwargs = rug_kwargs.copy()
             if "cds" in rug_kwargs:
                 cds_rug = rug_kwargs.pop("cds")
                 rug_varname = rug_kwargs.pop("y", "y")
@@ -157,12 +151,9 @@ def plot_kde(
             glyphs.append(line)
 
     else:
-        if contour_kwargs is None:
-            contour_kwargs = {}
-        if contourf_kwargs is None:
-            contourf_kwargs = {}
-        if pcolormesh_kwargs is None:
-            pcolormesh_kwargs = {}
+        contour_kwargs = _init_kwargs_dict(contour_kwargs)
+        contourf_kwargs = _init_kwargs_dict(contourf_kwargs)
+        pcolormesh_kwargs = _init_kwargs_dict(pcolormesh_kwargs)
 
         g_s = complex(gridsize[0])
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
@@ -223,9 +214,6 @@ def plot_kde(
 
             ax.xgrid.grid_line_color = None
             ax.ygrid.grid_line_color = None
-
-            # ax.x_range = Range1d(xmin, xmax)
-            # ax.y_range = Range1d(ymin, ymax)
 
         else:
 
