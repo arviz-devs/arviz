@@ -1,5 +1,5 @@
 (content_structure)=
-# Content hierarchy and goals
+# Documentation content structure
 
 For adding new docs or guides, we follow the [diataxis](https://diataxis.fr/) framework.
 

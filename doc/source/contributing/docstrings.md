@@ -1,5 +1,5 @@
 (docstrings)=
-# Docstrings
+# Docstring style
 
 Docstrings should follow the
 [numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html). Read more about it {ref}`docstring_formatting`.

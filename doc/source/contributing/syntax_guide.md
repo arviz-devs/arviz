@@ -1,5 +1,5 @@
 (syntax_guide)=
-# Syntax Guide
+# Written content formatting reference
 
 ## Adding targets
 Adding custom targets or anchors to the headings is really helpful for cross-referencing. They allow us to link to the heading using a simple syntax.
