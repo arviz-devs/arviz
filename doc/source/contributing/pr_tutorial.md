@@ -9,6 +9,7 @@ clone it to your local machine, and develop on a feature branch.
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
+(fork_step_pr)=
 2. Clone your fork of the ArviZ repo from your GitHub account to your local disk.
 
    ::::{tab-set}
@@ -55,6 +56,7 @@ clone it to your local machine, and develop on a feature branch.
 
    ::::
 
+(feature_branch_step_pr)=
 4. Create a ``feature`` branch to hold your development changes:
 
    ```bash

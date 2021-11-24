@@ -47,7 +47,18 @@ They are referred using this syntax:
 
 ::::
 
-For adding anchors in `.ipynb` files, Markdown syntax will be used in the markdown cells of `.ipynb` files. Read more about it [here](https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#ref-role).
+For adding anchors in `.ipynb` files, Markdown syntax will be used in the markdown cells of `.ipynb` files.
+
+:::{seealso}
+{ref}`sphinx:ref-role`
+  Sphinx documentation about the `ref` role.
+
+[Hyperlink targets](https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#hyperlink-targets)
+  Docutils documentation on targets (another name for anchors) with extensive detail on how and when
+  they can be used.
+
+[MyST targets and cross-referencing docs](https://myst-parser.readthedocs.io/en/latest/syntax/syntax.html#targets-and-cross-referencing)
+:::
 
 ## Backticks for highlighting code keywords
 
