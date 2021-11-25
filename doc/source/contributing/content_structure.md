@@ -1,7 +1,7 @@
 (content_structure)=
 # Documentation content structure
 
-ArviZ documentation has {doc}`diataxis:index` as a North Star.
+ArviZ documentation has the {doc}`diataxis:index` as a North Star.
 This page assumes basic familiarity with Diátaxis.
 
 The ArviZ website is divided into three content blocks:
@@ -76,7 +76,7 @@ In depth explanations
 
 ## ArviZ Project website
 It is the block formed by the navbar sections
-`Community`, `Abou Us` and by the homepage.
+`Community`, `About Us` and by the homepage.
 
 It's audience is anyone interested in the ArviZ project.
 This can well be users or contributors but it could also be someone

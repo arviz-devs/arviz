@@ -1,7 +1,7 @@
 (diataxis_for_arviz)=
 # Diátaxis for ArviZ
 
-ArviZ documentation has {doc}`diataxis:index` as a North Star.
+ArviZ documentation has the {doc}`diataxis:index` as a North Star.
 
 There are however some specificities to ArviZ case and knowing Diátaxis alone
 is not enough to be able to understand ArviZ doc structure and correctly place

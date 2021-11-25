@@ -68,6 +68,7 @@ pr_checklist
 architecture
 content_structure
 docstrings
+syntax_guide
 developing_in_docker
 :::
 
