@@ -1,20 +1,89 @@
 (content_structure)=
 # Documentation content structure
 
-For adding new docs or guides, we follow the [diataxis](https://diataxis.fr/) framework.
+ArviZ documentation has {doc}`diataxis:index` as a North Star.
+This page assumes basic familiarity with Diátaxis.
 
-The audience of ArviZ docs are its users, contributors and anyone who is intrested in the ArviZ project.
-The audience of getting started, example guide, user guide and API reference are ArviZ users. On the other hand, homepage, community and about us are for the people interested in the ArviZ project, i.e., users, contributors and other people too.
-Contributing section is for ArviZ contributors, if anyone wants to contribute to ArviZ but is not sure where to start, contirbuting section will help.
+The ArviZ website is divided into three content blocks:
 
-While adding the new doc files, follow the given points:
+* ArviZ user documentation
+* ArviZ contributor documentation
+* ArviZ Project website
 
-* Maintain the hierarchy of headings. There should be only one level one heading in one file, that will be the title of the page.
-* Add proper explanation of the thing you want to explain, it should not be too long ot too short. Try to add the links of the external resources where the basic things are already exlained instead of adding all the explanation yourself.
-* Top level pages should have the table of content tree, and all the bottom pages should be mentioned in it, see {ref}`syntax_guide`.
-* It is really important to add references. Add cross references to the ArviZ functions and objects, and external libraries.
-* If you are refering to any research paper, or some website, make sure to add its hyperlink.
-* Try to add the examples in the explanation. If it is a code example, add one liner or explain it a little bit before every example. Try to cover all the possible scenarios or if they are a lot, just cover the important ones.
-* Highlight the keywords using backticks.
+## ArviZ user documentation
+It is the block formed by the navbar sections
+`Getting Started`, `Example Gallery`, `User Guide` and `API Reference`.
 
+It's audience are ArviZ users and it uses Diátaxis to achieve its goal of
+teaching how to use ArviZ.
 
+Getting Started
+: The Getting Started section should contain mostly tutorials, however, some
+  how-to content or overview explanations are also allowed and even encouraged
+
+Example Gallery
+: The Example Gallery is a visual reference section that should contain
+  **no description** of the functions used. It should instead link to the
+  API Reference section.
+
+  Its goal is to serve as visual index for users who know how their desired plot
+  looks like but not the name of the ArviZ function that generates it
+
+User Guide
+: The User Guide is targeted to people who already have basic ArviZ knowledge
+  and should mostly contain how-to guides.
+  It can also contain in-depth explanations and some non-python objects reference
+  content.
+
+API Reference
+: It should index and describe all ArviZ objects that are part of the public API,
+  that is, are exposed to ArviZ users. It should be generated from a list of
+  public objects only via sphinx extensions, taking the actual content from
+  the docstrings in each ArviZ object.
+
+## ArviZ contributor documentation
+It is all inside the `Contributing` navbar section.
+
+It's audience are any and all ArviZ contributors, from new contributors to members
+of the core team.
+It follows Diátaxis quite closely by using multiple captioned toctrees.
+
+Contribution types overview
+: Diátaxis explanation content. Contributing to ArviZ can be loosely undestood
+  as a single practical craft, but it is more of multiple practical crafts
+  coming together.
+
+  This section aims to provide high level overviews explaining different
+  contribution types, what skills are needed for them, why are they important
+  and guide the reader to their next steps in one of the following sections.
+
+Tutorials
+: Diátaxis tutorial content. Tutorials with clearly defined and small scope,
+  guiding new contributors in a single "atomic" contribution or even step
+  in the contribution process.
+
+How-to guides
+: Diátaxis how-to content. Guides that outline the steps for common processes
+  in the contributing workflow. Documenting this ensures it is available
+  for newcomers but also that all contributors use the same processes
+  which can reduce misunderstanding and frictions.
+
+Reference
+: Diátaxis reference content.
+
+In depth explanations
+: Diátaxis explanation content.
+
+## ArviZ Project website
+It is the block formed by the navbar sections
+`Community`, `Abou Us` and by the homepage.
+
+It's audience is anyone interested in the ArviZ project.
+This can well be users or contributors but it could also be someone
+who is neither. It has also no relation to any practical craft
+and does not follow Diátaxis at all.
+
+It should contain all the information related to the ArviZ community,
+meeting places (online of physical), shared resources, related
+projects and communities; and to the project itself, its members,
+its roadmap, its procedures...

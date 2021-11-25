@@ -76,5 +76,6 @@ developing_in_docker
 :caption: In depth explanations
 
 doc_toolchain
+diataxis_for_arviz
 plotting_backends
 :::
