@@ -78,32 +78,48 @@ For highlighting inline code keywords or file names, backticks are used. In Mark
 :::::
 
 ## Table of content tree
+All documentation generated with sphinx is structured via `toctrees`.
+Sphinx prints a warning if a file is not part of any toctree unless
+that file is marked as an orphan.
 
-You might have noticed that ArviZ docs maintain a hierarchy to keep the documentation organized. A table of content tree is added to all the main pages to make the website easy to navigate. Adding the table of content tree provides the list of all pages in the left sidebar. It also enables navigation to the **Previous** and **Next** pages in the footer.
+The hierarchy defined via toctrees (and not the file hierarchy!) is
+the one that defines the nabvar and the contents of the left sidebar.
+Keeping the toctrees organized and up to date ensures the sphinx
+build works, that the generated documentation is correctly ordered
+and can be navigated and that all pages can be reached.
+It also enables navigation to the **Previous** and **Next** pages in the footer.
 
 Follow this syntax for adding the table of content:
 
-rST:
-<pre>
+:::::{tab-set}
+::::{tab-item} rST
+```rST
 .. toctree::
     developer_guide
     doc_guide
-</pre>
-
-MyST (Markdown):
-<pre>
-```{toctree}
+```
+::::
+::::{tab-item} MyST (Markdown)
+```markdown
+:::{toctree}
 developer_guide
 doc_guide
+:::
 ```
-</pre>
+::::
+:::::
 
-Read more about the {ref}`Sphinx toctree directive <table-of-contents>`.
+Read more about the {ref}`Sphinx toctree directive <sphinx:table-of-contents>`.
 
 (adding_references)=
 ## Adding references
 
-In ArviZ docs, we use [intersphinx mapping](https://docs.readthedocs.io/en/stable/guides/intersphinx.html) to add references to other libraies functions and objects. The [intersphinx extension](https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html) ensures us that cross-references to the target project exist. It is the only way to link for multiversioned docs to link to themselves. It raises a warning if the target references are changed or removed. This way we don't need to add the long exact links. It saves a lot of time and effort.
+In ArviZ docs, we use {confval}`sphinx:intersphinx_mapping` to add references to other libraies functions and objects.
+The {mod}`~sphinx.ext.intersphinx` ensures us that cross-references to the target project exist.
+It is the only way to link for multiversioned docs to link to themselves.
+It raises a warning if the target references are changed or removed.
+This way we don't need to add the long exact links.
+It saves a lot of time and effort.
 
 ### Hyperlinks
 Complementary functions such as {func}`arviz.compare` and {func}`arviz.plot_compare` should reference
@@ -111,7 +127,7 @@ each other in their docstrings using a hyperlink, not only by name. The same
 should happen with external functions whose usage is assumed to be known; a
 clear example of this situation are docstrings on `kwargs` passed to bokeh or
 matplotlib methods. This section covers how to reference functions from any
-part of the docstring. Read more about it [here](https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html).
+part of the docstring. Read more about it {doc}`here <sphinx:usage/restructuredtext/roles>`.
 
 (reference_external_libs)=
 #### Reference external libraries
