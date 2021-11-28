@@ -5,7 +5,7 @@ from numbers import Integral
 
 from matplotlib import _contour
 import numpy as np
-from bokeh.models import ColumnDataSource, Range1d
+from bokeh.models import ColumnDataSource
 from bokeh.models.glyphs import Scatter
 from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex

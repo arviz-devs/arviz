@@ -596,6 +596,7 @@ def compute_ranks(ary):
 
     return ranks
 
+
 def _init_kwargs_dict(kwargs):
     """Initialize kwargs dict.
 

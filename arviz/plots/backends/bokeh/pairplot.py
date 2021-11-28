@@ -10,7 +10,12 @@ from bokeh.models import CDSView, ColumnDataSource, GroupFilter, Span
 from ....rcparams import rcParams
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, calculate_point_estimate, vectorized_to_hex, _init_kwargs_dict
+from ...plot_utils import (
+    _scale_fig_size,
+    calculate_point_estimate,
+    vectorized_to_hex,
+    _init_kwargs_dict,
+)
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -50,7 +55,6 @@ def plot_pair(
         ),
         **backend_kwargs,
     }
-
 
     hexbin_kwargs = _init_kwargs_dict(hexbin_kwargs)
     hexbin_kwargs.setdefault("size", 0.5)
