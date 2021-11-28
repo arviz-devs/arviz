@@ -324,3 +324,13 @@ intersphinx_mapping = {
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
     "diataxis": ("https://diataxis.fr/", None),
 }
+
+def setup(app):
+    # this needs to be added so we can reference confval targets
+    # in the doc contributing pages and explain what values we use and why
+    app.add_object_type(
+        'confval',
+        'confval',
+        objname='configuration value',
+        indextemplate='pair: %s; configuration value'
+    )
