@@ -109,12 +109,12 @@ doc_guide
 ::::
 :::::
 
-Read more about the {ref}`Sphinx toctree directive <sphinx:table-of-contents>`.
+Read more about the {ref}`Sphinx toctree directive <sphinx:toctree-directive>`.
 
 (adding_references)=
 ## Adding references
 
-In ArviZ docs, we use {confval}`sphinx:intersphinx_mapping` to add references to other libraies functions and objects.
+In ArviZ docs, we use {confval}`sphinx:intersphinx_mapping` to add references to other libraries functions and objects.
 The {mod}`~sphinx.ext.intersphinx` ensures us that cross-references to the target project exist.
 It is the only way to link for multiversioned docs to link to themselves.
 It raises a warning if the target references are changed or removed.

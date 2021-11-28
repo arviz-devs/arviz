@@ -35,7 +35,7 @@ This translates for example into some duplicity when it comes to reference conte
 
 Both the {ref}`example_gallery` and the {ref}`api` pages are reference content.
 The API reference indexes by name and contains the description of each object,
-whereas eh Example Gallery indexes by image and to avoid excessive duplication,
+whereas the Example Gallery indexes by image and to avoid excessive duplication,
 links to the respective API page.
 
 This allows users who know the name of the function or who want to check the options
