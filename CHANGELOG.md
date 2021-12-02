@@ -21,7 +21,7 @@
 
 ## v0.11.3 (2021 Oct 1)
 ### New features
-* Change order of regularization in psislw ([1943](https://github.com/arviz-devs/arviz/pull/1943))
+* Change order of regularization in `psislw` ([1943](https://github.com/arviz-devs/arviz/pull/1943))
 * Added `labeller` argument to enable label customization in plots and summary ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 * Added `arviz.labels` module with classes and utilities ([1201](https://github.com/arviz-devs/arviz/pull/1201) and [1605](https://github.com/arviz-devs/arviz/pull/1605))
 * Added probability estimate within ROPE in `plot_posterior` ([1570](https://github.com/arviz-devs/arviz/pull/1570))
