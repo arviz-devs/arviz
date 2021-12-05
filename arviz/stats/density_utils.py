@@ -137,7 +137,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
             (
                 "`bw` must not be of type `bool`.\n"
                 "Expected a positive numeric or one of the following strings:\n"
-                f"{list(_BW_METHODS_LINEAR.keys())}."
+                f"{list(_BW_METHODS_LINEAR)}."
             )
         )
     if isinstance(bw, (int, float)):
@@ -146,11 +146,11 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
     elif isinstance(bw, str):
         bw_lower = bw.lower()
 
-        if bw_lower not in _BW_METHODS_LINEAR.keys():
+        if bw_lower not in _BW_METHODS_LINEAR:
             raise ValueError(
                 "Unrecognized bandwidth method.\n"
                 f"Input is: {bw_lower}.\n"
-                f"Expected one of: {list(_BW_METHODS_LINEAR.keys())}."
+                f"Expected one of: {list(_BW_METHODS_LINEAR)}."
             )
 
         bw_fun = _BW_METHODS_LINEAR[bw_lower]
@@ -159,7 +159,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
         raise ValueError(
             "Unrecognized `bw` argument.\n"
             "Expected a positive numeric or one of the following strings:\n"
-            f"{list(_BW_METHODS_LINEAR.keys())}."
+            f"{list(_BW_METHODS_LINEAR)}."
         )
     return bw
 
