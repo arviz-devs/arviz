@@ -36,12 +36,47 @@ Further information on how to contribute to ArviZ can be found on these specific
 
 ```{toctree}
 :maxdepth: 2
+:caption: Contribution types overview
 
 issue_reports
 issue_triaging
 outreach
 review_prs
 contributing_prs
-developing_in_docker
-developer_guide
 ```
+
+:::{toctree}
+:hidden:
+:caption: Tutorials
+
+pr_tutorial
+:::
+
+:::{toctree}
+:hidden:
+:caption: How-to guides
+
+sphinx_doc_build
+running_benchmarks
+:::
+
+:::{toctree}
+:hidden:
+:caption: Reference
+
+pr_checklist
+architecture
+content_structure
+docstrings
+syntax_guide
+developing_in_docker
+:::
+
+:::{toctree}
+:hidden:
+:caption: In depth explanations
+
+doc_toolchain
+diataxis_for_arviz
+plotting_backends
+:::
