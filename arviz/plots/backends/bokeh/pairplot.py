@@ -10,7 +10,12 @@ from bokeh.models import CDSView, ColumnDataSource, GroupFilter, Span
 from ....rcparams import rcParams
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, calculate_point_estimate, vectorized_to_hex
+from ...plot_utils import (
+    _scale_fig_size,
+    calculate_point_estimate,
+    vectorized_to_hex,
+    _init_kwargs_dict,
+)
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -42,8 +47,7 @@ def plot_pair(
     reference_values_kwargs,
 ):
     """Bokeh pair plot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(
@@ -52,18 +56,12 @@ def plot_pair(
         **backend_kwargs,
     }
 
-    if hexbin_kwargs is None:
-        hexbin_kwargs = {}
+    hexbin_kwargs = _init_kwargs_dict(hexbin_kwargs)
     hexbin_kwargs.setdefault("size", 0.5)
 
-    if marginal_kwargs is None:
-        marginal_kwargs = {}
-
-    if point_estimate_kwargs is None:
-        point_estimate_kwargs = {}
-
-    if kde_kwargs is None:
-        kde_kwargs = {}
+    marginal_kwargs = _init_kwargs_dict(marginal_kwargs)
+    point_estimate_kwargs = _init_kwargs_dict(point_estimate_kwargs)
+    kde_kwargs = _init_kwargs_dict(kde_kwargs)
 
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {})
@@ -121,16 +119,13 @@ def plot_pair(
                 UserWarning,
             )
 
-    if reference_values_kwargs is None:
-        reference_values_kwargs = {}
-
+    reference_values_kwargs = _init_kwargs_dict(reference_values_kwargs)
     reference_values_kwargs.setdefault("line_color", "black")
     reference_values_kwargs.setdefault("fill_color", vectorized_to_hex("C2"))
     reference_values_kwargs.setdefault("line_width", 1)
     reference_values_kwargs.setdefault("size", 10)
 
-    if divergences_kwargs is None:
-        divergences_kwargs = {}
+    divergences_kwargs = _init_kwargs_dict(divergences_kwargs)
     divergences_kwargs.setdefault("line_color", "black")
     divergences_kwargs.setdefault("fill_color", vectorized_to_hex("C1"))
     divergences_kwargs.setdefault("line_width", 1)
@@ -158,9 +153,7 @@ def plot_pair(
         figsize, textsize, numvars - offset, numvars - offset
     )
 
-    if point_estimate_marker_kwargs is None:
-        point_estimate_marker_kwargs = {}
-
+    point_estimate_marker_kwargs = _init_kwargs_dict(point_estimate_marker_kwargs)
     point_estimate_marker_kwargs.setdefault("size", markersize)
     point_estimate_marker_kwargs.setdefault("color", "black")
     point_estimate_kwargs.setdefault("line_color", "black")

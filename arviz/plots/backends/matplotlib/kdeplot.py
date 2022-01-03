@@ -5,7 +5,7 @@ from matplotlib import _pylab_helpers
 import matplotlib.ticker as mticker
 
 
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, _init_kwargs_dict
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
@@ -43,8 +43,7 @@ def plot_kde(
     return_glyph,  # pylint: disable=unused-argument
 ):
     """Matplotlib kde plot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
@@ -164,8 +163,6 @@ def plot_kde(
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
 
         ax.grid(False)
-        ax.set_xlim(xmin, xmax)
-        ax.set_ylim(ymin, ymax)
         if contour:
             qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
             qcs = ax.contour(x_x, y_y, density, **contour_kwargs)

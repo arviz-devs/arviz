@@ -5,7 +5,7 @@ import numpy as np
 
 from ....stats.density_utils import get_bins
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, _init_kwargs_dict
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
@@ -37,8 +37,7 @@ def plot_dist(
     show,
 ):
     """Matplotlib distplot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
