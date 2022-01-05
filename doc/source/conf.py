@@ -64,40 +64,7 @@ extensions = [
     "sphinx_codeautolink",
 ]
 
-from IPython.core.inputtransformer2 import TransformerManager
-import re
-
-
-def ipython_cell_transform(source):
-    out = TransformerManager().transform_cell(source)
-    return source, out
-
-
-def ipython_directive_transform(source):
-    """Convert ipython directive code (with initial 'In []:' or '...:') to valid code.
-
-    The current approach removes the "In []" and "...:" pieces and comments
-    all the lines that don't have either of those. This allows codeautolink/beautifulsoup
-    to correctly interpret the code as valid python code but codeautolink is then
-    unable to pair this "source" to the html output (at least for now) due to
-    the ammount of changes.
-    """
-    lines = []
-    for line in source.split("\n"):
-        (line, num_subs) = re.subn(r"^\s*(In\s*\[[0-9]+\]|\.{3,})\:\s", "", line)
-        if num_subs == 1:
-            lines.append(line)
-        else:
-            lines.append(f"# {line}")
-    return ipython_cell_transform("\n".join(lines))
-
-
 # codeautolink
-codeautolink_custom_blocks = {
-    "ipython3": ipython_cell_transform,
-    # ipython commented out because code and output are added in the same block and breaks autolink
-    # "ipython": ipython_directive_transform
-}
 codeautolink_autodoc_inject = False
 codeautolink_search_css_classes = ["highlight-default"]
 codeautolink_concat_default = True
