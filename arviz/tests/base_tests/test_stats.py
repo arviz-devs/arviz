@@ -121,12 +121,16 @@ def test_hdi_multimodal():
     intervals = hdi(normal_sample, multimodal=True)
     assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
 
+
 def test_hdi_multimodal_multivars():
     size = 2500000
     var1 = np.concatenate((np.random.normal(-4, 1, size), np.random.normal(2, 0.5, size)))
-    var2 = np.random.normal(8, 1, size*2)
+    var2 = np.random.normal(8, 1, size * 2)
     sample = Dataset(
-        {"var1": (("chain", "draw"), var1[np.newaxis, :]), "var2": (("chain", "draw"), var2[np.newaxis, :])},
+        {
+            "var1": (("chain", "draw"), var1[np.newaxis, :]),
+            "var2": (("chain", "draw"), var2[np.newaxis, :]),
+        },
         coords={"chain": [0], "draw": np.arange(size * 2)},
     )
     intervals = hdi(sample, multimodal=True)
