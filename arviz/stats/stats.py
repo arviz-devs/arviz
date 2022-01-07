@@ -476,7 +476,7 @@ def hdi(
         "skipna": skipna,
         "out_shape": (max_modes, 2) if multimodal else (2,),
     }
-    kwargs.setdefault("output_core_dims", [["hdi", "mode"] if multimodal else ["hdi"]])
+    kwargs.setdefault("output_core_dims", [["mode", "hdi"] if multimodal else ["hdi"]])
     if not multimodal:
         func_kwargs["circular"] = circular
     else:
