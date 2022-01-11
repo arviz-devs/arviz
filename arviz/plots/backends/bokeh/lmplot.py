@@ -72,6 +72,11 @@ def plot_lm(
         y_model_fill_kwargs = {}
     y_model_fill_kwargs.setdefault("color", "black")
     y_model_fill_kwargs.setdefault("alpha", 0.5)
+    
+    if y_model_mean_kwargs is None:
+        y_model_mean_kwargs = {}
+    y_model_mean_kwargs.setdefault("line_color", "yellow")
+    y_model_mean_kwargs.setdefault("line_width", 2)
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
 
@@ -130,7 +135,7 @@ def plot_lm(
                 x_plotters_edge = [min(x_plotters), max(x_plotters)]
                 y_model_mean_edge = [min(y_model_mean), max(y_model_mean)]
                 mean_legend = ax_i.line(
-                    x_plotters_edge, y_model_mean_edge, line_color="yellow", line_width=2
+                    x_plotters_edge, y_model_mean_edge, **y_model_mean_kwargs
                 )
                 legend_it.append(("Mean", [mean_legend]))
 
@@ -150,8 +155,7 @@ def plot_lm(
                 mean_legend = ax_i.line(
                     x_plotters_edge,
                     y_model_mean_edge,
-                    line_color="yellow",
-                    line_width=2,
+                    **y_model_mean_kwargs,
                 )
                 legend_it.append(("Mean", [mean_legend]))
 
