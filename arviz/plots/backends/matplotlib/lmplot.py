@@ -121,7 +121,7 @@ def plot_lm(
                 ax_i.plot([], **y_model_plot_kwargs, label="Uncertainty in mean")
 
                 y_model_mean = np.mean(y_model_plotters, axis=1)
-                ax_i.plot(x_plotters, y_model_mean, color="y", lw=0.8, zorder=11, label="Mean")
+                ax_i.plot(x_plotters, y_model_mean, **y_model_mean_kwargs, label="Mean")
             else:
                 plot_hdi(
                     x_plotters,
