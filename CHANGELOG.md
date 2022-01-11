@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 ### New features
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
+* Allow kwargs to customize appearance of the mean in `plot_lm`
 
 ### Maintenance and fixes
 * Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
