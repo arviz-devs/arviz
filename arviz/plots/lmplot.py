@@ -78,6 +78,9 @@ def plot_lm(
         and :meth:`bokeh:bokeh.plotting.Figure.line` in bokeh
     y_model_fill_kwargs : dict, optional
         Significant if ``kind_model`` is "hdi". Passed to :func:`arviz.plot_hdi`
+    y_model_mean_kwargs : dict, optional
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        and :meth:`bokeh:bokeh.plotting.Figure.line` in bokeh
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. Passed to
         :func:`matplotlib.pyplot.subplots` or
