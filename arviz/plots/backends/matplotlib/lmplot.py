@@ -81,7 +81,7 @@ def plot_lm(
         y_model_fill_kwargs.setdefault("linewidth", 0.5)
         y_model_fill_kwargs.setdefault("zorder", 9)
         y_model_fill_kwargs.setdefault("alpha", 0.5)
-        
+
         y_model_mean_kwargs = matplotlib_kwarg_dealiaser(y_model_mean_kwargs, "plot")
         y_model_mean_kwargs.setdefault("color", "y")
         y_model_mean_kwargs.setdefault("linewidth", 0.8)
