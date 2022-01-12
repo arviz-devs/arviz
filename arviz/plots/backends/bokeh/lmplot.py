@@ -73,7 +73,7 @@ def plot_lm(
         y_model_fill_kwargs = {}
     y_model_fill_kwargs.setdefault("color", "black")
     y_model_fill_kwargs.setdefault("alpha", 0.5)
-    
+
     if y_model_mean_kwargs is None:
         y_model_mean_kwargs = {}
     y_model_mean_kwargs.setdefault("line_color", "yellow")
