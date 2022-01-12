@@ -26,6 +26,7 @@ def plot_lm(
     y_hat_fill_kwargs,
     y_model_plot_kwargs,
     y_model_fill_kwargs,
+    y_model_mean_kwargs,
     backend_kwargs,
     show,
     figsize,
