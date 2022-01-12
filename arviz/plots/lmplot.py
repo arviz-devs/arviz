@@ -28,6 +28,7 @@ def plot_lm(
     y_hat_fill_kwargs=None,
     y_model_plot_kwargs=None,
     y_model_fill_kwargs=None,
+    y_model_mean_kwargs=None,
     backend_kwargs=None,
     show=None,
     figsize=None,
