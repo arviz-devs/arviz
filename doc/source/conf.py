@@ -64,32 +64,9 @@ extensions = [
     "sphinx_codeautolink",
 ]
 
-from IPython.core.inputtransformer2 import TransformerManager
-import re
-
-def ipython_cell_transform(source):
-    out = TransformerManager().transform_cell(source)
-    return source, out
-
-def ipython_directive_transform(source):
-    """Ignore lines starting with 'In[]:' or '...:'."""
-    lines = []
-    for line in source.split("\n"):
-        (line, num_subs) = re.subn(r"^\s*(In\s*\[[0-9]+\]|\.{3,})\:\s", "", line)
-        if num_subs==1:
-            lines.append(line)
-        else:
-            lines.append(f"# {line}")
-    return ipython_cell_transform("\n".join(lines))
-
 # codeautolink
-codeautolink_custom_blocks = {
-    "ipython3": ipython_cell_transform,
-    # ipython commented out because code and output are added in the same block and breaks autolink
-    # "ipython": ipython_directive_transform
-}
 codeautolink_autodoc_inject = False
-codeautolink_search_css_classes = ["highlight-default notranslate"]
+codeautolink_search_css_classes = ["highlight-default"]
 codeautolink_concat_default = True
 
 # ipython directive configuration
@@ -115,20 +92,10 @@ jupyter_execute_notebooks = "auto"
 execution_excludepatterns = ["*.ipynb"]
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
-myst_enable_extensions = [
-    "colon_fence",
-    "deflist",
-    "dollarmath",
-    "amsmath"
-]
+myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 
 
-myst_enable_extensions = [
-    "colon_fence",
-    "deflist",
-    "dollarmath",
-    "amsmath"
-]
+myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 
 # The base toctree document.
 master_doc = "index"
@@ -199,7 +166,8 @@ html_theme_options = {
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
-    "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
+    "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
+    "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
 }
 html_context = {
@@ -208,13 +176,16 @@ html_context = {
     "github_version": "main",
     "doc_path": "doc/source/",
 }
-html_sidebars: Dict[str, Any] = {}
+html_sidebars: Dict[str, Any] = {
+    "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html", "sidebar-ethical-ads.html"]
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_static_path = ["_static", thumb_directory]
+html_css_files = ["custom.css"]
 
 # use additional pages to add a 404 page
 html_additional_pages = {
@@ -325,12 +296,13 @@ intersphinx_mapping = {
     "diataxis": ("https://diataxis.fr/", None),
 }
 
+
 def setup(app):
     # this needs to be added so we can reference confval targets
     # in the doc contributing pages and explain what values we use and why
     app.add_object_type(
-        'confval',
-        'confval',
-        objname='configuration value',
-        indextemplate='pair: %s; configuration value'
+        "confval",
+        "confval",
+        objname="configuration value",
+        indextemplate="pair: %s; configuration value",
     )
