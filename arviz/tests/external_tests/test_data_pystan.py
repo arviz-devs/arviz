@@ -153,7 +153,7 @@ class TestDataPyStan:
         inference_data5 = self.get_inference_data5(data)
         # inference_data 1
         test_dict = {
-            "posterior": ["theta"],
+            "posterior": ["theta", "~log_lik"],
             "posterior_predictive": ["y_hat"],
             "predictions": ["y_hat"],
             "observed_data": ["y"],

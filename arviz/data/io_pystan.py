@@ -809,6 +809,8 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None, dtypes=None):
     data = OrderedDict()
 
     for var in variables:
+        if var in ignore:
+            continue
         if var in data:
             continue
         dtype = dtypes.get(var)
