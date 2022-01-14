@@ -28,6 +28,7 @@ def plot_lm(
     y_hat_fill_kwargs=None,
     y_model_plot_kwargs=None,
     y_model_fill_kwargs=None,
+    y_model_mean_kwargs=None,
     backend_kwargs=None,
     show=None,
     figsize=None,
@@ -78,6 +79,9 @@ def plot_lm(
         and :meth:`bokeh:bokeh.plotting.Figure.line` in bokeh
     y_model_fill_kwargs : dict, optional
         Significant if ``kind_model`` is "hdi". Passed to :func:`arviz.plot_hdi`
+    y_model_mean_kwargs : dict, optional
+        Passed to :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib
+        and :meth:`bokeh:bokeh.plotting.Figure.line` in bokeh
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. Passed to
         :func:`matplotlib.pyplot.subplots` or
@@ -329,6 +333,7 @@ def plot_lm(
         y_hat_fill_kwargs=y_hat_fill_kwargs,
         y_model_plot_kwargs=y_model_plot_kwargs,
         y_model_fill_kwargs=y_model_fill_kwargs,
+        y_model_mean_kwargs=y_model_mean_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
         figsize=figsize,

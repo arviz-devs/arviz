@@ -24,6 +24,7 @@ def plot_lm(
     y_hat_fill_kwargs,
     y_model_plot_kwargs,
     y_model_fill_kwargs,
+    y_model_mean_kwargs,
     backend_kwargs,
     show,
     figsize,
@@ -81,6 +82,11 @@ def plot_lm(
         y_model_fill_kwargs.setdefault("zorder", 9)
         y_model_fill_kwargs.setdefault("alpha", 0.5)
 
+        y_model_mean_kwargs = matplotlib_kwarg_dealiaser(y_model_mean_kwargs, "plot")
+        y_model_mean_kwargs.setdefault("color", "y")
+        y_model_mean_kwargs.setdefault("linewidth", 0.8)
+        y_model_mean_kwargs.setdefault("zorder", 11)
+
         y_var_name, _, _, y_plotters = y[i]
         x_var_name, _, _, x_plotters = x[i]
         ax_i.plot(x_plotters, y_plotters, **y_kwargs)
@@ -115,7 +121,7 @@ def plot_lm(
                 ax_i.plot([], **y_model_plot_kwargs, label="Uncertainty in mean")
 
                 y_model_mean = np.mean(y_model_plotters, axis=1)
-                ax_i.plot(x_plotters, y_model_mean, color="y", lw=0.8, zorder=11, label="Mean")
+                ax_i.plot(x_plotters, y_model_mean, **y_model_mean_kwargs, label="Mean")
             else:
                 plot_hdi(
                     x_plotters,
@@ -126,7 +132,7 @@ def plot_lm(
                 ax_i.plot([], color=y_model_fill_kwargs["color"], label="Uncertainty in mean")
 
                 y_model_mean = np.mean(y_model_plotters, axis=(0, 1))
-                ax_i.plot(x_plotters, y_model_mean, color="y", lw=0.8, zorder=11, label="Mean")
+                ax_i.plot(x_plotters, y_model_mean, **y_model_mean_kwargs, label="Mean")
 
         if legend:
             ax_i.legend(fontsize=xt_labelsize, loc="upper left")
