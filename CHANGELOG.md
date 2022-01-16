@@ -18,6 +18,7 @@
 * Fix axis sharing behaviour in `plot_pair`. ([1985](https://github.com/arviz-devs/arviz/pull/1985))
 * Fix parameter duplication problem with PyStan ([1962](https://github.com/arviz-devs/arviz/pull/1962))
 * Temporarily disable pyjags tests ([1963](https://github.com/arviz-devs/arviz/pull/1963))
+* Fix tuple bug in coords ([1695](https://github.com/arviz-devs/arviz/pull/1695))
 
 ### Deprecation
 
