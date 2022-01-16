@@ -42,6 +42,7 @@ __all__ = [
     "loo",
     "loo_pit",
     "psislw",
+    "r2_samples",
     "r2_score",
     "summary",
     "waic",
@@ -985,14 +986,58 @@ def _gpinv(probs, kappa, sigma):
     return x
 
 
+def r2_samples(y_true, y_pred):
+    """R² samples for Bayesian regression models. Only valid for linear models.
+
+    Parameters
+    ----------
+    y_true: array-like of shape = (n_outputs,)
+        Ground truth (correct) target values.
+    y_pred: array-like of shape = (n_posterior_samples, n_outputs)
+        Estimated target values.
+
+    Returns
+    -------
+    Pandas Series with the following indices:
+    Bayesian R² samples.
+
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+
+    Examples
+    --------
+    Calculate R² samples for Bayesian regression models :
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('regression1d')
+           ...: y_true = data.observed_data["y"].values
+           ...: y_pred = data.posterior_predictive.stack(sample=("chain", "draw"))["y"].values.T
+           ...: az.r2_samples(y_true, y_pred)
+
+    """
+    _numba_flag = Numba.numba_flag
+    if y_pred.ndim == 1:
+        var_y_est = _numba_var(svar, np.var, y_pred)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred))
+    else:
+        var_y_est = _numba_var(svar, np.var, y_pred, axis=1)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
+    r_squared = var_y_est / (var_y_est + var_e)
+
+    return r_squared
+
+
 def r2_score(y_true, y_pred):
     """R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
     ----------
-    y_true: array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_true: array-like of shape = (n_outputs,)
         Ground truth (correct) target values.
-    y_pred: array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_pred: array-like of shape = (n_posterior_samples, n_outputs)
         Estimated target values.
 
     Returns
@@ -1018,15 +1063,7 @@ def r2_score(y_true, y_pred):
            ...: az.r2_score(y_true, y_pred)
 
     """
-    _numba_flag = Numba.numba_flag
-    if y_pred.ndim == 1:
-        var_y_est = _numba_var(svar, np.var, y_pred)
-        var_e = _numba_var(svar, np.var, (y_true - y_pred))
-    else:
-        var_y_est = _numba_var(svar, np.var, y_pred.mean(0))
-        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=0)
-    r_squared = var_y_est / (var_y_est + var_e)
-
+    r_squared = r2_samples(y_true=y_true, y_pred=y_pred)
     return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
 
 

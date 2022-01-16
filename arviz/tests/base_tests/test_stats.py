@@ -161,17 +161,9 @@ def test_hdi_skipna():
 def test_r2_score():
     x = np.linspace(0, 1, 100)
     y = np.random.normal(x, 1)
+    y_pred = x + np.random.randn(300, 100)
     res = linregress(x, y)
-    assert_allclose(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2, 2)
-
-
-def test_r2_score_multivariate():
-    x = np.linspace(0, 1, 100)
-    y = np.random.normal(x, 1)
-    res = linregress(x, y)
-    y_multivariate = np.c_[y, y]
-    y_multivariate_pred = np.c_[res.intercept + res.slope * x, res.intercept + res.slope * x]
-    assert not np.isnan(r2_score(y_multivariate, y_multivariate_pred).r2)
+    assert_allclose(res.rvalue ** 2, r2_score(y, y_pred).r2, 2)
 
 
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
