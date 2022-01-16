@@ -946,6 +946,16 @@ def test_dict_to_dataset_event_dims_error():
         convert_to_dataset(datadict, coords=coords, dims={"a": ["b", "c"]})
 
 
+def test_dict_to_dataset_with_tuple_coord():
+    datadict = {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)}
+    dataset = convert_to_dataset(datadict, coords={"c": tuple(range(10))}, dims={"b": ["c"]})
+    assert set(dataset.data_vars) == {"a", "b"}
+    assert set(dataset.coords) == {"chain", "draw", "c"}
+
+    assert set(dataset.a.coords) == {"chain", "draw"}
+    assert set(dataset.b.coords) == {"chain", "draw", "c"}
+
+
 def test_convert_to_dataset_idempotent():
     first = convert_to_dataset(np.random.randn(100))
     second = convert_to_dataset(first)
