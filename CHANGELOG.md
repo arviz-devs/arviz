@@ -20,6 +20,8 @@
 * Temporarily disable pyjags tests ([1963](https://github.com/arviz-devs/arviz/pull/1963))
 * Fix tuple bug in coords ([1695](https://github.com/arviz-devs/arviz/pull/1695))
 * Fix extend 'right' join bug ([1718](https://github.com/arviz-devs/arviz/pull/1718))
+* Update attribute handling for InferenceData ([1357](https://github.com/arviz-devs/arviz/pull/1357))
+* Fix R2 implementation ([1666](https://github.com/arviz-devs/arviz/pull/1666))
 
 ### Deprecation
 
