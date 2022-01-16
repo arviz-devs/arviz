@@ -90,7 +90,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
     def __init__(
         self,
-        attrs: dict = None,
+        attrs: Union[None, Mapping[Any, Any]] = None,
         **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]],
     ) -> None:
         """Initialize InferenceData object from keyword xarray datasets.
@@ -137,7 +137,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         self._groups: List[str] = []
         self._groups_warmup: List[str] = []
-        self._attrs: dict = dict(attrs) if attrs is not None else None
+        self._attrs: Union[None, Mapping[Any, Any]] = dict(attrs) if attrs is not None else None
         save_warmup = kwargs.pop("save_warmup", False)
         key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
         for key in kwargs:
