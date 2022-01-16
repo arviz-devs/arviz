@@ -1358,9 +1358,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
             if dataset:
                 setattr(self, group, dataset)
                 if group.startswith(WARMUP_TAG):
-                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup]
+                    supported_order = [
+                        key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup
+                    ]
                     if (supported_order == self._groups_warmup) and (group in SUPPORTED_GROUPS_ALL):
-                        group_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup + [group]]
+                        group_order = [
+                            key
+                            for key in SUPPORTED_GROUPS_ALL
+                            if key in self._groups_warmup + [group]
+                        ]
                         group_idx = group_order.index(group)
                         self._groups_warmup.insert(group_idx, group)
                     else:
@@ -1368,7 +1374,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 else:
                     supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
                     if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
-                        group_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]]
+                        group_order = [
+                            key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
+                        ]
                         group_idx = group_order.index(group)
                         self._groups.insert(group_idx, group)
                     else:
@@ -1408,9 +1416,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
             setattr(self, group, dataset)
             if group.startswith(WARMUP_TAG):
                 if group not in self._groups_warmup:
-                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup]
+                    supported_order = [
+                        key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup
+                    ]
                     if (supported_order == self._groups_warmup) and (group in SUPPORTED_GROUPS_ALL):
-                        group_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup + [group]]
+                        group_order = [
+                            key
+                            for key in SUPPORTED_GROUPS_ALL
+                            if key in self._groups_warmup + [group]
+                        ]
                         group_idx = group_order.index(group)
                         self._groups_warmup.insert(group_idx, group)
                     else:
@@ -1419,7 +1433,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 if group not in self._groups:
                     supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
                     if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
-                        group_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]]
+                        group_order = [
+                            key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
+                        ]
                         group_idx = group_order.index(group)
                         self._groups.insert(group_idx, group)
                     else:
