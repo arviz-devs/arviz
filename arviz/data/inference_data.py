@@ -91,7 +91,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
     def __init__(
         self,
         attrs: dict = None,
-        **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]]
+        **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]],
     ) -> None:
         """Initialize InferenceData object from keyword xarray datasets.
 
