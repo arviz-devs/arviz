@@ -984,8 +984,50 @@ def _gpinv(probs, kappa, sigma):
             x[probs == 1] = -sigma / kappa
     return x
 
+def r2_samples(y_true, y_pred):
+    """R² samples for Bayesian regression models. Only valid for linear models.
 
-def r2_score(y_true, y_pred,summary=False):
+    Parameters
+    ----------
+    y_true: array-like of shape = (n_outputs,)
+        Ground truth (correct) target values.
+    y_pred: array-like of shape = (n_posterior_samples, n_outputs)
+        Estimated target values.
+
+    Returns
+    -------
+    Pandas Series with the following indices:
+    Bayesian R² samples.
+
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+
+    Examples
+    --------
+    Calculate R² samples for Bayesian regression models :
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('regression1d')
+           ...: y_true = data.observed_data["y"].values
+           ...: y_pred = data.posterior_predictive.stack(sample=("chain", "draw"))["y"].values.T
+           ...: az.r2_samples(y_true, y_pred)
+
+    """
+    _numba_flag = Numba.numba_flag
+    if y_pred.ndim == 1:
+        var_y_est = _numba_var(svar, np.var, y_pred)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred))
+    else:
+        var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
+        r_squared = var_y_est / (var_y_est + var_e)
+
+    return r_squared
+
+def r2_score(y_true, y_pred):
     """R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
@@ -994,14 +1036,12 @@ def r2_score(y_true, y_pred,summary=False):
         Ground truth (correct) target values.
     y_pred: array-like of shape = (n_posterior_samples, n_outputs)
         Estimated target values.
-    summary: If False return all posterior samples of the Bayesian R² if True only the mean and standard deviation. Defaults to False.
 
     Returns
     -------
     Pandas Series with the following indices:
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
-    Bayesian R² samples: if dist==True.
 
     See Also
     --------
@@ -1020,18 +1060,8 @@ def r2_score(y_true, y_pred,summary=False):
            ...: az.r2_score(y_true, y_pred)
 
     """
-    _numba_flag = Numba.numba_flag
-    if y_pred.ndim == 1:
-        var_y_est = _numba_var(svar, np.var, y_pred)
-        var_e = _numba_var(svar, np.var, (y_true - y_pred))
-    else:
-        var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
-        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
-        r_squared = var_y_est / (var_y_est + var_e)
-    
-    if summary:
-        return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
-    return r_squared
+    r_squared = r2_samples(y_true=y_true, y_pred=y_pred)
+    return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
 
 
 def summary(
