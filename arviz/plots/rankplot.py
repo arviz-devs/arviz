@@ -4,10 +4,12 @@ from itertools import cycle
 import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..stats.density_utils import _sturges_formula
 from ..utils import _var_names
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_rank(
@@ -21,9 +23,15 @@ def plot_rank(
     colors="cycle",
     ref_line=True,
     labels=True,
+    labeller=None,
+    grid=None,
     figsize=None,
     ax=None,
     backend=None,
+    ref_line_kwargs=None,
+    bar_kwargs=None,
+    vlines_kwargs=None,
+    marker_vlines_kwargs=None,
     backend_kwargs=None,
     show=None,
 ):
@@ -44,26 +52,26 @@ def plot_rank(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation of
-        az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of  :func:`arviz.convert_to_dataset` for details
     var_names: string or list of variable names
-        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     bins: None or passed to np.histogram
         Binning strategy used for histogram. By default uses twice the result of Sturges' formula.
-        See `np.histogram` documenation for, other available arguments.
+        See :func:`numpy.histogram` documentation for, other available arguments.
     kind: string
         If bars (defaults), ranks are represented as stacked histograms (one per chain). If vlines
-        ranks are represented as vertical lines above or below `ref_line`.
+        ranks are represented as vertical lines above or below ``ref_line``.
     colors: string or list of strings
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
@@ -72,16 +80,36 @@ def plot_rank(
     ref_line: boolean
         Whether to include a dashed line showing where a uniform distribution would lie
     labels: bool
-        wheter to plot or not the x and y labels, defaults to True
+        whether to plot or not the x and y labels, defaults to True
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        A 2D array of locations into which to plot the densities. If not supplied, ArviZ will create
         its own array of plot areas (and return it).
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    ref_line_kwargs : dict, optional
+        Reference line keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.axhline` or
+        :class:`bokeh:bokeh.models.Span`.
+    bar_kwargs : dict, optional
+        Bars keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.bar` or
+        :meth:`bokeh:bokeh.plotting.Figure.vbar`.
+    vlines_kwargs : dict, optional
+        Vlines keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.vlines` or
+        :meth:`bokeh:bokeh.plotting.Figure.multi_line`.
+    marker_vlines_kwargs : dict, optional
+        Marker for the vlines keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
+        :meth:`bokeh:bokeh.plotting.Figure.circle`.
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
@@ -89,6 +117,11 @@ def plot_rank(
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_trace : Plot distribution (histogram or kernel density estimates) and
+                 sampled values or rank plot.
 
     Examples
     --------
@@ -121,6 +154,13 @@ def plot_rank(
         >>> az.plot_rank(centered_data, var_names="mu", kind='vlines', ax=ax[0])
         >>> az.plot_rank(noncentered_data, var_names="mu", kind='vlines', ax=ax[1])
 
+    Change the aesthetics using kwargs
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_rank(noncentered_data, var_names="mu", kind="vlines",
+        >>>              vlines_kwargs={'lw':0}, marker_vlines_kwargs={'lw':3});
     """
     if transform is not None:
         data = transform(data)
@@ -136,7 +176,10 @@ def plot_rank(
     if bins is None:
         bins = _sturges_formula(posterior_data, mult=2)
 
-    rows, cols = default_grid(length_plotters)
+    if labeller is None:
+        labeller = BaseLabeller()
+
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     chains = len(posterior_data.chain)
     if colors == "cycle":
@@ -161,6 +204,11 @@ def plot_rank(
         colors=colors,
         ref_line=ref_line,
         labels=labels,
+        labeller=labeller,
+        ref_line_kwargs=ref_line_kwargs,
+        bar_kwargs=bar_kwargs,
+        vlines_kwargs=vlines_kwargs,
+        marker_vlines_kwargs=marker_vlines_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
     )

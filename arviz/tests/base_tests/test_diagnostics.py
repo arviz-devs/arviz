@@ -8,9 +8,9 @@ import pytest
 from numpy.testing import assert_almost_equal
 
 from ...data import from_cmdstan, load_arviz_data
-from ...plots.plot_utils import xarray_var_iter
-from ...rcparams import rc_context, rcParams
-from ...stats import bfmi, ess, geweke, mcse, rhat
+from ...rcparams import rcParams
+from ...sel_utils import xarray_var_iter
+from ...stats import bfmi, ess, mcse, rhat
 from ...stats.diagnostics import (
     _ess,
     _ess_quantile,
@@ -119,8 +119,7 @@ class TestDiagnostics:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "..", "saved_models")
         path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
-        with rc_context(rc={"data.pandas_float_precision": "high"}):
-            posterior = from_cmdstan(path)
+        posterior = from_cmdstan(path)
         reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_posterior.csv")
         reference = (
             pd.read_csv(reference_path, index_col=0, float_precision="high")
@@ -148,9 +147,9 @@ class TestDiagnostics:
             "mcse_quantile30": lambda x: mcse(x, method="quantile", prob=0.3),
         }
         results = {}
-        for key, coord_dict, vals in xarray_var_iter(posterior.posterior, combined=True):
+        for key, coord_dict, _, vals in xarray_var_iter(posterior.posterior, combined=True):
             if coord_dict:
-                key = key + ".{}".format(list(coord_dict.values())[0] + 1)
+                key = key + f".{list(coord_dict.values())[0] + 1}"
             results[key] = {func_name: func(vals) for func_name, func in funcs.items()}
         arviz_data = pd.DataFrame.from_dict(results).T.sort_index(axis=1).sort_index(axis=0)
 
@@ -303,7 +302,7 @@ class TestDiagnostics:
             else:
                 ess_value = ess(data, method=method, relative=relative)
             assert not np.isnan(ess_value)
-        # test following only once tests are runned
+        # test following only once tests are run
         if (method == "bulk") and (not relative) and (chain is None) and (draw == 4):
             if use_nan:
                 assert np.isnan(_ess(data))
@@ -418,7 +417,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("draws", (3, 4, 100))
     @pytest.mark.parametrize("chains", (None, 1, 2))
     def test_multichain_summary_array(self, draws, chains):
-        """Test multichain statistics against invidual functions."""
+        """Test multichain statistics against individual functions."""
         if chains is None:
             ary = np.random.randn(draws)
         else:
@@ -426,16 +425,12 @@ class TestDiagnostics:
 
         mcse_mean_hat = mcse(ary, method="mean")
         mcse_sd_hat = mcse(ary, method="sd")
-        ess_mean_hat = ess(ary, method="mean")
-        ess_sd_hat = ess(ary, method="sd")
         ess_bulk_hat = ess(ary, method="bulk")
         ess_tail_hat = ess(ary, method="tail")
         rhat_hat = _rhat_rank(ary)
         (
             mcse_mean_hat_,
             mcse_sd_hat_,
-            ess_mean_hat_,
-            ess_sd_hat_,
             ess_bulk_hat_,
             ess_tail_hat_,
             rhat_hat_,
@@ -445,8 +440,6 @@ class TestDiagnostics:
                 (
                     mcse_mean_hat,
                     mcse_sd_hat,
-                    ess_mean_hat,
-                    ess_sd_hat,
                     ess_bulk_hat,
                     ess_tail_hat,
                     rhat_hat,
@@ -456,8 +449,6 @@ class TestDiagnostics:
                 (
                     mcse_mean_hat_,
                     mcse_sd_hat_,
-                    ess_mean_hat_,
-                    ess_sd_hat_,
                     ess_bulk_hat_,
                     ess_tail_hat_,
                     rhat_hat_,
@@ -466,8 +457,6 @@ class TestDiagnostics:
         else:
             assert_almost_equal(mcse_mean_hat, mcse_mean_hat_)
             assert_almost_equal(mcse_sd_hat, mcse_sd_hat_)
-            assert_almost_equal(ess_mean_hat, ess_mean_hat_)
-            assert_almost_equal(ess_sd_hat, ess_sd_hat_)
             assert_almost_equal(ess_bulk_hat, ess_bulk_hat_)
             assert_almost_equal(ess_tail_hat, ess_tail_hat_)
             if chains in (None, 1):
@@ -475,31 +464,6 @@ class TestDiagnostics:
                 assert np.isnan(rhat_hat_)
             else:
                 assert round(rhat_hat, 3) == round(rhat_hat_, 3)
-
-    def test_geweke(self):
-        first = 0.1
-        last = 0.5
-        intervals = 100
-        data = np.random.randn(100000)
-        gw_stat = geweke(data, first, last, intervals)
-
-        # all geweke values should be between -1 and 1 for this many draws from a
-        # normal distribution
-        assert ((gw_stat[:, 1] > -1) | (gw_stat[:, 1] < 1)).all()
-
-        assert gw_stat.shape[0] == intervals
-        assert 100000 * last - gw_stat[:, 0].max() == 1
-
-    def test_geweke_bad_interval(self):
-        # lower bound
-        with pytest.raises(ValueError):
-            geweke(np.random.randn(10), first=0)
-        # upper bound
-        with pytest.raises(ValueError):
-            geweke(np.random.randn(10), last=1)
-        # sum larger than 1
-        with pytest.raises(ValueError):
-            geweke(np.random.randn(10), first=0.9, last=0.9)
 
     def test_ks_summary(self):
         """Instead of psislw data, this test uses fake data."""

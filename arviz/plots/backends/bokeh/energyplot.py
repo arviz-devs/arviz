@@ -45,7 +45,7 @@ def plot_energy(
     fill_kwargs = {} if fill_kwargs is None else fill_kwargs
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("line_width", line_width)
-    if kind in {"hist", "histogram"}:
+    if kind == "hist":
         legend = False
 
     if ax is None:
@@ -62,7 +62,7 @@ def plot_energy(
     if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
         fill_color[1].startswith("C") and len(fill_color[1]) == 2
     ):
-        fill_color = tuple([_colors[int(color[1:]) % 10] for color in fill_color])
+        fill_color = tuple((_colors[int(color[1:]) % 10] for color in fill_color))
     elif fill_color[0].startswith("C") and len(fill_color[0]) == 2:
         fill_color = tuple([_colors[int(fill_color[0][1:]) % 10]] + list(fill_color[1:]))
     elif fill_color[1].startswith("C") and len(fill_color[1]) == 2:
@@ -103,7 +103,7 @@ def plot_energy(
                 )
             )
 
-    elif kind in {"hist", "histogram"}:
+    elif kind == "hist":
         hist_kwargs = plot_kwargs.copy()
         hist_kwargs.update(**fill_kwargs)
 
@@ -122,7 +122,7 @@ def plot_energy(
             )
 
     else:
-        raise ValueError("Plot type {} not recognized.".format(kind))
+        raise ValueError(f"Plot type {kind} not recognized.")
 
     if bfmi:
         for idx, val in enumerate(e_bfmi(energy)):
@@ -131,8 +131,7 @@ def plot_energy(
                 y=int(figsize[1] * dpi * 0.73) - 20 * idx,
                 x_units="screen",
                 y_units="screen",
-                text="chain {:>2} BFMI = {:.2f}".format(idx, val),
-                render_mode="css",
+                text=f"chain {idx:>2} BFMI = {val:.2f}",
                 border_line_color=None,
                 border_line_alpha=0.0,
                 background_fill_color="white",

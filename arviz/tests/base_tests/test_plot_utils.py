@@ -8,19 +8,22 @@ import xarray as xr
 from ...data import from_dict
 from ...plots.backends.matplotlib import dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 from ...plots.plot_utils import (
+    compute_ranks,
     filter_plotters_list,
     format_sig_figs,
     get_plotting_function,
     make_2d,
     set_bokeh_circular_ticks_labels,
     vectorized_to_hex,
-    xarray_to_ndarray,
-    xarray_var_iter,
 )
 from ...rcparams import rc_context
+from ...sel_utils import xarray_sel_iter, xarray_to_ndarray
 from ...stats.density_utils import get_bins
 from ...utils import get_coords
 from ..helpers import running_on_ci
+
+# Check if Bokeh is installed
+bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
 
 
 @pytest.mark.parametrize(
@@ -86,7 +89,7 @@ def test_dataset_to_numpy_combined(sample_dataset):
     assert (data[var_names.index("tau")] == tau.reshape(1, 6)).all()
 
 
-def test_xarray_var_iter_ordering():
+def test_xarray_sel_iter_ordering():
     """Assert that coordinate names stay the provided order"""
     coords = list("dcba")
     data = from_dict(  # pylint: disable=no-member
@@ -95,21 +98,21 @@ def test_xarray_var_iter_ordering():
         dims={"x": ["in_order"]},
     ).posterior
 
-    coord_names = [sel["in_order"] for _, sel, _ in xarray_var_iter(data)]
+    coord_names = [sel["in_order"] for _, sel, _ in xarray_sel_iter(data)]
     assert coord_names == coords
 
 
-def test_xarray_var_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
+def test_xarray_sel_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are combined"""
     _, _, data = sample_dataset
-    var_names = [var for (var, _, _) in xarray_var_iter(data, var_names=None, combined=True)]
+    var_names = [var for (var, _, _) in xarray_sel_iter(data, var_names=None, combined=True)]
     assert set(var_names) == {"mu", "tau"}
 
 
-def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
+def test_xarray_sel_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are not combined"""
     _, _, data = sample_dataset
-    var_names = [(var, selection) for (var, selection, _) in xarray_var_iter(data, var_names=None)]
+    var_names = [(var, selection) for (var, selection, _) in xarray_sel_iter(data, var_names=None)]
 
     assert len(var_names) == 4
     for var_name in var_names:
@@ -121,13 +124,13 @@ def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable
         ]
 
 
-def test_xarray_var_data_array(sample_dataset):  # pylint: disable=invalid-name
+def test_xarray_sel_data_array(sample_dataset):  # pylint: disable=invalid-name
     """Assert that varname order stays consistent when chains are combined
 
     Touches code that is hard to reach.
     """
     _, _, data = sample_dataset
-    var_names = [var for (var, _, _) in xarray_var_iter(data.mu, var_names=None, combined=True)]
+    var_names = [var for (var, _, _) in xarray_sel_iter(data.mu, var_names=None, combined=True)]
     assert set(var_names) == {"mu"}
 
 
@@ -139,7 +142,12 @@ class TestCoordsExceptions:
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match="Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords(data, coords)
 
@@ -168,7 +176,12 @@ class TestCoordsExceptions:
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match=r"data\[1\]:.+Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"data\[1\]:.+Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords((data, data), ({"draw": [0, 1]}, coords))
 
@@ -200,14 +213,14 @@ def test_filter_plotter_list_warning():
 
 
 @pytest.mark.skipif(
-    (importlib.util.find_spec("bokeh") is None) & ~running_on_ci(),
+    not (bokeh_installed or running_on_ci()),
     reason="test requires bokeh which is not installed",
 )
 def test_bokeh_import():
     """Tests that correct method is returned on bokeh import"""
     plot = get_plotting_function("plot_dist", "distplot", "bokeh")
 
-    from arviz.plots.backends.bokeh.distplot import plot_dist
+    from ...plots.backends.bokeh.distplot import plot_dist
 
     assert plot is plot_dist
 
@@ -278,7 +291,7 @@ def test_mpl_dealiase_sel_kwargs():
 
 
 @pytest.mark.skipif(
-    (importlib.util.find_spec("bokeh") is None) & ~running_on_ci(),
+    not (bokeh_installed or running_on_ci()),
     reason="test requires bokeh which is not installed",
 )
 def test_bokeh_dealiase_sel_kwargs():
@@ -302,12 +315,8 @@ def test_bokeh_dealiase_sel_kwargs():
     assert res["line_color"] == "red"
 
 
-# Check if Bokeh is installed
-bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
-
-
 @pytest.mark.skipif(
-    not (bokeh_installed | running_on_ci()),
+    not (bokeh_installed or running_on_ci()),
     reason="test requires bokeh which is not installed",
 )
 def test_set_bokeh_circular_ticks_labels():
@@ -322,3 +331,20 @@ def test_set_bokeh_circular_ticks_labels():
     assert len(renderers) == 3
     assert renderers[2].data_source.data["text"] == labels
     assert len(renderers[0].data_source.data["start_angle"]) == len(labels)
+
+
+def test_compute_ranks():
+    pois_data = np.array([[5, 4, 1, 4, 0], [2, 8, 2, 1, 1]])
+    expected = np.array([[9.0, 7.0, 3.0, 8.0, 1.0], [5.0, 10.0, 6.0, 2.0, 4.0]])
+    ranks = compute_ranks(pois_data)
+    np.testing.assert_equal(ranks, expected)
+
+    norm_data = np.array(
+        [
+            [0.2644187, -1.3004813, -0.80428456, 1.01319068, 0.62631143],
+            [1.34498018, -0.13428933, -0.69855487, -0.9498981, -0.34074092],
+        ]
+    )
+    expected = np.array([[7.0, 1.0, 3.0, 9.0, 8.0], [10.0, 6.0, 4.0, 2.0, 5.0]])
+    ranks = compute_ranks(norm_data)
+    np.testing.assert_equal(ranks, expected)

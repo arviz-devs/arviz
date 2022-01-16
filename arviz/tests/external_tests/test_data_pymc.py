@@ -3,13 +3,15 @@ from sys import version_info
 from typing import Dict, Tuple
 
 import numpy as np
+import pkg_resources
 import packaging
 import pandas as pd
 import pytest
 from numpy import ma
 
-from arviz import (  # pylint: disable=wrong-import-position
+from ... import (  # pylint: disable=wrong-import-position
     InferenceData,
+    from_dict,
     from_pymc3,
     from_pymc3_predictions,
 )
@@ -23,8 +25,20 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     load_cached_models,
 )
 
-# Skip all tests if pymc3 not installed
-pm = importorskip("pymc3")
+# Skip all tests unless running on pymc3 v3
+try:
+    pymc3_version = pkg_resources.get_distribution("pymc3").version
+    PYMC3_V4 = packaging.version.parse(pymc3_version) >= packaging.version.parse("4.0")
+    PYMC3_installed = True
+    import pymc3 as pm
+except pkg_resources.DistributionNotFound:
+    PYMC3_V4 = False
+    PYMC3_installed = False
+
+pytestmark = pytest.mark.skipif(
+    not PYMC3_installed or PYMC3_V4,
+    reason="Run tests only if pymc3 installed and its version is <4.0",
+)
 
 
 class TestDataPyMC3:
@@ -107,7 +121,7 @@ class TestDataPyMC3:
                 )
 
     def test_from_pymc_predictions(self, data, eight_schools_params):
-        "Test that we can add predictions to a previously-existing InferenceData."
+        """Test that we can add predictions to a previously-existing InferenceData."""
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
             "sample_stats": ["diverging", "lp"],
@@ -139,6 +153,15 @@ class TestDataPyMC3:
             assert ivalues.shape[0] == 1  # one chain in predictions
             assert np.all(np.isclose(ivalues[0], values))
 
+    def test_from_pymc_trace_inference_data(self):
+        """Check if the error is raised successfully after passing InferenceData as trace"""
+        idata = from_dict(
+            posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+        )
+        assert isinstance(idata, InferenceData)
+        with pytest.raises(ValueError):
+            from_pymc3(trace=idata, model=pm.Model())
+
     def test_from_pymc_predictions_new(self, data, eight_schools_params):
         # check creating new
         inference_data, posterior_predictive = self.make_predictions_inference_data(
@@ -147,7 +170,7 @@ class TestDataPyMC3:
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
             "predictions": ["obs"],
-            "~observed_data": "",
+            "~observed_data": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
@@ -162,7 +185,7 @@ class TestDataPyMC3:
             elif len(ivalues.shape) == 2:
                 ivalues_arr = np.reshape(ivalues.values, (ivalues.shape[0] * ivalues.shape[1]))
             else:
-                raise ValueError("Unexpected values shape for variable %s" % key)
+                raise ValueError(f"Unexpected values shape for variable {key}")
             assert (ivalues.shape[0] == 2) and (ivalues.shape[1] == 500)
             assert values.shape[0] == 1000
             assert np.all(np.isclose(ivalues_arr, values))
@@ -329,7 +352,7 @@ class TestDataPyMC3:
         }
         if not log_likelihood:
             test_dict.pop("log_likelihood")
-            test_dict["~log_likelihood"] = []
+            test_dict["~log_likelihood"] = [""]
         if isinstance(log_likelihood, list):
             test_dict["log_likelihood"] = ["y1", "~y2"]
 
@@ -357,7 +380,8 @@ class TestDataPyMC3:
         assert not fails
         assert inference_data.observed_data.value.dtype.kind == "f"
 
-    def test_multiobservedrv_to_observed_data(self):
+    @pytest.mark.parametrize("multiobs", (True, False))
+    def test_multiobservedrv_to_observed_data(self, multiobs):
         # fake regression data, with weights (W)
         np.random.seed(2019)
         N = 100
@@ -379,16 +403,18 @@ class TestDataPyMC3:
                 "y_logp", weighted_normal, observed={"y": Y, "w": W}
             )
             trace = pm.sample(20, tune=20)
-            idata = from_pymc3(trace)
+            idata = from_pymc3(trace, density_dist_obs=multiobs)
+        multiobs_str = "" if multiobs else "~"
         test_dict = {
             "posterior": ["a", "b", "sigma"],
             "sample_stats": ["lp"],
             "log_likelihood": ["y_logp"],
-            "observed_data": ["y", "w"],
+            f"{multiobs_str}observed_data": ["y", "w"],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
-        assert idata.observed_data.y.dtype.kind == "f"
+        if multiobs:
+            assert idata.observed_data.y.dtype.kind == "f"
 
     def test_single_observation(self):
         with pm.Model():
@@ -450,7 +476,7 @@ class TestDataPyMC3:
             # assert predictive_trace["obs"].shape == (400, 2)
             # but the shape seems to vary between pymc3 versions
             inference_data = from_pymc3_predictions(predictive_trace, posterior_trace=trace)
-        test_dict = {"posterior": ["beta"], "~observed_data": ""}
+        test_dict = {"posterior": ["beta"], "~observed_data": [""]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails, "Posterior data not copied over as expected."
         test_dict = {"predictions": ["obs"]}
@@ -508,7 +534,7 @@ class TestDataPyMC3:
             "prior_predictive": ["obs"],
         }
         if use_context:
-            with model:
+            with model:  # pylint: disable=not-context-manager
                 inference_data = from_pymc3(prior=prior)
         else:
             inference_data = from_pymc3(prior=prior, model=model)
@@ -527,10 +553,28 @@ class TestDataPyMC3:
             inference_data = from_pymc3(prior=prior)
         test_dict = {
             "prior": ["beta", "obs"],
-            "~prior_predictive": [],
+            "~prior_predictive": [""],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+
+    def test_multivariate_observations(self):
+        coords = {"direction": ["x", "y", "z"], "experiment": np.arange(20)}
+        data = np.random.multinomial(20, [0.2, 0.3, 0.5], size=20)
+        with pm.Model(coords=coords):
+            p = pm.Beta("p", 1, 1, shape=(3,))
+            pm.Multinomial("y", 20, p, dims=("experiment", "direction"), observed=data)
+            idata = pm.sample(draws=50, tune=100, return_inferencedata=True)
+        test_dict = {
+            "posterior": ["p"],
+            "sample_stats": ["lp"],
+            "log_likelihood": ["y"],
+            "observed_data": ["y"],
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert "direction" not in idata.log_likelihood.dims
+        assert "direction" in idata.observed_data.dims
 
 
 class TestPyMC3WarmupHandling:
@@ -562,8 +606,8 @@ class TestPyMC3WarmupHandling:
             f"{post_prefix}sample_stats": ["~tune", "accept"],
             f"{warmup_prefix}warmup_posterior": ["u1", "n1"],
             f"{warmup_prefix}warmup_sample_stats": ["~tune"],
-            "~warmup_log_likelihood": [],
-            "~log_likelihood": [],
+            "~warmup_log_likelihood": [""],
+            "~log_likelihood": [""],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
@@ -600,8 +644,8 @@ class TestPyMC3WarmupHandling:
         test_dict = {
             "posterior": ["u1", "n1"],
             "sample_stats": ["~tune", "accept"],
-            "~warmup_posterior": [],
-            "~warmup_sample_stats": [],
+            "~warmup_posterior": [""],
+            "~warmup_sample_stats": [""],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
@@ -646,8 +690,8 @@ class TestPyMC3WarmupHandling:
             test_dict = {
                 "posterior": ["u1", "n1"],
                 "sample_stats": ["~tune", "accept"],
-                "~warmup_posterior": [],
-                "~warmup_sample_stats": [],
+                "~warmup_posterior": [""],
+                "~warmup_sample_stats": [""],
             }
             fails = check_multiple_attrs(test_dict, idata)
             assert not fails

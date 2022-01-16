@@ -6,14 +6,16 @@ from itertools import cycle
 import bokeh.plotting as bkp
 import matplotlib.pyplot as plt
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, DataRange1d, Span
+from bokeh.models import ColumnDataSource, DataRange1d, Span
+from bokeh.models.glyphs import Scatter
 from bokeh.models.annotations import Title
 
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size
 from ...rankplot import plot_rank
 from .. import show_layout
 from . import backend_kwarg_defaults, dealiase_sel_kwargs
+from ....sel_utils import xarray_var_iter
 
 
 def plot_trace(
@@ -31,6 +33,7 @@ def plot_trace(
     combined,
     chain_prop,
     legend,
+    labeller,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
@@ -167,7 +170,7 @@ def plot_trace(
     cds_var_groups = {}
     draw_name = "draw"
 
-    for var_name, selection, value in list(
+    for var_name, selection, isel, value in list(
         xarray_var_iter(data, var_names=var_names, combined=True)
     ):
         if selection:
@@ -199,12 +202,12 @@ def plot_trace(
     while any(key == draw_name for key in cds_data[0]):
         draw_name += "w"
 
-    for chain_idx in cds_data:
-        cds_data[chain_idx][draw_name] = data.draw.values
+    for chain in cds_data.values():
+        chain[draw_name] = data.draw.values
 
     cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
-    for idx, (var_name, selection, value) in enumerate(plotters):
+    for idx, (var_name, selection, isel, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
@@ -269,7 +272,7 @@ def plot_trace(
 
         for col in (0, 1):
             _title = Title()
-            _title.text = make_label(var_name, selection)
+            _title.text = labeller.make_label_vert(var_name, selection, isel)
             axes[idx, col].title = _title
             axes[idx, col].y_range = DataRange1d(
                 bounds=backend_config["bounds_y_range"], min_interval=0.1
@@ -337,11 +340,14 @@ def plot_trace(
                         y_div_trace = value.max()
                     else:
                         y_div_trace = value.min()
-                    glyph_density = Dash(x="y", y=0.0, **div_density_kwargs)
-                    glyph_trace = Dash(x="x", y=y_div_trace, **div_trace_kwargs)
+                    glyph_density = Scatter(x="y", y=0.0, marker="dash", **div_density_kwargs)
+                    if kind == "trace":
+                        glyph_trace = Scatter(
+                            x="x", y=y_div_trace, marker="dash", **div_trace_kwargs
+                        )
+                        axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
-                    axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
     show_layout(axes, show)
 
@@ -370,12 +376,12 @@ def _plot_chains_bokeh(
     for chain_idx, cds in data.items():
         if kind == "trace":
             if legend:
-                trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
+                trace_kwargs["legend_label"] = f"chain {chain_idx}"
             ax_trace.line(
                 x=x_name,
                 y=y_name,
                 source=cds,
-                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
+                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx),
             )
             if marker:
                 ax_trace.circle(
@@ -384,12 +390,12 @@ def _plot_chains_bokeh(
                     source=cds,
                     radius=0.30,
                     alpha=0.5,
-                    **dealiase_sel_kwargs({}, chain_prop, chain_idx)
+                    **dealiase_sel_kwargs({}, chain_prop, chain_idx),
                 )
         if not combined:
             rug_kwargs["cds"] = cds
             if legend:
-                plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
+                plot_kwargs["legend_label"] = f"chain {chain_idx}"
             plot_dist(
                 cds.data[y_name],
                 ax=ax_density,

@@ -5,6 +5,7 @@ from bokeh.models.annotations import Title
 from scipy import stats
 
 from ....stats.density_utils import kde
+from ....stats.stats_utils import smooth_data
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
@@ -29,11 +30,13 @@ def plot_bpv(
     bpv,
     plot_mean,
     reference,
+    mse,
     n_ref,
     hdi_prob,
     color,
     figsize,
     textsize,
+    labeller,
     plot_ref_kwargs,
     backend_kwargs,
     show,
@@ -81,17 +84,19 @@ def plot_bpv(
             )
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
-        var_name, _, obs_vals = obs_plotters[i]
-        pp_var_name, _, pp_vals = pp_plotters[i]
+        var_name, sel, isel, obs_vals = obs_plotters[i]
+        pp_var_name, _, _, pp_vals = pp_plotters[i]
 
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
+
+        if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
+            obs_vals, pp_vals = smooth_data(obs_vals, pp_vals)
 
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
             x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
-            # ax_i.set_yticks([])
             if reference is not None:
                 dist = stats.beta(obs_vals.size / 2, obs_vals.size / 2)
                 if reference == "analytical":
@@ -104,8 +109,8 @@ def plot_bpv(
                     x_ss, u_dens = sample_reference_distribution(
                         dist,
                         (
-                            n_ref,
                             tstat_pit_dens.size,
+                            n_ref,
                         ),
                     )
                     ax_i.multi_line(
@@ -115,12 +120,12 @@ def plot_bpv(
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
             x_s, tstat_pit_dens = kde(tstat_pit)
-            ax_i.line(x_s, tstat_pit_dens, line_color=color)
+            ax_i.line(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
-                    hdi = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
-                    hdi_odds = (hdi / (1 - hdi), (1 - hdi) / hdi)
+                    hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
+                    hdi_odds = (hdi_ / (1 - hdi_), (1 - hdi_) / hdi_)
                     ax_i.add_layout(
                         BoxAnnotation(
                             bottom=hdi_odds[1],
@@ -136,6 +141,9 @@ def plot_bpv(
                     x_ss, u_dens = sample_reference_distribution(dist, (tstat_pit_dens.size, n_ref))
                     for x_ss_i, u_dens_i in zip(x_ss.T, u_dens.T):
                         ax_i.line(x_ss_i, u_dens_i, line_width=linewidth, **plot_ref_kwargs)
+            if mse:
+                ax_i.line(0, 0, legend_label=f"mse={np.mean((1 - tstat_pit_dens)**2) * 100:.2f}")
+
             ax_i.line(0, 0)
         else:
             if t_stat in ["mean", "median", "std"]:
@@ -168,12 +176,8 @@ def plot_bpv(
                     obs_vals.mean(), 0, fill_color=color, line_color="black", size=markersize
                 )
 
-        if var_name != pp_var_name:
-            xlabel = "{} / {}".format(var_name, pp_var_name)
-        else:
-            xlabel = var_name
         _title = Title()
-        _title.text = xlabel
+        _title.text = labeller.make_pp_label(var_name, pp_var_name, sel, isel)
         ax_i.title = _title
         size = str(int(ax_labelsize))
         ax_i.title.text_font_size = f"{size}pt"

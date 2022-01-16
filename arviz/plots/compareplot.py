@@ -1,6 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
 
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
 
@@ -13,6 +14,7 @@ def plot_compare(
     order_by_rank=True,
     figsize=None,
     textsize=None,
+    labeller=None,
     plot_kwargs=None,
     ax=None,
     backend=None,
@@ -34,7 +36,7 @@ def plot_compare(
     Parameters
     ----------
     comp_df : pd.DataFrame
-        Result of the `az.compare()` method
+        Result of the :func:`arviz.compare` method
     insample_dev : bool, optional
         Plot in-sample deviance, that is the value of the information criteria without the
         penalization given by the effective number of parameters (pIC). Defaults to True
@@ -42,14 +44,18 @@ def plot_compare(
         Plot the standard error of the information criteria estimate. Defaults to True
     plot_ic_diff : bool, optional
         Plot standard error of the difference in information criteria between each model
-         and the top-ranked model. Defaults to True
+        and the top-ranked model. Defaults to True
     order_by_rank : bool
         If True (default) ensure the best model is used as reference.
     figsize : tuple, optional
         If None, size is (6, num of models) inches
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
+    labeller : labeller instance, optional
+        Class providing the method ``model_name_to_str`` to generate the labels in
+        the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     plot_kwargs : dict, optional
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
@@ -59,8 +65,9 @@ def plot_compare(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
 
@@ -68,6 +75,12 @@ def plot_compare(
     -------
     axes : matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+    waic : Compute the widely applicable information criterion.
 
     Examples
     --------
@@ -92,10 +105,19 @@ def plot_compare(
     if plot_kwargs is None:
         plot_kwargs = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     yticks_pos, step = np.linspace(0, -1, (comp_df.shape[0] * 2) - 1, retstep=True)
     yticks_pos[1::2] = yticks_pos[1::2] + step / 2
+    labels = [labeller.model_name_to_str(model_name) for model_name in comp_df.index]
 
-    yticks_labels = [""] * len(yticks_pos)
+    if plot_ic_diff:
+        yticks_labels = [""] * len(yticks_pos)
+        yticks_labels[0] = labels[0]
+        yticks_labels[2::2] = labels[1:]
+    else:
+        yticks_labels = labels
 
     _information_criterion = ["loo", "waic"]
     column_index = [c.lower() for c in comp_df.columns]

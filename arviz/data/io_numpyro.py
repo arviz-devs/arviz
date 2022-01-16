@@ -1,11 +1,12 @@
 """NumPyro-specific conversion code."""
 import logging
+from typing import Callable, Optional
 
 import numpy as np
-import xarray as xr
 
 from .. import utils
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from ..rcparams import rcParams
+from .base import dict_to_dataset, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ class NumPyroConverter:
 
     # pylint: disable=too-many-instance-attributes
 
-    model = None  # type: Optional[callable]
+    model = None  # type: Optional[Callable]
     nchains = None  # type: int
     ndraws = None  # type: int
 
@@ -29,10 +30,12 @@ class NumPyroConverter:
         predictions=None,
         constant_data=None,
         predictions_constant_data=None,
+        log_likelihood=None,
+        index_origin=None,
         coords=None,
         dims=None,
         pred_dims=None,
-        num_chains=1
+        num_chains=1,
     ):
         """Convert NumPyro data into an InferenceData object.
 
@@ -50,6 +53,7 @@ class NumPyroConverter:
             Dictionary containing constant data variables mapped to their values.
         predictions_constant_data: dict
             Constant data used for out-of-sample predictions.
+        index_origin : int, optional
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
@@ -68,6 +72,10 @@ class NumPyroConverter:
         self.predictions = predictions
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
+        self.index_origin = rcParams["data.index_origin"] if index_origin is None else index_origin
         self.coords = coords
         self.dims = dims
         self.pred_dims = pred_dims
@@ -84,11 +92,13 @@ class NumPyroConverter:
                 # (e.g. f(x) = x ** 2)
                 tree_flatten_samples = jax.tree_util.tree_flatten(samples)[0]
                 samples = {
-                    "Param:{}".format(i): jax.device_get(v)
-                    for i, v in enumerate(tree_flatten_samples)
+                    f"Param:{i}": jax.device_get(v) for i, v in enumerate(tree_flatten_samples)
                 }
             self._samples = samples
-            self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
+            self.nchains, self.ndraws = (
+                posterior.num_chains,
+                posterior.num_samples // posterior.thinning,
+            )
             self.model = self.posterior.sampler.model
             # model arguments and keyword arguments
             self._args = self.posterior._args  # pylint: disable=protected-access
@@ -113,7 +123,11 @@ class NumPyroConverter:
 
         observations = {}
         if self.model is not None:
-            seeded_model = numpyro.handlers.seed(self.model, jax.random.PRNGKey(0))
+            # we need to use an init strategy to generate random samples for ImproperUniform sites
+            seeded_model = numpyro.handlers.substitute(
+                numpyro.handlers.seed(self.model, jax.random.PRNGKey(0)),
+                substitute_fn=numpyro.infer.init_to_sample,
+            )
             trace = numpyro.handlers.trace(seeded_model).get_trace(*self._args, **self._kwargs)
             observations = {
                 name: site["value"]
@@ -126,17 +140,22 @@ class NumPyroConverter:
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         data = self._samples
-        return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(
+            data,
+            library=self.numpyro,
+            coords=self.coords,
+            dims=self.dims,
+            index_origin=self.index_origin,
+        )
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from NumPyro posterior."""
-        # match PyMC3 stat names
         rename_key = {
             "potential_energy": "lp",
             "adapt_state.step_size": "step_size",
-            "num_steps": "tree_size",
-            "accept_prob": "mean_tree_accept",
+            "num_steps": "n_steps",
+            "accept_prob": "acceptance_rate",
         }
         data = {}
         for stat, value in self.posterior.get_extra_fields(group_by_chain=True).items():
@@ -146,13 +165,21 @@ class NumPyroConverter:
             value = value.copy()
             data[name] = value
             if stat == "num_steps":
-                data["depth"] = np.log2(value).astype(int) + 1
-        return dict_to_dataset(data, library=self.numpyro, dims=None, coords=self.coords)
+                data["tree_depth"] = np.log2(value).astype(int) + 1
+        return dict_to_dataset(
+            data,
+            library=self.numpyro,
+            dims=None,
+            coords=self.coords,
+            index_origin=self.index_origin,
+        )
 
     @requires("posterior")
     @requires("model")
     def log_likelihood_to_xarray(self):
         """Extract log likelihood from NumPyro posterior."""
+        if not self.log_likelihood:
+            return None
         data = {}
         if self.observations is not None:
             samples = self.posterior.get_samples(group_by_chain=False)
@@ -162,7 +189,14 @@ class NumPyroConverter:
             for obs_name, log_like in log_likelihood_dict.items():
                 shape = (self.nchains, self.ndraws) + log_like.shape[1:]
                 data[obs_name] = np.reshape(log_like.copy(), shape)
-        return dict_to_dataset(data, library=self.numpyro, dims=self.dims, coords=self.coords)
+        return dict_to_dataset(
+            data,
+            library=self.numpyro,
+            dims=self.dims,
+            coords=self.coords,
+            index_origin=self.index_origin,
+            skip_event_dims=True,
+        )
 
     def translate_posterior_predictive_dict_to_xarray(self, dct, dims):
         """Convert posterior_predictive or prediction samples to xarray."""
@@ -179,7 +213,13 @@ class NumPyroConverter:
                     "posterior predictive shape not compatible with number of chains and draws. "
                     "This can mean that some draws or even whole chains are not represented."
                 )
-        return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=dims)
+        return dict_to_dataset(
+            data,
+            library=self.numpyro,
+            coords=self.coords,
+            dims=dims,
+            index_origin=self.index_origin,
+        )
 
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
@@ -215,6 +255,7 @@ class NumPyroConverter:
                     library=self.numpyro,
                     coords=self.coords,
                     dims=self.dims,
+                    index_origin=self.index_origin,
                 )
             )
         return priors_dict
@@ -223,47 +264,38 @@ class NumPyroConverter:
     @requires("model")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
-        observed_data = {}
-        for name, vals in self.observations.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(name)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, name, dims=val_dims, coords=self.coords
-            )
-            # filter coords based on the dims
-            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.numpyro))
-
-    def convert_constant_data_to_xarray(self, dct, dims):
-        """Convert constant_data or predictions_constant_data to xarray."""
-        if dims is None:
-            dims = {}
-        constant_data = {}
-        for name, vals in dct.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(name)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, name, dims=val_dims, coords=self.coords
-            )
-            # filter coords based on the dims
-            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.numpyro))
+        return dict_to_dataset(
+            self.observations,
+            library=self.numpyro,
+            dims=self.dims,
+            coords=self.coords,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
         """Convert constant_data to xarray."""
-        return self.convert_constant_data_to_xarray(self.constant_data, self.dims)
+        return dict_to_dataset(
+            self.constant_data,
+            library=self.numpyro,
+            dims=self.dims,
+            coords=self.coords,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("predictions_constant_data")
     def predictions_constant_data_to_xarray(self):
         """Convert predictions_constant_data to xarray."""
-        return self.convert_constant_data_to_xarray(self.predictions_constant_data, self.pred_dims)
+        return dict_to_dataset(
+            self.predictions_constant_data,
+            library=self.numpyro,
+            dims=self.pred_dims,
+            coords=self.coords,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -295,15 +327,17 @@ def from_numpyro(
     predictions=None,
     constant_data=None,
     predictions_constant_data=None,
+    log_likelihood=None,
+    index_origin=None,
     coords=None,
     dims=None,
     pred_dims=None,
-    num_chains=1
+    num_chains=1,
 ):
     """Convert NumPyro data into an InferenceData object.
 
     For a usage example read the
-    :doc:`Cookbook section on from_numpyro </notebooks/InferenceDataCookbook>`
+    :ref:`Creating InferenceData section on from_numpyro <creating_InferenceData>`
 
     Parameters
     ----------
@@ -319,6 +353,7 @@ def from_numpyro(
         Dictionary containing constant data variables mapped to their values.
     predictions_constant_data: dict
         Constant data used for out-of-sample predictions.
+    index_origin : int, optional
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
@@ -335,6 +370,8 @@ def from_numpyro(
         predictions=predictions,
         constant_data=constant_data,
         predictions_constant_data=predictions_constant_data,
+        log_likelihood=log_likelihood,
+        index_origin=index_origin,
         coords=coords,
         dims=dims,
         pred_dims=pred_dims,

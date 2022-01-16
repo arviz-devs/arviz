@@ -1,8 +1,11 @@
 """Matplotlib kdeplot."""
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import _pylab_helpers
+import matplotlib.ticker as mticker
 
-from ...plot_utils import _scale_fig_size
+
+from ...plot_utils import _scale_fig_size, _init_kwargs_dict
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
@@ -40,8 +43,7 @@ def plot_kde(
     return_glyph,  # pylint: disable=unused-argument
 ):
     """Matplotlib kde plot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
@@ -56,10 +58,14 @@ def plot_kde(
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        _, ax = create_axes_grid(
-            1,
-            backend_kwargs=backend_kwargs,
-        )
+        fig_manager = _pylab_helpers.Gcf.get_active()
+        if fig_manager is not None:
+            ax = fig_manager.canvas.figure.gca()
+        else:
+            _, ax = create_axes_grid(
+                1,
+                backend_kwargs=backend_kwargs,
+            )
 
     if values2 is None:
         plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
@@ -85,16 +91,18 @@ def plot_kde(
 
             if is_circular == "radians":
                 labels = [
-                    r"0",
-                    r"π/4",
-                    r"π/2",
-                    r"3π/4",
-                    r"π",
-                    r"5π/4",
-                    r"3π/2",
-                    r"7π/4",
+                    "0",
+                    f"{np.pi/4:.2f}",
+                    f"{np.pi/2:.2f}",
+                    f"{3*np.pi/4:.2f}",
+                    f"{np.pi:.2f}",
+                    f"{-3*np.pi/4:.2f}",
+                    f"{-np.pi/2:.2f}",
+                    f"{-np.pi/4:.2f}",
                 ]
 
+                ticks_loc = ax.get_xticks()
+                ax.xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
                 ax.set_xticklabels(labels)
 
             x = np.linspace(-np.pi, np.pi, len(density))
@@ -130,16 +138,18 @@ def plot_kde(
                 fill_x,
                 fill_y,
                 where=np.isin(fill_x, fill_x[idx], invert=True, assume_unique=True),
-                **fill_kwargs
+                **fill_kwargs,
             )
         else:
             fill_kwargs.setdefault("alpha", 0)
             if fill_kwargs.get("alpha") == 0:
-                ax.plot(x, density, label=label, **plot_kwargs)
+                label = plot_kwargs.setdefault("label", label)
+                ax.plot(x, density, **plot_kwargs)
                 fill_func(fill_x, fill_y, **fill_kwargs)
             else:
+                label = fill_kwargs.setdefault("label", label)
                 ax.plot(x, density, **plot_kwargs)
-                fill_func(fill_x, fill_y, label=label, **fill_kwargs)
+                fill_func(fill_x, fill_y, **fill_kwargs)
         if legend and label:
             ax.legend()
     else:
@@ -147,13 +157,12 @@ def plot_kde(
         contour_kwargs.setdefault("colors", "0.5")
         contourf_kwargs = matplotlib_kwarg_dealiaser(contourf_kwargs, "contour")
         pcolormesh_kwargs = matplotlib_kwarg_dealiaser(pcolormesh_kwargs, "pcolormesh")
+        pcolormesh_kwargs.setdefault("shading", "auto")
 
         g_s = complex(gridsize[0])
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
 
         ax.grid(False)
-        ax.set_xlim(xmin, xmax)
-        ax.set_ylim(ymin, ymax)
         if contour:
             qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
             qcs = ax.contour(x_x, y_y, density, **contour_kwargs)

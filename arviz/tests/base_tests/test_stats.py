@@ -40,6 +40,23 @@ def non_centered_eight():
     return non_centered_eight
 
 
+@pytest.fixture(scope="module")
+def multivariable_log_likelihood(centered_eight):
+    centered_eight = centered_eight.copy()
+    centered_eight.add_groups({"log_likelihood": centered_eight.sample_stats.log_likelihood})
+    centered_eight.log_likelihood = centered_eight.log_likelihood.rename_vars(
+        {"log_likelihood": "obs"}
+    )
+    new_arr = DataArray(
+        np.zeros(centered_eight.log_likelihood["obs"].values.shape),
+        dims=["chain", "draw", "school"],
+        coords=centered_eight.log_likelihood.coords,
+    )
+    centered_eight.log_likelihood["decoy"] = new_arr
+    delattr(centered_eight, "sample_stats")
+    return centered_eight
+
+
 def test_hdp():
     normal_sample = np.random.randn(5000000)
     interval = hdi(normal_sample)
@@ -48,7 +65,12 @@ def test_hdp():
 
 def test_hdp_2darray():
     normal_sample = np.random.randn(12000, 5)
-    result = hdi(normal_sample)
+    msg = (
+        r"hdi currently interprets 2d data as \(draw, shape\) but this will "
+        r"change in a future release to \(chain, draw\) for coherence with other functions"
+    )
+    with pytest.warns(FutureWarning, match=msg):
+        result = hdi(normal_sample)
     assert result.shape == (5, 2)
 
 
@@ -98,6 +120,22 @@ def test_hdi_multimodal():
     )
     intervals = hdi(normal_sample, multimodal=True)
     assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
+
+
+def test_hdi_multimodal_multivars():
+    size = 2500000
+    var1 = np.concatenate((np.random.normal(-4, 1, size), np.random.normal(2, 0.5, size)))
+    var2 = np.random.normal(8, 1, size * 2)
+    sample = Dataset(
+        {
+            "var1": (("chain", "draw"), var1[np.newaxis, :]),
+            "var2": (("chain", "draw"), var2[np.newaxis, :]),
+        },
+        coords={"chain": [0], "draw": np.arange(size * 2)},
+    )
+    intervals = hdi(sample, multimodal=True)
+    assert_array_almost_equal(intervals.var1, [[-5.8, -2.2], [0.9, 3.1]], 1)
+    assert_array_almost_equal(intervals.var2, [[6.1, 9.9], [np.nan, np.nan]], 1)
 
 
 def test_hdi_circular():
@@ -151,7 +189,7 @@ def test_compare_same(centered_eight, multidim_models, method, multidim):
 
 def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(ValueError):
         compare(model_dict, ic="Unknown", method="stacking")
     with pytest.raises(ValueError):
         compare(model_dict, ic="loo", method="Unknown")
@@ -163,7 +201,7 @@ def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
 def test_compare_different(centered_eight, non_centered_eight, ic, method, scale):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
     weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"]
-    assert weight["non_centered"] >= weight["centered"]
+    assert weight["non_centered"] > weight["centered"]
     assert_allclose(np.sum(weight), 1.0)
 
 
@@ -174,7 +212,7 @@ def test_compare_different_multidim(multidim_models, ic, method):
     weight = compare(model_dict, ic=ic, method=method)["weight"]
 
     # this should hold because the same seed is always used
-    assert weight["model_1"] >= weight["model_2"]
+    assert weight["model_1"] > weight["model_2"]
     assert_allclose(np.sum(weight), 1.0)
 
 
@@ -192,11 +230,59 @@ def test_compare_different_size(centered_eight, non_centered_eight):
         compare(model_dict, ic="waic", method="stacking")
 
 
+@pytest.mark.parametrize("ic", ["loo", "waic"])
+def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_centered_eight, ic):
+    compare_dict = {
+        "centered_eight": centered_eight,
+        "non_centered_eight": non_centered_eight,
+        "problematic": multivariable_log_likelihood,
+    }
+    with pytest.raises(TypeError, match="several log likelihood arrays"):
+        get_log_likelihood(compare_dict["problematic"])
+    with pytest.raises(TypeError, match=f"{ic}.*model problematic"):
+        compare(compare_dict, ic=ic)
+    assert compare(compare_dict, ic=ic, var_name="obs") is not None
+
+
+def test_summary_ndarray():
+    array = np.random.randn(4, 100, 2)
+    summary_df = summary(array)
+    assert summary_df.shape
+
+
 @pytest.mark.parametrize("var_names_expected", ((None, 10), ("mu", 1), (["mu", "tau"], 2)))
 def test_summary_var_names(centered_eight, var_names_expected):
     var_names, expected = var_names_expected
     summary_df = summary(centered_eight, var_names=var_names)
     assert len(summary_df.index) == expected
+
+
+@pytest.mark.parametrize("missing_groups", (None, "posterior", "prior"))
+def test_summary_groups(centered_eight, missing_groups):
+    if missing_groups == "posterior":
+        centered_eight = deepcopy(centered_eight)
+        del centered_eight.posterior
+    elif missing_groups == "prior":
+        centered_eight = deepcopy(centered_eight)
+        del centered_eight.posterior
+        del centered_eight.prior
+    if missing_groups == "prior":
+        with pytest.warns(UserWarning):
+            summary_df = summary(centered_eight)
+    else:
+        summary_df = summary(centered_eight)
+    assert summary_df.shape
+
+
+def test_summary_group_argument(centered_eight):
+    summary_df_posterior = summary(centered_eight, group="posterior")
+    summary_df_prior = summary(centered_eight, group="prior")
+    assert list(summary_df_posterior.index) != list(summary_df_prior.index)
+
+
+def test_summary_wrong_group(centered_eight):
+    with pytest.raises(TypeError, match=r"InferenceData does not contain group: InvalidGroup"):
+        summary(centered_eight, group="InvalidGroup")
 
 
 METRICS_NAMES = [
@@ -206,8 +292,6 @@ METRICS_NAMES = [
     "hdi_97%",
     "mcse_mean",
     "mcse_sd",
-    "ess_mean",
-    "ess_sd",
     "ess_bulk",
     "ess_tail",
     "r_hat",
@@ -229,38 +313,22 @@ def test_summary_fmt(centered_eight, fmt):
     assert summary(centered_eight, fmt=fmt) is not None
 
 
-@pytest.mark.parametrize("order", ["C", "F"])
-def test_summary_unpack_order(order):
-    data = from_dict({"a": np.random.randn(4, 100, 4, 5, 3)})
-    az_summary = summary(data, order=order, fmt="wide")
+def test_summary_labels():
+    coords1 = list("abcd")
+    coords2 = np.arange(1, 6)
+    data = from_dict(
+        {"a": np.random.randn(4, 100, 4, 5)},
+        coords={"dim1": coords1, "dim2": coords2},
+        dims={"a": ["dim1", "dim2"]},
+    )
+    az_summary = summary(data, fmt="wide")
     assert az_summary is not None
-    if order != "F":
-        first_index = 4
-        second_index = 5
-        third_index = 3
-    else:
-        first_index = 3
-        second_index = 5
-        third_index = 4
     column_order = []
-    for idx1 in range(first_index):
-        for idx2 in range(second_index):
-            for idx3 in range(third_index):
-                if order != "F":
-                    column_order.append("a[{},{},{}]".format(idx1, idx2, idx3))
-                else:
-                    column_order.append("a[{},{},{}]".format(idx3, idx2, idx1))
+    for coord1 in coords1:
+        for coord2 in coords2:
+            column_order.append(f"a[{coord1}, {coord2}]")
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
-
-
-@pytest.mark.parametrize("origin", [0, 1, 2, 3])
-def test_summary_index_origin(origin):
-    data = from_dict({"a": np.random.randn(2, 50, 10)})
-    az_summary = summary(data, index_origin=origin, fmt="wide")
-    assert az_summary is not None
-    for i, col in enumerate(list(az_summary.index)):
-        assert col == "a[{}]".format(i + origin)
 
 
 @pytest.mark.parametrize(
@@ -274,12 +342,12 @@ def test_summary_stat_func(centered_eight, stat_funcs):
 
 def test_summary_nan(centered_eight):
     centered_eight = deepcopy(centered_eight)
-    centered_eight.posterior.theta[:, :, 0] = np.nan
+    centered_eight.posterior["theta"].loc[{"school": "Deerfield"}] = np.nan
     summary_xarray = summary(centered_eight)
     assert summary_xarray is not None
-    assert summary_xarray.loc["theta[0]"].isnull().all()
+    assert summary_xarray.loc["theta[Deerfield]"].isnull().all()
     assert (
-        summary_xarray.loc[[ix for ix in summary_xarray.index if ix != "theta[0]"]]
+        summary_xarray.loc[[ix for ix in summary_xarray.index if ix != "theta[Deerfield]"]]
         .notnull()
         .all()
         .all()
@@ -288,9 +356,9 @@ def test_summary_nan(centered_eight):
 
 def test_summary_skip_nan(centered_eight):
     centered_eight = deepcopy(centered_eight)
-    centered_eight.posterior.theta[:, :10, 1] = np.nan
+    centered_eight.posterior["theta"].loc[{"draw": slice(10), "school": "Deerfield"}] = np.nan
     summary_xarray = summary(centered_eight)
-    theta_1 = summary_xarray.loc["theta[1]"].isnull()
+    theta_1 = summary_xarray.loc["theta[Deerfield]"].isnull()
     assert summary_xarray is not None
     assert ~theta_1[:4].all()
     assert theta_1[4:].all()
@@ -298,14 +366,18 @@ def test_summary_skip_nan(centered_eight):
 
 @pytest.mark.parametrize("fmt", [1, "bad_fmt"])
 def test_summary_bad_fmt(centered_eight, fmt):
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match="Invalid format"):
         summary(centered_eight, fmt=fmt)
 
 
-@pytest.mark.parametrize("order", [1, "bad_order"])
-def test_summary_bad_unpack_order(centered_eight, order):
-    with pytest.raises(TypeError):
-        summary(centered_eight, order=order)
+def test_summary_order_deprecation(centered_eight):
+    with pytest.warns(DeprecationWarning, match="order"):
+        summary(centered_eight, order="C")
+
+
+def test_summary_index_origin_deprecation(centered_eight):
+    with pytest.warns(DeprecationWarning, match="index_origin"):
+        summary(centered_eight, index_origin=1)
 
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
@@ -435,7 +507,7 @@ def test_loo_print(centered_eight, scale):
 def test_psislw(centered_eight):
     pareto_k = loo(centered_eight, pointwise=True, reff=0.7)["pareto_k"]
     log_likelihood = get_log_likelihood(centered_eight)
-    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
 
@@ -493,9 +565,9 @@ def test_loo_pit(centered_eight, args):
     y_hat = args.get("y_hat", None)
     log_weights = args.get("log_weights", None)
     y_arr = centered_eight.observed_data.obs
-    y_hat_arr = centered_eight.posterior_predictive.obs.stack(sample=("chain", "draw"))
-    log_like = get_log_likelihood(centered_eight).stack(sample=("chain", "draw"))
-    n_samples = len(log_like.sample)
+    y_hat_arr = centered_eight.posterior_predictive.obs.stack(__sample__=("chain", "draw"))
+    log_like = get_log_likelihood(centered_eight).stack(__sample__=("chain", "draw"))
+    n_samples = len(log_like.__sample__)
     ess_p = ess(centered_eight.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
     log_weights_arr = psislw(-log_like, reff=reff)[0]
@@ -533,9 +605,9 @@ def test_loo_pit_multidim(multidim_models, args):
     log_weights = args.get("log_weights", None)
     idata = multidim_models.model_1
     y_arr = idata.observed_data.y
-    y_hat_arr = idata.posterior_predictive.y.stack(sample=("chain", "draw"))
-    log_like = get_log_likelihood(idata).stack(sample=("chain", "draw"))
-    n_samples = len(log_like.sample)
+    y_hat_arr = idata.posterior_predictive.y.stack(__sample__=("chain", "draw"))
+    log_like = get_log_likelihood(idata).stack(__sample__=("chain", "draw"))
+    n_samples = len(log_like.__sample__)
     ess_p = ess(idata.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
     log_weights_arr = psislw(-log_like, reff=reff)[0]
@@ -550,6 +622,22 @@ def test_loo_pit_multidim(multidim_models, args):
         loo_pit_data = loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     else:
         loo_pit_data = loo_pit(idata=None, y=y_arr, y_hat=y_hat_arr, log_weights=log_weights_arr)
+    assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
+
+
+def test_loo_pit_multi_lik():
+    rng = np.random.default_rng(0)
+    post_pred = rng.standard_normal(size=(4, 100, 10))
+    obs = np.quantile(post_pred, np.linspace(0, 1, 10))
+    obs[0] *= 0.9
+    obs[-1] *= 1.1
+    idata = from_dict(
+        posterior={"a": np.random.randn(4, 100)},
+        posterior_predictive={"y": post_pred},
+        observed_data={"y": obs},
+        log_likelihood={"y": -(post_pred ** 2), "decoy": np.zeros_like(post_pred)},
+    )
+    loo_pit_data = loo_pit(idata, y="y")
     assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
 
 
@@ -573,13 +661,13 @@ def test_loo_pit_bad_input_type(centered_eight, arg):
     """Test wrong input type (not None, str not DataArray."""
     kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
     kwargs[arg] = 2  # use int instead of array-like
-    with pytest.raises(ValueError, match="not {}".format(type(2))):
+    with pytest.raises(ValueError, match=f"not {type(2)}"):
         loo_pit(idata=centered_eight, **kwargs)
 
 
 @pytest.mark.parametrize("incompatibility", ["y-y_hat1", "y-y_hat2", "y_hat-log_weights"])
 def test_loo_pit_bad_input_shape(incompatibility):
-    """Test shape incompatiblities."""
+    """Test shape incompatibilities."""
     y = np.random.random(8)
     y_hat = np.random.random((8, 200))
     log_weights = np.random.random((8, 200))

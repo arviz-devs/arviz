@@ -1,12 +1,14 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
 import numpy as np
-from scipy.stats.mstats import rankdata
+from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_to_ndarray
 from ..rcparams import rcParams
 from ..stats.stats_utils import stats_variance_2d as svar
 from ..utils import _numba_var, _var_names, get_coords
-from .plot_utils import get_plotting_function, xarray_to_ndarray
+from .plot_utils import get_plotting_function
 
 
 def plot_parallel(
@@ -20,6 +22,7 @@ def plot_parallel(
     colornd="k",
     colord="C1",
     shadend=0.025,
+    labeller=None,
     ax=None,
     norm_method=None,
     backend=None,
@@ -35,24 +38,25 @@ def plot_parallel(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names
-        Variables to be plotted, if `None` all variable are plotted. Can be used to change the order
-        of the plotted variables. Prefix the variables by `~` when you want to exclude
+        Variables to be plotted, if `None` all variables are plotted. Can be used to change the
+        order of the plotted variables. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of ``var_names`` to be plotted.
+        Passed to :meth:`xarray.Dataset.sel`.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
     legend: bool
         Flag for plotting legend (defaults to True)
     colornd: valid matplotlib color
@@ -62,6 +66,9 @@ def plot_parallel(
     shadend: float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     norm_method: str
@@ -70,16 +77,24 @@ def plot_parallel(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_config: dict, optional
-        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
+        Currently specifies the bounds to use for bokeh axes.
+        Defaults to value set in ``rcParams``.
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_pair : Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
+    plot_trace : Plot distribution (histogram or kernel density estimates) and sampled values
+                 or rank plot
 
     Examples
     --------
@@ -104,6 +119,9 @@ def plot_parallel(
     if coords is None:
         coords = {}
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group="sample_stats")
     _, diverging_mask = xarray_to_ndarray(divergent_data, var_names=("diverging",), combined=True)
@@ -113,10 +131,13 @@ def plot_parallel(
     posterior_data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, posterior_data, filter_vars)
     var_names, _posterior = xarray_to_ndarray(
-        get_coords(posterior_data, coords), var_names=var_names, combined=True
+        get_coords(posterior_data, coords),
+        var_names=var_names,
+        combined=True,
+        label_fun=labeller.make_label_vert,
     )
     if len(var_names) < 2:
-        raise ValueError("This plot needs at least two variables")
+        raise ValueError("Number of variables to be plotted must be 2 or greater.")
     if norm_method is not None:
         if norm_method == "normal":
             mean = np.mean(_posterior, axis=1)
@@ -132,9 +153,9 @@ def plot_parallel(
             for i in range(0, np.shape(min_elem)[0]):
                 _posterior[i, :] = ((_posterior[i, :]) - min_elem[i]) / (max_elem[i] - min_elem[i])
         elif norm_method == "rank":
-            _posterior = rankdata(_posterior, axis=1)
+            _posterior = rankdata(_posterior, axis=1, method="average")
         else:
-            raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
+            raise ValueError(f"{norm_method} is not supported. Use normal, minmax or rank.")
 
     parallel_kwargs = dict(
         ax=ax,

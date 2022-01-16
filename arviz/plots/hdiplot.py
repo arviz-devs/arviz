@@ -8,7 +8,6 @@ from xarray import Dataset
 
 from ..rcparams import rcParams
 from ..stats import hdi
-from ..utils import credible_interval_warning
 from .plot_utils import get_plotting_function
 
 
@@ -29,7 +28,6 @@ def plot_hdi(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     r"""
     Plot HDI intervals for regression data.
@@ -40,7 +38,7 @@ def plot_hdi(
         Values to plot.
     y : array-like, optional
         Values from which to compute the HDI. Assumed shape ``(chain, draw, \*shape)``.
-        Only optional if hdi_data is present.
+        Only optional if ``hdi_data`` is present.
     hdi_data : array_like, optional
         Precomputed HDI values to use. Assumed shape is ``(*x.shape, 2)``.
     hdi_prob : float, optional
@@ -48,7 +46,7 @@ def plot_hdi(
     color : str, optional
         Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
     circular : bool, optional
-        Whether to compute the HDI taking into account `x` is a circular variable
+        Whether to compute the HDI taking into account ``x`` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
     smooth : boolean, optional
         If True the result will be smoothed by first computing a linear interpolation of the data
@@ -61,11 +59,11 @@ def plot_hdi(
         Figure size. If None it will be defined automatically.
     fill_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.fill_between`
-        (use fill_kwargs={'alpha': 0} to disable fill) or to
-        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
+        (use ``fill_kwargs={'alpha': 0}`` to disable fill) or to
+        :meth:`bokeh.plotting.Figure.patch`.
     plot_kwargs : dict, optional
         HDI limits keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
-        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
+        :meth:`bokeh.plotting.Figure.patch`.
     hdi_kwargs : dict, optional
         Keyword arguments passed to :func:`~arviz.hdi`. Ignored if ``hdi_data`` is present.
     ax : axes, optional
@@ -73,11 +71,11 @@ def plot_hdi(
     backend : {"matplotlib","bokeh"}, optional
         Select plotting backend.
     backend_kwargs : bool, optional
-        These are kwargs specific to the backend being used. Passed to ::``
+        These are kwargs specific to the backend being used, passed to
+        :meth:`mpl:matplotlib.axes.Axes.plot` or
+        :meth:`bokeh.plotting.Figure.patch`.
     show : bool, optional
         Call backend show function.
-    credible_interval : float, optional
-        Deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -97,10 +95,14 @@ def plot_hdi(
         >>> import numpy as np
         >>> import arviz as az
         >>> x_data = np.random.normal(0, 1, 100)
-        >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
+        >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, size=(2, 50, 100))
         >>> az.plot_hdi(x_data, y_data)
 
-    Precalculate HDI interval per chain and plot separately:
+    ``plot_hdi`` can also be given precalculated values with the argument ``hdi_data``. This example
+    shows how to use :func:`~arviz.hdi` to precalculate the values and pass these values to
+    ``plot_hdi``. Similarly to an example in ``hdi`` we are using the ``input_core_dims``
+    argument of :func:`~arviz.wrap_xarray_ufunc` to manually define the dimensions over which
+    to calculate the HDI.
 
     .. plot::
         :context: close-figs
@@ -109,10 +111,20 @@ def plot_hdi(
         >>> ax = az.plot_hdi(x_data, hdi_data=hdi_data[0], color="r", fill_kwargs={"alpha": .2})
         >>> az.plot_hdi(x_data, hdi_data=hdi_data[1], color="k", ax=ax, fill_kwargs={"alpha": .2})
 
-    """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
+    ``plot_hdi`` can also be used with Inference Data objects. Here we use the posterior predictive
+    to plot the HDI interval.
 
+    .. plot::
+        :context: close-figs
+
+        >>> X = np.random.normal(0,1,100)
+        >>> Y = np.random.normal(2 + X * 0.5, 0.5, size=(2,10,100))
+        >>> idata = az.from_dict(posterior={"y": Y}, constant_data={"x":X})
+        >>> x_data = idata.constant_data.x
+        >>> y_data = idata.posterior.y
+        >>> az.plot_hdi(x_data, y_data)
+
+    """
     if hdi_kwargs is None:
         hdi_kwargs = {}
 
@@ -185,8 +197,3 @@ def plot_hdi(
     plot = get_plotting_function("plot_hdi", "hdiplot", backend)
     ax = plot(**hdiplot_kwargs)
     return ax
-
-
-def plot_hpd(*args, **kwargs):  # noqa: D103
-    warnings.warn("plot_hpd has been deprecated, please use plot_hdi", DeprecationWarning)
-    return plot_hdi(*args, **kwargs)

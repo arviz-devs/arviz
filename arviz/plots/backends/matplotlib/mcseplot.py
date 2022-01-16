@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import rankdata
 
 from ....stats.stats_utils import quantile as _quantile
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
@@ -24,6 +24,7 @@ def plot_mcse(
     mean_mcse,
     sd_mcse,
     textsize,
+    labeller,
     text_kwargs,
     rug_kwargs,
     extra_kwargs,
@@ -78,7 +79,7 @@ def plot_mcse(
             backend_kwargs=backend_kwargs,
         )
 
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    for (var_name, selection, isel, x), ax_ in zip(plotters, np.ravel(ax)):
         if errorbar or rug:
             values = data[var_name].sel(**selection).values.flatten()
         if errorbar:
@@ -116,7 +117,7 @@ def plot_mcse(
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+                raise ValueError(f"InferenceData does not contain {rug_kind} data")
             rug_kwargs.setdefault("marker", "|")
             rug_kwargs.setdefault("linestyle", rug_kwargs.pop("ls", "None"))
             rug_kwargs.setdefault("color", rug_kwargs.pop("c", kwargs.get("color", "C0")))
@@ -124,7 +125,7 @@ def plot_mcse(
             rug_kwargs.setdefault("markersize", rug_kwargs.pop("ms", 2 * _markersize))
 
             mask = idata.sample_stats[rug_kind].values.flatten()
-            values = rankdata(values)[mask]
+            values = rankdata(values, method="average")[mask]
             y_min, y_max = ax_.get_ylim()
             y_min = y_min if errorbar else 0
             rug_space = (y_max - y_min) * rug_kwargs.pop("space")
@@ -132,7 +133,9 @@ def plot_mcse(
             ax_.plot(rug_x, rug_y, **rug_kwargs)
             ax_.axhline(y_min, color="k", linewidth=_linewidth, alpha=0.7)
 
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+        ax_.set_title(
+            labeller.make_label_vert(var_name, selection, isel), fontsize=titlesize, wrap=True
+        )
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel("Quantile", fontsize=ax_labelsize, wrap=True)
         ax_.set_ylabel(
@@ -147,7 +150,7 @@ def plot_mcse(
             yticks = ax_.get_yticks()
             yticks = yticks[(yticks >= y_min) & (yticks < y_max)]
             ax_.set_yticks(yticks)
-            ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
+            ax_.set_yticklabels([f"{ytick:.3g}" for ytick in yticks])
         elif not errorbar:
             ax_.set_ylim(bottom=0)
 

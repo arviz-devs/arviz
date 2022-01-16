@@ -4,13 +4,16 @@ import functools
 import importlib
 import re
 import warnings
+from functools import lru_cache
 
 import matplotlib.pyplot as plt
 import numpy as np
-import xarray as xr
+import pkg_resources
 from numpy import newaxis
 
 from .rcparams import rcParams
+
+STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
 
 
 def _var_names(var_names, data, filter_vars=None):
@@ -31,6 +34,11 @@ def _var_names(var_names, data, filter_vars=None):
     -------
     var_name: list or None
     """
+    if filter_vars not in {None, "like", "regex"}:
+        raise ValueError(
+            f"'filter_vars' can only be None, 'like', or 'regex', got: '{filter_vars}'"
+        )
+
     if var_names is not None:
         if isinstance(data, (list, tuple)):
             all_vars = []
@@ -131,7 +139,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
 
         existing_items = np.isin(subset, whole_list)
         if not np.all(existing_items):
-            raise KeyError("{} are not present".format(np.array(subset)[~existing_items]))
+            raise KeyError(f"{np.array(subset)[~existing_items]} are not present")
 
     return subset
 
@@ -229,7 +237,7 @@ class interactive_backend:  # pylint: disable=invalid-name
         self.ipython = get_ipython()
         if self.ipython is None:
             raise EnvironmentError("This context manager can only be used inside ipython sessions")
-        self.ipython.magic("matplotlib {}".format(backend))
+        self.ipython.magic(f"matplotlib {backend}")
 
     def __enter__(self):
         """Enter context manager."""
@@ -403,7 +411,7 @@ def _cov_1d(x):
     return np.dot(x.T, x.conj()) / ddof
 
 
-@conditional_jit(cache=True)
+# @conditional_jit(cache=True)
 def _cov(data):
     if data.ndim == 1:
         return _cov_1d(data)
@@ -421,13 +429,7 @@ def _cov(data):
         prod += 1e-6 * np.eye(prod.shape[0])
         return prod
     else:
-        raise ValueError("{} dimension arrays are not supported".format(data.ndim))
-
-
-@conditional_jit(nopython=True)
-def full(shape, x, dtype=None):
-    """Jitting numpy full."""
-    return np.full(shape, x, dtype=dtype)
+        raise ValueError(f"{data.ndim} dimension arrays are not supported")
 
 
 def flatten_inference_data_to_dict(
@@ -569,7 +571,7 @@ def flatten_inference_data_to_dict(
                             group_separator_end=group_separator_end,
                         )
                     else:
-                        var_name_dim = "{var_name}".format(var_name=var_name)
+                        var_name_dim = f"{var_name}"
                     data_dict[var_name_dim] = var.values
                 else:
                     for loc in np.ndindex(var.shape[:-1]):
@@ -627,9 +629,7 @@ def get_coords(data, coords):
 
         except ValueError as err:
             invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError(
-                "Coords {} are invalid coordinate keys".format(invalid_coords)
-            ) from err
+            raise ValueError(f"Coords {invalid_coords} are invalid coordinate keys") from err
 
         except KeyError as err:
             raise KeyError(
@@ -646,29 +646,19 @@ def get_coords(data, coords):
         try:
             data_subset.append(get_coords(datum, coords_dict))
         except ValueError as err:
-            raise ValueError("Error in data[{}]: {}".format(idx, err)) from err
+            raise ValueError(f"Error in data[{idx}]: {err}") from err
         except KeyError as err:
-            raise KeyError("Error in data[{}]: {}".format(idx, err)) from err
+            raise KeyError(f"Error in data[{idx}]: {err}") from err
     return data_subset
 
 
-def credible_interval_warning(credible_interval, hdi_prob):
-    """Replace credible_interval with hdi_prob and to warns of be deprecation."""
-    warnings.warn(
-        ("Keyword argument credible_interval has been deprecated " "Please replace with hdi_prob"),
-    )
+@lru_cache(None)
+def _load_static_files():
+    """Lazily load the resource files into memory the first time they are needed.
 
-    if isinstance(credible_interval, str) and credible_interval == "auto":
-        raise Exception("Argument value 'auto' has been renamed to 'hide'")
-
-    if hdi_prob:
-        raise Exception(
-            "Both 'credible_interval' and 'hdi_prob' are in "
-            "keyword arguments. Please remove 'credible_interval'"
-        )
-
-    hdi_prob = credible_interval
-    return hdi_prob
+    Clone from xarray.core.formatted_html_template.
+    """
+    return [pkg_resources.resource_string("arviz", fname).decode("utf8") for fname in STATIC_FILES]
 
 
 class HtmlTemplate:
@@ -679,7 +669,7 @@ class HtmlTemplate:
               <div class='xr-header'>
                 <div class="xr-obj-type">arviz.InferenceData</div>
               </div>
-              <ul class="xr-sections">
+              <ul class="xr-sections group-sections">
               {}
               </ul>
             </div>
@@ -696,5 +686,73 @@ class HtmlTemplate:
                   </div>
             </li>
             """
+    _, css_style = _load_static_files()  # pylint: disable=protected-access
     specific_style = ".xr-wrap{width:700px!important;}"
-    css_template = f"<style> {xr.core.formatting_html.CSS_STYLE}{specific_style} </style>"
+    css_template = f"<style> {css_style}{specific_style} </style>"
+
+
+def either_dict_or_kwargs(
+    pos_kwargs,
+    kw_kwargs,
+    func_name,
+):
+    """Clone from xarray.core.utils."""
+    if pos_kwargs is not None:
+        if not hasattr(pos_kwargs, "keys") and hasattr(pos_kwargs, "__getitem__"):
+            raise ValueError(f"the first argument to .{func_name} must be a dictionary")
+        if kw_kwargs:
+            raise ValueError(
+                f"cannot specify both keyword and positional arguments to .{func_name}"
+            )
+        return pos_kwargs
+    else:
+        return kw_kwargs
+
+
+class Dask:
+    """Class to toggle Dask states.
+
+    Warnings
+    --------
+    Dask integration is an experimental feature still in progress. It can already be used
+    but it doesn't work with all stats nor diagnostics yet.
+    """
+
+    dask_flag = False
+    dask_kwargs = None
+
+    @classmethod
+    def enable_dask(cls, dask_kwargs=None):
+        """To enable Dask.
+
+        Parameters
+        ----------
+        dask_kwargs : dict
+            Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
+        """
+        cls.dask_flag = True
+        cls.dask_kwargs = dask_kwargs
+
+    @classmethod
+    def disable_dask(cls):
+        """To disable Dask."""
+        cls.dask_flag = False
+        cls.dask_kwargs = None
+
+
+def conditional_dask(func):
+    """Conditionally pass dask kwargs to `wrap_xarray_ufunc`."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if Dask.dask_flag:
+            user_kwargs = kwargs.pop("dask_kwargs", None)
+            if user_kwargs is None:
+                user_kwargs = {}
+            default_kwargs = Dask.dask_kwargs
+            return func(dask_kwargs={**default_kwargs, **user_kwargs}, *args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+
+    return wrapper

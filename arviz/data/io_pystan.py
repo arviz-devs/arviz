@@ -1,4 +1,4 @@
-#  pylint: disable=too-many-instance-attributes
+#  pylint: disable=too-many-instance-attributes,too-many-lines
 """PyStan-specific conversion code."""
 import re
 import warnings
@@ -10,8 +10,16 @@ import xarray as xr
 
 from .. import _log
 from ..rcparams import rcParams
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs, requires
 from .inference_data import InferenceData
+
+try:
+    import ujson as json
+except ImportError:
+    # Can't find ujson using json
+    # mypy struggles with conditional imports expressed as catching ImportError:
+    # https://github.com/python/mypy/issues/1153
+    import json  # type: ignore
 
 
 class PyStanConverter:
@@ -32,6 +40,7 @@ class PyStanConverter:
         coords=None,
         dims=None,
         save_warmup=None,
+        dtypes=None,
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -41,10 +50,22 @@ class PyStanConverter:
         self.observed_data = observed_data
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.coords = coords
         self.dims = dims
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
+        self.dtypes = dtypes
+
+        if (
+            self.log_likelihood is True
+            and self.posterior is not None
+            and "log_lik" in self.posterior.sim["pars_oi"]
+        ):
+            self.log_likelihood = ["log_lik"]
+        elif isinstance(self.log_likelihood, bool):
+            self.log_likelihood = None
 
         import pystan  # pylint: disable=import-error
 
@@ -75,7 +96,9 @@ class PyStanConverter:
 
         ignore = posterior_predictive + predictions + log_likelihood + ["lp__"]
 
-        data, data_warmup = get_draws(posterior, ignore=ignore, warmup=self.save_warmup)
+        data, data_warmup = get_draws(
+            posterior, ignore=ignore, warmup=self.save_warmup, dtypes=self.dtypes
+        )
         attrs = get_attrs(posterior)
         return (
             dict_to_dataset(
@@ -94,7 +117,9 @@ class PyStanConverter:
         data, data_warmup = get_sample_stats(posterior, warmup=self.save_warmup)
 
         # lp__
-        stat_lp, stat_lp_warmup = get_draws(posterior, variables="lp__", warmup=self.save_warmup)
+        stat_lp, stat_lp_warmup = get_draws(
+            posterior, variables="lp__", warmup=self.save_warmup, dtypes=self.dtypes
+        )
         data["lp"] = stat_lp["lp__"]
         if stat_lp_warmup:
             data_warmup["lp"] = stat_lp_warmup["lp__"]
@@ -122,7 +147,10 @@ class PyStanConverter:
         if isinstance(log_likelihood, (list, tuple)):
             log_likelihood = {name: name for name in log_likelihood}
         log_likelihood_draws, log_likelihood_draws_warmup = get_draws(
-            fit, variables=list(log_likelihood.values()), warmup=self.save_warmup
+            fit,
+            variables=list(log_likelihood.values()),
+            warmup=self.save_warmup,
+            dtypes=self.dtypes,
         )
         data = {
             obs_var_name: log_likelihood_draws[log_like_name]
@@ -137,8 +165,16 @@ class PyStanConverter:
         }
 
         return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pystan, coords=self.coords, dims=self.dims, skip_event_dims=True
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.pystan,
+                coords=self.coords,
+                dims=self.dims,
+                skip_event_dims=True,
+            ),
         )
 
     @requires("posterior")
@@ -148,7 +184,7 @@ class PyStanConverter:
         posterior = self.posterior
         posterior_predictive = self.posterior_predictive
         data, data_warmup = get_draws(
-            posterior, variables=posterior_predictive, warmup=self.save_warmup
+            posterior, variables=posterior_predictive, warmup=self.save_warmup, dtypes=self.dtypes
         )
         return (
             dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
@@ -161,7 +197,9 @@ class PyStanConverter:
         """Convert predictions samples to xarray."""
         posterior = self.posterior
         predictions = self.predictions
-        data, data_warmup = get_draws(posterior, variables=predictions, warmup=self.save_warmup)
+        data, data_warmup = get_draws(
+            posterior, variables=predictions, warmup=self.save_warmup, dtypes=self.dtypes
+        )
         return (
             dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
             dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
@@ -180,7 +218,7 @@ class PyStanConverter:
 
         ignore = prior_predictive + ["lp__"]
 
-        data, _ = get_draws(prior, ignore=ignore, warmup=False)
+        data, _ = get_draws(prior, ignore=ignore, warmup=False, dtypes=self.dtypes)
         attrs = get_attrs(prior)
         return dict_to_dataset(
             data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
@@ -193,7 +231,7 @@ class PyStanConverter:
         data, _ = get_sample_stats(prior, warmup=False)
 
         # lp__
-        stat_lp, _ = get_draws(prior, variables="lp__", warmup=False)
+        stat_lp, _ = get_draws(prior, variables="lp__", warmup=False, dtypes=self.dtypes)
         data["lp"] = stat_lp["lp__"]
 
         attrs = get_attrs(prior)
@@ -207,7 +245,7 @@ class PyStanConverter:
         """Convert prior_predictive samples to xarray."""
         prior = self.prior
         prior_predictive = self.prior_predictive
-        data, _ = get_draws(prior, variables=prior_predictive, warmup=False)
+        data, _ = get_draws(prior, variables=prior_predictive, warmup=False, dtypes=self.dtypes)
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
@@ -282,6 +320,7 @@ class PyStan3Converter:
         log_likelihood=None,
         coords=None,
         dims=None,
+        dtypes=None,
     ):
         self.posterior = posterior
         self.posterior_model = posterior_model
@@ -293,9 +332,21 @@ class PyStan3Converter:
         self.observed_data = observed_data
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
-        self.log_likelihood = log_likelihood
+        self.log_likelihood = (
+            rcParams["data.log_likelihood"] if log_likelihood is None else log_likelihood
+        )
         self.coords = coords
         self.dims = dims
+        self.dtypes = dtypes
+
+        if (
+            self.log_likelihood is True
+            and self.posterior is not None
+            and "log_lik" in self.posterior.param_names
+        ):
+            self.log_likelihood = ["log_lik"]
+        elif isinstance(self.log_likelihood, bool):
+            self.log_likelihood = None
 
         import stan  # pylint: disable=import-error
 
@@ -327,7 +378,7 @@ class PyStan3Converter:
 
         ignore = posterior_predictive + predictions + log_likelihood
 
-        data = get_draws_stan3(posterior, model=posterior_model, ignore=ignore)
+        data = get_draws_stan3(posterior, model=posterior_model, ignore=ignore, dtypes=self.dtypes)
         attrs = get_attrs_stan3(posterior, model=posterior_model)
         return dict_to_dataset(
             data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
@@ -338,7 +389,7 @@ class PyStan3Converter:
         """Extract sample_stats from posterior."""
         posterior = self.posterior
         posterior_model = self.posterior_model
-        data = get_sample_stats_stan3(posterior, ignore="lp__")
+        data = get_sample_stats_stan3(posterior, ignore="lp__", dtypes=self.dtypes)
         data["lp"] = get_sample_stats_stan3(posterior, variables="lp__")["lp"]
 
         attrs = get_attrs_stan3(posterior, model=posterior_model)
@@ -359,7 +410,7 @@ class PyStan3Converter:
         if isinstance(log_likelihood, (list, tuple)):
             log_likelihood = {name: name for name in log_likelihood}
         log_likelihood_draws = get_draws_stan3(
-            fit, model=model, variables=list(log_likelihood.values())
+            fit, model=model, variables=list(log_likelihood.values()), dtypes=self.dtypes
         )
         data = {
             obs_var_name: log_likelihood_draws[log_like_name]
@@ -376,7 +427,9 @@ class PyStan3Converter:
         posterior = self.posterior
         posterior_model = self.posterior_model
         posterior_predictive = self.posterior_predictive
-        data = get_draws_stan3(posterior, model=posterior_model, variables=posterior_predictive)
+        data = get_draws_stan3(
+            posterior, model=posterior_model, variables=posterior_predictive, dtypes=self.dtypes
+        )
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
@@ -386,7 +439,9 @@ class PyStan3Converter:
         posterior = self.posterior
         posterior_model = self.posterior_model
         predictions = self.predictions
-        data = get_draws_stan3(posterior, model=posterior_model, variables=predictions)
+        data = get_draws_stan3(
+            posterior, model=posterior_model, variables=predictions, dtypes=self.dtypes
+        )
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -403,7 +458,7 @@ class PyStan3Converter:
 
         ignore = prior_predictive
 
-        data = get_draws_stan3(prior, model=prior_model, ignore=ignore)
+        data = get_draws_stan3(prior, model=prior_model, ignore=ignore, dtypes=self.dtypes)
         attrs = get_attrs_stan3(prior, model=prior_model)
         return dict_to_dataset(
             data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
@@ -414,7 +469,7 @@ class PyStan3Converter:
         """Extract sample_stats_prior from prior."""
         prior = self.prior
         prior_model = self.prior_model
-        data = get_sample_stats_stan3(prior)
+        data = get_sample_stats_stan3(prior, dtypes=self.dtypes)
         attrs = get_attrs_stan3(prior, model=prior_model)
         return dict_to_dataset(
             data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
@@ -427,7 +482,9 @@ class PyStan3Converter:
         prior = self.prior
         prior_model = self.prior_model
         prior_predictive = self.prior_predictive
-        data = get_draws_stan3(prior, model=prior_model, variables=prior_predictive)
+        data = get_draws_stan3(
+            prior, model=prior_model, variables=prior_predictive, dtypes=self.dtypes
+        )
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("posterior_model")
@@ -508,7 +565,7 @@ class PyStan3Converter:
         )
 
 
-def get_draws(fit, variables=None, ignore=None, warmup=False):
+def get_draws(fit, variables=None, ignore=None, warmup=False, dtypes=None):
     """Extract draws from PyStan fit."""
     if ignore is None:
         ignore = []
@@ -520,7 +577,10 @@ def get_draws(fit, variables=None, ignore=None, warmup=False):
         msg = "Fit doesn't contain samples."
         raise AttributeError(msg)
 
-    dtypes = infer_dtypes(fit)
+    if dtypes is None:
+        dtypes = {}
+
+    dtypes = {**infer_dtypes(fit), **dtypes}
 
     if variables is None:
         variables = fit.sim["pars_oi"]
@@ -607,9 +667,19 @@ def get_draws(fit, variables=None, ignore=None, warmup=False):
     return data, data_warmup
 
 
-def get_sample_stats(fit, warmup=False):
+def get_sample_stats(fit, warmup=False, dtypes=None):
     """Extract sample stats from PyStan fit."""
-    dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+    if dtypes is None:
+        dtypes = {}
+    dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64, **dtypes}
+
+    rename_dict = {
+        "divergent": "diverging",
+        "n_leapfrog": "n_steps",
+        "treedepth": "tree_depth",
+        "stepsize": "step_size",
+        "accept_stat": "acceptance_rate",
+    }
 
     ndraws_warmup = fit.sim["warmup2"]
     if max(ndraws_warmup) == 0:
@@ -637,17 +707,16 @@ def get_sample_stats(fit, warmup=False):
         dtype = dtypes.get(key)
         values = values.astype(dtype)
         name = re.sub("__$", "", key)
-        name = "diverging" if name == "divergent" else name
+        name = rename_dict.get(name, name)
         data[name] = values
 
     data_warmup = OrderedDict()
     if warmup:
         for key, values in extraction_warmup.items():
             values = np.stack(values, axis=0)
-            dtype = dtypes.get(key)
-            values = values.astype(dtype)
+            values = values.astype(dtypes.get(key))
             name = re.sub("__$", "", key)
-            name = "diverging" if name == "divergent" else name
+            name = rename_dict.get(name, name)
             data_warmup[name] = values
 
     return data, data_warmup
@@ -665,10 +734,13 @@ def get_attrs(fit):
         for arg in attrs["args"]:
             if isinstance(arg["init"], bytes):
                 arg["init"] = arg["init"].decode("utf-8")
+        attrs["args"] = json.dumps(attrs["args"])
     try:
         attrs["inits"] = [holder.inits for holder in fit.sim["samples"]]
     except Exception as exp:  # pylint: disable=broad-except
         _log.warning("Failed to fetch `args` from fit: %s", exp)
+    else:
+        attrs["inits"] = json.dumps(attrs["inits"])
 
     attrs["step_size"] = []
     attrs["metric"] = []
@@ -706,6 +778,7 @@ def get_attrs(fit):
 
         attrs["metric"].append(metric)
         attrs["inv_metric"].append(inv_metric)
+    attrs["inv_metric"] = json.dumps(attrs["inv_metric"])
 
     if not attrs["step_size"]:
         del attrs["step_size"]
@@ -716,14 +789,16 @@ def get_attrs(fit):
     return attrs
 
 
-def get_draws_stan3(fit, model=None, variables=None, ignore=None):
+def get_draws_stan3(fit, model=None, variables=None, ignore=None, dtypes=None):
     """Extract draws from PyStan3 fit."""
     if ignore is None:
         ignore = []
 
-    dtypes = {}
+    if dtypes is None:
+        dtypes = {}
+
     if model is not None:
-        dtypes = infer_dtypes(fit, model)
+        dtypes = {**infer_dtypes(fit, model), **dtypes}
 
     if variables is None:
         variables = fit.param_names
@@ -734,12 +809,16 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
     data = OrderedDict()
 
     for var in variables:
+        if var in ignore:
+            continue
         if var in data:
             continue
         dtype = dtypes.get(var)
 
         # in future fix the correct number of draws if fit.save_warmup is True
         new_shape = (*fit.dims[fit.param_names.index(var)], -1, fit.num_chains)
+        if 0 in new_shape:
+            continue
         values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])
@@ -749,9 +828,19 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
     return data
 
 
-def get_sample_stats_stan3(fit, variables=None, ignore=None):
+def get_sample_stats_stan3(fit, variables=None, ignore=None, dtypes=None):
     """Extract sample stats from PyStan3 fit."""
-    dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+    if dtypes is None:
+        dtypes = {}
+    dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64, **dtypes}
+
+    rename_dict = {
+        "divergent": "diverging",
+        "n_leapfrog": "n_steps",
+        "treedepth": "tree_depth",
+        "stepsize": "step_size",
+        "accept_stat": "acceptance_rate",
+    }
 
     if isinstance(variables, str):
         variables = [variables]
@@ -769,7 +858,7 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None):
         dtype = dtypes.get(key)
         values = values.astype(dtype)
         name = re.sub("__$", "", key)
-        name = "diverging" if name == "divergent" else name
+        name = rename_dict.get(name, name)
         data[name] = values
 
     return data
@@ -797,33 +886,17 @@ def get_attrs_stan3(fit, model=None):
 def infer_dtypes(fit, model=None):
     """Infer dtypes from Stan model code.
 
-    Function strips out generated quantities block and searchs for `int`
+    Function strips out generated quantities block and searches for `int`
     dtypes after stripping out comments inside the block.
     """
-    pattern_remove_comments = re.compile(
-        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE
-    )
-    stan_integer = r"int"
-    stan_limits = r"(?:\<[^\>]+\>)*"  # ignore group: 0 or more <....>
-    stan_param = r"([^;=\s\[]+)"  # capture group: ends= ";", "=", "[" or whitespace
-    stan_ws = r"\s*"  # 0 or more whitespace
-    pattern_int = re.compile(
-        "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)), re.IGNORECASE
-    )
     if model is None:
         stan_code = fit.get_stancode()
         model_pars = fit.model_pars
     else:
         stan_code = model.program_code
         model_pars = fit.param_names
-    # remove deprecated comments
-    stan_code = "\n".join(
-        line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines()
-    )
-    stan_code = re.sub(pattern_remove_comments, "", stan_code)
-    stan_code = stan_code.split("generated quantities")[-1]
-    dtypes = re.findall(pattern_int, stan_code)
-    dtypes = {item.strip(): "int" for item in dtypes if item.strip() in model_pars}
+
+    dtypes = {key: item for key, item in infer_stan_dtypes(stan_code).items() if key in model_pars}
     return dtypes
 
 
@@ -844,11 +917,12 @@ def from_pystan(
     posterior_model=None,
     prior_model=None,
     save_warmup=None,
+    dtypes=None,
 ):
     """Convert PyStan data into an InferenceData object.
 
     For a usage example read the
-    :doc:`Cookbook section on from_pystan </notebooks/InferenceDataCookbook>`
+    :ref:`Creating InferenceData section on from_pystan <creating_InferenceData>`
 
     Parameters
     ----------
@@ -878,7 +952,10 @@ def from_pystan(
         posterior. It is recommended to use this argument as a dictionary whose keys
         are observed variable names and its values are the variables storing log
         likelihood arrays in the Stan code. In other cases, a dictionary with keys
-        equal to its values is used.
+        equal to its values is used. By default, if a variable ``log_lik`` is
+        present in the Stan model, it will be retrieved as pointwise log
+        likelihood values. Use ``False`` or set ``data.log_likelihood`` to
+        false to avoid this behaviour.
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -891,7 +968,12 @@ def from_pystan(
         PyStan3 specific model object. Needed for automatic dtype parsing.
     save_warmup : bool
         Save warmup iterations into InferenceData object. If not defined, use default
-        defined by the rcParams.
+        defined by the rcParams. Not supported in PyStan3.
+    dtypes: dict
+        A dictionary containing dtype information (int, float) for parameters.
+        By default dtype information is extracted from the model code.
+        Model code is extracted from fit object in PyStan 2 and from model object
+        in PyStan 3.
 
     Returns
     -------
@@ -919,6 +1001,7 @@ def from_pystan(
             log_likelihood=log_likelihood,
             coords=coords,
             dims=dims,
+            dtypes=dtypes,
         ).to_inference_data()
     else:
         return PyStanConverter(
@@ -934,4 +1017,5 @@ def from_pystan(
             coords=coords,
             dims=dims,
             save_warmup=save_warmup,
+            dtypes=dtypes,
         ).to_inference_data()

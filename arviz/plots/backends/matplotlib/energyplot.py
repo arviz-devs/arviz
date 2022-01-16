@@ -43,7 +43,7 @@ def plot_energy(
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
-    types = "hist" if kind in {"hist", "histogram"} else "plot"
+    types = "hist" if kind == "hist" else "plot"
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
 
     _colors = [
@@ -52,7 +52,7 @@ def plot_energy(
     if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
         fill_color[1].startswith("C") and len(fill_color[1]) == 2
     ):
-        fill_color = tuple([_colors[int(color[1:]) % 10] for color in fill_color])
+        fill_color = tuple((_colors[int(color[1:]) % 10] for color in fill_color))
     elif fill_color[0].startswith("C") and len(fill_color[0]) == 2:
         fill_color = tuple([_colors[int(fill_color[0][1:]) % 10]] + list(fill_color[1:]))
     elif fill_color[1].startswith("C") and len(fill_color[1]) == 2:
@@ -82,7 +82,7 @@ def plot_energy(
                 ax=ax,
                 legend=False,
             )
-    elif kind in {"hist", "histogram"}:
+    elif kind == "hist":
         for alpha, color, label, value in series:
             ax.hist(
                 value.flatten(),
@@ -91,15 +91,15 @@ def plot_energy(
                 alpha=alpha,
                 label=label,
                 color=color,
-                **plot_kwargs
+                **plot_kwargs,
             )
 
     else:
-        raise ValueError("Plot type {} not recognized.".format(kind))
+        raise ValueError(f"Plot type {kind} not recognized.")
 
     if bfmi:
         for idx, val in enumerate(e_bfmi(energy)):
-            ax.plot([], label="chain {:>2} BFMI = {:.2f}".format(idx, val), alpha=0)
+            ax.plot([], label=f"chain {idx:>2} BFMI = {val:.2f}", alpha=0)
     if legend:
         ax.legend()
 

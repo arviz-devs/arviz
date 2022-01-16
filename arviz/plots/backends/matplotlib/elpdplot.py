@@ -1,7 +1,7 @@
 """Matplotlib ELPDPlot."""
 import warnings
 
-import matplotlib.cm as cm
+from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
@@ -78,6 +78,8 @@ def plot_elpd(
                 1,
                 backend_kwargs=backend_kwargs,
             )
+        else:
+            fig = ax.get_figure()
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)
@@ -86,7 +88,7 @@ def plot_elpd(
             bool_ary = diff_abs > threshold * ydata.std()
             if coord_labels is None:
                 coord_labels = xdata.astype(str)
-            outliers = np.argwhere(bool_ary).squeeze()
+            outliers = np.nonzero(bool_ary)[0]
             for outlier in outliers:
                 label = coord_labels[outlier]
                 ax.text(
@@ -136,8 +138,10 @@ def plot_elpd(
                 squeeze=False,
                 constrained_layout=not xlabels,
                 sharey="row",
-                sharex="all",
+                sharex="col",
             )
+        else:
+            fig = ax.ravel()[0].get_figure()
 
         for i in range(0, numvars - 1):
             var1 = pointwise_data[i]
@@ -155,7 +159,7 @@ def plot_elpd(
                     bool_ary = diff_abs > threshold * ydata.std()
                     if coord_labels is None:
                         coord_labels = xdata.astype(str)
-                    outliers = np.argwhere(bool_ary).squeeze()
+                    outliers = np.nonzero(bool_ary)[0]
                     for outlier in outliers:
                         label = coord_labels[outlier]
                         ax[j, i].text(
@@ -171,11 +175,10 @@ def plot_elpd(
                     ax[j, i].set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
-                ax[j, i].set_title(
-                    "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
-                )
+                ax[j, i].set_title(f"{models[i]} - {models[j + 1]}", fontsize=titlesize, wrap=True)
         if xlabels:
-            set_xticklabels(ax[-1, -1], coord_labels)
+            for i in range(len(ax)):
+                set_xticklabels(ax[-1, i], coord_labels)
             fig.autofmt_xdate()
             fig.tight_layout()
         if legend:

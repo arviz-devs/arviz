@@ -3,6 +3,7 @@ KDE quantiles
 =============
 
 _thumb: .2, .8
+_example_title: Plot KDE of quantiles
 """
 import matplotlib.pyplot as plt
 import numpy as np

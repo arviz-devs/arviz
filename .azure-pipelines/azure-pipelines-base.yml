@@ -10,15 +10,22 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
+      Python_39:
+        python.version: "3.9"
+        PyPIGithub: false
+        name: "Python 3.9"
+      Python_39_preview:
+        python.version: "3.9"
+        PyPIGithub: true
+        name: "Python 3.9"
       Python_38:
-        python.version: 3.8
+        python.version: "3.8"
+        PyPIGithub: false
         name: "Python 3.8"
       Python_37:
-        python.version: 3.7
+        python.version: "3.7"
+        PyPIGithub: false
         name: "Python 3.7"
-      Python_36:
-        python.version: 3.6
-        name: "Python 3.6"
 
   steps:
   - task: UsePythonVersion@0
@@ -46,7 +53,19 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install pytest-azurepipelines codecov
+    condition: and(succeeded(), eq(variables.PyPIGithub, false))
     displayName: 'Install requirements'
+
+  - script: |
+      python -m pip install --upgrade pip
+      python -m pip install wheel
+      python -m pip install --no-cache-dir --pre -r requirements.txt
+      python -m pip install --no-cache-dir --pre -r requirements-optional.txt
+      python -m pip install --no-cache-dir -r requirements-dev.txt
+      python -m pip install --upgrade git+https://github.com/pydata/xarray.git
+      python -m pip install pytest-azurepipelines codecov
+    condition: and(succeeded(), eq(variables.PyPIGithub, true))
+    displayName: 'Install requirements (pypi preview / github)'
 
   - script: |
       python -m pip install .

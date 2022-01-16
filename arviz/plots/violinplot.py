@@ -1,8 +1,10 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
+from ..utils import _var_names
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_violin(
@@ -18,15 +20,16 @@ def plot_violin(
     circular=False,
     sharex=True,
     sharey=True,
+    grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     shade_kwargs=None,
     rug_kwargs=None,
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     """Plot posterior of traces as violin plot.
 
@@ -37,68 +40,79 @@ def plot_violin(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names, optional
         Variables to be plotted, if None all variable are plotted. Prefix the
-        variables by `~` when you want to exclude them from the plot.
+        variables by ``~`` when you want to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     transform: callable
-        Function to transform data (defaults to None i.e. the identity function)
+        Function to transform data (defaults to None i.e. the identity function).
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the hdi_prob*100%
-        intervals. Defaults to True
+        Flag for plotting the interquartile range, in addition to the ``hdi_prob`` * 100%
+        intervals. Defaults to ``True``.
     rug: bool
-        If True adds a jittered rugplot. Defaults to False.
+        If ``True`` adds a jittered rugplot. Defaults to ``False``.
     hdi_prob: float, optional
-        Plots highest posterior density interval for chosen percentage of density. Defaults to 0.94.
+        Plots highest posterior density interval for chosen percentage of density.
+        Defaults to 0.94.
     shade: float
         Alpha blending value for the shaded area under the curve, between 0
-        (no shade) and 1 (opaque). Defaults to 0
+        (no shade) and 1 (opaque). Defaults to 0.
     bw: float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
-        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
-        and "taylor" (for now) when `circular` is True.
+        one of "scott", "silverman", "isj" or "experimental" when ``circular`` is ``False``
+        and "taylor" (for now) when ``circular`` is ``True``.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
     circular: bool, optional.
-        If True, it interprets `values` is a circular variable measured in radians
-        and a circular KDE is used. Defaults to False.
+        If ``True``, it interprets `values` is a circular variable measured in radians
+        and a circular KDE is used. Defaults to ``False``.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: int
         Text size of the point_estimates, axis ticks, and highest density interval. If None it will
-        be autoscaled based on figsize.
+        be autoscaled based on ``figsize``.
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     sharex: bool
-        Defaults to True, violinplots share a common x-axis scale.
+        Defaults to ``True``, violinplots share a common x-axis scale.
     sharey: bool
-        Defaults to True, violinplots share a common y-axis scale.
+        Defaults to ``True``, violinplots share a common y-axis scale.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     shade_kwargs: dicts, optional
-        Additional keywords passed to `fill_between`, or `barh` to control the shade.
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.fill_between`, or
+        :meth:`matplotlib.axes.Axes.barh` to control the shade.
     rug_kwargs: dict
-        Keywords passed to the rug plot. If true only the righ half side of the violin will be
+        Keywords passed to the rug plot. If true only the right half side of the violin will be
         plotted.
     backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Select plotting backend {"matplotlib","bokeh"}. Default to "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_forest: Forest plot to compare HDI intervals from a number of distributions.
 
     Examples
     --------
@@ -111,16 +125,9 @@ def plot_violin(
         >>> data = az.load_arviz_data('centered_eight')
         >>> az.plot_violin(data)
 
-    Show a default violin plot, but with a transformation applied to the data
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_violin(data, var_names="tau", transform=np.log)
-
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
+    if labeller is None:
+        labeller = BaseLabeller()
 
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
@@ -131,13 +138,13 @@ def plot_violin(
         list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
     )
 
-    rows, cols = default_grid(len(plotters))
+    rows, cols = default_grid(len(plotters), grid=grid)
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
         if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     violinplot_kwargs = dict(
         ax=ax,
@@ -153,6 +160,7 @@ def plot_violin(
         rug_kwargs=rug_kwargs,
         bw=bw,
         textsize=textsize,
+        labeller=labeller,
         circular=circular,
         hdi_prob=hdi_prob,
         quartiles=quartiles,

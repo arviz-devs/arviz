@@ -2,14 +2,15 @@
 import warnings
 from itertools import cycle
 
-import matplotlib.gridspec as gridspec
+from matplotlib import gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
+import matplotlib.ticker as mticker
 
 from ....stats.density_utils import get_bins
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, format_coords_as_labels, make_label
+from ...plot_utils import _scale_fig_size, format_coords_as_labels
 from ...rankplot import plot_rank
 from . import backend_kwarg_defaults, backend_show, dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 
@@ -29,6 +30,7 @@ def plot_trace(
     combined,
     chain_prop,
     legend,
+    labeller,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
@@ -220,14 +222,18 @@ def plot_trace(
         spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
 
     # pylint: disable=too-many-nested-blocks
-    for idx, (var_name, selection, value) in enumerate(plotters):
+    for idx, (var_name, selection, isel, value) in enumerate(plotters):
         for idy in range(2):
             value = np.atleast_2d(value)
 
-            is_circular = var_name in circ_var_names and not idy
+            circular = var_name in circ_var_names and not idy
+            if var_name in circ_var_names and idy:
+                circ_units_trace = circ_var_units
+            else:
+                circ_units_trace = False
 
             if axes is None:
-                ax = fig.add_subplot(spec[idx, idy], polar=is_circular)
+                ax = fig.add_subplot(spec[idx, idy], polar=circular)
             else:
                 ax = axes[idx, idy]
 
@@ -255,8 +261,9 @@ def plot_trace(
                     fill_kwargs,
                     rug_kwargs,
                     rank_kwargs,
-                    is_circular,
+                    circular,
                     circ_var_units,
+                    circ_units_trace,
                 )
 
             else:
@@ -264,7 +271,7 @@ def plot_trace(
                 legend_labels = format_coords_as_labels(sub_data, skip_dims=("chain", "draw"))
                 legend_title = ", ".join(
                     [
-                        "{}".format(coord_name)
+                        f"{coord_name}"
                         for coord_name in sub_data.coords
                         if coord_name not in {"chain", "draw"}
                     ]
@@ -294,8 +301,9 @@ def plot_trace(
                         fill_kwargs,
                         rug_kwargs,
                         rank_kwargs,
-                        is_circular,
+                        circular,
                         circ_var_units,
+                        circ_units_trace,
                     )
                     if legend:
                         handles.append(
@@ -303,7 +311,7 @@ def plot_trace(
                                 [],
                                 [],
                                 label=label,
-                                **dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0)
+                                **dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0),
                             )
                         )
                 if legend and idy == 0:
@@ -312,9 +320,17 @@ def plot_trace(
             if value[0].dtype.kind == "i" and idy == 0:
                 xticks = get_bins(value)
                 ax.set_xticks(xticks[:-1])
+            y = 1 / textsize
             if not idy:
                 ax.set_yticks([])
-            ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True, y=1)
+                if circular:
+                    y = 0.13 if selection else 0.12
+            ax.set_title(
+                labeller.make_label_vert(var_name, selection, isel),
+                fontsize=titlesize,
+                wrap=True,
+                y=textsize * y,
+            )
             ax.tick_params(labelsize=xt_labelsize)
 
             xlims = ax.get_xlim()
@@ -337,7 +353,7 @@ def plot_trace(
                             ylocs = ylims[0]
                         values = value[chain, div_idxs]
 
-                        if is_circular:
+                        if circular:
                             tick = [ax.get_rmin() + ax.get_rmax() * 0.60, ax.get_rmax()]
                             for val in values:
                                 ax.plot(
@@ -362,7 +378,7 @@ def plot_trace(
                                     alpha=hist_kwargs["alpha"],
                                     zorder=0.6,
                                 )
-                            else:
+                            elif not idy:
                                 ax.plot(
                                     values,
                                     np.zeros_like(values) + ylocs,
@@ -381,9 +397,7 @@ def plot_trace(
                 else:
                     line_values = np.atleast_1d(vlines).ravel()
                     if not np.issubdtype(line_values.dtype, np.number):
-                        raise ValueError(
-                            "line-positions should be numeric, found {}".format(line_values)
-                        )
+                        raise ValueError(f"line-positions should be numeric, found {line_values}")
                 if idy:
                     ax.hlines(
                         line_values,
@@ -449,10 +463,12 @@ def _plot_chains_mpl(
     fill_kwargs,
     rug_kwargs,
     rank_kwargs,
-    is_circular,
+    circular,
     circ_var_units,
+    circ_units_trace,
 ):
-    if not is_circular:
+
+    if not circular:
         circ_var_units = False
 
     for chain_idx, row in enumerate(value):
@@ -460,6 +476,11 @@ def _plot_chains_mpl(
             aux_kwargs = dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
             if idy:
                 axes.plot(data.draw.values, row, **aux_kwargs)
+                if circ_units_trace == "degrees":
+                    y_tick_locs = axes.get_yticks()
+                    y_tick_labels = [i + 2 * 180 if i < 0 else i for i in np.rad2deg(y_tick_locs)]
+                    axes.yaxis.set_major_locator(mticker.FixedLocator(y_tick_locs))
+                    axes.set_yticklabels([f"{i:.0f}°" for i in y_tick_labels])
 
         if not combined:
             aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)

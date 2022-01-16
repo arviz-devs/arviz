@@ -8,10 +8,22 @@ import sys
 import warnings
 from collections.abc import MutableMapping
 from pathlib import Path
+from typing import Any, Dict
+from typing_extensions import Literal
+
+NO_GET_ARGS: bool = False
+try:
+    from typing_extensions import get_args
+except ImportError:
+    NO_GET_ARGS = True
+
 
 import numpy as np
 
 _log = logging.getLogger(__name__)
+
+ScaleKeyword = Literal["log", "negative_log", "deviance"]
+ICKeyword = Literal["loo", "waic"]
 
 
 def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
@@ -35,7 +47,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
         try:
             value = typeof(value)
         except (ValueError, TypeError) as err:
-            raise ValueError("Could not convert to {}".format(typeof.__name__)) from err
+            raise ValueError(f"Could not convert to {typeof.__name__}") from err
         if isinstance(value, str):
             value = value.lower()
 
@@ -103,14 +115,6 @@ def _validate_positive_int(value):
         raise ValueError("Only positive values are valid")
 
 
-def _validate_positive_int_or_none(value):
-    """Validate value is a natural number or None."""
-    if value is None or isinstance(value, str) and value.lower() == "none":
-        return None
-    else:
-        return _validate_positive_int(value)
-
-
 def _validate_float(value):
     """Validate value is a float."""
     try:
@@ -118,14 +122,6 @@ def _validate_float(value):
     except ValueError as err:
         raise ValueError("Could not convert to float") from err
     return value
-
-
-def _validate_float_or_none(value):
-    """Validate value is a float or None."""
-    if value is None or isinstance(value, str) and value.lower() == "none":
-        return None
-    else:
-        return _validate_float(value)
 
 
 def _validate_probability(value):
@@ -138,9 +134,24 @@ def _validate_probability(value):
 
 def _validate_boolean(value):
     """Validate value is a float."""
-    if value not in {True, "true", False, "false"}:
+    if isinstance(value, str):
+        value = value.lower()
+    if value not in {True, False, "true", "false"}:
         raise ValueError("Only boolean values are valid.")
     return value is True or value == "true"
+
+
+def _add_none_to_validator(base_validator):
+    """Create a validator function that catches none and then calls base_fun."""
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
+
+    def validate_with_none(value):
+        if value is None or isinstance(value, str) and value.lower() == "none":
+            return None
+        return base_validator(value)
+
+    return validate_with_none
 
 
 def _validate_bokeh_marker(value):
@@ -163,7 +174,7 @@ def _validate_bokeh_marker(value):
         "X",
     )
     if value not in all_markers:
-        raise ValueError("{} is not one of {}".format(value, all_markers))
+        raise ValueError(f"{value} is not one of {all_markers}")
     return value
 
 
@@ -199,13 +210,15 @@ def make_iterable_validator(scalar_validator, length=None, allow_none=False, all
         if np.iterable(value) and not isinstance(value, (set, frozenset)):
             val = tuple(scalar_validator(v) for v in value)
             if length is not None and len(val) != length:
-                raise ValueError("Iterable must be of length: {}".format(length))
+                raise ValueError(f"Iterable must be of length: {length}")
             return val
         raise ValueError("Only ordered iterable values are valid")
 
     return validate_iterable
 
 
+_validate_float_or_none = _add_none_to_validator(_validate_float)
+_validate_positive_int_or_none = _add_none_to_validator(_validate_positive_int)
 _validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-name
     _validate_float_or_none, length=2, allow_none=True, allow_auto=True
 )
@@ -227,12 +240,10 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.metagroups": (METAGROUPS, _validate_dict_of_lists),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
+    "data.log_likelihood": (True, _validate_boolean),
     "data.save_warmup": (False, _validate_boolean),
-    "data.pandas_float_precision": (
-        "high",
-        _make_validate_choice({"high", "round_trip"}, allow_none=True),
-    ),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.density_kind": ("kde", _make_validate_choice({"kde", "hist"})),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",
@@ -274,16 +285,27 @@ defaultParams = {  # pylint: disable=invalid-name
         "reset,pan,box_zoom,wheel_zoom,lasso_select,undo,save,hover",
         lambda x: x,
     ),
-    "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "stats.hdi_prob": (0.94, _validate_probability),
-    "stats.information_criterion": ("loo", _make_validate_choice({"waic", "loo"})),
+    "stats.information_criterion": (
+        "loo",
+        _make_validate_choice({"loo", "waic"} if NO_GET_ARGS else set(get_args(ICKeyword))),
+    ),
     "stats.ic_pointwise": (False, _validate_boolean),
-    "stats.ic_scale": ("log", _make_validate_choice({"deviance", "log", "negative_log"})),
+    "stats.ic_scale": (
+        "log",
+        _make_validate_choice(
+            {"log", "negative_log", "deviance"} if NO_GET_ARGS else set(get_args(ScaleKeyword))
+        ),
+    ),
+    "stats.ic_compare_method": (
+        "stacking",
+        _make_validate_choice({"stacking", "bb-pseudo-bma", "pseudo-bma"}),
+    ),
 }
 
 
-class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
+class RcParams(MutableMapping):
     """Class to contain ArviZ default parameters.
 
     It is implemented as a dict with validation when setting items.
@@ -292,7 +314,9 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
     validate = {key: validate_fun for key, (_, validate_fun) in defaultParams.items()}
 
     # validate values on the way in
-    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, *args, **kwargs):
+        self._underlying_storage: Dict[str, Any] = {}
+        super().__init__()
         self.update(*args, **kwargs)
 
     def __setitem__(self, key, val):
@@ -301,8 +325,8 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             try:
                 cval = self.validate[key](val)
             except ValueError as verr:
-                raise ValueError("Key %s: %s" % (key, str(verr))) from verr
-            dict.__setitem__(self, key, cval)
+                raise ValueError(f"Key {key}: {str(verr)}") from verr
+            self._underlying_storage[key] = cval
         except KeyError as err:
             raise KeyError(
                 "{} is not a valid rc parameter (see rcParams.keys() for "
@@ -310,8 +334,8 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             ) from err
 
     def __getitem__(self, key):
-        """Use dict getitem method."""
-        return dict.__getitem__(self, key)
+        """Use underlying dict's getitem method."""
+        return self._underlying_storage[key]
 
     def __delitem__(self, key):
         """Raise TypeError if someone ever tries to delete a key from RcParams."""
@@ -341,37 +365,29 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             ""
         )
 
-    def items(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.items(self)
-
-    def keys(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.keys(self)
-
-    def values(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.values(self)
-
     def __repr__(self):
         """Customize repr of RcParams objects."""
         class_name = self.__class__.__name__
         indent = len(class_name) + 1
-        repr_split = pprint.pformat(dict(self), indent=1, width=80 - indent).split("\n")
+        repr_split = pprint.pformat(
+            self._underlying_storage,
+            indent=1,
+            width=80 - indent,
+        ).split("\n")
         repr_indented = ("\n" + " " * indent).join(repr_split)
-        return "{}({})".format(class_name, repr_indented)
+        return f"{class_name}({repr_indented})"
 
     def __str__(self):
         """Customize str/print of RcParams objects."""
-        return "\n".join(map("{0[0]:<22}: {0[1]}".format, sorted(self.items())))
+        return "\n".join(map("{0[0]:<22}: {0[1]}".format, sorted(self._underlying_storage.items())))
 
     def __iter__(self):
         """Yield sorted list of keys."""
-        yield from sorted(dict.__iter__(self))
+        yield from sorted(self._underlying_storage.keys())
 
     def __len__(self):
-        """Use dict len method."""
-        return dict.__len__(self)
+        """Use underlying dict's len method."""
+        return len(self._underlying_storage)
 
     def find_all(self, pattern):
         """
@@ -390,7 +406,7 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
 
     def copy(self):
         """Get a copy of the RcParams object."""
-        return {k: dict.__getitem__(self, k) for k in self}
+        return dict(self._underlying_storage)
 
 
 def get_arviz_rcfile():
@@ -441,7 +457,7 @@ def read_rcfile(fname):
     _error_details_fmt = 'line #%d\n\t"%s"\n\tin file "%s"'
 
     config = RcParams()
-    with open(fname, "r") as rcfile:
+    with open(fname, "r", encoding="utf8") as rcfile:
         try:
             multiline = False
             for line_no, line in enumerate(rcfile, 1):
@@ -474,9 +490,7 @@ def read_rcfile(fname):
                     config[key] = val
                 except ValueError as verr:
                     error_details = _error_details_fmt % (line_no, line, fname)
-                    raise ValueError(
-                        "Bad val {} on {}\n\t{}".format(val, error_details, str(verr))
-                    ) from verr
+                    raise ValueError(f"Bad val {val} on {error_details}\n\t{str(verr)}") from verr
 
         except UnicodeDecodeError:
             _log.warning(
@@ -514,7 +528,7 @@ class rc_context:  # pylint: disable=invalid-name
     rc : dict, optional
         Mapping containing the rcParams to modify temporally.
     fname : str, optional
-        Filename of the file containig the rcParams to use inside the rc_context.
+        Filename of the file containing the rcParams to use inside the rc_context.
 
     Examples
     --------

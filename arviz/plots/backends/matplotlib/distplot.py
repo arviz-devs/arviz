@@ -1,10 +1,11 @@
 """Matplotlib distplot."""
 import matplotlib.pyplot as plt
+from matplotlib import _pylab_helpers
 import numpy as np
 
 from ....stats.density_utils import get_bins
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, _init_kwargs_dict
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
@@ -18,7 +19,6 @@ def plot_dist(
     rotated,
     rug,
     bw,
-    circular,
     quantiles,
     contour,
     fill_last,
@@ -37,8 +37,7 @@ def plot_dist(
     show,
 ):
     """Matplotlib distplot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
@@ -53,7 +52,14 @@ def plot_dist(
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
+        fig_manager = _pylab_helpers.Gcf.get_active()
+        if fig_manager is not None:
+            ax = fig_manager.canvas.figure.gca()
+        else:
+            _, ax = create_axes_grid(
+                1,
+                backend_kwargs=backend_kwargs,
+            )
 
     if kind == "hist":
         hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
@@ -90,7 +96,6 @@ def plot_dist(
             rug=rug,
             label=label,
             bw=bw,
-            circular=circular,
             quantiles=quantiles,
             rotated=rotated,
             contour=contour,
@@ -128,14 +133,14 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     elif is_circular:
         labels = [
-            r"0",
-            r"π/4",
-            r"π/2",
-            r"3π/4",
-            r"π",
-            r"5π/4",
-            r"3π/2",
-            r"7π/4",
+            "0",
+            f"{np.pi/4:.2f}",
+            f"{np.pi/2:.2f}",
+            f"{3*np.pi/4:.2f}",
+            f"{np.pi:.2f}",
+            f"{-3*np.pi/4:.2f}",
+            f"{-np.pi/2:.2f}",
+            f"{-np.pi/4:.2f}",
         ]
 
         ax.set_xticklabels(labels)

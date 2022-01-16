@@ -6,7 +6,7 @@ import numpy as np
 
 from ....stats import hdi
 from ....stats.density_utils import get_bins, kde
-from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label
+from ...plot_utils import _scale_fig_size, calculate_point_estimate
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
@@ -22,6 +22,7 @@ def plot_density(
     rows,
     cols,
     textsize,
+    labeller,
     hdi_prob,
     point_estimate,
     hdi_markers,
@@ -68,8 +69,8 @@ def plot_density(
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
     for m_idx, plotters in enumerate(to_plot):
-        for var_name, selection, values in plotters:
-            label = make_label(var_name, selection)
+        for var_name, selection, isel, values in plotters:
+            label = labeller.make_label_vert(var_name, selection, isel)
             _d_helper(
                 values.flatten(),
                 label,

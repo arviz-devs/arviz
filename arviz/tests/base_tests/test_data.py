@@ -1,5 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
+
 import os
 from collections import namedtuple
 from copy import deepcopy
@@ -13,7 +14,7 @@ import xarray as xr
 from xarray.core.options import OPTIONS
 from xarray.testing import assert_identical
 
-from arviz import (
+from ... import (
     InferenceData,
     clear_data_home,
     concat,
@@ -27,7 +28,7 @@ from arviz import (
     to_netcdf,
 )
 
-from ...data.base import dict_to_dataset, generate_dims_coords, make_attrs
+from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
 from ...data.datasets import LOCAL_DATASETS, REMOTE_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -158,6 +159,20 @@ def test_dims_coords_extra_dims():
     assert "xz" in dims
     assert len(coords["xx"]) == 4
     assert len(coords["xy"]) == 20
+
+
+@pytest.mark.parametrize("shape", [(4, 20), (4, 20, 1)])
+def test_dims_coords_skip_event_dims(shape):
+    coords = {"x": np.arange(4), "y": np.arange(20), "z": np.arange(5)}
+    dims, coords = generate_dims_coords(
+        shape, "name", dims=["x", "y", "z"], coords=coords, skip_event_dims=True
+    )
+    assert "x" in dims
+    assert "y" in dims
+    assert "z" not in dims
+    assert len(coords["x"]) == 4
+    assert len(coords["y"]) == 20
+    assert "z" not in coords
 
 
 def test_make_attrs():
@@ -316,7 +331,23 @@ def test_inference_concat_keeps_all_fields():
     assert not fails_c2
 
 
-class TestInferenceData:
+@pytest.mark.parametrize(
+    "model_code,expected",
+    [
+        ("data {int y;} models {y ~ poisson(3);} generated quantities {int X;}", {"X": "int"}),
+        (
+            "data {real y;} models {y ~ normal(0,1);} generated quantities {int Y; real G;}",
+            {"Y": "int"},
+        ),
+    ],
+)
+def test_infer_stan_dtypes(model_code, expected):
+    """Test different examples for dtypes in Stan models."""
+    res = infer_stan_dtypes(model_code)
+    assert res == expected
+
+
+class TestInferenceData:  # pylint: disable=too-many-public-methods
     def test_addition(self):
         idata1 = from_dict(
             posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
@@ -329,6 +360,30 @@ class TestInferenceData:
         test_dict = {"posterior": ["A", "B"], "prior": ["C", "D"]}
         fails = check_multiple_attrs(test_dict, new_idata)
         assert not fails
+
+    def test_iter(self, models):
+        idata = models.model_1
+        for group in idata:
+            assert group in idata._groups_all  # pylint: disable=protected-access
+
+    def test_groups(self, models):
+        idata = models.model_1
+        for group in idata.groups():
+            assert group in idata._groups_all  # pylint: disable=protected-access
+
+    def test_values(self, models):
+        idata = models.model_1
+        datasets = idata.values()
+        for group in idata.groups():
+            assert group in idata._groups_all  # pylint: disable=protected-access
+            dataset = getattr(idata, group)
+            assert dataset in datasets
+
+    def test_items(self, models):
+        idata = models.model_1
+        for group, dataset in idata.items():
+            assert group in idata._groups_all  # pylint: disable=protected-access
+            assert dataset.equals(getattr(idata, group))
 
     @pytest.mark.parametrize("inplace", [True, False])
     def test_extend_xr_method(self, data_random, inplace):
@@ -410,7 +465,7 @@ class TestInferenceData:
         assert not fails
         # assert _groups attribute contains all groups
         groups = getattr(idata, "_groups")
-        assert all([group in groups for group in test_dict])
+        assert all((group in groups for group in test_dict))
 
         # Use del method
         if use == "del":
@@ -453,6 +508,15 @@ class TestInferenceData:
         )
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
+
+    def test_group_names_invalid_args(self):
+        ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
+        idata = InferenceData(posterior=(ds, ds))
+        msg = r"^\'filter_groups\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+        with pytest.raises(ValueError, match=msg):
+            idata._group_names(  # pylint: disable=protected-access
+                ("posterior",), filter_groups="foo"
+            )
 
     @pytest.mark.parametrize("inplace", [False, True])
     def test_isel(self, data_random, inplace):
@@ -569,6 +633,83 @@ class TestInferenceData:
             test_xr_data = getattr(test_data, group)
             assert xr_data.equals(test_xr_data)
 
+    @pytest.mark.parametrize(
+        "kwargs",
+        (
+            {
+                "groups": "posterior",
+                "include_coords": True,
+                "include_index": True,
+                "index_origin": 0,
+            },
+            {
+                "groups": ["posterior", "sample_stats"],
+                "include_coords": False,
+                "include_index": True,
+                "index_origin": 0,
+            },
+            {
+                "groups": "posterior_groups",
+                "include_coords": True,
+                "include_index": False,
+                "index_origin": 1,
+            },
+        ),
+    )
+    def test_to_dataframe(self, kwargs):
+        idata = from_dict(
+            posterior={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            sample_stats={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            observed_data={"a": np.random.randn(3, 4, 5), "b": np.random.randn(4)},
+        )
+        test_data = idata.to_dataframe(**kwargs)
+        assert not test_data.empty
+        groups = kwargs.get("groups", idata._groups_all)  # pylint: disable=protected-access
+        for group in idata._groups_all:  # pylint: disable=protected-access
+            if "data" in group:
+                continue
+            assert test_data.shape == (
+                (4 * 100, 3 * 4 * 5 + 1 + 2)
+                if groups == "posterior"
+                else (4 * 100, (3 * 4 * 5 + 1) * 2 + 2)
+            )
+            if groups == "posterior":
+                if kwargs.get("include_coords", True) and kwargs.get("include_index", True):
+                    assert any(
+                        f"[{kwargs.get('index_origin', 0)}," in item[0]
+                        for item in test_data.columns
+                        if isinstance(item, tuple)
+                    )
+                if kwargs.get("include_coords", True):
+                    assert any(isinstance(item, tuple) for item in test_data.columns)
+                else:
+                    assert not any(isinstance(item, tuple) for item in test_data.columns)
+            else:
+                if not kwargs.get("include_index", True):
+                    assert all(
+                        item in test_data.columns
+                        for item in (("posterior", "a", 1, 1, 1), ("posterior", "b"))
+                    )
+            assert all(item in test_data.columns for item in ("chain", "draw"))
+
+    def test_to_dataframe_bad(self):
+        idata = from_dict(
+            posterior={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            sample_stats={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            observed_data={"a": np.random.randn(3, 4, 5), "b": np.random.randn(4)},
+        )
+        with pytest.raises(TypeError):
+            idata.to_dataframe(index_origin=2)
+
+        with pytest.raises(TypeError):
+            idata.to_dataframe(include_coords=False, include_index=False)
+
+        with pytest.raises(TypeError):
+            idata.to_dataframe(groups=["observed_data"])
+
+        with pytest.raises(KeyError):
+            idata.to_dataframe(groups=["invalid_group"])
+
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
         idata = load_arviz_data("centered_eight")
@@ -624,10 +765,10 @@ class TestInferenceData:
         assert isinstance(idata.prior, xr.Dataset)
         assert hasattr(idata, "prior")
 
-        idata.add_groups(posterior_warmup={"a": data[..., 0], "b": data})
-        assert "posterior_warmup" in idata._groups  # pylint: disable=protected-access
-        assert isinstance(idata.posterior_warmup, xr.Dataset)
-        assert hasattr(idata, "posterior_warmup")
+        idata.add_groups(warmup_posterior={"a": data[..., 0], "b": data})
+        assert "warmup_posterior" in idata._groups_all  # pylint: disable=protected-access
+        assert isinstance(idata.warmup_posterior, xr.Dataset)
+        assert hasattr(idata, "warmup_posterior")
 
     def test_add_groups_warning(self, data_random):
         data = np.random.normal(size=(4, 500, 8))
@@ -649,8 +790,12 @@ class TestInferenceData:
 
     def test_extend(self, data_random):
         idata = data_random
-        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
+        idata2 = create_data_random(
+            groups=["prior", "prior_predictive", "observed_data", "warmup_posterior"], seed=7
+        )
         idata.extend(idata2)
+        assert "prior" in idata._groups_all  # pylint: disable=protected-access
+        assert "warmup_posterior" in idata._groups_all  # pylint: disable=protected-access
         assert hasattr(idata, "prior")
         assert hasattr(idata, "prior_predictive")
         assert idata.prior.equals(idata2.prior)
@@ -786,6 +931,24 @@ class TestConvertToDataset:
 def test_dict_to_dataset():
     datadict = {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)}
     dataset = convert_to_dataset(datadict, coords={"c": np.arange(10)}, dims={"b": ["c"]})
+    assert set(dataset.data_vars) == {"a", "b"}
+    assert set(dataset.coords) == {"chain", "draw", "c"}
+
+    assert set(dataset.a.coords) == {"chain", "draw"}
+    assert set(dataset.b.coords) == {"chain", "draw", "c"}
+
+
+def test_dict_to_dataset_event_dims_error():
+    datadict = {"a": np.random.randn(1, 100, 10)}
+    coords = {"b": np.arange(10), "c": ["x", "y", "z"]}
+    msg = "different number of dimensions on data and dims"
+    with pytest.raises(ValueError, match=msg):
+        convert_to_dataset(datadict, coords=coords, dims={"a": ["b", "c"]})
+
+
+def test_dict_to_dataset_with_tuple_coord():
+    datadict = {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)}
+    dataset = convert_to_dataset(datadict, coords={"c": tuple(range(10))}, dims={"b": ["c"]})
     assert set(dataset.data_vars) == {"a", "b"}
     assert set(dataset.coords) == {"chain", "draw", "c"}
 

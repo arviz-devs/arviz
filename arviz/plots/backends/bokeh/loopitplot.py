@@ -34,7 +34,8 @@ def plot_loo_pit(
     y,
     color,
     textsize,
-    credible_interval,
+    labeller,
+    hdi_prob,
     plot_kwargs,
     backend_kwargs,
     show,
@@ -63,15 +64,21 @@ def plot_loo_pit(
     plot_kwargs.setdefault("color", to_hex(color))
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y
     elif isinstance(y, DataArray) and y.name is not None:
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y.name
     elif isinstance(y_hat, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y_hat
     elif isinstance(y_hat, DataArray) and y_hat.name is not None:
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = y_hat.name
     else:
         label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+        xlabel = ""
+    xlabel = labeller.var_name_to_str(xlabel)
 
     plot_kwargs.setdefault("legend_label", label)
 
@@ -96,9 +103,7 @@ def plot_loo_pit(
             fill_kwargs.setdefault(
                 "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
             )
-            fill_kwargs.setdefault(
-                "legend_label", "{:.3g}% credible interval".format(credible_interval)
-            )
+            fill_kwargs.setdefault("legend_label", f"{hdi_prob * 100:.3g}% credible interval")
     elif use_hdi:
         if hdi_kwargs is None:
             hdi_kwargs = {}
@@ -175,15 +180,18 @@ def plot_loo_pit(
                 )
     else:
         if use_hdi:
-            ax.add_layout(
-                BoxAnnotation(
-                    bottom=hdi_odds[1],
-                    top=hdi_odds[0],
-                    fill_alpha=hdi_kwargs.pop("alpha"),
-                    fill_color=hdi_kwargs.pop("color"),
-                    **hdi_kwargs
-                )
+            patch = BoxAnnotation(
+                bottom=hdi_odds[1],
+                top=hdi_odds[0],
+                fill_alpha=hdi_kwargs.pop("alpha"),
+                fill_color=hdi_kwargs.pop("color"),
+                **hdi_kwargs,
             )
+            patch.level = "underlay"
+            ax.add_layout(patch)
+
+            # Adds horizontal reference line
+            ax.line([0, 1], [1, 1], line_color="white", line_width=1.5)
         else:
             for idx in range(n_unif):
                 x_s, unif_density = kde(unif[idx, :])
@@ -202,6 +210,10 @@ def plot_loo_pit(
             line_width=plot_kwargs.get("linewidth", 3.0),
         )
 
+    # Sets xlim(0, 1)
+    ax.xaxis.axis_label = xlabel
+    ax.line(0, 0)
+    ax.line(1, 0)
     show_layout(ax, show)
 
     return ax

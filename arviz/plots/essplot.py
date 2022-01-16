@@ -3,10 +3,12 @@ import numpy as np
 import xarray as xr
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
+from ..sel_utils import xarray_var_iter
 from ..stats import ess
 from ..utils import _var_names, get_coords
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_ess(
@@ -17,12 +19,14 @@ def plot_ess(
     relative=False,
     coords=None,
     figsize=None,
+    grid=None,
     textsize=None,
     rug=False,
     rug_kind="diverging",
     n_points=20,
     extra_methods=False,
     min_ess=400,
+    labeller=None,
     ax=None,
     extra_kwargs=None,
     text_kwargs=None,
@@ -31,29 +35,32 @@ def plot_ess(
     backend=None,
     backend_kwargs=None,
     show=None,
-    **kwargs
+    **kwargs,
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
     Parameters
     ----------
     idata: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names, optional
-        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     kind: str, optional
         Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
     relative: bool
         Show relative ess in plot ``ress = ess / N``.
     coords: dict, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -70,6 +77,9 @@ def plot_ess(
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess: int
         Minimum number of ESS desired.
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
@@ -87,16 +97,23 @@ def plot_ess(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or
+        :meth:`mpl:matplotlib.axes.Axes.plot` function depending on the
+        value of ``kind``.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    ess: Calculate estimate of the effective sample size.
 
     References
     ----------
@@ -163,12 +180,14 @@ def plot_ess(
     valid_kinds = ("local", "quantile", "evolution")
     kind = kind.lower()
     if kind not in valid_kinds:
-        raise ValueError("Invalid kind, kind must be one of {} not {}".format(valid_kinds, kind))
+        raise ValueError(f"Invalid kind, kind must be one of {valid_kinds} not {kind}")
 
     if coords is None:
         coords = {}
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
+    if labeller is None:
+        labeller = BaseLabeller()
     extra_methods = False if kind == "evolution" else extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
@@ -242,7 +261,7 @@ def plot_ess(
         list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"})), "plot_ess"
     )
     length_plotters = len(plotters)
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     if extra_methods:
         mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
@@ -269,6 +288,7 @@ def plot_ess(
         n_samples=n_samples,
         relative=relative,
         min_ess=min_ess,
+        labeller=labeller,
         ylabel=ylabel,
         rug=rug,
         rug_kind=rug_kind,

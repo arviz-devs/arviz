@@ -1,10 +1,15 @@
+docutils
 ghp-import
 ipython
-nbsphinx
 numpydoc
 pydocstyle
 Sphinx>=1.8.3
-sphinx-bootstrap-theme
-sphinx-gallery
-selenium
-recommonmark
+pydata_sphinx_theme>=0.6.3
+myst-parser
+myst-nb
+sphinx-panels
+sphinx-notfound-page
+sphinx-copybutton
+bokeh
+sphinx_design
+sphinx-codeautolink @ git+https://github.com/felix-hilden/sphinx-codeautolink

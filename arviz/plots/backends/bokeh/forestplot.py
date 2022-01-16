@@ -7,15 +7,16 @@ import bokeh.plotting as bkp
 import matplotlib.pyplot as plt
 import numpy as np
 from bokeh.models import Band, ColumnDataSource, DataRange1d
-from bokeh.models.annotations import Title
+from bokeh.models.annotations import Title, Legend
 from bokeh.models.tickers import FixedTicker
 
+from ....sel_utils import xarray_var_iter
 from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
 from ....utils import conditional_jit
-from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -49,6 +50,8 @@ def plot_forest(
     ridgeplot_truncate,
     ridgeplot_quantiles,
     textsize,
+    legend,
+    labeller,
     ess,
     r_hat,
     backend_config,
@@ -57,7 +60,12 @@ def plot_forest(
 ):
     """Bokeh forest plot."""
     plot_handler = PlotHandler(
-        datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors
+        datasets,
+        var_names=var_names,
+        model_names=model_names,
+        combined=combined,
+        colors=colors,
+        labeller=labeller,
     )
 
     if figsize is None:
@@ -101,15 +109,15 @@ def plot_forest(
 
         for i, width_r in zip(range(ncols), width_ratios):
             backend_kwargs_i = backend_kwargs.copy()
-            backend_kwargs_i.setdefault("width", int(figsize[0] * dpi))
+            backend_kwargs_i.setdefault("height", int(figsize[1] * dpi))
             backend_kwargs_i.setdefault(
-                "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
+                "width", int(figsize[0] * (width_r / sum(width_ratios)) * dpi * 1.25)
             )
             if i == 0:
                 ax = bkp.figure(
                     **backend_kwargs_i,
                 )
-                backend_kwargs_i.setdefault("y_range", ax.y_range)
+                backend_kwargs.setdefault("y_range", ax.y_range)
             else:
                 ax = bkp.figure(**backend_kwargs_i)
             axes.append(ax)
@@ -117,6 +125,8 @@ def plot_forest(
         axes = ax
 
     axes = np.atleast_2d(axes)
+
+    plotted = defaultdict(list)
 
     if kind == "forestplot":
         plot_handler.forestplot(
@@ -126,6 +136,7 @@ def plot_forest(
             markersize,
             axes[0, 0],
             rope,
+            plotted,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
@@ -138,6 +149,7 @@ def plot_forest(
             ridgeplot_truncate,
             ridgeplot_quantiles,
             axes[0, 0],
+            plotted,
         )
     else:
         raise TypeError(
@@ -147,12 +159,23 @@ def plot_forest(
 
     idx = 1
     if ess:
-        plot_handler.plot_neff(axes[0, idx], markersize)
+        plotted_ess = defaultdict(list)
+        plot_handler.plot_neff(axes[0, idx], markersize, plotted_ess)
+        if legend:
+            plot_handler.legend(axes[0, idx], plotted_ess)
         idx += 1
 
     if r_hat:
-        plot_handler.plot_rhat(axes[0, idx], markersize)
+        plotted_r_hat = defaultdict(list)
+        plot_handler.plot_rhat(axes[0, idx], markersize, plotted_r_hat)
+        if legend:
+            plot_handler.legend(axes[0, idx], plotted_r_hat)
         idx += 1
+
+    all_plotters = list(plot_handler.plotters.values())
+    y_max = plot_handler.y_max() - all_plotters[-1].group_offset
+    if kind == "ridgeplot":  # space at the top
+        y_max += ridgeplot_overlap
 
     for i, ax_ in enumerate(axes.ravel()):
         if kind == "ridgeplot":
@@ -168,23 +191,19 @@ def plot_forest(
         ax_.x_range = DataRange1d(bounds=backend_config["bounds_x_range"], min_interval=1)
         ax_.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=2)
 
+        ax_.y_range._property_values["start"] = -all_plotters[  # pylint: disable=protected-access
+            0
+        ].group_offset
+        ax_.y_range._property_values["end"] = y_max  # pylint: disable=protected-access
+
     labels, ticks = plot_handler.labels_and_ticks()
+    ticks = [int(tick) if (tick).is_integer() else tick for tick in ticks]
 
     axes[0, 0].yaxis.ticker = FixedTicker(ticks=ticks)
     axes[0, 0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
 
-    all_plotters = list(plot_handler.plotters.values())
-    y_max = plot_handler.y_max() - all_plotters[-1].group_offset
-    if kind == "ridgeplot":  # space at the top
-        y_max += ridgeplot_overlap
-
-    axes[0, 0].y_range._property_values[
-        "start"
-    ] = -all_plotters[  # pylint: disable=protected-access
-        0
-    ].group_offset
-    axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
-
+    if legend:
+        plot_handler.legend(axes[0, 0], plotted)
     show_layout(axes, show)
 
     return axes
@@ -195,12 +214,12 @@ class PlotHandler:
 
     # pylint: disable=inconsistent-return-statements
 
-    def __init__(self, datasets, var_names, model_names, combined, colors):
+    def __init__(self, datasets, var_names, model_names, combined, colors, labeller):
         self.data = datasets
 
         if model_names is None:
             if len(self.data) > 1:
-                model_names = ["Model {}".format(idx) for idx, _ in enumerate(self.data)]
+                model_names = [f"Model {idx}" for idx, _ in enumerate(self.data)]
             else:
                 model_names = [""]
         elif len(model_names) != len(self.data):
@@ -233,6 +252,7 @@ class PlotHandler:
             colors = [colors for _ in self.data]
 
         self.colors = list(reversed(colors))  # y-values are upside down
+        self.labeller = labeller
 
         self.plotters = self.make_plotters()
 
@@ -247,6 +267,7 @@ class PlotHandler:
                 model_names=self.model_names,
                 combined=self.combined,
                 colors=self.colors,
+                labeller=self.labeller,
             )
             y = plotters[var_name].y_max()
         return plotters
@@ -259,29 +280,54 @@ class PlotHandler:
         def label_idxs():
             labels, idxs = [], []
             for plotter in val:
-                sub_labels, sub_idxs, _, _ = plotter.labels_ticks_and_vals()
+                sub_labels, sub_idxs, _, _, _ = plotter.labels_ticks_and_vals()
+                labels_to_idxs = defaultdict(list)
+                for label, idx in zip(sub_labels, sub_idxs):
+                    labels_to_idxs[label].append(idx)
+                sub_idxs = []
+                sub_labels = []
+                for label, all_idx in labels_to_idxs.items():
+                    sub_labels.append(label)
+                    sub_idxs.append(np.mean([j for j in all_idx]))
                 labels.append(sub_labels)
                 idxs.append(sub_idxs)
             return np.concatenate(labels), np.concatenate(idxs)
 
         return label_idxs()
 
-    def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
+    def legend(self, ax, plotted):
+        """Add interactive legend with colorcoded model info."""
+        legend_it = []
+        for (model_name, glyphs) in plotted.items():
+            legend_it.append((model_name, glyphs))
+
+        legend = Legend(items=legend_it, orientation="vertical", location="top_left")
+        ax.add_layout(legend, "above")
+        ax.legend.click_policy = "hide"
+
+    def display_multiple_ropes(
+        self, rope, ax, y, linewidth, var_name, selection, plotted, model_name
+    ):
         """Display ROPE when more than one interval is provided."""
-        vals = dict(rope[rope_var][0])["rope"]
-        ax.line(
-            vals,
-            (y + 0.05, y + 0.05),
-            line_width=linewidth * 2,
-            color=[
-                color
-                for _, color in zip(
-                    range(3), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        for sel in rope.get(var_name, []):
+            # pylint: disable=line-too-long
+            if all(k in selection and selection[k] == v for k, v in sel.items() if k != "rope"):
+                vals = sel["rope"]
+                plotted[model_name].append(
+                    ax.line(
+                        vals,
+                        (y + 0.05, y + 0.05),
+                        line_width=linewidth * 2,
+                        color=[
+                            color
+                            for _, color in zip(
+                                range(3), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                            )
+                        ][2],
+                        line_alpha=0.7,
+                    )
                 )
-            ][2],
-            line_alpha=0.7,
-        )
-        return ax
+                return ax
 
     def ridgeplot(
         self,
@@ -294,6 +340,7 @@ class PlotHandler:
         ridgeplot_truncate,
         ridgeplot_quantiles,
         ax,
+        plotted,
     ):
         """Draw ridgeplot for each plotter.
 
@@ -319,11 +366,13 @@ class PlotHandler:
             Defaults to None.
         ax : Axes
             Axes to draw on
+        plotted : dict
+            Contains glyphs for each model
         """
         if alpha is None:
             alpha = 1.0
         for plotter in list(self.plotters.values())[::-1]:
-            for x, y_min, y_max, hdi_, y_q, color in plotter.ridgeplot(
+            for x, y_min, y_max, hdi_, y_q, color, model_name in plotter.ridgeplot(
                 hdi_prob, mult, ridgeplot_kind
             ):
                 if alpha == 0:
@@ -340,14 +389,16 @@ class PlotHandler:
                         facecolor = color
                         alpha = [alpha if ci else 0 for ci in ((x >= hdi_[0]) & (x <= hdi_[1]))]
                     y_min = np.ones_like(x) * y_min
-                    ax.vbar(
-                        x=x,
-                        top=y_max - y_min,
-                        bottom=y_min,
-                        width=0.9,
-                        line_color=border,
-                        color=facecolor,
-                        fill_alpha=alpha,
+                    plotted[model_name].append(
+                        ax.vbar(
+                            x=x,
+                            top=y_max - y_min,
+                            bottom=y_min,
+                            width=0.9,
+                            line_color=border,
+                            color=facecolor,
+                            fill_alpha=alpha,
+                        )
                     )
                 else:
                     tr_x = x[(x >= hdi_[0]) & (x <= hdi_[1])]
@@ -362,41 +413,52 @@ class PlotHandler:
                         line_width=0,
                     )
                     patch.level = "overlay"
+                    plotted[model_name].append(patch)
                     if ridgeplot_truncate:
-                        ax.line(
-                            x, y_max, line_dash="solid", line_width=linewidth, line_color=border
+                        plotted[model_name].append(
+                            ax.line(
+                                x, y_max, line_dash="solid", line_width=linewidth, line_color=border
+                            )
                         )
-                        ax.line(
-                            x, y_min, line_dash="solid", line_width=linewidth, line_color=border
+                        plotted[model_name].append(
+                            ax.line(
+                                x, y_min, line_dash="solid", line_width=linewidth, line_color=border
+                            )
                         )
                     else:
-                        ax.line(
-                            tr_x,
-                            tr_y_max,
-                            line_dash="solid",
-                            line_width=linewidth,
-                            line_color=border,
+                        plotted[model_name].append(
+                            ax.line(
+                                tr_x,
+                                tr_y_max,
+                                line_dash="solid",
+                                line_width=linewidth,
+                                line_color=border,
+                            )
                         )
-                        ax.line(
-                            tr_x,
-                            tr_y_min,
-                            line_dash="solid",
-                            line_width=linewidth,
-                            line_color=border,
+                        plotted[model_name].append(
+                            ax.line(
+                                tr_x,
+                                tr_y_min,
+                                line_dash="solid",
+                                line_width=linewidth,
+                                line_color=border,
+                            )
                         )
                 if ridgeplot_quantiles is not None:
                     quantiles = [x[np.sum(y_q < quant)] for quant in ridgeplot_quantiles]
-                    ax.diamond(
-                        quantiles,
-                        np.ones_like(quantiles) * y_min[0],
-                        line_color="black",
-                        fill_color="black",
-                        size=markersize,
+                    plotted[model_name].append(
+                        ax.diamond(
+                            quantiles,
+                            np.ones_like(quantiles) * y_min[0],
+                            line_color="black",
+                            fill_color="black",
+                            size=markersize,
+                        )
                     )
 
         return ax
 
-    def forestplot(self, hdi_prob, quartiles, linewidth, markersize, ax, rope):
+    def forestplot(self, hdi_prob, quartiles, linewidth, markersize, ax, rope, plotted):
         """Draw forestplot for each plotter.
 
         Parameters
@@ -411,6 +473,8 @@ class PlotHandler:
             Size of marker in center of forestplot line
         ax : Axes
             Axes to draw on
+        plotted : dict
+            Contains glyphs for each model
         """
         if rope is None or isinstance(rope, dict):
             pass
@@ -452,42 +516,53 @@ class PlotHandler:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, rope_var, values, color in plotter.treeplot(qlist, hdi_prob):
+            for y, model_name, selection, values, color in plotter.treeplot(qlist, hdi_prob):
                 if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
+                    self.display_multiple_ropes(
+                        rope, ax, y, linewidth, plotter.var_name, selection, plotted, model_name
+                    )
 
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
                 )
                 for width, j in param_iter:
-                    ax.line(
-                        [values[j], values[-(j + 1)]], [y, y], line_width=width, line_color=color
+                    plotted[model_name].append(
+                        ax.line(
+                            [values[j], values[-(j + 1)]],
+                            [y, y],
+                            line_width=width,
+                            line_color=color,
+                        )
                     )
-                ax.circle(
-                    x=values[mid],
-                    y=y,
-                    size=markersize * 0.75,
-                    fill_color=color,
+                plotted[model_name].append(
+                    ax.circle(
+                        x=values[mid],
+                        y=y,
+                        size=markersize * 0.75,
+                        fill_color=color,
+                    )
                 )
         _title = Title()
-        _title.text = "{:.1%} HDI".format(hdi_prob)
+        _title.text = f"{hdi_prob:.1%} HDI"
         ax.title = _title
 
         return ax
 
-    def plot_neff(self, ax, markersize):
+    def plot_neff(self, ax, markersize, plotted):
         """Draw effective n for each plotter."""
         max_ess = 0
         for plotter in self.plotters.values():
-            for y, ess, color in plotter.ess():
+            for y, ess, color, model_name in plotter.ess():
                 if ess is not None:
-                    ax.circle(
-                        x=ess,
-                        y=y,
-                        fill_color=color,
-                        size=markersize,
-                        line_color="black",
+                    plotted[model_name].append(
+                        ax.circle(
+                            x=ess,
+                            y=y,
+                            fill_color=color,
+                            size=markersize,
+                            line_color="black",
+                        )
                     )
                 if ess > max_ess:
                     max_ess = ess
@@ -502,12 +577,16 @@ class PlotHandler:
 
         return ax
 
-    def plot_rhat(self, ax, markersize):
+    def plot_rhat(self, ax, markersize, plotted):
         """Draw r-hat for each plotter."""
         for plotter in self.plotters.values():
-            for y, r_hat, color in plotter.r_hat():
+            for y, r_hat, color, model_name in plotter.r_hat():
                 if r_hat is not None:
-                    ax.circle(x=r_hat, y=y, fill_color=color, size=markersize, line_color="black")
+                    plotted[model_name].append(
+                        ax.circle(
+                            x=r_hat, y=y, fill_color=color, size=markersize, line_color="black"
+                        )
+                    )
         ax.x_range._property_values["start"] = 0.9  # pylint: disable=protected-access
         ax.x_range._property_values["end"] = 2.1  # pylint: disable=protected-access
 
@@ -537,13 +616,14 @@ class PlotHandler:
 class VarHandler:
     """Handle individual variable logic."""
 
-    def __init__(self, var_name, data, y_start, model_names, combined, colors):
+    def __init__(self, var_name, data, y_start, model_names, combined, colors, labeller):
         self.var_name = var_name
         self.data = data
         self.y_start = y_start
         self.model_names = model_names
         self.combined = combined
         self.colors = colors
+        self.labeller = labeller
         self.model_color = dict(zip(self.model_names, self.colors))
         max_chains = max(datum.chain.max().values for datum in data)
         self.chain_offset = len(data) * 0.45 / max(1, max_chains)
@@ -560,6 +640,7 @@ class VarHandler:
             skip_dims = set()
 
         label_dict = OrderedDict()
+        selection_list = []
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(
@@ -568,8 +649,14 @@ class VarHandler:
                     skip_dims=skip_dims,
                     reverse_selections=True,
                 )
-                for _, selection, values in datum_iter:
-                    label = make_label(self.var_name, selection, position="beside")
+                datum_list = list(datum_iter)
+                for _, selection, isel, values in datum_list:
+                    selection_list.append(selection)
+                    if not selection or not len(selection_list) % len(datum_list):
+                        var_name = self.var_name
+                    else:
+                        var_name = ""
+                    label = self.labeller.make_label_flat(var_name, selection, isel)
                     if label not in label_dict:
                         label_dict[label] = OrderedDict()
                     if name not in label_dict[label]:
@@ -577,14 +664,13 @@ class VarHandler:
                     label_dict[label][name].append(values)
 
         y = self.y_start
-        for label, model_data in label_dict.items():
+        for idx, (label, model_data) in enumerate(label_dict.items()):
             for model_name, value_list in model_data.items():
-                if model_name:
-                    row_label = "{}: {}".format(model_name, label)
-                else:
-                    row_label = label
+                row_label = self.labeller.make_model_label(model_name, label)
                 for values in value_list:
-                    yield y, row_label, label, values, self.model_color[model_name]
+                    yield y, row_label, model_name, label, selection_list[
+                        idx
+                    ], values, self.model_color[model_name]
                     y += self.chain_offset
                 y += self.var_offset
             y += self.group_offset
@@ -592,30 +678,33 @@ class VarHandler:
     def labels_ticks_and_vals(self):
         """Get labels, ticks, values, and colors for the variable."""
         y_ticks = defaultdict(list)
-        for y, label, _, vals, color in self.iterator():
-            y_ticks[label].append((y, vals, color))
-        labels, ticks, vals, colors = [], [], [], []
-        for label, data in y_ticks.items():
-            labels.append(label)
-            ticks.append(np.mean([j[0] for j in data]))
-            vals.append(np.vstack([j[1] for j in data]))
-            colors.append(data[0][2])  # the colors are all the same
-        return labels, ticks, vals, colors
+        for y, label, model_name, _, _, vals, color in self.iterator():
+            y_ticks[label].append((y, vals, color, model_name))
+        labels, ticks, vals, colors, model_names = [], [], [], [], []
+        for label, all_data in y_ticks.items():
+            for data in all_data:
+                labels.append(label)
+                ticks.append(data[0])
+                vals.append(np.array(data[1]))
+                model_names.append(data[3])
+                colors.append(data[2])  # the colors are all the same
+        return labels, ticks, vals, colors, model_names
 
     def treeplot(self, qlist, hdi_prob):
         """Get data for each treeplot for the variable."""
-        for y, _, label, values, color in self.iterator():
+        for y, _, model_name, _, selection, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
             ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
-            yield y, label, ntiles, color
+            yield y, model_name, selection, ntiles, color
 
     def ridgeplot(self, hdi_prob, mult, ridgeplot_kind):
         """Get data for each ridgeplot for the variable."""
-        xvals, hdi_vals, yvals, pdfs, pdfs_q, colors = [], [], [], [], [], []
+        xvals, hdi_vals, yvals, pdfs, pdfs_q, colors, model_names = [], [], [], [], [], [], []
 
-        for y, *_, values, color in self.iterator():
+        for y, _, model_name, *_, values, color in self.iterator():
             yvals.append(y)
             colors.append(color)
+            model_names.append(model_name)
             values = values.flatten()
             values = values[np.isfinite(values)]
 
@@ -644,23 +733,25 @@ class VarHandler:
             hdi_vals.append(hdi_)
 
         scaling = max(np.max(j) for j in pdfs)
-        for y, x, hdi_val, pdf, pdf_q, color in zip(yvals, xvals, hdi_vals, pdfs, pdfs_q, colors):
-            yield x, y, mult * pdf / scaling + y, hdi_val, pdf_q, color
+        for y, x, hdi_val, pdf, pdf_q, color, model_name in zip(
+            yvals, xvals, hdi_vals, pdfs, pdfs_q, colors, model_names
+        ):
+            yield x, y, mult * pdf / scaling + y, hdi_val, pdf_q, color, model_name
 
     def ess(self):
         """Get effective n data for the variable."""
-        _, y_vals, values, colors = self.labels_ticks_and_vals()
-        for y, value, color in zip(y_vals, values, colors):
-            yield y, _ess(value), color
+        _, y_vals, values, colors, model_names = self.labels_ticks_and_vals()
+        for y, value, color, model_name in zip(y_vals, values, colors, model_names):
+            yield y, _ess(value), color, model_name
 
     def r_hat(self):
         """Get rhat data for the variable."""
-        _, y_vals, values, colors = self.labels_ticks_and_vals()
-        for y, value, color in zip(y_vals, values, colors):
+        _, y_vals, values, colors, model_names = self.labels_ticks_and_vals()
+        for y, value, color, model_name in zip(y_vals, values, colors, model_names):
             if value.ndim != 2 or value.shape[0] < 2:
-                yield y, None, color
+                yield y, None, color, model_name
             else:
-                yield y, _rhat(value), color
+                yield y, _rhat(value), color, model_name
 
     def y_max(self):
         """Get max y value for the variable."""

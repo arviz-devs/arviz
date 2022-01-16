@@ -12,8 +12,8 @@ from ...plot_utils import (
     _scale_fig_size,
     calculate_point_estimate,
     format_sig_figs,
-    make_label,
     round_num,
+    vectorized_to_hex,
 )
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
@@ -34,9 +34,13 @@ def plot_posterior(
     round_to,
     hdi_prob,
     multimodal,
+    skipna,
     textsize,
     ref_val,
     rope,
+    ref_val_color,
+    rope_color,
+    labeller,
     kwargs,
     backend_kwargs,
     show,
@@ -65,7 +69,7 @@ def plot_posterior(
     else:
         ax = np.atleast_2d(ax)
     idx = 0
-    for (var_name, selection, x), ax_ in zip(
+    for (var_name, selection, isel, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
         _plot_posterior_op(
@@ -82,15 +86,18 @@ def plot_posterior(
             round_to=round_to,
             hdi_prob=hdi_prob,
             multimodal=multimodal,
+            skipna=skipna,
             linewidth=linewidth,
             ref_val=ref_val,
             rope=rope,
+            ref_val_color=ref_val_color,
+            rope_color=rope_color,
             ax_labelsize=ax_labelsize,
-            **kwargs
+            **kwargs,
         )
         idx += 1
         _title = Title()
-        _title.text = make_label(var_name, selection)
+        _title.text = labeller.make_label_vert(var_name, selection, isel)
         ax_.title = _title
 
     show_layout(ax, show)
@@ -112,11 +119,14 @@ def _plot_posterior_op(
     point_estimate,
     hdi_prob,
     multimodal,
+    skipna,
     ref_val,
     rope,
+    ref_val_color,
+    rope_color,
     ax_labelsize,
     round_to: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ):  # noqa: D202
     """Artist to draw posterior."""
 
@@ -152,9 +162,20 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        ax.line([val, val], [0, 0.8 * max_data], line_color="blue", line_alpha=0.65)
+        ax.line(
+            [val, val],
+            [0, 0.8 * max_data],
+            line_color=vectorized_to_hex(ref_val_color),
+            line_alpha=0.65,
+        )
 
-        ax.text(x=[values.mean()], y=[max_data * 0.6], text=[ref_in_posterior], text_align="center")
+        ax.text(
+            x=[values.mean()],
+            y=[max_data * 0.6],
+            text=[ref_in_posterior],
+            text_color=vectorized_to_hex(ref_val_color),
+            text_align="center",
+        )
 
     def display_rope(max_data):
         if rope is None:
@@ -176,20 +197,34 @@ def _plot_posterior_op(
                 '{"var_name": {"rope": (lo, hi)}}, or an'
                 "iterable of length 2"
             )
+        rope_text = [f"{val:.{format_sig_figs(val, round_to)}g}" for val in vals]
 
         ax.line(
             vals,
             (max_data * 0.02, max_data * 0.02),
             line_width=linewidth * 5,
-            line_color="red",
+            line_color=vectorized_to_hex(rope_color),
             line_alpha=0.7,
         )
-
+        probability_within_rope = ((values > vals[0]) & (values <= vals[1])).mean()
         text_props = dict(
-            text_font_size="{}pt".format(ax_labelsize), text_color="black", text_align="center"
+            text_color=vectorized_to_hex(rope_color),
+            text_align="center",
+        )
+        ax.text(
+            x=values.mean(),
+            y=[max_data * 0.45],
+            text=[f"{format_as_percent(probability_within_rope, 1)} in ROPE"],
+            **text_props,
         )
 
-        ax.text(x=vals, y=[max_data * 0.2, max_data * 0.2], text=list(map(str, vals)), **text_props)
+        ax.text(
+            x=vals,
+            y=[max_data * 0.2, max_data * 0.2],
+            text_font_size=f"{ax_labelsize}pt",
+            text=rope_text,
+            **text_props,
+        )
 
     def display_point_estimate(max_data):
         if not point_estimate:
@@ -205,7 +240,9 @@ def _plot_posterior_op(
     def display_hdi(max_data):
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
+        hdi_probs = hdi(
+            values, hdi_prob=hdi_prob, circular=circular, multimodal=multimodal, skipna=skipna
+        )  # type: np.ndarray
 
         for hdi_i in np.atleast_2d(hdi_probs):
             ax.line(
@@ -231,12 +268,15 @@ def _plot_posterior_op(
         ax.xgrid.grid_line_color = None
         ax.ygrid.grid_line_color = None
 
+    if skipna:
+        values = values[~np.isnan(values)]
+
     if kind == "kde" and values.dtype.kind == "f":
         kwargs.setdefault("line_width", linewidth)
         plot_kde(
             values,
             bw=bw,
-            circular=circular,
+            is_circular=circular,
             fill_kwargs={"fill_alpha": kwargs.pop("fill_alpha", 0)},
             plot_kwargs=kwargs,
             ax=ax,

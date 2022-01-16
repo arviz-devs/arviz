@@ -1,8 +1,10 @@
 """Plot posterior densities."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
+from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning, get_coords
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_posterior(
@@ -11,24 +13,28 @@ def plot_posterior(
     filter_vars=None,
     transform=None,
     coords=None,
+    grid=None,
     figsize=None,
     textsize=None,
     hdi_prob=None,
     multimodal=False,
+    skipna=False,
     round_to=None,
     point_estimate="auto",
     group="posterior",
     rope=None,
     ref_val=None,
-    kind="kde",
+    rope_color="C2",
+    ref_val_color="C1",
+    kind=None,
     bw="default",
     circular=False,
     bins=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
     **kwargs
 ):
     """Plot Posterior densities in the style of John K. Kruschke's book.
@@ -36,31 +42,36 @@ def plot_posterior(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to the documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names
-        Variables to be plotted, two variables are required. Prefix the variables by `~`
+        Variables to be plotted, two variables are required. Prefix the variables with ``~``
         when you want to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
     hdi_prob: float, optional
         Plots highest density interval for chosen percentage of density.
         Use 'hide' to hide the highest density interval. Defaults to 0.94.
     multimodal: bool
         If true (default) it may compute more than one credible interval if the distribution is
         multimodal and the modes are well separated.
+    skipna : bool
+        If true ignores nan values when computing the hdi and point estimates. Defaults to false.
     round_to: int, optional
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
     point_estimate: Optional[str]
@@ -75,9 +86,13 @@ def plot_posterior(
         display the percentage below and above the values in ref_val. Must be None (default),
         a constant, a list or a dictionary like see an example below. If a list is provided, its
         length should match the number of variables.
+    rope_color: str, optional
+        Specifies the color of ROPE and displayed percentage within ROPE
+    ref_val_color: str, optional
+        Specifies the color of the displayed percentage
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
-        a histogram is always used.
+        a histogram is always used. Defaults to rcParam ``plot.density_kind``
     bw: float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
@@ -90,27 +105,35 @@ def plot_posterior(
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
         Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
-        Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
-        if `kind == hist`. If None (default) it will use `auto` for continuous variables and
-        `range(xmin, xmax + 1)` for discrete variables.
+        Controls the number of bins,accepts the same keywords :func:`matplotlib.pyplot.hist` does.
+        Only works if `kind == hist`. If None (default) it will use `auto` for continuous variables
+        and `range(xmin, xmax + 1)` for discrete variables.
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`
     show: bool, optional
         Call backend show function.
-    credible_interval: float or str, optional
-        deprecated: Please see hdi_prob
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :func:`matplotlib.pyplot.hist` or :func:`matplotlib.pyplot.plot` function
+        depending on the value of `kind`.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_dist : Plot distribution as histogram or kernel density estimates.
+    plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
+    plot_forest : Forest plot to compare HDI intervals from a number of distributions.
 
     Examples
     --------
@@ -145,6 +168,13 @@ def plot_posterior(
         >>> rope = {'mu': [{'rope': (-2, 2)}], 'theta': [{'school': 'Choate', 'rope': (2, 4)}]}
         >>> az.plot_posterior(data, var_names=['mu', 'theta'], rope=rope)
 
+    Using `coords` argument to plot only a subset of data
+
+    .. plot::
+        :context: close-figs
+
+        >>> coords = {"school": ["Choate","Phillips Exeter"]}
+        >>> az.plot_posterior(data, var_names=["mu", "theta"], coords=coords)
 
     Add reference lines
 
@@ -190,9 +220,6 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], hdi_prob=.75)
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     data = convert_to_dataset(data, group=group)
     if transform is not None:
         data = transform(data)
@@ -200,6 +227,9 @@ def plot_posterior(
 
     if coords is None:
         coords = {}
+
+    if labeller is None:
+        labeller = BaseLabeller()
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
@@ -212,12 +242,15 @@ def plot_posterior(
     elif point_estimate not in {"mean", "median", "mode", None}:
         raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
 
+    if kind is None:
+        kind = rcParams["plot.density_kind"]
+
     plotters = filter_plotters_list(
         list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
         "plot_posterior",
     )
     length_plotters = len(plotters)
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     posteriorplot_kwargs = dict(
         ax=ax,
@@ -234,9 +267,13 @@ def plot_posterior(
         round_to=round_to,
         hdi_prob=hdi_prob,
         multimodal=multimodal,
+        skipna=skipna,
         textsize=textsize,
         ref_val=ref_val,
         rope=rope,
+        ref_val_color=ref_val_color,
+        rope_color=rope_color,
+        labeller=labeller,
         kwargs=kwargs,
         backend_kwargs=backend_kwargs,
         show=show,

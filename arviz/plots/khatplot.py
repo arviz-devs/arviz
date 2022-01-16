@@ -1,4 +1,6 @@
 """Pareto tail indices plot."""
+import logging
+
 import numpy as np
 from xarray import DataArray
 
@@ -7,14 +9,18 @@ from ..stats import ELPDData
 from ..utils import get_coords
 from .plot_utils import format_coords_as_labels, get_plotting_function
 
+_log = logging.getLogger(__name__)
+
 
 def plot_khat(
     khats,
     color="C0",
     xlabels=False,
+    show_hlines=False,
     show_bins=False,
     bin_format="{1:.1f}%",
     annotate=False,
+    threshold=None,
     hover_label=False,
     hover_format="{1}",
     figsize=None,
@@ -29,25 +35,31 @@ def plot_khat(
     show=None,
     **kwargs
 ):
-    """
-    Plot Pareto tail indices.
+    r"""
+    Plot Pareto tail indices for diagnosing convergence.
 
     Parameters
     ----------
-    khats : ELPDData cointaining pareto shapes information or array
+    khats : ELPDData containing Pareto shapes information or array of
         Pareto tail indices.
     color : str or array_like, optional
-        Colors of the scatter plot, if color is a str all dots will have the same color,
-        if it is the size of the observations, each dot will have the specified color,
-        otherwise, it will be interpreted as a list of the dims to be used for the color code
+        Colors of the scatter plot, if color is a str all dots will
+        have the same color, if it is the size of the observations,
+        each dot will have the specified color, otherwise, it will be
+        interpreted as a list of the dims to be used for the color
+        code. If Matplotlib c argument is passed, it will override
+        the color argument
     xlabels : bool, optional
         Use coords as xticklabels
+    show_hlines : bool, optional
+        Show the horizontal lines, by default at the values [0, 0.5, 0.7, 1].
     show_bins : bool, optional
-        Show the number of khats which fall in each bin.
+        Show the percentage of khats falling in each bin, as delimited by hlines.
     bin_format : str, optional
         The string is used as formatting guide calling ``bin_format.format(count, pct)``.
-    annotate : bool, optional
-        Show the labels of k values larger than 1.
+    threshold : float, optional
+        Show the labels of k values larger than threshold. Defaults to `None`,
+        no observations will be highlighted.
     hover_label : bool, optional
         Show the datapoint label when hovering over it with the mouse. Requires an interactive
         backend.
@@ -69,20 +81,27 @@ def plot_khat(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     hlines_kwargs: dictionary, optional
-        Additional keywords passed to ax.hlines.
+        Additional keywords passed to
+        :meth:`matplotlib.axes.Axes.hlines`.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
     kwargs :
-        Additional keywords passed to ax.scatter.
+        Additional keywords passed to
+        :meth:`matplotlib.axes.Axes.scatter`.
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    psislw : Pareto smoothed importance sampling (PSIS).
 
     Examples
     --------
@@ -103,7 +122,7 @@ def plot_khat(
 
         >>> centered_eight = az.load_arviz_data("centered_eight")
         >>> khats = az.loo(centered_eight, pointwise=True).pareto_k
-        >>> az.plot_khat(khats, xlabels=True, annotate=True)
+        >>> az.plot_khat(khats, xlabels=True, threshold=1)
 
     Use custom color scheme
 
@@ -116,7 +135,30 @@ def plot_khat(
         ... ]
         >>> az.plot_khat(loo_radon, color=colors)
 
+    Notes
+    -----
+    The Generalized Pareto distribution (GPD) may be used to diagnose
+    convergence rates for importance sampling.  GPD has parameters
+    offset, scale, and shape. The shape parameter is usually denoted
+    with ``k``. ``k`` also tells how many finite moments the
+    distribution has. The pre-asymptotic convergence rate of
+    importance sampling can be estimated based on the fractional
+    number of finite moments of the importance ratio distribution. GPD
+    is fitted to the largest importance ratios and the estimated shape
+    parameter ``k``, i.e., ``\hat{k}`` can then be used as a diagnostic
+    (most importantly if ``\hat{k} > 0.7``, then the convergence rate
+    is impractically low). See [1]_.
+
+    References
+    ----------
+    .. [1] Vehtari, A., Simpson, D., Gelman, A., Yao, Y., Gabry, J.,
+    2019. Pareto Smoothed Importance Sampling. arXiv:1507.02646 [stat].
+
     """
+    if annotate:
+        _log.warning("annotate will be deprecated, please use threshold instead")
+        threshold = annotate
+
     if coords is None:
         coords = {}
 
@@ -152,8 +194,9 @@ def plot_khat(
         xdata=xdata,
         khats=khats,
         kwargs=kwargs,
-        annotate=annotate,
+        threshold=threshold,
         coord_labels=coord_labels,
+        show_hlines=show_hlines,
         show_bins=show_bins,
         hlines_kwargs=hlines_kwargs,
         xlabels=xlabels,

@@ -1,16 +1,18 @@
 """Plot kde or histograms and values from MCMC samples."""
 import warnings
-from typing import Any, Callable, List, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, List, Mapping, Optional, Tuple, Union, Sequence
 
 from ..data import CoordSpec, InferenceData, convert_to_dataset
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
+from ..sel_utils import xarray_var_iter
 from ..utils import _var_names, get_coords
-from .plot_utils import KwargSpec, get_plotting_function, xarray_var_iter
+from .plot_utils import KwargSpec, get_plotting_function
 
 
 def plot_trace(
     data: InferenceData,
-    var_names: Optional[List[str]] = None,
+    var_names: Optional[Sequence[str]] = None,
     filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
@@ -20,8 +22,8 @@ def plot_trace(
     rug: bool = False,
     lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
     circ_var_names: Optional[List[str]] = None,
-    circ_var_units: bool = "radians",
-    compact: bool = False,
+    circ_var_units: str = "radians",
+    compact: bool = True,
     compact_prop: Optional[Union[str, Mapping[str, Any]]] = None,
     combined: bool = False,
     chain_prop: Optional[Union[str, Mapping[str, Any]]] = None,
@@ -32,6 +34,7 @@ def plot_trace(
     hist_kwargs: Optional[KwargSpec] = None,
     trace_kwargs: Optional[KwargSpec] = None,
     rank_kwargs: Optional[KwargSpec] = None,
+    labeller=None,
     axes=None,
     backend: Optional[str] = None,
     backend_config: Optional[KwargSpec] = None,
@@ -46,18 +49,18 @@ def plot_trace(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: str or list of str, optional
-        One or more variables to be plotted. Prefix the variables by `~` when you want
+        One or more variables to be plotted. Prefix the variables by ``~`` when you want
         to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: dict of {str: slice or array_like}, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     divergences: {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
     kind: {"trace", "rank_bar", "rank_vlines"}, optional
@@ -67,7 +70,7 @@ def plot_trace(
     figsize: tuple of (float, float), optional
         If None, size is (12, variables * 2)
     rug: bool, optional
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
+        If True adds a rugplot of samples. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
     lines: list of tuple of (str, dict, array_like), optional
         List of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
@@ -75,36 +78,49 @@ def plot_trace(
     circ_var_names : str or list of str, optional
         List of circular variables to account for when plotting KDE.
     circ_var_units : str
-        Whether the variables in `circ_var_names` are in "degrees" or "radians".
+        Whether the variables in ``circ_var_names`` are in "degrees" or "radians".
     compact: bool, optional
         Plot multidimensional variables in a single plot.
     compact_prop: str or dict {str: array_like}, optional
-        Tuple containing the property name and the property values to distinguish diferent
+        Tuple containing the property name and the property values to distinguish different
         dimensions with compact=True
     combined: bool, optional
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
     chain_prop: str or dict {str: array_like}, optional
-        Tuple containing the property name and the property values to distinguish diferent chains
+        Tuple containing the property name and the property values to distinguish different chains
     legend: bool, optional
         Add a legend to the figure with the chain color code.
     plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs: dict, optional
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
+        Extra keyword arguments passed to :func:`arviz.plot_dist`. Only affects continuous
+        variables.
     trace_kwargs: dict, optional
-        Extra keyword arguments passed to `plt.plot`
+        Extra keyword arguments passed to :meth:`matplotlib.axes.Axes.plot`
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
+    rank_kwargs : dict, optional
+        Extra keyword arguments passed to :func:`arviz.plot_rank`
+    axes: axes, optional
+        Matplotlib axes or bokeh figures.
     backend: {"matplotlib", "bokeh"}, optional
         Select plotting backend.
     backend_config: dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: dict, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_rank : Plot rank order statistics of chains.
 
     Examples
     --------
@@ -160,10 +176,13 @@ def plot_trace(
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
-            divergences = False
+            divergences = None
 
     if coords is None:
         coords = {}
+
+    if labeller is None:
+        labeller = BaseLabeller()
 
     if divergences:
         divergence_data = get_coords(
@@ -172,19 +191,21 @@ def plot_trace(
     else:
         divergence_data = False
 
-    data = get_coords(convert_to_dataset(data, group="posterior"), coords)
+    coords_data = get_coords(convert_to_dataset(data, group="posterior"), coords)
 
     if transform is not None:
-        data = transform(data)
+        coords_data = transform(coords_data)
 
-    var_names = _var_names(var_names, data, filter_vars)
+    var_names = _var_names(var_names, coords_data, filter_vars)
 
     if compact:
-        skip_dims = set(data.dims) - {"chain", "draw"}
+        skip_dims = set(coords_data.dims) - {"chain", "draw"}
     else:
         skip_dims = set()
 
-    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
+    plotters = list(
+        xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)
+    )
     max_plots = rcParams["plot.max_subplots"]
     max_plots = len(plotters) if max_plots is None else max(max_plots // 2, 1)
     if len(plotters) > max_plots:
@@ -199,7 +220,7 @@ def plot_trace(
     # TODO: Check if this can be further simplified
     trace_plot_args = dict(
         # User Kwargs
-        data=data,
+        data=coords_data,
         var_names=var_names,
         # coords = coords,
         divergences=divergences,
@@ -220,6 +241,7 @@ def plot_trace(
         combined=combined,
         chain_prop=chain_prop,
         legend=legend,
+        labeller=labeller,
         # Generated kwargs
         divergence_data=divergence_data,
         # skip_dims=skip_dims,

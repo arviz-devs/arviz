@@ -12,7 +12,7 @@ from ..helpers import running_on_ci
 from .test_utils import utils_with_numba_import_fail  # pylint: disable=unused-import
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("numba") is None) & ~running_on_ci(),
+    (importlib.util.find_spec("numba") is None) and not running_on_ci(),
     reason="test requires numba which is not installed",
 )
 
@@ -29,7 +29,7 @@ def test_utils_fixture(utils_with_numba_import_fail):
 
 def test_conditional_jit_numba_decorator_keyword(monkeypatch):
     """Checks else statement and JIT keyword argument"""
-    from arviz import utils
+    from ... import utils
 
     # Mock import lib to return numba with hit method which returns a function that returns kwargs
     numba_mock = Mock()

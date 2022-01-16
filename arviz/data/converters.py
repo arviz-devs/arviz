@@ -151,16 +151,18 @@ def convert_to_dataset(obj, *, group="posterior", coords=None, dims=None):
     ----------
     obj : dict, str, np.ndarray, xr.Dataset, pystan fit, pymc3 trace
         A supported object to convert to InferenceData:
-            InferenceData: returns unchanged
-            str: Attempts to load the netcdf dataset from disk
-            pystan fit: Automatically extracts data
-            pymc3 trace: Automatically extracts data
-            xarray.Dataset: adds to InferenceData as only group
-            xarray.DataArray: creates an xarray dataset as the only group, gives the
-                         array an arbitrary name, if name not set
-            dict: creates an xarray dataset as the only group
-            numpy array: creates an xarray dataset as the only group, gives the
-                         array an arbitrary name
+
+        - InferenceData: returns unchanged
+        - str: Attempts to load the netcdf dataset from disk
+        - pystan fit: Automatically extracts data
+        - pymc3 trace: Automatically extracts data
+        - xarray.Dataset: adds to InferenceData as only group
+        - xarray.DataArray: creates an xarray dataset as the only group, gives the
+          array an arbitrary name, if name not set
+        - dict: creates an xarray dataset as the only group
+        - numpy array: creates an xarray dataset as the only group, gives the
+          array an arbitrary name
+
     group : str
         If `obj` is a dict or numpy array, assigns the resulting xarray
         dataset to this group.

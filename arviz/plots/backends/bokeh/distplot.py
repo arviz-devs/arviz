@@ -4,7 +4,12 @@ import numpy as np
 
 from ....stats.density_utils import get_bins, histogram
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, set_bokeh_circular_ticks_labels, vectorized_to_hex
+from ...plot_utils import (
+    _scale_fig_size,
+    set_bokeh_circular_ticks_labels,
+    vectorized_to_hex,
+    _init_kwargs_dict,
+)
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -19,7 +24,6 @@ def plot_dist(
     rotated,
     rug,
     bw,
-    circular,
     quantiles,
     contour,
     fill_last,
@@ -38,8 +42,7 @@ def plot_dist(
     show,
 ):
     """Bokeh distplot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
@@ -50,7 +53,7 @@ def plot_dist(
 
     color = vectorized_to_hex(color)
 
-    hist_kwargs = {} if hist_kwargs is None else hist_kwargs
+    hist_kwargs = _init_kwargs_dict(hist_kwargs)
     if kind == "hist":
         hist_kwargs.setdefault("cumulative", cumulative)
         hist_kwargs.setdefault("fill_color", color)
@@ -81,8 +84,7 @@ def plot_dist(
             is_circular=is_circular,
         )
     elif kind == "kde":
-        if plot_kwargs is None:
-            plot_kwargs = {}
+        plot_kwargs = _init_kwargs_dict(plot_kwargs)
         if color is None:
             color = plt.rcParams["axes.prop_cycle"].by_key()["color"][0]
         plot_kwargs.setdefault("line_color", color)
@@ -95,7 +97,7 @@ def plot_dist(
             rug=rug,
             label=label,
             bw=bw,
-            circular=circular,
+            is_circular=is_circular,
             quantiles=quantiles,
             rotated=rotated,
             contour=contour,
@@ -113,7 +115,7 @@ def plot_dist(
             show=False,
         )
     else:
-        raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
+        raise TypeError(f'Invalid "kind":{kind}. Select from {{"auto","kde","hist"}}')
 
     show_layout(ax, show)
 

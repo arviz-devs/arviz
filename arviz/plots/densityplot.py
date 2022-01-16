@@ -2,9 +2,13 @@
 import warnings
 
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import (
+    xarray_var_iter,
+)
 from ..rcparams import rcParams
-from ..utils import _var_names, credible_interval_warning
-from .plot_utils import default_grid, get_plotting_function, make_label, xarray_var_iter
+from ..utils import _var_names
+from .plot_utils import default_grid, get_plotting_function
 
 
 # pylint:disable-msg=too-many-function-args
@@ -22,13 +26,14 @@ def plot_density(
     shade=0.0,
     bw="default",
     circular=False,
+    grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -38,13 +43,14 @@ def plot_density(
     Parameters
     ----------
     data : Union[Object, Iterator[Object]]
-        Any object that can be converted to an az.InferenceData object, or an Iterator returning
-        a sequence of such objects.
-        Refer to documentation of az.convert_to_dataset for details about such objects.
+        Any object that can be converted to an :class:`arviz.InferenceData` object, or an Iterator
+        returning a sequence of such objects.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.
     group: Optional[str]
-        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
+        Specifies which :class:`arviz.InferenceData` group should be plotted.
+        Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
-        InferenceData.
+        :class:`arviz.InferenceData`.
     data_labels : Optional[List[str]]
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
@@ -59,7 +65,7 @@ def plot_density(
         Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
-        Defaults to 'auto' i.e. it falls back to default set in rcParams.
+        Defaults to 'auto' i.e. it falls back to default set in ``rcParams``.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
@@ -83,27 +89,37 @@ def plot_density(
     circular: Optional[bool]
         If True, it interprets the values passed are from a circular variable measured in radians
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize : Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
-    credible_interval: float, optional
-        deprecated: Please see hdi_prob
+
     Returns
     -------
     axes : matplotlib axes or bokeh figures
 
+    See Also
+    --------
+    plot_dist : Plot distribution as histogram or kernel density estimates.
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book.
 
     Examples
     --------
@@ -116,6 +132,13 @@ def plot_density(
         >>> centered = az.load_arviz_data('centered_eight')
         >>> non_centered = az.load_arviz_data('non_centered_eight')
         >>> az.plot_density([centered, non_centered])
+
+    Plot variables in a 4x5 grid
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_density([centered, non_centered], grid=(4, 5))
 
     Plot subset variables by specifying variable name exactly
 
@@ -152,9 +175,6 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
-    if credible_interval:
-        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
-
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
@@ -163,12 +183,15 @@ def plot_density(
     if transform is not None:
         datasets = [transform(dataset) for dataset in datasets]
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     var_names = _var_names(var_names, datasets)
     n_data = len(datasets)
 
     if data_labels is None:
         if n_data > 1:
-            data_labels = ["{}".format(idx) for idx in range(n_data)]
+            data_labels = [f"{idx}" for idx in range(n_data)]
         else:
             data_labels = [""]
     elif len(data_labels) != n_data:
@@ -188,8 +211,8 @@ def plot_density(
     length_plotters = []
     for plotters in to_plot:
         length_plotters.append(len(plotters))
-        for var_name, selection, _ in plotters:
-            label = make_label(var_name, selection)
+        for var_name, selection, isel, _ in plotters:
+            label = labeller.make_label_vert(var_name, selection, isel)
             if label not in all_labels:
                 all_labels.append(label)
     length_plotters = len(all_labels)
@@ -206,13 +229,13 @@ def plot_density(
         to_plot = [
             [
                 (var_name, selection, values)
-                for var_name, selection, values in plotters
-                if make_label(var_name, selection) in all_labels
+                for var_name, selection, isel, values in plotters
+                if labeller.make_label_vert(var_name, selection, isel) in all_labels
             ]
             for plotters in to_plot
         ]
         length_plotters = max_plots
-    rows, cols = default_grid(length_plotters, max_cols=3)
+    rows, cols = default_grid(length_plotters, grid=grid, max_cols=3)
 
     if bw == "default":
         if circular:
@@ -232,6 +255,7 @@ def plot_density(
         rows=rows,
         cols=cols,
         textsize=textsize,
+        labeller=labeller,
         hdi_prob=hdi_prob,
         point_estimate=point_estimate,
         hdi_markers=hdi_markers,

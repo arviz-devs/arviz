@@ -1,7 +1,9 @@
 """Density Comparison plot."""
+from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
-from .plot_utils import get_plotting_function, xarray_var_iter
+from .plot_utils import get_plotting_function
+from ..sel_utils import xarray_var_iter
 
 
 def plot_dist_comparison(
@@ -13,6 +15,7 @@ def plot_dist_comparison(
     coords=None,
     transform=None,
     legend=True,
+    labeller=None,
     ax=None,
     prior_kwargs=None,
     posterior_kwargs=None,
@@ -29,8 +32,8 @@ def plot_dist_comparison(
 
     Parameters
     ----------
-    data : az.InferenceData object
-        InferenceData object containing the posterior/prior data.
+    data : InferenceData object
+        :class:`arviz.InferenceData` object containing the posterior/prior data.
     kind : str
         kind of plot to display {"latent", "observed"}, defaults to 'latent'.
         "latent" includes {"prior", "posterior"} and "observed" includes
@@ -39,7 +42,7 @@ def plot_dist_comparison(
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on figsize.
+        autoscaled based on ``figsize``.
     var_names : str, list, list of lists
         if str, plot the variable. if list, plot all the variables in list
         of all groups. if list of lists, plot the vars of groups in respective lists.
@@ -51,28 +54,37 @@ def plot_dist_comparison(
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
+    labeller : labeller instance, optional
+        Class providing the method ``make_pp_label`` to generate the labels in the plot.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
         last column is for the combined before/after plots and columns 0 and 1 are
         for the before and after plots, respectively.
     prior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_dist` for prior/predictive groups.
+        Additional keywords passed to :func:`arviz.plot_dist` for prior/predictive groups.
     posterior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_dist` for posterior/predictive groups.
+        Additional keywords passed to :func:`arviz.plot_dist` for posterior/predictive groups.
     observed_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_dist` for observed_data group.
+        Additional keywords passed to :func:`arviz.plot_dist` for observed_data group.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : a numpy 2d array of matplotlib axes. Returned object will have shape (nvars, 3),
+    axes : a numpy 2D array of matplotlib axes. Returned object will have shape (nvars, 3),
     where the last column is the combined plot and the first columns are the single plots.
+
+    See Also
+    --------
+    plot_bpv : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
     Examples
     --------
@@ -93,6 +105,9 @@ def plot_dist_comparison(
 
     if coords is None:
         coords = {}
+
+    if labeller is None:
+        labeller = BaseLabeller()
 
     datasets = []
     groups = []
@@ -137,6 +152,7 @@ def plot_dist_comparison(
         legend=legend,
         groups=groups,
         textsize=textsize,
+        labeller=labeller,
         prior_kwargs=prior_kwargs,
         posterior_kwargs=posterior_kwargs,
         observed_kwargs=observed_kwargs,

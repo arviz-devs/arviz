@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import stats
 
 from ..data import convert_to_dataset
-from ..utils import Numba, _numba_var, _stack, _var_names, conditional_jit
+from ..utils import Numba, _numba_var, _stack, _var_names
 from .density_utils import histogram as _histogram
 from .stats_utils import _circular_standard_deviation, _sqrt
 from .stats_utils import autocov as _autocov
@@ -17,7 +17,7 @@ from .stats_utils import quantile as _quantile
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
-__all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
+__all__ = ["bfmi", "ess", "rhat", "mcse"]
 
 
 def bfmi(data):
@@ -25,15 +25,16 @@ def bfmi(data):
 
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
-    values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
-    change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
-    information.
+    values smaller than 0.3 indicate poor sampling. However, this threshold is
+    provisional and may change. See
+    `pystan_workflow <http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html>`_
+    for more information.
 
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         If InferenceData, energy variable needs to be found.
 
     Returns
@@ -41,6 +42,11 @@ def bfmi(data):
     z : array
         The Bayesian fraction of missing information of the model and trace. One element per
         chain in the trace.
+
+    See Also
+    --------
+    plot_energy : Plot energy transition distribution and marginal energy
+                  distribution in HMC algorithms.
 
     Examples
     --------
@@ -62,16 +68,24 @@ def bfmi(data):
     return _bfmi(dataset.energy)
 
 
-def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
+def ess(
+    data,
+    *,
+    var_names=None,
+    method="bulk",
+    relative=False,
+    prob=None,
+    dask_kwargs=None,
+):
     r"""Calculate estimate of the effective sample size (ess).
 
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an ``az.InferenceData`` object.
-        Refer to documentation of ``az.convert_to_dataset`` for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+        For n-dimensional ndarray transform first to dataset with :func:`arviz.convert_to_dataset`.
     var_names : str or list of str
         Names of variables to include in the return value Dataset.
     method : str, optional, default "bulk"
@@ -90,9 +104,11 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "local"
     relative : bool
         Return relative ess
-        `ress = ess / n`
+        ``ress = ess / n``
     prob : float, or tuple of two floats, optional
         probability value for "tail", "quantile" or "local" ess functions.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -121,6 +137,13 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
       Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
+
+    See Also
+    --------
+    arviz.rhat : Compute estimate of rank normalized splitR-hat for a set of traces.
+    arviz.mcse : Calculate Markov Chain Standard Error statistic.
+    plot_ess : Plot quantile, local or evolution of effective sample sizes (ESS).
+    arviz.summary : Create a data frame with summary statistics.
 
     Examples
     --------
@@ -161,9 +184,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     }
 
     if method not in methods:
-        raise TypeError(
-            "ess method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
-        )
+        raise TypeError(f"ess method {method} not found. Valid methods are:\n{', '.join(methods)}")
     ess_func = methods[method]
 
     if (method == "quantile") and prob is None:
@@ -192,10 +213,16 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {"relative": relative} if prob is None else {"prob": prob, "relative": relative}
-    return _wrap_xarray_ufunc(ess_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs)
+    return _wrap_xarray_ufunc(
+        ess_func,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
+    )
 
 
-def rhat(data, *, var_names=None, method="rank"):
+def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     r"""Compute estimate of rank normalized splitR-hat for a set of traces.
 
     The rank normalized R-hat diagnostic tests for lack of convergence by comparing the variance
@@ -207,12 +234,12 @@ def rhat(data, *, var_names=None, method="rank"):
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         At least 2 posterior chains are needed to compute this diagnostic of one or more
         stochastic parameters.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
     var_names : list
         Names of variables to include in the rhat report
     method : str
@@ -222,11 +249,19 @@ def rhat(data, *, var_names=None, method="rank"):
         - "folded"
         - "z_scale"
         - "identity"
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
     xarray.Dataset
       Returns dataset of the potential scale reduction factors, :math:`\hat{R}`
+
+    See Also
+    --------
+    ess : Calculate estimate of the effective sample size (ess).
+    mcse : Calculate Markov Chain Standard Error statistic.
+    plot_forest : Forest plot to compare HDI intervals from a number of distributions.
 
     Notes
     -----
@@ -239,7 +274,7 @@ def rhat(data, *, var_names=None, method="rank"):
     converges to unity when each of the traces is a sample from the target posterior. Values
     greater than one indicate that one or more chains have not yet converged.
 
-    Rank values are calculated over all the chains with `scipy.stats.rankdata`.
+    Rank values are calculated over all the chains with ``scipy.stats.rankdata``.
     Each chain is split in two and normalized with the z-transform following Vehtari et al. (2019).
 
     References
@@ -275,9 +310,7 @@ def rhat(data, *, var_names=None, method="rank"):
     }
     if method not in methods:
         raise TypeError(
-            "R-hat method {} not found. Valid methods are:\n{}".format(
-                method, "\n    ".join(methods)
-            )
+            f"R-hat method {method} not found. Valid methods are:\n{', '.join(methods)}"
         )
     rhat_func = methods[method]
 
@@ -300,20 +333,24 @@ def rhat(data, *, var_names=None, method="rank"):
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {}
     return _wrap_xarray_ufunc(
-        rhat_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
+        rhat_func,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
     )
 
 
-def mcse(data, *, var_names=None, method="mean", prob=None):
+def mcse(data, *, var_names=None, method="mean", prob=None, dask_kwargs=None):
     """Calculate Markov Chain Standard Error statistic.
 
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
     var_names : list
         Names of variables to include in the rhat report
     method : str
@@ -325,11 +362,19 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
     prob : float
         Quantile information.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
     xarray.Dataset
         Return the msce dataset
+
+    See Also
+    --------
+    ess : Compute autocovariance estimates for every lag for the input array.
+    summary : Create a data frame with summary statistics.
+    plot_mcse : Plot quantile or local Monte Carlo Standard Error.
 
     Examples
     --------
@@ -387,89 +432,12 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {} if prob is None else {"prob": prob}
     return _wrap_xarray_ufunc(
-        mcse_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
+        mcse_func,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
     )
-
-
-@conditional_jit(forceobj=True)
-def geweke(ary, first=0.1, last=0.5, intervals=20):
-    r"""Compute z-scores for convergence diagnostics.
-
-    Compare the mean of the first % of series with the mean of the last % of series. x is divided
-    into a number of segments for which this difference is computed. If the series is converged,
-    this score should oscillate between -1 and 1.
-
-    Parameters
-    ----------
-    ary : 1D array-like
-      The trace of some stochastic parameter.
-    first : float
-      The fraction of series at the beginning of the trace.
-    last : float
-      The fraction of series at the end to be compared with the section
-      at the beginning.
-    intervals : int
-      The number of segments.
-
-    Returns
-    -------
-    scores : list [[]]
-      Return a list of [i, score], where i is the starting index for each interval and score the
-      Geweke score on the interval.
-
-    Notes
-    -----
-    The Geweke score on some series x is computed by:
-
-      .. math:: \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
-
-    where :math:`E` stands for the mean, :math:`V` the variance,
-    :math:`x_s` a section at the start of the series and
-    :math:`x_e` a section at the end of the series.
-
-    References
-    ----------
-    * Geweke (1992)
-    """
-    # Filter out invalid intervals
-    return _geweke(ary, first, last, intervals)
-
-
-def _geweke(ary, first, last, intervals):
-    _numba_flag = Numba.numba_flag
-    for interval in (first, last):
-        if interval <= 0 or interval >= 1:
-            raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
-    if first + last >= 1:
-        raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
-
-    # Initialize list of z-scores
-    zscores = []
-
-    # Last index value
-    end = len(ary) - 1
-
-    # Start intervals going up to the <last>% of the chain
-    last_start_idx = (1 - last) * end
-
-    # Calculate starting indices
-    start_indices = np.linspace(0, last_start_idx, num=intervals, endpoint=True, dtype=int)
-
-    # Loop over start indices
-    for start in start_indices:
-        # Calculate slices
-        first_slice = ary[start : start + int(first * (end - start))]
-        last_slice = ary[int(end - last * (end - start)) :]
-
-        z_score = first_slice.mean() - last_slice.mean()
-        if _numba_flag:
-            z_score /= _sqrt(svar(first_slice), svar(last_slice))
-        else:
-            z_score /= np.sqrt(first_slice.var() + last_slice.var())
-
-        zscores.append([start, z_score])
-
-    return np.array(zscores)
 
 
 def ks_summary(pareto_tail_indices):
@@ -970,7 +938,7 @@ def _multichain_statistics(ary):
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan, np.nan
     # ess mean
     ess_mean_value = _ess_mean(ary)
 
@@ -1009,8 +977,6 @@ def _multichain_statistics(ary):
     return (
         mcse_mean_value,
         mcse_sd_value,
-        ess_mean_value,
-        ess_sd_value,
         ess_bulk_value,
         ess_tail_value,
         rhat_value,

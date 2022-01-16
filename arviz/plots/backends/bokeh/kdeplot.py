@@ -3,14 +3,15 @@
 from collections.abc import Callable
 from numbers import Integral
 
-import matplotlib._contour as _contour
+from matplotlib import _contour
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Range1d
+from bokeh.models import ColumnDataSource
+from bokeh.models.glyphs import Scatter
 from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, _init_kwargs_dict
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -49,8 +50,7 @@ def plot_kde(
     return_glyph,
 ):
     """Bokeh kde plot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
@@ -69,20 +69,15 @@ def plot_kde(
 
     glyphs = []
     if values2 is None:
-        if plot_kwargs is None:
-            plot_kwargs = {}
+        plot_kwargs = _init_kwargs_dict(plot_kwargs)
         plot_kwargs.setdefault("line_color", mpl_rcParams["axes.prop_cycle"].by_key()["color"][0])
 
-        if fill_kwargs is None:
-            fill_kwargs = {}
-
+        fill_kwargs = _init_kwargs_dict(fill_kwargs)
         fill_kwargs.setdefault("fill_color", mpl_rcParams["axes.prop_cycle"].by_key()["color"][0])
 
         if rug:
-            if rug_kwargs is None:
-                rug_kwargs = {}
+            rug_kwargs = _init_kwargs_dict(rug_kwargs)
 
-            rug_kwargs = rug_kwargs.copy()
             if "cds" in rug_kwargs:
                 cds_rug = rug_kwargs.pop("cds")
                 rug_varname = rug_kwargs.pop("y", "y")
@@ -99,15 +94,15 @@ def plot_kde(
             if isinstance(cds_rug, dict):
                 for _cds_rug in cds_rug.values():
                     if not rotated:
-                        glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                        glyph = Scatter(x=rug_varname, y=0.0, marker="dash", **rug_kwargs)
                     else:
-                        glyph = Dash(x=0.0, y=rug_varname, **rug_kwargs)
+                        glyph = Scatter(x=0.0, y=rug_varname, marker="dash", **rug_kwargs)
                     ax.add_glyph(_cds_rug, glyph)
             else:
                 if not rotated:
-                    glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                    glyph = Scatter(x=rug_varname, y=0.0, marker="dash", **rug_kwargs)
                 else:
-                    glyph = Dash(x=0.0, y=rug_varname, **rug_kwargs)
+                    glyph = Scatter(x=0.0, y=rug_varname, marker="dash", **rug_kwargs)
                 ax.add_glyph(cds_rug, glyph)
             glyphs.append(glyph)
 
@@ -147,6 +142,8 @@ def plot_kde(
                     patch = ax.patch(patch_y, patch_x, **fill_kwargs)
                 glyphs.append(patch)
 
+            if label is not None:
+                plot_kwargs.setdefault("legend_label", label)
             if not rotated:
                 line = ax.line(x, density, **plot_kwargs)
             else:
@@ -154,12 +151,9 @@ def plot_kde(
             glyphs.append(line)
 
     else:
-        if contour_kwargs is None:
-            contour_kwargs = {}
-        if contourf_kwargs is None:
-            contourf_kwargs = {}
-        if pcolormesh_kwargs is None:
-            pcolormesh_kwargs = {}
+        contour_kwargs = _init_kwargs_dict(contour_kwargs)
+        contourf_kwargs = _init_kwargs_dict(contourf_kwargs)
+        pcolormesh_kwargs = _init_kwargs_dict(pcolormesh_kwargs)
 
         g_s = complex(gridsize[0])
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
@@ -172,18 +166,17 @@ def plot_kde(
                 x_x, y_y, scaled_density, None, True, 0
             )
 
+            levels = 9
+            if "levels" in contourf_kwargs:
+                levels = contourf_kwargs.pop("levels")
             if "levels" in contour_kwargs:
-                levels = contour_kwargs.get("levels")
-            elif "levels" in contourf_kwargs:
-                levels = contourf_kwargs.get("levels")
-            else:
-                levels = 11
+                levels = contour_kwargs.pop("levels")
 
             if isinstance(levels, Integral):
-                levels_scaled = np.linspace(0, 1, levels)
+                levels_scaled = np.linspace(0, 1, levels + 2)
                 levels = _rescale_axis(levels_scaled, scaled_density_args)
             else:
-                levels_scaled_nonclip = _scale_axis(np.asarray(levels), scaled_density_args)
+                levels_scaled_nonclip, *_ = _scale_axis(np.asarray(levels), scaled_density_args)
                 levels_scaled = np.clip(levels_scaled_nonclip, 0, 1)
 
             cmap = contourf_kwargs.pop("cmap", "viridis")
@@ -195,7 +188,6 @@ def plot_kde(
                 colors = cmap
 
             contour_kwargs.update(contourf_kwargs)
-            contour_kwargs.setdefault("line_color", "black")
             contour_kwargs.setdefault("line_alpha", 0.25)
             contour_kwargs.setdefault("fill_alpha", 1)
 
@@ -204,9 +196,17 @@ def plot_kde(
             ):
                 if not fill_last and (i == 0):
                     continue
+                contour_kwargs_ = contour_kwargs.copy()
+                contour_kwargs_.setdefault("line_color", color)
+                contour_kwargs_.setdefault("fill_color", color)
                 vertices, _ = contour_generator.create_filled_contour(level, level_upper)
                 for seg in vertices:
-                    patch = ax.patch(*seg.T, fill_color=color, **contour_kwargs)
+                    # ax.multi_polygon would be better, but input is
+                    # currently not suitable
+                    # seg is 1 line that defines an area
+                    # multi_polygon would need inner and outer edges
+                    # as a line
+                    patch = ax.patch(*seg.T, **contour_kwargs_)
                     glyphs.append(patch)
 
             if fill_last:
@@ -214,9 +214,6 @@ def plot_kde(
 
             ax.xgrid.grid_line_color = None
             ax.ygrid.grid_line_color = None
-
-            ax.x_range = Range1d(xmin, xmax)
-            ax.y_range = Range1d(ymin, ymax)
 
         else:
 

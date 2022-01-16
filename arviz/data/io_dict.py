@@ -1,12 +1,10 @@
 """Dictionary specific conversion code."""
 import warnings
+from typing import Optional
 
-import xarray as xr
-
-from .. import utils
 from ..rcparams import rcParams
-from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
-from .inference_data import InferenceData
+from .base import dict_to_dataset, requires
+from .inference_data import WARMUP_TAG, InferenceData
 
 
 # pylint: disable=too-many-instance-attributes
@@ -33,6 +31,7 @@ class DictConverter:
         warmup_log_likelihood=None,
         warmup_sample_stats=None,
         save_warmup=None,
+        index_origin=None,
         coords=None,
         dims=None,
         pred_dims=None,
@@ -64,6 +63,8 @@ class DictConverter:
             if coords is None
             else {**coords, **pred_coords}
         )
+        self.index_origin = index_origin
+        self.coords = coords
         self.dims = dims
         self.pred_dims = dims if pred_dims is None else pred_dims
         self.attrs = {} if attrs is None else attrs
@@ -71,11 +72,15 @@ class DictConverter:
         self.attrs.pop("arviz_version", None)
         self._kwargs = kwargs
 
-    @requires("posterior")
+    def _init_dict(self, attr_name):
+        dict_or_none = getattr(self, attr_name, {})
+        return {} if dict_or_none is None else dict_or_none
+
+    @requires(["posterior", f"{WARMUP_TAG}posterior"])
     def posterior_to_xarray(self):
         """Convert posterior samples to xarray."""
-        data = self.posterior
-        data_warmup = self.warmup_posterior if self.warmup_posterior is not None else {}
+        data = self._init_dict("posterior")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}posterior")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.posterior is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -91,7 +96,12 @@ class DictConverter:
         posterior_warmup_attrs = self._kwargs.get("posterior_warmup_attrs")
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.dims, attrs=posterior_attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=posterior_attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
                 data_warmup,
@@ -99,14 +109,15 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs=posterior_warmup_attrs,
+                index_origin=self.index_origin,
             ),
         )
 
-    @requires("sample_stats")
+    @requires(["sample_stats", f"{WARMUP_TAG}sample_stats"])
     def sample_stats_to_xarray(self):
         """Convert sample_stats samples to xarray."""
-        data = self.sample_stats
-        data_warmup = self.warmup_sample_stats if self.warmup_sample_stats is not None else {}
+        data = self._init_dict("sample_stats")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}sample_stats")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -123,7 +134,12 @@ class DictConverter:
         sample_stats_warmup_attrs = self._kwargs.get("sample_stats_warmup_attrs")
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.dims, attrs=sample_stats_attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=sample_stats_attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
                 data_warmup,
@@ -131,14 +147,15 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs=sample_stats_warmup_attrs,
+                index_origin=self.index_origin,
             ),
         )
 
-    @requires("log_likelihood")
+    @requires(["log_likelihood", f"{WARMUP_TAG}log_likelihood"])
     def log_likelihood_to_xarray(self):
         """Convert log_likelihood samples to xarray."""
-        data = self.log_likelihood
-        data_warmup = self.warmup_log_likelihood if self.warmup_log_likelihood is not None else {}
+        data = self._init_dict("log_likelihood")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}log_likelihood")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.log_likelihood is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -147,7 +164,13 @@ class DictConverter:
         log_likelihood_warmup_attrs = self._kwargs.get("log_likelihood_warmup_attrs")
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.dims, attrs=log_likelihood_attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=log_likelihood_attrs,
+                index_origin=self.index_origin,
+                skip_event_dims=True,
             ),
             dict_to_dataset(
                 data_warmup,
@@ -155,16 +178,16 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs=log_likelihood_warmup_attrs,
+                index_origin=self.index_origin,
+                skip_event_dims=True,
             ),
         )
 
-    @requires("posterior_predictive")
+    @requires(["posterior_predictive", f"{WARMUP_TAG}posterior_predictive"])
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
-        data = self.posterior_predictive
-        data_warmup = (
-            self.warmup_posterior_predictive if self.warmup_posterior_predictive is not None else {}
-        )
+        data = self._init_dict("posterior_predictive")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}posterior_predictive")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.posterior_predictive is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -178,6 +201,7 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs=posterior_predictive_attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
                 data_warmup,
@@ -185,14 +209,15 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs=posterior_predictive_warmup_attrs,
+                index_origin=self.index_origin,
             ),
         )
 
-    @requires("predictions")
+    @requires(["predictions", f"{WARMUP_TAG}predictions"])
     def predictions_to_xarray(self):
         """Convert predictions to xarray."""
-        data = self.predictions
-        data_warmup = self.warmup_predictions if self.warmup_predictions is not None else {}
+        data = self._init_dict("predictions")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}predictions")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.predictions is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -201,7 +226,12 @@ class DictConverter:
         predictions_warmup_attrs = self._kwargs.get("predictions_warmup_attrs")
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.pred_dims, attrs=predictions_attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.pred_dims,
+                attrs=predictions_attrs,
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
                 data_warmup,
@@ -209,6 +239,7 @@ class DictConverter:
                 coords=self.coords,
                 dims=self.pred_dims,
                 attrs=predictions_warmup_attrs,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -220,7 +251,12 @@ class DictConverter:
             raise TypeError("DictConverter.prior is not a dictionary")
         prior_attrs = self._kwargs.get("prior_attrs")
         return dict_to_dataset(
-            data, library=None, coords=self.coords, dims=self.dims, attrs=prior_attrs
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            attrs=prior_attrs,
+            index_origin=self.index_origin,
         )
 
     @requires("sample_stats_prior")
@@ -231,7 +267,12 @@ class DictConverter:
             raise TypeError("DictConverter.sample_stats_prior is not a dictionary")
         sample_stats_prior_attrs = self._kwargs.get("sample_stats_prior_attrs")
         return dict_to_dataset(
-            data, library=None, coords=self.coords, dims=self.dims, attrs=sample_stats_prior_attrs
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            attrs=sample_stats_prior_attrs,
+            index_origin=self.index_origin,
         )
 
     @requires("prior_predictive")
@@ -242,25 +283,29 @@ class DictConverter:
             raise TypeError("DictConverter.prior_predictive is not a dictionary")
         prior_predictive_attrs = self._kwargs.get("prior_predictive_attrs")
         return dict_to_dataset(
-            data, library=None, coords=self.coords, dims=self.dims, attrs=prior_predictive_attrs
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            attrs=prior_predictive_attrs,
+            index_origin=self.index_origin,
         )
 
-    def data_to_xarray(self, dct, group, dims=None):
+    def data_to_xarray(self, data, group, dims=None):
         """Convert data to xarray."""
-        data = dct
         if not isinstance(data, dict):
-            raise TypeError("DictConverter.{} is not a dictionary".format(group))
+            raise TypeError(f"DictConverter.{group} is not a dictionary")
         if dims is None:
             dims = {} if self.dims is None else self.dims
-        new_data = dict()
-        for key, vals in data.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            new_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=new_data, attrs=make_attrs(attrs=self.attrs, library=None))
+        return dict_to_dataset(
+            data,
+            library=None,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+            attrs=self.attrs,
+            index_origin=self.index_origin,
+        )
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
@@ -324,6 +369,7 @@ def from_dict(
     warmup_log_likelihood=None,
     warmup_sample_stats=None,
     save_warmup=None,
+    index_origin: Optional[int] = None,
     coords=None,
     dims=None,
     pred_dims=None,
@@ -334,7 +380,7 @@ def from_dict(
     """Convert Dictionary data into an InferenceData object.
 
     For a usage example read the
-    :doc:`Cookbook section on from_dict </notebooks/InferenceDataCookbook>`
+    :ref:`Creating InferenceData section on from_dict <creating_InferenceData>`
 
     Parameters
     ----------
@@ -357,6 +403,7 @@ def from_dict(
     save_warmup : bool
         Save warmup iterations InferenceData object. If not defined, use default
         defined by the rcParams.
+    index_origin : int, optional
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -403,6 +450,7 @@ def from_dict(
         warmup_log_likelihood=warmup_log_likelihood,
         warmup_sample_stats=warmup_sample_stats,
         save_warmup=save_warmup,
+        index_origin=index_origin,
         coords=coords,
         dims=dims,
         pred_dims=pred_dims,

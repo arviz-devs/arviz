@@ -15,7 +15,7 @@ from ..helpers import (  # pylint: disable=unused-import
 from .test_stats import centered_eight, non_centered_eight  # pylint: disable=unused-import
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("numba") is None) & ~running_on_ci(),
+    (importlib.util.find_spec("numba") is None) and not running_on_ci(),
     reason="test requires numba which is not installed",
 )
 
@@ -23,18 +23,11 @@ rcParams["data.load"] = "eager"
 
 
 @pytest.mark.parametrize("circ_var_names", [["mu"], None])
-@pytest.mark.parametrize("include_circ", [True, False])
-def test_summary_circ_vars(centered_eight, circ_var_names, include_circ):
-    assert (
-        summary(centered_eight, circ_var_names=circ_var_names, include_circ=include_circ)
-        is not None
-    )
+def test_summary_circ_vars(centered_eight, circ_var_names):
+    assert summary(centered_eight, circ_var_names=circ_var_names) is not None
     state = Numba.numba_flag
     Numba.disable_numba()
-    assert (
-        summary(centered_eight, circ_var_names=circ_var_names, include_circ=include_circ)
-        is not NotImplementedError
-    )
+    assert summary(centered_eight, circ_var_names=circ_var_names) is not NotImplementedError
     Numba.enable_numba()
     assert state == Numba.numba_flag
 
@@ -52,6 +45,6 @@ def test_numba_stats():
     Numba.enable_numba()
     with_numba = r2_score(set_1, set_2)
     with_numba_one_dimensional = r2_score(set_3, set_4)
-    assert state == Numba.numba_flag  # Ensure that inital state = final state
+    assert state == Numba.numba_flag  # Ensure that initial state = final state
     assert np.allclose(non_numba, with_numba)
     assert np.allclose(non_numba_one_dimensional, with_numba_one_dimensional)

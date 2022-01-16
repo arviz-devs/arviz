@@ -1,13 +1,14 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Span
 from bokeh.models.annotations import Legend, Title
 from scipy.stats import rankdata
 
-from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
+from ...plot_utils import _scale_fig_size
+from bokeh.models.glyphs import Scatter
 
 
 def plot_ess(
@@ -31,6 +32,7 @@ def plot_ess(
     n_samples,
     relative,
     min_ess,
+    labeller,
     ylabel,
     rug,
     rug_kind,
@@ -61,7 +63,7 @@ def plot_ess(
     else:
         ax = np.atleast_2d(ax)
 
-    for (var_name, selection, x), ax_ in zip(
+    for (var_name, selection, isel, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
         bulk_points = ax_.circle(np.asarray(xdata), np.asarray(x), size=6)
@@ -76,7 +78,7 @@ def plot_ess(
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+                raise ValueError(f"InferenceData does not contain {rug_kind} data")
 
             rug_kwargs.setdefault("space", 0.1)
             _rug_kwargs = {}
@@ -88,11 +90,11 @@ def plot_ess(
 
             values = data[var_name].sel(**selection).values.flatten()
             mask = idata.sample_stats[rug_kind].values.flatten()
-            values = rankdata(values)[mask]
+            values = rankdata(values, method="average")[mask]
             rug_space = np.max(x) * rug_kwargs.pop("space")
             rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
 
-            glyph = Dash(x="rug_x", y="rug_y", **_rug_kwargs)
+            glyph = Scatter(x="rug_x", y="rug_y", marker="dash", **_rug_kwargs)
             cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
             ax_.add_glyph(cds_rug, glyph)
 
@@ -153,7 +155,7 @@ def plot_ess(
             ax_.legend.click_policy = "hide"
 
         title = Title()
-        title.text = make_label(var_name, selection)
+        title.text = labeller.make_label_vert(var_name, selection, isel)
         ax_.title = title
 
         ax_.xaxis.axis_label = "Total number of draws" if kind == "evolution" else "Quantile"

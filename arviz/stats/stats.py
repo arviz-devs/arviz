@@ -1,38 +1,44 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
-import logging
 import warnings
-from collections import OrderedDict
 from copy import deepcopy
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union, Mapping, cast, Callable
 
 import numpy as np
 import pandas as pd
 import scipy.stats as st
 import xarray as xr
 from scipy.optimize import minimize
+from typing_extensions import Literal
 
-from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
-from ..rcparams import rcParams
-from ..utils import Numba, _numba_var, _var_names, credible_interval_warning, get_coords
+NO_GET_ARGS: bool = False
+try:
+    from typing_extensions import get_args
+except ImportError:
+    NO_GET_ARGS = True
+
+from .. import _log
+from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
+from ..rcparams import rcParams, ScaleKeyword, ICKeyword
+from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
 from .density_utils import kde as _kde
 from .diagnostics import _mc_error, _multichain_statistics, ess
-from .stats_utils import ELPDData, _circular_standard_deviation
+from .stats_utils import ELPDData, _circular_standard_deviation, smooth_data
 from .stats_utils import get_log_likelihood as _get_log_likelihood
 from .stats_utils import logsumexp as _logsumexp
 from .stats_utils import make_ufunc as _make_ufunc
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
+from ..sel_utils import xarray_var_iter
+from ..labels import BaseLabeller
 
-_log = logging.getLogger(__name__)
 
 __all__ = [
     "apply_test_function",
     "compare",
     "hdi",
-    "hpd",
     "loo",
     "loo_pit",
     "psislw",
@@ -43,7 +49,14 @@ __all__ = [
 
 
 def compare(
-    dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
+    dataset_dict: Mapping[str, InferenceData],
+    ic: Optional[ICKeyword] = None,
+    method: Literal["stacking", "BB-pseudo-BMA", "pseudo-MA"] = "stacking",
+    b_samples: int = 1000,
+    alpha: float = 1,
+    seed=None,
+    scale: Optional[ScaleKeyword] = None,
+    var_name: Optional[str] = None,
 ):
     r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
@@ -55,32 +68,33 @@ def compare(
     Parameters
     ----------
     dataset_dict: dict[str] -> InferenceData
-        A dictionary of model names and InferenceData objects
-    ic: str
+        A dictionary of model names and :class:`arviz.InferenceData` objects
+    ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
-    method: str
+    method: str, optional
         Method used to estimate the weights for each model. Available options are:
 
         - 'stacking' : stacking of predictive distributions.
-        - 'BB-pseudo-BMA' : (default) pseudo-Bayesian Model averaging using Akaike-type
+        - 'BB-pseudo-BMA' : pseudo-Bayesian Model averaging using Akaike-type
           weighting. The weights are stabilized using the Bayesian bootstrap.
         - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
           weighting, without Bootstrap stabilization (not recommended).
 
         For more information read https://arxiv.org/abs/1704.02030
-    b_samples: int
+    b_samples: int, optional default = 1000
         Number of samples taken by the Bayesian bootstrap estimation.
         Only useful when method = 'BB-pseudo-BMA'.
-    alpha: float
+        Defaults to ``rcParams["stats.ic_compare_method"]``.
+    alpha: float, optional
         The shape parameter in the Dirichlet distribution used for the Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
         on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
-    seed: int or np.random.RandomState instance
+    seed: int or np.random.RandomState instance, optional
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
-        np.random state is used.
-    scale: str
+        :mod:`numpy.random` state is used.
+    scale: str, optional
         Output scale for IC. Available options are:
 
         - `log` : (default) log-score (after Vehtari et al. (2017))
@@ -89,6 +103,9 @@ def compare(
 
         A higher log-score (or a lower deviance) indicates a model with better predictive
         accuracy.
+    var_name: str, optional
+        If there is more than a single observed variable in the ``InferenceData``, which
+        should be used as the basis for comparison.
 
     Returns
     -------
@@ -139,19 +156,27 @@ def compare(
     --------
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
+    plot_compare : Summary plot for model comparison.
+
+    References
+    ----------
+    .. [1] Vehtari, A., Gelman, A. & Gabry, J. Practical Bayesian model evaluation using
+        leave-one-out cross-validation and WAIC. Stat Comput 27, 1413–1432 (2017)
+        see https://doi.org/10.1007/s11222-016-9696-4
 
     """
     names = list(dataset_dict.keys())
-    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
+    if scale is not None:
+        scale = cast(ScaleKeyword, scale.lower())
+    else:
+        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
+    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
+    if scale not in allowable:
+        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
+
     if scale == "log":
         scale_value = 1
         ascending = False
-        warnings.warn(
-            "\nThe scale is now log by default. Use 'scale' argument or "
-            "'stats.ic_scale' rcParam if you rely on a specific value.\nA higher "
-            "log-score (or a lower deviance) indicates a model with better predictive "
-            "accuracy."
-        )
     else:
         if scale == "negative_log":
             scale_value = -1
@@ -159,9 +184,15 @@ def compare(
             scale_value = -2
         ascending = True
 
-    ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
+    if ic is None:
+        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
+    else:
+        ic = cast(ICKeyword, ic.lower())
+    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
+    if ic not in allowable:
+        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
     if ic == "loo":
-        ic_func = loo
+        ic_func: Callable = loo
         df_comp = pd.DataFrame(
             index=names,
             columns=[
@@ -175,6 +206,7 @@ def compare(
                 "warning",
                 "loo_scale",
             ],
+            dtype=np.float_,
         )
         scale_col = "loo_scale"
     elif ic == "waic":
@@ -192,23 +224,30 @@ def compare(
                 "warning",
                 "waic_scale",
             ],
+            dtype=np.float_,
         )
         scale_col = "waic_scale"
     else:
-        raise NotImplementedError("The information criterion {} is not supported.".format(ic))
+        raise NotImplementedError(f"The information criterion {ic} is not supported.")
 
+    method = rcParams["stats.ic_compare_method"] if method is None else method
     if method.lower() not in ["stacking", "bb-pseudo-bma", "pseudo-bma"]:
-        raise ValueError("The method {}, to compute weights, is not supported.".format(method))
+        raise ValueError(f"The method {method}, to compute weights, is not supported.")
 
-    ic_se = "{}_se".format(ic)
-    p_ic = "p_{}".format(ic)
-    ic_i = "{}_i".format(ic)
+    ic_se = f"{ic}_se"
+    p_ic = f"p_{ic}"
+    ic_i = f"{ic}_i"
 
     ics = pd.DataFrame()
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        ics = ics.append([ic_func(dataset, pointwise=True, scale=scale)])
+        try:
+            # Here is where the IC function is actually computed -- the rest of this
+            # function is argument processing and return value formatting
+            ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
+        except Exception as e:
+            raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
@@ -216,7 +255,7 @@ def compare(
     if method.lower() == "stacking":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         exp_ic_i = np.exp(ic_i_val / scale_value)
-        last_col = cols - 1
+        km1 = cols - 1
 
         def w_fuller(weights):
             return np.concatenate((weights, [max(1.0 - np.sum(weights), 0.0)]))
@@ -230,18 +269,16 @@ def compare(
 
         def gradient(weights):
             w_full = w_fuller(weights)
-            grad = np.zeros(last_col)
-            for k in range(last_col - 1):
+            grad = np.zeros(km1)
+            for k in range(km1):
                 for i in range(rows):
-                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(
-                        exp_ic_i[i], w_full
-                    )
+                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, km1]) / np.dot(exp_ic_i[i], w_full)
             return -grad
 
-        theta = np.full(last_col, 1.0 / cols)
-        bounds = [(0.0, 1.0) for _ in range(last_col)]
+        theta = np.full(km1, 1.0 / cols)
+        bounds = [(0.0, 1.0) for _ in range(km1)]
         constraints = [
-            {"type": "ineq", "fun": lambda x: 1.0 - np.sum(x)},
+            {"type": "ineq", "fun": lambda x: -np.sum(x) + 1.0},
             {"type": "ineq", "fun": np.sum},
         ]
 
@@ -261,7 +298,7 @@ def compare(
         z_bs = np.zeros_like(weights)
         for i in range(b_samples):
             z_b = np.dot(b_weighting[i], ic_i_val)
-            u_weights = np.exp((z_b - np.min(z_b)) / scale_value)
+            u_weights = np.exp((z_b - np.max(z_b)) / scale_value)
             z_bs[i] = z_b  # pylint: disable=unsupported-assignment-operation
             weights[i] = u_weights / np.sum(u_weights)
 
@@ -298,6 +335,8 @@ def compare(
                 res[scale_col],
             )
 
+    df_comp["rank"] = df_comp["rank"].astype(int)
+    df_comp["warning"] = df_comp["warning"].astype(bool)
     return df_comp.sort_values(by=ic, ascending=ascending)
 
 
@@ -318,40 +357,6 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(
-    # pylint: disable=unused-argument
-    ary,
-    hdi_prob=None,
-    circular=False,
-    multimodal=False,
-    skipna=False,
-    group="posterior",
-    var_names=None,
-    filter_vars=None,
-    coords=None,
-    max_modes=10,
-    **kwargs,
-):
-    """Pending deprecation. Please refer to :func:`~arviz.hdi`."""
-    # pylint: enable=unused-argument
-    warnings.warn(
-        ("hpd will be deprecated " "Please replace hdi"),
-    )
-    return hdi(
-        ary,
-        hdi_prob,
-        circular,
-        multimodal,
-        skipna,
-        group,
-        var_names,
-        filter_vars,
-        coords,
-        max_modes,
-        **kwargs,
-    )
-
-
 def hdi(
     ary,
     hdi_prob=None,
@@ -363,6 +368,7 @@ def hdi(
     filter_vars=None,
     coords=None,
     max_modes=10,
+    dask_kwargs=None,
     **kwargs,
 ):
     """
@@ -374,35 +380,38 @@ def hdi(
     ----------
     ary: obj
         object containing posterior samples.
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     hdi_prob: float, optional
-        HDI prob for which interval will be computed. Defaults to ``stats.hdi_prob`` rcParam.
+        Prob for which the highest density interval will be computed. Defaults to
+        ``stats.hdi_prob`` rcParam.
     circular: bool, optional
         Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
         Only works if multimodal is False.
     multimodal: bool, optional
-        If true it may compute more than one hdi interval if the distribution is multimodal and the
+        If true it may compute more than one hdi if the distribution is multimodal and the
         modes are well separated.
     skipna: bool, optional
-        If true ignores nan values when computing the hdi interval. Defaults to false.
+        If true ignores nan values when computing the hdi. Defaults to false.
     group: str, optional
         Specifies which InferenceData group should be used to calculate hdi.
         Defaults to 'posterior'
     var_names: list, optional
-        Names of variables to include in the hdi report. Prefix the variables by `~`
+        Names of variables to include in the hdi report. Prefix the variables by ``~``
         when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
-        (see `az.summary` for more details).
+        (see :func:`arviz.summary` for more details).
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: mapping, optional
         Specifies the subset over to calculate hdi.
     max_modes: int, optional
         Specifies the maximum number of modes for multimodal case.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
     kwargs: dict, optional
         Additional keywords passed to :func:`~arviz.wrap_xarray_ufunc`.
 
@@ -413,7 +422,7 @@ def hdi(
 
     See Also
     --------
-    plot_hdi : Plot HDI intervals for regression data.
+    plot_hdi : Plot highest density intervals for regression data.
     xarray.Dataset.quantile : Calculate quantiles of array for given probabilities.
 
     Examples
@@ -441,14 +450,15 @@ def hdi(
 
         In [1]: az.hdi(data, var_names=["mu", "theta"])
 
-    If we want to calculate the HDI over specified dimension of dataset,
-    we can pass `input_core_dims` by kwargs:
+    By default, ``hdi`` is calculated over the ``chain`` and ``draw`` dimensions. We can use the
+    ``input_core_dims`` argument of :func:`~arviz.wrap_xarray_ufunc` to change this. In this example
+    we calculate the HDI also over the ``school`` dimension:
 
     .. ipython::
 
-        In [1]: az.hdi(data, input_core_dims = [["chain"]])
+        In [1]: az.hdi(data, var_names="theta", input_core_dims = [["chain","draw", "school"]])
 
-    We can also calculate the hdi over a particular selection over all groups:
+    We can also calculate the hdi over a particular selection:
 
     .. ipython::
 
@@ -466,7 +476,7 @@ def hdi(
         "skipna": skipna,
         "out_shape": (max_modes, 2) if multimodal else (2,),
     }
-    kwargs.setdefault("output_core_dims", [["hdi", "mode"] if multimodal else ["hdi"]])
+    kwargs.setdefault("output_core_dims", [["mode", "hdi"] if multimodal else ["hdi"]])
     if not multimodal:
         func_kwargs["circular"] = circular
     else:
@@ -485,6 +495,7 @@ def hdi(
             "hdi currently interprets 2d data as (draw, shape) but this will change in "
             "a future release to (chain, draw) for coherence with other functions",
             FutureWarning,
+            stacklevel=2,
         )
         ary = np.expand_dims(ary, 0)
 
@@ -495,9 +506,9 @@ def hdi(
     ary = ary[var_names] if var_names else ary
 
     hdi_coord = xr.DataArray(["lower", "higher"], dims=["hdi"], attrs=dict(hdi_prob=hdi_prob))
-    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords(
-        {"hdi": hdi_coord}
-    )
+    hdi_data = _wrap_xarray_ufunc(
+        func, ary, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs, **kwargs
+    ).assign_coords({"hdi": hdi_coord})
     hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
     return hdi_data.x.values if isarray else hdi_data
 
@@ -519,7 +530,7 @@ def _hdi(ary, hdi_prob, circular, skipna):
     ary = np.sort(ary)
     interval_idx_inc = int(np.floor(hdi_prob * n))
     n_intervals = n - interval_idx_inc
-    interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
+    interval_width = np.subtract(ary[interval_idx_inc:], ary[:n_intervals], dtype=np.float_)
 
     if len(interval_width) == 0:
         raise ValueError("Too few elements for interval calculation. ")
@@ -567,7 +578,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     for i, interval in enumerate(intervals_splitted):
         if i == max_modes:
             warnings.warn(
-                "found more modes than {0}, returning only the first {0} modes".format(max_modes)
+                f"found more modes than {max_modes}, returning only the first {max_modes} modes"
             )
             break
         if interval.size == 0:
@@ -589,8 +600,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation of
-        az.convert_to_inference_data for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of
+        :func:`arviz.convert_to_dataset` for details.
     pointwise: bool, optional
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
@@ -598,21 +610,21 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
         The name of the variable in log_likelihood groups storing the pointwise log
         likelihood data to use for loo computation.
     reff: float, optional
-        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by the number
+        Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples divided by the number
         of actual samples. Computed from trace by default.
     scale: str
         Output scale for loo. Available options are:
 
-        - `log` : (default) log-score
-        - `negative_log` : -1 * log-score
-        - `deviance` : -2 * log-score
+        - ``log`` : (default) log-score
+        - ``negative_log`` : -1 * log-score
+        - ``deviance`` : -2 * log-score
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
 
     Returns
     -------
-    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
     loo: approximated expected log pointwise predictive density (elpd)
     loo_se: standard error of loo
     p_loo: effective number of parameters
@@ -624,6 +636,14 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     loo_scale: scale of the loo results
 
         The returned object has a custom print method that overrides pd.Series method.
+
+    See Also
+    --------
+    compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
+    waic : Compute the widely applicable information criterion.
+    plot_compare : Summary plot for model comparison.
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    plot_khat : Plot Pareto tail indices for diagnosing convergence.
 
     Examples
     --------
@@ -646,7 +666,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
     pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
 
-    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
@@ -690,7 +710,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
         warn_mg = True
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs = {"input_core_dims": [["sample"]]}
+    kwargs = {"input_core_dims": [["__sample__"]]}
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
         _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
     )
@@ -750,12 +770,20 @@ def psislw(log_weights, reff=1.0):
     """
     Pareto smoothed importance sampling (PSIS).
 
+    Notes
+    -----
+    If the ``log_weights`` input is an :class:`~xarray.DataArray` with a dimension
+    named ``__sample__`` (recommended) ``psislw`` will interpret this dimension as samples,
+    and all other dimensions as dimensions of the observed data, looping over them to
+    calculate the psislw of each observation. If no ``__sample__`` dimension is present or
+    the input is a numpy array, the last dimension will be interpreted as ``__sample__``.
+
     Parameters
     ----------
     log_weights: array
         Array of size (n_observations, n_samples)
     reff: float
-        relative MCMC efficiency, `ess / n`
+        relative MCMC efficiency, ``ess / n``
 
     Returns
     -------
@@ -768,6 +796,10 @@ def psislw(log_weights, reff=1.0):
     ----------
     * Vehtari et al. (2015) see https://arxiv.org/abs/1507.02646
 
+    See Also
+    --------
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+
     Examples
     --------
     Get Pareto smoothed importance sampling (PSIS) log weights:
@@ -776,13 +808,17 @@ def psislw(log_weights, reff=1.0):
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
-           ...: log_likelihood = data.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+           ...: log_likelihood = data.sample_stats.log_likelihood.stack(
+           ...:     __sample__=("chain", "draw")
+           ...: )
            ...: az.psislw(-log_likelihood, reff=0.8)
 
     """
-    if hasattr(log_weights, "sample"):
-        n_samples = len(log_weights.sample)
-        shape = [size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "sample"]
+    if hasattr(log_weights, "__sample__"):
+        n_samples = len(log_weights.__sample__)
+        shape = [
+            size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "__sample__"
+        ]
     else:
         n_samples = log_weights.shape[-1]
         shape = log_weights.shape[:-1]
@@ -797,12 +833,16 @@ def psislw(log_weights, reff=1.0):
     # define kwargs
     func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "k_min": k_min, "out": out}
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
-    kwargs = {"input_core_dims": [["sample"]], "output_core_dims": [["sample"], []]}
+    kwargs = {"input_core_dims": [["__sample__"]], "output_core_dims": [["__sample__"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
-        _psislw, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
+        _psislw,
+        log_weights,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        **kwargs,
     )
     if isinstance(log_weights, xr.DataArray):
-        log_weights = log_weights.rename("log_weights").rename(sample="sample")
+        log_weights = log_weights.rename("log_weights")
     if isinstance(pareto_shape, xr.DataArray):
         pareto_shape = pareto_shape.rename("pareto_shape")
     return log_weights, pareto_shape
@@ -912,8 +952,8 @@ def _gpdfit(ary):
     # estimate for k
     k_post = np.log1p(-b_post * ary).mean()  # pylint: disable=invalid-unary-operand-type,no-member
     # add prior for k_post
-    k_post = (n * k_post + prior_k * 0.5) / (n + prior_k)
     sigma = -k_post / b_post
+    k_post = (n * k_post + prior_k * 0.5) / (n + prior_k)
 
     return k_post, sigma
 
@@ -961,6 +1001,10 @@ def r2_score(y_true, y_pred):
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
 
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+
     Examples
     --------
     Calculate R² for Bayesian regression models :
@@ -990,37 +1034,41 @@ def summary(
     data,
     var_names: Optional[List[str]] = None,
     filter_vars=None,
-    fmt: str = "wide",
-    kind: str = "all",
+    group=None,
+    fmt: "Literal['wide', 'long', 'xarray']" = "wide",
+    kind: "Literal['all', 'stats', 'diagnostics']" = "all",
     round_to=None,
-    include_circ=None,
     circ_var_names=None,
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
-    order="C",
-    index_origin=None,
     skipna=False,
-    coords: Optional[CoordSpec] = None,
-    dims: Optional[DimSpec] = None,
-    credible_interval=None,
+    labeller=None,
+    coords=None,
+    index_origin=None,
+    order=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list
-        Names of variables to include in summary. Prefix the variables by `~` when you
+        Names of variables to include in summary. Prefix the variables by ``~`` when you
         want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
         examples below).
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
+    coords: Dict[str, List[Any]], optional
+        Coordinate subset for which to calculate the summary.
+    group: str
+        Select a group for summary. Defaults to "posterior", "prior" or first group
+        in that order, depending what groups exists.
     fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     kind: {'all', 'stats', 'diagnostics'}
@@ -1029,9 +1077,6 @@ def summary(
         them.
     round_to: int
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
-    include_circ: boolean
-        Whether to include circular statistics
-        deprecated: Please see circ_var_names
     circ_var_names: list
         A list of circular variables to compute circular stats for
     stat_funcs: dict
@@ -1041,27 +1086,26 @@ def summary(
 
         The functions will be given one argument, the samples for a variable as an nD array,
         The functions should be in the style of a ufunc and return a single number. For example,
-        `np.mean`, or `scipy.stats.var` would both work.
+        :func:`numpy.mean`, or ``scipy.stats.var`` would both work.
     extend: boolean
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
     hdi_prob: float, optional
-        HDI interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
-        None.
-    order: {"C", "F"}
-        If fmt is "wide", use either C or F unpacking order. Defaults to C.
-    index_origin: int
-        If fmt is "wide, select n-based indexing for multivariate parameters.
-        Defaults to rcParam data.index.origin, which is 0.
+        Highest density interval to compute. Defaults to 0.94. This is only meaningful when
+        ``stat_funcs`` is None.
     skipna: bool
         If true ignores nan values when computing the summary statistics, it does not affect the
         behaviour of the functions passed to ``stat_funcs``. Defaults to false.
-    coords: Dict[str, List[Any]], optional
-        Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
-    dims: Dict[str, List[str]], optional
-        Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_flat` to generate the labels in the plot titles.
+        For more details on ``labeller`` usage see :ref:`label_guide`
     credible_interval: float, optional
         deprecated: Please see hdi_prob
+    order
+        deprecated: order is now ignored.
+    index_origin
+        deprecated: index_origin is now ignored, modify the coordinate values to change the
+        value used in summary.
 
     Returns
     -------
@@ -1072,6 +1116,15 @@ def summary(
         `r_hat`.
         `r_hat` is only computed for traces with 2 or more chains.
 
+    See Also
+    --------
+    waic : Compute the widely applicable information criterion.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out
+          cross-validation (PSIS-LOO-CV).
+    ess : Calculate estimate of the effective sample size (ess).
+    rhat : Compute estimate of rank normalized splitR-hat for a set of traces.
+    mcse : Calculate Markov Chain Standard Error statistic.
+
     Examples
     --------
     .. ipython::
@@ -1080,15 +1133,15 @@ def summary(
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.summary(data, var_names=["mu", "tau"])
 
-    You can use `filter_vars` to select variables without having to specify all the exact
-    names. Use `filter_vars="like"` to select based on partial naming:
+    You can use ``filter_vars`` to select variables without having to specify all the exact
+    names. Use ``filter_vars="like"`` to select based on partial naming:
 
     .. ipython::
 
         In [1]: az.summary(data, var_names=["the"], filter_vars="like")
 
-    Use `filter_vars="regex"` to select based on regular expressions, and prefix the variables
-    you want to exclude by `~`. Here, we exclude from the summary all the variables
+    Use ``filter_vars="regex"`` to select based on regular expressions, and prefix the variables
+    you want to exclude by ``~``. Here, we exclude from the summary all the variables
     starting with the letter t:
 
     .. ipython::
@@ -1121,39 +1174,58 @@ def summary(
            ...: )
 
     """
-    if include_circ:
+    _log.cache = []
+
+    if coords is None:
+        coords = {}
+
+    if index_origin is not None:
         warnings.warn(
-            "include_circ is deprecated and will be ignored. Use circ_var_names instead",
+            "index_origin has been deprecated. summary now shows coordinate values, "
+            "to change the label shown, modify the coordinate values before calling summary",
             DeprecationWarning,
         )
-
-    if credible_interval:
-        hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
-
-    extra_args = {}  # type: Dict[str, Any]
-    if coords is not None:
-        extra_args["coords"] = coords
-    if dims is not None:
-        extra_args["dims"] = dims
-    if index_origin is None:
         index_origin = rcParams["data.index_origin"]
+    if labeller is None:
+        labeller = BaseLabeller()
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
         if not 1 >= hdi_prob > 0:
             raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
-    posterior = convert_to_dataset(data, group="posterior", **extra_args)
-    var_names = _var_names(var_names, posterior, filter_vars)
-    posterior = posterior if var_names is None else posterior[var_names]
+
+    if isinstance(data, InferenceData):
+        if group is None:
+            if not data.groups():
+                raise TypeError("InferenceData does not contain any groups")
+            if "posterior" in data:
+                dataset = data["posterior"]
+            elif "prior" in data:
+                dataset = data["prior"]
+            else:
+                warnings.warn(f"Selecting first found group: {data.groups()[0]}")
+                dataset = data[data.groups()[0]]
+        else:
+            if group not in data.groups():
+                raise TypeError(f"InferenceData does not contain group: {group}")
+            dataset = data[group]
+    else:
+        dataset = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names, dataset, filter_vars)
+    dataset = dataset if var_names is None else dataset[var_names]
+    dataset = get_coords(dataset, coords)
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
-        raise TypeError("Invalid format: '{}'. Formatting options are: {}".format(fmt, fmt_group))
+        raise TypeError(f"Invalid format: '{fmt}'. Formatting options are: {fmt_group}")
 
-    unpack_order_group = ("C", "F")
-    if not isinstance(order, str) or (order.upper() not in unpack_order_group):
-        raise TypeError(
-            "Invalid order: '{}'. Unpacking options are: {}".format(order, unpack_order_group)
+    kind_group = ("all", "stats", "diagnostics")
+    if not isinstance(kind, str) or kind not in kind_group:
+        raise TypeError(f"Invalid kind: '{kind}'. Kind options are: {kind_group}")
+
+    if order is not None:
+        warnings.warn(
+            "order has been deprecated. summary now shows coordinate values.", DeprecationWarning
         )
 
     alpha = 1 - hdi_prob
@@ -1166,7 +1238,7 @@ def summary(
             for stat_func_name, stat_func in stat_funcs.items():
                 extra_metrics.append(
                     xr.apply_ufunc(
-                        _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
+                        _make_ufunc(stat_func), dataset, input_core_dims=(("chain", "draw"),)
                     )
                 )
                 extra_metric_names.append(stat_func_name)
@@ -1174,17 +1246,17 @@ def summary(
             for stat_func in stat_funcs:
                 extra_metrics.append(
                     xr.apply_ufunc(
-                        _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
+                        _make_ufunc(stat_func), dataset, input_core_dims=(("chain", "draw"),)
                     )
                 )
                 extra_metric_names.append(stat_func.__name__)
 
     if extend and kind in ["all", "stats"]:
-        mean = posterior.mean(dim=("chain", "draw"), skipna=skipna)
+        mean = dataset.mean(dim=("chain", "draw"), skipna=skipna)
 
-        sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
+        sd = dataset.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hdi_post = hdi(posterior, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
+        hdi_post = hdi(dataset, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
         hdi_lower = hdi_post.sel(hdi="lower", drop=True)
         hdi_higher = hdi_post.sel(hdi="higher", drop=True)
 
@@ -1192,7 +1264,7 @@ def summary(
         nan_policy = "omit" if skipna else "propagate"
         circ_mean = xr.apply_ufunc(
             _make_ufunc(st.circmean),
-            posterior,
+            dataset,
             kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
             input_core_dims=(("chain", "draw"),),
         )
@@ -1206,43 +1278,42 @@ def summary(
             kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
         circ_sd = xr.apply_ufunc(
             _make_ufunc(func),
-            posterior,
+            dataset,
             kwargs=kwargs_circ_std,
             input_core_dims=(("chain", "draw"),),
         )
 
         circ_mcse = xr.apply_ufunc(
             _make_ufunc(_mc_error),
-            posterior,
+            dataset,
             kwargs=dict(circular=True),
             input_core_dims=(("chain", "draw"),),
         )
 
-        circ_hdi = hdi(posterior, hdi_prob=hdi_prob, circular=True, skipna=skipna)
+        circ_hdi = hdi(dataset, hdi_prob=hdi_prob, circular=True, skipna=skipna)
         circ_hdi_lower = circ_hdi.sel(hdi="lower", drop=True)
         circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
     if kind in ["all", "diagnostics"]:
-        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
-            posterior,
+        mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+            _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
+            dataset,
             input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(7)),
+            output_core_dims=tuple([] for _ in range(5)),
         )
 
     # Combine metrics
-    metrics = []
-    metric_names = []
+    metrics: List[xr.Dataset] = []
+    metric_names: List[str] = []
     if extend:
-        metrics_names_ = (
+        metrics_: Tuple[xr.Dataset, ...]
+        metrics_names_: Tuple[str, ...] = (
             "mean",
             "sd",
-            "hdi_{:g}%".format(100 * alpha / 2),
-            "hdi_{:g}%".format(100 * (1 - alpha / 2)),
+            f"hdi_{100 * alpha / 2:g}%",
+            f"hdi_{100 * (1 - alpha / 2):g}%",
             "mcse_mean",
             "mcse_sd",
-            "ess_mean",
-            "ess_sd",
             "ess_bulk",
             "ess_tail",
             "r_hat",
@@ -1255,8 +1326,6 @@ def summary(
                 hdi_higher,
                 mcse_mean,
                 mcse_sd,
-                ess_mean,
-                ess_sd,
                 ess_bulk,
                 ess_tail,
                 r_hat,
@@ -1265,13 +1334,12 @@ def summary(
             metrics_ = (mean, sd, hdi_lower, hdi_higher)
             metrics_names_ = metrics_names_[:4]
         elif kind == "diagnostics":
-            metrics_ = (mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat)
+            metrics_ = (mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat)
             metrics_names_ = metrics_names_[4:]
         metrics.extend(metrics_)
         metric_names.extend(metrics_names_)
 
     if circ_var_names:
-
         if kind != "diagnostics":
             for metric, circ_stat in zip(
                 # Replace only the first 5 statistics for their circular equivalent
@@ -1286,28 +1354,20 @@ def summary(
     joined = (
         xr.concat(metrics, dim="metric").assign_coords(metric=metric_names).reset_coords(drop=True)
     )
+    n_metrics = len(metric_names)
+    n_vars = np.sum([joined[var].size // n_metrics for var in joined.data_vars])
 
     if fmt.lower() == "wide":
-        dfs = []
-        for var_name, values in joined.data_vars.items():
-            if len(values.shape[1:]):
-                metric = list(values.metric.values)
-                data_dict = OrderedDict()
-                for idx in np.ndindex(values.shape[1:] if order == "C" else values.shape[1:][::-1]):
-                    if order == "F":
-                        idx = tuple(idx[::-1])
-                    ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
-                    key_index = ",".join(map(str, (i + index_origin for i in idx)))
-                    key = "{}[{}]".format(var_name, key_index)
-                    data_dict[key] = ser
-                df = pd.DataFrame.from_dict(data_dict, orient="index")
-                df = df.loc[list(data_dict.keys())]
-            else:
-                df = values.to_dataframe()
-                df.index = list(df.index)
-                df = df.T
-            dfs.append(df)
-        summary_df = pd.concat(dfs, sort=False)
+        summary_df = pd.DataFrame(
+            (np.full((cast(int, n_vars), n_metrics), np.nan)), columns=metric_names
+        )
+        indices = []
+        for i, (var_name, sel, isel, values) in enumerate(
+            xarray_var_iter(joined, skip_dims={"metric"})
+        ):
+            summary_df.iloc[i] = values
+            indices.append(labeller.make_label_flat(var_name, sel, isel))
+        summary_df.index = indices
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
         df.index = list(df.index)
@@ -1320,11 +1380,7 @@ def summary(
     elif round_to not in ("None", "none") and (fmt.lower() in ("long", "wide")):
         # Don't round xarray object by default (even with "none")
         decimals = {
-            col: 3
-            if col not in {"ess_mean", "ess_sd", "ess_bulk", "ess_tail", "r_hat"}
-            else 2
-            if col == "r_hat"
-            else 0
+            col: 3 if col not in {"ess_bulk", "ess_tail", "r_hat"} else 2 if col == "r_hat" else 0
             for col in summary_df.columns
         }
         summary_df = summary_df.round(decimals)
@@ -1332,7 +1388,7 @@ def summary(
     return summary_df
 
 
-def waic(data, pointwise=None, var_name=None, scale=None):
+def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     """Compute the widely applicable information criterion.
 
     Estimates the expected log pointwise predictive density (elpd) using WAIC. Also calculates the
@@ -1342,8 +1398,8 @@ def waic(data, pointwise=None, var_name=None, scale=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation of
-        ``az.convert_to_inference_data`` for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_inference_data` for details.
     pointwise: bool
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
@@ -1359,19 +1415,28 @@ def waic(data, pointwise=None, var_name=None, scale=None):
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
-    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
     waic: approximated expected log pointwise predictive density (elpd)
     waic_se: standard error of waic
     p_waic: effective number parameters
     var_warn: bool
         True if posterior variance of the log predictive densities exceeds 0.4
-    waic_i: xarray.DataArray with the pointwise predictive accuracy, only if pointwise=True
+    waic_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy,
+            only if pointwise=True
     waic_scale: scale of the reported waic results
 
         The returned object has a custom print method that overrides pd.Series method.
+
+    See Also
+    --------
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+    compare : Compare models based on PSIS-LOO-CV or WAIC.
+    plot_compare : Summary plot for model comparison.
 
     Examples
     --------
@@ -1404,22 +1469,23 @@ def waic(data, pointwise=None, var_name=None, scale=None):
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
-    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs = {"input_core_dims": [["sample"]]}
+    kwargs = {"input_core_dims": [["__sample__"]]}
     lppd_i = _wrap_xarray_ufunc(
         _logsumexp,
         log_likelihood,
         func_kwargs={"b_inv": n_samples},
         ufunc_kwargs=ufunc_kwargs,
+        dask_kwargs=dask_kwargs,
         **kwargs,
     )
 
-    vars_lpd = log_likelihood.var(dim="sample")
+    vars_lpd = log_likelihood.var(dim="__sample__")
     warn_mg = False
     if np.any(vars_lpd > 0.4):
         warnings.warn(
@@ -1486,21 +1552,31 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     Parameters
     ----------
     idata: InferenceData
-        InferenceData object.
+        :class:`arviz.InferenceData` object.
     y: array, DataArray or str
-        Observed data. If str, idata must be present and contain the observed data group
+        Observed data. If str, ``idata`` must be present and contain the observed data group
     y_hat: array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
-        None, idata must contain the posterior predictive group. If None, y_hat is taken
+        None, ``idata`` must contain the posterior predictive group. If None, y_hat is taken
         equal to y, thus, y must be str too.
     log_weights: array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
     loo_pit: array or DataArray
         Value of the LOO-PIT at each observed data point.
+
+    See Also
+    --------
+    plot_loo_pit : Plot Leave-One-Out probability integral transformation (PIT) predictive checks.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out
+          cross-validation (PSIS-LOO-CV).
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    plot_khat : Plot Pareto tail indices for diagnosing convergence.
 
     Examples
     --------
@@ -1521,7 +1597,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
         In [1]: T = data.observed_data.obs - data.posterior.mu.median(dim=("chain", "draw"))
            ...: T_hat = data.posterior_predictive.obs - data.posterior.mu
-           ...: T_hat = T_hat.stack(sample=("chain", "draw"))
+           ...: T_hat = T_hat.stack(__sample__=("chain", "draw"))
            ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
 
     """
@@ -1533,7 +1609,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         if not all(isinstance(arg, (np.ndarray, xr.DataArray)) for arg in (y, y_hat, log_weights)):
             raise ValueError(
                 "all 3 y, y_hat and log_weights must be array or DataArray when idata is None "
-                "but they are of types {}".format([type(arg) for arg in (y, y_hat, log_weights)])
+                f"but they are of types {[type(arg) for arg in (y, y_hat, log_weights)]}"
             )
 
     else:
@@ -1545,25 +1621,23 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             y_str = y
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
-            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+            raise ValueError(f"y must be of types array, DataArray or str, not {type(y)}")
         if isinstance(y_hat, str):
-            y_hat = idata.posterior_predictive[y_hat].stack(sample=("chain", "draw")).values
+            y_hat = idata.posterior_predictive[y_hat].stack(__sample__=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
-            raise ValueError(
-                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
-            )
+            raise ValueError(f"y_hat must be of types array, DataArray or str, not {type(y_hat)}")
         if log_weights is None:
             if y_str:
                 try:
-                    log_likelihood = _get_log_likelihood(idata, var_name=y)
+                    log_likelihood = _get_log_likelihood(idata, var_name=y_str)
                 except TypeError:
                     log_likelihood = _get_log_likelihood(idata)
             else:
                 log_likelihood = _get_log_likelihood(idata)
-            log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
+            log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
-            n_samples = len(log_likelihood.sample)
+            n_samples = len(log_likelihood.__sample__)
             ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
             reff = (
@@ -1574,38 +1648,45 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             log_weights = psislw(-log_likelihood, reff=reff)[0].values
         elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
             raise ValueError(
-                "log_weights must be None or of types array or DataArray, not {}".format(
-                    type(log_weights)
-                )
+                f"log_weights must be None or of types array or DataArray, not {type(log_weights)}"
             )
 
     if len(y.shape) + 1 != len(y_hat.shape):
         raise ValueError(
-            "y_hat must have 1 more dimension than y, but y_hat has {} dims and y has "
-            "{} dims".format(len(y.shape), len(y_hat.shape))
+            f"y_hat must have 1 more dimension than y, but y_hat has {len(y.shape)} dims and y has "
+            f"{len(y_hat.shape)} dims"
         )
 
     if y.shape != y_hat.shape[:-1]:
         raise ValueError(
-            "y has shape: {} which should be equal to y_hat shape (omitting the last "
-            "dimension): {}".format(y.shape, y_hat.shape)
+            f"y has shape: {y.shape} which should be equal to y_hat shape (omitting the last "
+            f"dimension): {y_hat.shape}"
         )
 
     if y_hat.shape != log_weights.shape:
         raise ValueError(
-            "y_hat and log_weights must have the same shape but have shapes {} and {}".format(
-                y_hat.shape, log_weights.shape
-            )
+            "y_hat and log_weights must have the same shape but have shapes "
+            f"{y_hat.shape,} and {log_weights.shape}"
         )
 
     kwargs = {
-        "input_core_dims": [[], ["sample"], ["sample"]],
+        "input_core_dims": [[], ["__sample__"], ["__sample__"]],
         "output_core_dims": [[]],
         "join": "left",
     }
     ufunc_kwargs = {"n_dims": 1}
 
-    return _wrap_xarray_ufunc(_loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs)
+    if y.dtype.kind == "i" or y_hat.dtype.kind == "i":
+        y, y_hat = smooth_data(y, y_hat)
+
+    return _wrap_xarray_ufunc(
+        _loo_pit,
+        y,
+        y_hat,
+        log_weights,
+        ufunc_kwargs=ufunc_kwargs,
+        **kwargs,
+    )
 
 
 def _loo_pit(y, y_hat, log_weights):
@@ -1641,9 +1722,9 @@ def apply_test_function(
     Parameters
     ----------
     idata: InferenceData
-        InferenceData object on which to apply the test function. This function will add
-        new variables to the InferenceData object to store the result without modifying the
-        existing ones.
+        :class:`arviz.InferenceData` object on which to apply the test function.
+        This function will add new variables to the InferenceData object
+        to store the result without modifying the existing ones.
     func: callable
         Callable that calculates the test function. It must have the following call signature
         ``func(y, theta, *args, **kwargs)`` (where ``y`` is the observed data or posterior
@@ -1672,10 +1753,10 @@ def apply_test_function(
     func_kwargs: mapping, optional
         Passed as is to ``func``
     wrap_data_kwargs, wrap_pp_kwargs: mapping, optional
-        kwargs passed to ``az.stats.wrap_xarray_ufunc``. By default, some suitable input_core_dims
+        kwargs passed to :func:`~arviz.wrap_xarray_ufunc`. By default, some suitable input_core_dims
         are used.
     inplace: bool, optional
-        If True, add the variables inplace, othewise, return a copy of idata with the variables
+        If True, add the variables inplace, otherwise, return a copy of idata with the variables
         added.
     overwrite: bool, optional
         Overwrite data in case ``out_name_data`` or ``out_name_pp`` are already variables in
@@ -1687,6 +1768,10 @@ def apply_test_function(
         Output InferenceData object. If ``inplace=True``, it is the same input object modified
         inplace.
 
+    See Also
+    --------
+    plot_bpv :  Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+
     Notes
     -----
     This function is provided for convenience to wrap scalar or functions working on low
@@ -1695,7 +1780,7 @@ def apply_test_function(
 
     Examples
     --------
-    Use ``apply_test_function`` to wrap ``np.min`` for illustration purposes. And plot the
+    Use ``apply_test_function`` to wrap ``numpy.min`` for illustration purposes. And plot the
     results.
 
     .. plot::
@@ -1712,9 +1797,7 @@ def apply_test_function(
 
     valid_groups = ("observed_data", "posterior_predictive", "both")
     if group not in valid_groups:
-        raise ValueError(
-            "Invalid group argument. Must be one of {} not {}.".format(valid_groups, group)
-        )
+        raise ValueError(f"Invalid group argument. Must be one of {valid_groups} not {group}.")
     if overwrite is None:
         overwrite = not inplace
 
@@ -1752,19 +1835,18 @@ def apply_test_function(
         out_name_group = out_name_data if grp == "observed_data" else out_name_pp
         wrap_group_kwargs = wrap_data_kwargs if grp == "observed_data" else wrap_pp_kwargs
         if not hasattr(out, grp):
-            raise ValueError("InferenceData object must have {} group".format(grp))
+            raise ValueError(f"InferenceData object must have {grp} group")
         if not overwrite and out_name_group in getattr(out, grp).data_vars:
             raise ValueError(
-                "Should overwrite: {} variable present in group {}, but overwrite is False".format(
-                    out_name_group, grp
-                )
+                f"Should overwrite: {out_name_group} variable present in group {grp},"
+                " but overwrite is False"
             )
         var_names.setdefault(
             grp, list(getattr(out, grp).data_vars) if both_var_names is None else both_var_names
         )
         in_group = getattr(out, grp)[var_names[grp]]
         if isinstance(in_group, xr.Dataset):
-            in_group = in_group.to_array(dim="{}_var".format(grp)).squeeze()
+            in_group = in_group.to_array(dim=f"{grp}_var").squeeze()
 
         if pointwise:
             out_group_shape = in_group.shape if out_group_shape is None else out_group_shape

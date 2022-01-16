@@ -1,6 +1,6 @@
 # pylint: disable=wildcard-import,invalid-name,wrong-import-position
 """ArviZ is a library for exploratory analysis of Bayesian models."""
-__version__ = "0.9.0"
+__version__ = "0.11.4"
 
 import logging
 import os
@@ -9,16 +9,32 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.pyplot import register_cmap, style
 
 
-# Configure logging before importing arviz internals
-_log = logging.getLogger("arviz")
+class Logger(logging.Logger):
+    """Override Logger to avoid repeated messages."""
+
+    def __init__(self, name, level=logging.NOTSET):
+        super().__init__(name=name, level=level)
+        self.cache = []
+
+    def _log(
+        self, level, msg, *args, **kwargs
+    ):  # pylint: disable=signature-differs, arguments-differ
+        msg_hash = hash(msg)
+        if msg_hash in self.cache:
+            return
+        self.cache.append(msg_hash)
+        super()._log(level, msg, *args, **kwargs)
+
+
+_log = Logger("arviz")
 
 
 from .data import *
 from .plots import *
-from .plots import backends
+from .plots.backends import *
 from .stats import *
 from .rcparams import rc_context, rcParams
-from .utils import Numba, interactive_backend
+from .utils import Numba, Dask, interactive_backend
 from .wrappers import *
 
 # add ArviZ's styles to matplotlib's styles
@@ -306,4 +322,4 @@ _mpl_cm("gray_r", list(reversed(_linear_grey_10_95_c0)))
 
 
 # clean namespace
-del os, logging, register_cmap, LinearSegmentedColormap
+del os, logging, register_cmap, LinearSegmentedColormap, Logger

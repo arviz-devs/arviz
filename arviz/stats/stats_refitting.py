@@ -76,8 +76,8 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
     if not_implemented:
         raise TypeError(
             "Passed wrapper instance does not implement all methods required for reloo "
-            "to work. Check the documentation of SamplingWrapper. {} must be "
-            "implemented and were not found.".format(not_implemented)
+            f"to work. Check the documentation of SamplingWrapper. {not_implemented} must be "
+            "implemented and were not found."
         )
     if loo_orig is None:
         loo_orig = loo(wrapper.idata_orig, pointwise=True, scale=scale)
@@ -99,7 +99,7 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
         warnings.warn("reloo is an experimental and untested feature", UserWarning)
 
     if np.any(khats > k_thresh):
-        for idx in np.argwhere(khats.values > 0.7):
+        for idx in np.argwhere(khats.values > k_thresh):
             if verbose:
                 _log.info("Refitting model excluding observation %d", idx)
             new_obs, excluded_obs = wrapper.sel_observations(idx)

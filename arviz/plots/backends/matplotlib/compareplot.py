@@ -42,8 +42,6 @@ def plot_compare(
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     if plot_ic_diff:
-        yticks_labels[0] = comp_df.index[0]
-        yticks_labels[2::2] = comp_df.index[1:]
         ax.set_yticks(yticks_pos)
         ax.errorbar(
             x=comp_df[information_criterion].iloc[1:],
@@ -56,7 +54,6 @@ def plot_compare(
         )
 
     else:
-        yticks_labels = comp_df.index
         ax.set_yticks(yticks_pos[::2])
 
     if plot_standard_error:
@@ -82,8 +79,16 @@ def plot_compare(
         )
 
     if insample_dev:
+        scale = comp_df[f"{information_criterion}_scale"][0]
+        p_ic = comp_df[f"p_{information_criterion}"]
+        if scale == "log":
+            correction = p_ic
+        elif scale == "negative_log":
+            correction = -p_ic
+        elif scale == "deviance":
+            correction = -(2 * p_ic)
         ax.plot(
-            comp_df[information_criterion] - (2 * comp_df["p_" + information_criterion]),
+            comp_df[information_criterion] + correction,
             yticks_pos[::2],
             color=plot_kwargs.get("color_insample_dev", "k"),
             marker=plot_kwargs.get("marker_insample_dev", "o"),

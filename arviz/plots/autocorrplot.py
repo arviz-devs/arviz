@@ -1,8 +1,10 @@
 """Autocorrelation plot of data."""
 from ..data import convert_to_dataset
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..utils import _var_names
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_autocorr(
@@ -11,8 +13,10 @@ def plot_autocorr(
     filter_vars=None,
     max_lag=None,
     combined=False,
+    grid=None,
     figsize=None,
     textsize=None,
+    labeller=None,
     ax=None,
     backend=None,
     backend_config=None,
@@ -26,44 +30,57 @@ def plot_autocorr(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names, optional
-        Variables to be plotted, if None all variable are plotted. Prefix the
-        variables by `~` when you want to exclude them from the plot. Vector-value
+        Variables to be plotted, if None all variables are plotted. Prefix the
+        variables by ``~`` when you want to exclude them from the plot. Vector-value
         stochastics are handled automatically.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     max_lag: int, optional
-        Maximum lag to calculate autocorrelation. Defaults to 100 or num draws, whichever is smaller
-    combined: bool
-        Flag for combining multiple chains into a single chain. If False (default), chains will be
+        Maximum lag to calculate autocorrelation. Defaults to 100 or num draws,
+        whichever is smaller.
+    combined: bool, default=False
+        Flag for combining multiple chains into a single chain. If False, chains will be
         plotted separately.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
-        Note this is not used if ax is supplied.
+        Note this is not used if ``ax`` is supplied.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
+    labeller : labeller instance, optional
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_config: dict, optional
-        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
     backend_kwargs: dict, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    autocov : Compute autocovariance estimates for every lag for the input array.
+    autocorr : Compute autocorrelation using FFT for every lag for the input array.
 
     Examples
     --------
@@ -106,10 +123,13 @@ def plot_autocorr(
     if max_lag is None:
         max_lag = min(100, data["draw"].shape[0])
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     plotters = filter_plotters_list(
         list(xarray_var_iter(data, var_names, combined)), "plot_autocorr"
     )
-    rows, cols = default_grid(len(plotters))
+    rows, cols = default_grid(len(plotters), grid=grid)
 
     autocorr_plot_args = dict(
         axes=ax,
@@ -120,6 +140,7 @@ def plot_autocorr(
         cols=cols,
         combined=combined,
         textsize=textsize,
+        labeller=labeller,
         backend_kwargs=backend_kwargs,
         show=show,
     )

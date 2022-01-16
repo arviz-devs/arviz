@@ -3,10 +3,12 @@ import numpy as np
 import xarray as xr
 
 from ..data import convert_to_dataset
-from ..rcparams import rcParams
+from ..labels import BaseLabeller
+from ..sel_utils import xarray_var_iter
 from ..stats import mcse
+from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_mcse(
@@ -15,12 +17,14 @@ def plot_mcse(
     filter_vars=None,
     coords=None,
     errorbar=False,
+    grid=None,
     figsize=None,
     textsize=None,
     extra_methods=False,
     rug=False,
     rug_kind="diverging",
     n_points=20,
+    labeller=None,
     ax=None,
     rug_kwargs=None,
     extra_kwargs=None,
@@ -35,10 +39,10 @@ def plot_mcse(
     Parameters
     ----------
     idata: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names, optional
-        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
@@ -46,9 +50,12 @@ def plot_mcse(
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: dict, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     errorbar: bool, optional
         Plot quantile value +/- mcse instead of plotting mcse.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -64,29 +71,40 @@ def plot_mcse(
     n_points: int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
+    labeller : labeller instance, optional
+        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     rug_kwargs: dict
-        kwargs passed to rug plot.
+        kwargs passed to rug plot in
+        :meth:`mpl:matplotlib.axes.Axes.plot` or :class:`bokeh:bokeh.models.glyphs.Scatter`.
     extra_kwargs: dict, optional
-        kwargs passed to ax.plot for extra methods lines.
+        kwargs passed as extra method lines in
+        :meth:`mpl:matplotlib.axes.Axes.axhline` or :class:`bokeh:bokeh.models.Span`
     text_kwargs: dict, optional
-        kwargs passed to ax.annotate for extra methods lines labels. It accepts the additional
-        key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
+        kwargs passed to :meth:`mpl:matplotlib.axes.Axes.annotate` for extra methods lines labels.
+        It accepts the additional key ``x`` to set ``xy=(text_kwargs["x"], mcse)``.
+        text_kwargs are ignored for the bokeh plotting backend.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or
+        :meth:`mpl:matplotlib.axes.Axes.plot` in matplotlib depending on the value of `kind`.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    :func:`arviz.mcse`: Calculate Markov Chain Standard Error statistic.
 
     References
     ----------
@@ -115,6 +133,9 @@ def plot_mcse(
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
 
+    if labeller is None:
+        labeller = BaseLabeller()
+
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
     var_names = _var_names(var_names, data, filter_vars)
 
@@ -128,7 +149,7 @@ def plot_mcse(
         "plot_mcse",
     )
     length_plotters = len(plotters)
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     if extra_methods:
         mean_mcse = mcse(data, var_names=var_names, method="mean")
@@ -150,6 +171,7 @@ def plot_mcse(
         mean_mcse=mean_mcse,
         sd_mcse=sd_mcse,
         textsize=textsize,
+        labeller=labeller,
         text_kwargs=text_kwargs,
         rug_kwargs=rug_kwargs,
         extra_kwargs=extra_kwargs,

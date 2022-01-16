@@ -55,7 +55,8 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-docs/source/_build/
+doc/build/
+doc/source/savefig
 
 # PyBuilder
 target/
@@ -63,15 +64,22 @@ target/
 # IDE configs
 .idea/
 .vscode/
-
+.DS_Store
 saved_animations/
 
 # mypy
 .mypy_cache
 
 # Stan file
-doc/notebooks/*.stan
+doc/getting_started/*.stan
 
 # eight-schools files
-doc/notebooks/eight_school*
-doc/notebooks/sample_data/
+doc/source/getting_started/eight_school*
+doc/source/getting_started/sample_data/
+
+# MyST related
+doc/jupyter_execute
+
+# Dask related
+mydask.png
+**/dask-worker-space/*

@@ -4,7 +4,7 @@ import numpy as np
 
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
@@ -22,6 +22,7 @@ def plot_violin(
     rug_kwargs,
     bw,
     textsize,
+    labeller,
     circular,
     hdi_prob,
     quartiles,
@@ -63,7 +64,8 @@ def plot_violin(
 
     ax = np.atleast_1d(ax)
 
-    for (var_name, selection, x), ax_ in zip(plotters, ax.flatten()):
+    current_col = 0
+    for (var_name, selection, isel, x), ax_ in zip(plotters, ax.flatten()):
         val = x.flatten()
         if val[0].dtype.kind == "i":
             dens = cat_hist(val, rug, shade, ax_, **shade_kwargs)
@@ -82,10 +84,16 @@ def plot_violin(
         ax_.plot([0, 0], hdi_probs, lw=linewidth, color="k", solid_capstyle="round")
         ax_.plot(0, per[-1], "wo", ms=linewidth * 1.5)
 
-        ax_.set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)
+        ax_.set_title(labeller.make_label_vert(var_name, selection, isel), fontsize=ax_labelsize)
         ax_.set_xticks([])
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.grid(None, axis="x")
+        if current_col != 0:
+            ax_.spines["left"].set_visible(False)
+            ax_.yaxis.set_ticks_position("none")
+        current_col += 1
+        if current_col == cols:
+            current_col = 0
 
     if backend_show(show):
         plt.show()

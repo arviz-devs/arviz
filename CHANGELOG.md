@@ -2,13 +2,185 @@
 
 ## v0.x.x Unreleased
 ### New features
+* [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
+* Allow kwargs to customize appearance of the mean in `plot_lm`
+
+### Maintenance and fixes
+* Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
+* Bokeh 3 compatibility. ([1919](https://github.com/arviz-devs/arviz/pull/1919))
+* Remove manual setting of 2d KDE limits ([1939](https://github.com/arviz-devs/arviz/pull/1939))
+* Pin to bokeh<3 version ([1954](https://github.com/arviz-devs/arviz/pull/1954))
+
+### Deprecation
+
+### Documentation
+* Fixed typo in `Forestplot` documentation
+
+
+## v0.11.4 (2021 Oct 3)
+
+### Maintenance and fixes
+* Fix standard deviation code in density utils by replacing it with `np.std`. ([1833](https://github.com/arviz-devs/arviz/pull/1833))
+
+## v0.11.3 (2021 Oct 1)
+### New features
+* Change order of regularization in `psislw` ([1943](https://github.com/arviz-devs/arviz/pull/1943))
+* Added `labeller` argument to enable label customization in plots and summary ([1201](https://github.com/arviz-devs/arviz/pull/1201))
+* Added `arviz.labels` module with classes and utilities ([1201](https://github.com/arviz-devs/arviz/pull/1201) and [1605](https://github.com/arviz-devs/arviz/pull/1605))
+* Added probability estimate within ROPE in `plot_posterior` ([1570](https://github.com/arviz-devs/arviz/pull/1570))
+* Added `rope_color` and `ref_val_color` arguments to `plot_posterior` ([1570](https://github.com/arviz-devs/arviz/pull/1570))
+* Improved retrieving or pointwise log likelihood in `from_cmdstanpy`, `from_cmdstan` and `from_pystan` ([1579](https://github.com/arviz-devs/arviz/pull/1579) and [1599](https://github.com/arviz-devs/arviz/pull/1599))
+* Added interactive legend to bokeh `forestplot` ([1591](https://github.com/arviz-devs/arviz/pull/1591))
+* Added interactive legend to bokeh `ppcplot` ([1602](https://github.com/arviz-devs/arviz/pull/1602))
+* Add more helpful error message for HDF5 problems reading `InferenceData` from NetCDF ([1637](https://github.com/arviz-devs/arviz/pull/1637))
+* Added `data.log_likelihood`, `stats.ic_compare_method` and `plot.density_kind` to `rcParams` ([1611](https://github.com/arviz-devs/arviz/pull/1611))
+* Improve error messages in `stats.compare()`, and `var_name` parameter. ([1616](https://github.com/arviz-devs/arviz/pull/1616))
+* Added ability to plot HDI contours to `plot_kde` with the new `hdi_probs` parameter. ([1665](https://github.com/arviz-devs/arviz/pull/1665))
+* Add dtype parsing and setting in all Stan converters ([1632](https://github.com/arviz-devs/arviz/pull/1632))
+* Add option to specify colors for each element in ppc_plot  ([1769](https://github.com/arviz-devs/arviz/pull/1769))
+
+### Maintenance and fixes
+* Fix conversion for numpyro models with ImproperUniform latent sites ([1713](https://github.com/arviz-devs/arviz/pull/1713))
+* Fixed conversion of Pyro output fit using GPUs ([1659](https://github.com/arviz-devs/arviz/pull/1659))
+* Enforced using coordinate values as default labels ([1201](https://github.com/arviz-devs/arviz/pull/1201))
+* Integrate `index_origin` with all the library ([1201](https://github.com/arviz-devs/arviz/pull/1201))
+* Fix pareto k threshold typo in reloo function ([1580](https://github.com/arviz-devs/arviz/pull/1580))
+* Preserve shape from Stan code in `from_cmdstanpy` ([1579](https://github.com/arviz-devs/arviz/pull/1579))
+* Updated `from_pystan` converters to follow schema convention ([1585](https://github.com/arviz-devs/arviz/pull/1585)
+* Used generator instead of list wherever possible ([1588](https://github.com/arviz-devs/arviz/pull/1588))
+* Correctly use chain index when constructing PyMC3 `DefaultTrace` in `from_pymc3` ([1590](https://github.com/arviz-devs/arviz/pull/1590))
+* Fix bugs in CmdStanPyConverter ([1595](https://github.com/arviz-devs/arviz/pull/1595) and [1598](https://github.com/arviz-devs/arviz/pull/1598))
+* Fix `c` argument in `plot_khat` ([1592](https://github.com/arviz-devs/arviz/pull/1592))
+* Fix `ax` argument in `plot_elpd` ([1593](https://github.com/arviz-devs/arviz/pull/1593))
+* Remove warning in `stats.py` compare function ([1607](https://github.com/arviz-devs/arviz/pull/1607))
+* Fix `ess/rhat` plots in `plot_forest` ([1606](https://github.com/arviz-devs/arviz/pull/1606))
+* Fix `from_numpyro` crash when importing model with `thinning=x` for `x > 1` ([1619](https://github.com/arviz-devs/arviz/pull/1619))
+* Upload updated mypy.ini in ci if mypy copilot fails ([1624](https://github.com/arviz-devs/arviz/pull/1624))
+* Added type checking to raise an error whenever `InferenceData` object is passed using `io_pymc3`'s `trace` argument ([1629](https://github.com/arviz-devs/arviz/pull/1629))
+* Fix `xlabels` in `plot_elpd` ([1601](https://github.com/arviz-devs/arviz/pull/1601))
+* Renamed `sample` dim to `__sample__` when stacking `chain` and `draw` to avoid dimension collision ([1647](https://github.com/arviz-devs/arviz/pull/1647))
+* Removed the `circular` argument in `plot_dist` in favor of `is_circular` ([1681](https://github.com/arviz-devs/arviz/pull/1681))
+* Fix `legend` argument in `plot_separation` ([1701](https://github.com/arviz-devs/arviz/pull/1701))
+* Removed testing dependency on http download for radon dataset ([1717](https://github.com/arviz-devs/arviz/pull/1717))
+* Fixed plot_kde to take labels with kwargs. ([1710](https://github.com/arviz-devs/arviz/pull/1710))
+* Fixed xarray related tests. ([1726](https://github.com/arviz-devs/arviz/pull/1726))
+* Fix Bokeh deprecation warnings ([1657](https://github.com/arviz-devs/arviz/pull/1657))
+* Fix credible inteval percentage in legend in `plot_loo_pit` ([1745](https://github.com/arviz-devs/arviz/pull/1745))
+* Arguments `filter_vars` and `filter_groups` now raise `ValueError` if illegal arguments are passed ([1772](https://github.com/arviz-devs/arviz/pull/1772))
+* Remove constrained_layout from arviz rcparams ([1764](https://github.com/arviz-devs/arviz/pull/1764))
+* Fix plot_elpd for a single outlier ([1787](https://github.com/arviz-devs/arviz/pull/1787))
+
+### Deprecation
+* Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
+
+### Documentation
+* Language improvements of the first third of the "Label guide" ([1699](https://github.com/arviz-devs/arviz/pull/1699))
+* Added "Label guide" page and API section for `arviz.labels` module ([1201](https://github.com/arviz-devs/arviz/pull/1201) and [1635](https://github.com/arviz-devs/arviz/pull/1635))
+* Add "Installation guide" page to the documentation ([1551](https://github.com/arviz-devs/arviz/pull/1551))
+* Improve documentation on experimental `SamplingWrapper` classes ([1582](https://github.com/arviz-devs/arviz/pull/1582))
+* Added example to `plot_hdi` using Inference Data ([1615](https://github.com/arviz-devs/arviz/pull/1615))
+* Removed `geweke` diagnostic from `numba` user guide ([1653](https://github.com/arviz-devs/arviz/pull/1653))
+* Restructured the documentation sections to improve community and about us information ([1587](https://github.com/arviz-devs/arviz/pull/1587))
+
+## v0.11.2 (2021 Feb 21)
+### New features
+* Added `to_zarr` and `from_zarr` methods to InferenceData ([1518](https://github.com/arviz-devs/arviz/pull/1518))
+* Added confidence interval band to auto-correlation plot ([1535](https://github.com/arviz-devs/arviz/pull/1535))
+
+### Maintenance and fixes
+* Updated CmdStanPy converter form compatibility with versions >=0.9.68 ([1558](https://github.com/arviz-devs/arviz/pull/1558) and ([1564](https://github.com/arviz-devs/arviz/pull/1564))
+* Updated `from_cmdstanpy`, `from_cmdstan`, `from_numpyro` and `from_pymc3` converters to follow schema convention ([1550](https://github.com/arviz-devs/arviz/pull/1550), [1541](https://github.com/arviz-devs/arviz/pull/1541), [1525](https://github.com/arviz-devs/arviz/pull/1525) and [1555](https://github.com/arviz-devs/arviz/pull/1555))
+* Fix calculation of mode as point estimate ([1552](https://github.com/arviz-devs/arviz/pull/1552))
+* Remove variable name from legend in posterior predictive plot ([1559](https://github.com/arviz-devs/arviz/pull/1559))
+* Added significant digits formatter to round rope values ([1569](https://github.com/arviz-devs/arviz/pull/1569))
+* Updated `from_cmdstan`. csv reader, dtype problem fixed and dtype kwarg added for manual dtype casting ([1565](https://github.com/arviz-devs/arviz/pull/1565))
+
+### Deprecation
+* Removed Geweke diagnostic ([1545](https://github.com/arviz-devs/arviz/pull/1545))
+* Removed credible_interval and include_circ arguments ([1548](https://github.com/arviz-devs/arviz/pull/1548))
+
+### Documentation
+* Added an example for converting dataframe to InferenceData ([1556](https://github.com/arviz-devs/arviz/pull/1556))
+* Added example for `coords` argument in `plot_posterior` docstring ([1566](https://github.com/arviz-devs/arviz/pull/1566))
+
+## v0.11.1 (2021 Feb 2)
+### Maintenance and fixes
+* Fixed ovelapping titles and repeating warnings on circular traceplot ([1517](https://github.com/arviz-devs/arviz/pull/1517))
+* Removed repetitive variable names from forest plots of multivariate variables ([1527](https://github.com/arviz-devs/arviz/pull/1527))
+* Fixed regression in `plot_pair` labels that prevented coord names to be shown when necessary ([1533](https://github.com/arviz-devs/arviz/pull/1533))
+
+### Documentation
+* Use tabs in ArviZ example gallery ([1521](https://github.com/arviz-devs/arviz/pull/1521))
+
+## v0.11.0 (2021 Dec 17)
+### New features
+* Added `to_dataframe` method to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
+* Added `__getitem__` magic to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
+* Added group argument to summary ([1408](https://github.com/arviz-devs/arviz/pull/1408))
+* Add `ref_line`, `bar`, `vlines` and `marker_vlines` kwargs to `plot_rank` ([1419](https://github.com/arviz-devs/arviz/pull/1419))
+* Add observed argument to (un)plot observed data in `plot_ppc` ([1422](https://github.com/arviz-devs/arviz/pull/1422))
+* Add support for named dims and coordinates with multivariate observations ([1429](https://github.com/arviz-devs/arviz/pull/1429))
+* Add support for discrete variables in rank plots ([1433](https://github.com/arviz-devs/arviz/pull/1433)) and
+  `loo_pit` ([1500](https://github.com/arviz-devs/arviz/pull/1500))
+* Add `skipna` argument to `plot_posterior` ([1432](https://github.com/arviz-devs/arviz/pull/1432))
+* Make stacking the default method to compute weights in `compare` ([1438](https://github.com/arviz-devs/arviz/pull/1438))
+* Add `copy()` method to `InferenceData` class. ([1501](https://github.com/arviz-devs/arviz/pull/1501)).
+
+
+### Maintenance and fixes
+* prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
+* Updated CmdStanPy interface ([1409](https://github.com/arviz-devs/arviz/pull/1409))
+* Remove left out warning about default IC scale in `compare` ([1412](https://github.com/arviz-devs/arviz/pull/1412))
+* Fixed a typo found in an error message raised in `distplot.py` ([1414](https://github.com/arviz-devs/arviz/pull/1414))
+* Fix typo in `loo_pit` extraction of log likelihood ([1418](https://github.com/arviz-devs/arviz/pull/1418))
+* Have `from_pystan` store attrs as strings to allow netCDF storage ([1417](https://github.com/arviz-devs/arviz/pull/1417))
+* Remove ticks and spines in `plot_violin`  ([1426 ](https://github.com/arviz-devs/arviz/pull/1426))
+* Use circular KDE function and fix tick labels in circular `plot_trace` ([1428](https://github.com/arviz-devs/arviz/pull/1428))
+* Fix `pair_plot` for mixed discrete and continuous variables ([1434](https://github.com/arviz-devs/arviz/pull/1434))
+* Fix in-sample deviance in `plot_compare` ([1435](https://github.com/arviz-devs/arviz/pull/1435))
+* Fix computation of weights in compare ([1438](https://github.com/arviz-devs/arviz/pull/1438))
+* Avoid repeated warning in summary ([1442](https://github.com/arviz-devs/arviz/pull/1442))
+* Fix hdi failure with boolean array ([1444](https://github.com/arviz-devs/arviz/pull/1444))
+* Automatically get the current axes instance for `plt_kde`, `plot_dist` and `plot_hdi` ([1452](https://github.com/arviz-devs/arviz/pull/1452))
+* Add grid argument to manually specify the number of rows and columns ([1459](https://github.com/arviz-devs/arviz/pull/1459))
+* Switch to `compact=True` by default in our plots ([1468](https://github.com/arviz-devs/arviz/issues/1468))
+* `plot_elpd`, avoid modifying the input dict ([1477](https://github.com/arviz-devs/arviz/issues/1477))
+* Do not plot divergences in `plot_trace` when `kind=rank_vlines` or `kind=rank_bars` ([1476](https://github.com/arviz-devs/arviz/issues/1476))
+* Allow ignoring `observed` argument of `pymc3.DensityDist` in `from_pymc3` ([1495](https://github.com/arviz-devs/arviz/pull/1495))
+* Make `from_pymc3` compatible with theano-pymc 1.1.0 ([1495](https://github.com/arviz-devs/arviz/pull/1495))
+* Improve typing hints ([1491](https://github.com/arviz-devs/arviz/pull/1491), ([1492](https://github.com/arviz-devs/arviz/pull/1492),
+  ([1493](https://github.com/arviz-devs/arviz/pull/1493), ([1494](https://github.com/arviz-devs/arviz/pull/1494) and
+  ([1497](https://github.com/arviz-devs/arviz/pull/1497))
+
+
+### Deprecation
+* `plot_khat` deprecate `annotate` argument in favor of `threshold`. The new argument accepts floats ([1478](https://github.com/arviz-devs/arviz/issues/1478))
+
+### Documentation
+* Reorganize documentation and change sphinx theme ([1406](https://github.com/arviz-devs/arviz/pull/1406))
+* Switch to [MyST](https://myst-parser.readthedocs.io/en/latest/) and [MyST-NB](https://myst-nb.readthedocs.io/en/latest/index.html)
+  for markdown/notebook parsing in docs ([1406](https://github.com/arviz-devs/arviz/pull/1406))
+* Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
+* Add documentation pages about experimental `SamplingWrapper`s usage ([1373](https://github.com/arviz-devs/arviz/pull/1373))
+* Show example titles in gallery page ([1484](https://github.com/arviz-devs/arviz/pull/1484))
+* Add `sample_stats` naming convention to the InferenceData schema ([1063](https://github.com/arviz-devs/arviz/pull/1063))
+* Extend api documentation about `InferenceData` methods ([1338](https://github.com/arviz-devs/arviz/pull/1338))
+
+### Experimental
+* Modified `SamplingWrapper` base API ([1373](https://github.com/arviz-devs/arviz/pull/1373))
+
+## v0.10.0 (2020 Sep 24)
+### New features
 * Added InferenceData dataset containing circular variables ([1265](https://github.com/arviz-devs/arviz/pull/1265))
 * Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). ([1266](https://github.com/arviz-devs/arviz/pull/1266))
 * Added `to_dict` method for InferenceData object ([1223](https://github.com/arviz-devs/arviz/pull/1223))
 * Added `circ_var_names` argument to `plot_trace` allowing for circular traceplot (Matplotlib) ([1336](https://github.com/arviz-devs/arviz/pull/1336))
 * Ridgeplot is hdi aware. By default displays truncated densities at the specified `hdi_prop` level ([1348](https://github.com/arviz-devs/arviz/pull/1348))
 * Added `plot_separation` ([1359](https://github.com/arviz-devs/arviz/pull/1359))
-
+* Extended methods from `xr.Dataset` to `InferenceData` ([1254](https://github.com/arviz-devs/arviz/pull/1254))
+* Add `extend` and `add_groups` to `InferenceData` ([1300](https://github.com/arviz-devs/arviz/pull/1300) and [1386](https://github.com/arviz-devs/arviz/pull/1386))
+* Added `__iter__` method (`.items`) for InferenceData ([1356](https://github.com/arviz-devs/arviz/pull/1356))
+* Add support for discrete variables in `plot_bpv` ([#1379](https://github.com/arviz-devs/arviz/pull/1379))
 
 ### Maintenance and fixes
 * Automatic conversion of list/tuple to numpy array in distplot ([1277](https://github.com/arviz-devs/arviz/pull/1277))
@@ -21,16 +193,19 @@
 * Restructure plotting code to be compatible with mpl>=3.3 ([1312](https://github.com/arviz-devs/arviz/pull/1312) and [1352](https://github.com/arviz-devs/arviz/pull/1352))
 * Replaced `_fast_kde()` with `kde()` which now also supports circular variables via the argument `circular` ([1284](https://github.com/arviz-devs/arviz/pull/1284)).
 * Increased `from_pystan` attrs information content ([1353](https://github.com/arviz-devs/arviz/pull/1353))
-* Allow `plot_trace` to return and accept axes ([#1361](https://github.com/arviz-devs/arviz/pull/1361))
-* Update diagnostics to be on par with posterior package ([#1366](https://github.com/arviz-devs/arviz/pull/1366))
-
-### Deprecation
-
-### Documentation
+* Allow `plot_trace` to return and accept axes ([1361](https://github.com/arviz-devs/arviz/pull/1361))
+* Update diagnostics to be on par with posterior package ([1366](https://github.com/arviz-devs/arviz/pull/1366))
+* Use method="average" in `scipy.stats.rankdata` ([1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Add more `plot_parallel` examples ([1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Bump minimum xarray version to 0.16.1 ([1389](https://github.com/arviz-devs/arviz/pull/1389)
+* Fix multi rope for `plot_forest` ([1390](https://github.com/arviz-devs/arviz/pull/1390))
+* Bump minimum xarray version to 0.16.1 ([1389](https://github.com/arviz-devs/arviz/pull/1389))
+* `from_dict` will now store warmup groups even with the main group missing ([1386](https://github.com/arviz-devs/arviz/pull/1386))
+* increase robustness for repr_html handling ([1392](https://github.com/arviz-devs/arviz/pull/1392))
 
 ## v0.9.0 (2020 June 23)
 ### New features
-* loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The HDI is computed analitically ([1215](https://github.com/arviz-devs/arviz/pull/1215))
+* loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The HDI is computed analytically ([1215](https://github.com/arviz-devs/arviz/pull/1215))
 * Added `html_repr` of InferenceData objects for jupyter notebooks. ([1217](https://github.com/arviz-devs/arviz/pull/1217))
 * Added support for PyJAGS via the function `from_pyjags`. ([1219](https://github.com/arviz-devs/arviz/pull/1219) and [1245](https://github.com/arviz-devs/arviz/pull/1245))
 * `from_pymc3` can now retrieve `coords` and `dims` from model context ([1228](https://github.com/arviz-devs/arviz/pull/1228), [1240](https://github.com/arviz-devs/arviz/pull/1240) and [1249](https://github.com/arviz-devs/arviz/pull/1249))
@@ -81,7 +256,7 @@
 * Fixed enforcement of rcParam `plot.max_subplots` in `plot_trace` and
   `plot_pair` ([1205](https://github.com/arviz-devs/arviz/pull/1205))
 * Removed extra subplot row and column in in `plot_pair` with `marginal=True` ([1205](https://github.com/arviz-devs/arviz/pull/1205))
-* Added latest PyMC3 release to CI in addition to using GitHub master ([1207](https://github.com/arviz-devs/arviz/pull/1207))
+* Added latest PyMC3 release to CI in addition to using GitHub default branch ([1207](https://github.com/arviz-devs/arviz/pull/1207))
 
 ### Documentation
 * Use `dev` as version indicator in online documentation ([1204](https://github.com/arviz-devs/arviz/pull/1204))
