@@ -137,7 +137,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         self._groups: List[str] = []
         self._groups_warmup: List[str] = []
-        self._attrs: Union[None, Mapping[Any, Any]] = dict(attrs) if attrs is not None else None
+        self._attrs: Union[None, dict] = dict(attrs) if attrs is not None else None
         save_warmup = kwargs.pop("save_warmup", False)
         key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
         for key in kwargs:
