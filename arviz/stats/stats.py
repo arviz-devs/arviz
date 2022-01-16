@@ -985,6 +985,7 @@ def _gpinv(probs, kappa, sigma):
             x[probs == 1] = -sigma / kappa
     return x
 
+
 def r2_samples(y_true, y_pred):
     """R² samples for Bayesian regression models. Only valid for linear models.
 
@@ -1027,6 +1028,7 @@ def r2_samples(y_true, y_pred):
     r_squared = var_y_est / (var_y_est + var_e)
 
     return r_squared
+
 
 def r2_score(y_true, y_pred):
     """R² for Bayesian regression models. Only valid for linear models.
