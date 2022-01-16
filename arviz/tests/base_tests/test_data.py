@@ -509,6 +509,15 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
 
+    def test_group_names_invalid_args(self):
+        ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
+        idata = InferenceData(posterior=(ds, ds))
+        msg = r"^\'filter_groups\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+        with pytest.raises(ValueError, match=msg):
+            idata._group_names(  # pylint: disable=protected-access
+                ("posterior",), filter_groups="foo"
+            )
+
     @pytest.mark.parametrize("inplace", [False, True])
     def test_isel(self, data_random, inplace):
         idata = data_random
@@ -667,7 +676,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             if groups == "posterior":
                 if kwargs.get("include_coords", True) and kwargs.get("include_index", True):
                     assert any(
-                        "[{},".format(kwargs.get("index_origin", 0)) in item[0]
+                        f"[{kwargs.get('index_origin', 0)}," in item[0]
                         for item in test_data.columns
                         if isinstance(item, tuple)
                     )

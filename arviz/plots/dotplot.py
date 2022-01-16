@@ -48,7 +48,7 @@ def plot_dot(
         The distance between the center of the dots in the same stack relative to the bin height.
         The default, 1, makes dots in the same stack just touch each other.
     point_interval : bool, optional
-        Plots the point interval. Uses hdi_prob to plot the HDI interval
+        Plots the point interval. Uses ``hdi_prob`` to plot the HDI interval
     point_estimate : str, optional
         Plot point estimate per variable. Values should be ‘mean’, ‘median’, ‘mode’ or None.
         Defaults to ‘auto’ i.e. it falls back to default set in rcParams.
@@ -57,14 +57,14 @@ def plot_dot(
     intervalcolor : string, optional
         The color of the interval. Should be a valid matplotlib color.
     linewidth : int, optional
-        Line width throughout. If None it will be autoscaled based on figsize.
+        Line width throughout. If None it will be autoscaled based on ``figsize``.
     markersize : int, optional
-        Markersize throughout. If None it will be autoscaled based on figsize.
+        Markersize throughout. If None it will be autoscaled based on ``figsize``.
     markercolor: string, optional
         The color of the marker when plot_interval is True. Should be a valid matplotlib color.
     marker: string, optional
         The shape of the marker. Valid for matplotlib backend
-        Defaults to "o"
+        Defaults to "o".
     hdi_prob : float, optional
         Valid only when point_interval is True. Plots HDI for chosen percentage of density.
         Defaults to ``stats.hdi_prob`` rcParam.
@@ -79,7 +79,7 @@ def plot_dot(
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     plot_kwargs : dict, optional
-        Keywords passed for customizing the dots. Passed to :meth:`mpl:matplotlib.patches.Circle`
+        Keywords passed for customizing the dots. Passed to :class:`mpl:matplotlib.patches.Circle`
         in matplotlib and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
@@ -89,12 +89,17 @@ def plot_dot(
         Call backend show function.
     backend_kwargs: dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`mpl:matplotlib.pyplot.subplots` or
-        :meth:`bokeh:bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_dist : Plot distribution as histogram or kernel density estimates.
 
     References
     ----------
@@ -111,8 +116,8 @@ def plot_dot(
     .. plot::
         :context: close-figs
 
-        >>> import numpy as np
         >>> import arviz as az
+        >>> import numpy as np
         >>> values = np.random.normal(0, 1, 500)
         >>> az.plot_dot(values)
 
@@ -128,14 +133,14 @@ def plot_dot(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_dot(b, point_interval=True)
+        >>> az.plot_dot(values, point_interval=True)
 
     Rotate the dot plots by 90 degrees i.e swap x and y axis
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_dot(b, point_interval=True, rotated=True)
+        >>> az.plot_dot(values, point_interval=True, rotated=True)
 
     """
     if nquantiles == 0:
@@ -222,9 +227,7 @@ def layout_stacks(stack_locs, stack_counts, binwidth, stackratio, rotated):
     binradius = binwidth / 2
 
     x = np.repeat(stack_locs, stack_counts)
-    y = np.hstack(
-        np.array([dotheight * np.arange(count) + binradius for count in stack_counts], dtype=object)
-    )
+    y = np.hstack([dotheight * np.arange(count) + binradius for count in stack_counts])
     if rotated:
         x, y = y, x
 

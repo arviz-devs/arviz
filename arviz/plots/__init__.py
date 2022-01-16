@@ -11,7 +11,6 @@ from .energyplot import plot_energy
 from .essplot import plot_ess
 from .forestplot import plot_forest
 from .hdiplot import plot_hdi
-from .jointplot import plot_joint
 from .kdeplot import plot_kde
 from .khatplot import plot_khat
 from .lmplot import plot_lm
@@ -24,6 +23,7 @@ from .ppcplot import plot_ppc
 from .rankplot import plot_rank
 from .separationplot import plot_separation
 from .traceplot import plot_trace
+from .tsplot import plot_ts
 from .violinplot import plot_violin
 
 __all__ = [
@@ -38,7 +38,6 @@ __all__ = [
     "plot_ess",
     "plot_forest",
     "plot_hdi",
-    "plot_joint",
     "plot_kde",
     "plot_khat",
     "plot_lm",
@@ -51,6 +50,7 @@ __all__ = [
     "plot_dist_comparison",
     "plot_rank",
     "plot_trace",
+    "plot_ts",
     "plot_violin",
     "plot_separation",
 ]

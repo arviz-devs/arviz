@@ -24,7 +24,6 @@ from ...plots import (
     plot_ess,
     plot_forest,
     plot_hdi,
-    plot_joint,
     plot_kde,
     plot_khat,
     plot_lm,
@@ -37,6 +36,7 @@ from ...plots import (
     plot_rank,
     plot_separation,
     plot_trace,
+    plot_ts,
     plot_violin,
 )
 from ...rcparams import rc_context, rcParams
@@ -62,7 +62,7 @@ def clean_plots(request, save_figs):
 
     def fin():
         if save_figs is not None:
-            plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
+            plt.savefig(f"{os.path.join(save_figs, request.node.name)}.png")
         plt.close("all")
 
     request.addfinalizer(fin)
@@ -158,7 +158,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, point_estimate="bad_value")
 
     with pytest.raises(ValueError):
-        plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
+        plot_density(obj, data_labels=[f"bad_value_{i}" for i in range(len(obj) + 10)])
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
@@ -323,7 +323,7 @@ def test_plot_forest_bad(models, model_fits):
         plot_forest(obj, kind="bad_kind")
 
     with pytest.raises(ValueError):
-        plot_forest(obj, model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)])
+        plot_forest(obj, model_names=[f"model_name_{i}" for i in range(len(obj) + 10)])
 
 
 @pytest.mark.parametrize("kind", ["kde", "hist"])
@@ -351,35 +351,6 @@ def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
         assert plot_parallel(models.model_1, var_names=var_names, norm_method="foo")
-
-
-@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, kind):
-    axjoin, _, _ = plot_joint(models.model_1, var_names=("mu", "tau"), kind=kind)
-    assert axjoin
-
-
-def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(models.model_1, var_names=("mu", "tau"))
-    axjoin, _, _ = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax)
-    assert axjoin
-
-
-def test_plot_joint_discrete(discrete_model):
-    axjoin, _, _ = plot_joint(discrete_model)
-    assert axjoin
-
-
-def test_plot_joint_bad(models):
-    with pytest.raises(ValueError):
-        plot_joint(models.model_1, var_names=("mu", "tau"), kind="bad_kind")
-
-    with pytest.raises(Exception):
-        plot_joint(models.model_1, var_names=("mu", "tau", "eta"))
-
-    with pytest.raises(ValueError, match="ax.+3.+5"):
-        _, axes = plt.subplots(5, 1)
-        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes)
 
 
 @pytest.mark.parametrize(
@@ -713,7 +684,7 @@ def test_plot_ppc_save_animation(models, kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)
@@ -742,7 +713,7 @@ def test_plot_ppc_discrete_save_animation(kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_discrete_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_discrete_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)
@@ -1082,6 +1053,7 @@ def test_kde_cumulative(limits):
         {"color": "obs_dim", "legend": True},
         {"ic": "loo", "color": "blue", "coords": {"obs_dim": slice(2, 5)}},
         {"color": np.random.uniform(size=8), "threshold": 0.1},
+        {"threshold": 2},
     ],
 )
 @pytest.mark.parametrize("add_model", [False, True])
@@ -1642,3 +1614,108 @@ def test_plot_lm_list():
     """Test the plots when input data is list or ndarray."""
     y = [1, 2, 3, 4, 5]
     assert plot_lm(y=y, x=np.arange(len(y)), show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat": "bad_name"},
+        {"x": "x"},
+        {"x": ("x", "x")},
+        {"y_holdout": "z"},
+        {"y_holdout": "z", "x_holdout": "x_pred"},
+        {"x": ("x", "x"), "y_holdout": "z", "x_holdout": ("x_pred", "x_pred")},
+        {"y_forecasts": "z"},
+        {"y_holdout": "z", "y_forecasts": "bad_name"},
+    ],
+)
+def test_plot_ts(kwargs):
+    """Test timeseries plots basic functionality."""
+    nchains = 4
+    ndraws = 500
+    obs_data = {
+        "y": 2 * np.arange(1, 9) + 3,
+        "z": 2 * np.arange(8, 12) + 3,
+    }
+
+    posterior_predictive = {
+        "y": np.random.normal(
+            (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
+        ),
+        "z": np.random.normal(
+            (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
+        ),
+    }
+
+    const_data = {"x": np.arange(1, 9), "x_pred": np.arange(8, 12)}
+
+    idata = from_dict(
+        observed_data=obs_data,
+        posterior_predictive=posterior_predictive,
+        constant_data=const_data,
+        coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
+        dims={"y": ["obs_dim"], "z": ["pred_dim"]},
+    )
+
+    ax = plot_ts(idata=idata, y="y", show=True, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "y_holdout": "z",
+            "holdout_dim": "holdout_dim1",
+            "x": ("x", "x"),
+            "x_holdout": ("x_pred", "x_pred"),
+        },
+        {"y_forecasts": "z", "holdout_dim": "holdout_dim1"},
+    ],
+)
+def test_plot_ts_multidim(kwargs):
+    """Test timeseries plots multidim functionality."""
+    nchains = 4
+    ndraws = 500
+    ndim1 = 5
+    ndim2 = 7
+    data = {
+        "y": np.random.normal(size=(ndim1, ndim2)),
+        "z": np.random.normal(size=(ndim1, ndim2)),
+    }
+
+    posterior_predictive = {
+        "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+
+    const_data = {"x": np.arange(1, 6), "x_pred": np.arange(5, 10)}
+
+    idata = from_dict(
+        observed_data=data,
+        posterior_predictive=posterior_predictive,
+        constant_data=const_data,
+        dims={
+            "y": ["dim1", "dim2"],
+            "z": ["holdout_dim1", "holdout_dim2"],
+        },
+        coords={
+            "dim1": range(ndim1),
+            "dim2": range(ndim2),
+            "holdout_dim1": range(ndim1 - 1, ndim1 + 4),
+            "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
+        },
+    )
+
+    ax = plot_ts(idata=idata, y="y", plot_dim="dim1", **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize("val_err_kwargs", [{}, {"plot_dim": "dim1", "y_holdout": "y"}])
+def test_plot_ts_valueerror(multidim_models, val_err_kwargs):
+    """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_ts(idata=idata2, y="y", **val_err_kwargs)

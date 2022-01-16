@@ -149,7 +149,7 @@ def generate_dims_coords(
 
     for idx, dim_len in enumerate(shape):
         if (len(dims) < idx + 1) or (dims[idx] is None):
-            dim_name = "{var_name}_dim_{idx}".format(var_name=var_name, idx=idx)
+            dim_name = f"{var_name}_dim_{idx}"
             if len(dims) < idx + 1:
                 dims.append(dim_name)
             else:

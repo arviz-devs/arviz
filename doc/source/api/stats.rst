@@ -11,6 +11,7 @@ Stats
     apply_test_function
     compare
     hdi
+    kde
     loo
     loo_pit
     psislw

@@ -122,6 +122,22 @@ def test_hdi_multimodal():
     assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
 
 
+def test_hdi_multimodal_multivars():
+    size = 2500000
+    var1 = np.concatenate((np.random.normal(-4, 1, size), np.random.normal(2, 0.5, size)))
+    var2 = np.random.normal(8, 1, size * 2)
+    sample = Dataset(
+        {
+            "var1": (("chain", "draw"), var1[np.newaxis, :]),
+            "var2": (("chain", "draw"), var2[np.newaxis, :]),
+        },
+        coords={"chain": [0], "draw": np.arange(size * 2)},
+    )
+    intervals = hdi(sample, multimodal=True)
+    assert_array_almost_equal(intervals.var1, [[-5.8, -2.2], [0.9, 3.1]], 1)
+    assert_array_almost_equal(intervals.var2, [[6.1, 9.9], [np.nan, np.nan]], 1)
+
+
 def test_hdi_circular():
     normal_sample = np.random.vonmises(np.pi, 1, 5000000)
     interval = hdi(normal_sample, circular=True)
@@ -310,7 +326,7 @@ def test_summary_labels():
     column_order = []
     for coord1 in coords1:
         for coord2 in coords2:
-            column_order.append("a[{}, {}]".format(coord1, coord2))
+            column_order.append(f"a[{coord1}, {coord2}]")
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
 
@@ -645,7 +661,7 @@ def test_loo_pit_bad_input_type(centered_eight, arg):
     """Test wrong input type (not None, str not DataArray."""
     kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
     kwargs[arg] = 2  # use int instead of array-like
-    with pytest.raises(ValueError, match="not {}".format(type(2))):
+    with pytest.raises(ValueError, match=f"not {type(2)}"):
         loo_pit(idata=centered_eight, **kwargs)
 
 

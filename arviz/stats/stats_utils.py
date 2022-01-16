@@ -192,7 +192,7 @@ def wrap_xarray_ufunc(
     Parameters
     ----------
     ufunc : callable
-    datasets : xarray.dataset
+    *datasets : xarray.Dataset
     ufunc_kwargs : dict
         Keyword arguments passed to `make_ufunc`.
             - 'n_dims', int, by default 2
@@ -207,13 +207,13 @@ def wrap_xarray_ufunc(
             - 'out_shape', int, by default None
     dask_kwargs : dict
         Dask related kwargs passed to :func:`xarray:xarray.apply_ufunc`.
-        Use :meth:`~arviz.Dask.enable_dask` to set default kwargs.
+        Use ``enable_dask`` method of :class:`arviz.Dask` to set default kwargs.
     **kwargs
-        Passed to xarray.apply_ufunc.
+        Passed to :func:`xarray.apply_ufunc`.
 
     Returns
     -------
-    xarray.dataset
+    xarray.Dataset
     """
     if ufunc_kwargs is None:
         ufunc_kwargs = {}
@@ -495,7 +495,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         """Alias to ``__str__``."""
         return self.__str__()
 
-    def copy(self, deep=True):
+    def copy(self, deep=True):  # pylint:disable=overridden-final-method
         """Perform a pandas deep copy of the ELPDData plus a copy of the stored data."""
         copied_obj = pd.Series.copy(self)
         for key in copied_obj.keys():

@@ -20,5 +20,5 @@ Thanks for your interest in contributing code to ArviZ!
 
 ### Adding new features
 If you are interested in adding a new feature to ArviZ,
-first submit an issue using the "Feature Requrest" label for the community
+first submit an issue using the "Feature Request" label for the community
 to discuss its place and implementation within ArviZ.

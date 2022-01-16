@@ -185,7 +185,7 @@ class TestDataPyMC3:
             elif len(ivalues.shape) == 2:
                 ivalues_arr = np.reshape(ivalues.values, (ivalues.shape[0] * ivalues.shape[1]))
             else:
-                raise ValueError("Unexpected values shape for variable %s" % key)
+                raise ValueError(f"Unexpected values shape for variable {key}")
             assert (ivalues.shape[0] == 2) and (ivalues.shape[1] == 500)
             assert values.shape[0] == 1000
             assert np.all(np.isclose(ivalues_arr, values))

@@ -20,7 +20,6 @@ Plots
     plot_ess
     plot_forest
     plot_hdi
-    plot_joint
     plot_kde
     plot_khat
     plot_loo_pit
@@ -33,4 +32,5 @@ Plots
     plot_rank
     plot_separation
     plot_trace
+    plot_ts
     plot_violin

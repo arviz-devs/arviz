@@ -10,7 +10,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ....rcparams import rcParams
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, calculate_point_estimate
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, _init_kwargs_dict
 from . import backend_kwarg_defaults, backend_show, matplotlib_kwarg_dealiaser
 
 
@@ -41,14 +41,11 @@ def plot_pair(
     reference_values_kwargs,
 ):
     """Matplotlib pairplot."""
-    if backend_kwargs is None:
-        backend_kwargs = {}
-
+    backend_kwargs = _init_kwargs_dict(backend_kwargs)
     backend_kwargs = {
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    backend_kwargs.pop("constrained_layout")
 
     scatter_kwargs = matplotlib_kwarg_dealiaser(scatter_kwargs, "scatter")
 
@@ -57,11 +54,9 @@ def plot_pair(
     # Sets the default zorder higher than zorder of grid, which is 0.5
     scatter_kwargs.setdefault("zorder", 0.6)
 
-    if kde_kwargs is None:
-        kde_kwargs = {}
+    kde_kwargs = _init_kwargs_dict(kde_kwargs)
 
-    if hexbin_kwargs is None:
-        hexbin_kwargs = {}
+    hexbin_kwargs = matplotlib_kwarg_dealiaser(hexbin_kwargs, "hexbin")
     hexbin_kwargs.setdefault("mincnt", 1)
 
     divergences_kwargs = matplotlib_kwarg_dealiaser(divergences_kwargs, "plot")
@@ -70,8 +65,7 @@ def plot_pair(
     divergences_kwargs.setdefault("color", "C1")
     divergences_kwargs.setdefault("lw", 0)
 
-    if marginal_kwargs is None:
-        marginal_kwargs = {}
+    marginal_kwargs = _init_kwargs_dict(marginal_kwargs)
 
     point_estimate_kwargs = matplotlib_kwarg_dealiaser(point_estimate_kwargs, "fill_between")
     point_estimate_kwargs.setdefault("color", "k")
@@ -221,8 +215,8 @@ def plot_pair(
                 reference_values_copy[flat_var_names[1]],
                 **reference_values_kwargs,
             )
-        ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
-        ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
+        ax.set_xlabel(f"{flat_var_names[0]}", fontsize=ax_labelsize, wrap=True)
+        ax.set_ylabel(f"{flat_var_names[1]}", fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
 
     else:
@@ -333,14 +327,12 @@ def plot_pair(
                 if j != vars_to_plot - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax[j, i].set_xlabel(
-                        "{}".format(flat_var_names[i]), fontsize=ax_labelsize, wrap=True
-                    )
+                    ax[j, i].set_xlabel(f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True)
                 if i != 0:
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
                     ax[j, i].set_ylabel(
-                        "{}".format(flat_var_names[j + not_marginals]),
+                        f"{flat_var_names[j + not_marginals]}",
                         fontsize=ax_labelsize,
                         wrap=True,
                     )

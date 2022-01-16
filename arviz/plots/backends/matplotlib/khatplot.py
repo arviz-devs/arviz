@@ -9,7 +9,7 @@ from matplotlib.colors import to_rgba_array
 
 from ....stats.density_utils import histogram
 from ...plot_utils import _scale_fig_size, color_from_dim, set_xticklabels, vectorized_to_hex
-from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
+from . import backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_khat(
@@ -51,7 +51,6 @@ def plot_khat(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(constrained_layout=(not xlabels)),
         **backend_kwargs,
     }
 

@@ -1,7 +1,7 @@
 """
-Regression Plot.
+Regression Plot
+===============
 
-===============================
 _thumb: .6, .5
 _example_title: Plot regression
 """
