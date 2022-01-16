@@ -18,14 +18,15 @@ from ...plots import (
     plot_density,
     plot_dist,
     plot_dist_comparison,
+    plot_dot,
     plot_elpd,
     plot_energy,
     plot_ess,
     plot_forest,
     plot_hdi,
-    plot_joint,
     plot_kde,
     plot_khat,
+    plot_lm,
     plot_loo_pit,
     plot_mcse,
     plot_pair,
@@ -35,12 +36,15 @@ from ...plots import (
     plot_rank,
     plot_separation,
     plot_trace,
+    plot_ts,
     plot_violin,
 )
 from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...stats.density_utils import kde as _kde
 from ...utils import _cov
+from ...plots.plot_utils import plot_point_interval
+from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
     create_model,
     create_multidimensional_model,
@@ -58,7 +62,7 @@ def clean_plots(request, save_figs):
 
     def fin():
         if save_figs is not None:
-            plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
+            plt.savefig(f"{os.path.join(save_figs, request.node.name)}.png")
         plt.close("all")
 
     request.addfinalizer(fin)
@@ -154,7 +158,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, point_estimate="bad_value")
 
     with pytest.raises(ValueError):
-        plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
+        plot_density(obj, data_labels=[f"bad_value_{i}" for i in range(len(obj) + 10)])
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
@@ -319,7 +323,7 @@ def test_plot_forest_bad(models, model_fits):
         plot_forest(obj, kind="bad_kind")
 
     with pytest.raises(ValueError):
-        plot_forest(obj, model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)])
+        plot_forest(obj, model_names=[f"model_name_{i}" for i in range(len(obj) + 10)])
 
 
 @pytest.mark.parametrize("kind", ["kde", "hist"])
@@ -349,35 +353,6 @@ def test_plot_parallel_exception(models, var_names):
         assert plot_parallel(models.model_1, var_names=var_names, norm_method="foo")
 
 
-@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, kind):
-    axjoin, _, _ = plot_joint(models.model_1, var_names=("mu", "tau"), kind=kind)
-    assert axjoin
-
-
-def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(models.model_1, var_names=("mu", "tau"))
-    axjoin, _, _ = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax)
-    assert axjoin
-
-
-def test_plot_joint_discrete(discrete_model):
-    axjoin, _, _ = plot_joint(discrete_model)
-    assert axjoin
-
-
-def test_plot_joint_bad(models):
-    with pytest.raises(ValueError):
-        plot_joint(models.model_1, var_names=("mu", "tau"), kind="bad_kind")
-
-    with pytest.raises(Exception):
-        plot_joint(models.model_1, var_names=("mu", "tau", "eta"))
-
-    with pytest.raises(ValueError, match="ax.+3.+5"):
-        _, axes = plt.subplots(5, 1)
-        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes)
-
-
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -395,6 +370,9 @@ def test_plot_joint_bad(models):
         {"is_circular": "radians"},
         {"is_circular": "degrees"},
         {"adaptive": True},
+        {"hdi_probs": [0.3, 0.9, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 0.9], "contourf_kwargs": {"cmap": "Blues"}},
+        {"hdi_probs": [0.9, 0.6, 0.3], "contour_kwargs": {"alpha": 0}},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -402,6 +380,35 @@ def test_plot_kde(continuous_model, kwargs):
     axes1 = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
     assert axes
     assert axes is axes1
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"hdi_probs": [1, 2, 3]},
+        {"hdi_probs": [-0.3, 0.6, 0.9]},
+        {"hdi_probs": [0, 0.3, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 1]},
+    ],
+)
+def test_plot_kde_hdi_probs_bad(continuous_model, kwargs):
+    """Ensure invalid hdi probabilities are rejected."""
+    with pytest.raises(ValueError):
+        plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"hdi_probs": [0.3, 0.6, 0.9], "contourf_kwargs": {"levels": [0, 0.5, 1]}},
+        {"hdi_probs": [0.3, 0.6, 0.9], "contour_kwargs": {"levels": [0, 0.5, 1]}},
+    ],
+)
+def test_plot_kde_hdi_probs_warning(continuous_model, kwargs):
+    """Ensure warning is raised when too many keywords are specified."""
+    with pytest.warns(UserWarning):
+        axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+    assert axes
 
 
 @pytest.mark.parametrize("shape", [(8,), (8, 8), (8, 8, 8)])
@@ -677,7 +684,7 @@ def test_plot_ppc_save_animation(models, kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)
@@ -706,7 +713,7 @@ def test_plot_ppc_discrete_save_animation(kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_discrete_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_discrete_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)
@@ -895,7 +902,7 @@ def test_plot_rank(models, kwargs):
         {"rope": {"mu": [{"rope": (-2, 2)}], "theta": [{"school": "Choate", "rope": (2, 4)}]}},
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
-        {"hdi_prob": "hide"},
+        {"hdi_prob": "hide", "label": ""},
         {"point_estimate": None},
         {"ref_val": 0},
         {"ref_val": None},
@@ -1046,6 +1053,7 @@ def test_kde_cumulative(limits):
         {"color": "obs_dim", "legend": True},
         {"ic": "loo", "color": "blue", "coords": {"obs_dim": slice(2, 5)}},
         {"color": np.random.uniform(size=8), "threshold": 0.1},
+        {"threshold": 2},
     ],
 )
 @pytest.mark.parametrize("add_model", [False, True])
@@ -1259,7 +1267,7 @@ def test_plot_ess_evolution(models):
 
 
 def test_plot_ess_bad_kind(models):
-    """Test error when plot_ess recieves an invalid kind."""
+    """Test error when plot_ess receives an invalid kind."""
     idata = models.model_1
     with pytest.raises(ValueError, match="Invalid kind"):
         plot_ess(idata, kind="bad kind")
@@ -1409,3 +1417,305 @@ def test_plot_bpv_discrete():
     fake_model = from_dict(posterior_predictive=fake_pp, observed_data=fake_obs)
     axes = plot_bpv(fake_model)
     assert not isinstance(axes, np.ndarray)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "binwidth": 0.5,
+            "stackratio": 2,
+            "nquantiles": 20,
+        },
+        {"point_interval": True},
+        {
+            "point_interval": True,
+            "dotsize": 1.2,
+            "point_estimate": "median",
+            "plot_kwargs": {"color": "grey"},
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "quartiles": False,
+            "linewidth": 2,
+        },
+    ],
+)
+def test_plot_dot(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"rotated": True},
+        {
+            "point_interval": True,
+            "rotated": True,
+            "dotcolor": "grey",
+            "binwidth": 0.5,
+        },
+        {
+            "rotated": True,
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "dotsize": 0.8,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_dot_rotated(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {
+            "point_estimate": "mean",
+            "hdi_prob": 0.95,
+            "quartiles": False,
+            "linewidth": 2,
+            "markersize": 2,
+            "markercolor": "red",
+            "marker": "o",
+            "rotated": False,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_point_interval(continuous_model, kwargs):
+    _, ax = plt.subplots()
+    data = continuous_model["x"]
+    values = np.sort(data)
+    ax = plot_point_interval(ax, values, **kwargs)
+    assert ax
+
+
+def test_wilkinson_algorithm(continuous_model):
+    data = continuous_model["x"]
+    values = np.sort(data)
+    _, stack_counts = wilkinson_algorithm(values, 0.5)
+    assert np.sum(stack_counts) == len(values)
+    stack_locs, stack_counts = wilkinson_algorithm([0.0, 1.0, 1.8, 3.0, 5.0], 1.0)
+    assert stack_locs == [0.0, 1.4, 3.0, 5.0]
+    assert stack_counts == [1, 2, 1, 1]
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat": "bad_name"},
+        {"x": "x1"},
+        {"x": ("x1", "x2")},
+        {
+            "x": ("x1", "x2"),
+            "y_kwargs": {"color": "blue", "marker": "^"},
+            "y_hat_plot_kwargs": {"color": "cyan"},
+        },
+        {"x": ("x1", "x2"), "y_model_plot_kwargs": {"color": "red"}},
+        {
+            "x": ("x1", "x2"),
+            "kind_pp": "hdi",
+            "kind_model": "hdi",
+            "y_model_fill_kwargs": {"color": "red"},
+            "y_hat_fill_kwargs": {"color": "cyan"},
+        },
+    ],
+)
+def test_plot_lm(models, kwargs):
+    """Test functionality for 1D data."""
+    idata = models.model_1
+    if "constant_data" not in idata.groups():
+        y = idata.observed_data["y"]
+        x1data = y.coords[y.dims[0]]
+        idata.add_groups({"constant_data": {"_": x1data}})
+        idata.constant_data["x1"] = x1data
+        idata.constant_data["x2"] = x1data
+
+    axes = plot_lm(idata=idata, y="y", y_model="eta", xjitter=True, **kwargs)
+    assert np.all(axes)
+
+
+def test_plot_lm_multidim(multidim_models):
+    """Test functionality for multidimentional data."""
+    idata = multidim_models.model_1
+    axes = plot_lm(
+        idata=idata,
+        x=idata.observed_data["y"].coords["dim1"].values,
+        y="y",
+        xjitter=True,
+        plot_dim="dim1",
+        show=False,
+        figsize=(4, 16),
+    )
+    assert np.all(axes)
+
+
+@pytest.mark.parametrize(
+    "val_err_kwargs",
+    [
+        {},
+        {"kind_pp": "bad_kind"},
+        {"kind_model": "bad_kind"},
+    ],
+)
+def test_plot_lm_valueerror(multidim_models, val_err_kwargs):
+    """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_lm(idata=idata2, y="y", **val_err_kwargs)
+
+
+@pytest.mark.parametrize(
+    "warn_kwargs",
+    [
+        {"y_hat": "bad_name"},
+        {"y_model": "bad_name"},
+    ],
+)
+def test_plot_lm_warning(models, warn_kwargs):
+    """Test Warning when needed groups or variables are not there in idata."""
+    idata1 = models.model_1
+    with pytest.warns(UserWarning):
+        plot_lm(
+            idata=from_dict(observed_data={"y": idata1.observed_data["y"].values}),
+            y="y",
+            **warn_kwargs,
+        )
+    with pytest.warns(UserWarning):
+        plot_lm(idata=idata1, y="y", **warn_kwargs)
+
+
+def test_plot_lm_typeerror(models):
+    """Test error when invalid value passed to num_samples."""
+    idata1 = models.model_1
+    with pytest.raises(TypeError):
+        plot_lm(idata=idata1, y="y", num_samples=-1)
+
+
+def test_plot_lm_list():
+    """Test the plots when input data is list or ndarray."""
+    y = [1, 2, 3, 4, 5]
+    assert plot_lm(y=y, x=np.arange(len(y)), show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat": "bad_name"},
+        {"x": "x"},
+        {"x": ("x", "x")},
+        {"y_holdout": "z"},
+        {"y_holdout": "z", "x_holdout": "x_pred"},
+        {"x": ("x", "x"), "y_holdout": "z", "x_holdout": ("x_pred", "x_pred")},
+        {"y_forecasts": "z"},
+        {"y_holdout": "z", "y_forecasts": "bad_name"},
+    ],
+)
+def test_plot_ts(kwargs):
+    """Test timeseries plots basic functionality."""
+    nchains = 4
+    ndraws = 500
+    obs_data = {
+        "y": 2 * np.arange(1, 9) + 3,
+        "z": 2 * np.arange(8, 12) + 3,
+    }
+
+    posterior_predictive = {
+        "y": np.random.normal(
+            (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
+        ),
+        "z": np.random.normal(
+            (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
+        ),
+    }
+
+    const_data = {"x": np.arange(1, 9), "x_pred": np.arange(8, 12)}
+
+    idata = from_dict(
+        observed_data=obs_data,
+        posterior_predictive=posterior_predictive,
+        constant_data=const_data,
+        coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
+        dims={"y": ["obs_dim"], "z": ["pred_dim"]},
+    )
+
+    ax = plot_ts(idata=idata, y="y", show=True, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "y_holdout": "z",
+            "holdout_dim": "holdout_dim1",
+            "x": ("x", "x"),
+            "x_holdout": ("x_pred", "x_pred"),
+        },
+        {"y_forecasts": "z", "holdout_dim": "holdout_dim1"},
+    ],
+)
+def test_plot_ts_multidim(kwargs):
+    """Test timeseries plots multidim functionality."""
+    nchains = 4
+    ndraws = 500
+    ndim1 = 5
+    ndim2 = 7
+    data = {
+        "y": np.random.normal(size=(ndim1, ndim2)),
+        "z": np.random.normal(size=(ndim1, ndim2)),
+    }
+
+    posterior_predictive = {
+        "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+
+    const_data = {"x": np.arange(1, 6), "x_pred": np.arange(5, 10)}
+
+    idata = from_dict(
+        observed_data=data,
+        posterior_predictive=posterior_predictive,
+        constant_data=const_data,
+        dims={
+            "y": ["dim1", "dim2"],
+            "z": ["holdout_dim1", "holdout_dim2"],
+        },
+        coords={
+            "dim1": range(ndim1),
+            "dim2": range(ndim2),
+            "holdout_dim1": range(ndim1 - 1, ndim1 + 4),
+            "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
+        },
+    )
+
+    ax = plot_ts(idata=idata, y="y", plot_dim="dim1", **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize("val_err_kwargs", [{}, {"plot_dim": "dim1", "y_holdout": "y"}])
+def test_plot_ts_valueerror(multidim_models, val_err_kwargs):
+    """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_ts(idata=idata2, y="y", **val_err_kwargs)

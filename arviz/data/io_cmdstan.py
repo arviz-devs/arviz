@@ -1,16 +1,25 @@
+# pylint: disable=too-many-lines
 """CmdStan-specific conversion code."""
+try:
+    import ujson as json
+except ImportError:
+    # Can't find ujson using json
+    # mypy struggles with conditional imports expressed as catching ImportError:
+    # https://github.com/python/mypy/issues/1153
+    import json  # type: ignore
 import logging
 import os
 import re
 from collections import defaultdict
 from glob import glob
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import numpy as np
 
 from .. import utils
 from ..rcparams import rcParams
-from .base import CoordSpec, DimSpec, dict_to_dataset, requires
+from .base import CoordSpec, DimSpec, dict_to_dataset, infer_stan_dtypes, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -22,9 +31,7 @@ def check_glob(path, group, disable_glob):
         path_glob = glob(path)
         if path_glob:
             path = sorted(path_glob)
-            msg = "\n".join(
-                "{}: {}".format(i, os.path.normpath(fpath)) for i, fpath in enumerate(path, 1)
-            )
+            msg = "\n".join(f"{i}: {os.path.normpath(fpath)}" for i, fpath in enumerate(path, 1))
             len_p = len(path)
             _log.info("glob found %d files for '%s':\n%s", len_p, group, msg)
     return path
@@ -83,9 +90,19 @@ class CmdStanConverter:
         self.index_origin = index_origin
 
         if dtypes is None:
-            self.dtypes = {}
-        else:
-            self.dtypes = dtypes
+            dtypes = {}
+        elif isinstance(dtypes, str):
+            dtypes_path = Path(dtypes)
+            if dtypes_path.exists():
+                with dtypes_path.open("r", encoding="UTF-8") as f_obj:
+                    model_code = f_obj.read()
+            else:
+                model_code = dtypes
+
+            dtypes = infer_stan_dtypes(model_code)
+
+        self.dtypes = dtypes
+
         # populate posterior and sample_stats
         self._parse_posterior()
         self._parse_prior()
@@ -826,7 +843,7 @@ def _process_data_var(string):
 
 
 def _read_data(path):
-    """Read Rdump output to dictionary.
+    """Read Rdump or JSON output to dictionary.
 
     Parameters
     ----------
@@ -835,10 +852,12 @@ def _read_data(path):
     Returns
     -------
     Dict
-        key, values pairs from Rdump formatted data.
+        key, values pairs from Rdump/JSON formatted data.
     """
     data = {}
-    with open(path, "r") as f_obj:
+    with open(path, "r", encoding="utf8") as f_obj:
+        if path.lower().endswith(".json"):
+            return json.load(f_obj)
         var = ""
         for line in f_obj:
             if "<-" in line:
@@ -932,18 +951,18 @@ def from_cmdstan(
     prior_predictive : str or list of str, optional
         Prior predictive samples for the fit. If endswith ".csv" assumes file.
     observed_data : str, optional
-        Observed data used in the sampling. Path to data file in Rdump format.
+        Observed data used in the sampling. Path to data file in Rdump or JSON format.
     observed_data_var : str or list of str, optional
         Variable(s) used for slicing observed_data. If not defined, all
         data variables are imported.
     constant_data : str, optional
-        Constant data used in the sampling. Path to data file in Rdump format.
+        Constant data used in the sampling. Path to data file in Rdump or JSON format.
     constant_data_var : str or list of str, optional
         Variable(s) used for slicing constant_data. If not defined, all
         data variables are imported.
     predictions_constant_data : str, optional
         Constant data for predictions used in the sampling.
-        Path to data file in Rdump format.
+        Path to data file in Rdump or JSON format.
     predictions_constant_data_var : str or list of str, optional
         Variable(s) used for slicing predictions_constant_data.
         If not defined, all data variables are imported.
@@ -955,7 +974,7 @@ def from_cmdstan(
     coords : dict of {str: array_like}, optional
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
-    dims : dict of {str: list of str, optional
+    dims : dict of {str: list of str}, optional
         A mapping from variables to a list of coordinate names for the variable.
     disable_glob : bool
         Don't use glob for string input. This means that all string input is
@@ -963,8 +982,9 @@ def from_cmdstan(
     save_warmup : bool
         Save warmup iterations into InferenceData object, if found in the input files.
         If not defined, use default defined by the rcParams.
-    dtypes : dict
+    dtypes : dict or str
         A dictionary containing dtype information (int, float) for parameters.
+        If input is a string, it is assumed to be a model code or path to model code file.
 
     Returns
     -------

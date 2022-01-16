@@ -1,7 +1,6 @@
 # Main Governance Document
 
-The Project
-===========
+## The Project
 
 The ArviZ Project (The Project) is an open source software project
 affiliated with the 501c3 NumFOCUS Foundation. The goal of The Project is to
@@ -34,7 +33,7 @@ The Project is formally affiliated with the 501c3 NumFOCUS Foundation
 ([http://numfocus.org](http://numfocus.org)),  NumFOCUS is the
 only legal entity that has a formal relationship with the project.
 
-### Governance
+## Governance
 
 This section describes the governance and leadership model of The Project.
 
@@ -58,20 +57,55 @@ the formalization of what we are already doing, rather than a change in
 direction.
 
 
-Community Architecture
------------------------
+## Community Architecture
 
-* 7 Person steering council
-* Core Contributors (of which Council members are also a part of)
 * General Contributors
+* Core Contributors (of which Council members are also a part of)
+* 7 Person steering council (Random Variables Council)
 
 Anyone working with ArviZ has the responsibility to personally uphold
 the Code of Conduct. Core Contributors have the additional responsibility
 of _enforcing_ the Code of Conduct to maintain a safe community.
 
+## Core Contributors
+Core Contributors are those who have provided consistent and meaningful contributions to ArviZ.
+These can be, but are not limited to, code contributions, community contributions, tutorial
+development etc. Core Contributors will be given the ability to manage the ArviZ GitHub
+repository, including code merges to main. This does not necessarily mean Core Contributors
+must submit code, but more so signifies trust with the project as a whole.
 
-Random Variables Council
-------------------------
+### Core Contributor Responsibilities
+* Enforce code of conduct
+* Maintain a check against Council
+
+### Core Contributor Nominations and Confirmation Process
+Current Core Contributors can nominate candidates to become Core Contributors by
+requesting so in a GitHub issue. If nominated candidates accept their nomination
+(explicit comment approving nomination on the issue or "thumbs-up" emoji on the same issue),
+then they can be considered by the Council: on the first of the month following a
+nomination, the Council will vote on each nominee using the process above.
+
+Voting will be private with results published on the issue ticket. In the case of a
+rejection, results must include the reasons behind the decision (e.g. the time since
+starting to contribute is deemed too short for now). The candidate
+would then have to wait 3 months to be considered again.
+
+### Current Core Contributors
+* Oriol Abril-Pla (@OriolAbril)
+* Agustina Arroyuelo (@agustinaarroyuelo)
+* Alex Andorra (@AlexAndorra)
+* Seth Axen (@sethaxen)
+* Colin Carroll (@ColCarroll)
+* Piyush Gautam (@percygautam)
+* Robert P. Goldman (@rpgoldman)
+* Ari Hartikainen (@ahartikainen)
+* Ravin Kumar (@canyon289)
+* Osvaldo Martin (@aloctavodia)
+* Mitzi Morris (@mitzimorris)
+* Du Phan (@fehiepsi)
+* Aki Vehtari (@avehtari)
+
+## Random Variables Council
 The Project will have a Steering Council that consists of Core Contributors
 who have produced contributions that are substantial in quality and quantity,
 and sustained over at least one year. The overall role of the Council is to
@@ -102,6 +136,19 @@ Note that an individual council member does not have the power to unilaterally w
 responsibilities, but the council as a whole must jointly make these decisions.
 In other words, Council Members are first and foremost Core Contributors, but only
 when needed they can collectively make decisions for the health of the project.
+
+### Current Random Variables Council members
+The current RV Council members are:
+
+* Oriol Abril-Pla (@OriolAbril)
+* Alex Andorra (@AlexAndorra)
+* Seth Axen (@sethaxen)
+* Colin Carroll (@ColCarroll)
+* Ari Hartikainen (@ahartikainen)
+* Ravin Kumar (@canyon289)
+* Osvaldo Martin (@aloctavodia)
+
+The election record can be found at [elections/ArviZ_2020.md](https://github.com/arviz-devs/arviz/blob/main/elections/ArviZ_2020.md)
 
 ### Council Decision Making Process
 By and large we expect the decisions in ArviZ to be made _ad hoc_ and require little formal
@@ -253,41 +300,3 @@ Voting for first election is restricted to establish stable governance, and to d
 * In the first year, the council must determine voting eligibility for future elections between two criteria:
   * Core contributors
   * The contributing community at large
-
-### Core Contributors
-Core Contributors are those who have provided consistent and meaningful contributions to ArviZ.
-These can be, but are not limited to, code contributions, community contributions, tutorial
-development etc. Core Contributors will be given the ability to manage the ArviZ GitHub
-repository, including code merges to main. This does not necessarily mean Core Contributors
-must submit code, but more so signifies trust with the project as a whole.
-
-#### Core Contributor Responsibilities
-* Enforce code of conduct
-* Maintain a check against Council
-
-#### Core Contributor Nominations and Confirmation Process
-Current Core Contributors can nominate candidates to become Core Contributors by
-requesting so in a GitHub issue. If nominated candidates accept their nomination
-(explicit comment approving nomination on the issue or "thumbs-up" emoji on the same issue),
-then they can be considered by the Council: on the first of the month following a
-nomination, the Council will vote on each nominee using the process above.
-
-Voting will be private with results published on the issue ticket. In the case of a
-rejection, results must include the reasons behind the decision (e.g. the time since
-starting to contribute is deemed too short for now). The candidate
-would then have to wait 3 months to be considered again.
-
-#### Current Core Contributors
-* Oriol Abril-Pla (@OriolAbril)
-* Agustina Arroyuelo (@agustinaarroyuelo)
-* Alex Andorra (@AlexAndorra)
-* Seth Axen (@sethaxen)
-* Colin Carroll (@ColCarroll)
-* Piyush Gautam (@percygautam)
-* Robert P. Goldman (@rpgoldman)
-* Ari Hartikainen (@ahartikainen)
-* Ravin Kumar (@canyon289)
-* Osvaldo Martin (@aloctavodia)
-* Mitzi Morris (@mitzimorris)
-* Du Phan (@fehiepsi)
-* Aki Vehtari (@avehtari)

@@ -2,7 +2,7 @@
 import warnings
 from itertools import cycle
 
-import matplotlib.gridspec as gridspec
+from matplotlib import gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
@@ -271,7 +271,7 @@ def plot_trace(
                 legend_labels = format_coords_as_labels(sub_data, skip_dims=("chain", "draw"))
                 legend_title = ", ".join(
                     [
-                        "{}".format(coord_name)
+                        f"{coord_name}"
                         for coord_name in sub_data.coords
                         if coord_name not in {"chain", "draw"}
                     ]
@@ -397,9 +397,7 @@ def plot_trace(
                 else:
                     line_values = np.atleast_1d(vlines).ravel()
                     if not np.issubdtype(line_values.dtype, np.number):
-                        raise ValueError(
-                            "line-positions should be numeric, found {}".format(line_values)
-                        )
+                        raise ValueError(f"line-positions should be numeric, found {line_values}")
                 if idy:
                     ax.hlines(
                         line_values,
@@ -499,7 +497,6 @@ def _plot_chains_mpl(
                     backend="matplotlib",
                     show=False,
                     is_circular=circ_var_units,
-                    circular=circular,
                 )
 
     if kind == "rank_bars" and idy:
@@ -522,6 +519,5 @@ def _plot_chains_mpl(
                 backend="matplotlib",
                 show=False,
                 is_circular=circ_var_units,
-                circular=circular,
             )
     return axes

@@ -180,7 +180,7 @@ class PlotHandler:
 
         if model_names is None:
             if len(self.data) > 1:
-                model_names = ["Model {}".format(idx) for idx, _ in enumerate(self.data)]
+                model_names = [f"Model {idx}" for idx, _ in enumerate(self.data)]
             else:
                 model_names = [None]
         elif len(model_names) != len(self.data):
@@ -204,7 +204,7 @@ class PlotHandler:
 
         if colors == "cycle":
             # TODO: Use matplotlib prop cycle instead
-            colors = ["C{}".format(idx) for idx, _ in enumerate(self.data)]
+            colors = [f"C{idx}" for idx, _ in enumerate(self.data)]
         elif isinstance(colors, str):
             colors = [colors for _ in self.data]
 
@@ -425,7 +425,7 @@ class PlotHandler:
                     color=color,
                 )
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title("{:.1%} HDI".format(hdi_prob), fontsize=titlesize, wrap=True)
+        ax.set_title(f"{hdi_prob:.1%} HDI", fontsize=titlesize, wrap=True)
         if rope is None or isinstance(rope, dict):
             return
         elif len(rope) == 2:

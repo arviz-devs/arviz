@@ -17,7 +17,7 @@ try:
 except ImportError:
     NO_GET_ARGS = True
 
-from arviz import _log
+from .. import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams, ScaleKeyword, ICKeyword
 from ..utils import Numba, _numba_var, _var_names, get_coords
@@ -68,7 +68,7 @@ def compare(
     Parameters
     ----------
     dataset_dict: dict[str] -> InferenceData
-        A dictionary of model names and InferenceData objects
+        A dictionary of model names and :class:`arviz.InferenceData` objects
     ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
@@ -93,7 +93,7 @@ def compare(
     seed: int or np.random.RandomState instance, optional
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
-        np.random state is used.
+        :mod:`numpy.random` state is used.
     scale: str, optional
         Output scale for IC. Available options are:
 
@@ -156,6 +156,14 @@ def compare(
     --------
     loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
     waic : Compute the widely applicable information criterion.
+    plot_compare : Summary plot for model comparison.
+
+    References
+    ----------
+    .. [1] Vehtari, A., Gelman, A. & Gabry, J. Practical Bayesian model evaluation using
+        leave-one-out cross-validation and WAIC. Stat Comput 27, 1413–1432 (2017)
+        see https://doi.org/10.1007/s11222-016-9696-4
+
     """
     names = list(dataset_dict.keys())
     if scale is not None:
@@ -372,8 +380,8 @@ def hdi(
     ----------
     ary: obj
         object containing posterior samples.
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     hdi_prob: float, optional
         Prob for which the highest density interval will be computed. Defaults to
         ``stats.hdi_prob`` rcParam.
@@ -390,14 +398,14 @@ def hdi(
         Specifies which InferenceData group should be used to calculate hdi.
         Defaults to 'posterior'
     var_names: list, optional
-        Names of variables to include in the hdi report. Prefix the variables by `~`
+        Names of variables to include in the hdi report. Prefix the variables by ``~``
         when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
-        (see `az.summary` for more details).
+        (see :func:`arviz.summary` for more details).
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: mapping, optional
         Specifies the subset over to calculate hdi.
     max_modes: int, optional
@@ -468,7 +476,7 @@ def hdi(
         "skipna": skipna,
         "out_shape": (max_modes, 2) if multimodal else (2,),
     }
-    kwargs.setdefault("output_core_dims", [["hdi", "mode"] if multimodal else ["hdi"]])
+    kwargs.setdefault("output_core_dims", [["mode", "hdi"] if multimodal else ["hdi"]])
     if not multimodal:
         func_kwargs["circular"] = circular
     else:
@@ -487,6 +495,7 @@ def hdi(
             "hdi currently interprets 2d data as (draw, shape) but this will change in "
             "a future release to (chain, draw) for coherence with other functions",
             FutureWarning,
+            stacklevel=2,
         )
         ary = np.expand_dims(ary, 0)
 
@@ -591,8 +600,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation of
-        az.convert_to_inference_data for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of
+        :func:`arviz.convert_to_dataset` for details.
     pointwise: bool, optional
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
@@ -600,21 +610,21 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
         The name of the variable in log_likelihood groups storing the pointwise log
         likelihood data to use for loo computation.
     reff: float, optional
-        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by the number
+        Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples divided by the number
         of actual samples. Computed from trace by default.
     scale: str
         Output scale for loo. Available options are:
 
-        - `log` : (default) log-score
-        - `negative_log` : -1 * log-score
-        - `deviance` : -2 * log-score
+        - ``log`` : (default) log-score
+        - ``negative_log`` : -1 * log-score
+        - ``deviance`` : -2 * log-score
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
 
     Returns
     -------
-    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
     loo: approximated expected log pointwise predictive density (elpd)
     loo_se: standard error of loo
     p_loo: effective number of parameters
@@ -626,6 +636,14 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     loo_scale: scale of the loo results
 
         The returned object has a custom print method that overrides pd.Series method.
+
+    See Also
+    --------
+    compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
+    waic : Compute the widely applicable information criterion.
+    plot_compare : Summary plot for model comparison.
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    plot_khat : Plot Pareto tail indices for diagnosing convergence.
 
     Examples
     --------
@@ -765,7 +783,7 @@ def psislw(log_weights, reff=1.0):
     log_weights: array
         Array of size (n_observations, n_samples)
     reff: float
-        relative MCMC efficiency, `ess / n`
+        relative MCMC efficiency, ``ess / n``
 
     Returns
     -------
@@ -777,6 +795,10 @@ def psislw(log_weights, reff=1.0):
     References
     ----------
     * Vehtari et al. (2015) see https://arxiv.org/abs/1507.02646
+
+    See Also
+    --------
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
     Examples
     --------
@@ -930,8 +952,8 @@ def _gpdfit(ary):
     # estimate for k
     k_post = np.log1p(-b_post * ary).mean()  # pylint: disable=invalid-unary-operand-type,no-member
     # add prior for k_post
-    k_post = (n * k_post + prior_k * 0.5) / (n + prior_k)
     sigma = -k_post / b_post
+    k_post = (n * k_post + prior_k * 0.5) / (n + prior_k)
 
     return k_post, sigma
 
@@ -980,7 +1002,11 @@ def r2_score(y_true, y_pred,summary=False):
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
     Bayesian R² samples: if dist==True.
-    
+
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+
     Examples
     --------
     Calculate R² for Bayesian regression models :
@@ -1031,17 +1057,17 @@ def summary(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list
-        Names of variables to include in summary. Prefix the variables by `~` when you
+        Names of variables to include in summary. Prefix the variables by ``~`` when you
         want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
         examples below).
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: Dict[str, List[Any]], optional
         Coordinate subset for which to calculate the summary.
     group: str
@@ -1064,7 +1090,7 @@ def summary(
 
         The functions will be given one argument, the samples for a variable as an nD array,
         The functions should be in the style of a ufunc and return a single number. For example,
-        `np.mean`, or `scipy.stats.var` would both work.
+        :func:`numpy.mean`, or ``scipy.stats.var`` would both work.
     extend: boolean
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
@@ -1094,6 +1120,15 @@ def summary(
         `r_hat`.
         `r_hat` is only computed for traces with 2 or more chains.
 
+    See Also
+    --------
+    waic : Compute the widely applicable information criterion.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out
+          cross-validation (PSIS-LOO-CV).
+    ess : Calculate estimate of the effective sample size (ess).
+    rhat : Compute estimate of rank normalized splitR-hat for a set of traces.
+    mcse : Calculate Markov Chain Standard Error statistic.
+
     Examples
     --------
     .. ipython::
@@ -1102,15 +1137,15 @@ def summary(
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.summary(data, var_names=["mu", "tau"])
 
-    You can use `filter_vars` to select variables without having to specify all the exact
-    names. Use `filter_vars="like"` to select based on partial naming:
+    You can use ``filter_vars`` to select variables without having to specify all the exact
+    names. Use ``filter_vars="like"`` to select based on partial naming:
 
     .. ipython::
 
         In [1]: az.summary(data, var_names=["the"], filter_vars="like")
 
-    Use `filter_vars="regex"` to select based on regular expressions, and prefix the variables
-    you want to exclude by `~`. Here, we exclude from the summary all the variables
+    Use ``filter_vars="regex"`` to select based on regular expressions, and prefix the variables
+    you want to exclude by ``~``. Here, we exclude from the summary all the variables
     starting with the letter t:
 
     .. ipython::
@@ -1151,7 +1186,7 @@ def summary(
     if index_origin is not None:
         warnings.warn(
             "index_origin has been deprecated. summary now shows coordinate values, "
-            "to change the label shown, modify the coordinate values before calling sumary",
+            "to change the label shown, modify the coordinate values before calling summary",
             DeprecationWarning,
         )
         index_origin = rcParams["data.index_origin"]
@@ -1330,13 +1365,13 @@ def summary(
         summary_df = pd.DataFrame(
             (np.full((cast(int, n_vars), n_metrics), np.nan)), columns=metric_names
         )
-        indexs = []
+        indices = []
         for i, (var_name, sel, isel, values) in enumerate(
             xarray_var_iter(joined, skip_dims={"metric"})
         ):
             summary_df.iloc[i] = values
-            indexs.append(labeller.make_label_flat(var_name, sel, isel))
-        summary_df.index = indexs
+            indices.append(labeller.make_label_flat(var_name, sel, isel))
+        summary_df.index = indices
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
         df.index = list(df.index)
@@ -1367,8 +1402,8 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation of
-        ``az.convert_to_inference_data`` for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_inference_data` for details.
     pointwise: bool
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
@@ -1389,16 +1424,23 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
 
     Returns
     -------
-    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
     waic: approximated expected log pointwise predictive density (elpd)
     waic_se: standard error of waic
     p_waic: effective number parameters
     var_warn: bool
         True if posterior variance of the log predictive densities exceeds 0.4
-    waic_i: xarray.DataArray with the pointwise predictive accuracy, only if pointwise=True
+    waic_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy,
+            only if pointwise=True
     waic_scale: scale of the reported waic results
 
         The returned object has a custom print method that overrides pd.Series method.
+
+    See Also
+    --------
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+    compare : Compare models based on PSIS-LOO-CV or WAIC.
+    plot_compare : Summary plot for model comparison.
 
     Examples
     --------
@@ -1514,13 +1556,13 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     Parameters
     ----------
     idata: InferenceData
-        InferenceData object.
+        :class:`arviz.InferenceData` object.
     y: array, DataArray or str
-        Observed data. If str, idata must be present and contain the observed data group
+        Observed data. If str, ``idata`` must be present and contain the observed data group
     y_hat: array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
-        None, idata must contain the posterior predictive group. If None, y_hat is taken
+        None, ``idata`` must contain the posterior predictive group. If None, y_hat is taken
         equal to y, thus, y must be str too.
     log_weights: array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
@@ -1531,6 +1573,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     -------
     loo_pit: array or DataArray
         Value of the LOO-PIT at each observed data point.
+
+    See Also
+    --------
+    plot_loo_pit : Plot Leave-One-Out probability integral transformation (PIT) predictive checks.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out
+          cross-validation (PSIS-LOO-CV).
+    plot_elpd : Plot pointwise elpd differences between two or more models.
+    plot_khat : Plot Pareto tail indices for diagnosing convergence.
 
     Examples
     --------
@@ -1676,9 +1726,9 @@ def apply_test_function(
     Parameters
     ----------
     idata: InferenceData
-        InferenceData object on which to apply the test function. This function will add
-        new variables to the InferenceData object to store the result without modifying the
-        existing ones.
+        :class:`arviz.InferenceData` object on which to apply the test function.
+        This function will add new variables to the InferenceData object
+        to store the result without modifying the existing ones.
     func: callable
         Callable that calculates the test function. It must have the following call signature
         ``func(y, theta, *args, **kwargs)`` (where ``y`` is the observed data or posterior
@@ -1710,7 +1760,7 @@ def apply_test_function(
         kwargs passed to :func:`~arviz.wrap_xarray_ufunc`. By default, some suitable input_core_dims
         are used.
     inplace: bool, optional
-        If True, add the variables inplace, othewise, return a copy of idata with the variables
+        If True, add the variables inplace, otherwise, return a copy of idata with the variables
         added.
     overwrite: bool, optional
         Overwrite data in case ``out_name_data`` or ``out_name_pp`` are already variables in
@@ -1722,6 +1772,10 @@ def apply_test_function(
         Output InferenceData object. If ``inplace=True``, it is the same input object modified
         inplace.
 
+    See Also
+    --------
+    plot_bpv :  Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+
     Notes
     -----
     This function is provided for convenience to wrap scalar or functions working on low
@@ -1730,7 +1784,7 @@ def apply_test_function(
 
     Examples
     --------
-    Use ``apply_test_function`` to wrap ``np.min`` for illustration purposes. And plot the
+    Use ``apply_test_function`` to wrap ``numpy.min`` for illustration purposes. And plot the
     results.
 
     .. plot::

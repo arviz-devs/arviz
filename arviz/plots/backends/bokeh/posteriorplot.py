@@ -221,7 +221,7 @@ def _plot_posterior_op(
         ax.text(
             x=vals,
             y=[max_data * 0.2, max_data * 0.2],
-            text_font_size="{}pt".format(ax_labelsize),
+            text_font_size=f"{ax_labelsize}pt",
             text=rope_text,
             **text_props,
         )
@@ -276,7 +276,7 @@ def _plot_posterior_op(
         plot_kde(
             values,
             bw=bw,
-            circular=circular,
+            is_circular=circular,
             fill_kwargs={"fill_alpha": kwargs.pop("fill_alpha", 0)},
             plot_kwargs=kwargs,
             ax=ax,

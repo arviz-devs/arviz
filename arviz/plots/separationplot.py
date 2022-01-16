@@ -35,22 +35,22 @@ def plot_separation(
     Parameters
     ----------
     idata : InferenceData
-        InferenceData object.
+        :class:`arviz.InferenceData` object.
     y : array, DataArray or str
-        Observed data. If str, idata must be present and contain the observed data group
+        Observed data. If str, ``idata`` must be present and contain the observed data group
     y_hat : array, DataArray or str
-        Posterior predictive samples for ``y``. It must have the same shape as y. If str or
-        None, idata must contain the posterior predictive group.
+        Posterior predictive samples for ``y``. It must have the same shape as ``y``. If str or
+        None, ``idata`` must contain the posterior predictive group.
     y_hat_line : bool, optional
-        Plot the sorted `y_hat` predictions.
+        Plot the sorted ``y_hat`` predictions.
     expected_events : bool, optional
         Plot the total number of expected events.
     figsize : figure size tuple, optional
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int, optional
-        Text size for labels. If None it will be autoscaled based on figsize.
+        Text size for labels. If None it will be autoscaled based on ``figsize``.
     color : str, optional
-        Color to assign to the postive class. The negative class will be plotted using the
+        Color to assign to the positive class. The negative class will be plotted using the
         same color and an `alpha=0.3` transparency.
     legend : bool, optional
         Show the legend of the figure.
@@ -60,20 +60,25 @@ def plot_separation(
         Additional keywords passed to :meth:`mpl:matplotlib.axes.Axes.bar` or
         :meth:`bokeh:bokeh.plotting.Figure.vbar` for separation plot.
     y_hat_line_kwargs : dict, optional
-        Additional keywords passed to ax.plot for `y_hat` line.
+        Additional keywords passed to ax.plot for ``y_hat`` line.
     exp_events_kwargs : dict, optional
-        Additional keywords passed to ax.scatter for expected_events marker.
+        Additional keywords passed to ax.scatter for ``expected_events`` marker.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_ppc : Plot for posterior/prior predictive checks.
 
     References
     ----------
@@ -114,19 +119,17 @@ def plot_separation(
         if isinstance(y, str):
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
-            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+            raise ValueError(f"y must be of types array, DataArray or str, not {type(y)}")
 
         if isinstance(y_hat, str):
             label_y_hat = y_hat
             y_hat = idata.posterior_predictive[y_hat].mean(dim=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
-            raise ValueError(
-                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
-            )
+            raise ValueError(f"y_hat must be of types array, DataArray or str, not {type(y_hat)}")
 
     if len(y) != len(y_hat):
         warnings.warn(
-            "y and y_hat must be the same lenght",
+            "y and y_hat must be the same length",
             UserWarning,
         )
 

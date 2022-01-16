@@ -14,14 +14,15 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_density,
     plot_dist,
     plot_dist_comparison,
+    plot_dot,
     plot_elpd,
     plot_energy,
     plot_ess,
     plot_forest,
     plot_hdi,
-    plot_joint,
     plot_kde,
     plot_khat,
+    plot_lm,
     plot_loo_pit,
     plot_mcse,
     plot_pair,
@@ -140,7 +141,7 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(
             obj,
-            data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)],
+            data_labels=[f"bad_value_{i}" for i in range(len(obj) + 10)],
             backend="bokeh",
             show=False,
         )
@@ -266,6 +267,11 @@ def test_plot_kde_1d(continuous_model):
         {"contour": True, "contourf_kwargs": {"cmap": "plasma"}},
         {"contour": False},
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+        {"contour": True, "contourf_kwargs": {"levels": 3}},
+        {"contour": True, "contourf_kwargs": {"levels": [0.1, 0.2, 0.3]}},
+        {"hdi_probs": [0.3, 0.9, 0.6]},
+        {"hdi_probs": [0.3, 0.6, 0.9], "contourf_kwargs": {"cmap": "Blues"}},
+        {"hdi_probs": [0.9, 0.6, 0.3], "contour_kwargs": {"alpha": 0}},
     ],
 )
 def test_plot_kde_2d(continuous_model, kwargs):
@@ -339,7 +345,9 @@ def test_plot_compare_no_ic(models):
     assert "['loo', 'waic']" in str(err.value)
 
 
-@pytest.mark.parametrize("kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}])
+@pytest.mark.parametrize(
+    "kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}, {"threshold": 2}]
+)
 @pytest.mark.parametrize("add_model", [False, True])
 @pytest.mark.parametrize("use_elpddata", [False, True])
 def test_plot_elpd(models, add_model, use_elpddata, kwargs):
@@ -445,7 +453,7 @@ def test_plot_ess_evolution(models):
 
 
 def test_plot_ess_bad_kind(models):
-    """Test error when plot_ess recieves an invalid kind."""
+    """Test error when plot_ess receives an invalid kind."""
     idata = models.model_1
     with pytest.raises(ValueError, match="Invalid kind"):
         plot_ess(idata, kind="bad kind", backend="bokeh", show=False)
@@ -532,7 +540,7 @@ def test_plot_forest_bad(models, model_fits):
     with pytest.raises(ValueError):
         plot_forest(
             obj,
-            model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)],
+            model_names=[f"model_name_{i}" for i in range(len(obj) + 10)],
             backend="bokeh",
             show=False,
         )
@@ -557,39 +565,6 @@ def test_plot_hdi(models, data, kwargs):
     else:
         axis = plot_hdi(data["y"], y_data, backend="bokeh", show=False, **kwargs)
     assert axis
-
-
-@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, kind):
-    axes = plot_joint(
-        models.model_1, var_names=("mu", "tau"), kind=kind, backend="bokeh", show=False
-    )
-    assert axes[1, 0]
-
-
-def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(models.model_1, var_names=("mu", "tau"), backend="bokeh", show=False)
-    axes = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax, backend="bokeh", show=False)
-    assert axes[1, 0]
-
-
-def test_plot_joint_discrete(discrete_model):
-    axes = plot_joint(discrete_model, backend="bokeh", show=False)
-    assert axes[1, 0]
-
-
-def test_plot_joint_bad(models):
-    with pytest.raises(ValueError):
-        plot_joint(
-            models.model_1, var_names=("mu", "tau"), kind="bad_kind", backend="bokeh", show=False
-        )
-
-    with pytest.raises(Exception):
-        plot_joint(models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh", show=False)
-
-    with pytest.raises(ValueError):
-        _, axes = list(range(5))
-        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(
@@ -987,7 +962,7 @@ def test_plot_ppc_ax(models, kind):
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
         {"point_estimate": None},
-        {"hdi_prob": "hide"},
+        {"hdi_prob": "hide", "legend_label": ""},
         {"ref_val": 0},
         {"ref_val": None},
         {"ref_val": {"mu": [{"ref_val": 1}]}},
@@ -1099,3 +1074,119 @@ def test_plot_bpv_discrete():
         show=False,
     )
     assert axes.shape
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "binwidth": 0.5,
+            "stackratio": 2,
+            "nquantiles": 20,
+        },
+        {"point_interval": True},
+        {
+            "point_interval": True,
+            "dotsize": 1.2,
+            "point_estimate": "median",
+            "plot_kwargs": {"color": "grey"},
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "quartiles": False,
+            "linewidth": 2,
+        },
+    ],
+)
+def test_plot_dot(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs, backend="bokeh", show=False)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"rotated": True},
+        {
+            "point_interval": True,
+            "rotated": True,
+            "dotcolor": "grey",
+            "binwidth": 0.5,
+        },
+        {
+            "rotated": True,
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "dotsize": 0.8,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_dot_rotated(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs, backend="bokeh", show=False)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat": "bad_name"},
+        {"x": "x1"},
+        {"x": ("x1", "x2")},
+        {
+            "x": ("x1", "x2"),
+            "y_kwargs": {"fill_color": "blue"},
+            "y_hat_plot_kwargs": {"fill_color": "orange"},
+            "legend": True,
+        },
+        {"x": ("x1", "x2"), "y_model_plot_kwargs": {"line_color": "red"}},
+        {
+            "x": ("x1", "x2"),
+            "kind_pp": "hdi",
+            "kind_model": "hdi",
+            "y_model_fill_kwargs": {"color": "red"},
+            "y_hat_fill_kwargs": {"color": "cyan"},
+        },
+    ],
+)
+def test_plot_lm(models, kwargs):
+    """Test functionality for 1D data."""
+    idata = models.model_1
+    if "constant_data" not in idata.groups():
+        y = idata.observed_data["y"]
+        x1data = y.coords[y.dims[0]]
+        idata.add_groups({"constant_data": {"_": x1data}})
+        idata.constant_data["x1"] = x1data
+        idata.constant_data["x2"] = x1data
+
+    axes = plot_lm(
+        idata=idata, y="y", y_model="eta", backend="bokeh", xjitter=True, show=False, **kwargs
+    )
+    assert np.all(axes)
+
+
+def test_plot_lm_multidim(multidim_models):
+    """Test functionality for multidimentional data."""
+    idata = multidim_models.model_1
+    axes = plot_lm(idata=idata, y="y", plot_dim="dim1", show=False, backend="bokeh")
+    assert np.any(axes)
+
+
+def test_plot_lm_list():
+    """Test the plots when input data is list or ndarray."""
+    y = [1, 2, 3, 4, 5]
+    assert plot_lm(y=y, x=np.arange(len(y)), show=False, backend="bokeh")

@@ -40,7 +40,7 @@ def plot_khat(
 
     Parameters
     ----------
-    khats : ELPDData cointaining Pareto shapes information or array of
+    khats : ELPDData containing Pareto shapes information or array of
         Pareto tail indices.
     color : str or array_like, optional
         Colors of the scatter plot, if color is a str all dots will
@@ -81,20 +81,27 @@ def plot_khat(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     hlines_kwargs: dictionary, optional
-        Additional keywords passed to ax.hlines.
+        Additional keywords passed to
+        :meth:`matplotlib.axes.Axes.hlines`.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show : bool, optional
         Call backend show function.
     kwargs :
-        Additional keywords passed to ax.scatter.
+        Additional keywords passed to
+        :meth:`matplotlib.axes.Axes.scatter`.
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    psislw : Pareto smoothed importance sampling (PSIS).
 
     Examples
     --------
@@ -138,15 +145,15 @@ def plot_khat(
     importance sampling can be estimated based on the fractional
     number of finite moments of the importance ratio distribution. GPD
     is fitted to the largest importance ratios and the estimated shape
-    parameter ``k``, i.e., ``\hat{k}` can then be used as a diagnostic
+    parameter ``k``, i.e., ``\hat{k}`` can then be used as a diagnostic
     (most importantly if ``\hat{k} > 0.7``, then the convergence rate
     is impractically low). See [1]_.
 
     References
     ----------
     .. [1] Vehtari, A., Simpson, D., Gelman, A., Yao, Y., Gabry, J.,
-    2019. Pareto Smoothed Importance Sampling. arXiv:1507.02646
-    [stat].
+    2019. Pareto Smoothed Importance Sampling. arXiv:1507.02646 [stat].
+
     """
     if annotate:
         _log.warning("annotate will be deprecated, please use threshold instead")

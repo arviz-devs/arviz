@@ -156,7 +156,7 @@ python setup.py install
 
 ## Dependencies
 
-ArviZ is tested on Python 3.6, 3.7 and 3.8, and depends on NumPy, SciPy, xarray, and Matplotlib.
+ArviZ is tested on Python 3.7, 3.8 and 3.9, and depends on NumPy, SciPy, xarray, and Matplotlib.
 
 
 ## Citation
@@ -195,4 +195,4 @@ can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/m
 ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate [here](https://numfocus.org/donate-to-arviz).
 
 ## Sponsors
-[![NumFOCUS](https://i0.wp.com/numfocus.org/wp-content/uploads/2019/06/AffiliatedProject.png)](https://numfocus.org)
+[![NumFOCUS](https://www.numfocus.org/wp-content/uploads/2017/07/NumFocus_LRG.png)](https://numfocus.org)

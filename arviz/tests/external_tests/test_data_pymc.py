@@ -3,12 +3,13 @@ from sys import version_info
 from typing import Dict, Tuple
 
 import numpy as np
+import pkg_resources
 import packaging
 import pandas as pd
 import pytest
 from numpy import ma
 
-from arviz import (  # pylint: disable=wrong-import-position
+from ... import (  # pylint: disable=wrong-import-position
     InferenceData,
     from_dict,
     from_pymc3,
@@ -24,8 +25,20 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     load_cached_models,
 )
 
-# Skip all tests if pymc3 not installed
-pm = importorskip("pymc3")
+# Skip all tests unless running on pymc3 v3
+try:
+    pymc3_version = pkg_resources.get_distribution("pymc3").version
+    PYMC3_V4 = packaging.version.parse(pymc3_version) >= packaging.version.parse("4.0")
+    PYMC3_installed = True
+    import pymc3 as pm
+except pkg_resources.DistributionNotFound:
+    PYMC3_V4 = False
+    PYMC3_installed = False
+
+pytestmark = pytest.mark.skipif(
+    not PYMC3_installed or PYMC3_V4,
+    reason="Run tests only if pymc3 installed and its version is <4.0",
+)
 
 
 class TestDataPyMC3:
@@ -172,7 +185,7 @@ class TestDataPyMC3:
             elif len(ivalues.shape) == 2:
                 ivalues_arr = np.reshape(ivalues.values, (ivalues.shape[0] * ivalues.shape[1]))
             else:
-                raise ValueError("Unexpected values shape for variable %s" % key)
+                raise ValueError(f"Unexpected values shape for variable {key}")
             assert (ivalues.shape[0] == 2) and (ivalues.shape[1] == 500)
             assert values.shape[0] == 1000
             assert np.all(np.isclose(ivalues_arr, values))
@@ -521,7 +534,7 @@ class TestDataPyMC3:
             "prior_predictive": ["obs"],
         }
         if use_context:
-            with model:
+            with model:  # pylint: disable=not-context-manager
                 inference_data = from_pymc3(prior=prior)
         else:
             inference_data = from_pymc3(prior=prior, model=model)

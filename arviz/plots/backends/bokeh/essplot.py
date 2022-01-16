@@ -1,13 +1,14 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Span
 from bokeh.models.annotations import Legend, Title
 from scipy.stats import rankdata
 
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 from ...plot_utils import _scale_fig_size
+from bokeh.models.glyphs import Scatter
 
 
 def plot_ess(
@@ -77,7 +78,7 @@ def plot_ess(
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+                raise ValueError(f"InferenceData does not contain {rug_kind} data")
 
             rug_kwargs.setdefault("space", 0.1)
             _rug_kwargs = {}
@@ -93,7 +94,7 @@ def plot_ess(
             rug_space = np.max(x) * rug_kwargs.pop("space")
             rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
 
-            glyph = Dash(x="rug_x", y="rug_y", **_rug_kwargs)
+            glyph = Scatter(x="rug_x", y="rug_y", marker="dash", **_rug_kwargs)
             cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
             ax_.add_glyph(cds_rug, glyph)
 

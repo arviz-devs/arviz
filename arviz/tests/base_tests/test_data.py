@@ -14,7 +14,7 @@ import xarray as xr
 from xarray.core.options import OPTIONS
 from xarray.testing import assert_identical
 
-from arviz import (
+from ... import (
     InferenceData,
     clear_data_home,
     concat,
@@ -28,7 +28,7 @@ from arviz import (
     to_netcdf,
 )
 
-from ...data.base import dict_to_dataset, generate_dims_coords, make_attrs
+from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
 from ...data.datasets import LOCAL_DATASETS, REMOTE_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -331,6 +331,22 @@ def test_inference_concat_keeps_all_fields():
     assert not fails_c2
 
 
+@pytest.mark.parametrize(
+    "model_code,expected",
+    [
+        ("data {int y;} models {y ~ poisson(3);} generated quantities {int X;}", {"X": "int"}),
+        (
+            "data {real y;} models {y ~ normal(0,1);} generated quantities {int Y; real G;}",
+            {"Y": "int"},
+        ),
+    ],
+)
+def test_infer_stan_dtypes(model_code, expected):
+    """Test different examples for dtypes in Stan models."""
+    res = infer_stan_dtypes(model_code)
+    assert res == expected
+
+
 class TestInferenceData:  # pylint: disable=too-many-public-methods
     def test_addition(self):
         idata1 = from_dict(
@@ -493,6 +509,15 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
 
+    def test_group_names_invalid_args(self):
+        ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
+        idata = InferenceData(posterior=(ds, ds))
+        msg = r"^\'filter_groups\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+        with pytest.raises(ValueError, match=msg):
+            idata._group_names(  # pylint: disable=protected-access
+                ("posterior",), filter_groups="foo"
+            )
+
     @pytest.mark.parametrize("inplace", [False, True])
     def test_isel(self, data_random, inplace):
         idata = data_random
@@ -651,7 +676,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             if groups == "posterior":
                 if kwargs.get("include_coords", True) and kwargs.get("include_index", True):
                     assert any(
-                        "[{},".format(kwargs.get("index_origin", 0)) in item[0]
+                        f"[{kwargs.get('index_origin', 0)}," in item[0]
                         for item in test_data.columns
                         if isinstance(item, tuple)
                     )
@@ -919,6 +944,16 @@ def test_dict_to_dataset_event_dims_error():
     msg = "different number of dimensions on data and dims"
     with pytest.raises(ValueError, match=msg):
         convert_to_dataset(datadict, coords=coords, dims={"a": ["b", "c"]})
+
+
+def test_dict_to_dataset_with_tuple_coord():
+    datadict = {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)}
+    dataset = convert_to_dataset(datadict, coords={"c": tuple(range(10))}, dims={"b": ["c"]})
+    assert set(dataset.data_vars) == {"a", "b"}
+    assert set(dataset.coords) == {"chain", "draw", "c"}
+
+    assert set(dataset.a.coords) == {"chain", "draw"}
+    assert set(dataset.b.coords) == {"chain", "draw", "c"}
 
 
 def test_convert_to_dataset_idempotent():

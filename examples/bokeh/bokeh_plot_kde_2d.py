@@ -1,6 +1,6 @@
 """
-2d KDE Bokeh
-============
+2d KDE (default style)
+======================
 
 _thumb: .1, .8
 """

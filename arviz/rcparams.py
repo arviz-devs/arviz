@@ -47,7 +47,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
         try:
             value = typeof(value)
         except (ValueError, TypeError) as err:
-            raise ValueError("Could not convert to {}".format(typeof.__name__)) from err
+            raise ValueError(f"Could not convert to {typeof.__name__}") from err
         if isinstance(value, str):
             value = value.lower()
 
@@ -174,7 +174,7 @@ def _validate_bokeh_marker(value):
         "X",
     )
     if value not in all_markers:
-        raise ValueError("{} is not one of {}".format(value, all_markers))
+        raise ValueError(f"{value} is not one of {all_markers}")
     return value
 
 
@@ -210,7 +210,7 @@ def make_iterable_validator(scalar_validator, length=None, allow_none=False, all
         if np.iterable(value) and not isinstance(value, (set, frozenset)):
             val = tuple(scalar_validator(v) for v in value)
             if length is not None and len(val) != length:
-                raise ValueError("Iterable must be of length: {}".format(length))
+                raise ValueError(f"Iterable must be of length: {length}")
             return val
         raise ValueError("Only ordered iterable values are valid")
 
@@ -285,7 +285,6 @@ defaultParams = {  # pylint: disable=invalid-name
         "reset,pan,box_zoom,wheel_zoom,lasso_select,undo,save,hover",
         lambda x: x,
     ),
-    "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "stats.hdi_prob": (0.94, _validate_probability),
     "stats.information_criterion": (
@@ -326,7 +325,7 @@ class RcParams(MutableMapping):
             try:
                 cval = self.validate[key](val)
             except ValueError as verr:
-                raise ValueError("Key %s: %s" % (key, str(verr))) from verr
+                raise ValueError(f"Key {key}: {str(verr)}") from verr
             self._underlying_storage[key] = cval
         except KeyError as err:
             raise KeyError(
@@ -376,7 +375,7 @@ class RcParams(MutableMapping):
             width=80 - indent,
         ).split("\n")
         repr_indented = ("\n" + " " * indent).join(repr_split)
-        return "{}({})".format(class_name, repr_indented)
+        return f"{class_name}({repr_indented})"
 
     def __str__(self):
         """Customize str/print of RcParams objects."""
@@ -458,7 +457,7 @@ def read_rcfile(fname):
     _error_details_fmt = 'line #%d\n\t"%s"\n\tin file "%s"'
 
     config = RcParams()
-    with open(fname, "r") as rcfile:
+    with open(fname, "r", encoding="utf8") as rcfile:
         try:
             multiline = False
             for line_no, line in enumerate(rcfile, 1):
@@ -491,9 +490,7 @@ def read_rcfile(fname):
                     config[key] = val
                 except ValueError as verr:
                     error_details = _error_details_fmt % (line_no, line, fname)
-                    raise ValueError(
-                        "Bad val {} on {}\n\t{}".format(val, error_details, str(verr))
-                    ) from verr
+                    raise ValueError(f"Bad val {val} on {error_details}\n\t{str(verr)}") from verr
 
         except UnicodeDecodeError:
             _log.warning(
@@ -531,7 +528,7 @@ class rc_context:  # pylint: disable=invalid-name
     rc : dict, optional
         Mapping containing the rcParams to modify temporally.
     fname : str, optional
-        Filename of the file containig the rcParams to use inside the rc_context.
+        Filename of the file containing the rcParams to use inside the rc_context.
 
     Examples
     --------

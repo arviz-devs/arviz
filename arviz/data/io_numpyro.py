@@ -35,7 +35,7 @@ class NumPyroConverter:
         coords=None,
         dims=None,
         pred_dims=None,
-        num_chains=1
+        num_chains=1,
     ):
         """Convert NumPyro data into an InferenceData object.
 
@@ -53,7 +53,7 @@ class NumPyroConverter:
             Dictionary containing constant data variables mapped to their values.
         predictions_constant_data: dict
             Constant data used for out-of-sample predictions.
-        index_origin : int, optinal
+        index_origin : int, optional
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
@@ -92,8 +92,7 @@ class NumPyroConverter:
                 # (e.g. f(x) = x ** 2)
                 tree_flatten_samples = jax.tree_util.tree_flatten(samples)[0]
                 samples = {
-                    "Param:{}".format(i): jax.device_get(v)
-                    for i, v in enumerate(tree_flatten_samples)
+                    f"Param:{i}": jax.device_get(v) for i, v in enumerate(tree_flatten_samples)
                 }
             self._samples = samples
             self.nchains, self.ndraws = (
@@ -124,7 +123,11 @@ class NumPyroConverter:
 
         observations = {}
         if self.model is not None:
-            seeded_model = numpyro.handlers.seed(self.model, jax.random.PRNGKey(0))
+            # we need to use an init strategy to generate random samples for ImproperUniform sites
+            seeded_model = numpyro.handlers.substitute(
+                numpyro.handlers.seed(self.model, jax.random.PRNGKey(0)),
+                substitute_fn=numpyro.infer.init_to_sample,
+            )
             trace = numpyro.handlers.trace(seeded_model).get_trace(*self._args, **self._kwargs)
             observations = {
                 name: site["value"]
@@ -329,7 +332,7 @@ def from_numpyro(
     coords=None,
     dims=None,
     pred_dims=None,
-    num_chains=1
+    num_chains=1,
 ):
     """Convert NumPyro data into an InferenceData object.
 

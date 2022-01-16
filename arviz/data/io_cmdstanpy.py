@@ -3,11 +3,12 @@ import logging
 import re
 from collections import defaultdict
 from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 
 from ..rcparams import rcParams
-from .base import dict_to_dataset, make_attrs, requires
+from .base import dict_to_dataset, infer_stan_dtypes, make_attrs, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class CmdStanPyConverter:
         coords=None,
         dims=None,
         save_warmup=None,
+        dtypes=None,
     ):
         self.posterior = posterior  # CmdStanPy CmdStanMCMC object
         self.posterior_predictive = posterior_predictive
@@ -52,7 +54,28 @@ class CmdStanPyConverter:
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
-        if hasattr(self.posterior, "stan_vars_cols"):
+        import cmdstanpy  # pylint: disable=import-error
+
+        if dtypes is None:
+            dtypes = {}
+        elif isinstance(dtypes, cmdstanpy.model.CmdStanModel):
+            model_code = dtypes.code()
+            dtypes = infer_stan_dtypes(model_code)
+        elif isinstance(dtypes, str):
+            dtypes_path = Path(dtypes)
+            if dtypes_path.exists():
+                with dtypes_path.open("r", encoding="UTF-8") as f_obj:
+                    model_code = f_obj.read()
+            else:
+                model_code = dtypes
+            dtypes = infer_stan_dtypes(model_code)
+
+        self.dtypes = dtypes
+
+        if hasattr(self.posterior, "metadata"):
+            if self.log_likelihood is True and "log_lik" in self.posterior.metadata.stan_vars_cols:
+                self.log_likelihood = ["log_lik"]
+        elif hasattr(self.posterior, "stan_vars_cols"):
             if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
         else:
@@ -66,17 +89,18 @@ class CmdStanPyConverter:
         if isinstance(self.log_likelihood, bool):
             self.log_likelihood = None
 
-        import cmdstanpy  # pylint: disable=import-error
-
         self.cmdstanpy = cmdstanpy
 
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
-        if not hasattr(self.posterior, "stan_vars_cols"):
+        if not (hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols")):
             return self.posterior_to_xarray_pre_v_0_9_68()
 
-        items = list(self.posterior.stan_vars_cols.keys())
+        if hasattr(self.posterior, "metadata"):
+            items = list(self.posterior.metadata.stan_vars_cols.keys())
+        else:
+            items = list(self.posterior.stan_vars_cols.keys())
         if self.posterior_predictive is not None:
             try:
                 items = _filter(items, self.posterior_predictive)
@@ -95,12 +119,16 @@ class CmdStanPyConverter:
 
         valid_cols = []
         for item in items:
-            valid_cols.extend(self.posterior.stan_vars_cols[item])
+            if hasattr(self.posterior, "metadata"):
+                valid_cols.extend(self.posterior.metadata.stan_vars_cols[item])
+            else:
+                valid_cols.extend(self.posterior.stan_vars_cols[item])
 
         data, data_warmup = _unpack_fit(
             self.posterior,
             items,
             self.save_warmup,
+            self.dtypes,
         )
 
         # copy dims and coords  - Mitzi question:  why???
@@ -136,11 +164,19 @@ class CmdStanPyConverter:
 
     def stats_to_xarray(self, fit):
         """Extract sample_stats from fit."""
-        if not hasattr(fit, "sampler_vars_cols"):
+        if not (hasattr(fit, "metadata") or hasattr(fit, "sampler_vars_cols")):
             return self.sample_stats_to_xarray_pre_v_0_9_68(fit)
 
-        dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
-        items = list(fit.sampler_vars_cols.keys())
+        dtypes = {
+            "divergent__": bool,
+            "n_leapfrog__": np.int64,
+            "treedepth__": np.int64,
+            **self.dtypes,
+        }
+        if hasattr(fit, "metadata"):
+            items = list(fit.metadata._method_vars_cols.keys())  # pylint: disable=protected-access
+        else:
+            items = list(fit.sampler_vars_cols.keys())
         rename_dict = {
             "divergent": "diverging",
             "n_leapfrog": "n_steps",
@@ -153,6 +189,7 @@ class CmdStanPyConverter:
             fit,
             items,
             self.save_warmup,
+            self.dtypes,
         )
         for item in items:
             name = re.sub("__$", "", item)
@@ -193,11 +230,12 @@ class CmdStanPyConverter:
         """Convert predictive samples to xarray."""
         predictive = _as_set(names)
 
-        if hasattr(fit, "stan_vars_cols"):
+        if hasattr(fit, "metadata") or hasattr(fit, "stan_vars_cols"):
             data, data_warmup = _unpack_fit(
                 fit,
                 predictive,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             valid_cols = _filter_columns(fit.column_names, predictive)
@@ -206,6 +244,7 @@ class CmdStanPyConverter:
                 fit.column_names,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
 
         return (
@@ -231,11 +270,12 @@ class CmdStanPyConverter:
         """Convert out of sample predictions samples to xarray."""
         predictions = _as_set(self.predictions)
 
-        if hasattr(self.posterior, "stan_vars_cols"):
+        if hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols"):
             data, data_warmup = _unpack_fit(
                 self.posterior,
                 predictions,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             columns = self.posterior.column_names
@@ -245,6 +285,7 @@ class CmdStanPyConverter:
                 columns,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
 
         return (
@@ -270,11 +311,12 @@ class CmdStanPyConverter:
         """Convert elementwise log likelihood samples to xarray."""
         log_likelihood = _as_set(self.log_likelihood)
 
-        if hasattr(self.posterior, "stan_vars_cols"):
+        if hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols"):
             data, data_warmup = _unpack_fit(
                 self.posterior,
                 log_likelihood,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             columns = self.posterior.column_names
@@ -284,6 +326,7 @@ class CmdStanPyConverter:
                 columns,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
         if isinstance(self.log_likelihood, dict):
             data = {obs_name: data[lik_name] for obs_name, lik_name in self.log_likelihood.items()}
@@ -314,8 +357,11 @@ class CmdStanPyConverter:
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        if hasattr(self.prior, "stan_vars_cols"):
-            items = list(self.prior.stan_vars_cols.keys())
+        if hasattr(self.posterior, "metadata") or hasattr(self.prior, "stan_vars_cols"):
+            if hasattr(self.posterior, "metadata"):
+                items = list(self.prior.metadata.stan_vars_cols.keys())
+            else:
+                items = list(self.prior.stan_vars_cols.keys())
             if self.prior_predictive is not None:
                 try:
                     items = _filter(items, self.prior_predictive)
@@ -325,6 +371,7 @@ class CmdStanPyConverter:
                 self.prior,
                 items,
                 self.save_warmup,
+                self.dtypes,
             )
         else:  # pre_v_0_9_68
             columns = self.prior.column_names
@@ -339,6 +386,7 @@ class CmdStanPyConverter:
                 columns,
                 valid_cols,
                 self.save_warmup,
+                self.dtypes,
             )
 
         return (
@@ -477,6 +525,7 @@ class CmdStanPyConverter:
             columns,
             valid_cols,
             self.save_warmup,
+            self.dtypes,
         )
 
         return (
@@ -506,6 +555,7 @@ class CmdStanPyConverter:
             columns,
             valid_cols,
             self.save_warmup,
+            self.dtypes,
         )
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
@@ -562,7 +612,7 @@ def _filter_columns(columns, spec):
     return [col for col in columns if col.split("[")[0].split(".")[0] in spec]
 
 
-def _unpack_fit(fit, items, save_warmup):
+def _unpack_fit(fit, items, save_warmup, dtypes):
     """Transform fit to dictionary containing ndarrays.
 
     Parameters
@@ -570,6 +620,7 @@ def _unpack_fit(fit, items, save_warmup):
     data: cmdstanpy.CmdStanMCMC
     items: list
     save_warmup: bool
+    dtypes: dict
 
     Returns
     -------
@@ -588,9 +639,15 @@ def _unpack_fit(fit, items, save_warmup):
     sample = {}
     sample_warmup = {}
 
+    stan_vars_cols = fit.metadata.stan_vars_cols if hasattr(fit, "metadata") else fit.stan_vars_cols
+    sampler_vars_cols = (
+        fit.metadata._method_vars_cols  # pylint: disable=protected-access
+        if hasattr(fit, "metadata")
+        else fit.sampler_vars_cols
+    )
     for item in items:
-        if item in fit.stan_vars_cols:
-            col_idxs = fit.stan_vars_cols[item]
+        if item in stan_vars_cols:
+            col_idxs = stan_vars_cols[item]
             if len(col_idxs) == 1:
                 raw_draws = draws[..., col_idxs[0]]
             else:
@@ -598,11 +655,12 @@ def _unpack_fit(fit, items, save_warmup):
                 raw_draws = np.swapaxes(
                     raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
                 )
-        elif item in fit.sampler_vars_cols:
-            col_idxs = fit.sampler_vars_cols[item]
+        elif item in sampler_vars_cols:
+            col_idxs = sampler_vars_cols[item]
             raw_draws = draws[..., col_idxs[0]]
         else:
-            raise ValueError("fit data, unknown variable: {}".format(item))
+            raise ValueError(f"fit data, unknown variable: {item}")
+        raw_draws = raw_draws.astype(dtypes.get(item))
         if save_warmup:
             sample_warmup[item] = raw_draws[:, :num_warmup, ...]
             sample[item] = raw_draws[:, num_warmup:, ...]
@@ -612,7 +670,7 @@ def _unpack_fit(fit, items, save_warmup):
     return sample, sample_warmup
 
 
-def _unpack_frame(fit, columns, valid_cols, save_warmup):
+def _unpack_frame(fit, columns, valid_cols, save_warmup, dtypes):
     """Transform fit to dictionary containing ndarrays.
 
     Called when fit object created by cmdstanpy version < 0.9.68
@@ -623,6 +681,7 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
     columns: list
     valid_cols: list
     save_warmup: bool
+    dtypes: dict
 
     Returns
     -------
@@ -696,6 +755,13 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup):
                 sample[key][shape_loc] = np.swapaxes(data[..., i], 0, 1)
                 if save_warmup:
                     sample_warmup[key][shape_loc] = np.swapaxes(data_warmup[..., i], 0, 1)
+
+    for key, dtype in dtypes.items():
+        if key in sample:
+            sample[key] = sample[key].astype(dtype)
+            if save_warmup:
+                if key in sample_warmup:
+                    sample_warmup[key] = sample_warmup[key].astype(dtype)
     return sample, sample_warmup
 
 
@@ -714,6 +780,7 @@ def from_cmdstanpy(
     coords=None,
     dims=None,
     save_warmup=None,
+    dtypes=None,
 ):
     """Convert CmdStanPy data into an InferenceData object.
 
@@ -755,6 +822,10 @@ def from_cmdstanpy(
     save_warmup : bool
         Save warmup iterations into InferenceData object, if found in the input files.
         If not defined, use default defined by the rcParams.
+    dtypes: dict or str or cmdstanpy.CmdStanModel
+        A dictionary containing dtype information (int, float) for parameters.
+        If input is a string, it is assumed to be a model code or path to model code file.
+        Model code can extracted from cmdstanpy.CmdStanModel object.
 
     Returns
     -------
@@ -774,4 +845,5 @@ def from_cmdstanpy(
         coords=coords,
         dims=dims,
         save_warmup=save_warmup,
+        dtypes=dtypes,
     ).to_inference_data()

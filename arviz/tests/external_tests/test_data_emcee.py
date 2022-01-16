@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pytest
 
-from arviz import from_emcee
+from ... import from_emcee
 
 from ..helpers import _emcee_lnprior as emcee_lnprior
 from ..helpers import _emcee_lnprob as emcee_lnprob

@@ -7,7 +7,7 @@ import pytest
 import scipy.stats as st
 
 from ...data import dict_to_dataset, from_dict, load_arviz_data
-from ...stats.density_utils import _circular_mean, _normalize_angle
+from ...stats.density_utils import _circular_mean, _normalize_angle, _find_hdi_contours
 from ...utils import (
     _stack,
     _subset_list,
@@ -101,6 +101,15 @@ def test_var_names_filter(var_args):
     assert _var_names(var_names, data, filter_vars) == expected
 
 
+def test_var_names_filter_invalid_argument():
+    """Check invalid argument raises."""
+    samples = np.random.randn(10)
+    data = dict_to_dataset({"alpha": samples})
+    msg = r"^\'filter_vars\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+    with pytest.raises(ValueError, match=msg):
+        assert _var_names(["alpha"], data, filter_vars="foo")
+
+
 def test_subset_list_negation_not_found():
     """Check there is a warning if negation pattern is ignored"""
     names = ["mu", "theta"]
@@ -114,7 +123,7 @@ def utils_with_numba_import_fail(monkeypatch):
     failed_import = Mock()
     failed_import.side_effect = ImportError
 
-    from arviz import utils
+    from ... import utils
 
     monkeypatch.setattr(utils.importlib, "import_module", failed_import)
     return utils
@@ -154,7 +163,7 @@ def test_conditional_jit_numba_decorator():
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
     """
-    from arviz import utils
+    from ... import utils
 
     @utils.conditional_jit
     def func():
@@ -169,7 +178,7 @@ def test_conditional_vect_numba_decorator():
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
     """
-    from arviz import utils
+    from ... import utils
 
     @utils.conditional_vect
     def func(a_a, b_b):
@@ -182,7 +191,7 @@ def test_conditional_vect_numba_decorator():
 
 def test_conditional_vect_numba_decorator_keyword(monkeypatch):
     """Checks else statement and vect keyword argument"""
-    from arviz import utils
+    from ... import utils
 
     # Mock import lib to return numba with hit method which returns a function that returns kwargs
     numba_mock = Mock()
@@ -291,3 +300,48 @@ def test_normalize_angle(mean):
 
     values = _normalize_angle(rvs, zero_centered=False)
     assert ((values >= 0) & (values <= 2 * np.pi)).all()
+
+
+@pytest.mark.parametrize("mean", [[0, 0], [1, 1]])
+@pytest.mark.parametrize(
+    "cov",
+    [
+        np.diag([1, 1]),
+        np.diag([0.5, 0.5]),
+        np.diag([0.25, 1]),
+        np.array([[0.4, 0.2], [0.2, 0.8]]),
+    ],
+)
+@pytest.mark.parametrize("contour_sigma", [np.array([1, 2, 3])])
+def test_find_hdi_contours(mean, cov, contour_sigma):
+    """Test `_find_hdi_contours()` against SciPy's multivariate normal distribution."""
+    # Set up scipy distribution
+    prob_dist = st.multivariate_normal(mean, cov)
+
+    # Find standard deviations and eigenvectors
+    eigenvals, eigenvecs = np.linalg.eig(cov)
+    eigenvecs = eigenvecs.T
+    stdevs = np.sqrt(eigenvals)
+
+    # Find min and max for grid at 7-sigma contour
+    extremes = np.empty((4, 2))
+    for i in range(4):
+        extremes[i] = mean + (-1) ** i * 7 * stdevs[i // 2] * eigenvecs[i // 2]
+    x_min, y_min = np.amin(extremes, axis=0)
+    x_max, y_max = np.amax(extremes, axis=0)
+
+    # Create 256x256 grid
+    x = np.linspace(x_min, x_max, 256)
+    y = np.linspace(y_min, y_max, 256)
+    grid = np.dstack(np.meshgrid(x, y))
+
+    density = prob_dist.pdf(grid)
+
+    contour_sp = np.empty(contour_sigma.shape)
+    for idx, sigma in enumerate(contour_sigma):
+        contour_sp[idx] = prob_dist.pdf(mean + sigma * stdevs[0] * eigenvecs[0])
+
+    hdi_probs = 1 - np.exp(-0.5 * contour_sigma ** 2)
+    contour_az = _find_hdi_contours(density, hdi_probs)
+
+    np.testing.assert_allclose(contour_sp, contour_az, rtol=1e-2, atol=1e-4)

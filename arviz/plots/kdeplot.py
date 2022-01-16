@@ -1,10 +1,12 @@
 # pylint: disable=unexpected-keyword-arg
 """One-dimensional kernel density estimate plots."""
+import warnings
+
 import xarray as xr
 
 from ..data import InferenceData
 from ..rcparams import rcParams
-from ..stats.density_utils import _fast_kde_2d, kde
+from ..stats.density_utils import _fast_kde_2d, kde, _find_hdi_contours
 from .plot_utils import get_plotting_function
 
 
@@ -16,10 +18,10 @@ def plot_kde(
     label=None,
     bw="default",
     adaptive=False,
-    circular=False,
     quantiles=None,
     rotated=False,
     contour=True,
+    hdi_probs=None,
     fill_last=False,
     figsize=None,
     textsize=None,
@@ -56,16 +58,13 @@ def plot_kde(
     bw: float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
-        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
-        and "taylor" (for now) when `circular` is True.
+        one of "scott", "silverman", "isj" or "experimental" when ``is_circular`` is False
+        and "taylor" (for now) when ``is_circular`` is True.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
     adaptive: bool, optional.
         If True, an adaptative bandwidth is used. Only valid for 1D KDE.
         Defaults to False.
-    circular: bool, optional.
-        If True, it interprets `values` is a circular variable measured in radians
-        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     quantiles : list
         Quantiles in ascending order used to segment the KDE.
         Use [.25, .5, .75] for quartiles. Defaults to None.
@@ -74,32 +73,43 @@ def plot_kde(
     contour : bool
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
         Defaults to True.
+    hdi_probs : list
+        Plots highest density credibility regions for the provided probabilities for a 2D KDE.
+        Defaults to matplotlib chosen levels with no fixed probability associated.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to False.
     figsize : tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize. Not implemented for bokeh backend.
+        on ``figsize``. Not implemented for bokeh backend.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`
-        or :meth:`bokeh:bokeh.plotting.figure.Figure.line` for a description of accepted values.
+        or :meth:`bokeh:bokeh.plotting.Figure.line` for a description of accepted values.
     fill_kwargs : dict
-        Keywords passed to the fill under the line (use fill_kwargs={'alpha': 0} to disable fill).
-        Ignored for 2D KDE
+        Keywords passed to the fill under the line (use ``fill_kwargs={'alpha': 0}``
+        to disable fill). Ignored for 2D KDE. Passed to
+        :meth:`bokeh.plotting.Figure.patch`.
     rug_kwargs : dict
-        Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE
-        Use `space` keyword (float) to control the position of the rugplot. The larger this number
-        the lower the rugplot.
+        Keywords passed to the rug plot. Ignored if ``rug=False`` or for 2D KDE
+        Use ``space`` keyword (float) to control the position of the rugplot. The larger this number
+        the lower the rugplot. Passed to :class:`bokeh:bokeh.models.glyphs.Scatter`.
     contour_kwargs : dict
-        Keywords passed to ax.contour to draw contour lines. Ignored for 1D KDE.
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contour`
+        to draw contour lines or :meth:`bokeh.plotting.Figure.patch`.
+        Ignored for 1D KDE.
     contourf_kwargs : dict
-        Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contourf`
+        to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
-        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.pcolormesh` or
+        :meth:`bokeh.plotting.Figure.image`.
+        Ignored for 1D KDE.
     is_circular : {False, True, "radians", "degrees"}. Default False.
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
-        default input type is "radians".
+        default input type is "radians". When this argument is present, it interprets ``values``
+        is a circular variable measured in radians and a circular KDE is used. Inputs in
+        "degrees" will undergo an internal conversion to radians.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
@@ -107,7 +117,9 @@ def plot_kde(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
@@ -120,6 +132,11 @@ def plot_kde(
         Object containing the kde plot
     glyphs : list, optional
         Bokeh glyphs present in plot.  Only provided if ``return_glyph`` is True.
+
+    See Also
+    --------
+    kde : One dimensional density estimation.
+    plot_dist : Plot distribution as histogram or kernel density estimates.
 
     Examples
     --------
@@ -169,7 +186,7 @@ def plot_kde(
         :context: close-figs
 
         >>> rvs = np.random.vonmises(mu=np.pi, kappa=2, size=500)
-        >>> az.plot_kde(rvs, circular=True)
+        >>> az.plot_kde(rvs, is_circular=True)
 
 
     Plot a cumulative distribution
@@ -197,7 +214,7 @@ def plot_kde(
         >>> az.plot_kde(mu_posterior, values2=tau_posterior)
 
 
-    Plot 2d contour KDE, without filling and countour lines using viridis cmap
+    Plot 2d contour KDE, without filling and contour lines using viridis cmap
 
     .. plot::
         :context: close-figs
@@ -216,16 +233,19 @@ def plot_kde(
         ...     contour_kwargs={"levels":3}, contourf_kwargs={"levels":3}
         ... );
 
+    Plot 2d contour KDE with 30%, 60% and 90% HDI contours.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, values2=tau_posterior, hdi_probs=[0.3, 0.6, 0.9])
+
     Plot 2d smooth KDE
 
     .. plot::
         :context: close-figs
 
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
-
-    See Also
-    --------
-    plot_kde : Compute and plot a kernel density estimate.
 
     """
     if isinstance(values, xr.Dataset):
@@ -242,12 +262,12 @@ def plot_kde(
     if values2 is None:
 
         if bw == "default":
-            if circular:
+            if is_circular:
                 bw = "taylor"
             else:
                 bw = "experimental"
 
-        grid, density = kde(values, circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
+        grid, density = kde(values, is_circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
         lower, upper = grid[0], grid[-1]
 
         if cumulative:
@@ -260,6 +280,40 @@ def plot_kde(
     else:
         gridsize = (128, 128) if contour else (256, 256)
         density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
+
+        if hdi_probs is not None:
+            # Check hdi probs are within bounds (0, 1)
+            if min(hdi_probs) <= 0 or max(hdi_probs) >= 1:
+                raise ValueError("Highest density interval probabilities must be between 0 and 1")
+
+            # Calculate contour levels and sort for matplotlib
+            contour_levels = _find_hdi_contours(density, hdi_probs)
+            contour_levels.sort()
+
+            contour_level_list = [0] + list(contour_levels) + [density.max()]
+
+            # Add keyword arguments to contour, contourf
+            if contour_kwargs is None:
+                contour_kwargs = {"levels": contour_level_list}
+            else:
+                if "levels" in contour_kwargs:
+                    warnings.warn(
+                        "Both 'levels' in contour_kwargs and 'hdi_probs' have been specified."
+                        "Using 'hdi_probs' in favor of 'levels'.",
+                        UserWarning,
+                    )
+                contour_kwargs["levels"] = contour_level_list
+
+            if contourf_kwargs is None:
+                contourf_kwargs = {"levels": contour_level_list}
+            else:
+                if "levels" in contourf_kwargs:
+                    warnings.warn(
+                        "Both 'levels' in contourf_kwargs and 'hdi_probs' have been specified."
+                        "Using 'hdi_probs' in favor of 'levels'.",
+                        UserWarning,
+                    )
+                contourf_kwargs["levels"] = contour_level_list
 
         lower, upper, density_q = [None] * 3
 

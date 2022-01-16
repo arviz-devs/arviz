@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 import pytest
 
-from arviz import from_pystan
+from ... import from_pystan
 
 from ...data.io_pystan import get_draws, get_draws_stan3  # pylint: disable=unused-import
 from ..helpers import (  # pylint: disable=unused-import
@@ -136,6 +136,7 @@ class TestDataPyStan:
             log_likelihood=False,
             prior_model=data.model,
             save_warmup=pystan_version() == 2,
+            dtypes={"eta": int},
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
@@ -152,7 +153,7 @@ class TestDataPyStan:
         inference_data5 = self.get_inference_data5(data)
         # inference_data 1
         test_dict = {
-            "posterior": ["theta"],
+            "posterior": ["theta", "~log_lik"],
             "posterior_predictive": ["y_hat"],
             "predictions": ["y_hat"],
             "observed_data": ["y"],
@@ -221,6 +222,7 @@ class TestDataPyStan:
             )
         fails = check_multiple_attrs(test_dict, inference_data5)
         assert not fails
+        assert inference_data5.posterior.eta.dtype.kind == "i"
 
     def test_invalid_fit(self, data):
         if pystan_version() == 2:
@@ -292,7 +294,7 @@ class TestDataPyStan:
                     if "[" in key:
                         name, *shape = key.replace("]", "").split("[")
                         shape = [str(int(item) - 1) for items in shape for item in items.split(",")]
-                        key = name + "[{}]".format(",".join(shape))
+                        key = name + f"[{','.join(shape)}]"
                     new_chains[key] = np.full_like(values, fill_value=float(i))
                 setattr(holder, "chains", new_chains)
             fit.sim["fnames_oi"] = list(fit.sim["samples"][0].chains.keys())

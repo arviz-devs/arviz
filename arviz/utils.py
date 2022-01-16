@@ -34,6 +34,11 @@ def _var_names(var_names, data, filter_vars=None):
     -------
     var_name: list or None
     """
+    if filter_vars not in {None, "like", "regex"}:
+        raise ValueError(
+            f"'filter_vars' can only be None, 'like', or 'regex', got: '{filter_vars}'"
+        )
+
     if var_names is not None:
         if isinstance(data, (list, tuple)):
             all_vars = []
@@ -134,7 +139,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
 
         existing_items = np.isin(subset, whole_list)
         if not np.all(existing_items):
-            raise KeyError("{} are not present".format(np.array(subset)[~existing_items]))
+            raise KeyError(f"{np.array(subset)[~existing_items]} are not present")
 
     return subset
 
@@ -232,7 +237,7 @@ class interactive_backend:  # pylint: disable=invalid-name
         self.ipython = get_ipython()
         if self.ipython is None:
             raise EnvironmentError("This context manager can only be used inside ipython sessions")
-        self.ipython.magic("matplotlib {}".format(backend))
+        self.ipython.magic(f"matplotlib {backend}")
 
     def __enter__(self):
         """Enter context manager."""
@@ -424,7 +429,7 @@ def _cov(data):
         prod += 1e-6 * np.eye(prod.shape[0])
         return prod
     else:
-        raise ValueError("{} dimension arrays are not supported".format(data.ndim))
+        raise ValueError(f"{data.ndim} dimension arrays are not supported")
 
 
 def flatten_inference_data_to_dict(
@@ -566,7 +571,7 @@ def flatten_inference_data_to_dict(
                             group_separator_end=group_separator_end,
                         )
                     else:
-                        var_name_dim = "{var_name}".format(var_name=var_name)
+                        var_name_dim = f"{var_name}"
                     data_dict[var_name_dim] = var.values
                 else:
                     for loc in np.ndindex(var.shape[:-1]):
@@ -624,9 +629,7 @@ def get_coords(data, coords):
 
         except ValueError as err:
             invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError(
-                "Coords {} are invalid coordinate keys".format(invalid_coords)
-            ) from err
+            raise ValueError(f"Coords {invalid_coords} are invalid coordinate keys") from err
 
         except KeyError as err:
             raise KeyError(
@@ -643,9 +646,9 @@ def get_coords(data, coords):
         try:
             data_subset.append(get_coords(datum, coords_dict))
         except ValueError as err:
-            raise ValueError("Error in data[{}]: {}".format(idx, err)) from err
+            raise ValueError(f"Error in data[{idx}]: {err}") from err
         except KeyError as err:
-            raise KeyError("Error in data[{}]: {}".format(idx, err)) from err
+            raise KeyError(f"Error in data[{idx}]: {err}") from err
     return data_subset
 
 
@@ -696,10 +699,10 @@ def either_dict_or_kwargs(
     """Clone from xarray.core.utils."""
     if pos_kwargs is not None:
         if not hasattr(pos_kwargs, "keys") and hasattr(pos_kwargs, "__getitem__"):
-            raise ValueError("the first argument to .%s must be a dictionary" % func_name)
+            raise ValueError(f"the first argument to .{func_name} must be a dictionary")
         if kw_kwargs:
             raise ValueError(
-                "cannot specify both keyword and positional " "arguments to .%s" % func_name
+                f"cannot specify both keyword and positional arguments to .{func_name}"
             )
         return pos_kwargs
     else:

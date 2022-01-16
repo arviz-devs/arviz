@@ -49,18 +49,18 @@ def plot_trace(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names: str or list of str, optional
-        One or more variables to be plotted. Prefix the variables by `~` when you want
+        One or more variables to be plotted. Prefix the variables by ``~`` when you want
         to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
     coords: dict of {str: slice or array_like}, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     divergences: {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
     kind: {"trace", "rank_bar", "rank_vlines"}, optional
@@ -78,28 +78,29 @@ def plot_trace(
     circ_var_names : str or list of str, optional
         List of circular variables to account for when plotting KDE.
     circ_var_units : str
-        Whether the variables in `circ_var_names` are in "degrees" or "radians".
+        Whether the variables in ``circ_var_names`` are in "degrees" or "radians".
     compact: bool, optional
         Plot multidimensional variables in a single plot.
     compact_prop: str or dict {str: array_like}, optional
-        Tuple containing the property name and the property values to distinguish diferent
+        Tuple containing the property name and the property values to distinguish different
         dimensions with compact=True
     combined: bool, optional
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
     chain_prop: str or dict {str: array_like}, optional
-        Tuple containing the property name and the property values to distinguish diferent chains
+        Tuple containing the property name and the property values to distinguish different chains
     legend: bool, optional
         Add a legend to the figure with the chain color code.
     plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs: dict, optional
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
+        Extra keyword arguments passed to :func:`arviz.plot_dist`. Only affects continuous
+        variables.
     trace_kwargs: dict, optional
-        Extra keyword arguments passed to `plt.plot`
+        Extra keyword arguments passed to :meth:`matplotlib.axes.Axes.plot`
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     rank_kwargs : dict, optional
-        Extra keyword arguments passed to `arviz.plot_rank`
+        Extra keyword arguments passed to :func:`arviz.plot_rank`
     axes: axes, optional
         Matplotlib axes or bokeh figures.
     backend: {"matplotlib", "bokeh"}, optional
@@ -107,14 +108,19 @@ def plot_trace(
     backend_config: dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: dict, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`.
     show: bool, optional
         Call backend show function.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_rank : Plot rank order statistics of chains.
 
     Examples
     --------
