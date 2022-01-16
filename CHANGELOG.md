@@ -16,6 +16,8 @@
 * Fix legend labels in plot_ppc to reflect prior or posterior. ([1967](https://github.com/arviz-devs/arviz/pull/1967))
 * Change `DataFrame.append` to `pandas.concat` ([1973](https://github.com/arviz-devs/arviz/pull/1973))
 * Fix axis sharing behaviour in `plot_pair`. ([1985](https://github.com/arviz-devs/arviz/pull/1985))
+* Fix parameter duplication problem with PyStan ([1962](https://github.com/arviz-devs/arviz/pull/1962))
+* Temporarily disable pyjags tests ([1963](https://github.com/arviz-devs/arviz/pull/1963))
 
 ### Deprecation
 
