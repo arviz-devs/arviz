@@ -37,7 +37,7 @@ class DictConverter:
         pred_dims=None,
         pred_coords=None,
         attrs=None,
-        **kwargs
+        **kwargs,
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -375,7 +375,7 @@ def from_dict(
     pred_dims=None,
     pred_coords=None,
     attrs=None,
-    **kwargs
+    **kwargs,
 ):
     """Convert Dictionary data into an InferenceData object.
 
