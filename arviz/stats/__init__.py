@@ -15,6 +15,7 @@ __all__ = [
     "loo",
     "loo_pit",
     "psislw",
+    "r2_samples",
     "r2_score",
     "summary",
     "waic",
