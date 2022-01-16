@@ -1358,9 +1358,21 @@ class InferenceData(Mapping[str, xr.Dataset]):
             if dataset:
                 setattr(self, group, dataset)
                 if group.startswith(WARMUP_TAG):
-                    self._groups_warmup.append(group)
+                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup]
+                    if (supported_order == self._groups_warmup) and (group in SUPPORTED_GROUPS_ALL):
+                        group_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup + [group]]
+                        group_idx = group_order.index(group)
+                        self._groups_warmup.insert(group_idx, group)
+                    else:
+                        self._groups_warmup.append(group)
                 else:
-                    self._groups.append(group)
+                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
+                    if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
+                        group_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]]
+                        group_idx = group_order.index(group)
+                        self._groups.insert(group_idx, group)
+                    else:
+                        self._groups.append(group)
 
     def extend(self, other, join="left"):
         """Extend InferenceData with groups from another InferenceData.
