@@ -166,15 +166,6 @@ def test_r2_score():
     assert_allclose(res.rvalue ** 2, r2_score(y, y_pred).r2, 2)
 
 
-def test_r2_score_multivariate():
-    x = np.linspace(0, 1, 100)
-    y = np.random.normal(x, 1)
-    res = linregress(x, y)
-    y_multivariate = np.c_[y, y]
-    y_multivariate_pred = x[None, :, None] + np.random.randn(300, 100, 2)
-    assert not np.isnan(r2_score(y_multivariate, y_multivariate_pred).r2)
-
-
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
 @pytest.mark.parametrize("multidim", [True, False])
 def test_compare_same(centered_eight, multidim_models, method, multidim):
