@@ -65,7 +65,7 @@ class InferenceData:
         Parameters
         ----------
         attrs : dict
-            sets global atrribute for InferenceData object.
+            sets global attribute for InferenceData object.
         kwargs :
             Keyword arguments of xarray datasets
 
