@@ -37,6 +37,7 @@ class DictConverter:
         pred_dims=None,
         pred_coords=None,
         attrs=None,
+        **kwargs,
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -69,6 +70,7 @@ class DictConverter:
         self.attrs = {} if attrs is None else attrs
         self.attrs.pop("created_at", None)
         self.attrs.pop("arviz_version", None)
+        self._kwargs = kwargs
 
     def _init_dict(self, attr_name):
         dict_or_none = getattr(self, attr_name, {})
@@ -90,14 +92,15 @@ class DictConverter:
                 " For stats functions log likelihood data needs to be in log_likelihood group.",
                 UserWarning,
             )
-
+        posterior_attrs = self._kwargs.get("posterior_attrs")
+        posterior_warmup_attrs = self._kwargs.get("posterior_warmup_attrs")
         return (
             dict_to_dataset(
                 data,
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=posterior_attrs,
                 index_origin=self.index_origin,
             ),
             dict_to_dataset(
@@ -105,7 +108,7 @@ class DictConverter:
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=posterior_warmup_attrs,
                 index_origin=self.index_origin,
             ),
         )
@@ -127,14 +130,15 @@ class DictConverter:
                 "favour of storing them in the log_likelihood group.",
                 PendingDeprecationWarning,
             )
-
+        sample_stats_attrs = self._kwargs.get("sample_stats_attrs")
+        sample_stats_warmup_attrs = self._kwargs.get("sample_stats_warmup_attrs")
         return (
             dict_to_dataset(
                 data,
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=sample_stats_attrs,
                 index_origin=self.index_origin,
             ),
             dict_to_dataset(
@@ -142,7 +146,7 @@ class DictConverter:
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=sample_stats_warmup_attrs,
                 index_origin=self.index_origin,
             ),
         )
@@ -156,14 +160,15 @@ class DictConverter:
             raise TypeError("DictConverter.log_likelihood is not a dictionary")
         if not isinstance(data_warmup, dict):
             raise TypeError("DictConverter.warmup_log_likelihood is not a dictionary")
-
+        log_likelihood_attrs = self._kwargs.get("log_likelihood_attrs")
+        log_likelihood_warmup_attrs = self._kwargs.get("log_likelihood_warmup_attrs")
         return (
             dict_to_dataset(
                 data,
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=log_likelihood_attrs,
                 index_origin=self.index_origin,
                 skip_event_dims=True,
             ),
@@ -172,7 +177,7 @@ class DictConverter:
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=log_likelihood_warmup_attrs,
                 index_origin=self.index_origin,
                 skip_event_dims=True,
             ),
@@ -187,14 +192,15 @@ class DictConverter:
             raise TypeError("DictConverter.posterior_predictive is not a dictionary")
         if not isinstance(data_warmup, dict):
             raise TypeError("DictConverter.warmup_posterior_predictive is not a dictionary")
-
+        posterior_predictive_attrs = self._kwargs.get("posterior_predictive_attrs")
+        posterior_predictive_warmup_attrs = self._kwargs.get("posterior_predictive_warmup_attrs")
         return (
             dict_to_dataset(
                 data,
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=posterior_predictive_attrs,
                 index_origin=self.index_origin,
             ),
             dict_to_dataset(
@@ -202,7 +208,7 @@ class DictConverter:
                 library=None,
                 coords=self.coords,
                 dims=self.dims,
-                attrs=self.attrs,
+                attrs=posterior_predictive_warmup_attrs,
                 index_origin=self.index_origin,
             ),
         )
@@ -216,14 +222,15 @@ class DictConverter:
             raise TypeError("DictConverter.predictions is not a dictionary")
         if not isinstance(data_warmup, dict):
             raise TypeError("DictConverter.warmup_predictions is not a dictionary")
-
+        predictions_attrs = self._kwargs.get("predictions_attrs")
+        predictions_warmup_attrs = self._kwargs.get("predictions_warmup_attrs")
         return (
             dict_to_dataset(
                 data,
                 library=None,
                 coords=self.coords,
                 dims=self.pred_dims,
-                attrs=self.attrs,
+                attrs=predictions_attrs,
                 index_origin=self.index_origin,
             ),
             dict_to_dataset(
@@ -231,7 +238,7 @@ class DictConverter:
                 library=None,
                 coords=self.coords,
                 dims=self.pred_dims,
-                attrs=self.attrs,
+                attrs=predictions_warmup_attrs,
                 index_origin=self.index_origin,
             ),
         )
@@ -242,13 +249,13 @@ class DictConverter:
         data = self.prior
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior is not a dictionary")
-
+        prior_attrs = self._kwargs.get("prior_attrs")
         return dict_to_dataset(
             data,
             library=None,
             coords=self.coords,
             dims=self.dims,
-            attrs=self.attrs,
+            attrs=prior_attrs,
             index_origin=self.index_origin,
         )
 
@@ -258,13 +265,13 @@ class DictConverter:
         data = self.sample_stats_prior
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats_prior is not a dictionary")
-
+        sample_stats_prior_attrs = self._kwargs.get("sample_stats_prior_attrs")
         return dict_to_dataset(
             data,
             library=None,
             coords=self.coords,
             dims=self.dims,
-            attrs=self.attrs,
+            attrs=sample_stats_prior_attrs,
             index_origin=self.index_origin,
         )
 
@@ -274,13 +281,13 @@ class DictConverter:
         data = self.prior_predictive
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior_predictive is not a dictionary")
-
+        prior_predictive_attrs = self._kwargs.get("prior_predictive_attrs")
         return dict_to_dataset(
             data,
             library=None,
             coords=self.coords,
             dims=self.dims,
-            attrs=self.attrs,
+            attrs=prior_predictive_attrs,
             index_origin=self.index_origin,
         )
 
@@ -337,6 +344,7 @@ class DictConverter:
                 "constant_data": self.constant_data_to_xarray(),
                 "predictions_constant_data": self.predictions_constant_data_to_xarray(),
                 "save_warmup": self.save_warmup,
+                "attrs": self.attrs,
             }
         )
 
@@ -367,6 +375,7 @@ def from_dict(
     pred_dims=None,
     pred_coords=None,
     attrs=None,
+    **kwargs,
 ):
     """Convert Dictionary data into an InferenceData object.
 
@@ -406,6 +415,18 @@ def from_dict(
         A mapping from variables to a list of coordinate values for predictions.
     attrs : dict
         A dictionary containing attributes for different groups.
+    kwargs : dict
+        A dictionary containing group attrs.
+        Accepted kwargs are:
+        - posterior_attrs, posterior_warmup_attrs : attrs for posterior group
+        - sample_stats_attrs, sample_stats_warmup_attrs : attrs for sample_stats group
+        - log_likelihood_attrs, log_likelihood_warmup_attrs : attrs for log_likelihood group
+        - posterior_predictive_attrs, posterior_predictive_warmup_attrs : attrs for
+                posterior_predictive group
+        - predictions_attrs, predictions_warmup_attrs : attrs for predictions group
+        - prior_attrs : attrs for prior group
+        - sample_stats_prior_attrs : attrs for sample_stats_prior group
+        - prior_predictive_attrs : attrs for prior_predictive group
 
     Returns
     -------
@@ -435,4 +456,5 @@ def from_dict(
         pred_dims=pred_dims,
         pred_coords=pred_coords,
         attrs=attrs,
+        **kwargs,
     ).to_inference_data()
