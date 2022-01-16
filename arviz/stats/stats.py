@@ -42,6 +42,7 @@ __all__ = [
     "loo",
     "loo_pit",
     "psislw",
+    "r2_samples",
     "r2_score",
     "summary",
     "waic",
@@ -1023,7 +1024,7 @@ def r2_samples(y_true, y_pred):
     else:
         var_y_est = _numba_var(svar, np.var, y_pred,axis=1)
         var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
-        r_squared = var_y_est / (var_y_est + var_e)
+    r_squared = var_y_est / (var_y_est + var_e)
 
     return r_squared
 
