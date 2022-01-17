@@ -6,6 +6,7 @@ from .densityplot import plot_density
 from .distcomparisonplot import plot_dist_comparison
 from .distplot import plot_dist
 from .dotplot import plot_dot
+from .draw_prior import draw_prior
 from .elpdplot import plot_elpd
 from .energyplot import plot_energy
 from .essplot import plot_ess
@@ -53,4 +54,5 @@ __all__ = [
     "plot_ts",
     "plot_violin",
     "plot_separation",
+    "draw_prior",
 ]
