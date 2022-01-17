@@ -26,7 +26,7 @@ from ... import (
     list_datasets,
     load_arviz_data,
     to_netcdf,
-    extract_dataset
+    extract_dataset,
 )
 
 from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
@@ -1399,13 +1399,14 @@ class TestDataArrayToDataset:
         assert inference_data.prior.draw.shape == shape[1:2]
         assert inference_data.prior[var_name].shape == shape
 
+
 class TestExtractDataset:
     def test_default(self):
         idata = load_arviz_data("centered_eight")
         post = extract_dataset(idata)
         assert isinstance(post, xr.Dataset)
         assert "sample" in post.dims
-        assert post.theta.size == (4*500*8)
+        assert post.theta.size == (4 * 500 * 8)
 
     def test_seed(self):
         idata = load_arviz_data("centered_eight")

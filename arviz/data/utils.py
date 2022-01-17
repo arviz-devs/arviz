@@ -4,6 +4,7 @@ import numpy as np
 from ..utils import _var_names
 from .converters import convert_to_dataset
 
+
 def extract_dataset(
     data,
     group="posterior",
@@ -13,7 +14,7 @@ def extract_dataset(
     num_samples=None,
     rng=None,
 ):
-    """Extracts an InferenceData group or subset of it as a {class}`xarray.Dataset`.
+    """Extract an InferenceData group or subset of it as a {class}`xarray.Dataset`.
 
     Parameters
     ----------

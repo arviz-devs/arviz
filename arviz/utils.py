@@ -16,7 +16,6 @@ from .rcparams import rcParams
 STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
 
 
-
 def _var_names(var_names, data, filter_vars=None):
     """Handle var_names input across arviz.
 
