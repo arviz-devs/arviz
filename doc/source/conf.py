@@ -62,6 +62,7 @@ extensions = [
     "notfound.extension",
     "sphinx_copybutton",
     "sphinx_codeautolink",
+    "jupyter_sphinx",
 ]
 
 # codeautolink

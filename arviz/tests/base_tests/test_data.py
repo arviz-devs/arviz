@@ -26,6 +26,7 @@ from ... import (
     list_datasets,
     load_arviz_data,
     to_netcdf,
+    extract_dataset
 )
 
 from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
@@ -1397,3 +1398,37 @@ class TestDataArrayToDataset:
         assert inference_data.prior.chain.shape == shape[:1]
         assert inference_data.prior.draw.shape == shape[1:2]
         assert inference_data.prior[var_name].shape == shape
+
+class TestExtractDataset:
+    def test_default(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata)
+        assert isinstance(post, xr.Dataset)
+        assert "sample" in post.dims
+        assert post.theta.size == (4*500*8)
+
+    def test_seed(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata, rng=7)
+        post_pred = extract_dataset(idata, group="posterior_predictive", rng=7)
+        assert all(post.sample == post_pred.sample)
+
+    def test_no_combine(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata, combined=False)
+        assert "sample" not in post.dims
+        assert post.dims["chain"] == 4
+        assert post.dims["draw"] == 500
+
+    def test_var_name_group(self):
+        idata = load_arviz_data("centered_eight")
+        prior = extract_dataset(idata, group="prior", var_names="the", filter_vars="like")
+        assert prior.attrs == idata.prior.attrs
+        assert "theta" in prior.data_vars
+        assert "mu" not in prior.data_vars
+
+    def test_subset_samples(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata, num_samples=10)
+        assert post.dims["sample"] == 10
+        assert post.attrs == idata.posterior.attrs
