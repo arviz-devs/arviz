@@ -55,7 +55,7 @@ def extract_dataset(
     .. jupyter-execute::
 
         import arviz as az
-        idata = az.load_arviz_data("centered")
+        idata = az.load_arviz_data("centered_eight")
         az.extract_dataset(idata)
 
     You can also indicate a subset to be returned, but in variables and in samples:
