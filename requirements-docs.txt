@@ -13,3 +13,4 @@ sphinx-copybutton
 bokeh
 sphinx_design
 sphinx-codeautolink @ git+https://github.com/felix-hilden/sphinx-codeautolink
+jupyter-sphinx

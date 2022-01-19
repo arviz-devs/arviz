@@ -2,6 +2,7 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 * Allow kwargs to customize appearance of the mean in `plot_lm`
 
@@ -15,6 +16,7 @@
 
 ### Documentation
 * Fixed typo in `Forestplot` documentation
+* Restructured contributing section and added several new pages to help contributing to docs ([1903](https://github.com/arviz-devs/arviz/pull/1903))
 
 
 ## v0.11.4 (2021 Oct 3)
