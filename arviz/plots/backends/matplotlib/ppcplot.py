@@ -257,7 +257,7 @@ def plot_ppc(
                     drawstyle=drawstyle,
                     linewidth=linewidth,
                 )
-            ax_i.plot([], color=colors[0], label="Posterior predictive")
+            ax_i.plot([], color=colors[0], label=f"{group.capitalize()} predictive")
             if mean:
                 ax_i.plot(
                     *_empirical_cdf(pp_vals.flatten()),
@@ -265,7 +265,7 @@ def plot_ppc(
                     linestyle="--",
                     linewidth=linewidth * 1.5,
                     drawstyle=drawstyle,
-                    label="Posterior predictive mean",
+                    label=f"{group.capitalize()} predictive mean",
                 )
             ax_i.set_yticks([0, 0.5, 1])
 
@@ -280,7 +280,7 @@ def plot_ppc(
                             "linewidth": linewidth * 1.5,
                             "zorder": 3,
                         },
-                        label="Posterior predictive mean",
+                        label=f"{group.capitalize()} predictive mean",
                         ax=ax_i,
                         legend=legend,
                     )
@@ -294,7 +294,7 @@ def plot_ppc(
                         hist,
                         color=colors[2],
                         linewidth=linewidth * 1.5,
-                        label="Posterior predictive mean",
+                        label=f"{group.capitalize()} predictive mean",
                         zorder=3,
                         linestyle="--",
                         drawstyle="steps-pre",
@@ -350,7 +350,12 @@ def plot_ppc(
                         alpha=alpha,
                     )
 
-            ax_i.plot([], color=colors[0], marker="o", label="Posterior predictive")
+            ax_i.plot(
+                [],
+                color=colors[0],
+                marker="o",
+                label=f"{group.capitalize()} predictive"
+            )
 
             ax_i.set_yticks([])
 
