@@ -350,12 +350,7 @@ def plot_ppc(
                         alpha=alpha,
                     )
 
-            ax_i.plot(
-                [],
-                color=colors[0],
-                marker="o",
-                label=f"{group.capitalize()} predictive"
-            )
+            ax_i.plot([], color=colors[0], marker="o", label=f"{group.capitalize()} predictive")
 
             ax_i.set_yticks([])
 
