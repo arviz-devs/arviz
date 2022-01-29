@@ -63,7 +63,7 @@ def plot_trace(
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     divergences: {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
-    kind: {"trace", "rank_bar", "rank_vlines"}, optional
+    kind: {"trace", "rank_bars", "rank_vlines"}, optional
         Choose between plotting sampled values per iteration and rank plots.
     transform: callable, optional
         Function to transform data (defaults to None i.e.the identity function)
