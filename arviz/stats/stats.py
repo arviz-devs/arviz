@@ -246,7 +246,7 @@ def compare(
         try:
             # Here is where the IC function is actually computed -- the rest of this
             # function is argument processing and return value formatting
-            ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
+            ics = pd.concat([ics, ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
         except Exception as e:
             raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
     ics.index = names
