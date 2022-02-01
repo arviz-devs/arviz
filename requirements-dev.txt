@@ -6,7 +6,7 @@ pydocstyle
 pylint
 pytest
 pytest-cov
-black<22.1.0 ; python_version >= '3.6'
+black==21.12b0 ; python_version >= '3.6'
 typing_copilot ; python_version >= '3.7'
 mypy<0.800
 cloudpickle<1.5.0
