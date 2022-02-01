@@ -85,7 +85,7 @@ class Rectangles:
     """
     Clickable rectangles
 
-    Clicked rectangles are highlithed
+    Clicked rectangles are highlighted
     """
 
     def __init__(self, fig, coll, nrows, ncols, ax):

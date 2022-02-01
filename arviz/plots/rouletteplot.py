@@ -5,7 +5,7 @@ from ..rcparams import rcParams
 
 
 def plot_roulette(
-    x_min=0, x_max=10, nrows=10, ncols=10, parameterization="PyMC", figsize=None, backend=None
+    x_min=0, x_max=10, nrows=10, ncols=10, parametrization="PyMC", figsize=None, backend=None
 ):
     """
     Prior elicitation for 1D distribution.
@@ -23,20 +23,20 @@ def plot_roulette(
         Number of rows for the grid. Defaults to 10.
     ncols: Optional[int]
         Number of columns for the grid. Defaults to 10.
-    parameterization: Optional[str]
-        Parametization used to report the result of the fit.
-        Currently only "PyMC" parameterization is supported.
+    parametrization: Optional[str]
+        Parametrization used to report the result of the fit.
+        Currently only "PyMC" parametrization is supported.
     figsize: Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
     backend: Optional[str]
         Select plotting backend {"matplotlib", "bokeh"}. Default "matplotlib". Currently this plot
-        only works with bokeh backend.
+        only works with the matplotlib backend.
 
     Returns
     -------
     scipy.stats.distributions.rv_frozen
-        Notice that the returned rv_frozen object always use the scipy parameterization, irrespective of the
-        value of `parameterization` argument.
+        Notice that the returned rv_frozen object always use the scipy parametrization,
+        irrespective of the value of `parametrization` argument.
         Unlike standard rv_frozen objects this one has a name attribute
 
     References
@@ -50,7 +50,7 @@ def plot_roulette(
         x_max=x_max,
         nrows=nrows,
         ncols=ncols,
-        parameterization=parameterization,
+        parametrization=parametrization,
         figsize=figsize,
     )
 
