@@ -120,5 +120,6 @@ from .parallelplot import plot_parallel
 from .posteriorplot import plot_posterior
 from .ppcplot import plot_ppc
 from .rankplot import plot_rank
+from .rouletteplot import plot_roulette
 from .traceplot import plot_trace
 from .violinplot import plot_violin

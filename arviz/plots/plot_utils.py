@@ -7,7 +7,7 @@ import matplotlib as mpl
 import numpy as np
 import packaging
 from matplotlib.colors import to_hex
-from scipy.stats import mode, rankdata
+from scipy import stats
 from scipy.interpolate import CubicSpline
 
 
@@ -372,7 +372,7 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
             x, density = kde(values, circular=circular, bw=bw)
             point_value = x[np.argmax(density)]
         else:
-            point_value = mode(values)[0][0]
+            point_value = stats.mode(values)[0][0]
     elif point_estimate == "median":
         if skipna:
             point_value = np.nanmedian(values)
@@ -592,7 +592,7 @@ def compute_ranks(ary):
         x = np.linspace(min_ary, max_ary, len(ary))
         csi = CubicSpline(x, ary)
         ary = csi(np.linspace(min_ary + 0.001, max_ary - 0.001, len(ary))).reshape(ary_shape)
-    ranks = rankdata(ary, method="average").reshape(ary.shape)
+    ranks = stats.rankdata(ary, method="average").reshape(ary.shape)
 
     return ranks
 
@@ -612,3 +612,90 @@ def _init_kwargs_dict(kwargs):
     if kwargs is None:
         return {}
     return kwargs.copy()
+
+
+def weights_to_sample(weights, x_min, x_range, ncols):
+    """
+    Turn the weights (chips) into a sample over a grid.
+    """
+
+    sample = []
+    filled_columns = 0
+
+    if any(weights.values()):
+        for k, v in weights.items():
+            if v != 0:
+                filled_columns += 1
+            la = np.repeat((k / ncols * x_range) + x_min + ((x_range / ncols) / 2), v * 100 + 1)
+            sample.extend(la)
+    return sample, filled_columns
+
+
+def get_scipy_distributions(cvars):
+    """
+    Generate a subset of scipy.stats distributions which names agrees with those in cvars
+    """
+    selection = [cvar.get() for cvar in cvars]
+    scipy_dists = []
+    for d in dir(stats):
+        obj = getattr(stats, d)
+        if hasattr(obj, "fit") and hasattr(obj, "name"):
+            if obj.name in selection:
+                scipy_dists.append(obj)
+    return scipy_dists
+
+
+def fit_to_sample(selected_distributions, sample, x_min, x_max, x_range):
+    """
+    Fit a sample to scipy distributions
+
+    Use a MLE approximated over a grid of values defined by x_min and x_max
+    """
+    x_vals = np.linspace(x_min, x_max, 500)
+    sum_pdf_old = -np.inf
+    fitted_dist, can_dist, params, ref_pdf = [None] * 4
+    for dist in selected_distributions:
+        if dist.name == "beta":
+            a, b, _, _ = dist.fit(sample, floc=x_min, fscale=x_range)
+            can_dist = dist(a, b, loc=x_min, scale=x_range)
+        elif dist.name == "norm":
+            a, b = dist.fit(sample)
+            can_dist = dist(a, b)
+        elif dist.name == "gamma" and x_min >= 0:
+            a, _, b = dist.fit(sample)
+            can_dist = dist(a, scale=b)
+            b = 1 / b
+        elif dist.name == "lognorm" and x_min >= 0:
+            b, _, a = dist.fit(sample)
+            can_dist = dist(b, scale=a)
+            a = np.log(a)
+
+        if can_dist is not None:
+            logpdf = can_dist.logpdf(x_vals)
+            sum_pdf = np.sum(logpdf[np.isfinite(logpdf)])
+            pdf = np.exp(logpdf)
+            if sum_pdf > sum_pdf_old:
+                sum_pdf_old = sum_pdf
+                ref_pdf = pdf
+                params = a, b
+                fitted_dist = can_dist
+                dist_name = dist.name
+                if dist_name == "beta" and (x_min < 0 or x_max > 1):
+                    dist_name = "scaled beta"
+                fitted_dist.name = dist_name
+
+    return fitted_dist, params, x_vals, ref_pdf
+
+
+def plot_boxlike(fitted_dist, x_vals, ref_pdf, quantiles, ax):
+    """
+    Plot the mean as a dot and two interquantile ranges as lines
+    """
+    qs = fitted_dist.ppf(quantiles)
+    mean = fitted_dist.moment(1)
+    support = fitted_dist.support()
+
+    ax.plot(x_vals, ref_pdf)
+    ax.plot([qs[1], qs[2]], [0, 0], "k", lw=4)
+    ax.plot([qs[0], qs[3]], [0, 0], "k", lw=2)
+    ax.plot(mean, 0, "w.")

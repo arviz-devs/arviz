@@ -6,7 +6,6 @@ from .densityplot import plot_density
 from .distcomparisonplot import plot_dist_comparison
 from .distplot import plot_dist
 from .dotplot import plot_dot
-from .draw_prior import draw_prior
 from .elpdplot import plot_elpd
 from .energyplot import plot_energy
 from .essplot import plot_ess
@@ -22,6 +21,7 @@ from .parallelplot import plot_parallel
 from .posteriorplot import plot_posterior
 from .ppcplot import plot_ppc
 from .rankplot import plot_rank
+from .rouletteplot import plot_roulette
 from .separationplot import plot_separation
 from .traceplot import plot_trace
 from .tsplot import plot_ts
@@ -54,5 +54,5 @@ __all__ = [
     "plot_ts",
     "plot_violin",
     "plot_separation",
-    "draw_prior",
+    "plot_roulette",
 ]
