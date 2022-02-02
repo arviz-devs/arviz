@@ -12,7 +12,7 @@
 * Remove manual setting of 2d KDE limits ([1939](https://github.com/arviz-devs/arviz/pull/1939))
 * Pin to bokeh<3 version ([1954](https://github.com/arviz-devs/arviz/pull/1954))
 * Fix legend labels in plot_ppc to reflect prior or posterior. ([1967](https://github.com/arviz-devs/arviz/pull/1967))
-* Change `DataFrame.append()` to `pandas.concat()` ([1973](https://github.com/arviz-devs/arviz/pull/1973))
+* Change `DataFrame.append` to `pandas.concat` ([1973](https://github.com/arviz-devs/arviz/pull/1973))
 
 ### Deprecation
 
