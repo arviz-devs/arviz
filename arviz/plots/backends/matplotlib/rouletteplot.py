@@ -14,7 +14,7 @@ from scipy import stats
 from ...plot_utils import weights_to_sample, get_scipy_distributions, fit_to_sample, plot_boxlike
 
 
-def plot_roulette(x_min, x_max, nrows, ncols, parameterization, figsize):
+def plot_roulette(x_min, x_max, nrows, ncols, parametrization, figsize):
 
     BGCOLOR = "#F2F2F2"  # tkinter background color
     BUCOLOR = "#E2E2E2"  # tkinter button color
