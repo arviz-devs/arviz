@@ -46,8 +46,9 @@ def plot_loo_pit(
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
         None, ``idata`` must contain the posterior predictive group. If None, ``y_hat`` is taken
         equal to y, thus, y must be str too.
-    log_weights : array or DataArray
-        Smoothed log_weights. It must have the same shape as ``y_hat``
+    log_weights: array, DataArray, or str
+        Smoothed log_weights. It must have the same shape as ``y_hat``. If str, it should be
+        the name of a variable in the log_likelihood group.
     ecdf : bool, optional
         Plot the difference between the LOO-PIT Empirical Cumulative Distribution Function
         (ECDF) and the uniform CDF instead of LOO-PIT kde.
