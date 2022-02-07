@@ -217,6 +217,12 @@ class CmdStanConverter:
             log_likelihood = []
         elif isinstance(log_likelihood, str):
             log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
+        elif isinstance(log_likelihood, dict):
+            log_likelihood = [
+                col
+                for col in columns
+                if any(item == col.split(".")[0] for item in log_likelihood.values())
+            ]
         else:
             log_likelihood = [
                 col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
@@ -430,13 +436,22 @@ class CmdStanConverter:
             data = _unpack_ndarrays(chain_data, columns, self.dtypes)
             data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
         else:
-            if isinstance(log_likelihood, str):
-                log_likelihood = [log_likelihood]
-            columns = {
-                col: idx
-                for col, idx in self.posterior_columns.items()
-                if any(item == col.split(".")[0] for item in log_likelihood)
-            }
+            if isinstance(log_likelihood, dict):
+                log_lik_to_obs_name = {v: f"{k}.{{}}".format for k, v in log_likelihood.items()}
+                columns = {
+                    log_lik_to_obs_name[col_varidx[0]](col_varidx[1]): idx
+                    for col, idx in self.posterior_columns.items()
+                    if any(item == col.split(".")[0] for item in log_likelihood.values())
+                    and (col_varidx := col.split("."))
+                }
+            else:
+                if isinstance(log_likelihood, str):
+                    log_likelihood = [log_likelihood]
+                columns = {
+                    col: idx
+                    for col, idx in self.posterior_columns.items()
+                    if any(item == col.split(".")[0] for item in log_likelihood)
+                }
             data = _unpack_ndarrays(self.posterior[0], columns, self.dtypes)
             data_warmup = _unpack_ndarrays(self.posterior[1], columns, self.dtypes)
             attrs = None
@@ -966,8 +981,14 @@ def from_cmdstan(
     predictions_constant_data_var : str or list of str, optional
         Variable(s) used for slicing predictions_constant_data.
         If not defined, all data variables are imported.
-    log_likelihood : str or list of str, optional
-        Pointwise log_likelihood for the data.
+    log_likelihood : dict of {str: str}, list of str or str, optional
+        Pointwise log_likelihood for the data. log_likelihood is extracted from the
+        posterior. It is recommended to use this argument as a dictionary whose keys
+        are observed variable names and its values are the variables storing log
+        likelihood arrays in the Stan code. In other cases, a dictionary with keys
+        equal to its values is used. By default, if a variable ``log_lik`` is
+        present in the Stan model, it will be retrieved as pointwise log
+        likelihood values. Use ``False`` to avoid this behaviour.
     index_origin : int, optional
         Starting value of integer coordinate values. Defaults to the value in rcParam
         ``data.index_origin``.

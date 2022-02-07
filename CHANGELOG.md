@@ -5,6 +5,8 @@
 * Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 * Allow kwargs to customize appearance of the mean in `plot_lm`
+* Add dict option to `from_cmdstan` log_likelihood parameter (as in `from_pystan`)
+
 
 ### Maintenance and fixes
 * Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
