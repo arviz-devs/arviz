@@ -1597,9 +1597,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
         None, ``idata`` must contain the posterior predictive group. If None, y_hat is taken
         equal to y, thus, y must be str too.
-    log_weights: array, DataArray, or str
-        Smoothed log_weights. It must have the same shape as ``y_hat``. If str, it should be
-        the name of a variable in the log_likelihood group.
+    log_weights: array or DataArray
+        Smoothed log_weights. It must have the same shape as ``y_hat``
     dask_kwargs : dict, optional
         Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
@@ -1664,10 +1663,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             y_hat = idata.posterior_predictive[y_hat].stack(__sample__=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
             raise ValueError(f"y_hat must be of types array, DataArray or str, not {type(y_hat)}")
-        if log_weights is None or isinstance(log_weights, str):
-            if isinstance(log_weights, str):
-                log_likelihood = _get_log_likelihood(idata, var_name=log_weights)
-            elif y_str:
+        if log_weights is None:
+            if y_str:
                 try:
                     log_likelihood = _get_log_likelihood(idata, var_name=y_str)
                 except TypeError:
