@@ -5,7 +5,6 @@
 * Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 * Allow kwargs to customize appearance of the mean in `plot_lm`
-* Allow `log_weights` to specificy the log_likelihood variable name in `loo_pit` (and `plot_loo_pit`)
 
 ### Maintenance and fixes
 * Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
