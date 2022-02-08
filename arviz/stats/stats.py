@@ -248,7 +248,7 @@ def compare(
         except Exception as e:
             raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
 
-    ics = pd.concat(ics, axis=1).T
+    ics =  pd.DataFrame.from_dict(ics, orient="index")
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
 
