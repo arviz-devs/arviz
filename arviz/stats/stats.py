@@ -1690,8 +1690,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
     if len(y.shape) + 1 != len(y_hat.shape):
         raise ValueError(
-            f"y_hat must have 1 more dimension than y, but y_hat has {len(y.shape)} dims and y has "
-            f"{len(y_hat.shape)} dims"
+            f"y_hat must have 1 more dimension than y, but y_hat has {len(y_hat.shape)} dims and "
+            f"y has {len(y.shape)} dims"
         )
 
     if y.shape != y_hat.shape[:-1]:
