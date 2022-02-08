@@ -437,11 +437,15 @@ class CmdStanConverter:
             data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
         else:
             if isinstance(log_likelihood, dict):
-                log_lik_to_obs_name = {v: f"{k}.{{}}".format for k, v in log_likelihood.items()}
+                log_lik_to_obs_name = {
+                    v: lambda idx: f"{k}.{{}}".format(idx) if idx else k
+                    for k, v in log_likelihood.items()
+                }
                 columns = {
                     log_lik_to_obs_name[col](varidx): idx
                     for col, varidx, idx in (
-                        (*col.split(".", 1), idx) for col, idx in self.posterior_columns.items()
+                        (*(col.split(".", 1) if "." in col else (col, None)), idx)
+                        for col, idx in self.posterior_columns.items()
                     )
                     if any(item == col for item in log_likelihood.values())
                 }
