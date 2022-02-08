@@ -441,7 +441,7 @@ class CmdStanConverter:
                 columns = {
                     log_lik_to_obs_name[col](varidx): idx
                     for col, varidx, idx in (
-                        (*col.split("."), idx) for col, idx in self.posterior_columns.items()
+                        (*col.split(".", 1), idx) for col, idx in self.posterior_columns.items()
                     )
                     if any(item == col for item in log_likelihood.values())
                 }
