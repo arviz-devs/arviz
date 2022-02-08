@@ -439,10 +439,11 @@ class CmdStanConverter:
             if isinstance(log_likelihood, dict):
                 log_lik_to_obs_name = {v: f"{k}.{{}}".format for k, v in log_likelihood.items()}
                 columns = {
-                    log_lik_to_obs_name[col_varidx[0]](col_varidx[1]): idx
-                    for col, idx in self.posterior_columns.items()
-                    if any(item == col.split(".")[0] for item in log_likelihood.values())
-                    and (col_varidx := col.split("."))
+                    log_lik_to_obs_name[col](varidx): idx
+                    for col, varidx, idx in (
+                        (*col.split("."), idx) for col, idx in self.posterior_columns.items()
+                    )
+                    if any(item == col for item in log_likelihood.values())
                 }
             else:
                 if isinstance(log_likelihood, str):
