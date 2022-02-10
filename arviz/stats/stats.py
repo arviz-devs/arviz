@@ -239,16 +239,16 @@ def compare(
     p_ic = f"p_{ic}"
     ic_i = f"{ic}_i"
 
-    ics = {}
+    ics_dict = {}
     for name, dataset in dataset_dict.items():
         try:
             # Here is where the IC function is actually computed -- the rest of this
             # function is argument processing and return value formatting
-            ics[name] = ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)
+            ics_dict[name] = ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)
         except Exception as e:
             raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
 
-    ics =  pd.DataFrame.from_dict(ics, orient="index")
+    ics = pd.DataFrame.from_dict(ics_dict, orient="index")
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
 
