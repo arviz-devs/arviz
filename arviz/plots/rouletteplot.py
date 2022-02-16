@@ -2,7 +2,7 @@
 
 from .backends.matplotlib import plot_roulette as plot
 from ..rcparams import rcParams
-
+from .. import _log
 
 def plot_roulette(
     x_min=0, x_max=10, nrows=10, ncols=10, parametrization="PyMC", figsize=None, backend=None
@@ -44,6 +44,8 @@ def plot_roulette(
     * Morris D.E. et al. (2014) see https://doi.org/10.1016/j.envsoft.2013.10.010
     * See roulette mode http://optics.eee.nottingham.ac.uk/match/uncertainty.php
     """
+
+    _log.warning("The Roulette plot is experimental. Use with caution.")
 
     plot_roulette_args = dict(
         x_min=x_min,
