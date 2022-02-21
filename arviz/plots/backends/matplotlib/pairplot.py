@@ -4,7 +4,6 @@ from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from ....rcparams import rcParams
@@ -324,18 +323,29 @@ def plot_pair(
                                 **reference_values_kwargs,
                             )
 
-                if j != vars_to_plot - 1:
-                    ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
-                else:
+                if j == vars_to_plot - 1:
                     ax[j, i].set_xlabel(f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True)
-                if i != 0:
-                    ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
-                else:
+                elif backend_kwargs.get("sharex") is None:
+                    try:
+                        ax[j, i].axes.sharex(ax[-1, i])
+                        plt.setp(ax[j, i].get_xticklabels(), visible=False)
+                    except ValueError:
+                        # Raised if user has provided shared axes
+                        pass
+                if i == 0:
                     ax[j, i].set_ylabel(
                         f"{flat_var_names[j + not_marginals]}",
                         fontsize=ax_labelsize,
                         wrap=True,
                     )
+                elif backend_kwargs.get("sharey") is None:
+                    try:
+                        if i != j:
+                            ax[j, i].axes.sharey(ax[j, 0])
+                        plt.setp(ax[j, i].get_yticklabels(), visible=False)
+                    except ValueError:
+                        # Raised if user has provided shared axes
+                        pass
                 ax[j, i].tick_params(labelsize=xt_labelsize)
 
     if backend_show(show):
