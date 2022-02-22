@@ -32,6 +32,7 @@ _log = Logger("arviz")
 from .data import *
 from .plots import *
 from .plots.backends import *
+from .priors import *
 from .stats import *
 from .rcparams import rc_context, rcParams
 from .utils import Numba, Dask, interactive_backend
