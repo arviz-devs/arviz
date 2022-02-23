@@ -245,11 +245,19 @@ def plot_pair(
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
+            backend_kwargs.setdefault("sharex", "col")
+            if not_marginals:
+                backend_kwargs.setdefault("sharey", "row")
             fig, ax = plt.subplots(
                 vars_to_plot,
                 vars_to_plot,
                 **backend_kwargs,
             )
+            if backend_kwargs.get("sharey") is None:
+                for j in range(0, vars_to_plot):
+                    for i in range(0, j):
+                        ax[j, i].axes.sharey(ax[j, 0])
+
         hexbin_values = []
         for i in range(0, vars_to_plot):
             var1 = plotters[i][-1].flatten()
@@ -323,29 +331,18 @@ def plot_pair(
                                 **reference_values_kwargs,
                             )
 
-                if j == vars_to_plot - 1:
+                if j != vars_to_plot - 1:
+                    plt.setp(ax[j, i].get_xticklabels(), visible=False)
+                else:
                     ax[j, i].set_xlabel(f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True)
-                elif backend_kwargs.get("sharex") is None:
-                    try:
-                        ax[j, i].axes.sharex(ax[-1, i])
-                        plt.setp(ax[j, i].get_xticklabels(), visible=False)
-                    except ValueError:
-                        # Raised if user has provided shared axes
-                        pass
-                if i == 0:
+                if i != 0:
+                    plt.setp(ax[j, i].get_yticklabels(), visible=False)
+                else:
                     ax[j, i].set_ylabel(
                         f"{flat_var_names[j + not_marginals]}",
                         fontsize=ax_labelsize,
                         wrap=True,
                     )
-                elif backend_kwargs.get("sharey") is None:
-                    try:
-                        if i != j:
-                            ax[j, i].axes.sharey(ax[j, 0])
-                        plt.setp(ax[j, i].get_yticklabels(), visible=False)
-                    except ValueError:
-                        # Raised if user has provided shared axes
-                        pass
                 ax[j, i].tick_params(labelsize=xt_labelsize)
 
     if backend_show(show):
