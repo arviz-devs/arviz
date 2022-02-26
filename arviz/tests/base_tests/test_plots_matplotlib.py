@@ -111,6 +111,24 @@ def data_list():
     "kwargs",
     [
         {"point_estimate": "mean"},
+        {"hdi_prob": 0.94},
+        {"outline": True},
+        {"colors": ["g", "b", "r", "y"]},
+        {"colors": "k"},
+        {"hdi_markers": ["v"]},
+        {"shade": 1},
+    ],
+)
+@pytest.mark.parametrize("filter_vars", [None, "like", "regex"])
+def test_plot_density(models, filter_vars, kwargs):
+    idata = models.model_1
+    axes = plot_density(idata, filter_vars = filter_vars, **kwargs)
+    assert np.all(axes)
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"point_estimate": "mean"},
         {"point_estimate": "median"},
         {"hdi_prob": 0.94},
         {"hdi_prob": 1},
@@ -123,13 +141,6 @@ def data_list():
         {"ax": plt.subplots(6, 3)[1]},
     ],
 )
-@pytest.mark.parametrize("filter_vars", [None, "like", "regex"])
-def test_plot_density(models, filter_vars, kwargs):
-    idata = models.model_1
-    axes = plot_density(idata, filter_vars = filter_vars, **kwargs)
-    assert np.all(axes)
-
-
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     axes = plot_density(obj, **kwargs)
