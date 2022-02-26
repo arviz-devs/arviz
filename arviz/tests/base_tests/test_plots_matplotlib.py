@@ -122,8 +122,9 @@ def data_list():
 @pytest.mark.parametrize("filter_vars", [None, "like", "regex"])
 def test_plot_density(models, filter_vars, kwargs):
     idata = models.model_1
-    axes = plot_density(idata, filter_vars = filter_vars, **kwargs)
+    axes = plot_density(idata, filter_vars=filter_vars, **kwargs)
     assert np.all(axes)
+
 
 @pytest.mark.parametrize(
     "kwargs",
