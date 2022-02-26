@@ -123,6 +123,13 @@ def data_list():
         {"ax": plt.subplots(6, 3)[1]},
     ],
 )
+@pytest.mark.parametrize("filter_vars", [None, "like", "regex"])
+def test_plot_density(models, filter_vars, kwargs):
+    idata = models.model_1
+    axes = plot_density(idata, filter_vars=filter_vars, **kwargs)
+    assert np.all(axex)
+
+
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     axes = plot_density(obj, **kwargs)
@@ -162,6 +169,9 @@ def test_plot_density_bad_kwargs(models):
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
+
+    with pytest.raises(ValueError):
+        plot_density(obj, filter_vars="bad_value")
 
 
 @pytest.mark.parametrize(

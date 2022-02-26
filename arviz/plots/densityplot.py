@@ -17,6 +17,7 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
+    filter_vars=None,
     transform=None,
     hdi_prob=None,
     point_estimate="auto",
@@ -58,6 +59,11 @@ def plot_density(
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        ``pandas.filter``.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
@@ -186,7 +192,7 @@ def plot_density(
     if labeller is None:
         labeller = BaseLabeller()
 
-    var_names = _var_names(var_names, datasets)
+    var_names = _var_names(var_names, datasets, filter_vars)
     n_data = len(datasets)
 
     if data_labels is None:
