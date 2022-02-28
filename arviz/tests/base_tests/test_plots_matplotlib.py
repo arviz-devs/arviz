@@ -10,7 +10,7 @@ from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde
 
-from ...data import from_dict, load_arviz_data
+from ...data import from_dict, load_arviz_data, dict_to_dataset
 from ...plots import (
     plot_autocorr,
     plot_bpv,
@@ -42,7 +42,7 @@ from ...plots import (
 from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...stats.density_utils import kde as _kde
-from ...utils import _cov
+from ...utils import _cov, _var_names
 from ...plots.plot_utils import plot_point_interval
 from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
@@ -108,22 +108,22 @@ def data_list():
 
 
 @pytest.mark.parametrize(
-    "kwargs",
+    "var_args",
     [
-        {"point_estimate": "mean"},
-        {"hdi_prob": 0.94},
-        {"outline": True},
-        {"colors": ["g", "b", "r", "y"]},
-        {"colors": "k"},
-        {"hdi_markers": ["v"]},
-        {"shade": 1},
+        (["ta"], ["beta1", "beta2", "theta"], "like"),
+        (["~beta"], ["phi", "theta"], "like"),
+        (["beta[0-9]+"], ["beta1", "beta2"], "regex"),
+        (["^p"], ["phi"], "regex"),
+        (["~^t"], ["beta1", "beta2", "phi"], "regex"),
     ],
 )
-@pytest.mark.parametrize("filter_vars", [None, "like", "regex"])
-def test_plot_density(models, filter_vars, kwargs):
-    idata = models.model_1
-    axes = plot_density(idata, filter_vars=filter_vars, **kwargs)
-    assert np.all(axes)
+def test_var_names_filter(var_args):
+    samples = np.random.randn(10)
+    data1 = dict_to_dataset({"beta1": samples, "beta2": samples, "phi": samples})
+    data2 = dict_to_dataset({"beta1": samples, "beta2": samples, "theta": samples})
+    data = [data1, data2]
+    var_names, expected, filter_vars = var_args
+    assert _var_names(var_names, data, filter_vars) == expected
 
 
 @pytest.mark.parametrize(
