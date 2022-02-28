@@ -245,7 +245,17 @@ def plot_pair(
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
-            backend_kwargs.setdefault("sharex", "col")
+            if backend_kwargs.pop("sharex", None) is not None:
+                warnings.warn(
+                    "'sharex' keyword is ignored. For non-standard sharing, provide 'ax'.",
+                    UserWarning,
+                )
+            if backend_kwargs.pop("sharey", None) is not None:
+                warnings.warn(
+                    "'sharey' keyword is ignored. For non-standard sharing, provide 'ax'.",
+                    UserWarning,
+                )
+            backend_kwargs["sharex"] = "col"
             if not_marginals:
                 backend_kwargs.setdefault("sharey", "row")
             fig, ax = plt.subplots(
