@@ -605,10 +605,13 @@ def test_plot_pair_shared(sharex, sharey, marginals):
     if sharex is None and sharey is None:
         ax = plot_pair(idata, marginals=marginals)
     else:
+        backend_kwargs = {}
+        if sharex is not None:
+            backend_kwargs["sharex"] = sharex
+        if sharey is not None:
+            backend_kwargs["sharey"] = sharey
         with pytest.warns(UserWarning):
-            ax = plot_pair(
-                idata, marginals=marginals, backend_kwargs={"sharex": sharex, "sharey": sharey}
-            )
+            ax = plot_pair(idata, marginals=marginals, backend_kwargs=backend_kwargs)
 
     # Check x axes shared correctly
     for i in range(numvars):
