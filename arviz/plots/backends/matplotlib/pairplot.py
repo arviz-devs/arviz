@@ -257,7 +257,7 @@ def plot_pair(
                 )
             backend_kwargs["sharex"] = "col"
             if not_marginals:
-                backend_kwargs.setdefault("sharey", "row")
+                backend_kwargs["sharey"] = "row"
             fig, ax = plt.subplots(
                 vars_to_plot,
                 vars_to_plot,
