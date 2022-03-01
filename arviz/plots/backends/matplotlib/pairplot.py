@@ -288,7 +288,7 @@ def plot_pair(
                         loc = "left"
 
                     if "scatter" in kind:
-                        ax[j, i].plot(var1, var2, **scatter_kwargs)
+                        ax[j, i].scatter(var1, var2, **scatter_kwargs)
 
                     if "kde" in kind:
 
