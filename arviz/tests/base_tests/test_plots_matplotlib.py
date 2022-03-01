@@ -163,6 +163,9 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
 
+    with pytest.raises(ValueError):
+        plot_density(obj, filter_vars="bad_value")
+
 
 @pytest.mark.parametrize(
     "kwargs",
