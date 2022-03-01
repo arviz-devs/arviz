@@ -597,6 +597,45 @@ def test_plot_pair_shapes(marginals, max_subplots):
     assert ax.shape == (side, side)
 
 
+@pytest.mark.parametrize("sharex", ["col", None])
+@pytest.mark.parametrize("sharey", ["row", None])
+@pytest.mark.parametrize("marginals", [True, False])
+def test_plot_pair_shared(sharex, sharey, marginals):
+    # Generate fake data and plot
+    rng = np.random.default_rng()
+    idata = from_dict({"a": rng.standard_normal((4, 500, 5))})
+    numvars = 5 - (not marginals)
+    if sharex is None and sharey is None:
+        ax = plot_pair(idata, marginals=marginals)
+    else:
+        backend_kwargs = {}
+        if sharex is not None:
+            backend_kwargs["sharex"] = sharex
+        if sharey is not None:
+            backend_kwargs["sharey"] = sharey
+        with pytest.warns(UserWarning):
+            ax = plot_pair(idata, marginals=marginals, backend_kwargs=backend_kwargs)
+
+    # Check x axes shared correctly
+    for i in range(numvars):
+        num_shared_x = numvars - i
+        assert len(ax[-1, i].get_shared_x_axes().get_siblings(ax[-1, i])) == num_shared_x
+
+    # Check y axes shared correctly
+    for j in range(numvars):
+        if marginals:
+            num_shared_y = j
+
+            # Check diagonal has unshared axis
+            assert len(ax[j, j].get_shared_y_axes().get_siblings(ax[j, j])) == 1
+
+            if j == 0:
+                continue
+        else:
+            num_shared_y = j + 1
+        assert len(ax[j, 0].get_shared_y_axes().get_siblings(ax[j, 0])) == num_shared_y
+
+
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
