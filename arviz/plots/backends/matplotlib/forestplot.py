@@ -514,7 +514,9 @@ class PlotHandler:
 class VarHandler:
     """Handle individual variable logic."""
 
-    def __init__(self, var_name, data, y_start, model_names, combined, combine_dims, colors, labeller):
+    def __init__(
+        self, var_name, data, y_start, model_names, combined, combine_dims, colors, labeller
+    ):
         self.var_name = var_name
         self.data = data
         self.y_start = y_start
