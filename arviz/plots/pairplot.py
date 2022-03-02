@@ -17,7 +17,7 @@ def plot_pair(
     group="posterior",
     var_names: Optional[List[str]] = None,
     filter_vars: Optional[str] = None,
-    combine_dims: Optional[List[str]] = None,
+    combine_dims=None,
     coords=None,
     marginals=False,
     figsize=None,
@@ -64,7 +64,8 @@ def plot_pair(
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
     combine_dims : set_like of str, optional
-        List of dimensions to flatten. Defaults to flattening none of the dimensions.
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
     marginals: bool, optional
@@ -210,14 +211,13 @@ def plot_pair(
     if labeller is None:
         labeller = BaseLabeller()
 
-    if combine_dims is None:
-        combine_dims = []
-
     # Get posterior draws and combine chains
     dataset = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, dataset, filter_vars)
     plotters = list(
-        xarray_var_iter(get_coords(dataset, coords), var_names=var_names, skip_dims=set(combine_dims), combined=True)
+        xarray_var_iter(
+            get_coords(dataset, coords), var_names=var_names, skip_dims=combine_dims, combined=True
+        )
     )
     flat_var_names = [
         labeller.make_label_vert(var_name, sel, isel) for var_name, sel, isel, _ in plotters

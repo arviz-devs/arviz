@@ -66,8 +66,6 @@ def plot_rank(
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
-    combine_dims : list
-        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     bins: None or passed to np.histogram
         Binning strategy used for histogram. By default uses twice the result of Sturges' formula.
         See :func:`numpy.histogram` documentation for, other available arguments.
@@ -173,7 +171,9 @@ def plot_rank(
     plotters = filter_plotters_list(
         list(
             xarray_var_iter(
-                posterior_data, var_names=var_names, combined=True,
+                posterior_data,
+                var_names=var_names,
+                combined=True,
             )
         ),
         "plot_rank",

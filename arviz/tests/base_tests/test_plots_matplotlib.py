@@ -86,6 +86,16 @@ def discrete_model():
 
 
 @pytest.fixture(scope="module")
+def discrete_multidim_model():
+    """Simple fixture for random discrete model"""
+    idata = from_dict(
+        {"x": np.random.randint(10, size=(2, 50, 3)), "y": np.random.randint(10, size=(2, 50))},
+        dims={"x": ["school"]},
+    )
+    return idata
+
+
+@pytest.fixture(scope="module")
 def continuous_model():
     """Simple fixture for random continuous model"""
     return {"x": np.random.beta(2, 5, size=100), "y": np.random.beta(2, 5, size=100)}
@@ -166,8 +176,9 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(obj, filter_vars="bad_value")
 
+
 def test_plot_density_discrete_combinedims(discrete_model):
-    axes = plot_density(discrete_model, combine_dims=['school'], shade=0.9)
+    axes = plot_density(discrete_model, combine_dims={"school"}, shade=0.9)
     assert axes.size == 2
 
 
@@ -585,52 +596,16 @@ def test_plot_pair_overlaid(models, kwargs):
     assert ax is ax2
     assert ax.shape
 
-@pytest.mark.parametrize(
-    "kwargs", [{"var_names": ["mu", "theta"]}]
-)
-def test_plot_pair_combinedims(models, kwargs):
-    ax = plot_pair(models.model_1, combine_dims=["school"], **kwargs)
-    assert np.all(ax)
 
-
-@pytest.mark.parametrize(
-    "kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin", "colorbar": True}]
-)
-def test_plot_pair_2var_combinedims(discrete_model, fig_ax, kwargs):
-    _, ax = fig_ax
-    ax = plot_pair(discrete_model, combine_dims=["school"], ax=ax, **kwargs)
-    assert ax
-
-
-def test_plot_pair_bad_combinedims(models):
-    with pytest.raises(ValueError):
-        plot_pair(models.model_1, combine_dims=["school"], kind="bad_kind")
-    with pytest.raises(Exception):
-        plot_pair(models.model_1, var_names=["mu"], combine_dims=["school"])
-
-
-@pytest.mark.parametrize("has_sample_stats", [True, False])
-def test_plot_pair_divergences_warning_combinedims(has_sample_stats):
-    data = load_arviz_data("centered_eight")
-    if has_sample_stats:
-        # sample_stats present, diverging field missing
-        data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
+@pytest.mark.parametrize("marginals", [True, False])
+def test_plot_pair_combinedims(models, marginals):
+    ax = plot_pair(
+        models.model_1, var_names=["eta", "theta"], combine_dims={"school"}, marginals=marginals
+    )
+    if marginals:
+        assert ax.shape == (2, 2)
     else:
-        # sample_stats missing
-        data = data.posterior  # pylint: disable=no-member
-    with pytest.warns(UserWarning):
-        ax = plot_pair(data, combine_dims=["tau"], divergences=True)
-    assert np.all(ax)
-
-
-@pytest.mark.parametrize(
-    "kwargs", [{}, {"marginals": True}, {"marginals": True, "var_names": ["mu", "tau"]}]
-)
-def test_plot_pair_overlaid_combinedims(models, kwargs):
-    ax = plot_pair(models.model_1, combine_dims=["school"], **kwargs)
-    ax2 = plot_pair(models.model_2, combine_dims=["school"], ax=ax, **kwargs)
-    assert ax is ax2
-    assert ax.shape
+        assert not isinstance(ax, np.ndarray)
 
 
 @pytest.mark.parametrize("marginals", [True, False])
@@ -884,25 +859,28 @@ def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model)
     assert axes.shape
 
+
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_violin_combinedims(models, var_names):
-    axes = plot_violin(models.model_1, var_names=var_names, combine_dims=["school"])
+    axes = plot_violin(models.model_1, var_names=var_names, combine_dims={"school"})
     assert axes.shape
 
 
 def test_plot_violin_ax_combinedims(models):
     _, ax = plt.subplots(1)
-    axes = plot_violin(models.model_1, var_names="mu", combine_dims=["school"], ax=ax)
+    axes = plot_violin(models.model_1, var_names="mu", combine_dims={"school"}, ax=ax)
     assert axes.shape
 
 
 def test_plot_violin_layout_combinedims(models):
-    axes = plot_violin(models.model_1, var_names=["mu", "tau"], combine_dims=["school"], sharey=False)
+    axes = plot_violin(
+        models.model_1, var_names=["mu", "tau"], combine_dims={"school"}, sharey=False
+    )
     assert axes.shape
 
 
 def test_plot_violin_discrete_combinedims(discrete_model):
-    axes = plot_violin(discrete_model, combine_dims=["school"])
+    axes = plot_violin(discrete_model, combine_dims={"school"})
     assert axes.shape
 
 
@@ -1032,7 +1010,7 @@ def test_plot_posterior_skipna():
 
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "theta"]}])
 def test_plot_posterior_combinedims(models, kwargs):
-    axes = plot_posterior(models.model_1, combine_dims=["school"], **kwargs)
+    axes = plot_posterior(models.model_1, combine_dims={"school"}, **kwargs)
     if isinstance(kwargs.get("var_names"), str):
         assert not isinstance(axes, np.ndarray)
     else:
@@ -1040,32 +1018,30 @@ def test_plot_posterior_combinedims(models, kwargs):
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
-def test_plot_posterior_discrete_combinedims(discrete_model, kwargs):
-    axes = plot_posterior(discrete_model, combine_dims=["mu"], **kwargs)
-    assert axes.shape
-
-
-def test_plot_posterior_bad_combinedims(models):
-    with pytest.raises(ValueError):
-        plot_posterior(models.model_1, combine_dims=["mu"], rope="bad_value")
-    with pytest.raises(ValueError):
-        plot_posterior(models.model_1, combine_dims=["mu"], ref_val="bad_value")
-    with pytest.raises(ValueError):
-        plot_posterior(models.model_1, combine_dims=["mu"], point_estimate="bad_value")
+def test_plot_posterior_discrete_combinedims(discrete_multidim_model, kwargs):
+    axes = plot_posterior(discrete_multidim_model, combine_dims={"school"}, **kwargs)
+    assert axes.size == 2
 
 
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
 def test_plot_posterior_point_estimates_combinedims(models, point_estimate):
-    axes = plot_posterior(models.model_1, var_names=("mu", "tau"), combine_dims=["mu"], point_estimate=point_estimate)
+    axes = plot_posterior(
+        models.model_1,
+        var_names=("mu", "tau"),
+        combine_dims={"school"},
+        point_estimate=point_estimate,
+    )
     assert axes.size == 2
 
 
 def test_plot_posterior_skipna_combinedims():
-    sample = np.linspace(0, 1)
-    sample[:10] = np.nan
-    plot_posterior({"a": sample}, combine_dims=["mu"], skipna=True)
+    idata = load_arviz_data("centered_eight")
+    idata.posterior["theta"].loc[dict(school="Deerfield")] = np.nan
     with pytest.raises(ValueError):
-        plot_posterior({"a": sample}, combine_dims=["mu"], skipna=False)
+        plot_posterior(idata, var_names="theta", combine_dims={"school"}, skipna=False)
+    ax = plot_posterior(idata, var_names="theta", combine_dims={"school"}, skipna=True)
+    assert not isinstance(ax, np.ndarray)
+
 
 @pytest.mark.parametrize(
     "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
@@ -1507,9 +1483,10 @@ def test_plot_dist_comparison_different_vars():
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
 
+
 def test_plot_dist_comparison_combinedims(models):
     idata = models.model_1
-    ax = plot_dist_comparison(idata, combine_dims=["school"])
+    ax = plot_dist_comparison(idata, combine_dims={"school"})
     assert np.all(ax)
 
 
@@ -1519,11 +1496,14 @@ def test_plot_dist_comparison_different_vars_combinedims():
             "x": np.random.randn(4, 100, 30),
         },
         prior={"x_hat": np.random.randn(4, 100, 30)},
+        dims={"x": ["3rd_dim"], "x_hat": ["3rd_dim"]},
     )
     with pytest.raises(KeyError):
-        plot_dist_comparison(data, var_names="x", combine_dims=["theta"])
-    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]], combine_dims=["theta"])
+        plot_dist_comparison(data, var_names="x", combine_dims={"3rd_dim"})
+    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]], combine_dims={"3rd_dim"})
     assert np.all(ax)
+    assert ax.size == 3
+
 
 @pytest.mark.parametrize(
     "kwargs",

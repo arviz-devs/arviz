@@ -47,7 +47,8 @@ def plot_violin(
         Variables to be plotted, if None all variable are plotted. Prefix the
         variables by ``~`` when you want to exclude them from the plot.
     combine_dims : set_like of str, optional
-        List of dimensions to flatten. Defaults to flattening none of the dimensions.
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
@@ -132,18 +133,13 @@ def plot_violin(
     if labeller is None:
         labeller = BaseLabeller()
 
-    if combine_dims is None:
-        combine_dims = []
-
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
         data = transform(data)
     var_names = _var_names(var_names, data, filter_vars)
 
     plotters = filter_plotters_list(
-        list(
-            xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=set(combine_dims))
-        ),
+        list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=combine_dims)),
         "plot_violin",
     )
 

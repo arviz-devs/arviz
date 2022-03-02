@@ -52,8 +52,6 @@ def plot_parallel(
     coords: mapping, optional
         Coordinates of ``var_names`` to be plotted.
         Passed to :meth:`xarray.Dataset.sel`.
-    combine_dims : list
-        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -127,7 +125,9 @@ def plot_parallel(
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group="sample_stats")
     _, diverging_mask = xarray_to_ndarray(
-        divergent_data, var_names=("diverging",), combined=True, 
+        divergent_data,
+        var_names=("diverging",),
+        combined=True,
     )
     diverging_mask = np.squeeze(diverging_mask)
 

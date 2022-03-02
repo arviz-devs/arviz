@@ -52,7 +52,9 @@ def plot_dist_comparison(
         Dimensions without a mapping specified will include all coordinates for
         that dimension.
     combine_dims : set_like of str, optional
-        List of dimensions to flatten. Defaults to flattening none of the dimensions.
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
+
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
@@ -112,9 +114,6 @@ def plot_dist_comparison(
     if labeller is None:
         labeller = BaseLabeller()
 
-    if combine_dims is None:
-        combine_dims = []    
-
     datasets = []
     groups = []
     for group in all_groups:
@@ -142,7 +141,9 @@ def plot_dist_comparison(
     len_plots = rcParams["plot.max_subplots"] // (len(groups) + 1)
     len_plots = len_plots if len_plots else 1
     dc_plotters = [
-        list(xarray_var_iter(data, var_names=var, combined=True, skip_dims=set(combine_dims)))[:len_plots]
+        list(xarray_var_iter(data, var_names=var, combined=True, skip_dims=combine_dims))[
+            :len_plots
+        ]
         for data, var in zip(datasets, var_names)
     ]
 
