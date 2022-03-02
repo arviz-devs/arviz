@@ -85,7 +85,12 @@ def create_model(seed=10):
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
         observed_data={"y": data["y"]},
-        dims={"y": ["obs_dim"], "log_likelihood": ["obs_dim"]},
+        dims={
+            "y": ["obs_dim"],
+            "log_likelihood": ["obs_dim"],
+            "theta": ["school"],
+            "eta": ["school"],
+        },
         coords={"obs_dim": range(data["J"])},
     )
     return model
