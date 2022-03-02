@@ -61,8 +61,6 @@ def plot_trace(
         ``pandas.filter``.
     coords: dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
-    combine_dims : list
-        List of dimensions to flatten. Defaults to flattening none of the dimensions.
     divergences: {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
     kind: {"trace", "rank_bars", "rank_vlines"}, optional

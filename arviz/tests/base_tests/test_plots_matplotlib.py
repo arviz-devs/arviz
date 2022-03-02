@@ -285,7 +285,7 @@ def test_plot_trace_futurewarning(models, prop):
     [
         ({}, 1),
         ({"var_names": "mu", "transform": lambda x: x + 1}, 1),
-        ({"var_names": "mu", "rope": (-1, 1)}, 1),
+        ({"var_names": "mu", "rope": (-1, 1), "combine_dims": {"school"}}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "ess": True, "combined": True}, 2),
         (
@@ -524,7 +524,7 @@ def test_plot_kde_inference_data(models):
         {
             "var_names": "theta",
             "divergences": True,
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "scatter_kwargs": {"marker": "x"},
             "divergences_kwargs": {"marker": "*", "c": "C0"},
         },
@@ -540,7 +540,7 @@ def test_plot_kde_inference_data(models):
         {
             "kind": "hexbin",
             "var_names": ["theta"],
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "colorbar": True,
             "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
@@ -919,7 +919,7 @@ def test_plot_autocorr_var_names(models, var_names):
     [
         {},
         {"var_names": "mu"},
-        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ("mu", "tau"), "coords": {"school": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
         {
             "var_names": "mu",
@@ -1317,7 +1317,7 @@ def test_plot_khat_bad_input(models):
     [
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
-        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"coords": {"school": slice(4)}, "n_points": 10},
         {"min_ess": 600, "hline_kwargs": {"color": "r"}},
     ],
 )
@@ -1415,7 +1415,7 @@ def test_plot_loo_pit_incompatible_args(models):
         {"var_names": ["theta"], "color": "r"},
         {"rug": True, "rug_kwargs": {"color": "r"}},
         {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
-        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"errorbar": True, "coords": {"school": slice(4)}, "n_points": 10},
         {"extra_methods": True, "rug": True},
         {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
     ],
@@ -1454,7 +1454,7 @@ def test_plot_mcse_no_divergences(models):
     [
         {},
         {"var_names": ["theta"]},
-        {"var_names": ["theta"], "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ["theta"], "coords": {"school": [0, 1]}},
         {"var_names": ["eta"], "posterior_kwargs": {"rug": True, "rug_kwargs": {"color": "r"}}},
         {"var_names": ["mu"], "prior_kwargs": {"fill_kwargs": {"alpha": 0.5}}},
         {

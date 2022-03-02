@@ -408,7 +408,7 @@ def test_plot_energy_bad(models):
     [
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
-        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"coords": {"school": slice(4)}, "n_points": 10},
         {"min_ess": 600, "hline_kwargs": {"color": "r"}},
     ],
 )
@@ -710,7 +710,7 @@ def test_plot_loo_pit_label(models, args):
         {"var_names": ["theta"], "color": "r"},
         {"rug": True, "rug_kwargs": {"color": "r"}},
         {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
-        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"errorbar": True, "coords": {"school": slice(4)}, "n_points": 10},
         {"extra_methods": True, "rug": True},
         {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
     ],
@@ -748,7 +748,7 @@ def test_plot_mcse_no_divergences(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"var_names": "theta", "divergences": True, "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": "theta", "divergences": True, "coords": {"school": [0, 1]}},
         {"divergences": True, "var_names": ["theta", "mu"]},
         {"kind": "kde", "var_names": ["theta"]},
         {"kind": "hexbin", "var_names": ["theta"]},
@@ -756,7 +756,7 @@ def test_plot_mcse_no_divergences(models):
         {
             "kind": "hexbin",
             "var_names": ["theta"],
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "textsize": 20,
         },
         {
@@ -1022,7 +1022,7 @@ def test_plot_posterior_skipna():
     [
         {},
         {"var_names": "mu"},
-        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ("mu", "tau"), "coords": {"school": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
         {
             "var_names": "mu",

@@ -1,3 +1,9 @@
+"""
+Posterior Plot (reducing school dimension)
+==========================================
+
+_thumb: .5, .8
+"""
 import arviz as az
 
 data = az.load_arviz_data("centered_eight")
@@ -8,6 +14,5 @@ ax = az.plot_posterior(
     var_names=["mu", "theta"],
     combine_dims={"school"},
     coords=coords,
-    rope=(-1, 1),
     backend="bokeh",
 )
