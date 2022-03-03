@@ -20,6 +20,9 @@ which use one specific function to illustrate the usage but
 the behaviour described here will be the same for the
 other functions with the same argument.
 
+This page can be downloaded as a {jupyter-download:script}`Python script <plots_arguments_guide>`
+or as a {jupyter-download:nb}`Jupyter notebook <plots_arguments_guide>`.
+
 ```{code-cell} ipython3
 import arviz as az
 import numpy as np
@@ -32,7 +35,7 @@ y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
 ```
 
 ```{code-cell} ipython3
-:tags: [hide-cell]
+:tags: [remove-cell]
 
 # if running the notebook locally,
 # you can set the backend here to compare
@@ -177,7 +180,7 @@ in `plot_pair` to generate their global 2d KDE.
 ```{code-cell} ipython3
 az.plot_pair(
     non_centered_eight, var_names=["theta", "theta_t"], combine_dims={"school"}, kind="kde"
-)
+);
 ```
 
 `mu` however does not, so trying to plot their combined distribution errors out:
@@ -185,24 +188,25 @@ az.plot_pair(
 ```{code-cell} ipython3
 :tags: [raises-exception, hide-output]
 
-az.plot_pair(non_centered_eight, var_names=["theta", "mu"], combine_dims={"school"})
+az.plot_pair(non_centered_eight, var_names=["theta", "mu"], combine_dims={"school"});
 ```
 
-`combine_dims` can be used alongside `combined` or it can also be used to replace it.
-When `combined=True`, ArviZ adds `"chain"` to `combine_dims` under the hood.
+`combine_dims` can be used alongside `combined`, but it can't be used to replace it.
+When `combined=True`, ArviZ does extra processing in addition to adding
+`"chain"` to `combine_dims` under the hood. Therefore:
 
 ```{code-cell} ipython3
 az.plot_forest(
     centered_eight, var_names="theta", combined=True, combine_dims={"school"}
-)
+);
 ```
 
-is equivalent to:
+is not equivalent to:
 
 ```{code-cell} ipython3
 az.plot_forest(
     centered_eight, var_names="theta", combine_dims={"chain", "school"}
-)
+);
 ```
 
 (common_hdi_prob)=
@@ -262,7 +266,7 @@ plotting backend.
 Plot the HDI interval of simulated regression data using `y` argument, in red:
 
 ```{code-cell} ipython3
-az.plot_hdi(x_data, y_data, color="red")
+az.plot_hdi(x_data, y_data, color="red");
 ```
 
 `colors` behaves like `color` but it takes an iterable of colors instead
@@ -271,9 +275,10 @@ the models being compared (like in `plot_density`) of by the number
 of different quantities being plotted (like in `plot_ppc`).
 
 :::{warning}
-In `plot_elpd` and `plot_khat`, where scatter plots are generated with
-one dot per observation, `color` can also take an {term}`numpy:array_like`
-of colors, one per dot.
+In {func}`~arviz.plot_elpd` and {func}`~arviz.plot_khat`, where scatter plots are generated with
+one dot per observation, `color` can also take an {term}`numpy:array_like` of colors, one per dot.
+
+There are examples in their respective docstrings.
 :::
 
 ```{code-cell} ipython3
@@ -281,7 +286,7 @@ az.plot_density([centered_eight, non_centered_eight], colors=["salmon", "indigo"
 ```
 
 :::{seealso}
-Matplotlib {doc}`matplotlib:/tutorials/colors/colors` tutorial.
+Matplotlib {doc}`mpl:/tutorials/colors/colors` tutorial.
 
 Module {mod}`bokeh.colors`
 :::
