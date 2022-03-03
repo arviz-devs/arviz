@@ -290,7 +290,7 @@ az.plot_density([centered_eight, non_centered_eight], colors=["salmon", "indigo"
 ```
 
 :::{seealso}
-Matplotlib {doc}`mpl:tutorials/colors/colors` tutorial.
+Matplotlib {ref}`mpl:sphx_glr_tutorials_colors_colors.py` tutorial.
 
 Module {mod}`bokeh.colors`
 :::
