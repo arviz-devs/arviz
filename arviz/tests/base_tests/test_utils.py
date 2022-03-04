@@ -69,6 +69,25 @@ def test_var_names_key_error(data):
 @pytest.mark.parametrize(
     "var_args",
     [
+        (["ta"], ["beta1", "beta2", "theta"], "like"),
+        (["~beta"], ["phi", "theta"], "like"),
+        (["beta[0-9]+"], ["beta1", "beta2"], "regex"),
+        (["^p"], ["phi"], "regex"),
+        (["~^t"], ["beta1", "beta2", "phi"], "regex"),
+    ],
+)
+def test_var_names_filter_multiple_input(var_args):
+    samples = np.random.randn(10)
+    data1 = dict_to_dataset({"beta1": samples, "beta2": samples, "phi": samples})
+    data2 = dict_to_dataset({"beta1": samples, "beta2": samples, "theta": samples})
+    data = [data1, data2]
+    var_names, expected, filter_vars = var_args
+    assert _var_names(var_names, data, filter_vars) == expected
+
+
+@pytest.mark.parametrize(
+    "var_args",
+    [
         (["alpha", "beta"], ["alpha", "beta1", "beta2"], "like"),
         (["~beta"], ["alpha", "p1", "p2", "phi", "theta", "theta_t"], "like"),
         (["theta"], ["theta", "theta_t"], "like"),
@@ -101,6 +120,15 @@ def test_var_names_filter(var_args):
     assert _var_names(var_names, data, filter_vars) == expected
 
 
+def test_var_names_filter_invalid_argument():
+    """Check invalid argument raises."""
+    samples = np.random.randn(10)
+    data = dict_to_dataset({"alpha": samples})
+    msg = r"^\'filter_vars\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+    with pytest.raises(ValueError, match=msg):
+        assert _var_names(["alpha"], data, filter_vars="foo")
+
+
 def test_subset_list_negation_not_found():
     """Check there is a warning if negation pattern is ignored"""
     names = ["mu", "theta"]
@@ -114,7 +142,7 @@ def utils_with_numba_import_fail(monkeypatch):
     failed_import = Mock()
     failed_import.side_effect = ImportError
 
-    from arviz import utils
+    from ... import utils
 
     monkeypatch.setattr(utils.importlib, "import_module", failed_import)
     return utils
@@ -154,7 +182,7 @@ def test_conditional_jit_numba_decorator():
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
     """
-    from arviz import utils
+    from ... import utils
 
     @utils.conditional_jit
     def func():
@@ -169,7 +197,7 @@ def test_conditional_vect_numba_decorator():
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
     """
-    from arviz import utils
+    from ... import utils
 
     @utils.conditional_vect
     def func(a_a, b_b):
@@ -182,7 +210,7 @@ def test_conditional_vect_numba_decorator():
 
 def test_conditional_vect_numba_decorator_keyword(monkeypatch):
     """Checks else statement and vect keyword argument"""
-    from arviz import utils
+    from ... import utils
 
     # Mock import lib to return numba with hit method which returns a function that returns kwargs
     numba_mock = Mock()

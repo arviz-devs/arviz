@@ -1,7 +1,7 @@
 """Matplotlib ELPDPlot."""
 import warnings
 
-import matplotlib.cm as cm
+from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
@@ -88,7 +88,7 @@ def plot_elpd(
             bool_ary = diff_abs > threshold * ydata.std()
             if coord_labels is None:
                 coord_labels = xdata.astype(str)
-            outliers = np.argwhere(bool_ary).squeeze()
+            outliers = np.nonzero(bool_ary)[0]
             for outlier in outliers:
                 label = coord_labels[outlier]
                 ax.text(
@@ -159,7 +159,7 @@ def plot_elpd(
                     bool_ary = diff_abs > threshold * ydata.std()
                     if coord_labels is None:
                         coord_labels = xdata.astype(str)
-                    outliers = np.argwhere(bool_ary).squeeze()
+                    outliers = np.nonzero(bool_ary)[0]
                     for outlier in outliers:
                         label = coord_labels[outlier]
                         ax[j, i].text(
@@ -175,9 +175,7 @@ def plot_elpd(
                     ax[j, i].set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
-                ax[j, i].set_title(
-                    "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
-                )
+                ax[j, i].set_title(f"{models[i]} - {models[j + 1]}", fontsize=titlesize, wrap=True)
         if xlabels:
             for i in range(len(ax)):
                 set_xticklabels(ax[-1, i], coord_labels)

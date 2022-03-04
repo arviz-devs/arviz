@@ -7,7 +7,7 @@ from glob import glob
 import numpy as np
 import pytest
 
-from arviz import from_cmdstanpy
+from ... import from_cmdstanpy
 
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -70,7 +70,7 @@ def _create_test_data():
         }
     """
     stan_file = "stan_test_data.stan"
-    with open(stan_file, "w") as file_handle:
+    with open(stan_file, "w", encoding="utf8") as file_handle:
         print(model_code, file=file_handle)
     model = cmdstanpy.CmdStanModel(stan_file=stan_file)
     os.remove(stan_file)
@@ -151,7 +151,6 @@ class TestDataCmdStanPy:
             runset_obj = RunSet(args)
             runset_obj._csv_files = filepaths["nowarmup"]  # pylint: disable=protected-access
             obj = CmdStanMCMC(runset_obj)
-            obj.validate_csv_files()  # pylint: disable=protected-access
             obj._assemble_draws()  # pylint: disable=protected-access
 
             args_warmup = CmdStanArgs(
@@ -163,13 +162,12 @@ class TestDataCmdStanPy:
             runset_obj_warmup = RunSet(args_warmup)
             runset_obj_warmup._csv_files = filepaths["warmup"]  # pylint: disable=protected-access
             obj_warmup = CmdStanMCMC(runset_obj_warmup)
-            obj_warmup.validate_csv_files()  # pylint: disable=protected-access
             obj_warmup._assemble_draws()  # pylint: disable=protected-access
 
             _model_code = """model { real y; } generated quantities { int eta; int theta[N]; }"""
             _tmp_dir = tempfile.TemporaryDirectory(prefix="arviz_tests_")
             _stan_file = os.path.join(_tmp_dir.name, "stan_model_test.stan")
-            with open(_stan_file, "w") as f:
+            with open(_stan_file, "w", encoding="utf8") as f:
                 f.write(_model_code)
             model = CmdStanModel(stan_file=_stan_file, compile=False)
 

@@ -1,11 +1,16 @@
-docutils==0.16 # temporary fix due to incompatibility with 0.17
+docutils
 ghp-import
 ipython
 numpydoc
 pydocstyle
 Sphinx>=1.8.3
 pydata_sphinx_theme>=0.6.3
-myst-parser==0.13.7
+myst-parser
 myst-nb
 sphinx-panels
 sphinx-notfound-page
+sphinx-copybutton
+bokeh
+sphinx_design
+sphinx-codeautolink @ git+https://github.com/felix-hilden/sphinx-codeautolink
+jupyter-sphinx

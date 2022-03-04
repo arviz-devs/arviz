@@ -18,9 +18,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import re
 import sys
-from typing import Dict
+from typing import Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import arviz
@@ -59,9 +58,17 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
     "myst_nb",
-    "sphinx_panels",
+    "sphinx_design",
     "notfound.extension",
+    "sphinx_copybutton",
+    "sphinx_codeautolink",
+    "jupyter_sphinx",
 ]
+
+# codeautolink
+codeautolink_autodoc_inject = False
+codeautolink_search_css_classes = ["highlight-default"]
+codeautolink_concat_default = True
 
 # ipython directive configuration
 ipython_warning_is_error = False
@@ -86,7 +93,10 @@ jupyter_execute_notebooks = "auto"
 execution_excludepatterns = ["*.ipynb"]
 myst_heading_anchors = 3
 panels_add_bootstrap_css = False
+myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 
+
+myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 
 # The base toctree document.
 master_doc = "index"
@@ -99,12 +109,15 @@ author = "ArviZ devs"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
-if branch_name == "main":
-    version = "dev"
+version = arviz.__version__
+if os.environ.get("READTHEDOCS", False):
+    rtd_version = os.environ.get("READTHEDOCS_VERSION", "")
+    if "." not in rtd_version and rtd_version.lower() != "stable":
+        version = "dev"
 else:
-    # The short X.Y version.
-    version = arviz.__version__
+    branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
+    if branch_name == "main":
+        version = "dev"
 
 # The full version, including alpha/beta/rc tags.
 release = version
@@ -140,7 +153,6 @@ html_theme = "pydata_sphinx_theme"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-
 html_theme_options = {
     "icon_links": [
         {
@@ -155,7 +167,8 @@ html_theme_options = {
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
-    "use_edit_page_button": False,  # TODO: see how to skip of fix for generated pages
+    "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
+    "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
 }
 html_context = {
@@ -164,16 +177,16 @@ html_context = {
     "github_version": "main",
     "doc_path": "doc/source/",
 }
+html_sidebars: Dict[str, Any] = {
+    "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html", "sidebar-ethical-ads.html"]
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_static_path = ["_static", thumb_directory]
-
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-# html_sidebars = {}
+html_css_files = ["custom.css"]
 
 # use additional pages to add a 404 page
 html_additional_pages = {
@@ -273,8 +286,24 @@ intersphinx_mapping = {
     "xarray": ("http://xarray.pydata.org/en/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "pymc3": ("https://docs.pymc.io/", None),
-    "mpl": ("https://matplotlib.org/", None),
+    "mpl": ("https://matplotlib.org/stable", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
     "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "dask": ("https://docs.dask.org/en/latest/", None),
+    "sphinx-primer": ("https://sphinx-primer.readthedocs.io/en/latest/", None),
+    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "diataxis": ("https://diataxis.fr/", None),
 }
+
+
+def setup(app):
+    # this needs to be added so we can reference confval targets
+    # in the doc contributing pages and explain what values we use and why
+    app.add_object_type(
+        "confval",
+        "confval",
+        objname="configuration value",
+        indextemplate="pair: %s; configuration value",
+    )

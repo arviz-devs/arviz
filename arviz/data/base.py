@@ -149,7 +149,7 @@ def generate_dims_coords(
 
     for idx, dim_len in enumerate(shape):
         if (len(dims) < idx + 1) or (dims[idx] is None):
-            dim_name = "{var_name}_dim_{idx}".format(var_name=var_name, idx=idx)
+            dim_name = f"{var_name}_dim_{idx}"
             if len(dims) < idx + 1:
                 dims.append(dim_name)
             else:
@@ -246,7 +246,7 @@ def numpy_to_data_array(
         coords["draw"] = np.arange(index_origin, n_samples + index_origin)
 
     # filter coords based on the dims
-    coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}
+    coords = {key: xr.IndexVariable((key,), data=np.asarray(coords[key])) for key in dims}
     return xr.DataArray(ary, coords=coords, dims=dims)
 
 
@@ -421,7 +421,7 @@ def _extend_xr_method(func, doc="", description="", examples="", see_also=""):
 
 def _make_json_serializable(data: dict) -> dict:
     """Convert `data` with numpy.ndarray-like values to JSON-serializable form."""
-    ret = dict()
+    ret = {}
     for key, value in data.items():
         try:
             json.dumps(value)

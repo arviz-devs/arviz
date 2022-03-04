@@ -1,5 +1,12 @@
 # pylint: disable=too-many-lines
 """CmdStan-specific conversion code."""
+try:
+    import ujson as json
+except ImportError:
+    # Can't find ujson using json
+    # mypy struggles with conditional imports expressed as catching ImportError:
+    # https://github.com/python/mypy/issues/1153
+    import json  # type: ignore
 import logging
 import os
 import re
@@ -24,9 +31,7 @@ def check_glob(path, group, disable_glob):
         path_glob = glob(path)
         if path_glob:
             path = sorted(path_glob)
-            msg = "\n".join(
-                "{}: {}".format(i, os.path.normpath(fpath)) for i, fpath in enumerate(path, 1)
-            )
+            msg = "\n".join(f"{i}: {os.path.normpath(fpath)}" for i, fpath in enumerate(path, 1))
             len_p = len(path)
             _log.info("glob found %d files for '%s':\n%s", len_p, group, msg)
     return path
@@ -89,7 +94,7 @@ class CmdStanConverter:
         elif isinstance(dtypes, str):
             dtypes_path = Path(dtypes)
             if dtypes_path.exists():
-                with dtypes_path.open("r") as f_obj:
+                with dtypes_path.open("r", encoding="UTF-8") as f_obj:
                     model_code = f_obj.read()
             else:
                 model_code = dtypes
@@ -212,6 +217,12 @@ class CmdStanConverter:
             log_likelihood = []
         elif isinstance(log_likelihood, str):
             log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
+        elif isinstance(log_likelihood, dict):
+            log_likelihood = [
+                col
+                for col in columns
+                if any(item == col.split(".")[0] for item in log_likelihood.values())
+            ]
         else:
             log_likelihood = [
                 col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
@@ -425,13 +436,23 @@ class CmdStanConverter:
             data = _unpack_ndarrays(chain_data, columns, self.dtypes)
             data_warmup = _unpack_ndarrays(chain_data_warmup, columns, self.dtypes)
         else:
-            if isinstance(log_likelihood, str):
-                log_likelihood = [log_likelihood]
-            columns = {
-                col: idx
-                for col, idx in self.posterior_columns.items()
-                if any(item == col.split(".")[0] for item in log_likelihood)
-            }
+            if isinstance(log_likelihood, dict):
+                log_lik_to_obs_name = {v: k for k, v in log_likelihood.items()}
+                columns = {
+                    col.replace(col_name, log_lik_to_obs_name[col_name]): idx
+                    for col, col_name, idx in (
+                        (col, col.split(".")[0], idx) for col, idx in self.posterior_columns.items()
+                    )
+                    if any(item == col_name for item in log_likelihood.values())
+                }
+            else:
+                if isinstance(log_likelihood, str):
+                    log_likelihood = [log_likelihood]
+                columns = {
+                    col: idx
+                    for col, idx in self.posterior_columns.items()
+                    if any(item == col.split(".")[0] for item in log_likelihood)
+                }
             data = _unpack_ndarrays(self.posterior[0], columns, self.dtypes)
             data_warmup = _unpack_ndarrays(self.posterior[1], columns, self.dtypes)
             attrs = None
@@ -838,7 +859,7 @@ def _process_data_var(string):
 
 
 def _read_data(path):
-    """Read Rdump output to dictionary.
+    """Read Rdump or JSON output to dictionary.
 
     Parameters
     ----------
@@ -847,10 +868,12 @@ def _read_data(path):
     Returns
     -------
     Dict
-        key, values pairs from Rdump formatted data.
+        key, values pairs from Rdump/JSON formatted data.
     """
     data = {}
-    with open(path, "r") as f_obj:
+    with open(path, "r", encoding="utf8") as f_obj:
+        if path.lower().endswith(".json"):
+            return json.load(f_obj)
         var = ""
         for line in f_obj:
             if "<-" in line:
@@ -944,30 +967,36 @@ def from_cmdstan(
     prior_predictive : str or list of str, optional
         Prior predictive samples for the fit. If endswith ".csv" assumes file.
     observed_data : str, optional
-        Observed data used in the sampling. Path to data file in Rdump format.
+        Observed data used in the sampling. Path to data file in Rdump or JSON format.
     observed_data_var : str or list of str, optional
         Variable(s) used for slicing observed_data. If not defined, all
         data variables are imported.
     constant_data : str, optional
-        Constant data used in the sampling. Path to data file in Rdump format.
+        Constant data used in the sampling. Path to data file in Rdump or JSON format.
     constant_data_var : str or list of str, optional
         Variable(s) used for slicing constant_data. If not defined, all
         data variables are imported.
     predictions_constant_data : str, optional
         Constant data for predictions used in the sampling.
-        Path to data file in Rdump format.
+        Path to data file in Rdump or JSON format.
     predictions_constant_data_var : str or list of str, optional
         Variable(s) used for slicing predictions_constant_data.
         If not defined, all data variables are imported.
-    log_likelihood : str or list of str, optional
-        Pointwise log_likelihood for the data.
+    log_likelihood : dict of {str: str}, list of str or str, optional
+        Pointwise log_likelihood for the data. log_likelihood is extracted from the
+        posterior. It is recommended to use this argument as a dictionary whose keys
+        are observed variable names and its values are the variables storing log
+        likelihood arrays in the Stan code. In other cases, a dictionary with keys
+        equal to its values is used. By default, if a variable ``log_lik`` is
+        present in the Stan model, it will be retrieved as pointwise log
+        likelihood values. Use ``False`` to avoid this behaviour.
     index_origin : int, optional
         Starting value of integer coordinate values. Defaults to the value in rcParam
         ``data.index_origin``.
     coords : dict of {str: array_like}, optional
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
-    dims : dict of {str: list of str, optional
+    dims : dict of {str: list of str}, optional
         A mapping from variables to a list of coordinate names for the variable.
     disable_glob : bool
         Don't use glob for string input. This means that all string input is

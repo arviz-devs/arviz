@@ -1,6 +1,7 @@
 """Bokeh mcseplot."""
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Span
+from bokeh.models.glyphs import Scatter
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
@@ -105,7 +106,7 @@ def plot_mcse(
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+                raise ValueError(f"InferenceData does not contain {rug_kind} data")
             rug_kwargs.setdefault("space", 0.1)
 
             _rug_kwargs = {}
@@ -160,7 +161,7 @@ def plot_mcse(
 
             ax_.renderers.append(hline)
 
-            glyph = Dash(x="rug_x", y="rug_y", **_rug_kwargs)
+            glyph = Scatter(x="rug_x", y="rug_y", marker="dash", **_rug_kwargs)
             cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
             ax_.add_glyph(cds_rug, glyph)
 

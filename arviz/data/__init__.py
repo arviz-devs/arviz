@@ -14,7 +14,7 @@ from .io_pyjags import from_pyjags
 from .io_pymc3 import from_pymc3, from_pymc3_predictions
 from .io_pyro import from_pyro
 from .io_pystan import from_pystan
-from .io_tfp import from_tfp
+from .utils import extract_dataset
 
 __all__ = [
     "InferenceData",
@@ -23,6 +23,7 @@ __all__ = [
     "list_datasets",
     "clear_data_home",
     "numpy_to_data_array",
+    "extract_dataset",
     "dict_to_dataset",
     "convert_to_dataset",
     "convert_to_inference_data",
@@ -37,7 +38,6 @@ __all__ = [
     "from_json",
     "from_pyro",
     "from_numpyro",
-    "from_tfp",
     "from_netcdf",
     "to_netcdf",
     "CoordSpec",

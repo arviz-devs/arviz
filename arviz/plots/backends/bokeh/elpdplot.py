@@ -1,12 +1,11 @@
 """Bokeh ELPDPlot."""
 import warnings
 
-import bokeh.models.markers as mk
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
-
+from bokeh.models.glyphs import Scatter
 from ....rcparams import _validate_bokeh_marker, rcParams
 from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
 from .. import show_layout
@@ -101,7 +100,7 @@ def plot_elpd(
                         ax_first = bkp.figure(
                             width=int(figsize[0] / (numvars - 1) * dpi),
                             height=int(figsize[1] / (numvars - 1) * dpi),
-                            **backend_kwargs
+                            **backend_kwargs,
                         )
                         ax_row.append(ax_first)
                     elif row < col:
@@ -113,7 +112,7 @@ def plot_elpd(
                                 height=int(figsize[1] / (numvars - 1) * dpi),
                                 x_range=ax_first.x_range,
                                 y_range=ax_first.y_range,
-                                **backend_kwargs
+                                **backend_kwargs,
                             )
                         )
                 ax.append(ax_row)
@@ -161,10 +160,13 @@ def _plot_atomic_elpd(
     plot_kwargs,
 ):
     marker = _validate_bokeh_marker(plot_kwargs.get("marker"))
-    marker_func = getattr(mk, marker)
     sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
-    glyph = marker_func(
-        x="xdata", y="ydata", size="sizes", line_color=plot_kwargs.get("color", "black")
+    glyph = Scatter(
+        x="xdata",
+        y="ydata",
+        size="sizes",
+        line_color=plot_kwargs.get("color", "black"),
+        marker=marker,
     )
     source = ColumnDataSource(dict(xdata=xdata, ydata=ydata, sizes=sizes))
     ax_.add_glyph(source, glyph)
@@ -173,12 +175,12 @@ def _plot_atomic_elpd(
         bool_ary = diff_abs > threshold * ydata.std()
         if coord_labels is None:
             coord_labels = xdata.astype(str)
-        outliers = np.argwhere(bool_ary).squeeze()
+        outliers = np.nonzero(bool_ary)[0]
         for outlier in outliers:
             label = coord_labels[outlier]
             ax_.text(
-                x=np.asarray(outlier),
-                y=np.asarray(ydata[outlier]),
+                x=[outlier],
+                y=[ydata[outlier]],
                 text=label,
                 text_color="black",
             )
@@ -199,5 +201,5 @@ def _plot_atomic_elpd(
         ax_.xaxis.minor_tick_line_color = None
         ax_.xaxis.major_label_text_font_size = "0pt"
     title = Title()
-    title.text = "{} - {}".format(model1, model2)
+    title.text = f"{model1} - {model2}"
     ax_.title = title

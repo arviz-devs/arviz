@@ -14,6 +14,7 @@ def plot_dist_comparison(
     textsize=None,
     var_names=None,
     coords=None,
+    combine_dims=None,
     transform=None,
     legend=True,
     labeller=None,
@@ -33,8 +34,8 @@ def plot_dist_comparison(
 
     Parameters
     ----------
-    data : az.InferenceData object
-        InferenceData object containing the posterior/prior data.
+    data : InferenceData object
+        :class:`arviz.InferenceData` object containing the posterior/prior data.
     kind : str
         kind of plot to display {"latent", "observed"}, defaults to 'latent'.
         "latent" includes {"prior", "posterior"} and "observed" includes
@@ -43,7 +44,7 @@ def plot_dist_comparison(
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on figsize.
+        autoscaled based on ``figsize``.
     var_names : str, list, list of lists
         if str, plot the variable. if list, plot all the variables in list
         of all groups. if list of lists, plot the vars of groups in respective lists.
@@ -51,35 +52,45 @@ def plot_dist_comparison(
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
+
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
     labeller : labeller instance, optional
-        Class providing the method `make_pp_label` to generate the labels in the plot.
+        Class providing the method ``make_pp_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
         last column is for the combined before/after plots and columns 0 and 1 are
         for the before and after plots, respectively.
     prior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_dist` for prior/predictive groups.
+        Additional keywords passed to :func:`arviz.plot_dist` for prior/predictive groups.
     posterior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_dist` for posterior/predictive groups.
+        Additional keywords passed to :func:`arviz.plot_dist` for posterior/predictive groups.
     observed_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_dist` for observed_data group.
+        Additional keywords passed to :func:`arviz.plot_dist` for observed_data group.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or
+        :func:`bokeh.plotting.figure`. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : a numpy 2d array of matplotlib axes. Returned object will have shape (nvars, 3),
+    axes : a numpy 2D array of matplotlib axes. Returned object will have shape (nvars, 3),
     where the last column is the combined plot and the first columns are the single plots.
+
+    See Also
+    --------
+    plot_bpv : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
     Examples
     --------
@@ -131,7 +142,9 @@ def plot_dist_comparison(
     len_plots = rcParams["plot.max_subplots"] // (len(groups) + 1)
     len_plots = len_plots if len_plots else 1
     dc_plotters = [
-        list(xarray_var_iter(data, var_names=var, combined=True))[:len_plots]
+        list(xarray_var_iter(data, var_names=var, combined=True, skip_dims=combine_dims))[
+            :len_plots
+        ]
         for data, var in zip(datasets, var_names)
     ]
 

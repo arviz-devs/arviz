@@ -142,7 +142,12 @@ class TestCoordsExceptions:
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match="Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords(data, coords)
 
@@ -171,7 +176,12 @@ class TestCoordsExceptions:
         coords = {"NOT_A_COORD_NAME": [1]}
 
         with pytest.raises(
-            ValueError, match=r"data\[1\]:.+Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+            (KeyError, ValueError),
+            match=(
+                r"data\[1\]:.+Coords "
+                r"({'NOT_A_COORD_NAME'} are invalid coordinate keys"
+                r"|should follow mapping format {coord_name:\[dim1, dim2\]})"
+            ),
         ):
             get_coords((data, data), ({"draw": [0, 1]}, coords))
 
@@ -210,7 +220,7 @@ def test_bokeh_import():
     """Tests that correct method is returned on bokeh import"""
     plot = get_plotting_function("plot_dist", "distplot", "bokeh")
 
-    from arviz.plots.backends.bokeh.distplot import plot_dist
+    from ...plots.backends.bokeh.distplot import plot_dist
 
     assert plot is plot_dist
 

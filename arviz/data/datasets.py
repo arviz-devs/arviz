@@ -199,7 +199,7 @@ def _sha256(path):
     return sha256hash.hexdigest()
 
 
-def load_arviz_data(dataset=None, data_home=None):
+def load_arviz_data(dataset=None, data_home=None, regex=False, **kwargs):
     """Load a local or remote pre-made dataset.
 
     Run with no parameters to get a list of all available models.
@@ -218,9 +218,18 @@ def load_arviz_data(dataset=None, data_home=None):
     data_home : str, optional
         Where to save remote datasets
 
+    regex : bool, optional
+        Specifies regex support for chunking information in
+        :func:`arviz.from_netcdf`. This feature is currently experimental.
+
+    **kwargs : dict of {str: dict}, optional
+        Keyword arguments to be passed to :func:`arviz.from_netcdf`.
+        This feature is currently experimental.
+
     Returns
     -------
     xarray.Dataset
+
     """
     if dataset in LOCAL_DATASETS:
         resource = LOCAL_DATASETS[dataset]
@@ -245,7 +254,7 @@ def load_arviz_data(dataset=None, data_home=None):
                 "file may be corrupted. Run `arviz.clear_data_home()` and try "
                 "again, or please open an issue.".format(file_path, checksum, remote.checksum)
             )
-        return from_netcdf(file_path)
+        return from_netcdf(file_path, kwargs, regex)
     else:
         if dataset is None:
             return dict(itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()))
@@ -263,11 +272,11 @@ def list_datasets():
     for name, resource in itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()):
 
         if isinstance(resource, LocalFileMetadata):
-            location = "local: {}".format(resource.filename)
+            location = f"local: {resource.filename}"
         elif isinstance(resource, RemoteFileMetadata):
-            location = "remote: {}".format(resource.url)
+            location = f"remote: {resource.url}"
         else:
             location = "unknown"
-        lines.append("{}\n{}\n{}\n{}".format(name, "=" * len(name), resource.description, location))
+        lines.append(f"{name}\n{'=' * len(name)}\n{resource.description}\n{location}")
 
-    return "\n\n{}\n\n".format(10 * "-").join(lines)
+    return f"\n\n{10 * '-'}\n\n".join(lines)

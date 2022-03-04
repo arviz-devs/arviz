@@ -106,7 +106,7 @@ def plot_ess(
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+                raise ValueError(f"InferenceData does not contain {rug_kind} data")
             rug_kwargs.setdefault("marker", "|")
             rug_kwargs.setdefault("linestyle", rug_kwargs.pop("ls", "None"))
             rug_kwargs.setdefault("color", rug_kwargs.pop("c", kwargs.get("color", "C0")))

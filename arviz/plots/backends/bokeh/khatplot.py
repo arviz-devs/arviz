@@ -1,7 +1,7 @@
 """Bokeh pareto shape plot."""
 from collections.abc import Iterable
 
-import matplotlib.cm as cm
+from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from bokeh.models import Span

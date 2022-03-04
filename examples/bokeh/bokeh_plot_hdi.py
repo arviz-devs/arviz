@@ -11,7 +11,7 @@ import arviz as az
 
 x_data = np.random.normal(0, 1, 100)
 y_data = 2 + x_data * 0.5
-y_data_rep = np.random.normal(y_data, 0.5, (200, 100))
+y_data_rep = np.random.normal(y_data, 0.5, (4, 200, 100))
 x_data_sorted = np.sort(x_data)
 
 ax = az.plot_hdi(x_data, y_data_rep, color="red", backend="bokeh", show=False)
