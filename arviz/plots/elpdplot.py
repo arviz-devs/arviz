@@ -114,7 +114,7 @@ def plot_elpd(
 
     """
     try:
-        (compare_dict, _, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name, pointwise=True)
+        (compare_dict, _, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name)
     except Exception as e:
         raise e.__class__("Encountered error in ic computation of plot_elpd.") from e
 

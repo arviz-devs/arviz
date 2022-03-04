@@ -291,7 +291,7 @@ defaultParams = {  # pylint: disable=invalid-name
         "loo",
         _make_validate_choice({"loo", "waic"} if NO_GET_ARGS else set(get_args(ICKeyword))),
     ),
-    "stats.ic_pointwise": (False, _validate_boolean),
+    "stats.ic_pointwise": (True, _validate_boolean),
     "stats.ic_scale": (
         "log",
         _make_validate_choice(

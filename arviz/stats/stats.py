@@ -168,7 +168,7 @@ def compare(
 
     """
     try:
-        (ics_dict, scale, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name, pointwise=False)
+        (ics_dict, scale, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name)
     except Exception as e:
         raise e.__class__("Encountered error in ic computation of compare.") from e
     names = list(ics_dict.keys())
@@ -341,9 +341,10 @@ def _calculate_ics(
     scale: Optional[ScaleKeyword] = None,
     ic: Optional[ICKeyword] = None,
     var_name: Optional[str] = None,
-    pointwise: Optional[bool] = None,
 ):
     """Calculate loo and waic information criteria only if necessary.
+
+    It always calls the ic function with ``pointwise=True``.
 
     Parameters
     ----------
@@ -362,8 +363,7 @@ def _calculate_ics(
         Defaults to ``rcParams["stats.information_criterion"]``.
     var_name : str, optional
         Name of the variable storing pointwise log likelihood values in ``log_likelihood`` group.
-    pointwise : bool, optional
-        Compute pointwise values for loo/waic
+
 
     Returns
     -------
@@ -383,6 +383,9 @@ def _calculate_ics(
         _, arbitrary_elpd = precomputed_elpds.popitem()
         precomputed_ic = arbitrary_elpd.index[0]
         precomputed_scale = arbitrary_elpd[f"{precomputed_ic}_scale"]
+        raise_non_pointwise = False
+        if not f"{precomputed_ic}_i" in arbitrary_elpd:
+            raise_non_pointwise = True
         if precomputed_elpds:
             if not all(
                 elpd_data.index[0] == precomputed_ic for elpd_data in precomputed_elpds.values()
@@ -396,6 +399,15 @@ def _calculate_ics(
                 for elpd_data in precomputed_elpds.values()
             ):
                 raise ValueError("All information criteria to be compared must use the same scale")
+            if (
+                not all(
+                    f"{precomputed_ic}_i" in elpd_data for elpd_data in precomputed_elpds.values()
+                )
+                or raise_non_pointwise
+            ):
+                raise ValueError(
+                    "Not all provided ELPDData have been calculated with pointwise=True"
+                )
         if ic is not None and ic.lower() != precomputed_ic:
             warnings.warn(
                 "Provided ic argument is incompatible with precomputed elpd data. "
@@ -442,7 +454,7 @@ def _calculate_ics(
             try:
                 compare_dict[name] = ic_func(
                     convert_to_inference_data(dataset),
-                    pointwise=pointwise,
+                    pointwise=True,
                     scale=scale,
                     var_name=var_name,
                 )
