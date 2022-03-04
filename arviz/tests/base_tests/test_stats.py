@@ -20,6 +20,7 @@ from ...stats import (
     r2_score,
     summary,
     waic,
+    _calculate_ics,
 )
 from ...stats.stats import _gpinv
 from ...stats.stats_utils import get_log_likelihood
@@ -65,7 +66,12 @@ def test_hdp():
 
 def test_hdp_2darray():
     normal_sample = np.random.randn(12000, 5)
-    result = hdi(normal_sample)
+    msg = (
+        r"hdi currently interprets 2d data as \(draw, shape\) but this will "
+        r"change in a future release to \(chain, draw\) for coherence with other functions"
+    )
+    with pytest.warns(FutureWarning, match=msg):
+        result = hdi(normal_sample)
     assert result.shape == (5, 2)
 
 
@@ -117,6 +123,22 @@ def test_hdi_multimodal():
     assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
 
 
+def test_hdi_multimodal_multivars():
+    size = 2500000
+    var1 = np.concatenate((np.random.normal(-4, 1, size), np.random.normal(2, 0.5, size)))
+    var2 = np.random.normal(8, 1, size * 2)
+    sample = Dataset(
+        {
+            "var1": (("chain", "draw"), var1[np.newaxis, :]),
+            "var2": (("chain", "draw"), var2[np.newaxis, :]),
+        },
+        coords={"chain": [0], "draw": np.arange(size * 2)},
+    )
+    intervals = hdi(sample, multimodal=True)
+    assert_array_almost_equal(intervals.var1, [[-5.8, -2.2], [0.9, 3.1]], 1)
+    assert_array_almost_equal(intervals.var2, [[6.1, 9.9], [np.nan, np.nan]], 1)
+
+
 def test_hdi_circular():
     normal_sample = np.random.vonmises(np.pi, 1, 5000000)
     interval = hdi(normal_sample, circular=True)
@@ -140,17 +162,9 @@ def test_hdi_skipna():
 def test_r2_score():
     x = np.linspace(0, 1, 100)
     y = np.random.normal(x, 1)
+    y_pred = x + np.random.randn(300, 100)
     res = linregress(x, y)
-    assert_allclose(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2, 2)
-
-
-def test_r2_score_multivariate():
-    x = np.linspace(0, 1, 100)
-    y = np.random.normal(x, 1)
-    res = linregress(x, y)
-    y_multivariate = np.c_[y, y]
-    y_multivariate_pred = np.c_[res.intercept + res.slope * x, res.intercept + res.slope * x]
-    assert not np.isnan(r2_score(y_multivariate, y_multivariate_pred).r2)
+    assert_allclose(res.rvalue ** 2, r2_score(y, y_pred).r2, 2)
 
 
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
@@ -221,6 +235,36 @@ def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_
     with pytest.raises(TypeError, match=f"{ic}.*model problematic"):
         compare(compare_dict, ic=ic)
     assert compare(compare_dict, ic=ic, var_name="obs") is not None
+
+
+@pytest.mark.parametrize("ic", ["loo", "waic"])
+def test_calculate_ics(centered_eight, non_centered_eight, ic):
+    ic_func = loo if ic == "loo" else waic
+    idata_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
+    elpddata_dict = {key: ic_func(value) for key, value in idata_dict.items()}
+    mixed_dict = {"centered": idata_dict["centered"], "non_centered": elpddata_dict["non_centered"]}
+    idata_out, _, _ = _calculate_ics(idata_dict, ic=ic)
+    elpddata_out, _, _ = _calculate_ics(elpddata_dict, ic=ic)
+    mixed_out, _, _ = _calculate_ics(mixed_dict, ic=ic)
+    for model in idata_dict:
+        assert idata_out[model][ic] == elpddata_out[model][ic]
+        assert idata_out[model][ic] == mixed_out[model][ic]
+        assert idata_out[model][f"p_{ic}"] == elpddata_out[model][f"p_{ic}"]
+        assert idata_out[model][f"p_{ic}"] == mixed_out[model][f"p_{ic}"]
+
+
+def test_calculate_ics_ic_error(centered_eight, non_centered_eight):
+    in_dict = {"centered": loo(centered_eight), "non_centered": waic(non_centered_eight)}
+    with pytest.raises(ValueError, match="found both loo and waic"):
+        _calculate_ics(in_dict)
+
+
+def test_calculate_ics_ic_override(centered_eight, non_centered_eight):
+    in_dict = {"centered": centered_eight, "non_centered": waic(non_centered_eight)}
+    with pytest.warns(UserWarning, match="precomputed elpddata: waic"):
+        out_dict, _, ic = _calculate_ics(in_dict, ic="loo")
+    assert ic == "waic"
+    assert out_dict["centered"]["waic"] == waic(centered_eight)["waic"]
 
 
 def test_summary_ndarray():
@@ -305,7 +349,7 @@ def test_summary_labels():
     column_order = []
     for coord1 in coords1:
         for coord2 in coords2:
-            column_order.append("a[{}, {}]".format(coord1, coord2))
+            column_order.append(f"a[{coord1}, {coord2}]")
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
 
@@ -640,7 +684,7 @@ def test_loo_pit_bad_input_type(centered_eight, arg):
     """Test wrong input type (not None, str not DataArray."""
     kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
     kwargs[arg] = 2  # use int instead of array-like
-    with pytest.raises(ValueError, match="not {}".format(type(2))):
+    with pytest.raises(ValueError, match=f"not {type(2)}"):
         loo_pit(idata=centered_eight, **kwargs)
 
 

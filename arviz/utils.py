@@ -5,19 +5,6 @@ import importlib
 import re
 import warnings
 from functools import lru_cache
-from copy import deepcopy
-
-from .data import InferenceData, convert_to_dataset, convert_to_inference_data
-from typing import cast
-from .rcparams import rcParams, ScaleKeyword, ICKeyword
-
-NO_GET_ARGS: bool = False
-try:
-    from typing_extensions import get_args
-except ImportError:
-    NO_GET_ARGS = True
-
-from arviz.stats.stats_utils import ELPDData
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -48,6 +35,11 @@ def _var_names(var_names, data, filter_vars=None):
     -------
     var_name: list or None
     """
+    if filter_vars not in {None, "like", "regex"}:
+        raise ValueError(
+            f"'filter_vars' can only be None, 'like', or 'regex', got: '{filter_vars}'"
+        )
+
     if var_names is not None:
         if isinstance(data, (list, tuple)):
             all_vars = []
@@ -148,7 +140,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
 
         existing_items = np.isin(subset, whole_list)
         if not np.all(existing_items):
-            raise KeyError("{} are not present".format(np.array(subset)[~existing_items]))
+            raise KeyError(f"{np.array(subset)[~existing_items]} are not present")
 
     return subset
 
@@ -246,7 +238,7 @@ class interactive_backend:  # pylint: disable=invalid-name
         self.ipython = get_ipython()
         if self.ipython is None:
             raise EnvironmentError("This context manager can only be used inside ipython sessions")
-        self.ipython.magic("matplotlib {}".format(backend))
+        self.ipython.magic(f"matplotlib {backend}")
 
     def __enter__(self):
         """Enter context manager."""
@@ -438,7 +430,7 @@ def _cov(data):
         prod += 1e-6 * np.eye(prod.shape[0])
         return prod
     else:
-        raise ValueError("{} dimension arrays are not supported".format(data.ndim))
+        raise ValueError(f"{data.ndim} dimension arrays are not supported")
 
 
 def flatten_inference_data_to_dict(
@@ -580,7 +572,7 @@ def flatten_inference_data_to_dict(
                             group_separator_end=group_separator_end,
                         )
                     else:
-                        var_name_dim = "{var_name}".format(var_name=var_name)
+                        var_name_dim = f"{var_name}"
                     data_dict[var_name_dim] = var.values
                 else:
                     for loc in np.ndindex(var.shape[:-1]):
@@ -638,9 +630,7 @@ def get_coords(data, coords):
 
         except ValueError as err:
             invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError(
-                "Coords {} are invalid coordinate keys".format(invalid_coords)
-            ) from err
+            raise ValueError(f"Coords {invalid_coords} are invalid coordinate keys") from err
 
         except KeyError as err:
             raise KeyError(
@@ -657,9 +647,9 @@ def get_coords(data, coords):
         try:
             data_subset.append(get_coords(datum, coords_dict))
         except ValueError as err:
-            raise ValueError("Error in data[{}]: {}".format(idx, err)) from err
+            raise ValueError(f"Error in data[{idx}]: {err}") from err
         except KeyError as err:
-            raise KeyError("Error in data[{}]: {}".format(idx, err)) from err
+            raise KeyError(f"Error in data[{idx}]: {err}") from err
     return data_subset
 
 
@@ -710,10 +700,10 @@ def either_dict_or_kwargs(
     """Clone from xarray.core.utils."""
     if pos_kwargs is not None:
         if not hasattr(pos_kwargs, "keys") and hasattr(pos_kwargs, "__getitem__"):
-            raise ValueError("the first argument to .%s must be a dictionary" % func_name)
+            raise ValueError(f"the first argument to .{func_name} must be a dictionary")
         if kw_kwargs:
             raise ValueError(
-                "cannot specify both keyword and positional " "arguments to .%s" % func_name
+                f"cannot specify both keyword and positional arguments to .{func_name}"
             )
         return pos_kwargs
     else:
@@ -767,95 +757,3 @@ def conditional_dask(func):
             return func(*args, **kwargs)
 
     return wrapper
-
-def Calculate_ICS(
-    dataset_dict,
-    scale: Optional[ScaleKeyword] = None,
-    ic: Optional[ICKeyword] = None
-):
-
-    """
-    Helper Function used to execute the loo and waic information criteria
-
-    LOO is leave-one-out (PSIS-LOO `loo`) cross-validation and
-    WAIC is the widely applicable information criterion.
-    Read more theory here - in a paper by some of the leading authorities
-    on model selection dx.doi.org/10.1111/1467-9868.00353
-
-    Parameters
-    ----------
-
-    dataset_dict :  dataset_dict: dict[str] -> InferenceData or ELPDData
-    A dictionary of model names and InferenceData or ELPDData objects
-    scale: str, optional
-        Output scale for IC. Available options are:
-
-        - `log` : (default) log-score (after Vehtari et al. (2017))
-        - `negative_log` : -1 * (log-score)
-        - `deviance` : -2 * (log-score)
-
-        A higher log-score (or a lower deviance) indicates a model with better predictive
-        accuracy.
-    ic: str, optional
-        Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
-        ``rcParams["stats.information_criterion"]``.
-
-    Returns
-    -------
-
-    [WIP]
-
-    """
-    names = list(dataset_dict.keys())
-
-    if scale is not None:
-        scale = cast(ScaleKeyword, scale.lower())
-    else:
-        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
-    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
-    if scale not in allowable:
-        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
-    if scale == "log":
-            scale_value = 1
-            ascending = False
-    else:
-        if scale == "negative_log":
-            scale_value = -1
-        else:
-            scale_value = -2
-        ascending = True
-
-
-    if ic is None:
-        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
-    else:
-        ic = cast(ICKeyword, ic.lower())
-    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
-    if ic not in allowable:
-        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
-
-    # I have to return loo or waic in order for compare to create the df_comp and scale col
-
-    if ic == "loo":
-        ic_func: Callable = loo
-    elif ic == "waic":
-        ic_func = waic
-    else:
-        raise NotImplementedError(f"The information criterion {ic} is not supported.")
-    
-
-    names = []
-    dataset_dict = deepcopy(dataset_dict)
-    for name, dataset in dataset_dict.items():
-        names.append(name)
-        if not isinstance(dataset, ELPDData):
-            try:
-                dataset_dict[name] = ic_func(convert_to_inference_data(dataset), pointwise=True, scale=scale)
-            except Exception as e:
-                raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e    
-    ics = [elpd_data.index[0] for elpd_data in dataset_dict.values()]
-    if not all(x == ics[0] for x in ics):
-        raise SyntaxError(
-            "All Information Criteria must be of the same kind, but both loo and waic data present"
-        )
-    return(dataset_dict, scale, ic, ics, name)

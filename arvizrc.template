@@ -7,7 +7,7 @@ data.index_origin            : 0     # index origin, must be either 0 or 1
 data.load                    : lazy  # Sets the default data loading mode.
                                      # "lazy" stands for xarray lazy loading,
                                      # "eager" loads all datasets into memory
-data.log_likelihood          : true   # save pointwise log likelihood values, one of "true", "false"
+data.log_likelihood          : true  # save pointwise log likelihood values, one of "true", "false"
 data.metagroups              : {
     posterior_groups: posterior, posterior_predictive, sample_stats, log_likelihood
     prior_groups: prior, prior_predictive, sample_stats_prior
@@ -15,7 +15,7 @@ data.metagroups              : {
     latent_vars: posterior, prior
     observed_vars: posterior_predictive, observed_data, prior_predictive
 }
-data.save_warmup             : false  # save warmup iterations, one of "true", "false"
+data.save_warmup             : false # save warmup iterations, one of "true", "false"
 
 ### PLOT  ###
 # rcParams related with plotting functions
@@ -44,7 +44,6 @@ plot.bokeh.tools             : reset,pan,box_zoom,wheel_zoom,lasso_select,undo,s
                                            # pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover
 
 # matplotlib specific rcParams
-plot.matplotlib.constrained_layout : true  # One of "true", "false"
 plot.matplotlib.show         : false       # call plt.show. One of "true", "false"
 
 ### STATS ###

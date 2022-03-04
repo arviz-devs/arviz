@@ -2,11 +2,12 @@
 import os
 import shutil
 from collections.abc import MutableMapping
+from typing import Mapping
 
 import numpy as np
 import pytest
 
-from arviz import InferenceData, from_dict
+from ... import InferenceData, from_dict
 
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -26,7 +27,8 @@ class TestDataZarr:
         class Data:
             # fake 8-school output
             obj = {}
-            for key, shape in {"mu": [], "tau": [], "eta": [8], "theta": [8]}.items():
+            shapes: Mapping[str, list] = {"mu": [], "tau": [], "eta": [8], "theta": [8]}
+            for key, shape in shapes.items():
                 obj[key] = np.random.randn(chains, draws, *shape)
 
         return Data

@@ -24,14 +24,3 @@
     {{ super() }}
   {% endif %}
 {% endblock %}
-
-<!-- Add banner to all pages! -->
-{%- block scripts_end %}
-{{ super() }}
-<script>
-  $(document).ready(function () {
-    const content = $('<div class="alert-info">Help us improve our documentation answering this  <a href="https://docs.google.com/forms/d/e/1FAIpQLSdm98VJvKad6V7V-s6Dg5vk34Dyc17fnFBtAOBcaaQ7In7eUw/viewform">~2min survey</a></div>')
-    $('#banner').append(content);
-  })
-</script>
-{%- endblock %}

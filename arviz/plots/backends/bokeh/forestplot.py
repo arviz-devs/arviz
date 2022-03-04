@@ -34,6 +34,7 @@ def plot_forest(
     var_names,
     model_names,
     combined,
+    combine_dims,
     colors,
     figsize,
     width_ratios,
@@ -64,6 +65,7 @@ def plot_forest(
         var_names=var_names,
         model_names=model_names,
         combined=combined,
+        combine_dims=combine_dims,
         colors=colors,
         labeller=labeller,
     )
@@ -214,12 +216,12 @@ class PlotHandler:
 
     # pylint: disable=inconsistent-return-statements
 
-    def __init__(self, datasets, var_names, model_names, combined, colors, labeller):
+    def __init__(self, datasets, var_names, model_names, combined, combine_dims, colors, labeller):
         self.data = datasets
 
         if model_names is None:
             if len(self.data) > 1:
-                model_names = ["Model {}".format(idx) for idx, _ in enumerate(self.data)]
+                model_names = [f"Model {idx}" for idx, _ in enumerate(self.data)]
             else:
                 model_names = [""]
         elif len(model_names) != len(self.data):
@@ -240,6 +242,7 @@ class PlotHandler:
             self.var_names = list(reversed(var_names))  # y-values are upside down
 
         self.combined = combined
+        self.combine_dims = combine_dims
 
         if colors == "cycle":
             colors = [
@@ -266,6 +269,7 @@ class PlotHandler:
                 y,
                 model_names=self.model_names,
                 combined=self.combined,
+                combine_dims=self.combine_dims,
                 colors=self.colors,
                 labeller=self.labeller,
             )
@@ -544,7 +548,7 @@ class PlotHandler:
                     )
                 )
         _title = Title()
-        _title.text = "{:.1%} HDI".format(hdi_prob)
+        _title.text = f"{hdi_prob:.1%} HDI"
         ax.title = _title
 
         return ax
@@ -616,12 +620,15 @@ class PlotHandler:
 class VarHandler:
     """Handle individual variable logic."""
 
-    def __init__(self, var_name, data, y_start, model_names, combined, colors, labeller):
+    def __init__(
+        self, var_name, data, y_start, model_names, combined, combine_dims, colors, labeller
+    ):
         self.var_name = var_name
         self.data = data
         self.y_start = y_start
         self.model_names = model_names
         self.combined = combined
+        self.combine_dims = combine_dims
         self.colors = colors
         self.labeller = labeller
         self.model_color = dict(zip(self.model_names, self.colors))
@@ -634,10 +641,10 @@ class VarHandler:
         """Iterate over models and chains for each variable."""
         if self.combined:
             grouped_data = [[(0, datum)] for datum in self.data]
-            skip_dims = {"chain"}
+            skip_dims = self.combine_dims.union({"chain"})
         else:
             grouped_data = [datum.groupby("chain") for datum in self.data]
-            skip_dims = set()
+            skip_dims = self.combine_dims
 
         label_dict = OrderedDict()
         selection_list = []

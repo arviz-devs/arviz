@@ -2,6 +2,36 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
+* [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
+* Allow kwargs to customize appearance of the mean in `plot_lm`
+* Add dict option to `from_cmdstan` log_likelihood parameter (as in `from_pystan`)
+
+
+### Maintenance and fixes
+* Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
+* Bokeh 3 compatibility. ([1919](https://github.com/arviz-devs/arviz/pull/1919))
+* Remove manual setting of 2d KDE limits ([1939](https://github.com/arviz-devs/arviz/pull/1939))
+* Pin to bokeh<3 version ([1954](https://github.com/arviz-devs/arviz/pull/1954))
+* Fix legend labels in plot_ppc to reflect prior or posterior. ([1967](https://github.com/arviz-devs/arviz/pull/1967))
+* Change `DataFrame.append` to `pandas.concat` ([1973](https://github.com/arviz-devs/arviz/pull/1973))
+* Fix axis sharing behaviour in `plot_pair`. ([1985](https://github.com/arviz-devs/arviz/pull/1985))
+
+### Deprecation
+
+### Documentation
+* Fixed typo in `Forestplot` documentation
+* Restructured contributing section and added several new pages to help contributing to docs ([1903](https://github.com/arviz-devs/arviz/pull/1903))
+
+
+## v0.11.4 (2021 Oct 3)
+
+### Maintenance and fixes
+* Fix standard deviation code in density utils by replacing it with `np.std`. ([1833](https://github.com/arviz-devs/arviz/pull/1833))
+
+## v0.11.3 (2021 Oct 1)
+### New features
+* Change order of regularization in `psislw` ([1943](https://github.com/arviz-devs/arviz/pull/1943))
 * Added `labeller` argument to enable label customization in plots and summary ([1201](https://github.com/arviz-devs/arviz/pull/1201))
 * Added `arviz.labels` module with classes and utilities ([1201](https://github.com/arviz-devs/arviz/pull/1201) and [1605](https://github.com/arviz-devs/arviz/pull/1605))
 * Added probability estimate within ROPE in `plot_posterior` ([1570](https://github.com/arviz-devs/arviz/pull/1570))
@@ -14,6 +44,7 @@
 * Improve error messages in `stats.compare()`, and `var_name` parameter. ([1616](https://github.com/arviz-devs/arviz/pull/1616))
 * Added ability to plot HDI contours to `plot_kde` with the new `hdi_probs` parameter. ([1665](https://github.com/arviz-devs/arviz/pull/1665))
 * Add dtype parsing and setting in all Stan converters ([1632](https://github.com/arviz-devs/arviz/pull/1632))
+* Add option to specify colors for each element in ppc_plot  ([1769](https://github.com/arviz-devs/arviz/pull/1769))
 
 ### Maintenance and fixes
 * Fix conversion for numpyro models with ImproperUniform latent sites ([1713](https://github.com/arviz-devs/arviz/pull/1713))
@@ -41,6 +72,10 @@
 * Fixed plot_kde to take labels with kwargs. ([1710](https://github.com/arviz-devs/arviz/pull/1710))
 * Fixed xarray related tests. ([1726](https://github.com/arviz-devs/arviz/pull/1726))
 * Fix Bokeh deprecation warnings ([1657](https://github.com/arviz-devs/arviz/pull/1657))
+* Fix credible inteval percentage in legend in `plot_loo_pit` ([1745](https://github.com/arviz-devs/arviz/pull/1745))
+* Arguments `filter_vars` and `filter_groups` now raise `ValueError` if illegal arguments are passed ([1772](https://github.com/arviz-devs/arviz/pull/1772))
+* Remove constrained_layout from arviz rcparams ([1764](https://github.com/arviz-devs/arviz/pull/1764))
+* Fix plot_elpd for a single outlier ([1787](https://github.com/arviz-devs/arviz/pull/1787))
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))

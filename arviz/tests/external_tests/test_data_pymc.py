@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from numpy import ma
 
-from arviz import (  # pylint: disable=wrong-import-position
+from ... import (  # pylint: disable=wrong-import-position
     InferenceData,
     from_dict,
     from_pymc3,
@@ -185,7 +185,7 @@ class TestDataPyMC3:
             elif len(ivalues.shape) == 2:
                 ivalues_arr = np.reshape(ivalues.values, (ivalues.shape[0] * ivalues.shape[1]))
             else:
-                raise ValueError("Unexpected values shape for variable %s" % key)
+                raise ValueError(f"Unexpected values shape for variable {key}")
             assert (ivalues.shape[0] == 2) and (ivalues.shape[1] == 500)
             assert values.shape[0] == 1000
             assert np.all(np.isclose(ivalues_arr, values))
@@ -534,7 +534,7 @@ class TestDataPyMC3:
             "prior_predictive": ["obs"],
         }
         if use_context:
-            with model:
+            with model:  # pylint: disable=not-context-manager
                 inference_data = from_pymc3(prior=prior)
         else:
             inference_data = from_pymc3(prior=prior, model=model)

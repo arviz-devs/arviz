@@ -64,7 +64,7 @@ target/
 # IDE configs
 .idea/
 .vscode/
-
+.DS_Store
 saved_animations/
 
 # mypy
@@ -79,3 +79,7 @@ doc/source/getting_started/sample_data/
 
 # MyST related
 doc/jupyter_execute
+
+# Dask related
+mydask.png
+**/dask-worker-space/*

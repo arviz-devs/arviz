@@ -17,6 +17,8 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
+    filter_vars=None,
+    combine_dims=None,
     transform=None,
     hdi_prob=None,
     point_estimate="auto",
@@ -43,13 +45,14 @@ def plot_density(
     Parameters
     ----------
     data : Union[Object, Iterator[Object]]
-        Any object that can be converted to an az.InferenceData object, or an Iterator returning
-        a sequence of such objects.
-        Refer to documentation of az.convert_to_dataset for details about such objects.
+        Any object that can be converted to an :class:`arviz.InferenceData` object, or an Iterator
+        returning a sequence of such objects.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.
     group: Optional[str]
-        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
+        Specifies which :class:`arviz.InferenceData` group should be plotted.
+        Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
-        InferenceData.
+        :class:`arviz.InferenceData`.
     data_labels : Optional[List[str]]
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
@@ -57,6 +60,14 @@ def plot_density(
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        ``pandas.filter``.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
@@ -64,7 +75,7 @@ def plot_density(
         Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
-        Defaults to 'auto' i.e. it falls back to default set in rcParams.
+        Defaults to 'auto' i.e. it falls back to default set in ``rcParams``.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
@@ -95,9 +106,9 @@ def plot_density(
         Figure size. If None it will be defined automatically.
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
@@ -105,14 +116,20 @@ def plot_density(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_dist : Plot distribution as histogram or kernel density estimates.
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book.
 
     Examples
     --------
@@ -179,12 +196,13 @@ def plot_density(
     if labeller is None:
         labeller = BaseLabeller()
 
-    var_names = _var_names(var_names, datasets)
+    var_names = _var_names(var_names, datasets, filter_vars)
+
     n_data = len(datasets)
 
     if data_labels is None:
         if n_data > 1:
-            data_labels = ["{}".format(idx) for idx in range(n_data)]
+            data_labels = [f"{idx}" for idx in range(n_data)]
         else:
             data_labels = [""]
     elif len(data_labels) != n_data:
@@ -199,7 +217,10 @@ def plot_density(
         if not 1 >= hdi_prob > 0:
             raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
-    to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
+    to_plot = [
+        list(xarray_var_iter(data, var_names, combined=True, skip_dims=combine_dims))
+        for data in datasets
+    ]
     all_labels = []
     length_plotters = []
     for plotters in to_plot:

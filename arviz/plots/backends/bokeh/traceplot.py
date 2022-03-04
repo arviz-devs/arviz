@@ -202,8 +202,8 @@ def plot_trace(
     while any(key == draw_name for key in cds_data[0]):
         draw_name += "w"
 
-    for chain_idx in cds_data:
-        cds_data[chain_idx][draw_name] = data.draw.values
+    for chain in cds_data.values():
+        chain[draw_name] = data.draw.values
 
     cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
@@ -376,12 +376,12 @@ def _plot_chains_bokeh(
     for chain_idx, cds in data.items():
         if kind == "trace":
             if legend:
-                trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
+                trace_kwargs["legend_label"] = f"chain {chain_idx}"
             ax_trace.line(
                 x=x_name,
                 y=y_name,
                 source=cds,
-                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
+                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx),
             )
             if marker:
                 ax_trace.circle(
@@ -390,12 +390,12 @@ def _plot_chains_bokeh(
                     source=cds,
                     radius=0.30,
                     alpha=0.5,
-                    **dealiase_sel_kwargs({}, chain_prop, chain_idx)
+                    **dealiase_sel_kwargs({}, chain_prop, chain_idx),
                 )
         if not combined:
             rug_kwargs["cds"] = cds
             if legend:
-                plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
+                plot_kwargs["legend_label"] = f"chain {chain_idx}"
             plot_dist(
                 cds.data[y_name],
                 ax=ax_density,

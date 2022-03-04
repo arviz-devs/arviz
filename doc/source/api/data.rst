@@ -20,7 +20,6 @@ Inference library converters
    from_pymc3_predictions
    from_pyro
    from_pystan
-   from_tfp
 
 
 IO / General conversion
@@ -45,6 +44,7 @@ General functions
    :toctree: generated/
 
    concat
+   extract_dataset
 
 Data examples
 .............
