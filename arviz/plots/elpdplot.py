@@ -114,9 +114,9 @@ def plot_elpd(
 
     """
     try:
-        (compare_dict, _, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name)
+        (compare_dict, _, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name, pointwise=True)
     except Exception as e:
-        raise e.__class__("Encountered error in ic computation of compare.") from e
+        raise e.__class__("Encountered error in ic computation of plot_elpd.") from e
 
     if backend is None:
         backend = rcParams["plot.backend"]

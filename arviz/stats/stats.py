@@ -168,7 +168,7 @@ def compare(
 
     """
     try:
-        (ics_dict, scale, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name)
+        (ics_dict, scale, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name, pointwise=False)
     except Exception as e:
         raise e.__class__("Encountered error in ic computation of compare.") from e
     names = list(ics_dict.keys())
@@ -341,6 +341,7 @@ def _calculate_ics(
     scale: Optional[ScaleKeyword] = None,
     ic: Optional[ICKeyword] = None,
     var_name: Optional[str] = None,
+    pointwise: Optional[bool] = None,
 ):
     """Calculate loo and waic information criteria only if necessary.
 
@@ -361,6 +362,8 @@ def _calculate_ics(
         Defaults to ``rcParams["stats.information_criterion"]``.
     var_name : str, optional
         Name of the variable storing pointwise log likelihood values in ``log_likelihood`` group.
+    pointwise : bool, optional
+        Compute pointwise values for loo/waic
 
     Returns
     -------
@@ -374,6 +377,8 @@ def _calculate_ics(
         for name, elpd_data in compare_dict.items()
         if isinstance(elpd_data, ELPDData)
     }
+    precomputed_ic = None
+    precomputed_scale = None
     if precomputed_elpds:
         _, arbitrary_elpd = precomputed_elpds.popitem()
         precomputed_ic = arbitrary_elpd.index[0]
@@ -404,18 +409,22 @@ def _calculate_ics(
             )
             scale = precomputed_scale
 
-    if ic is None:
+    if ic is None and precomputed_ic is None:
         ic = cast(ICKeyword, rcParams["stats.information_criterion"])
+    elif ic is None:
+        ic = precomputed_ic
     else:
         ic = cast(ICKeyword, ic.lower())
     allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
     if ic not in allowable:
         raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
 
-    if scale is not None:
-        scale = cast(ScaleKeyword, scale.lower())
-    else:
+    if scale is None and precomputed_scale is None:
         scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
+    elif scale is None:
+        scale = precomputed_scale
+    else:
+        scale = cast(ScaleKeyword, scale.lower())
     allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
     if scale not in allowable:
         raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
@@ -433,7 +442,7 @@ def _calculate_ics(
             try:
                 compare_dict[name] = ic_func(
                     convert_to_inference_data(dataset),
-                    pointwise=True,
+                    pointwise=pointwise,
                     scale=scale,
                     var_name=var_name,
                 )
