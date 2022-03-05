@@ -232,7 +232,7 @@ def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_
     }
     with pytest.raises(TypeError, match="several log likelihood arrays"):
         get_log_likelihood(compare_dict["problematic"])
-    with pytest.raises(TypeError, match=f"{ic}.*model problematic"):
+    with pytest.raises(TypeError, match=f"error in ic computation"):
         compare(compare_dict, ic=ic)
     assert compare(compare_dict, ic=ic, var_name="obs") is not None
 
@@ -520,7 +520,7 @@ def test_loo_warning(centered_eight):
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_loo_print(centered_eight, scale):
-    loo_data = loo(centered_eight, scale=scale).__repr__()
+    loo_data = loo(centered_eight, scale=scale, pointwise=False).__repr__()
     loo_pointwise = loo(centered_eight, scale=scale, pointwise=True).__repr__()
     assert loo_data is not None
     assert loo_pointwise is not None
@@ -565,7 +565,9 @@ def test_multidimensional_log_likelihood(func):
     frm = func(dsm)
     fr1 = func(ds1)
 
-    assert (fr1 == frm).all()
+    assert all(
+        fr1[key] == frm[key] for key in fr1.index if key not in {"loo_i", "waic_i", "pareto_k"}
+    )
     assert_array_almost_equal(frm[:4], fr1[:4])
 
 
