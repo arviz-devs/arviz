@@ -232,7 +232,7 @@ def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_
     }
     with pytest.raises(TypeError, match="several log likelihood arrays"):
         get_log_likelihood(compare_dict["problematic"])
-    with pytest.raises(TypeError, match=f"error in ic computation"):
+    with pytest.raises(TypeError, match="error in ic computation"):
         compare(compare_dict, ic=ic)
     assert compare(compare_dict, ic=ic, var_name="obs") is not None
 
