@@ -1918,14 +1918,14 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         " combine InferenceData with overlapping groups"
                     )
                     raise TypeError(msg)
-                group_data = getattr(arg, group)
+                group_data = arg[group]
                 args_groups[group] = deepcopy(group_data) if copy else group_data
         # add arg0 to args_groups if inplace is False
         # otherwise it will merge args_groups to arg0
         # inference data object
         if not inplace:
             for group in arg0_groups:
-                group_data = getattr(arg0, group)
+                group_data = arg0[group]
                 args_groups[group] = deepcopy(group_data) if copy else group_data
 
         other_groups = [group for group in args_groups if group not in SUPPORTED_GROUPS_ALL]
@@ -1974,13 +1974,13 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         raise TypeError(msg)
 
                     # assert that variables are equal
-                    group_data = getattr(arg, group)
+                    group_data = arg[group]
                     group_vars = group_data.data_vars
 
                     if not inplace and group in inference_data_dict:
                         group0_data = inference_data_dict[group]
                     else:
-                        group0_data = getattr(arg0, group)
+                        group0_data = arg[group]
                     group0_vars = group0_data.data_vars
 
                     for var in group0_vars:
@@ -1992,8 +1992,8 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         if var not in group0_vars:
                             msg = "Mismatch between the variables."
                             raise TypeError(msg)
-                        var_dims = getattr(group_data, var).dims
-                        var0_dims = getattr(group0_data, var).dims
+                        var_dims = group_data[var].dims
+                        var0_dims = group0_data[var].dims
                         if var_dims != var0_dims:
                             msg = "Mismatch between the dimensions."
                             raise TypeError(msg)
@@ -2066,21 +2066,21 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         continue
 
                     # assert that variables are equal
-                    group_data = getattr(arg, group)
+                    group_data = arg[group]
                     group_vars = group_data.data_vars
 
-                    group0_data = getattr(arg0, group)
+                    group0_data = arg0[group]
                     if not inplace:
                         group0_data = deepcopy(group0_data)
                     group0_vars = group0_data.data_vars
 
                     for var in group_vars:
                         if var not in group0_vars:
-                            var_data = getattr(group_data, var)
-                            getattr(arg0, group)[var] = var_data
+                            var_data = group_data[var]
+                            arg0[group][var] = var_data
                         else:
-                            var_data = getattr(group_data, var)
-                            var0_data = getattr(group0_data, var)
+                            var_data = group_data[var]
+                            var0_data = group0_data[var]
                             if dim in var_data.dims and dim in var0_data.dims:
                                 concatenated_var = xr.concat((group_data, group0_data), dim=dim)
                                 group0_data[var] = concatenated_var
