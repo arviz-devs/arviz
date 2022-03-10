@@ -735,7 +735,7 @@ def _ess_sd(ary, relative=False):
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     ary = _split_chains(ary)
-    return min(_ess(ary, relative=relative), _ess(ary ** 2, relative=relative))
+    return min(_ess(ary, relative=relative), _ess(ary**2, relative=relative))
 
 
 def _ess_quantile(ary, prob, relative=False):

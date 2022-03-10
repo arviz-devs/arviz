@@ -76,7 +76,7 @@ def plot_autocorr(
         x_prime = x
         if combined:
             x_prime = x.flatten()
-        c_i = 1.96 / x_prime.size ** 0.5
+        c_i = 1.96 / x_prime.size**0.5
         y = autocorr(x_prime)
 
         ax.add_layout(BoxAnnotation(bottom=-c_i, top=c_i, fill_color="gray"))
