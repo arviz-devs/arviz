@@ -23,6 +23,7 @@
 * Fix extend 'right' join bug ([1718](https://github.com/arviz-devs/arviz/pull/1718))
 * Update attribute handling for InferenceData ([1357](https://github.com/arviz-devs/arviz/pull/1357))
 * Fix R2 implementation ([1666](https://github.com/arviz-devs/arviz/pull/1666))
+* Added warning message in `plot_dist_comparison()` in case subplots go over the limit ([1688](https://github.com/arviz-devs/arviz/pull/1688))
 
 ### Deprecation
 

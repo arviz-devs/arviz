@@ -1,9 +1,10 @@
 """Density Comparison plot."""
+import warnings
 from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
 from .plot_utils import get_plotting_function
-from ..sel_utils import xarray_var_iter
+from ..sel_utils import xarray_var_iter, xarray_sel_iter
 
 
 def plot_dist_comparison(
@@ -146,6 +147,21 @@ def plot_dist_comparison(
         ]
         for data, var in zip(datasets, var_names)
     ]
+
+    total_plots = sum(
+        1 for _ in xarray_sel_iter(datasets[0], var_names=var_names[0], combined=True)
+    ) * (len(groups) + 1)
+    maxplots = len(dc_plotters[0]) * (len(groups) + 1)
+
+    if total_plots > rcParams["plot.max_subplots"]:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({rcParam}) is smaller than the number "
+            "of subplots to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(
+                rcParam=rcParams["plot.max_subplots"], len_plotters=total_plots, max_plots=maxplots
+            ),
+            UserWarning,
+        )
 
     nvars = len(dc_plotters[0])
     ngroups = len(groups)

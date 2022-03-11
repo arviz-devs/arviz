@@ -360,7 +360,7 @@ def test_find_hdi_contours(mean, cov, contour_sigma):
     for idx, sigma in enumerate(contour_sigma):
         contour_sp[idx] = prob_dist.pdf(mean + sigma * stdevs[0] * eigenvecs[0])
 
-    hdi_probs = 1 - np.exp(-0.5 * contour_sigma ** 2)
+    hdi_probs = 1 - np.exp(-0.5 * contour_sigma**2)
     contour_az = _find_hdi_contours(density, hdi_probs)
 
     np.testing.assert_allclose(contour_sp, contour_az, rtol=1e-2, atol=1e-4)
