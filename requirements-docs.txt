@@ -12,5 +12,5 @@ sphinx-notfound-page
 sphinx-copybutton
 bokeh
 sphinx_design
-sphinx-codeautolink @ git+https://github.com/felix-hilden/sphinx-codeautolink
+sphinx-codeautolink>=0.9.0
 jupyter-sphinx
