@@ -1918,14 +1918,14 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         " combine InferenceData with overlapping groups"
                     )
                     raise TypeError(msg)
-                group_data = arg[group]
+                group_data = getattr(arg, group)
                 args_groups[group] = deepcopy(group_data) if copy else group_data
         # add arg0 to args_groups if inplace is False
         # otherwise it will merge args_groups to arg0
         # inference data object
         if not inplace:
             for group in arg0_groups:
-                group_data = arg0[group]
+                group_data = getattr(arg0, group)
                 args_groups[group] = deepcopy(group_data) if copy else group_data
 
         other_groups = [group for group in args_groups if group not in SUPPORTED_GROUPS_ALL]
@@ -1974,13 +1974,13 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         raise TypeError(msg)
 
                     # assert that variables are equal
-                    group_data = arg[group]
+                    group_data = getattr(arg, group)
                     group_vars = group_data.data_vars
 
                     if not inplace and group in inference_data_dict:
                         group0_data = inference_data_dict[group]
                     else:
-                        group0_data = arg[group]
+                        group0_data = getattr(arg, group)
                     group0_vars = group0_data.data_vars
 
                     for var in group0_vars:
@@ -2066,10 +2066,10 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         continue
 
                     # assert that variables are equal
-                    group_data = arg[group]
+                    group_data = getattr(arg, group)
                     group_vars = group_data.data_vars
 
-                    group0_data = arg0[group]
+                    group0_data = getattr(arg0, group)
                     if not inplace:
                         group0_data = deepcopy(group0_data)
                     group0_vars = group0_data.data_vars
@@ -2077,7 +2077,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     for var in group_vars:
                         if var not in group0_vars:
                             var_data = group_data[var]
-                            arg0[group][var] = var_data
+                            getattr(arg0, group)[var] = var_data
                         else:
                             var_data = group_data[var]
                             var0_data = group0_data[var]
