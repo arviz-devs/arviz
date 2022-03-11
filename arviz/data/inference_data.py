@@ -1980,7 +1980,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     if not inplace and group in inference_data_dict:
                         group0_data = inference_data_dict[group]
                     else:
-                        group0_data = getattr(arg, group)
+                        group0_data = getattr(arg0, group)
                     group0_vars = group0_data.data_vars
 
                     for var in group0_vars:
