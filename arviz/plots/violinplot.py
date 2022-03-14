@@ -15,6 +15,7 @@ def plot_violin(
     transform=None,
     quartiles=True,
     rug=False,
+    side="both",
     hdi_prob=None,
     shade=0.35,
     bw="default",
@@ -61,6 +62,10 @@ def plot_violin(
         intervals. Defaults to ``True``.
     rug: bool
         If ``True`` adds a jittered rugplot. Defaults to ``False``.
+    side: string
+        If ``both``, both sides of the violin plot are rendered. If ``left`` or ``right``, only
+        the respective side is rendered. By separately plotting left and right halfs with
+        different data, split violin plots can be achieved. Defaults to ``both``.
     hdi_prob: float, optional
         Plots highest posterior density interval for chosen percentage of density.
         Defaults to 0.94.
@@ -163,6 +168,7 @@ def plot_violin(
         shade=shade,
         rug=rug,
         rug_kwargs=rug_kwargs,
+        side=side,
         bw=bw,
         textsize=textsize,
         labeller=labeller,
