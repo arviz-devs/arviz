@@ -143,13 +143,13 @@ def cat_hist(val, rug, side, shade, ax, **shade_kwargs):
     if rug and side == "both":
         side = "right"
     
-    if side =='right':
+    if side == "right":
         left = 0
         right = bar_length
-    elif side=='left':
+    elif side== "left":
         left = -bar_length
         right = 0
-    elif side =='both':
+    elif side == "both":
         left = -bar_length
         right = bar_length
 
