@@ -139,11 +139,11 @@ def cat_hist(val, rug, side, shade, ax, **shade_kwargs):
     if rug and side == "both":
         side = "right"
     
-    if side =='right':
+    if side =="right":
         left = None
-    elif side=='left':
+    elif side=="left":
         left = -binned_d
-    elif side =='both':
+    elif side =="both":
         left = -0.5 * binned_d
 
     ax.barh(centers, binned_d, height=heights, left=left, alpha=shade, **shade_kwargs)
