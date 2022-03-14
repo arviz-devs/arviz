@@ -414,6 +414,12 @@ def mcse(data, *, var_names=None, method="mean", prob=None, func=None, dask_kwar
     if method == "func" and func is None:
         raise TypeError("func argument needs to be defined.")
 
+    func_kwargs = {}
+    if prob is not None:
+        func_kwargs["prob"] = prob
+    elif func is not None:
+        func_kwargs["func"] = func
+
     if isinstance(data, np.ndarray):
         data = np.atleast_2d(data)
         if len(data.shape) < 3:
@@ -421,16 +427,13 @@ def mcse(data, *, var_names=None, method="mean", prob=None, func=None, dask_kwar
                 warnings.warn(
                     "Not enough samples for reliable estimate of MCSE for arbitrary functions"
                 )
-            if prob is not None:
-                return mcse_func(data, prob=prob)  # pylint: disable=unexpected-keyword-arg
-
-            return mcse_func(data)
-
-        msg = (
-            "Only uni-dimensional ndarray variables are supported."
-            " Please transform first to dataset with `az.convert_to_dataset`."
-        )
-        raise TypeError(msg)
+            return mcse_func(data, **func_kwargs)
+        else:
+            msg = (
+                "Only uni-dimensional ndarray variables are supported."
+                " Please transform first to dataset with `az.convert_to_dataset`."
+            )
+            raise TypeError(msg)
 
     dataset = convert_to_dataset(data, group="posterior")
     if (dataset.dims["chain"] * dataset.dims["draw"]) < 1000 and method == "func":
@@ -442,11 +445,6 @@ def mcse(data, *, var_names=None, method="mean", prob=None, func=None, dask_kwar
     dataset = dataset if var_names is None else dataset[var_names]
 
     ufunc_kwargs = {"ravel": False}
-    func_kwargs = {}
-    if prob is not None:
-        func_kwargs["prob"] = prob
-    elif func is not None:
-        func_kwargs["func"] = func
     return _wrap_xarray_ufunc(
         mcse_func,
         dataset,
