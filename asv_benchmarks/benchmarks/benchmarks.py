@@ -55,7 +55,7 @@ class CircStd:
 
 
 class Kde_1d:
-    params = [(True, False), (10 ** 5, 10 ** 6, 10 ** 7)]
+    params = [(True, False), (10**5, 10**6, 10**7)]
     param_names = ("Numba", "n")
 
     def setup(self, numba_flag, n):
@@ -70,7 +70,7 @@ class Kde_1d:
 
 
 class Fast_KDE_2d:
-    params = [(True, False), ((100, 10 ** 4), (10 ** 4, 100), (1000, 1000))]
+    params = [(True, False), ((100, 10**4), (10**4, 100), (1000, 1000))]
     param_names = ("Numba", "shape")
 
     def setup(self, numba_flag, shape):

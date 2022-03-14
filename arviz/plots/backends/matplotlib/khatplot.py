@@ -69,7 +69,7 @@ def plot_khat(
     hlines_kwargs["color"] = vectorized_to_hex(hlines_kwargs["color"])
 
     if markersize is None:
-        markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
+        markersize = scaled_markersize**2  # s in scatter plot mus be markersize square
         # for dots to have the same size
 
     kwargs = matplotlib_kwarg_dealiaser(kwargs, "scatter")
