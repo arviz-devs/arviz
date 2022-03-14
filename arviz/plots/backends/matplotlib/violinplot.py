@@ -20,6 +20,7 @@ def plot_violin(
     shade,
     rug,
     rug_kwargs,
+    side,
     bw,
     textsize,
     labeller,
@@ -68,9 +69,9 @@ def plot_violin(
     for (var_name, selection, isel, x), ax_ in zip(plotters, ax.flatten()):
         val = x.flatten()
         if val[0].dtype.kind == "i":
-            dens = cat_hist(val, rug, shade, ax_, **shade_kwargs)
+            dens = cat_hist(val, rug, side, shade, ax_, **shade_kwargs)
         else:
-            dens = _violinplot(val, rug, shade, bw, circular, ax_, **shade_kwargs)
+            dens = _violinplot(val, rug, side, shade, bw, circular, ax_, **shade_kwargs)
 
         if rug:
             rug_x = -np.abs(np.random.normal(scale=max(dens) / 3.5, size=len(val)))
@@ -101,7 +102,7 @@ def plot_violin(
     return ax
 
 
-def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
+def _violinplot(val, rug, side, shade, bw, circular, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
     if bw == "default":
         if circular:
@@ -109,16 +110,24 @@ def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
         else:
             bw = "experimental"
     x, density = kde(val, circular=circular, bw=bw)
+    
+    if rug and side == "both":
+        side = "right"
 
-    if not rug:
+    if side == "left":
+        dens = -density
+    elif side == "right":
+        x = x[::-1]
+        dens = density[::-1]
+    elif side == "both":
         x = np.concatenate([x, x[::-1]])
-        density = np.concatenate([-density, density[::-1]])
-
-    ax.fill_betweenx(x, density, alpha=shade, lw=0, **shade_kwargs)
+        dens = np.concatenate([-density, density[::-1]])
+        
+    ax.fill_betweenx(x, dens, alpha=shade, lw=0, **shade_kwargs)
     return density
 
 
-def cat_hist(val, rug, shade, ax, **shade_kwargs):
+def cat_hist(val, rug, side, shade, ax, **shade_kwargs):
     """Auxiliary function to plot discrete-violinplots."""
     bins = get_bins(val)
     _, binned_d, _ = histogram(val, bins=bins)
@@ -127,9 +136,14 @@ def cat_hist(val, rug, shade, ax, **shade_kwargs):
     heights = np.diff(bin_edges)
     centers = bin_edges[:-1] + heights.mean() / 2
 
-    if rug:
+    if rug and side == "both":
+        side = "right"
+    
+    if side =='right':
         left = None
-    else:
+    elif side=='left':
+        left = -binned_d
+    elif side =='both':
         left = -0.5 * binned_d
 
     ax.barh(centers, binned_d, height=heights, left=left, alpha=shade, **shade_kwargs)
