@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 ### New features
 * Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
+* Add `combine_dims` argument to several functions ([1676](https://github.com/arviz-devs/arviz/pull/1676))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 * Allow kwargs to customize appearance of the mean in `plot_lm`
 * Add dict option to `from_cmdstan` log_likelihood parameter (as in `from_pystan`)
@@ -16,6 +17,12 @@
 * Fix legend labels in plot_ppc to reflect prior or posterior. ([1967](https://github.com/arviz-devs/arviz/pull/1967))
 * Change `DataFrame.append` to `pandas.concat` ([1973](https://github.com/arviz-devs/arviz/pull/1973))
 * Fix axis sharing behaviour in `plot_pair`. ([1985](https://github.com/arviz-devs/arviz/pull/1985))
+* Fix parameter duplication problem with PyStan ([1962](https://github.com/arviz-devs/arviz/pull/1962))
+* Temporarily disable pyjags tests ([1963](https://github.com/arviz-devs/arviz/pull/1963))
+* Fix tuple bug in coords ([1695](https://github.com/arviz-devs/arviz/pull/1695))
+* Fix extend 'right' join bug ([1718](https://github.com/arviz-devs/arviz/pull/1718))
+* Update attribute handling for InferenceData ([1357](https://github.com/arviz-devs/arviz/pull/1357))
+* Fix R2 implementation ([1666](https://github.com/arviz-devs/arviz/pull/1666))
 * Added warning message in `plot_dist_comparison()` in case subplots go over the limit ([1688](https://github.com/arviz-devs/arviz/pull/1688))
 
 ### Deprecation
