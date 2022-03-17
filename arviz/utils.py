@@ -112,7 +112,9 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
             )
 
         excluded_items = [
-            item[1:] for item in subset if _repr_str(item).startswith("~") and item not in whole_list
+            item[1:]
+            for item in subset
+            if _repr_str(item).startswith("~") and item not in whole_list
         ]
         filter_items = str(filter_items).lower()
         not_found = []
