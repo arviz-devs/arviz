@@ -16,6 +16,13 @@ from .rcparams import rcParams
 STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
 
 
+def _repr_str(x):
+    if isinstance(x, str):
+        return x
+    else:
+        return repr(x)
+
+
 def _var_names(var_names, data, filter_vars=None):
     """Handle var_names input across arviz.
 
@@ -50,7 +57,7 @@ def _var_names(var_names, data, filter_vars=None):
         else:
             all_vars = list(data.data_vars)
 
-        all_vars_tilde = [var for var in all_vars if repr(var).startswith("~")]
+        all_vars_tilde = [var for var in all_vars if _repr_str(var).startswith("~")]
         if all_vars_tilde:
             warnings.warn(
                 """ArviZ treats '~' as a negation character for variable selection.
@@ -94,7 +101,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
         if isinstance(subset, str):
             subset = [subset]
 
-        whole_list_tilde = [item for item in whole_list if repr(item).startswith("~")]
+        whole_list_tilde = [item for item in whole_list if _repr_str(item).startswith("~")]
         if whole_list_tilde and warn:
             warnings.warn(
                 "ArviZ treats '~' as a negation character for selection. There are "
@@ -105,7 +112,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
             )
 
         excluded_items = [
-            item[1:] for item in subset if repr(item).startswith("~") and item not in whole_list
+            item[1:] for item in subset if _repr_str(item).startswith("~") and item not in whole_list
         ]
         filter_items = str(filter_items).lower()
         not_found = []
