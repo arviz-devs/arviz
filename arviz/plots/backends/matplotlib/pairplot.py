@@ -4,7 +4,6 @@ from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from ....rcparams import rcParams
@@ -223,7 +222,7 @@ def plot_pair(
         not_marginals = int(not marginals)
         num_subplot_cols = numvars - not_marginals
         max_plots = (
-            num_subplot_cols ** 2
+            num_subplot_cols**2
             if rcParams["plot.max_subplots"] is None
             else rcParams["plot.max_subplots"]
         )
@@ -246,11 +245,29 @@ def plot_pair(
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
+            if backend_kwargs.pop("sharex", None) is not None:
+                warnings.warn(
+                    "'sharex' keyword is ignored. For non-standard sharing, provide 'ax'.",
+                    UserWarning,
+                )
+            if backend_kwargs.pop("sharey", None) is not None:
+                warnings.warn(
+                    "'sharey' keyword is ignored. For non-standard sharing, provide 'ax'.",
+                    UserWarning,
+                )
+            backend_kwargs["sharex"] = "col"
+            if not_marginals:
+                backend_kwargs["sharey"] = "row"
             fig, ax = plt.subplots(
                 vars_to_plot,
                 vars_to_plot,
                 **backend_kwargs,
             )
+            if backend_kwargs.get("sharey") is None:
+                for j in range(0, vars_to_plot):
+                    for i in range(0, j):
+                        ax[j, i].axes.sharey(ax[j, 0])
+
         hexbin_values = []
         for i in range(0, vars_to_plot):
             var1 = plotters[i][-1].flatten()
@@ -325,11 +342,11 @@ def plot_pair(
                             )
 
                 if j != vars_to_plot - 1:
-                    ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
+                    plt.setp(ax[j, i].get_xticklabels(), visible=False)
                 else:
                     ax[j, i].set_xlabel(f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True)
                 if i != 0:
-                    ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
+                    plt.setp(ax[j, i].get_yticklabels(), visible=False)
                 else:
                     ax[j, i].set_ylabel(
                         f"{flat_var_names[j + not_marginals]}",

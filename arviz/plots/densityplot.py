@@ -18,6 +18,8 @@ def plot_density(
     data_labels=None,
     var_names=None,
     filter_vars=None,
+    combine_dims=None,
+
     transform=None,
     hdi_prob=None,
     point_estimate="auto",
@@ -64,6 +66,9 @@ def plot_density(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
@@ -193,6 +198,7 @@ def plot_density(
         labeller = BaseLabeller()
 
     var_names = _var_names(var_names, datasets, filter_vars)
+
     n_data = len(datasets)
 
     if data_labels is None:
@@ -212,7 +218,10 @@ def plot_density(
         if not 1 >= hdi_prob > 0:
             raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
-    to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
+    to_plot = [
+        list(xarray_var_iter(data, var_names, combined=True, skip_dims=combine_dims))
+        for data in datasets
+    ]
     all_labels = []
     length_plotters = []
     for plotters in to_plot:
