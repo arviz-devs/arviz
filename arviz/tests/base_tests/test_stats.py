@@ -163,7 +163,7 @@ def test_r2_score():
     y = np.random.normal(x, 1)
     y_pred = x + np.random.randn(300, 100)
     res = linregress(x, y)
-    assert_allclose(res.rvalue**2, r2_score(y, y_pred).r2, 2)
+    assert_allclose(res.rvalue ** 2, r2_score(y, y_pred).r2, 2)
 
 
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
@@ -639,7 +639,7 @@ def test_loo_pit_multi_lik():
         posterior={"a": np.random.randn(4, 100)},
         posterior_predictive={"y": post_pred},
         observed_data={"y": obs},
-        log_likelihood={"y": -(post_pred**2), "decoy": np.zeros_like(post_pred)},
+        log_likelihood={"y": -(post_pred ** 2), "decoy": np.zeros_like(post_pred)},
     )
     loo_pit_data = loo_pit(idata, y="y")
     assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))

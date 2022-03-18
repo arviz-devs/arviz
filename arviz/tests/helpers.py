@@ -291,9 +291,9 @@ def _emcee_lnprior(theta):
     # Half-cauchy prior, hwhm=25
     if tau < 0:
         return -np.inf
-    prior_tau = -np.log(tau**2 + 25**2)
+    prior_tau = -np.log(tau ** 2 + 25 ** 2)
     prior_mu = -((mu / 10) ** 2)  # normal prior, loc=0, scale=10
-    prior_eta = -np.sum(eta**2)  # normal prior, loc=0, scale=1
+    prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
     return prior_mu + prior_tau + prior_eta
 
 

@@ -222,7 +222,7 @@ def plot_pair(
         not_marginals = int(not marginals)
         num_subplot_cols = numvars - not_marginals
         max_plots = (
-            num_subplot_cols**2
+            num_subplot_cols ** 2
             if rcParams["plot.max_subplots"] is None
             else rcParams["plot.max_subplots"]
         )

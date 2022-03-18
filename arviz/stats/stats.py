@@ -929,7 +929,7 @@ def _gpdfit(ary):
     prior_bs = 3
     prior_k = 10
     n = len(ary)
-    m_est = 30 + int(n**0.5)
+    m_est = 30 + int(n ** 0.5)
 
     b_ary = 1 - np.sqrt(m_est / (np.arange(1, m_est + 1, dtype=float) - 0.5))
     b_ary /= prior_bs * ary[int(n / 4 + 0.5) - 1]

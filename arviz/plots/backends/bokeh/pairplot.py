@@ -133,7 +133,7 @@ def plot_pair(
 
     dpi = backend_kwargs.pop("dpi")
     max_plots = (
-        numvars**2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+        numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
     )
     vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
     if vars_to_plot < numvars:

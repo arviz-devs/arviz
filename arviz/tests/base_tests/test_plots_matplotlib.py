@@ -177,11 +177,9 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, filter_vars="bad_value")
 
 
-
 def test_plot_density_discrete_combinedims(discrete_model):
     axes = plot_density(discrete_model, combine_dims={"school"}, shade=0.9)
     assert axes.size == 2
-
 
 
 @pytest.mark.parametrize(
