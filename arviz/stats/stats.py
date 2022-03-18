@@ -1275,6 +1275,7 @@ def summary(
     if stat_focus is not None:
         if stat_focus == "median":
             stat_funcs = {"median": np.median, "mad": st.median_abs_deviation}
+            extend = False
     if stat_funcs is not None:
         if isinstance(stat_funcs, dict):
             for stat_func_name, stat_func in stat_funcs.items():
