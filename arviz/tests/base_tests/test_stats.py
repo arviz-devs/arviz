@@ -287,17 +287,29 @@ METRICS_NAMES = [
     "ess_bulk",
     "ess_tail",
     "r_hat",
+    "median",
+    "mad",
 ]
 
 
 @pytest.mark.parametrize(
     "params",
-    (("all", METRICS_NAMES), ("stats", METRICS_NAMES[:4]), ("diagnostics", METRICS_NAMES[4:])),
+    (("all", METRICS_NAMES[:9]), ("stats", METRICS_NAMES[:4]), ("diagnostics", METRICS_NAMES[4:9])),
 )
 def test_summary_kind(centered_eight, params):
     kind, metrics_names_ = params
     summary_df = summary(centered_eight, kind=kind)
     assert_array_equal(summary_df.columns, metrics_names_)
+
+
+@pytest.mark.parametrize(
+    "focus",
+    (("mean", METRICS_NAMES[:9]), ("median", METRICS_NAMES[9:])),
+)
+def test_summary_stat_focus(centered_eight, focus):
+    stat_focus, metrics_names_ = focus
+    az_summary = summary(centered_eight, stat_focus=stat_focus)
+    assert_array_equal(az_summary.columns, metrics_names_)
 
 
 @pytest.mark.parametrize("fmt", ["wide", "long", "xarray"])

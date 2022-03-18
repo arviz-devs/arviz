@@ -1075,6 +1075,7 @@ def summary(
     kind: "Literal['all', 'stats', 'diagnostics']" = "all",
     round_to=None,
     circ_var_names=None,
+    stat_focus=None,
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
@@ -1115,6 +1116,8 @@ def summary(
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
     circ_var_names: list
         A list of circular variables to compute circular stats for
+    stat_focus: str
+        Select the focus of summary. Default to "mean".
     stat_funcs: dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -1269,6 +1272,9 @@ def summary(
     extra_metrics = []
     extra_metric_names = []
 
+    if stat_focus is not None:
+        if stat_focus == "median":
+            stat_funcs = {"median": np.median, "mad": st.median_abs_deviation}
     if stat_funcs is not None:
         if isinstance(stat_funcs, dict):
             for stat_func_name, stat_func in stat_funcs.items():
