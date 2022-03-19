@@ -150,6 +150,26 @@ def test_dims_coords():
     assert len(coords["x_dim_2"]) == 5
 
 
+def test_dims_coords_default_dims():
+    shape = 4, 7
+    var_name = "x"
+    dims, coords = generate_dims_coords(
+        shape,
+        var_name,
+        dims=["dim1", "dim2"],
+        coords={"chain": ["a", "b", "c"]},
+        default_dims=["chain", "draw"],
+    )
+    assert "dim1" in dims
+    assert "dim2" in dims
+    assert "chain" not in dims
+    assert "draw" not in dims
+    assert len(coords["dim1"]) == 4
+    assert len(coords["dim2"]) == 7
+    assert len(coords["chain"]) == 3
+    assert "draw" not in coords
+
+
 def test_dims_coords_extra_dims():
     shape = 4, 20
     var_name = "x"
