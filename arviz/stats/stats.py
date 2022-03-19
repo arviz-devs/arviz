@@ -1075,7 +1075,7 @@ def summary(
     kind: "Literal['all', 'stats', 'diagnostics']" = "all",
     round_to=None,
     circ_var_names=None,
-    stat_focus=None,
+    stat_focus="mean",
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
@@ -1117,7 +1117,7 @@ def summary(
     circ_var_names: list
         A list of circular variables to compute circular stats for
     stat_focus: str
-        Select the focus of summary. Default to "mean".
+        Select the focus for summary. Default to "mean".
     stat_funcs: dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -1262,6 +1262,10 @@ def summary(
     if not isinstance(kind, str) or kind not in kind_group:
         raise TypeError(f"Invalid kind: '{kind}'. Kind options are: {kind_group}")
 
+    focus_group = ("mean", "median")
+    if not isinstance(stat_focus, str) or (stat_focus not in focus_group):
+        raise TypeError(f"Invalid format: '{stat_focus}'. Focus options are: {focus_group}")
+
     if order is not None:
         warnings.warn(
             "order has been deprecated. summary now shows coordinate values.", DeprecationWarning
@@ -1276,6 +1280,7 @@ def summary(
         if stat_focus == "median":
             stat_funcs = {"median": np.median, "mad": st.median_abs_deviation}
             extend = False
+
     if stat_funcs is not None:
         if isinstance(stat_funcs, dict):
             for stat_func_name, stat_func in stat_funcs.items():

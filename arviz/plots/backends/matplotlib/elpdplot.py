@@ -55,7 +55,7 @@ def plot_elpd(
                 for coord, float_color in color_mapping.items()
             ]
             plot_kwargs.setdefault("cmap", cmap_name)
-            plot_kwargs.setdefault("s", markersize ** 2)
+            plot_kwargs.setdefault("s", markersize**2)
             plot_kwargs.setdefault("c", colors)
         else:
             legend = False
@@ -70,7 +70,7 @@ def plot_elpd(
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
-        plot_kwargs.setdefault("s", markersize ** 2)
+        plot_kwargs.setdefault("s", markersize**2)
         backend_kwargs.setdefault("figsize", figsize)
         backend_kwargs["squeeze"] = True
         if ax is None:
@@ -113,7 +113,7 @@ def plot_elpd(
 
     else:
         max_plots = (
-            numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+            numvars**2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
         )
         vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
         if vars_to_plot < numvars:
@@ -128,7 +128,7 @@ def plot_elpd(
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 2, numvars - 2
         )
-        plot_kwargs.setdefault("s", markersize ** 2)
+        plot_kwargs.setdefault("s", markersize**2)
 
         if ax is None:
             fig, ax = plt.subplots(

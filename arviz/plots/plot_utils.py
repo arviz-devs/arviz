@@ -125,7 +125,7 @@ def default_grid(n_items, grid=None, max_cols=4, min_cols=3):  # noqa: D202
 
         if n_items <= max_cols:
             return 1, n_items
-        ideal = in_bounds(round(n_items ** 0.5))
+        ideal = in_bounds(round(n_items**0.5))
 
         for offset in (0, 1, -1, 2, -2):
             cols = in_bounds(ideal + offset)
