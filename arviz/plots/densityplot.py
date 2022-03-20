@@ -19,7 +19,6 @@ def plot_density(
     var_names=None,
     filter_vars=None,
     combine_dims=None,
-
     transform=None,
     hdi_prob=None,
     point_estimate="auto",
