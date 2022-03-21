@@ -17,6 +17,7 @@
 * Change `DataFrame.append` to `pandas.concat` ([1973](https://github.com/arviz-devs/arviz/pull/1973))
 * Fix axis sharing behaviour in `plot_pair`. ([1985](https://github.com/arviz-devs/arviz/pull/1985))
 * Added warning message in `plot_dist_comparison()` in case subplots go over the limit ([1688](https://github.com/arviz-devs/arviz/pull/1688))
+* Fix coord value ignoring for default dims ([2001](https://github.com/arviz-devs/arviz/pull/2001))
 
 ### Deprecation
 
