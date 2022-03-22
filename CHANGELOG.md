@@ -25,6 +25,7 @@
 * Fix R2 implementation ([1666](https://github.com/arviz-devs/arviz/pull/1666))
 * Added warning message in `plot_dist_comparison()` in case subplots go over the limit ([1688](https://github.com/arviz-devs/arviz/pull/1688))
 * Fix coord value ignoring for default dims ([2001](https://github.com/arviz-devs/arviz/pull/2001))
+* Fix min_ess usage in plot_ess ([2002](https://github.com/arviz-devs/arviz/pull/2002))
 
 ### Deprecation
 
