@@ -409,7 +409,7 @@ def test_plot_energy_bad(models):
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
         {"coords": {"school": slice(4)}, "n_points": 10},
-        {"min_ess": 600, "hline_kwargs": {"color": "r"}},
+        {"min_ess": 600, "hline_kwargs": {"line_color": "red"}},
     ],
 )
 @pytest.mark.parametrize("kind", ["local", "quantile", "evolution"])

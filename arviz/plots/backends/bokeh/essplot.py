@@ -143,12 +143,12 @@ def plot_ess(
 
         if relative and kind == "evolution":
             thin_xdata = np.linspace(xdata.min(), xdata.max(), 100)
-            ax_.line(thin_xdata, min_ess/thin_xdata, **hline_kwargs)
+            ax_.line(thin_xdata, min_ess / thin_xdata, **hline_kwargs)
         else:
             hline = Span(
                 location=min_ess / n_samples if relative else min_ess,
                 dimension="width",
-                **hline_kwargs
+                **hline_kwargs,
             )
 
             ax_.renderers.append(hline)
