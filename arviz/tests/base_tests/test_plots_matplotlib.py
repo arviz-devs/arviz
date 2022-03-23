@@ -979,7 +979,7 @@ def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
         plot_posterior(models.model_1, point_estimate="bad_value")
 
-                                           
+
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
 def test_plot_posterior_point_estimates(models, point_estimate):
     axes = plot_posterior(models.model_1, var_names=("mu", "tau"), point_estimate=point_estimate)
