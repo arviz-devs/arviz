@@ -272,26 +272,7 @@ def compute_ecdf(sample, z):
     This function computes the ecdf value at the evaluation point
         or a sorted set of evaluation points.
     """
-    if not isinstance(z, np.ndarray):
-        ## if z is just an instance then use Binary search
-        left, right = 0, len(sample) - 1
-        while left <= right:
-            mid = int((left + right) / 2)
-            if sample[mid] > z:
-                right = mid - 1
-            else:
-                left = mid + 1
-        return left / len(sample)
-    else:
-        ## if z is a list then follow this approach
-        f_z = np.empty(len(z))
-        u_idx = 0
-        for i, z_i in enumerate(z):
-            while u_idx < len(sample) and sample[u_idx] < z_i:
-                u_idx += 1
-            f_z[i] = u_idx + 1
-
-        return f_z / len(sample)
+    return np.searchsorted(sample, z, side='right') / len(sample)
 
 
 def get_ecdf_points(x, probs, difference):
