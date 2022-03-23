@@ -42,7 +42,7 @@ def plot_ecdf(
         plot_kwargs = {}
 
     plot_kwargs.setdefault("where", "post")
-    
+
     if fill_band:
         if fill_kwargs is None:
             fill_kwargs = {}
@@ -57,7 +57,7 @@ def plot_ecdf(
         plot_outline_kwargs.setdefault("alpha", 0.2)
 
     ax.step(x_coord, y_coord, **plot_kwargs)
-        
+
     if confidence_bands:
         if fill_band:
             ax.fill_between(x_bands, lower, higher, **fill_kwargs)
