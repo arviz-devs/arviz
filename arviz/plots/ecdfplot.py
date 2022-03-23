@@ -2,8 +2,8 @@
 import numpy as np
 from scipy.stats import uniform, binom
 
-from arviz.rcparams import rcParams
-from arviz.plots.plot_utils import get_plotting_function
+from ..rcparams import rcParams
+from .plot_utils import get_plotting_function
 
 
 def plot_ecdf(
