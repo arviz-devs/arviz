@@ -275,7 +275,7 @@ def compute_ecdf(sample, z):
     This function computes the ecdf value at the evaluation point
         or a sorted set of evaluation points.
     """
-    return np.searchsorted(sample, z, side='right') / len(sample)
+    return np.searchsorted(sample, z, side="right") / len(sample)
 
 
 def get_ecdf_points(x, probs, difference):
@@ -305,8 +305,7 @@ def compute_gamma(n, z, npoints=None, num_trials=1000, fpr=0.05):
         f_z = compute_ecdf(unif_samples, z)
         f_z = compute_ecdf(unif_samples, z)
         gamma_m = 2 * min(
-            np.amin(binom.cdf(n * f_z, n, z)), 
-            np.amin(1 - binom.cdf(n * f_z - 1, n, z))
+            np.amin(binom.cdf(n * f_z, n, z)), np.amin(1 - binom.cdf(n * f_z - 1, n, z))
         )
         gamma.append(gamma_m)
     return np.quantile(gamma, fpr)
