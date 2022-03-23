@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from matplotlib import animation
 from pandas import DataFrame
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, norm
 
 from ...data import from_dict, load_arviz_data
 from ...plots import (
@@ -19,6 +19,7 @@ from ...plots import (
     plot_dist,
     plot_dist_comparison,
     plot_dot,
+    plot_ecdf,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -1025,10 +1026,24 @@ def test_plot_posterior(models, kwargs):
         assert axes.shape
 
 
+def test_plot_posterior_boolean():
+    data = np.random.choice(a=[False, True], size=(4, 100))
+    axes = plot_posterior(data)
+    assert axes
+    plt.draw()
+    labels = [label.get_text() for label in axes.get_xticklabels()]
+    assert all(item in labels for item in ("True", "False"))
+
+
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
 def test_plot_posterior_discrete(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, **kwargs)
     assert axes.shape
+
+
+def test_plot_posterior_bad_type():
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]))
 
 
 def test_plot_posterior_bad(models):
@@ -1177,6 +1192,26 @@ def test_kde_cumulative(limits):
     np.testing.assert_almost_equal(round(density[-1], 3), 1)
 
 
+def test_plot_ecdf_basic():
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data)
+    assert axes is not None
+
+
+def test_plot_ecdf_values2():
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, data2)
+    assert axes is not None
+
+
+def test_plot_ecdf_cdf():
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
+    axes = plot_ecdf(data, cdf=cdf)
+    assert axes is not None
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -1260,7 +1295,7 @@ def test_plot_elpd_ic_error(models):
         "Model 1": waic(models.model_1, pointwise=True),
         "Model 2": loo(models.model_2, pointwise=True),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 
@@ -1269,7 +1304,7 @@ def test_plot_elpd_scale_error(models):
         "Model 1": waic(models.model_1, pointwise=True, scale="log"),
         "Model 2": waic(models.model_2, pointwise=True, scale="deviance"),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 

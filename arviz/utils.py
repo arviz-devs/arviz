@@ -13,6 +13,7 @@ from numpy import newaxis
 
 from .rcparams import rcParams
 
+
 STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
 
 
