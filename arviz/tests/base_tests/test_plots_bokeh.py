@@ -362,7 +362,7 @@ def test_plot_ecdf_values2():
 
 def test_plot_ecdf_cdf():
     data = np.random.randn(4, 1000)
-    cdf = norm(0,1).cdf
+    cdf = norm(0, 1).cdf
     axes = plot_ecdf(data, cdf=cdf, backend="bokeh", show=False)
     assert axes is not None
 
