@@ -277,20 +277,12 @@ def compute_ecdf(sample, z):
 
 def get_ecdf_points(x, probs, difference):
     """Compute the coordinates for the ecdf points using compute_ecdf."""
-    if difference:
-        x_coord, y_coord = np.empty(len(x)), np.empty(len(x))
-    else:
-        x_coord, y_coord = np.empty(len(x) + 1), np.empty(len(x) + 1)
-        ## pseudo point at the start of ecdf plot so that it touches x-axis
-        x_coord[0], y_coord[0] = x[0], 0
+    y = compute_ecdf(probs, x)
 
-    for i, x_i in enumerate(x):
-        f_x_i = compute_ecdf(probs, x_i)
-        if difference:
-            x_coord[i], y_coord[i] = x_i, f_x_i
-        else:
-            x_coord[i + 1], y_coord[i + 1] = x_i, f_x_i
-    return x_coord, y_coord
+    if not difference:
+        x = np.insert(x, 0, x[0])
+        y = np.insert(y, 0, 0)
+    return x, y
 
 
 def compute_gamma(n, z, npoints=None, num_trials=1000, fpr=0.05):
