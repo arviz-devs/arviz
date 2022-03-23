@@ -957,7 +957,7 @@ def test_plot_posterior_boolean():
     assert axes
     plt.draw()
     labels = [label.get_text() for label in axes.get_xticklabels()]
-    assert all(item in labels for item in ("True", "False))
+    assert all(item in labels for item in ("True", "False"))
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
@@ -965,7 +965,12 @@ def test_plot_posterior_discrete(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, **kwargs)
     assert axes.shape
 
-
+                                           
+def test_plot_posterior_bad_type(models):
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]))
+                                           
+                                           
 def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
         plot_posterior(models.model_1, rope="bad_value")
@@ -974,7 +979,7 @@ def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
         plot_posterior(models.model_1, point_estimate="bad_value")
 
-
+                                           
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
 def test_plot_posterior_point_estimates(models, point_estimate):
     axes = plot_posterior(models.model_1, var_names=("mu", "tau"), point_estimate=point_estimate)
