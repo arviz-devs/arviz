@@ -2,6 +2,16 @@
 
 ## v0.x.x Unreleased
 ### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+
+## v0.12.0 (2022 Mar 23)
+### New features
 * Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
 * Add `combine_dims` argument to several functions ([1676](https://github.com/arviz-devs/arviz/pull/1676))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
