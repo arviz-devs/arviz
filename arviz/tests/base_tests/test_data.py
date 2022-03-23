@@ -26,6 +26,7 @@ from ... import (
     list_datasets,
     load_arviz_data,
     to_netcdf,
+    extract_dataset,
 )
 
 from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
@@ -147,6 +148,26 @@ def test_dims_coords():
     assert len(coords["x_dim_0"]) == 4
     assert len(coords["x_dim_1"]) == 20
     assert len(coords["x_dim_2"]) == 5
+
+
+def test_dims_coords_default_dims():
+    shape = 4, 7
+    var_name = "x"
+    dims, coords = generate_dims_coords(
+        shape,
+        var_name,
+        dims=["dim1", "dim2"],
+        coords={"chain": ["a", "b", "c"]},
+        default_dims=["chain", "draw"],
+    )
+    assert "dim1" in dims
+    assert "dim2" in dims
+    assert "chain" not in dims
+    assert "draw" not in dims
+    assert len(coords["dim1"]) == 4
+    assert len(coords["dim2"]) == 7
+    assert len(coords["chain"]) == 3
+    assert "draw" not in coords
 
 
 def test_dims_coords_extra_dims():
@@ -509,6 +530,15 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
 
+    def test_group_names_invalid_args(self):
+        ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
+        idata = InferenceData(posterior=(ds, ds))
+        msg = r"^\'filter_groups\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+        with pytest.raises(ValueError, match=msg):
+            idata._group_names(  # pylint: disable=protected-access
+                ("posterior",), filter_groups="foo"
+            )
+
     @pytest.mark.parametrize("inplace", [False, True])
     def test_isel(self, data_random, inplace):
         idata = data_random
@@ -667,7 +697,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             if groups == "posterior":
                 if kwargs.get("include_coords", True) and kwargs.get("include_index", True):
                     assert any(
-                        "[{},".format(kwargs.get("index_origin", 0)) in item[0]
+                        f"[{kwargs.get('index_origin', 0)}," in item[0]
                         for item in test_data.columns
                         if isinstance(item, tuple)
                     )
@@ -935,6 +965,16 @@ def test_dict_to_dataset_event_dims_error():
     msg = "different number of dimensions on data and dims"
     with pytest.raises(ValueError, match=msg):
         convert_to_dataset(datadict, coords=coords, dims={"a": ["b", "c"]})
+
+
+def test_dict_to_dataset_with_tuple_coord():
+    datadict = {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)}
+    dataset = convert_to_dataset(datadict, coords={"c": tuple(range(10))}, dims={"b": ["c"]})
+    assert set(dataset.data_vars) == {"a", "b"}
+    assert set(dataset.coords) == {"chain", "draw", "c"}
+
+    assert set(dataset.a.coords) == {"chain", "draw"}
+    assert set(dataset.b.coords) == {"chain", "draw", "c"}
 
 
 def test_convert_to_dataset_idempotent():
@@ -1378,3 +1418,38 @@ class TestDataArrayToDataset:
         assert inference_data.prior.chain.shape == shape[:1]
         assert inference_data.prior.draw.shape == shape[1:2]
         assert inference_data.prior[var_name].shape == shape
+
+
+class TestExtractDataset:
+    def test_default(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata)
+        assert isinstance(post, xr.Dataset)
+        assert "sample" in post.dims
+        assert post.theta.size == (4 * 500 * 8)
+
+    def test_seed(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata, rng=7)
+        post_pred = extract_dataset(idata, group="posterior_predictive", rng=7)
+        assert all(post.sample == post_pred.sample)
+
+    def test_no_combine(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata, combined=False)
+        assert "sample" not in post.dims
+        assert post.dims["chain"] == 4
+        assert post.dims["draw"] == 500
+
+    def test_var_name_group(self):
+        idata = load_arviz_data("centered_eight")
+        prior = extract_dataset(idata, group="prior", var_names="the", filter_vars="like")
+        assert prior.attrs == idata.prior.attrs
+        assert "theta" in prior.data_vars
+        assert "mu" not in prior.data_vars
+
+    def test_subset_samples(self):
+        idata = load_arviz_data("centered_eight")
+        post = extract_dataset(idata, num_samples=10)
+        assert post.dims["sample"] == 10
+        assert post.attrs == idata.posterior.attrs

@@ -4,8 +4,6 @@ Point Estimate Pairplot
 
 _thumb: .2, .5
 """
-import matplotlib.pyplot as plt
-
 import arviz as az
 
 centered = az.load_arviz_data("centered_eight")
@@ -22,5 +20,3 @@ ax = az.plot_pair(
     figsize=(10, 8),
     backend="bokeh",
 )
-
-plt.show()

@@ -1,7 +1,7 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
 import numpy as np
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Span
 from bokeh.models.annotations import Legend, Title
 from scipy.stats import rankdata
 
@@ -78,7 +78,7 @@ def plot_ess(
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+                raise ValueError(f"InferenceData does not contain {rug_kind} data")
 
             rug_kwargs.setdefault("space", 0.1)
             _rug_kwargs = {}

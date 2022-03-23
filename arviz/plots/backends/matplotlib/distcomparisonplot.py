@@ -48,22 +48,22 @@ def plot_dist_comparison(
 
     backend_kwargs.setdefault("figsize", figsize)
 
-    posterior_kwargs.setdefault("plot_kwargs", dict())
+    posterior_kwargs.setdefault("plot_kwargs", {})
     posterior_kwargs["plot_kwargs"]["color"] = posterior_kwargs["plot_kwargs"].get("color", "C0")
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
-    posterior_kwargs.setdefault("hist_kwargs", dict())
+    posterior_kwargs.setdefault("hist_kwargs", {})
     posterior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
-    prior_kwargs.setdefault("plot_kwargs", dict())
+    prior_kwargs.setdefault("plot_kwargs", {})
     prior_kwargs["plot_kwargs"]["color"] = prior_kwargs["plot_kwargs"].get("color", "C1")
     prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
-    prior_kwargs.setdefault("hist_kwargs", dict())
+    prior_kwargs.setdefault("hist_kwargs", {})
     prior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
-    observed_kwargs.setdefault("plot_kwargs", dict())
+    observed_kwargs.setdefault("plot_kwargs", {})
     observed_kwargs["plot_kwargs"]["color"] = observed_kwargs["plot_kwargs"].get("color", "C2")
     observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
-    observed_kwargs.setdefault("hist_kwargs", dict())
+    observed_kwargs.setdefault("hist_kwargs", {})
     observed_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     if ax is None:

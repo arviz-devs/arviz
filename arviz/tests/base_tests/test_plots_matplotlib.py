@@ -18,14 +18,15 @@ from ...plots import (
     plot_density,
     plot_dist,
     plot_dist_comparison,
+    plot_dot,
     plot_elpd,
     plot_energy,
     plot_ess,
     plot_forest,
     plot_hdi,
-    plot_joint,
     plot_kde,
     plot_khat,
+    plot_lm,
     plot_loo_pit,
     plot_mcse,
     plot_pair,
@@ -35,12 +36,15 @@ from ...plots import (
     plot_rank,
     plot_separation,
     plot_trace,
+    plot_ts,
     plot_violin,
 )
 from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...stats.density_utils import kde as _kde
 from ...utils import _cov
+from ...plots.plot_utils import plot_point_interval
+from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
     create_model,
     create_multidimensional_model,
@@ -58,7 +62,7 @@ def clean_plots(request, save_figs):
 
     def fin():
         if save_figs is not None:
-            plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
+            plt.savefig(f"{os.path.join(save_figs, request.node.name)}.png")
         plt.close("all")
 
     request.addfinalizer(fin)
@@ -79,6 +83,16 @@ def df_trace():
 def discrete_model():
     """Simple fixture for random discrete model"""
     return {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
+
+
+@pytest.fixture(scope="module")
+def discrete_multidim_model():
+    """Simple fixture for random discrete model"""
+    idata = from_dict(
+        {"x": np.random.randint(10, size=(2, 50, 3)), "y": np.random.randint(10, size=(2, 50))},
+        dims={"x": ["school"]},
+    )
+    return idata
 
 
 @pytest.fixture(scope="module")
@@ -154,10 +168,18 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, point_estimate="bad_value")
 
     with pytest.raises(ValueError):
-        plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
+        plot_density(obj, data_labels=[f"bad_value_{i}" for i in range(len(obj) + 10)])
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
+
+    with pytest.raises(ValueError):
+        plot_density(obj, filter_vars="bad_value")
+
+
+def test_plot_density_discrete_combinedims(discrete_model):
+    axes = plot_density(discrete_model, combine_dims={"school"}, shade=0.9)
+    assert axes.size == 2
 
 
 @pytest.mark.parametrize(
@@ -235,6 +257,13 @@ def test_plot_trace_max_subplots_warning(models):
     assert axes.shape == (3, 2)
 
 
+def test_plot_dist_comparison_warning(models):
+    with pytest.warns(UserWarning):
+        with rc_context(rc={"plot.max_subplots": 6}):
+            axes = plot_dist_comparison(models.model_1)
+    assert axes.shape == (2, 3)
+
+
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
 def test_plot_trace_invalid_varname_warning(models, kwargs):
     with pytest.warns(UserWarning, match="valid var.+should be provided"):
@@ -263,7 +292,7 @@ def test_plot_trace_futurewarning(models, prop):
     [
         ({}, 1),
         ({"var_names": "mu", "transform": lambda x: x + 1}, 1),
-        ({"var_names": "mu", "rope": (-1, 1)}, 1),
+        ({"var_names": "mu", "rope": (-1, 1), "combine_dims": {"school"}}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "ess": True, "combined": True}, 2),
         (
@@ -319,7 +348,7 @@ def test_plot_forest_bad(models, model_fits):
         plot_forest(obj, kind="bad_kind")
 
     with pytest.raises(ValueError):
-        plot_forest(obj, model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)])
+        plot_forest(obj, model_names=[f"model_name_{i}" for i in range(len(obj) + 10)])
 
 
 @pytest.mark.parametrize("kind", ["kde", "hist"])
@@ -347,35 +376,6 @@ def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
         assert plot_parallel(models.model_1, var_names=var_names, norm_method="foo")
-
-
-@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, kind):
-    axjoin, _, _ = plot_joint(models.model_1, var_names=("mu", "tau"), kind=kind)
-    assert axjoin
-
-
-def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(models.model_1, var_names=("mu", "tau"))
-    axjoin, _, _ = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax)
-    assert axjoin
-
-
-def test_plot_joint_discrete(discrete_model):
-    axjoin, _, _ = plot_joint(discrete_model)
-    assert axjoin
-
-
-def test_plot_joint_bad(models):
-    with pytest.raises(ValueError):
-        plot_joint(models.model_1, var_names=("mu", "tau"), kind="bad_kind")
-
-    with pytest.raises(Exception):
-        plot_joint(models.model_1, var_names=("mu", "tau", "eta"))
-
-    with pytest.raises(ValueError, match="ax.+3.+5"):
-        _, axes = plt.subplots(5, 1)
-        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes)
 
 
 @pytest.mark.parametrize(
@@ -531,7 +531,7 @@ def test_plot_kde_inference_data(models):
         {
             "var_names": "theta",
             "divergences": True,
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "scatter_kwargs": {"marker": "x"},
             "divergences_kwargs": {"marker": "*", "c": "C0"},
         },
@@ -547,7 +547,7 @@ def test_plot_kde_inference_data(models):
         {
             "kind": "hexbin",
             "var_names": ["theta"],
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "colorbar": True,
             "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
@@ -605,6 +605,17 @@ def test_plot_pair_overlaid(models, kwargs):
 
 
 @pytest.mark.parametrize("marginals", [True, False])
+def test_plot_pair_combinedims(models, marginals):
+    ax = plot_pair(
+        models.model_1, var_names=["eta", "theta"], combine_dims={"school"}, marginals=marginals
+    )
+    if marginals:
+        assert ax.shape == (2, 2)
+    else:
+        assert not isinstance(ax, np.ndarray)
+
+
+@pytest.mark.parametrize("marginals", [True, False])
 @pytest.mark.parametrize("max_subplots", [True, False])
 def test_plot_pair_shapes(marginals, max_subplots):
     rng = np.random.default_rng()
@@ -617,6 +628,45 @@ def test_plot_pair_shapes(marginals, max_subplots):
         ax = plot_pair(idata, marginals=marginals)
     side = 3 if max_subplots else (4 + marginals)
     assert ax.shape == (side, side)
+
+
+@pytest.mark.parametrize("sharex", ["col", None])
+@pytest.mark.parametrize("sharey", ["row", None])
+@pytest.mark.parametrize("marginals", [True, False])
+def test_plot_pair_shared(sharex, sharey, marginals):
+    # Generate fake data and plot
+    rng = np.random.default_rng()
+    idata = from_dict({"a": rng.standard_normal((4, 500, 5))})
+    numvars = 5 - (not marginals)
+    if sharex is None and sharey is None:
+        ax = plot_pair(idata, marginals=marginals)
+    else:
+        backend_kwargs = {}
+        if sharex is not None:
+            backend_kwargs["sharex"] = sharex
+        if sharey is not None:
+            backend_kwargs["sharey"] = sharey
+        with pytest.warns(UserWarning):
+            ax = plot_pair(idata, marginals=marginals, backend_kwargs=backend_kwargs)
+
+    # Check x axes shared correctly
+    for i in range(numvars):
+        num_shared_x = numvars - i
+        assert len(ax[-1, i].get_shared_x_axes().get_siblings(ax[-1, i])) == num_shared_x
+
+    # Check y axes shared correctly
+    for j in range(numvars):
+        if marginals:
+            num_shared_y = j
+
+            # Check diagonal has unshared axis
+            assert len(ax[j, j].get_shared_y_axes().get_siblings(ax[j, j])) == 1
+
+            if j == 0:
+                continue
+        else:
+            num_shared_y = j + 1
+        assert len(ax[j, 0].get_shared_y_axes().get_siblings(ax[j, 0])) == num_shared_y
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
@@ -709,7 +759,7 @@ def test_plot_ppc_save_animation(models, kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)
@@ -738,7 +788,7 @@ def test_plot_ppc_discrete_save_animation(kind):
     assert anim
     animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
-    path = os.path.join(animations_folder, "ppc_discrete_{}_animation.mp4".format(kind))
+    path = os.path.join(animations_folder, f"ppc_discrete_{kind}_animation.mp4")
     anim.save(path)
     assert os.path.exists(path)
     assert os.path.getsize(path)
@@ -856,6 +906,30 @@ def test_plot_violin_discrete(discrete_model):
     assert axes.shape
 
 
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def test_plot_violin_combinedims(models, var_names):
+    axes = plot_violin(models.model_1, var_names=var_names, combine_dims={"school"})
+    assert axes.shape
+
+
+def test_plot_violin_ax_combinedims(models):
+    _, ax = plt.subplots(1)
+    axes = plot_violin(models.model_1, var_names="mu", combine_dims={"school"}, ax=ax)
+    assert axes.shape
+
+
+def test_plot_violin_layout_combinedims(models):
+    axes = plot_violin(
+        models.model_1, var_names=["mu", "tau"], combine_dims={"school"}, sharey=False
+    )
+    assert axes.shape
+
+
+def test_plot_violin_discrete_combinedims(discrete_model):
+    axes = plot_violin(discrete_model, combine_dims={"school"})
+    assert axes.shape
+
+
 def test_plot_autocorr_short_chain():
     """Check that logic for small chain defaulting doesn't cause exception"""
     chain = np.arange(10)
@@ -891,7 +965,7 @@ def test_plot_autocorr_var_names(models, var_names):
     [
         {},
         {"var_names": "mu"},
-        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ("mu", "tau"), "coords": {"school": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
         {
             "var_names": "mu",
@@ -994,6 +1068,41 @@ def test_plot_posterior_skipna():
         plot_posterior({"a": sample}, skipna=False)
 
 
+@pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "theta"]}])
+def test_plot_posterior_combinedims(models, kwargs):
+    axes = plot_posterior(models.model_1, combine_dims={"school"}, **kwargs)
+    if isinstance(kwargs.get("var_names"), str):
+        assert not isinstance(axes, np.ndarray)
+    else:
+        assert axes.shape
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
+def test_plot_posterior_discrete_combinedims(discrete_multidim_model, kwargs):
+    axes = plot_posterior(discrete_multidim_model, combine_dims={"school"}, **kwargs)
+    assert axes.size == 2
+
+
+@pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
+def test_plot_posterior_point_estimates_combinedims(models, point_estimate):
+    axes = plot_posterior(
+        models.model_1,
+        var_names=("mu", "tau"),
+        combine_dims={"school"},
+        point_estimate=point_estimate,
+    )
+    assert axes.size == 2
+
+
+def test_plot_posterior_skipna_combinedims():
+    idata = load_arviz_data("centered_eight")
+    idata.posterior["theta"].loc[dict(school="Deerfield")] = np.nan
+    with pytest.raises(ValueError):
+        plot_posterior(idata, var_names="theta", combine_dims={"school"}, skipna=False)
+    ax = plot_posterior(idata, var_names="theta", combine_dims={"school"}, skipna=True)
+    assert not isinstance(ax, np.ndarray)
+
+
 @pytest.mark.parametrize(
     "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
@@ -1092,6 +1201,7 @@ def test_kde_cumulative(limits):
         {"color": "obs_dim", "legend": True},
         {"ic": "loo", "color": "blue", "coords": {"obs_dim": slice(2, 5)}},
         {"color": np.random.uniform(size=8), "threshold": 0.1},
+        {"threshold": 2},
     ],
 )
 @pytest.mark.parametrize("add_model", [False, True])
@@ -1267,7 +1377,7 @@ def test_plot_khat_bad_input(models):
     [
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
-        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"coords": {"school": slice(4)}, "n_points": 10},
         {"min_ess": 600, "hline_kwargs": {"color": "r"}},
     ],
 )
@@ -1365,7 +1475,7 @@ def test_plot_loo_pit_incompatible_args(models):
         {"var_names": ["theta"], "color": "r"},
         {"rug": True, "rug_kwargs": {"color": "r"}},
         {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
-        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"errorbar": True, "coords": {"school": slice(4)}, "n_points": 10},
         {"extra_methods": True, "rug": True},
         {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
     ],
@@ -1404,7 +1514,7 @@ def test_plot_mcse_no_divergences(models):
     [
         {},
         {"var_names": ["theta"]},
-        {"var_names": ["theta"], "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ["theta"], "coords": {"school": [0, 1]}},
         {"var_names": ["eta"], "posterior_kwargs": {"rug": True, "rug_kwargs": {"color": "r"}}},
         {"var_names": ["mu"], "prior_kwargs": {"fill_kwargs": {"alpha": 0.5}}},
         {
@@ -1434,6 +1544,27 @@ def test_plot_dist_comparison_different_vars():
     assert np.all(ax)
 
 
+def test_plot_dist_comparison_combinedims(models):
+    idata = models.model_1
+    ax = plot_dist_comparison(idata, combine_dims={"school"})
+    assert np.all(ax)
+
+
+def test_plot_dist_comparison_different_vars_combinedims():
+    data = from_dict(
+        posterior={
+            "x": np.random.randn(4, 100, 30),
+        },
+        prior={"x_hat": np.random.randn(4, 100, 30)},
+        dims={"x": ["3rd_dim"], "x_hat": ["3rd_dim"]},
+    )
+    with pytest.raises(KeyError):
+        plot_dist_comparison(data, var_names="x", combine_dims={"3rd_dim"})
+    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]], combine_dims={"3rd_dim"})
+    assert np.all(ax)
+    assert ax.size == 3
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -1455,3 +1586,305 @@ def test_plot_bpv_discrete():
     fake_model = from_dict(posterior_predictive=fake_pp, observed_data=fake_obs)
     axes = plot_bpv(fake_model)
     assert not isinstance(axes, np.ndarray)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "binwidth": 0.5,
+            "stackratio": 2,
+            "nquantiles": 20,
+        },
+        {"point_interval": True},
+        {
+            "point_interval": True,
+            "dotsize": 1.2,
+            "point_estimate": "median",
+            "plot_kwargs": {"color": "grey"},
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+        {
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "quartiles": False,
+            "linewidth": 2,
+        },
+    ],
+)
+def test_plot_dot(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"rotated": True},
+        {
+            "point_interval": True,
+            "rotated": True,
+            "dotcolor": "grey",
+            "binwidth": 0.5,
+        },
+        {
+            "rotated": True,
+            "point_interval": True,
+            "plot_kwargs": {"color": "grey"},
+            "nquantiles": 100,
+            "dotsize": 0.8,
+            "hdi_prob": 0.95,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_dot_rotated(continuous_model, kwargs):
+    data = continuous_model["x"]
+    ax = plot_dot(data, **kwargs)
+    assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {
+            "point_estimate": "mean",
+            "hdi_prob": 0.95,
+            "quartiles": False,
+            "linewidth": 2,
+            "markersize": 2,
+            "markercolor": "red",
+            "marker": "o",
+            "rotated": False,
+            "intervalcolor": "green",
+        },
+    ],
+)
+def test_plot_point_interval(continuous_model, kwargs):
+    _, ax = plt.subplots()
+    data = continuous_model["x"]
+    values = np.sort(data)
+    ax = plot_point_interval(ax, values, **kwargs)
+    assert ax
+
+
+def test_wilkinson_algorithm(continuous_model):
+    data = continuous_model["x"]
+    values = np.sort(data)
+    _, stack_counts = wilkinson_algorithm(values, 0.5)
+    assert np.sum(stack_counts) == len(values)
+    stack_locs, stack_counts = wilkinson_algorithm([0.0, 1.0, 1.8, 3.0, 5.0], 1.0)
+    assert stack_locs == [0.0, 1.4, 3.0, 5.0]
+    assert stack_counts == [1, 2, 1, 1]
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat": "bad_name"},
+        {"x": "x1"},
+        {"x": ("x1", "x2")},
+        {
+            "x": ("x1", "x2"),
+            "y_kwargs": {"color": "blue", "marker": "^"},
+            "y_hat_plot_kwargs": {"color": "cyan"},
+        },
+        {"x": ("x1", "x2"), "y_model_plot_kwargs": {"color": "red"}},
+        {
+            "x": ("x1", "x2"),
+            "kind_pp": "hdi",
+            "kind_model": "hdi",
+            "y_model_fill_kwargs": {"color": "red"},
+            "y_hat_fill_kwargs": {"color": "cyan"},
+        },
+    ],
+)
+def test_plot_lm(models, kwargs):
+    """Test functionality for 1D data."""
+    idata = models.model_1
+    if "constant_data" not in idata.groups():
+        y = idata.observed_data["y"]
+        x1data = y.coords[y.dims[0]]
+        idata.add_groups({"constant_data": {"_": x1data}})
+        idata.constant_data["x1"] = x1data
+        idata.constant_data["x2"] = x1data
+
+    axes = plot_lm(idata=idata, y="y", y_model="eta", xjitter=True, **kwargs)
+    assert np.all(axes)
+
+
+def test_plot_lm_multidim(multidim_models):
+    """Test functionality for multidimentional data."""
+    idata = multidim_models.model_1
+    axes = plot_lm(
+        idata=idata,
+        x=idata.observed_data["y"].coords["dim1"].values,
+        y="y",
+        xjitter=True,
+        plot_dim="dim1",
+        show=False,
+        figsize=(4, 16),
+    )
+    assert np.all(axes)
+
+
+@pytest.mark.parametrize(
+    "val_err_kwargs",
+    [
+        {},
+        {"kind_pp": "bad_kind"},
+        {"kind_model": "bad_kind"},
+    ],
+)
+def test_plot_lm_valueerror(multidim_models, val_err_kwargs):
+    """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_lm(idata=idata2, y="y", **val_err_kwargs)
+
+
+@pytest.mark.parametrize(
+    "warn_kwargs",
+    [
+        {"y_hat": "bad_name"},
+        {"y_model": "bad_name"},
+    ],
+)
+def test_plot_lm_warning(models, warn_kwargs):
+    """Test Warning when needed groups or variables are not there in idata."""
+    idata1 = models.model_1
+    with pytest.warns(UserWarning):
+        plot_lm(
+            idata=from_dict(observed_data={"y": idata1.observed_data["y"].values}),
+            y="y",
+            **warn_kwargs,
+        )
+    with pytest.warns(UserWarning):
+        plot_lm(idata=idata1, y="y", **warn_kwargs)
+
+
+def test_plot_lm_typeerror(models):
+    """Test error when invalid value passed to num_samples."""
+    idata1 = models.model_1
+    with pytest.raises(TypeError):
+        plot_lm(idata=idata1, y="y", num_samples=-1)
+
+
+def test_plot_lm_list():
+    """Test the plots when input data is list or ndarray."""
+    y = [1, 2, 3, 4, 5]
+    assert plot_lm(y=y, x=np.arange(len(y)), show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat": "bad_name"},
+        {"x": "x"},
+        {"x": ("x", "x")},
+        {"y_holdout": "z"},
+        {"y_holdout": "z", "x_holdout": "x_pred"},
+        {"x": ("x", "x"), "y_holdout": "z", "x_holdout": ("x_pred", "x_pred")},
+        {"y_forecasts": "z"},
+        {"y_holdout": "z", "y_forecasts": "bad_name"},
+    ],
+)
+def test_plot_ts(kwargs):
+    """Test timeseries plots basic functionality."""
+    nchains = 4
+    ndraws = 500
+    obs_data = {
+        "y": 2 * np.arange(1, 9) + 3,
+        "z": 2 * np.arange(8, 12) + 3,
+    }
+
+    posterior_predictive = {
+        "y": np.random.normal(
+            (obs_data["y"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["y"]))
+        ),
+        "z": np.random.normal(
+            (obs_data["z"] * 1.2) - 3, size=(nchains, ndraws, len(obs_data["z"]))
+        ),
+    }
+
+    const_data = {"x": np.arange(1, 9), "x_pred": np.arange(8, 12)}
+
+    idata = from_dict(
+        observed_data=obs_data,
+        posterior_predictive=posterior_predictive,
+        constant_data=const_data,
+        coords={"obs_dim": np.arange(1, 9), "pred_dim": np.arange(8, 12)},
+        dims={"y": ["obs_dim"], "z": ["pred_dim"]},
+    )
+
+    ax = plot_ts(idata=idata, y="y", show=True, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {
+            "y_holdout": "z",
+            "holdout_dim": "holdout_dim1",
+            "x": ("x", "x"),
+            "x_holdout": ("x_pred", "x_pred"),
+        },
+        {"y_forecasts": "z", "holdout_dim": "holdout_dim1"},
+    ],
+)
+def test_plot_ts_multidim(kwargs):
+    """Test timeseries plots multidim functionality."""
+    nchains = 4
+    ndraws = 500
+    ndim1 = 5
+    ndim2 = 7
+    data = {
+        "y": np.random.normal(size=(ndim1, ndim2)),
+        "z": np.random.normal(size=(ndim1, ndim2)),
+    }
+
+    posterior_predictive = {
+        "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        "z": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+
+    const_data = {"x": np.arange(1, 6), "x_pred": np.arange(5, 10)}
+
+    idata = from_dict(
+        observed_data=data,
+        posterior_predictive=posterior_predictive,
+        constant_data=const_data,
+        dims={
+            "y": ["dim1", "dim2"],
+            "z": ["holdout_dim1", "holdout_dim2"],
+        },
+        coords={
+            "dim1": range(ndim1),
+            "dim2": range(ndim2),
+            "holdout_dim1": range(ndim1 - 1, ndim1 + 4),
+            "holdout_dim2": range(ndim2 - 1, ndim2 + 6),
+        },
+    )
+
+    ax = plot_ts(idata=idata, y="y", plot_dim="dim1", **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize("val_err_kwargs", [{}, {"plot_dim": "dim1", "y_holdout": "y"}])
+def test_plot_ts_valueerror(multidim_models, val_err_kwargs):
+    """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
+    idata2 = multidim_models.model_1
+    with pytest.raises(ValueError):
+        plot_ts(idata=idata2, y="y", **val_err_kwargs)

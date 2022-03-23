@@ -20,11 +20,11 @@ Using pip
 
     pip install arviz
 
-Use the below pip command to install ArviZ with all of it's :ref:`Optional-dependencies`.
+Use the below pip command to install ArviZ with all of its :ref:`Optional-dependencies`.
 
 .. code:: bash
 
-    pip install arviz[all]
+    pip install "arviz[all]"
 
 Using conda-forge
 =================
@@ -39,12 +39,13 @@ Using conda-forge
 Development
 ***********
 
-If you want to install the latest development version of ArviZ, then you
-may use
+If you want to install the latest development version of ArviZ, use the following command:
 
 .. code:: bash
 
     pip install git+https://github.com/arviz-devs/arviz
+
+**Note**: It can take sometime to execute depending upon your internet connection.
 
 .. _arviz-dependencies:
 
@@ -59,12 +60,18 @@ The required dependencies for installing ArviZ are:
 
 .. literalinclude:: ../../../requirements.txt
 
+and
+
+.. code:: bash
+
+    python>=3.6
+
 .. _Optional-dependencies:
 
 Optional dependencies
 =====================
 
-The list of optional dependencies to further enhance ArviZ are.
+The list of optional dependencies to further enhance ArviZ is given below.
 
 .. literalinclude:: ../../../requirements-optional.txt
 

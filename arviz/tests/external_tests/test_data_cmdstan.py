@@ -51,6 +51,7 @@ class TestDataCmdStan:
         observed_data_paths = [
             os.path.join(data_directory, "cmdstan/eight_schools.data.R"),
             os.path.join(data_directory, "cmdstan/example_stan.data.R"),
+            os.path.join(data_directory, "cmdstan/example_stan.json"),
         ]
 
         return observed_data_paths
@@ -298,55 +299,100 @@ class TestDataCmdStan:
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
 
+    def test_inference_data_input_types6(self, paths, observed_data_paths):
+        """Check input types (change, see earlier)
+
+        log_likelihood --> dict
+        """
+        for key, path in paths.items():
+            if "eight" not in key:
+                continue
+            post_pred = paths["eight_schools_glob"]
+            inference_data = self.get_inference_data(
+                posterior=path,
+                posterior_predictive=post_pred,
+                prior=path,
+                prior_predictive=post_pred,
+                observed_data=observed_data_paths[0],
+                observed_data_var=["y"],
+                log_likelihood={"y": "log_lik"},
+                coords={
+                    "school": np.arange(8),
+                    "log_lik_dim_0": np.arange(8),
+                    "y_hat": np.arange(8),
+                },
+                dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
+            )
+            test_dict = {
+                "posterior": ["mu", "tau", "theta_tilde", "theta"],
+                "sample_stats": ["diverging"],
+                "prior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior_predictive": ["y_hat"],
+                "observed_data": ["y"],
+                "posterior_predictive": ["y_hat"],
+                "log_likelihood": ["y", "~log_lik"],
+            }
+            fails = check_multiple_attrs(test_dict, inference_data)
+            assert not fails
+
     def test_inference_data_observed_data1(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         All variables
         """
-        path = observed_data_paths[1]
-        inference_data = self.get_inference_data(posterior=None, observed_data=path)
-        assert hasattr(inference_data, "observed_data")
-        assert len(inference_data.observed_data.data_vars) == 3
-        assert inference_data.observed_data["x"].shape == (1,)
-        assert inference_data.observed_data["y"].shape == (3,)
-        assert inference_data.observed_data["Z"].shape == (4, 5)
+        # Check the Rdump (idx=1) and equivalent JSON data file (idx=2)
+        for data_idx in (1, 2):
+            path = observed_data_paths[data_idx]
+            inference_data = self.get_inference_data(posterior=None, observed_data=path)
+            assert hasattr(inference_data, "observed_data")
+            assert len(inference_data.observed_data.data_vars) == 3
+            assert inference_data.observed_data["x"].shape == (1,)
+            assert inference_data.observed_data["x"][0] == 1
+            assert inference_data.observed_data["y"].shape == (3,)
+            assert inference_data.observed_data["Z"].shape == (4, 5)
 
     def test_inference_data_observed_data2(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         One variable as str
         """
-        path = observed_data_paths[1]
-        inference_data = self.get_inference_data(
-            posterior=None, observed_data=path, observed_data_var="x"
-        )
-        assert hasattr(inference_data, "observed_data")
-        assert len(inference_data.observed_data.data_vars) == 1
-        assert inference_data.observed_data["x"].shape == (1,)
+        # Check the Rdump (idx=1) and equivalent JSON data file (idx=2)
+        for data_idx in (1, 2):
+            path = observed_data_paths[data_idx]
+            inference_data = self.get_inference_data(
+                posterior=None, observed_data=path, observed_data_var="x"
+            )
+            assert hasattr(inference_data, "observed_data")
+            assert len(inference_data.observed_data.data_vars) == 1
+            assert inference_data.observed_data["x"].shape == (1,)
 
     def test_inference_data_observed_data3(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         One variable as a list
         """
-        path = observed_data_paths[1]
-        inference_data = self.get_inference_data(
-            posterior=None, observed_data=path, observed_data_var=["x"]
-        )
-        assert hasattr(inference_data, "observed_data")
-        assert len(inference_data.observed_data.data_vars) == 1
-        assert inference_data.observed_data["x"].shape == (1,)
+        # Check the Rdump (idx=1) and equivalent JSON data file (idx=2)
+        for data_idx in (1, 2):
+            path = observed_data_paths[data_idx]
+            inference_data = self.get_inference_data(
+                posterior=None, observed_data=path, observed_data_var=["x"]
+            )
+            assert hasattr(inference_data, "observed_data")
+            assert len(inference_data.observed_data.data_vars) == 1
+            assert inference_data.observed_data["x"].shape == (1,)
 
     def test_inference_data_observed_data4(self, observed_data_paths):
-        """Read Rdump, check shapes are correct
+        """Read Rdump/JSON, check shapes are correct
 
         Many variables as list
         """
-        path = observed_data_paths[1]
-        inference_data = self.get_inference_data(
-            posterior=None, observed_data=path, observed_data_var=["y", "Z"]
-        )
-        assert hasattr(inference_data, "observed_data")
-        assert len(inference_data.observed_data.data_vars) == 2
-        assert inference_data.observed_data["y"].shape == (3,)
-        assert inference_data.observed_data["Z"].shape == (4, 5)
+        # Check the Rdump (idx=1) and equivalent JSON data file (idx=2)
+        for data_idx in (1, 2):
+            path = observed_data_paths[data_idx]
+            inference_data = self.get_inference_data(
+                posterior=None, observed_data=path, observed_data_var=["y", "Z"]
+            )
+            assert hasattr(inference_data, "observed_data")
+            assert len(inference_data.observed_data.data_vars) == 2
+            assert inference_data.observed_data["y"].shape == (3,)
+            assert inference_data.observed_data["Z"].shape == (4, 5)

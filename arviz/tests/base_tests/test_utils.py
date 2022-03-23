@@ -69,6 +69,25 @@ def test_var_names_key_error(data):
 @pytest.mark.parametrize(
     "var_args",
     [
+        (["ta"], ["beta1", "beta2", "theta"], "like"),
+        (["~beta"], ["phi", "theta"], "like"),
+        (["beta[0-9]+"], ["beta1", "beta2"], "regex"),
+        (["^p"], ["phi"], "regex"),
+        (["~^t"], ["beta1", "beta2", "phi"], "regex"),
+    ],
+)
+def test_var_names_filter_multiple_input(var_args):
+    samples = np.random.randn(10)
+    data1 = dict_to_dataset({"beta1": samples, "beta2": samples, "phi": samples})
+    data2 = dict_to_dataset({"beta1": samples, "beta2": samples, "theta": samples})
+    data = [data1, data2]
+    var_names, expected, filter_vars = var_args
+    assert _var_names(var_names, data, filter_vars) == expected
+
+
+@pytest.mark.parametrize(
+    "var_args",
+    [
         (["alpha", "beta"], ["alpha", "beta1", "beta2"], "like"),
         (["~beta"], ["alpha", "p1", "p2", "phi", "theta", "theta_t"], "like"),
         (["theta"], ["theta", "theta_t"], "like"),
@@ -99,6 +118,15 @@ def test_var_names_filter(var_args):
     )
     var_names, expected, filter_vars = var_args
     assert _var_names(var_names, data, filter_vars) == expected
+
+
+def test_var_names_filter_invalid_argument():
+    """Check invalid argument raises."""
+    samples = np.random.randn(10)
+    data = dict_to_dataset({"alpha": samples})
+    msg = r"^\'filter_vars\' can only be None, \'like\', or \'regex\', got: 'foo'$"
+    with pytest.raises(ValueError, match=msg):
+        assert _var_names(["alpha"], data, filter_vars="foo")
 
 
 def test_subset_list_negation_not_found():
@@ -332,7 +360,7 @@ def test_find_hdi_contours(mean, cov, contour_sigma):
     for idx, sigma in enumerate(contour_sigma):
         contour_sp[idx] = prob_dist.pdf(mean + sigma * stdevs[0] * eigenvecs[0])
 
-    hdi_probs = 1 - np.exp(-0.5 * contour_sigma ** 2)
+    hdi_probs = 1 - np.exp(-0.5 * contour_sigma**2)
     contour_az = _find_hdi_contours(density, hdi_probs)
 
     np.testing.assert_allclose(contour_sp, contour_az, rtol=1e-2, atol=1e-4)
