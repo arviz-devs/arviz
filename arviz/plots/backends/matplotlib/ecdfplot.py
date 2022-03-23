@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_hex
 
-from ..plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, create_axes_grid, backend_show
 
 
