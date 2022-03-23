@@ -43,9 +43,6 @@ def plot_ecdf(
 
     plot_kwargs.setdefault("where", "post")
     
-    if plot_outline_kwargs is None:
-        plot_outline_kwargs = {}
-    
     if fill_band:
         if fill_kwargs is None:
             fill_kwargs = {}
@@ -53,17 +50,19 @@ def plot_ecdf(
         fill_kwargs.setdefault("color", to_hex("C0"))
         fill_kwargs.setdefault("alpha", 0.2)
     else:
+        if plot_outline_kwargs is None:
+            plot_outline_kwargs = {}
         plot_outline_kwargs.setdefault("where", "post")
         plot_outline_kwargs.setdefault("color", to_hex("C0"))
         plot_outline_kwargs.setdefault("alpha", 0.2)
 
-    plt.step(x_coord, y_coord, **plot_kwargs)
+    ax.step(x_coord, y_coord, **plot_kwargs)
         
     if confidence_bands:
         if fill_band:
-            plt.fill_between(x_bands, lower, higher, **fill_kwargs)
-
-        plt.plot(x_bands, lower, x_bands, higher, **plot_outline_kwargs)
+            ax.fill_between(x_bands, lower, higher, **fill_kwargs)
+        else:
+            ax.plot(x_bands, lower, x_bands, higher, **plot_outline_kwargs)
 
     if backend_show(show):
         plt.show()
