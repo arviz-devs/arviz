@@ -46,6 +46,7 @@ def plot_ecdf(
     if fill_band:
         if fill_kwargs is None:
             fill_kwargs = {}
+        fill_kwargs.setdefault("step", "post")
         fill_kwargs.setdefault("color", to_hex("C0"))
         fill_kwargs.setdefault("alpha", 0.2)
     else:
