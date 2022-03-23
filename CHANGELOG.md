@@ -9,6 +9,7 @@
 * Add dict option to `from_cmdstan` log_likelihood parameter (as in `from_pystan`)
 * Unify model comparison API. Both `plot_compare`, `plot_elpd` can now take dicts of InferenceData or ELPDData ([1690](https://github.com/arviz-devs/arviz/pull/1690))
 * Change default for rcParam `stats.ic_pointwise` to True ([1690](https://github.com/arviz-devs/arviz/pull/1690))
+* Add new plot type: plot_ecdf ([1753](https://github.com/arviz-devs/arviz/pull/1753))
 
 
 ### Maintenance and fixes

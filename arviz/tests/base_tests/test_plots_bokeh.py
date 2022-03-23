@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pytest
 from pandas import DataFrame  # pylint: disable=wrong-import-position
+from scipy.stats import norm  # pylint: disable=wrong-import-position
 
 from ...data import from_dict, load_arviz_data  # pylint: disable=wrong-import-position
 from ...plots import (  # pylint: disable=wrong-import-position
@@ -15,6 +16,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_dist,
     plot_dist_comparison,
     plot_dot,
+    plot_ecdf,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -343,6 +345,26 @@ def test_plot_compare_no_ic(models):
 
     assert "comp_df must contain one of the following" in str(err.value)
     assert "['loo', 'waic']" in str(err.value)
+
+
+def test_plot_ecdf_basic():
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, backend="bokeh", show=False)
+    assert axes is not None
+
+
+def test_plot_ecdf_values2():
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 500)
+    axes = plot_ecdf(data, data2, backend="bokeh", show=False)
+    assert axes is not None
+
+
+def test_plot_ecdf_cdf():
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
+    axes = plot_ecdf(data, cdf=cdf, backend="bokeh", show=False)
+    assert axes is not None
 
 
 @pytest.mark.parametrize(

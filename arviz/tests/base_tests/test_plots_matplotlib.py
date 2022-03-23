@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from matplotlib import animation
 from pandas import DataFrame
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, norm
 
 from ...data import from_dict, load_arviz_data
 from ...plots import (
@@ -19,6 +19,7 @@ from ...plots import (
     plot_dist,
     plot_dist_comparison,
     plot_dot,
+    plot_ecdf,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -1189,6 +1190,26 @@ def test_kde_cumulative(limits):
     data = np.random.normal(0, 1, 1000)
     density = _kde(data, custom_lims=limits, cumulative=True)[1]
     np.testing.assert_almost_equal(round(density[-1], 3), 1)
+
+
+def test_plot_ecdf_basic():
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data)
+    assert axes is not None
+
+
+def test_plot_ecdf_values2():
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, data2)
+    assert axes is not None
+
+
+def test_plot_ecdf_cdf():
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
+    axes = plot_ecdf(data, cdf=cdf)
+    assert axes is not None
 
 
 @pytest.mark.parametrize(
