@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_hex
 
-from arviz.plots.plot_utils import _scale_fig_size
-from arviz.plots.backends.matplotlib import backend_kwarg_defaults, create_axes_grid, backend_show
+from ..plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, create_axes_grid, backend_show
 
 
 def plot_ecdf(
