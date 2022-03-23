@@ -25,6 +25,7 @@
 * Fix R2 implementation ([1666](https://github.com/arviz-devs/arviz/pull/1666))
 * Added warning message in `plot_dist_comparison()` in case subplots go over the limit ([1688](https://github.com/arviz-devs/arviz/pull/1688))
 * Fix coord value ignoring for default dims ([2001](https://github.com/arviz-devs/arviz/pull/2001))
+* Fixed plot_posterior with boolean data ([1707](https://github.com/arviz-devs/arviz/pull/1707))
 
 ### Deprecation
 
@@ -85,7 +86,6 @@
 * Arguments `filter_vars` and `filter_groups` now raise `ValueError` if illegal arguments are passed ([1772](https://github.com/arviz-devs/arviz/pull/1772))
 * Remove constrained_layout from arviz rcparams ([1764](https://github.com/arviz-devs/arviz/pull/1764))
 * Fix plot_elpd for a single outlier ([1787](https://github.com/arviz-devs/arviz/pull/1787))
-* Fixed plot_posterior with boolean data ([1707](https://github.com/arviz-devs/arviz/pull/1707))
 
 ### Deprecation
 * Deprecated `index_origin` and `order` arguments in `az.summary` ([1201](https://github.com/arviz-devs/arviz/pull/1201))
