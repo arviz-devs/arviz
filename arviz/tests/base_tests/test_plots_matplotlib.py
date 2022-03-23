@@ -1274,7 +1274,7 @@ def test_plot_elpd_ic_error(models):
         "Model 1": waic(models.model_1, pointwise=True),
         "Model 2": loo(models.model_2, pointwise=True),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 
@@ -1283,7 +1283,7 @@ def test_plot_elpd_scale_error(models):
         "Model 1": waic(models.model_1, pointwise=True, scale="log"),
         "Model 2": waic(models.model_2, pointwise=True, scale="deviance"),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 

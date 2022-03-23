@@ -7,6 +7,8 @@
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 * Allow kwargs to customize appearance of the mean in `plot_lm`
 * Add dict option to `from_cmdstan` log_likelihood parameter (as in `from_pystan`)
+* Unify model comparison API. Both `plot_compare`, `plot_elpd` can now take dicts of InferenceData or ELPDData ([1690](https://github.com/arviz-devs/arviz/pull/1690))
+* Change default for rcParam `stats.ic_pointwise` to True ([1690](https://github.com/arviz-devs/arviz/pull/1690))
 
 
 ### Maintenance and fixes
