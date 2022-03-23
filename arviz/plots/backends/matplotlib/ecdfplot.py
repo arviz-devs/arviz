@@ -63,8 +63,6 @@ def plot_ecdf(
             plt.fill_between(x_bands, lower, higher, **fill_kwargs)
 
         plt.plot(x_bands, lower, x_bands, higher, **plot_outline_kwargs)
-    else:
-        plt.step(x_coord, y_coord, **plot_kwargs)
 
     if backend_show(show):
         plt.show()
