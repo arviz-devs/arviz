@@ -45,9 +45,6 @@ def plot_ecdf(
         plot_kwargs = {}
 
     plot_kwargs.setdefault("mode", "after")
-    
-    if plot_outline_kwargs is None:
-        plot_outline_kwargs = {}
 
     if fill_band:
         if fill_kwargs is None:
@@ -55,6 +52,8 @@ def plot_ecdf(
         fill_kwargs.setdefault("fill_color", to_hex("C0"))
         fill_kwargs.setdefault("fill_alpha", 0.2)
     else:
+        if plot_outline_kwargs is None:
+            plot_outline_kwargs = {}
         plot_outline_kwargs.setdefault("color", to_hex("C0"))
         plot_outline_kwargs.setdefault("alpha", 0.2)
 
