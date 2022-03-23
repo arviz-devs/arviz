@@ -151,6 +151,9 @@ def plot_ecdf(
         >>> az.plot_ecdf(sample, sample2, confidence_bands = True, difference = True, pit = True)
 
     """
+    if confidence_bands is None:
+        confidence_bands = (values2 is not None) or (cdf is not None)
+
     if values2 is None and cdf is None and confidence_bands is True:
         raise ValueError("For confidence bands you need to specify values2 or the cdf")
 
