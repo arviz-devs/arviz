@@ -351,14 +351,14 @@ def test_plot_ecdf_basic():
     data = np.random.randn(4,1000)
     axes = plot_ecdf(data, backend="bokeh", show=False)
     assert axes is not None
-    
+
 
 def test_plot_ecdf_values2():
     data = np.random.randn(4,1000)
     data2 = np.random.randn(4,500)
     axes = plot_ecdf(data, data2, backend="bokeh", show=False)
     assert axes is not None
-    
+
 
 def test_plot_ecdf_cdf():
     data = np.random.randn(4,1000)
