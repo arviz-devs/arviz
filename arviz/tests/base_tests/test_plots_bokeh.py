@@ -1018,6 +1018,17 @@ def test_plot_posterior_discrete(discrete_model, kwargs):
     assert axes.shape
 
 
+def test_plot_posterior_boolean():
+    data = np.random.choice(a=[False, True], size=(4, 100))
+    axes = plot_posterior(data, backend="bokeh", show=False)
+    assert axes.shape
+
+
+def test_plot_posterior_bad_type():
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]), backend="bokeh", show=False)
+
+
 def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
         plot_posterior(models.model_1, backend="bokeh", show=False, rope="bad_value")
