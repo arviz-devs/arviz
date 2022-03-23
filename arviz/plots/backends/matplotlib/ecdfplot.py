@@ -52,6 +52,7 @@ def plot_ecdf(
     else:
         if plot_outline_kwargs is None:
             plot_outline_kwargs = {}
+        plot_outline_kwargs.setdefault("where", "post")
         plot_outline_kwargs.setdefault("color", to_hex("C0"))
         plot_outline_kwargs.setdefault("alpha", 0.2)
 
