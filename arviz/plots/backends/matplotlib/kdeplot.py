@@ -1,7 +1,6 @@
 """Matplotlib kdeplot."""
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import _pylab_helpers
 import matplotlib.ticker as mticker
 
 
@@ -58,9 +57,8 @@ def plot_kde(
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        fig_manager = _pylab_helpers.Gcf.get_active()
-        if fig_manager is not None:
-            ax = fig_manager.canvas.figure.gca()
+        if plt.get_fignums():
+            ax = plt.gca()
         else:
             _, ax = create_axes_grid(
                 1,
