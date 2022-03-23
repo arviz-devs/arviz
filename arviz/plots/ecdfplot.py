@@ -304,7 +304,10 @@ def compute_gamma(n, z, npoints=None, num_trials=1000, fpr=0.05):
         ## Can compute ecdf for all the z together or one at a time.
         f_z = compute_ecdf(unif_samples, z)
         f_z = compute_ecdf(unif_samples, z)
-        gamma_m = 2 * min(np.amin(binom.cdf(n * f_z, n, z)), np.amin(1 - binom.cdf(n * f_z - 1, n, z)))
+        gamma_m = 2 * min(
+            np.amin(binom.cdf(n * f_z, n, z)), 
+            np.amin(1 - binom.cdf(n * f_z - 1, n, z))
+        )
         gamma.append(gamma_m)
     return np.quantile(gamma, fpr)
 
