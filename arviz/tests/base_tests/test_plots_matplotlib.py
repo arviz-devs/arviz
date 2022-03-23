@@ -1179,21 +1179,21 @@ def test_kde_cumulative(limits):
 
 
 def test_plot_ecdf_basic():
-    data = np.random.randn(4,1000)
+    data = np.random.randn(4, 1000)
     axes = plot_ecdf(data)
     assert axes is not None
 
 
 def test_plot_ecdf_values2():
-    data = np.random.randn(4,1000)
-    data2 = np.random.randn(4,1000)
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 1000)
     axes = plot_ecdf(data, data2)
     assert axes is not None
 
 
 def test_plot_ecdf_cdf():
-    data = np.random.randn(4,1000)
-    cdf = norm(0,1).cdf
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
     axes = plot_ecdf(data, cdf=cdf)
     assert axes is not None
 
