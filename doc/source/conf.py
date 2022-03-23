@@ -62,6 +62,7 @@ extensions = [
     "notfound.extension",
     "sphinx_copybutton",
     "sphinx_codeautolink",
+    "jupyter_sphinx",
 ]
 
 # codeautolink
@@ -285,7 +286,7 @@ intersphinx_mapping = {
     "xarray": ("http://xarray.pydata.org/en/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "pymc3": ("https://docs.pymc.io/", None),
-    "mpl": ("https://matplotlib.org/", None),
+    "mpl": ("https://matplotlib.org/stable", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
     "zarr": ("https://zarr.readthedocs.io/en/stable/", None),

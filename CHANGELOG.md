@@ -2,20 +2,41 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
+* Add `combine_dims` argument to several functions ([1676](https://github.com/arviz-devs/arviz/pull/1676))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
 * Allow kwargs to customize appearance of the mean in `plot_lm`
+* Add dict option to `from_cmdstan` log_likelihood parameter (as in `from_pystan`)
+* Unify model comparison API. Both `plot_compare`, `plot_elpd` can now take dicts of InferenceData or ELPDData ([1690](https://github.com/arviz-devs/arviz/pull/1690))
+* Change default for rcParam `stats.ic_pointwise` to True ([1690](https://github.com/arviz-devs/arviz/pull/1690))
+* Add new plot type: plot_ecdf ([1753](https://github.com/arviz-devs/arviz/pull/1753))
+
 
 ### Maintenance and fixes
 * Drop Python 3.6 support ([1430](https://github.com/arviz-devs/arviz/pull/1430))
 * Bokeh 3 compatibility. ([1919](https://github.com/arviz-devs/arviz/pull/1919))
 * Remove manual setting of 2d KDE limits ([1939](https://github.com/arviz-devs/arviz/pull/1939))
 * Pin to bokeh<3 version ([1954](https://github.com/arviz-devs/arviz/pull/1954))
+* Fix legend labels in plot_ppc to reflect prior or posterior. ([1967](https://github.com/arviz-devs/arviz/pull/1967))
+* Change `DataFrame.append` to `pandas.concat` ([1973](https://github.com/arviz-devs/arviz/pull/1973))
+* Fix axis sharing behaviour in `plot_pair`. ([1985](https://github.com/arviz-devs/arviz/pull/1985))
+* Fix parameter duplication problem with PyStan ([1962](https://github.com/arviz-devs/arviz/pull/1962))
+* Temporarily disable pyjags tests ([1963](https://github.com/arviz-devs/arviz/pull/1963))
+* Fix tuple bug in coords ([1695](https://github.com/arviz-devs/arviz/pull/1695))
+* Fix extend 'right' join bug ([1718](https://github.com/arviz-devs/arviz/pull/1718))
+* Update attribute handling for InferenceData ([1357](https://github.com/arviz-devs/arviz/pull/1357))
+* Fix R2 implementation ([1666](https://github.com/arviz-devs/arviz/pull/1666))
+* Added warning message in `plot_dist_comparison()` in case subplots go over the limit ([1688](https://github.com/arviz-devs/arviz/pull/1688))
+* Fix coord value ignoring for default dims ([2001](https://github.com/arviz-devs/arviz/pull/2001))
+* Fixed plot_posterior with boolean data ([1707](https://github.com/arviz-devs/arviz/pull/1707))
+* Fix min_ess usage in plot_ess ([2002](https://github.com/arviz-devs/arviz/pull/2002))
 * Fix plots in Jupyter Notebooks appearing when `show=False` ([1768](https://github.com/arviz-devs/arviz/pull/1768))
 
 ### Deprecation
 
 ### Documentation
 * Fixed typo in `Forestplot` documentation
+* Restructured contributing section and added several new pages to help contributing to docs ([1903](https://github.com/arviz-devs/arviz/pull/1903))
 
 
 ## v0.11.4 (2021 Oct 3)

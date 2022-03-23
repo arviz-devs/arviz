@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pytest
 from pandas import DataFrame  # pylint: disable=wrong-import-position
+from scipy.stats import norm  # pylint: disable=wrong-import-position
 
 from ...data import from_dict, load_arviz_data  # pylint: disable=wrong-import-position
 from ...plots import (  # pylint: disable=wrong-import-position
@@ -15,6 +16,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_dist,
     plot_dist_comparison,
     plot_dot,
+    plot_ecdf,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -345,6 +347,26 @@ def test_plot_compare_no_ic(models):
     assert "['loo', 'waic']" in str(err.value)
 
 
+def test_plot_ecdf_basic():
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, backend="bokeh", show=False)
+    assert axes is not None
+
+
+def test_plot_ecdf_values2():
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 500)
+    axes = plot_ecdf(data, data2, backend="bokeh", show=False)
+    assert axes is not None
+
+
+def test_plot_ecdf_cdf():
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
+    axes = plot_ecdf(data, cdf=cdf, backend="bokeh", show=False)
+    assert axes is not None
+
+
 @pytest.mark.parametrize(
     "kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}, {"threshold": 2}]
 )
@@ -408,8 +430,8 @@ def test_plot_energy_bad(models):
     [
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
-        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
-        {"min_ess": 600, "hline_kwargs": {"color": "r"}},
+        {"coords": {"school": slice(4)}, "n_points": 10},
+        {"min_ess": 600, "hline_kwargs": {"line_color": "red"}},
     ],
 )
 @pytest.mark.parametrize("kind", ["local", "quantile", "evolution"])
@@ -710,7 +732,7 @@ def test_plot_loo_pit_label(models, args):
         {"var_names": ["theta"], "color": "r"},
         {"rug": True, "rug_kwargs": {"color": "r"}},
         {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
-        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"errorbar": True, "coords": {"school": slice(4)}, "n_points": 10},
         {"extra_methods": True, "rug": True},
         {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
     ],
@@ -748,7 +770,7 @@ def test_plot_mcse_no_divergences(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"var_names": "theta", "divergences": True, "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": "theta", "divergences": True, "coords": {"school": [0, 1]}},
         {"divergences": True, "var_names": ["theta", "mu"]},
         {"kind": "kde", "var_names": ["theta"]},
         {"kind": "hexbin", "var_names": ["theta"]},
@@ -756,7 +778,7 @@ def test_plot_mcse_no_divergences(models):
         {
             "kind": "hexbin",
             "var_names": ["theta"],
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "textsize": 20,
         },
         {
@@ -988,6 +1010,17 @@ def test_plot_posterior_discrete(discrete_model, kwargs):
     assert axes.shape
 
 
+def test_plot_posterior_boolean():
+    data = np.random.choice(a=[False, True], size=(4, 100))
+    axes = plot_posterior(data, backend="bokeh", show=False)
+    assert axes.shape
+
+
+def test_plot_posterior_bad_type():
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]), backend="bokeh", show=False)
+
+
 def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
         plot_posterior(models.model_1, backend="bokeh", show=False, rope="bad_value")
@@ -1022,7 +1055,7 @@ def test_plot_posterior_skipna():
     [
         {},
         {"var_names": "mu"},
-        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ("mu", "tau"), "coords": {"school": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
         {
             "var_names": "mu",

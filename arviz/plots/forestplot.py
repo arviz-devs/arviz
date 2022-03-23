@@ -15,6 +15,7 @@ def plot_forest(
     transform=None,
     coords=None,
     combined=False,
+    combine_dims=None,
     hdi_prob=None,
     rope=None,
     quartiles=True,
@@ -55,6 +56,9 @@ def plot_forest(
     var_names: list[str], optional
         List of variables to plot (defaults to None, which results in all variables plotted)
         Prefix the variables by ``~`` when you want to exclude them from the plot.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If None(default), interpret var_names as the real variables names. If "like", interpret
         var_names as substrings of the real variables names. If "regex", interpret var_names as
@@ -219,6 +223,9 @@ def plot_forest(
     if coords is None:
         coords = {}
 
+    if combine_dims is None:
+        combine_dims = set()
+
     if labeller is None:
         labeller = NoModelLabeller() if legend else BaseLabeller()
 
@@ -253,6 +260,7 @@ def plot_forest(
         var_names=var_names,
         model_names=model_names,
         combined=combined,
+        combine_dims=combine_dims,
         colors=colors,
         figsize=figsize,
         width_ratios=width_ratios,

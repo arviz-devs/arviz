@@ -89,12 +89,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
     """
 
     def __init__(
-        self, **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]]
+        self,
+        attrs: Union[None, Mapping[Any, Any]] = None,
+        **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]],
     ) -> None:
         """Initialize InferenceData object from keyword xarray datasets.
 
         Parameters
         ----------
+        attrs : dict
+            sets global attribute for InferenceData object.
         kwargs :
             Keyword arguments of xarray datasets
 
@@ -133,6 +137,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         self._groups: List[str] = []
         self._groups_warmup: List[str] = []
+        self._attrs: Union[None, dict] = dict(attrs) if attrs is not None else None
         save_warmup = kwargs.pop("save_warmup", False)
         key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
         for key in kwargs:
@@ -166,6 +171,17 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     key = f"{WARMUP_TAG}{key}"
                     setattr(self, key, dataset_warmup)
                     self._groups_warmup.append(key)
+
+    @property
+    def attrs(self) -> dict:
+        """Attributes of InferenceData object."""
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value) -> None:
+        self._attrs = dict(value)
 
     def __repr__(self) -> str:
         """Make string representation of InferenceData object."""
@@ -437,7 +453,6 @@ class InferenceData(Mapping[str, xr.Dataset]):
             When `data=False` return just the schema.
         """
         ret = defaultdict(dict)
-        attrs = None
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
                 groups = self._group_names(groups, filter_groups)
@@ -467,15 +482,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     if len(dims) > 0:
                         ret[dims_key][var_name] = dims
                     ret[group] = data
-                if attrs is None:
-                    attrs = dataset.attrs
-                elif attrs != dataset.attrs:
-                    warnings.warn(
-                        "The attributes are not same for all groups."
-                        " Considering only the first group `attrs`"
-                    )
+                ret[group + "_attrs"] = dataset.attrs
 
-        ret["attrs"] = attrs
+        ret["attrs"] = self.attrs
         return ret
 
     def to_json(self, filename, groups=None, filter_groups=None, **kwargs):
@@ -1379,9 +1388,29 @@ class InferenceData(Mapping[str, xr.Dataset]):
             if dataset:
                 setattr(self, group, dataset)
                 if group.startswith(WARMUP_TAG):
-                    self._groups_warmup.append(group)
+                    supported_order = [
+                        key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup
+                    ]
+                    if (supported_order == self._groups_warmup) and (group in SUPPORTED_GROUPS_ALL):
+                        group_order = [
+                            key
+                            for key in SUPPORTED_GROUPS_ALL
+                            if key in self._groups_warmup + [group]
+                        ]
+                        group_idx = group_order.index(group)
+                        self._groups_warmup.insert(group_idx, group)
+                    else:
+                        self._groups_warmup.append(group)
                 else:
-                    self._groups.append(group)
+                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
+                    if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
+                        group_order = [
+                            key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
+                        ]
+                        group_idx = group_order.index(group)
+                        self._groups.insert(group_idx, group)
+                    else:
+                        self._groups.append(group)
 
     def extend(self, other, join="left"):
         """Extend InferenceData with groups from another InferenceData.
@@ -1416,9 +1445,31 @@ class InferenceData(Mapping[str, xr.Dataset]):
             dataset = getattr(other, group)
             setattr(self, group, dataset)
             if group.startswith(WARMUP_TAG):
-                self._groups_warmup.append(group)
+                if group not in self._groups_warmup:
+                    supported_order = [
+                        key for key in SUPPORTED_GROUPS_ALL if key in self._groups_warmup
+                    ]
+                    if (supported_order == self._groups_warmup) and (group in SUPPORTED_GROUPS_ALL):
+                        group_order = [
+                            key
+                            for key in SUPPORTED_GROUPS_ALL
+                            if key in self._groups_warmup + [group]
+                        ]
+                        group_idx = group_order.index(group)
+                        self._groups_warmup.insert(group_idx, group)
+                    else:
+                        self._groups_warmup.append(group)
             else:
-                self._groups.append(group)
+                if group not in self._groups:
+                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
+                    if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
+                        group_order = [
+                            key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
+                        ]
+                        group_idx = group_order.index(group)
+                        self._groups.insert(group_idx, group)
+                    else:
+                        self._groups.append(group)
 
     set_index = _extend_xr_method(xr.Dataset.set_index, see_also="reset_index")
     get_index = _extend_xr_method(xr.Dataset.get_index)
@@ -1832,6 +1883,21 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                 return args[0]
 
     current_time = str(datetime.now())
+    combined_attr = defaultdict(list)
+    for idata in args:
+        for key, val in idata.attrs.items():
+            combined_attr[key].append(val)
+
+    for key, val in combined_attr.items():
+        all_same = True
+        for indx in range(len(val) - 1):
+            if val[indx] != val[indx + 1]:
+                all_same = False
+                break
+        if all_same:
+            combined_attr[key] = val[0]
+    if inplace:
+        setattr(args[0], "_attrs", dict(combined_attr))
 
     if not inplace:
         # Keep order for python 3.5
@@ -1926,8 +1992,8 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         if var not in group0_vars:
                             msg = "Mismatch between the variables."
                             raise TypeError(msg)
-                        var_dims = getattr(group_data, var).dims
-                        var0_dims = getattr(group0_data, var).dims
+                        var_dims = group_data[var].dims
+                        var0_dims = group0_data[var].dims
                         if var_dims != var0_dims:
                             msg = "Mismatch between the dimensions."
                             raise TypeError(msg)
@@ -2010,11 +2076,11 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
                     for var in group_vars:
                         if var not in group0_vars:
-                            var_data = getattr(group_data, var)
+                            var_data = group_data[var]
                             getattr(arg0, group)[var] = var_data
                         else:
-                            var_data = getattr(group_data, var)
-                            var0_data = getattr(group0_data, var)
+                            var_data = group_data[var]
+                            var0_data = group0_data[var]
                             if dim in var_data.dims and dim in var0_data.dims:
                                 concatenated_var = xr.concat((group_data, group0_data), dim=dim)
                                 group0_data[var] = concatenated_var
@@ -2071,5 +2137,8 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         setattr(arg0, group, group0_data)
                     else:
                         inference_data_dict[group] = group0_data
+
+    if not inplace:
+        inference_data_dict["attrs"] = combined_attr
 
     return None if inplace else InferenceData(**inference_data_dict)

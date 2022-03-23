@@ -42,14 +42,16 @@ __all__ = [
     "loo",
     "loo_pit",
     "psislw",
+    "r2_samples",
     "r2_score",
     "summary",
     "waic",
+    "_calculate_ics",
 ]
 
 
 def compare(
-    dataset_dict: Mapping[str, InferenceData],
+    compare_dict: Mapping[str, InferenceData],
     ic: Optional[ICKeyword] = None,
     method: Literal["stacking", "BB-pseudo-BMA", "pseudo-MA"] = "stacking",
     b_samples: int = 1000,
@@ -67,8 +69,8 @@ def compare(
 
     Parameters
     ----------
-    dataset_dict: dict[str] -> InferenceData
-        A dictionary of model names and :class:`arviz.InferenceData` objects
+    compare_dict: dict of {str: InferenceData or ELPDData}
+        A dictionary of model names and :class:`arviz.InferenceData` or ``ELPDData``.
     ic: str, optional
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
@@ -165,34 +167,12 @@ def compare(
         see https://doi.org/10.1007/s11222-016-9696-4
 
     """
-    names = list(dataset_dict.keys())
-    if scale is not None:
-        scale = cast(ScaleKeyword, scale.lower())
-    else:
-        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
-    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
-    if scale not in allowable:
-        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
-
-    if scale == "log":
-        scale_value = 1
-        ascending = False
-    else:
-        if scale == "negative_log":
-            scale_value = -1
-        else:
-            scale_value = -2
-        ascending = True
-
-    if ic is None:
-        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
-    else:
-        ic = cast(ICKeyword, ic.lower())
-    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
-    if ic not in allowable:
-        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
+    try:
+        (ics_dict, scale, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name)
+    except Exception as e:
+        raise e.__class__("Encountered error in ic computation of compare.") from e
+    names = list(ics_dict.keys())
     if ic == "loo":
-        ic_func: Callable = loo
         df_comp = pd.DataFrame(
             index=names,
             columns=[
@@ -210,7 +190,6 @@ def compare(
         )
         scale_col = "loo_scale"
     elif ic == "waic":
-        ic_func = waic
         df_comp = pd.DataFrame(
             index=names,
             columns=[
@@ -230,6 +209,16 @@ def compare(
     else:
         raise NotImplementedError(f"The information criterion {ic} is not supported.")
 
+    if scale == "log":
+        scale_value = 1
+        ascending = False
+    else:
+        if scale == "negative_log":
+            scale_value = -1
+        else:
+            scale_value = -2
+        ascending = True
+
     method = rcParams["stats.ic_compare_method"] if method is None else method
     if method.lower() not in ["stacking", "bb-pseudo-bma", "pseudo-bma"]:
         raise ValueError(f"The method {method}, to compute weights, is not supported.")
@@ -238,17 +227,7 @@ def compare(
     p_ic = f"p_{ic}"
     ic_i = f"{ic}_i"
 
-    ics = pd.DataFrame()
-    names = []
-    for name, dataset in dataset_dict.items():
-        names.append(name)
-        try:
-            # Here is where the IC function is actually computed -- the rest of this
-            # function is argument processing and return value formatting
-            ics = ics.append([ic_func(dataset, pointwise=True, scale=scale, var_name=var_name)])
-        except Exception as e:
-            raise e.__class__(f"Encountered error trying to compute {ic} from model {name}.") from e
-    ics.index = names
+    ics = pd.DataFrame.from_dict(ics_dict, orient="index")
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
 
@@ -355,6 +334,135 @@ def _ic_matrix(ics, ic_i):
         ic_i_val[:, idx] = ic
 
     return rows, cols, ic_i_val
+
+
+def _calculate_ics(
+    compare_dict,
+    scale: Optional[ScaleKeyword] = None,
+    ic: Optional[ICKeyword] = None,
+    var_name: Optional[str] = None,
+):
+    """Calculate loo and waic information criteria only if necessary.
+
+    It always calls the ic function with ``pointwise=True``.
+
+    Parameters
+    ----------
+    compare_dict :  dict of {str : InferenceData or ELPDData}
+        A dictionary of model names and InferenceData or ELPDData objects
+    scale : str, optional
+        Output scale for IC. Available options are:
+
+        - `log` : (default) log-score (after Vehtari et al. (2017))
+        - `negative_log` : -1 * (log-score)
+        - `deviance` : -2 * (log-score)
+
+        A higher log-score (or a lower deviance) indicates a model with better predictive accuracy.
+    ic : str, optional
+        Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models.
+        Defaults to ``rcParams["stats.information_criterion"]``.
+    var_name : str, optional
+        Name of the variable storing pointwise log likelihood values in ``log_likelihood`` group.
+
+
+    Returns
+    -------
+    compare_dict : dict of ELPDData
+    scale : str
+    ic : str
+
+    """
+    precomputed_elpds = {
+        name: elpd_data
+        for name, elpd_data in compare_dict.items()
+        if isinstance(elpd_data, ELPDData)
+    }
+    precomputed_ic = None
+    precomputed_scale = None
+    if precomputed_elpds:
+        _, arbitrary_elpd = precomputed_elpds.popitem()
+        precomputed_ic = arbitrary_elpd.index[0]
+        precomputed_scale = arbitrary_elpd[f"{precomputed_ic}_scale"]
+        raise_non_pointwise = False
+        if not f"{precomputed_ic}_i" in arbitrary_elpd:
+            raise_non_pointwise = True
+        if precomputed_elpds:
+            if not all(
+                elpd_data.index[0] == precomputed_ic for elpd_data in precomputed_elpds.values()
+            ):
+                raise ValueError(
+                    "All information criteria to be compared must be the same "
+                    "but found both loo and waic."
+                )
+            if not all(
+                elpd_data[f"{precomputed_ic}_scale"] == precomputed_scale
+                for elpd_data in precomputed_elpds.values()
+            ):
+                raise ValueError("All information criteria to be compared must use the same scale")
+            if (
+                not all(
+                    f"{precomputed_ic}_i" in elpd_data for elpd_data in precomputed_elpds.values()
+                )
+                or raise_non_pointwise
+            ):
+                raise ValueError(
+                    "Not all provided ELPDData have been calculated with pointwise=True"
+                )
+        if ic is not None and ic.lower() != precomputed_ic:
+            warnings.warn(
+                "Provided ic argument is incompatible with precomputed elpd data. "
+                f"Using ic from precomputed elpddata: {precomputed_ic}"
+            )
+            ic = precomputed_ic
+        if scale is not None and scale.lower() != precomputed_scale:
+            warnings.warn(
+                "Provided scale argument is incompatible with precomputed elpd data. "
+                f"Using scale from precomputed elpddata: {precomputed_scale}"
+            )
+            scale = precomputed_scale
+
+    if ic is None and precomputed_ic is None:
+        ic = cast(ICKeyword, rcParams["stats.information_criterion"])
+    elif ic is None:
+        ic = precomputed_ic
+    else:
+        ic = cast(ICKeyword, ic.lower())
+    allowable = ["loo", "waic"] if NO_GET_ARGS else get_args(ICKeyword)
+    if ic not in allowable:
+        raise ValueError(f"{ic} is not a valid value for ic: must be in {allowable}")
+
+    if scale is None and precomputed_scale is None:
+        scale = cast(ScaleKeyword, rcParams["stats.ic_scale"])
+    elif scale is None:
+        scale = precomputed_scale
+    else:
+        scale = cast(ScaleKeyword, scale.lower())
+    allowable = ["log", "negative_log", "deviance"] if NO_GET_ARGS else get_args(ScaleKeyword)
+    if scale not in allowable:
+        raise ValueError(f"{scale} is not a valid value for scale: must be in {allowable}")
+
+    if ic == "loo":
+        ic_func: Callable = loo
+    elif ic == "waic":
+        ic_func = waic
+    else:
+        raise NotImplementedError(f"The information criterion {ic} is not supported.")
+
+    compare_dict = deepcopy(compare_dict)
+    for name, dataset in compare_dict.items():
+        if not isinstance(dataset, ELPDData):
+            try:
+                compare_dict[name] = ic_func(
+                    convert_to_inference_data(dataset),
+                    pointwise=True,
+                    scale=scale,
+                    var_name=var_name,
+                )
+            except Exception as e:
+                raise e.__class__(
+                    f"Encountered error trying to compute {ic} from model {name}."
+                ) from e
+    return (compare_dict, scale, ic)
 
 
 def hdi(
@@ -929,7 +1037,7 @@ def _gpdfit(ary):
     prior_bs = 3
     prior_k = 10
     n = len(ary)
-    m_est = 30 + int(n ** 0.5)
+    m_est = 30 + int(n**0.5)
 
     b_ary = 1 - np.sqrt(m_est / (np.arange(1, m_est + 1, dtype=float) - 0.5))
     b_ary /= prior_bs * ary[int(n / 4 + 0.5) - 1]
@@ -985,14 +1093,58 @@ def _gpinv(probs, kappa, sigma):
     return x
 
 
+def r2_samples(y_true, y_pred):
+    """R² samples for Bayesian regression models. Only valid for linear models.
+
+    Parameters
+    ----------
+    y_true: array-like of shape = (n_outputs,)
+        Ground truth (correct) target values.
+    y_pred: array-like of shape = (n_posterior_samples, n_outputs)
+        Estimated target values.
+
+    Returns
+    -------
+    Pandas Series with the following indices:
+    Bayesian R² samples.
+
+    See Also
+    --------
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+
+    Examples
+    --------
+    Calculate R² samples for Bayesian regression models :
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('regression1d')
+           ...: y_true = data.observed_data["y"].values
+           ...: y_pred = data.posterior_predictive.stack(sample=("chain", "draw"))["y"].values.T
+           ...: az.r2_samples(y_true, y_pred)
+
+    """
+    _numba_flag = Numba.numba_flag
+    if y_pred.ndim == 1:
+        var_y_est = _numba_var(svar, np.var, y_pred)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred))
+    else:
+        var_y_est = _numba_var(svar, np.var, y_pred, axis=1)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=1)
+    r_squared = var_y_est / (var_y_est + var_e)
+
+    return r_squared
+
+
 def r2_score(y_true, y_pred):
     """R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
     ----------
-    y_true: array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_true: array-like of shape = (n_outputs,)
         Ground truth (correct) target values.
-    y_pred: array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_pred: array-like of shape = (n_posterior_samples, n_outputs)
         Estimated target values.
 
     Returns
@@ -1018,15 +1170,7 @@ def r2_score(y_true, y_pred):
            ...: az.r2_score(y_true, y_pred)
 
     """
-    _numba_flag = Numba.numba_flag
-    if y_pred.ndim == 1:
-        var_y_est = _numba_var(svar, np.var, y_pred)
-        var_e = _numba_var(svar, np.var, (y_true - y_pred))
-    else:
-        var_y_est = _numba_var(svar, np.var, y_pred.mean(0))
-        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=0)
-    r_squared = var_y_est / (var_y_est + var_e)
-
+    r_squared = r2_samples(y_true=y_true, y_pred=y_pred)
     return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
 
 
@@ -1653,8 +1797,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
     if len(y.shape) + 1 != len(y_hat.shape):
         raise ValueError(
-            f"y_hat must have 1 more dimension than y, but y_hat has {len(y.shape)} dims and y has "
-            f"{len(y_hat.shape)} dims"
+            f"y_hat must have 1 more dimension than y, but y_hat has {len(y_hat.shape)} dims and "
+            f"y has {len(y.shape)} dims"
         )
 
     if y.shape != y_hat.shape[:-1]:

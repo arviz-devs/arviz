@@ -165,7 +165,7 @@ def create_layout(ax, force_layout=False):
         if subplot_order in ("square", "square_trimmed"):
             ax = [item for item in ax.ravel().tolist() if item is not None]
             n = int(np.ceil(len(ax) ** 0.5))
-            ax = ax + [None for _ in range(n ** 2 - len(ax))]
+            ax = ax + [None for _ in range(n**2 - len(ax))]
             ax = np.array(ax).reshape(n, n)
         ax = ax.tolist()
         if (subplot_order == "square_trimmed") and any(

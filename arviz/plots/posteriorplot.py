@@ -11,6 +11,7 @@ def plot_posterior(
     data,
     var_names=None,
     filter_vars=None,
+    combine_dims=None,
     transform=None,
     coords=None,
     grid=None,
@@ -52,6 +53,9 @@ def plot_posterior(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
@@ -246,7 +250,11 @@ def plot_posterior(
         kind = rcParams["plot.density_kind"]
 
     plotters = filter_plotters_list(
-        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
+        list(
+            xarray_var_iter(
+                get_coords(data, coords), var_names=var_names, combined=True, skip_dims=combine_dims
+            )
+        ),
         "plot_posterior",
     )
     length_plotters = len(plotters)
