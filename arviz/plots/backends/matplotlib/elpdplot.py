@@ -55,7 +55,7 @@ def plot_elpd(
                 for coord, float_color in color_mapping.items()
             ]
             plot_kwargs.setdefault("cmap", cmap_name)
-            plot_kwargs.setdefault("s", markersize ** 2)
+            plot_kwargs.setdefault("s", markersize**2)
             plot_kwargs.setdefault("c", colors)
         else:
             legend = False
@@ -70,7 +70,7 @@ def plot_elpd(
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
-        plot_kwargs.setdefault("s", markersize ** 2)
+        plot_kwargs.setdefault("s", markersize**2)
         backend_kwargs.setdefault("figsize", figsize)
         backend_kwargs["squeeze"] = True
         if ax is None:
@@ -88,7 +88,7 @@ def plot_elpd(
             bool_ary = diff_abs > threshold * ydata.std()
             if coord_labels is None:
                 coord_labels = xdata.astype(str)
-            outliers = np.argwhere(bool_ary).squeeze()
+            outliers = np.nonzero(bool_ary)[0]
             for outlier in outliers:
                 label = coord_labels[outlier]
                 ax.text(
@@ -113,7 +113,7 @@ def plot_elpd(
 
     else:
         max_plots = (
-            numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+            numvars**2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
         )
         vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
         if vars_to_plot < numvars:
@@ -128,7 +128,7 @@ def plot_elpd(
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 2, numvars - 2
         )
-        plot_kwargs.setdefault("s", markersize ** 2)
+        plot_kwargs.setdefault("s", markersize**2)
 
         if ax is None:
             fig, ax = plt.subplots(
@@ -159,7 +159,7 @@ def plot_elpd(
                     bool_ary = diff_abs > threshold * ydata.std()
                     if coord_labels is None:
                         coord_labels = xdata.astype(str)
-                    outliers = np.argwhere(bool_ary).squeeze()
+                    outliers = np.nonzero(bool_ary)[0]
                     for outlier in outliers:
                         label = coord_labels[outlier]
                         ax[j, i].text(
@@ -175,9 +175,7 @@ def plot_elpd(
                     ax[j, i].set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
-                ax[j, i].set_title(
-                    "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
-                )
+                ax[j, i].set_title(f"{models[i]} - {models[j + 1]}", fontsize=titlesize, wrap=True)
         if xlabels:
             for i in range(len(ax)):
                 set_xticklabels(ax[-1, i], coord_labels)

@@ -221,7 +221,7 @@ def _plot_posterior_op(
         ax.text(
             x=vals,
             y=[max_data * 0.2, max_data * 0.2],
-            text_font_size="{}pt".format(ax_labelsize),
+            text_font_size=f"{ax_labelsize}pt",
             text=rope_text,
             **text_props,
         )

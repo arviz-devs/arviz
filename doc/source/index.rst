@@ -1,3 +1,9 @@
+.. raw:: html
+
+    <form class="bd-search align-items-center" action="search.html" method="get">
+      <input type="search" class="form-control search-front-page" name="q" id="search-input" placeholder="&#128269; Search the docs ..." aria-label="Search the docs ..." autocomplete="off">
+    </form>
+
 ArviZ: Exploratory analysis of Bayesian models
 ==============================================
 |pypi|
@@ -30,7 +36,6 @@ ArviZ: Exploratory analysis of Bayesian models
     <div class="container-xl">
       <div class="row">
         <div class="col-md-6">
-
 
 ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, data storage, sample diagnostics, model checking, and comparison.
 

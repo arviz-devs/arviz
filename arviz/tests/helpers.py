@@ -85,7 +85,12 @@ def create_model(seed=10):
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
         observed_data={"y": data["y"]},
-        dims={"y": ["obs_dim"], "log_likelihood": ["obs_dim"]},
+        dims={
+            "y": ["obs_dim"],
+            "log_likelihood": ["obs_dim"],
+            "theta": ["school"],
+            "eta": ["school"],
+        },
         coords={"obs_dim": range(data["J"])},
     )
     return model
@@ -286,9 +291,9 @@ def _emcee_lnprior(theta):
     # Half-cauchy prior, hwhm=25
     if tau < 0:
         return -np.inf
-    prior_tau = -np.log(tau ** 2 + 25 ** 2)
+    prior_tau = -np.log(tau**2 + 25**2)
     prior_mu = -((mu / 10) ** 2)  # normal prior, loc=0, scale=10
-    prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
+    prior_eta = -np.sum(eta**2)  # normal prior, loc=0, scale=1
     return prior_mu + prior_tau + prior_eta
 
 
@@ -401,73 +406,6 @@ def numpyro_schools_model(data, draws, chains):
     return mcmc
 
 
-def tfp_schools_model(num_schools, treatment_stddevs):
-    """Non-centered eight schools model for tfp."""
-    import tensorflow as tf
-    import tensorflow_probability.python.edward2 as ed
-
-    if int(tf.__version__[0]) > 1:
-        import tensorflow.compat.v1 as tf  # pylint: disable=import-error
-
-        tf.disable_v2_behavior()
-
-    avg_effect = ed.Normal(loc=0.0, scale=10.0, name="avg_effect")  # `mu`
-    avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)`
-    school_effects_standard = ed.Normal(
-        loc=tf.zeros(num_schools), scale=tf.ones(num_schools), name="school_effects_standard"
-    )  # `eta`
-    school_effects = avg_effect + tf.exp(avg_stddev) * school_effects_standard  # `theta`
-    treatment_effects = ed.Normal(
-        loc=school_effects, scale=treatment_stddevs, name="treatment_effects"
-    )  # `y`
-    return treatment_effects
-
-
-def tfp_noncentered_schools(data, draws, chains):
-    """Non-centered eight schools implementation for tfp."""
-    import tensorflow as tf
-    import tensorflow_probability as tfp
-    import tensorflow_probability.python.edward2 as ed
-
-    if int(tf.__version__[0]) > 1:
-        import tensorflow.compat.v1 as tf  # pylint: disable=import-error
-
-        tf.disable_v2_behavior()
-
-    del chains
-
-    log_joint = ed.make_log_joint_fn(tfp_schools_model)
-
-    def target_log_prob_fn(avg_effect, avg_stddev, school_effects_standard):
-        """Unnormalized target density as a function of states."""
-        return log_joint(
-            num_schools=data["J"],
-            treatment_stddevs=data["sigma"].astype(np.float32),
-            avg_effect=avg_effect,
-            avg_stddev=avg_stddev,
-            school_effects_standard=school_effects_standard,
-            treatment_effects=data["y"].astype(np.float32),
-        )
-
-    states, kernel_results = tfp.mcmc.sample_chain(
-        num_results=draws,
-        num_burnin_steps=500,
-        current_state=[
-            tf.zeros([], name="init_avg_effect"),
-            tf.zeros([], name="init_avg_stddev"),
-            tf.ones([data["J"]], name="init_school_effects_standard"),
-        ],
-        kernel=tfp.mcmc.HamiltonianMonteCarlo(
-            target_log_prob_fn=target_log_prob_fn, step_size=0.4, num_leapfrog_steps=3
-        ),
-    )
-
-    with tf.Session() as sess:
-        [states_, _] = sess.run([states, kernel_results])
-
-    return tfp_schools_model, states_
-
-
 def pystan_noncentered_schools(data, draws, chains):
     """Non-centered eight schools implementation for pystan."""
     schools_code = """
@@ -557,7 +495,6 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
     """Load pymc3, pystan, emcee, and pyro models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
     supported = (
-        ("tensorflow_probability", tfp_noncentered_schools),
         ("pystan", pystan_noncentered_schools),
         ("pymc3", pymc3_noncentered_schools),
         ("emcee", emcee_schools_model),

@@ -71,7 +71,7 @@ def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
     a_sq = a_k[range(1, grid_len)] ** 2
 
     t = _root(_fixed_point, x_len, args=(x_len, k_sq, a_sq), x=x)
-    h = t ** 0.5 * x_range
+    h = t**0.5 * x_range
     return h
 
 
@@ -100,8 +100,8 @@ def _bw_taylor(x):
     """
     x_len = len(x)
     kappa = _kappa_mle(x)
-    num = 3 * x_len * kappa ** 2 * ive(2, 2 * kappa)
-    den = 4 * np.pi ** 0.5 * ive(0, kappa) ** 2
+    num = 3 * x_len * kappa**2 * ive(2, 2 * kappa)
+    den = 4 * np.pi**0.5 * ive(0, kappa) ** 2
     return (num / den) ** 0.4
 
 
@@ -137,7 +137,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
             (
                 "`bw` must not be of type `bool`.\n"
                 "Expected a positive numeric or one of the following strings:\n"
-                f"{list(_BW_METHODS_LINEAR.keys())}."
+                f"{list(_BW_METHODS_LINEAR)}."
             )
         )
     if isinstance(bw, (int, float)):
@@ -146,11 +146,11 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
     elif isinstance(bw, str):
         bw_lower = bw.lower()
 
-        if bw_lower not in _BW_METHODS_LINEAR.keys():
+        if bw_lower not in _BW_METHODS_LINEAR:
             raise ValueError(
                 "Unrecognized bandwidth method.\n"
                 f"Input is: {bw_lower}.\n"
-                f"Expected one of: {list(_BW_METHODS_LINEAR.keys())}."
+                f"Expected one of: {list(_BW_METHODS_LINEAR)}."
             )
 
         bw_fun = _BW_METHODS_LINEAR[bw_lower]
@@ -159,7 +159,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
         raise ValueError(
             "Unrecognized `bw` argument.\n"
             "Expected a positive numeric or one of the following strings:\n"
-            f"{list(_BW_METHODS_LINEAR.keys())}."
+            f"{list(_BW_METHODS_LINEAR)}."
         )
     return bw
 
@@ -181,11 +181,11 @@ def _a1inv(x):
     Returns the value k, such that a1inv(x) = k, i.e. a1(k) = x.
     """
     if 0 <= x < 0.53:
-        return 2 * x + x ** 3 + (5 * x ** 5) / 6
+        return 2 * x + x**3 + (5 * x**5) / 6
     elif x < 0.85:
         return -0.4 + 1.39 * x + 0.43 / (1 - x)
     else:
-        return 1 / (x ** 3 - 4 * x ** 2 + 3 * x)
+        return 1 / (x**3 - 4 * x**2 + 3 * x)
 
 
 def _kappa_mle(x):
@@ -235,7 +235,7 @@ def _fixed_point(t, N, k_sq, a_sq):
     a_sq = np.asfarray(a_sq, dtype=np.float64)
 
     l = 7
-    f = np.sum(np.power(k_sq, l) * a_sq * np.exp(-k_sq * np.pi ** 2 * t))
+    f = np.sum(np.power(k_sq, l) * a_sq * np.exp(-k_sq * np.pi**2 * t))
     f *= 0.5 * np.pi ** (2.0 * l)
 
     for j in np.arange(l - 1, 2 - 1, -1):
@@ -243,10 +243,10 @@ def _fixed_point(t, N, k_sq, a_sq):
         c2 = np.product(np.arange(1.0, 2 * j + 1, 2, dtype=np.float64))
         c2 /= (np.pi / 2) ** 0.5
         t_j = np.power((c1 * (c2 / (N * f))), (2.0 / (3.0 + 2.0 * j)))
-        f = np.sum(k_sq ** j * a_sq * np.exp(-k_sq * np.pi ** 2.0 * t_j))
+        f = np.sum(k_sq**j * a_sq * np.exp(-k_sq * np.pi**2.0 * t_j))
         f *= 0.5 * np.pi ** (2 * j)
 
-    out = t - (2 * N * np.pi ** 0.5 * f) ** (-0.4)
+    out = t - (2 * N * np.pi**0.5 * f) ** (-0.4)
     return out
 
 
@@ -378,103 +378,113 @@ def _get_grid(
 def kde(x, circular=False, **kwargs):
     """One dimensional density estimation.
 
-    It is a wrapper around `kde_linear()` and `kde_circular()`.
+    It is a wrapper around ``kde_linear()`` and ``kde_circular()``.
 
     Parameters
     ----------
-    x : 1D numpy array
+    x: 1D numpy array
         Data used to calculate the density estimation.
     circular: bool, optional
-        Whether `x` is a circular variable or not. Defaults to False.
-    **kwargs: Arguments passed to `kde_linear()` and `kde_circular()`.
+        Whether ``x`` is a circular variable or not. Defaults to False.
+    **kwargs
+        Arguments passed to ``kde_linear()`` and ``kde_circular()``.
         See their documentation for more info.
 
     Returns
     -------
-    grid : Gridded numpy array for the x values.
-    pdf : Numpy array for the density estimates.
+    grid: Gridded numpy array for the x values.
+    pdf: Numpy array for the density estimates.
     bw: optional, the estimated bandwidth.
 
     Examples
     --------
     Default density estimation for linear data
+
     .. plot::
         :context: close-figs
 
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> from arviz import kde
-    >>>
-    >>> rvs = np.random.gamma(shape=1.8, size=1000)
-    >>> grid, pdf = kde(rvs)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> from arviz import kde
+        >>>
+        >>> rvs = np.random.gamma(shape=1.8, size=1000)
+        >>> grid, pdf = kde(rvs)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for linear data with Silverman's rule bandwidth
+
     .. plot::
         :context: close-figs
 
-    >>> grid, pdf = kde(rvs, bw="silverman")
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> grid, pdf = kde(rvs, bw="silverman")
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for linear data with scaled bandwidth
+
     .. plot::
         :context: close-figs
 
-    >>> # bw_fct > 1 means more smoothness.
-    >>> grid, pdf = kde(rvs, bw_fct=2.5)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> # bw_fct > 1 means more smoothness.
+        >>> grid, pdf = kde(rvs, bw_fct=2.5)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Default density estimation for linear data with extended limits
+
     .. plot::
         :context: close-figs
 
-    >>> grid, pdf = kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> grid, pdf = kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Default density estimation for linear data with custom limits
+
     .. plot::
         :context: close-figs
-    # It accepts tuples and lists of length 2.
-    >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 10))
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+
+        >>> # It accepts tuples and lists of length 2.
+        >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 10))
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Default density estimation for circular data
+
     .. plot::
         :context: close-figs
 
-    >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
-    >>> grid, pdf = kde(rvs, circular=True)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+        >>> grid, pdf = kde(rvs, circular=True)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for circular data with scaled bandwidth
+
     .. plot::
         :context: close-figs
 
-    >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
-    >>> # bw_fct > 1 means less smoothness.
-    >>> grid, pdf = kde(rvs, circular=True, bw_fct=3)
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+        >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+        >>> # bw_fct > 1 means less smoothness.
+        >>> grid, pdf = kde(rvs, circular=True, bw_fct=3)
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     Density estimation for circular data with custom limits
+
     .. plot::
         :context: close-figs
-    >>> # This is still experimental, does not always work.
-    >>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
-    >>> grid, pdf = kde(rvs, circular=True, custom_lims=(-1, 1))
-    >>> plt.plot(grid, pdf)
-    >>> plt.show()
+
+        >>> # This is still experimental, does not always work.
+        >>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
+        >>> grid, pdf = kde(rvs, circular=True, custom_lims=(-1, 1))
+        >>> plt.plot(grid, pdf)
+        >>> plt.show()
 
     See Also
     --------
     plot_kde : Compute and plot a kernel density estimate.
-    arviz.stats.density_utils.kde: Arviz KDE estimator
     """
     x = x[np.isfinite(x)]
     if x.size == 0 or np.all(x == x[0]):
@@ -563,10 +573,9 @@ def _kde_linear(
         raise ValueError(f"`bw_fct` must be a positive number, not {bw_fct}.")
 
     # Preliminary calculations
-    x_len = len(x)
     x_min = x.min()
     x_max = x.max()
-    x_std = (((x ** 2).sum() / x_len) - (x.sum() / x_len) ** 2) ** 0.5
+    x_std = np.std(x)
     x_range = x_max - x_min
 
     # Determine grid
@@ -768,13 +777,13 @@ def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **
             [bw_adj[grid_npad - 1 :: -1], bw_adj, bw_adj[grid_len : grid_len - grid_npad - 1 : -1]]
         )
         pdf_mat = (grid_padded - grid_padded[:, None]) / bw_adj[:, None]
-        pdf_mat = np.exp(-0.5 * pdf_mat ** 2) * grid_counts[:, None]
+        pdf_mat = np.exp(-0.5 * pdf_mat**2) * grid_counts[:, None]
         pdf_mat /= (2 * np.pi) ** 0.5 * bw_adj[:, None]
         pdf = np.sum(pdf_mat[:, grid_npad : grid_npad + grid_len], axis=0) / len(x)
 
     else:
         pdf_mat = (grid - grid[:, None]) / bw_adj[:, None]
-        pdf_mat = np.exp(-0.5 * pdf_mat ** 2) * grid_counts[:, None]
+        pdf_mat = np.exp(-0.5 * pdf_mat**2) * grid_counts[:, None]
         pdf_mat /= (2 * np.pi) ** 0.5 * bw_adj[:, None]
         pdf = np.sum(pdf_mat, axis=0) / len(x)
 
@@ -829,7 +838,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     std_devs = np.diag(cov) ** 0.5
     kern_nx, kern_ny = np.round(scotts_factor * 2 * np.pi * std_devs)
 
-    inv_cov = np.linalg.inv(cov * scotts_factor ** 2)
+    inv_cov = np.linalg.inv(cov * scotts_factor**2)
 
     x_x = np.arange(kern_nx) - kern_nx / 2
     y_y = np.arange(kern_ny) - kern_ny / 2
@@ -845,8 +854,8 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     grid = coo_matrix((weights, xyi), shape=(n_x, n_y)).toarray()
     grid = convolve2d(grid, kernel, mode="same", boundary=boundary)
 
-    norm_factor = np.linalg.det(2 * np.pi * cov * scotts_factor ** 2)
-    norm_factor = len_x * d_x * d_y * norm_factor ** 0.5
+    norm_factor = np.linalg.det(2 * np.pi * cov * scotts_factor**2)
+    norm_factor = len_x * d_x * d_y * norm_factor**0.5
 
     grid /= norm_factor
 

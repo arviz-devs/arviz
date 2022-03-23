@@ -25,15 +25,16 @@ def bfmi(data):
 
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
-    values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
-    change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
-    information.
+    values smaller than 0.3 indicate poor sampling. However, this threshold is
+    provisional and may change. See
+    `pystan_workflow <http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html>`_
+    for more information.
 
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         If InferenceData, energy variable needs to be found.
 
     Returns
@@ -41,6 +42,11 @@ def bfmi(data):
     z : array
         The Bayesian fraction of missing information of the model and trace. One element per
         chain in the trace.
+
+    See Also
+    --------
+    plot_energy : Plot energy transition distribution and marginal energy
+                  distribution in HMC algorithms.
 
     Examples
     --------
@@ -76,10 +82,10 @@ def ess(
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an ``az.InferenceData`` object.
-        Refer to documentation of ``az.convert_to_dataset`` for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+        For n-dimensional ndarray transform first to dataset with :func:`arviz.convert_to_dataset`.
     var_names : str or list of str
         Names of variables to include in the return value Dataset.
     method : str, optional, default "bulk"
@@ -98,7 +104,7 @@ def ess(
         - "local"
     relative : bool
         Return relative ess
-        `ress = ess / n`
+        ``ress = ess / n``
     prob : float, or tuple of two floats, optional
         probability value for "tail", "quantile" or "local" ess functions.
     dask_kwargs : dict, optional
@@ -131,6 +137,13 @@ def ess(
     * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
       Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
+
+    See Also
+    --------
+    arviz.rhat : Compute estimate of rank normalized splitR-hat for a set of traces.
+    arviz.mcse : Calculate Markov Chain Standard Error statistic.
+    plot_ess : Plot quantile, local or evolution of effective sample sizes (ESS).
+    arviz.summary : Create a data frame with summary statistics.
 
     Examples
     --------
@@ -221,12 +234,12 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         At least 2 posterior chains are needed to compute this diagnostic of one or more
         stochastic parameters.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
     var_names : list
         Names of variables to include in the rhat report
     method : str
@@ -244,6 +257,12 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     xarray.Dataset
       Returns dataset of the potential scale reduction factors, :math:`\hat{R}`
 
+    See Also
+    --------
+    ess : Calculate estimate of the effective sample size (ess).
+    mcse : Calculate Markov Chain Standard Error statistic.
+    plot_forest : Forest plot to compare HDI intervals from a number of distributions.
+
     Notes
     -----
     The diagnostic is computed by:
@@ -255,7 +274,7 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     converges to unity when each of the traces is a sample from the target posterior. Values
     greater than one indicate that one or more chains have not yet converged.
 
-    Rank values are calculated over all the chains with `scipy.stats.rankdata`.
+    Rank values are calculated over all the chains with ``scipy.stats.rankdata``.
     Each chain is split in two and normalized with the z-transform following Vehtari et al. (2019).
 
     References
@@ -328,10 +347,10 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask_kwargs=None):
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
     var_names : list
         Names of variables to include in the rhat report
     method : str
@@ -350,6 +369,12 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask_kwargs=None):
     -------
     xarray.Dataset
         Return the msce dataset
+
+    See Also
+    --------
+    ess : Compute autocovariance estimates for every lag for the input array.
+    summary : Create a data frame with summary statistics.
+    plot_mcse : Plot quantile or local Monte Carlo Standard Error.
 
     Examples
     --------
@@ -710,7 +735,7 @@ def _ess_sd(ary, relative=False):
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     ary = _split_chains(ary)
-    return min(_ess(ary, relative=relative), _ess(ary ** 2, relative=relative))
+    return min(_ess(ary, relative=relative), _ess(ary**2, relative=relative))
 
 
 def _ess_quantile(ary, prob, relative=False):

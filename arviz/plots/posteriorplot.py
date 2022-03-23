@@ -11,6 +11,7 @@ def plot_posterior(
     data,
     var_names=None,
     filter_vars=None,
+    combine_dims=None,
     transform=None,
     coords=None,
     grid=None,
@@ -42,20 +43,23 @@ def plot_posterior(
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to the documentation of :func:`arviz.convert_to_dataset` for details
     var_names: list of variable names
-        Variables to be plotted, two variables are required. Prefix the variables by `~`
+        Variables to be plotted, two variables are required. Prefix the variables with ``~``
         when you want to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        ``pandas.filter``.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
@@ -63,7 +67,7 @@ def plot_posterior(
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on ``figsize``.
     hdi_prob: float, optional
         Plots highest density interval for chosen percentage of density.
         Use 'hide' to hide the highest density interval. Defaults to 0.94.
@@ -105,11 +109,11 @@ def plot_posterior(
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
         Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
-        Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
-        if `kind == hist`. If None (default) it will use `auto` for continuous variables and
-        `range(xmin, xmax + 1)` for discrete variables.
+        Controls the number of bins,accepts the same keywords :func:`matplotlib.pyplot.hist` does.
+        Only works if `kind == hist`. If None (default) it will use `auto` for continuous variables
+        and `range(xmin, xmax + 1)` for discrete variables.
     labeller : labeller instance, optional
-        Class providing the method `make_label_vert` to generate the labels in the plot titles.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
@@ -117,16 +121,23 @@ def plot_posterior(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used, passed to
+        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`
     show: bool, optional
         Call backend show function.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
+        Passed as-is to :func:`matplotlib.pyplot.hist` or :func:`matplotlib.pyplot.plot` function
+        depending on the value of `kind`.
 
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    plot_dist : Plot distribution as histogram or kernel density estimates.
+    plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
+    plot_forest : Forest plot to compare HDI intervals from a number of distributions.
 
     Examples
     --------
@@ -239,7 +250,11 @@ def plot_posterior(
         kind = rcParams["plot.density_kind"]
 
     plotters = filter_plotters_list(
-        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
+        list(
+            xarray_var_iter(
+                get_coords(data, coords), var_names=var_names, combined=True, skip_dims=combine_dims
+            )
+        ),
         "plot_posterior",
     )
     length_plotters = len(plotters)

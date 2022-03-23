@@ -107,14 +107,14 @@ def to_cds(
 
 
 def output_notebook(*args, **kwargs):
-    """Wrap bokeh.plotting.output_notebook."""
+    """Wrap func:`bokeh.plotting.output_notebook`."""
     import bokeh.plotting as bkp
 
     return bkp.output_notebook(*args, **kwargs)
 
 
 def output_file(*args, **kwargs):
-    """Wrap bokeh.plotting.output_file."""
+    """Wrap :func:`bokeh.plotting.output_file`."""
     import bokeh.plotting as bkp
 
     return bkp.output_file(*args, **kwargs)
@@ -165,7 +165,7 @@ def create_layout(ax, force_layout=False):
         if subplot_order in ("square", "square_trimmed"):
             ax = [item for item in ax.ravel().tolist() if item is not None]
             n = int(np.ceil(len(ax) ** 0.5))
-            ax = ax + [None for _ in range(n ** 2 - len(ax))]
+            ax = ax + [None for _ in range(n**2 - len(ax))]
             ax = np.array(ax).reshape(n, n)
         ax = ax.tolist()
         if (subplot_order == "square_trimmed") and any(
@@ -208,13 +208,14 @@ def _copy_docstring(lib, function):
         func = getattr(module, function)
         doc = func.__doc__
     except ImportError:
-        doc = "Failed to import function {} from {}".format(function, lib)
+        doc = f"Failed to import function {function} from {lib}"
 
     if not isinstance(doc, str):
         doc = ""
     return doc
 
 
+# TODO: try copying substitutions too, or autoreplace them ourselves
 output_notebook.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_notebook")
 output_file.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_file")
 ColumnDataSource.__doc__ += "\n\n" + _copy_docstring("bokeh.models", "ColumnDataSource")

@@ -125,7 +125,7 @@ def default_grid(n_items, grid=None, max_cols=4, min_cols=3):  # noqa: D202
 
         if n_items <= max_cols:
             return 1, n_items
-        ideal = in_bounds(round(n_items ** 0.5))
+        ideal = in_bounds(round(n_items**0.5))
 
         for offset in (0, 1, -1, 2, -2):
             cols = in_bounds(ideal + offset)
@@ -246,7 +246,7 @@ def format_coords_as_labels(dataarray, skip_dims=None):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])
         coord_labels[:] = [fmt.format(*x) for x in coord_labels]
     else:
-        coord_labels[:] = ["{}".format(s) for s in coord_labels]
+        coord_labels[:] = [f"{s}" for s in coord_labels]
     return coord_labels
 
 
@@ -314,11 +314,7 @@ def get_plotting_function(plot_name, plot_module, backend):
 
     # Perform import of plotting method
     # TODO: Convert module import to top level for all plots
-    module = importlib.import_module(
-        "arviz.plots.backends.{backend}.{plot_module}".format(
-            backend=backend, plot_module=plot_module
-        )
-    )
+    module = importlib.import_module(f"arviz.plots.backends.{backend}.{plot_module}")
 
     plotting_method = getattr(module, plot_name)
 
@@ -599,3 +595,20 @@ def compute_ranks(ary):
     ranks = rankdata(ary, method="average").reshape(ary.shape)
 
     return ranks
+
+
+def _init_kwargs_dict(kwargs):
+    """Initialize kwargs dict.
+
+    If the input is a dictionary, it returns
+    a copy of the dictionary, otherwise it
+    returns an empty dictionary.
+
+    Parameters
+    ----------
+    kwargs : dict or None
+        kwargs dict to initialize
+    """
+    if kwargs is None:
+        return {}
+    return kwargs.copy()

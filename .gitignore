@@ -64,11 +64,14 @@ target/
 # IDE configs
 .idea/
 .vscode/
-
+.DS_Store
 saved_animations/
 
 # mypy
 .mypy_cache
+
+# MacOS generated files
+.DS_Store
 
 # Stan file
 doc/getting_started/*.stan
@@ -79,3 +82,7 @@ doc/source/getting_started/sample_data/
 
 # MyST related
 doc/jupyter_execute
+
+# Dask related
+mydask.png
+**/dask-worker-space/*

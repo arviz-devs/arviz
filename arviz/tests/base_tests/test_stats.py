@@ -122,6 +122,22 @@ def test_hdi_multimodal():
     assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
 
 
+def test_hdi_multimodal_multivars():
+    size = 2500000
+    var1 = np.concatenate((np.random.normal(-4, 1, size), np.random.normal(2, 0.5, size)))
+    var2 = np.random.normal(8, 1, size * 2)
+    sample = Dataset(
+        {
+            "var1": (("chain", "draw"), var1[np.newaxis, :]),
+            "var2": (("chain", "draw"), var2[np.newaxis, :]),
+        },
+        coords={"chain": [0], "draw": np.arange(size * 2)},
+    )
+    intervals = hdi(sample, multimodal=True)
+    assert_array_almost_equal(intervals.var1, [[-5.8, -2.2], [0.9, 3.1]], 1)
+    assert_array_almost_equal(intervals.var2, [[6.1, 9.9], [np.nan, np.nan]], 1)
+
+
 def test_hdi_circular():
     normal_sample = np.random.vonmises(np.pi, 1, 5000000)
     interval = hdi(normal_sample, circular=True)
@@ -145,17 +161,9 @@ def test_hdi_skipna():
 def test_r2_score():
     x = np.linspace(0, 1, 100)
     y = np.random.normal(x, 1)
+    y_pred = x + np.random.randn(300, 100)
     res = linregress(x, y)
-    assert_allclose(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2, 2)
-
-
-def test_r2_score_multivariate():
-    x = np.linspace(0, 1, 100)
-    y = np.random.normal(x, 1)
-    res = linregress(x, y)
-    y_multivariate = np.c_[y, y]
-    y_multivariate_pred = np.c_[res.intercept + res.slope * x, res.intercept + res.slope * x]
-    assert not np.isnan(r2_score(y_multivariate, y_multivariate_pred).r2)
+    assert_allclose(res.rvalue**2, r2_score(y, y_pred).r2, 2)
 
 
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
@@ -310,7 +318,7 @@ def test_summary_labels():
     column_order = []
     for coord1 in coords1:
         for coord2 in coords2:
-            column_order.append("a[{}, {}]".format(coord1, coord2))
+            column_order.append(f"a[{coord1}, {coord2}]")
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
 
@@ -619,7 +627,7 @@ def test_loo_pit_multi_lik():
         posterior={"a": np.random.randn(4, 100)},
         posterior_predictive={"y": post_pred},
         observed_data={"y": obs},
-        log_likelihood={"y": -(post_pred ** 2), "decoy": np.zeros_like(post_pred)},
+        log_likelihood={"y": -(post_pred**2), "decoy": np.zeros_like(post_pred)},
     )
     loo_pit_data = loo_pit(idata, y="y")
     assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
@@ -645,7 +653,7 @@ def test_loo_pit_bad_input_type(centered_eight, arg):
     """Test wrong input type (not None, str not DataArray."""
     kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
     kwargs[arg] = 2  # use int instead of array-like
-    with pytest.raises(ValueError, match="not {}".format(type(2))):
+    with pytest.raises(ValueError, match=f"not {type(2)}"):
         loo_pit(idata=centered_eight, **kwargs)
 
 

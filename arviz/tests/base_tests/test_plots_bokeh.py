@@ -22,7 +22,6 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_ess,
     plot_forest,
     plot_hdi,
-    plot_joint,
     plot_kde,
     plot_khat,
     plot_lm,
@@ -144,7 +143,7 @@ def test_plot_density_bad_kwargs(models):
     with pytest.raises(ValueError):
         plot_density(
             obj,
-            data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)],
+            data_labels=[f"bad_value_{i}" for i in range(len(obj) + 10)],
             backend="bokeh",
             show=False,
         )
@@ -367,7 +366,10 @@ def test_plot_ecdf_cdf():
     axes = plot_ecdf(data, cdf=cdf, backend="bokeh", show=False)
     assert axes is not None
 
-@pytest.mark.parametrize("kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}])
+
+@pytest.mark.parametrize(
+    "kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}, {"threshold": 2}]
+)
 @pytest.mark.parametrize("add_model", [False, True])
 @pytest.mark.parametrize("use_elpddata", [False, True])
 def test_plot_elpd(models, add_model, use_elpddata, kwargs):
@@ -428,7 +430,7 @@ def test_plot_energy_bad(models):
     [
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
-        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"coords": {"school": slice(4)}, "n_points": 10},
         {"min_ess": 600, "hline_kwargs": {"color": "r"}},
     ],
 )
@@ -560,7 +562,7 @@ def test_plot_forest_bad(models, model_fits):
     with pytest.raises(ValueError):
         plot_forest(
             obj,
-            model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)],
+            model_names=[f"model_name_{i}" for i in range(len(obj) + 10)],
             backend="bokeh",
             show=False,
         )
@@ -585,39 +587,6 @@ def test_plot_hdi(models, data, kwargs):
     else:
         axis = plot_hdi(data["y"], y_data, backend="bokeh", show=False, **kwargs)
     assert axis
-
-
-@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, kind):
-    axes = plot_joint(
-        models.model_1, var_names=("mu", "tau"), kind=kind, backend="bokeh", show=False
-    )
-    assert axes[1, 0]
-
-
-def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(models.model_1, var_names=("mu", "tau"), backend="bokeh", show=False)
-    axes = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax, backend="bokeh", show=False)
-    assert axes[1, 0]
-
-
-def test_plot_joint_discrete(discrete_model):
-    axes = plot_joint(discrete_model, backend="bokeh", show=False)
-    assert axes[1, 0]
-
-
-def test_plot_joint_bad(models):
-    with pytest.raises(ValueError):
-        plot_joint(
-            models.model_1, var_names=("mu", "tau"), kind="bad_kind", backend="bokeh", show=False
-        )
-
-    with pytest.raises(Exception):
-        plot_joint(models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh", show=False)
-
-    with pytest.raises(ValueError):
-        _, axes = list(range(5))
-        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(
@@ -763,7 +732,7 @@ def test_plot_loo_pit_label(models, args):
         {"var_names": ["theta"], "color": "r"},
         {"rug": True, "rug_kwargs": {"color": "r"}},
         {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
-        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"errorbar": True, "coords": {"school": slice(4)}, "n_points": 10},
         {"extra_methods": True, "rug": True},
         {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
     ],
@@ -801,7 +770,7 @@ def test_plot_mcse_no_divergences(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"var_names": "theta", "divergences": True, "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": "theta", "divergences": True, "coords": {"school": [0, 1]}},
         {"divergences": True, "var_names": ["theta", "mu"]},
         {"kind": "kde", "var_names": ["theta"]},
         {"kind": "hexbin", "var_names": ["theta"]},
@@ -809,7 +778,7 @@ def test_plot_mcse_no_divergences(models):
         {
             "kind": "hexbin",
             "var_names": ["theta"],
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "textsize": 20,
         },
         {
@@ -1075,7 +1044,7 @@ def test_plot_posterior_skipna():
     [
         {},
         {"var_names": "mu"},
-        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ("mu", "tau"), "coords": {"school": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
         {
             "var_names": "mu",
