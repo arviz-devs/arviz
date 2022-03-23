@@ -827,7 +827,7 @@ def _mcse_mean(ary):
         return np.nan
     ess = _ess_mean(ary)
     if _numba_flag:
-        sd = _sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1))
+        sd = _sqrt(svar(np.ravel(ary), ddof=1), 0)
     else:
         sd = np.std(ary, ddof=1)
     mcse_mean_value = sd / np.sqrt(ess)
