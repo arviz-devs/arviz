@@ -1026,10 +1026,24 @@ def test_plot_posterior(models, kwargs):
         assert axes.shape
 
 
+def test_plot_posterior_boolean():
+    data = np.random.choice(a=[False, True], size=(4, 100))
+    axes = plot_posterior(data)
+    assert axes
+    plt.draw()
+    labels = [label.get_text() for label in axes.get_xticklabels()]
+    assert all(item in labels for item in ("True", "False"))
+
+
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
 def test_plot_posterior_discrete(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, **kwargs)
     assert axes.shape
+
+
+def test_plot_posterior_bad_type():
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]))
 
 
 def test_plot_posterior_bad(models):
@@ -1281,7 +1295,7 @@ def test_plot_elpd_ic_error(models):
         "Model 1": waic(models.model_1, pointwise=True),
         "Model 2": loo(models.model_2, pointwise=True),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 
@@ -1290,7 +1304,7 @@ def test_plot_elpd_scale_error(models):
         "Model 1": waic(models.model_1, pointwise=True, scale="log"),
         "Model 2": waic(models.model_2, pointwise=True, scale="deviance"),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 

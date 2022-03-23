@@ -1,10 +1,8 @@
 """Plot pointwise elpd estimations of inference data."""
-from copy import deepcopy
 import numpy as np
 
-from ..data import convert_to_inference_data
 from ..rcparams import rcParams
-from ..stats import ELPDData, loo, waic
+from ..stats import _calculate_ics
 from ..utils import get_coords
 from .plot_utils import format_coords_as_labels, get_plotting_function
 
@@ -21,6 +19,7 @@ def plot_elpd(
     ax=None,
     ic=None,
     scale=None,
+    var_name=None,
     plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
@@ -31,7 +30,7 @@ def plot_elpd(
 
     Parameters
     ----------
-    compare_dict : mapping, str -> ELPDData or InferenceData
+    compare_dict : mapping of {str : ELPDData or InferenceData}
         A dictionary mapping the model name to the object containing inference data or the result
         of :func:`arviz.loo` or :func:`arviz.waic` functions.
         Refer to :func:`arviz.convert_to_inference_data` for details on possible dict items.
@@ -59,7 +58,12 @@ def plot_elpd(
         Only taken into account when input is :class:`arviz.InferenceData`.
     scale : str, optional
         Scale argument passed to :func:`arviz.loo` or :func:`arviz.waic`, see their docs for
-        details. Only taken into account when input is :class:`arviz.InferenceData`.
+        details. Only taken into account when values in ``compare_dict`` are
+        :class:`arviz.InferenceData`.
+    var_name : str, optional
+        Argument passed to to :func:`arviz.loo` or :func:`arviz.waic`, see their docs for
+        details. Only taken into account when values in ``compare_dict`` are
+        :class:`arviz.InferenceData`.
     plot_kwargs : dicts, optional
         Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter`.
     ax: axes, optional
@@ -109,35 +113,10 @@ def plot_elpd(
         )
 
     """
-    valid_ics = ["loo", "waic"]
-    ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
-    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
-    if ic not in valid_ics:
-        raise ValueError(
-            ("Information Criteria type {} not recognized." "IC must be in {}").format(
-                ic, valid_ics
-            )
-        )
-    ic_fun = loo if ic == "loo" else waic
-
-    # Make sure all object are ELPDData
-    compare_dict = deepcopy(compare_dict)
-    for k, item in compare_dict.items():
-        if not isinstance(item, ELPDData):
-            compare_dict[k] = ic_fun(convert_to_inference_data(item), pointwise=True, scale=scale)
-    ics = [elpd_data.index[0] for elpd_data in compare_dict.values()]
-    if not all(x == ics[0] for x in ics):
-        raise SyntaxError(
-            "All Information Criteria must be of the same kind, but both loo and waic data present"
-        )
-    ic = ics[0]
-    scales = [elpd_data[f"{ic}_scale"] for elpd_data in compare_dict.values()]
-    if not all(x == scales[0] for x in scales):
-        raise SyntaxError(
-            "All Information Criteria must be on the same scale, but {} are present".format(
-                set(scales)
-            )
-        )
+    try:
+        (compare_dict, _, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name)
+    except Exception as e:
+        raise e.__class__("Encountered error in ic computation of plot_elpd.") from e
 
     if backend is None:
         backend = rcParams["plot.backend"]
@@ -174,7 +153,6 @@ def plot_elpd(
         show=show,
     )
 
-    # TODO: Add backend kwargs
     plot = get_plotting_function("plot_elpd", "elpdplot", backend)
     ax = plot(**elpd_plot_kwargs)
     return ax
