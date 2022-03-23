@@ -12,7 +12,7 @@ def plot_ecdf(
     cdf=None,
     difference=False,
     pit=False,
-    confidence_bands=True,
+    confidence_bands=None,
     pointwise=False,
     npoints=100,
     num_trials=500,
