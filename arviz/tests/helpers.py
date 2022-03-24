@@ -18,6 +18,14 @@ from ..data import InferenceData, from_dict
 _log = logging.getLogger(__name__)
 
 
+class TestRandomVariable:
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return self.name
+
+
 @pytest.fixture(scope="module")
 def eight_schools_params():
     """Share setup for eight schools."""

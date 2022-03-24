@@ -17,6 +17,7 @@ from ...utils import (
     one_de,
     two_de,
 )
+from ..helpers import TestRandomVariable
 
 
 @pytest.fixture(scope="session")
@@ -118,6 +119,14 @@ def test_var_names_filter(var_args):
     )
     var_names, expected, filter_vars = var_args
     assert _var_names(var_names, data, filter_vars) == expected
+
+
+def test_nonstring_var_names():
+    """Check that non-string variables are preserved"""
+    mu = TestRandomVariable("mu")
+    samples = np.random.randn(10)
+    data = dict_to_dataset({mu: samples})
+    assert _var_names([mu], data) == [mu]
 
 
 def test_var_names_filter_invalid_argument():
