@@ -1276,11 +1276,6 @@ def summary(
     extra_metrics = []
     extra_metric_names = []
 
-    if stat_focus is not None:
-        if stat_focus == "median":
-            stat_funcs = {"median": np.median, "mad": st.median_abs_deviation}
-            extend = False
-
     if stat_funcs is not None:
         if isinstance(stat_funcs, dict):
             for stat_func_name, stat_func in stat_funcs.items():
@@ -1299,14 +1294,29 @@ def summary(
                 )
                 extra_metric_names.append(stat_func.__name__)
 
+    metrics: List[xr.Dataset] = []
+    metric_names: List[str] = []
     if extend and kind in ["all", "stats"]:
-        mean = dataset.mean(dim=("chain", "draw"), skipna=skipna)
+        if stat_focus == "mean":
+            mean = dataset.mean(dim=("chain", "draw"), skipna=skipna)
 
-        sd = dataset.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
+            sd = dataset.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hdi_post = hdi(dataset, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
-        hdi_lower = hdi_post.sel(hdi="lower", drop=True)
-        hdi_higher = hdi_post.sel(hdi="higher", drop=True)
+            hdi_post = hdi(dataset, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
+            hdi_lower = hdi_post.sel(hdi="lower", drop=True)
+            hdi_higher = hdi_post.sel(hdi="higher", drop=True)
+            metrics.extend((mean, sd, hdi_lower, hdi_higher))
+            metric_names.extend(("mean", "sd", f"hdi_{100 * alpha / 2:g}%", f"hdi_{100 * (1 - alpha / 2):g}%"))
+        elif stat_focus == "median":
+            median = dataset.median(dim=("chain", "draw"), skipna=skipna)
+
+            mad = dataset.mad(dim=("chain", "draw"), ddof=1, skipna=skipna)  # not sure if this exists
+
+            eti_post = dataset.quantile((alpha/2, 1-alpha/2), dim=("chain", "draw"), skipna=skipna)
+            eti_lower = eti_post.isel(quantile=0, drop=True)
+            eti_higher = eti_post.isel(quantile=1, drop=True)
+            metrics.extend((median, mad, eti_lower, eti_higher))
+            metric_names.extend(("median", "mad", f"eti_{100 * alpha / 2:g}%", f"eti_{100 * (1 - alpha / 2):g}%"))
 
     if circ_var_names:
         nan_policy = "omit" if skipna else "propagate"
@@ -1353,42 +1363,26 @@ def summary(
     # Combine metrics
     metrics: List[xr.Dataset] = []
     metric_names: List[str] = []
-    if extend:
-        metrics_: Tuple[xr.Dataset, ...]
+    if extend and kind in ["all", "diagnostics"]:
+        metrics_: Tuple[xr.Dataset, ...] = (
+            mcse_mean,
+            mcse_sd,
+            ess_bulk,
+            ess_tail,
+            r_hat,
+        )
         metrics_names_: Tuple[str, ...] = (
-            "mean",
-            "sd",
-            f"hdi_{100 * alpha / 2:g}%",
-            f"hdi_{100 * (1 - alpha / 2):g}%",
             "mcse_mean",
             "mcse_sd",
             "ess_bulk",
             "ess_tail",
             "r_hat",
         )
-        if kind == "all":
-            metrics_ = (
-                mean,
-                sd,
-                hdi_lower,
-                hdi_higher,
-                mcse_mean,
-                mcse_sd,
-                ess_bulk,
-                ess_tail,
-                r_hat,
-            )
-        elif kind == "stats":
-            metrics_ = (mean, sd, hdi_lower, hdi_higher)
-            metrics_names_ = metrics_names_[:4]
-        elif kind == "diagnostics":
-            metrics_ = (mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat)
-            metrics_names_ = metrics_names_[4:]
         metrics.extend(metrics_)
         metric_names.extend(metrics_names_)
 
     if circ_var_names:
-        if kind != "diagnostics":
+        if kind != "diagnostics" and stat_focus == "mean":
             for metric, circ_stat in zip(
                 # Replace only the first 5 statistics for their circular equivalent
                 metrics[:5],
