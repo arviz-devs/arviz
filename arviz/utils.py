@@ -19,8 +19,7 @@ STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
 def check_tilde_start(x):
     if isinstance(x, str) and x.startswith("~"):
         return True
-    else:
-        return False
+    return False
 
 
 def _var_names(var_names, data, filter_vars=None):
