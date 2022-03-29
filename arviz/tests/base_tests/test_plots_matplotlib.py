@@ -52,6 +52,7 @@ from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     multidim_models,
+    TestRandomVariable,
 )
 
 rcParams["data.load"] = "eager"
@@ -157,6 +158,27 @@ def test_plot_density_no_subset():
         {
             "b": np.random.normal(size=200),
             "c": np.random.normal(size=200),
+        }
+    )
+    axes = plot_density([model_ab, model_bc])
+    assert axes.size == 3
+
+
+def test_plot_density_nonstring_varnames():
+    """Test plot_density works when variables are not strings."""
+    rv1 = TestRandomVariable("a")
+    rv2 = TestRandomVariable("b")
+    rv3 = TestRandomVariable("c")
+    model_ab = from_dict(
+        {
+            rv1: np.random.normal(size=200),
+            rv2: np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            rv2: np.random.normal(size=200),
+            rv3: np.random.normal(size=200),
         }
     )
     axes = plot_density([model_ab, model_bc])

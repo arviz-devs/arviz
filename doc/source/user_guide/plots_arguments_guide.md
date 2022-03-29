@@ -83,6 +83,16 @@ Use `var_names` to indicate which variables to exclude with the `~` prefix:
 az.plot_posterior(centered_eight, var_names=['~mu', '~theta']);
 ```
 
+Variables do not need to be strings to be used. Anything that is
+hashable will work.
+
+```{code-cell} ipython3
+mu = ("mu", "var")
+samples = np.random.normal(0, 1, 100)
+data = az.dict_to_dataset({mu: samples})
+az.plot_posterior(data);
+```
+
 (common_filter_vars)=
 ## `filter_vars`
 If None (default), interpret `var_names` as the real variables names,
