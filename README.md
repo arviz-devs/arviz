@@ -1,4 +1,4 @@
-<img src="doc/logo/ArviZ_fav.png" height=100></img>
+<img src="https://github.com/arviz-devs/arviz_governance/blob/main/arviz_logos/ArviZ_fav.png" height=100></img>
 
 [![PyPI version](https://badge.fury.io/py/arviz.svg)](https://badge.fury.io/py/arviz)
 [![Azure Build Status](https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=main)](https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=main)
