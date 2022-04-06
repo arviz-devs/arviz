@@ -183,9 +183,9 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
             </a>
             </div>
             <div class="col">
-            <a href="examples/plot_joint.html">
+            <a href="examples/plot_dot.html">
             <div class="img-thumbnail">
-                <img src="_static/plot_joint_thumb.png">
+                <img src="_static/plot_dot_thumb.png">
             </div>
             </a>
             </div>
