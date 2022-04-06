@@ -100,9 +100,9 @@ python setup.py install
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_joint.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_dot.html">
   <img alt="Joint plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_joint_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_dot_thumb.png" />
   </a>
   </td>
 

@@ -140,11 +140,6 @@ def plot_pair(
     -------
     axes: matplotlib axes or bokeh figures
 
-    See Also
-    --------
-    plot_joint : Plot a scatter or hexbin of two variables with their
-                 respective marginals distributions.
-
     Examples
     --------
     KDE Pair Plot
