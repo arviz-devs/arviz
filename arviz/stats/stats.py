@@ -933,13 +933,12 @@ def psislw(log_weights, reff=1.0):
     # precalculate constants
     cutoff_ind = -int(np.ceil(min(n_samples / 5.0, 3 * (n_samples / reff) ** 0.5))) - 1
     cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member, assignment-from-no-return
-    k_min = 1.0 / 3
 
     # create output array with proper dimensions
     out = tuple([np.empty_like(log_weights), np.empty(shape)])
 
     # define kwargs
-    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "k_min": k_min, "out": out}
+    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "out": out}
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
     kwargs = {"input_core_dims": [["__sample__"]], "output_core_dims": [["__sample__"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
@@ -956,7 +955,7 @@ def psislw(log_weights, reff=1.0):
     return log_weights, pareto_shape
 
 
-def _psislw(log_weights, cutoff_ind, cutoffmin, k_min=1.0 / 3):
+def _psislw(log_weights, cutoff_ind, cutoffmin):
     """
     Pareto smoothed importance sampling (PSIS) for a 1D vector.
 
@@ -998,8 +997,8 @@ def _psislw(log_weights, cutoff_ind, cutoffmin, k_min=1.0 / 3):
         x_tail = np.exp(x_tail) - expxcutoff
         k, sigma = _gpdfit(x_tail[x_tail_si])
 
-        if k >= k_min:
-            # no smoothing if short tail or GPD fit failed
+        if np.isfinite(k):
+            # no smoothing if GPD fit failed
             # compute ordered statistic for the fit
             sti = np.arange(0.5, tail_len) / tail_len
             smoothed_tail = _gpinv(sti, k, sigma)
