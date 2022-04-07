@@ -534,6 +534,7 @@ def test_psislw(centered_eight):
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
+
 def test_psislw_smooths_for_low_k():
     # check that log-weights are smoothed even when k < 1/3
     # https://github.com/arviz-devs/arviz/issues/2010
