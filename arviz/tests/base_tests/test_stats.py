@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
+from scipy.special import logsumexp
 from scipy.stats import linregress
 from xarray import DataArray, Dataset
 
@@ -532,6 +533,16 @@ def test_psislw(centered_eight):
     log_likelihood = get_log_likelihood(centered_eight)
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
+
+
+def test_psislw_smooths_for_low_k():
+    # check that log-weights are smoothed even when k < 1/3
+    # https://github.com/arviz-devs/arviz/issues/2010
+    rng = np.random.default_rng(44)
+    x = rng.normal(size=100)
+    x_smoothed, k = psislw(x.copy())
+    assert k < 1 / 3
+    assert not np.allclose(x - logsumexp(x), x_smoothed)
 
 
 @pytest.mark.parametrize("probs", [True, False])
