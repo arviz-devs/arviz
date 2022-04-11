@@ -68,7 +68,7 @@ ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray dataset
 `emcee <https://emcee.readthedocs.io/en/stable/>`_, and
 `TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for Edward2 is on the roadmap.
 
-A Julia wrapper, `ArviZ.jl <https://arviz-devs.github.io/ArviZ.jl/stable/>`_ is
+A Julia wrapper, `ArviZ.jl <https://julia.arviz.org/>`_ is
 also available. It provides built-in support for
 `Turing.jl <https://turing.ml/dev/>`_, `CmdStan.jl
 <https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl

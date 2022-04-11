@@ -11,7 +11,7 @@ developed openly and hosted in public GitHub repositories under the
 [GitHub organization](https://github.com/arviz-devs). Examples of
 Project Software include the ArviZ code and the Documentation, etc. The Services run by the
 Project consist of public websites and web-services that are hosted
-at [https://arviz-devs.github.io/arviz/](https://arviz-devs.github.io/arviz/)
+at [https://www.arviz.org/](https://www.arviz.org/)
 The Project is developed by a team of distributed developers, called
 Contributors. Contributors are individuals who have contributed code,
 documentation, designs or other work to one or more Project repositories.

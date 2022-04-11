@@ -6,7 +6,7 @@ The `InferenceData` schema approach defines a data structure compatible with [Ne
 3. Interoperability between different inference backends and programming languages.
 
 Currently there are **two beta implementations** of this design:
-* [ArviZ](https://arviz-devs.github.io/arviz/) in **Python** which integrates with:
+* [ArviZ](https://python.arviz.org/) in **Python** which integrates with:
   - [emcee](https://emcee.readthedocs.io/en/stable/)
   - [PyMC3](https://docs.pymc.io)
   - [Pyro](https://pyro.ai/) and [NumPyro](https://pyro.ai/numpyro/)
