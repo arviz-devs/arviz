@@ -4,6 +4,8 @@
       <input type="search" class="form-control search-front-page" name="q" id="search-input" placeholder="&#128269; Search the docs ..." aria-label="Search the docs ..." autocomplete="off">
     </form>
 
+.. _homepage:
+
 ArviZ: Exploratory analysis of Bayesian models
 ==============================================
 |pypi|
@@ -106,7 +108,6 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
   api/index
   community
   Contributing<contributing/index>
-  about_us
 
 
 .. raw:: html

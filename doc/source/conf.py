@@ -170,6 +170,9 @@ html_theme_options = {
     "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
     "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
+    "external_links": [
+        {"name": "About", "url": "https://www.arviz.org"},
+    ],
 }
 html_context = {
     "github_user": "arviz-devs",
