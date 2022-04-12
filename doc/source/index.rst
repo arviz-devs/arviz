@@ -17,7 +17,7 @@ ArviZ: Exploratory analysis of Bayesian models
 .. |pypi| image:: https://badge.fury.io/py/arviz.svg
     :target: https://badge.fury.io/py/arviz
 
-.. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01143/status.svg
+.. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.01143/status.svg
    :target: https://doi.org/10.21105/joss.01143
 
 .. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2540944.svg
