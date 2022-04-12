@@ -25,7 +25,7 @@ Below we list some examples of contributions that might serve as inspiration.
 
 * [Submitting issues](https://github.com/arviz-devs/arviz/issues/new/choose) related to bugs or desired enhancements. Check the details at {doc}`issue_reports`.
 * Fixing outstanding [issues](https://github.com/arviz-devs/arviz/issues) (bugs) with the existing codebase. They range from low-level software bugs to higher-level design problems.
-* Contributing or improving the [documentation](https://python.arviz.org/) (`docs`) or examples (`arviz/examples`).
+* Contributing or improving the {ref}`homepage <documentation>` (`docs`) or examples (`arviz/examples`).
 * Help users submitting issues by making sure their issue is clear and/or providing temporal
   workarounds for them. Check the details at {ref}`issue_triaging`
 * Review Pull Requests ensuring contributions are well tested and documented, that documentation
