@@ -213,7 +213,7 @@ Moreover, the intersphinx key is optional. Thus, the pattern to get sphinx to ge
 
 with the part between brackets being optional. See the docstring on
 {meth}`~arviz.InferenceData.to_dataframe` and
-[its source](https://arviz-devs.github.io/arviz/_modules/arviz/data/inference_data.html#InferenceData.to_dataframe) for an example.
+[its source](https://python.arviz.org/en/latest/_modules/arviz/data/inference_data.html#InferenceData.to_dataframe) for an example.
 
 (reference_arviz_objects)=
 #### Referencing ArviZ objects

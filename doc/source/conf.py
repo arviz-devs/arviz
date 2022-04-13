@@ -134,7 +134,7 @@ language = None
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ["_build", "build", "Thumbs.db", ".DS_Store", "notebooks/.ipynb_checkpoints"]
 # configure notfound extension to not add any prefix to the urls
-notfound_urls_prefix = "/arviz/"
+notfound_urls_prefix = "/en/latest/"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -170,6 +170,9 @@ html_theme_options = {
     "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
     "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
+    "external_links": [
+        {"name": "About", "url": "https://www.arviz.org"},
+    ],
 }
 html_context = {
     "github_user": "arviz-devs",
