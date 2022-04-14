@@ -923,25 +923,33 @@ def _mc_error(ary, batches=5, circular=False):
         return std / np.sqrt(batches)
 
 
-def _multichain_statistics(ary):
+def _multichain_statistics(ary, focus="mean"):
     """Calculate efficiently multichain statistics for summary.
 
     Parameters
     ----------
     ary : numpy.ndarray
+    focus : select focus for the statistics. Deafault is mean.
 
     Returns
     -------
     tuple
         Order of return parameters is
-            - mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat
+            If focus equals "mean"
+                - mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat
+            Else if focus equals "median"
+                - mcse_median, ess_median, ess_tail, r_hat
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan, np.nan, np.nan, np.nan, np.nan
-    # ess mean
+        if focus == "mean":
+            return np.nan, np.nan, np.nan, np.nan, np.nan
+        elif focus == "median":
+            return np.nan, np.nan, np.nan, np.nan
+    # ess mean/ ess median
     ess_mean_value = _ess_mean(ary)
-
+    ess_median_value = _ess_median(ary)
+    
     # ess sd
     ess_sd_value = _ess_sd(ary)
 
@@ -970,14 +978,25 @@ def _multichain_statistics(ary):
     sd = np.std(ary, ddof=1)
     mcse_mean_value = sd / np.sqrt(ess_mean_value)
 
+    # mcse_median
+    mcse_median_value = _mcse_median(ary)
+
     # mcse_sd
     fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess_sd_value) ** (ess_sd_value - 1) - 1)
     mcse_sd_value = sd * fac_mcse_sd
 
-    return (
-        mcse_mean_value,
-        mcse_sd_value,
-        ess_bulk_value,
-        ess_tail_value,
-        rhat_value,
-    )
+    if focus == "mean":
+        return (
+            mcse_mean_value,
+            mcse_sd_value,
+            ess_bulk_value,
+            ess_tail_value,
+            rhat_value,
+        )
+    elif focus == "median":
+        return (
+            mcse_median_value,
+            ess_median_value,
+            ess_tail_value,
+            rhat_value,
+        )

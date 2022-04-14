@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple, Union, Mapping, cast, Callable
 import numpy as np
 import pandas as pd
 import scipy.stats as st
+from xarray_einstats import stats
 import xarray as xr
 from scipy.optimize import minimize
 from typing_extensions import Literal
@@ -1310,8 +1311,7 @@ def summary(
         elif stat_focus == "median":
             median = dataset.median(dim=("chain", "draw"), skipna=skipna)
 
-            mad = dataset.mad(dim=("chain", "draw"), ddof=1, skipna=skipna)  # not sure if this exists
-
+            mad = stats.median_abs_deviation(dataset, dims=("chain", "draw"))
             eti_post = dataset.quantile((alpha/2, 1-alpha/2), dim=("chain", "draw"), skipna=skipna)
             eti_lower = eti_post.isel(quantile=0, drop=True)
             eti_higher = eti_post.isel(quantile=1, drop=True)
@@ -1353,31 +1353,52 @@ def summary(
         circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
     if kind in ["all", "diagnostics"]:
-        mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-            _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
-            dataset,
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(5)),
-        )
+        if stat_focus == "mean":
+            mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+                _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
+                dataset,
+                input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(5)),
+            )
+        elif stat_focus == "median":
+            mcse_median, ess_median, ess_tail, r_hat = xr.apply_ufunc(
+                _make_ufunc(_multichain_statistics, n_output=4, ravel=False),
+                dataset,
+                kwargs=dict(focus="median"),
+                input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(4)),
+            )
 
     # Combine metrics
-    metrics: List[xr.Dataset] = []
-    metric_names: List[str] = []
     if extend and kind in ["all", "diagnostics"]:
-        metrics_: Tuple[xr.Dataset, ...] = (
-            mcse_mean,
-            mcse_sd,
-            ess_bulk,
-            ess_tail,
-            r_hat,
-        )
-        metrics_names_: Tuple[str, ...] = (
-            "mcse_mean",
-            "mcse_sd",
-            "ess_bulk",
-            "ess_tail",
-            "r_hat",
-        )
+        if stat_focus == "mean":
+            metrics_: Tuple[xr.Dataset, ...] = (
+                mcse_mean,
+                mcse_sd,
+                ess_bulk,
+                ess_tail,
+                r_hat,
+            )
+            metrics_names_: Tuple[str, ...] = (
+                "mcse_mean",
+                "mcse_sd",
+                "ess_bulk",
+                "ess_tail",
+                "r_hat",
+            )
+        elif stat_focus == "median":
+            metrics_: Tuple[xr.Dataset, ...] = (
+                mcse_median,
+                ess_median,
+                ess_tail,
+                r_hat,
+            )
+            metrics_names_: Tuple[str, ...] = (
+                "mcse_median",
+                "ess_median",
+                "ess_tail",
+                "r_hat",
+            )
         metrics.extend(metrics_)
         metric_names.extend(metrics_names_)
 
