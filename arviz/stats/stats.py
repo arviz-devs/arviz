@@ -1393,9 +1393,7 @@ def summary(
                     metrics[:5],
                     (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
                 ):
-                    print(metric)
                     for circ_var in circ_var_names:
-                        print ("hello", metric[circ_var])
                         metric[circ_var] = circ_stat[circ_var]
             else:
                 circ_stats: Tuple[str, ...] = (
