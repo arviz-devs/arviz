@@ -1307,16 +1307,22 @@ def summary(
             hdi_lower = hdi_post.sel(hdi="lower", drop=True)
             hdi_higher = hdi_post.sel(hdi="higher", drop=True)
             metrics.extend((mean, sd, hdi_lower, hdi_higher))
-            metric_names.extend(("mean", "sd", f"hdi_{100 * alpha / 2:g}%", f"hdi_{100 * (1 - alpha / 2):g}%"))
+            metric_names.extend(
+                ("mean", "sd", f"hdi_{100 * alpha / 2:g}%", f"hdi_{100 * (1 - alpha / 2):g}%")
+            )
         elif stat_focus == "median":
             median = dataset.median(dim=("chain", "draw"), skipna=skipna)
 
             mad = stats.median_abs_deviation(dataset, dims=("chain", "draw"))
-            eti_post = dataset.quantile((alpha/2, 1-alpha/2), dim=("chain", "draw"), skipna=skipna)
+            eti_post = dataset.quantile(
+                (alpha/2, 1-alpha/2), dim=("chain", "draw"), skipna=skipna
+            )
             eti_lower = eti_post.isel(quantile=0, drop=True)
             eti_higher = eti_post.isel(quantile=1, drop=True)
             metrics.extend((median, mad, eti_lower, eti_higher))
-            metric_names.extend(("median", "mad", f"eti_{100 * alpha / 2:g}%", f"eti_{100 * (1 - alpha / 2):g}%"))
+            metric_names.extend(
+                ("median", "mad", f"eti_{100 * alpha / 2:g}%", f"eti_{100 * (1 - alpha / 2):g}%")
+            )
 
     if circ_var_names:
         nan_policy = "omit" if skipna else "propagate"
@@ -1400,20 +1406,19 @@ def summary(
                     circ_mean,
                     circ_sd,
                     circ_hdi_lower,
-                    circ_hdi_higher, 
-                    circ_mcse
+                    circ_hdi_higher,
+                    circ_mcse,
                 )
                 circ_stats_name: Tuple[str, ...] = (
                     "circ_mean",
                     "circ_sd",
                     "circ_hdi_lower",
-                    "circ_hdi_higher", 
-                    "circ_mcse"
+                    "circ_hdi_higher",
+                    "circ_mcse",
                 )
                 metric_names.extend(circ_stats_name)
                 for circ_var in circ_var_names:
                     metrics.extend(circ_stats)
-                
 
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
