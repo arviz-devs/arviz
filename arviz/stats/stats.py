@@ -1352,65 +1352,70 @@ def summary(
         circ_hdi_lower = circ_hdi.sel(hdi="lower", drop=True)
         circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
-    if kind in ["all", "diagnostics"]:
+    if kind in ["all", "diagnostics"] and extend:
         if stat_focus == "mean":
-            mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+            diagnostics = xr.apply_ufunc(
                 _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
                 dataset,
                 input_core_dims=(("chain", "draw"),),
                 output_core_dims=tuple([] for _ in range(5)),
             )
-        elif stat_focus == "median":
-            mcse_median, ess_median, ess_tail, r_hat = xr.apply_ufunc(
-                _make_ufunc(_multichain_statistics, n_output=4, ravel=False),
-                dataset,
-                kwargs=dict(focus="median"),
-                input_core_dims=(("chain", "draw"),),
-                output_core_dims=tuple([] for _ in range(4)),
-            )
-
-    # Combine metrics
-    if extend and kind in ["all", "diagnostics"]:
-        if stat_focus == "mean":
-            metrics_: Tuple[xr.Dataset, ...] = (
-                mcse_mean,
-                mcse_sd,
-                ess_bulk,
-                ess_tail,
-                r_hat,
-            )
-            metrics_names_: Tuple[str, ...] = (
+            diagnostics_names: Tuple[str, ...] = (
                 "mcse_mean",
                 "mcse_sd",
                 "ess_bulk",
                 "ess_tail",
                 "r_hat",
             )
+
         elif stat_focus == "median":
-            metrics_: Tuple[xr.Dataset, ...] = (
-                mcse_median,
-                ess_median,
-                ess_tail,
-                r_hat,
+            diagnostics = xr.apply_ufunc(
+                _make_ufunc(_multichain_statistics, n_output=4, ravel=False),
+                dataset,
+                kwargs=dict(focus="median"),
+                input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(4)),
             )
-            metrics_names_: Tuple[str, ...] = (
+            diagnostics_names: Tuple[str, ...] = (
                 "mcse_median",
                 "ess_median",
                 "ess_tail",
                 "r_hat",
             )
-        metrics.extend(metrics_)
-        metric_names.extend(metrics_names_)
+        metrics.extend(diagnostics)
+        metric_names.extend(diagnostics_names)
 
     if circ_var_names:
-        if kind != "diagnostics" and stat_focus == "mean":
-            for metric, circ_stat in zip(
-                # Replace only the first 5 statistics for their circular equivalent
-                metrics[:5],
-                (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
-            ):
+        if kind != "diagnostics":
+            if stat_focus == "mean":
+                for metric, circ_stat in zip(
+                    # Replace only the first 5 statistics for their circular equivalent
+                    metrics[:5],
+                    (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
+                ):
+                    print(metric)
+                    for circ_var in circ_var_names:
+                        print ("hello", metric[circ_var])
+                        metric[circ_var] = circ_stat[circ_var]
+            else:
+                circ_stats: Tuple[str, ...] = (
+                    circ_mean,
+                    circ_sd,
+                    circ_hdi_lower,
+                    circ_hdi_higher, 
+                    circ_mcse
+                )
+                circ_stats_name: Tuple[str, ...] = (
+                    "circ_mean",
+                    "circ_sd",
+                    "circ_hdi_lower",
+                    "circ_hdi_higher", 
+                    "circ_mcse"
+                )
+                metric_names.extend(circ_stats_name)
                 for circ_var in circ_var_names:
-                    metric[circ_var] = circ_stat[circ_var]
+                    metrics.extend(circ_stats)
+                
 
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
