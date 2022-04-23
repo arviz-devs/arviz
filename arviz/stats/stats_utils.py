@@ -439,7 +439,7 @@ def get_log_likelihood(idata, var_name=None):
         return log_likelihood
 
 
-BASE_FMT = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
+BASE_FMT = """Computed from {{n_samples}} samples and {{n_points}} points log-likelihood matrix.
 
 {{0:{0}}} Estimate       SE
 {{scale}}_{{kind}} {{1:8.2f}}  {{2:7.2f}}
