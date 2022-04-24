@@ -10,6 +10,10 @@
 
 ### Documentation
 
+## v0.12.1 (2022 Apr 24)
+
+### Maintenance and fixes
+* Update `BASE_FMT` message to clearly specify sample size. ([2019](https://github.com/arviz-devs/arviz/pull/2019))
 
 ## v0.12.0 (2022 Mar 23)
 ### New features
