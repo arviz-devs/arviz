@@ -17,6 +17,7 @@ def plot_pair(
     group="posterior",
     var_names: Optional[List[str]] = None,
     filter_vars: Optional[str] = None,
+    combine_dims=None,
     coords=None,
     marginals=False,
     figsize=None,
@@ -62,6 +63,9 @@ def plot_pair(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
     marginals: bool, optional
@@ -136,11 +140,6 @@ def plot_pair(
     -------
     axes: matplotlib axes or bokeh figures
 
-    See Also
-    --------
-    plot_joint : Plot a scatter or hexbin of two variables with their
-                 respective marginals distributions.
-
     Examples
     --------
     KDE Pair Plot
@@ -188,7 +187,7 @@ def plot_pair(
     else:
         kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
     if not np.all(kind_boolean):
-        raise ValueError((f"Plot type {kind} not recognized." "Plot type must be in {valid_kinds}"))
+        raise ValueError(f"Plot type {kind} not recognized. Plot type must be in {valid_kinds}")
     if fill_last or contour:
         warnings.warn(
             "fill_last and contour will be deprecated. Please use kde_kwargs",
@@ -211,7 +210,9 @@ def plot_pair(
     dataset = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, dataset, filter_vars)
     plotters = list(
-        xarray_var_iter(get_coords(dataset, coords), var_names=var_names, combined=True)
+        xarray_var_iter(
+            get_coords(dataset, coords), var_names=var_names, skip_dims=combine_dims, combined=True
+        )
     )
     flat_var_names = [
         labeller.make_label_vert(var_name, sel, isel) for var_name, sel, isel, _ in plotters

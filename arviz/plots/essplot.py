@@ -76,7 +76,9 @@ def plot_ess(
     extra_methods: bool, optional
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess: int
-        Minimum number of ESS desired.
+        Minimum number of ESS desired. If ``relative=True`` the line is plotted at
+        ``min_ess / n_samples`` for local and quantile kinds and as a curve following
+        the ``min_ess / n`` dependency in evolution kind.
     labeller : labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
@@ -91,7 +93,10 @@ def plot_ess(
         for extra methods lines labels. It accepts the additional
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
     hline_kwargs: dict, optional
-        kwargs passed to ax.axhline for the horizontal minimum ESS line.
+        kwargs passed to :func:`~matplotlib.axes.Axes.axhline` or to :class:`~bokeh.models.Span`
+        depending on the backend for the horizontal minimum ESS line.
+        For relative ess evolution plots the kwargs are passed to
+        :func:`~matplotlib.axes.Axes.plot` or to :class:`~bokeh.plotting.figure.line`
     rug_kwargs: dict
         kwargs passed to rug plot.
     backend: str, optional

@@ -169,7 +169,14 @@ def plot_rank(
         posterior_data = posterior_data.sel(**coords)
     var_names = _var_names(var_names, posterior_data, filter_vars)
     plotters = filter_plotters_list(
-        list(xarray_var_iter(posterior_data, var_names=var_names, combined=True)), "plot_rank"
+        list(
+            xarray_var_iter(
+                posterior_data,
+                var_names=var_names,
+                combined=True,
+            )
+        ),
+        "plot_rank",
     )
     length_plotters = len(plotters)
 

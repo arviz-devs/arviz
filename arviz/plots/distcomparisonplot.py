@@ -1,9 +1,10 @@
 """Density Comparison plot."""
+import warnings
 from ..labels import BaseLabeller
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
 from .plot_utils import get_plotting_function
-from ..sel_utils import xarray_var_iter
+from ..sel_utils import xarray_var_iter, xarray_sel_iter
 
 
 def plot_dist_comparison(
@@ -13,6 +14,7 @@ def plot_dist_comparison(
     textsize=None,
     var_names=None,
     coords=None,
+    combine_dims=None,
     transform=None,
     legend=True,
     labeller=None,
@@ -50,6 +52,10 @@ def plot_dist_comparison(
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension.
+    combine_dims : set_like of str, optional
+        List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
+        See the :ref:`this section <common_combine_dims>` for usage examples.
+
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
@@ -136,9 +142,26 @@ def plot_dist_comparison(
     len_plots = rcParams["plot.max_subplots"] // (len(groups) + 1)
     len_plots = len_plots if len_plots else 1
     dc_plotters = [
-        list(xarray_var_iter(data, var_names=var, combined=True))[:len_plots]
+        list(xarray_var_iter(data, var_names=var, combined=True, skip_dims=combine_dims))[
+            :len_plots
+        ]
         for data, var in zip(datasets, var_names)
     ]
+
+    total_plots = sum(
+        1 for _ in xarray_sel_iter(datasets[0], var_names=var_names[0], combined=True)
+    ) * (len(groups) + 1)
+    maxplots = len(dc_plotters[0]) * (len(groups) + 1)
+
+    if total_plots > rcParams["plot.max_subplots"]:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({rcParam}) is smaller than the number "
+            "of subplots to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(
+                rcParam=rcParams["plot.max_subplots"], len_plotters=total_plots, max_plots=maxplots
+            ),
+            UserWarning,
+        )
 
     nvars = len(dc_plotters[0])
     ngroups = len(groups)

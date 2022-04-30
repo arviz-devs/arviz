@@ -18,6 +18,17 @@ from ..data import InferenceData, from_dict
 _log = logging.getLogger(__name__)
 
 
+class TestRandomVariable:
+    """Example class for random variables."""
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        """Return argument to constructor as string representation."""
+        return self.name
+
+
 @pytest.fixture(scope="module")
 def eight_schools_params():
     """Share setup for eight schools."""
@@ -85,7 +96,12 @@ def create_model(seed=10):
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
         observed_data={"y": data["y"]},
-        dims={"y": ["obs_dim"], "log_likelihood": ["obs_dim"]},
+        dims={
+            "y": ["obs_dim"],
+            "log_likelihood": ["obs_dim"],
+            "theta": ["school"],
+            "eta": ["school"],
+        },
         coords={"obs_dim": range(data["J"])},
     )
     return model
@@ -286,9 +302,9 @@ def _emcee_lnprior(theta):
     # Half-cauchy prior, hwhm=25
     if tau < 0:
         return -np.inf
-    prior_tau = -np.log(tau ** 2 + 25 ** 2)
+    prior_tau = -np.log(tau**2 + 25**2)
     prior_mu = -((mu / 10) ** 2)  # normal prior, loc=0, scale=10
-    prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
+    prior_eta = -np.sum(eta**2)  # normal prior, loc=0, scale=1
     return prior_mu + prior_tau + prior_eta
 
 

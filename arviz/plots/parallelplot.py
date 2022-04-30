@@ -124,7 +124,11 @@ def plot_parallel(
 
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group="sample_stats")
-    _, diverging_mask = xarray_to_ndarray(divergent_data, var_names=("diverging",), combined=True)
+    _, diverging_mask = xarray_to_ndarray(
+        divergent_data,
+        var_names=("diverging",),
+        combined=True,
+    )
     diverging_mask = np.squeeze(diverging_mask)
 
     # Get posterior draws and combine chains

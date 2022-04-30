@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from matplotlib import animation
 from pandas import DataFrame
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, norm
 
 from ...data import from_dict, load_arviz_data
 from ...plots import (
@@ -19,6 +19,7 @@ from ...plots import (
     plot_dist,
     plot_dist_comparison,
     plot_dot,
+    plot_ecdf,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -51,6 +52,7 @@ from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     multidim_models,
+    TestRandomVariable,
 )
 
 rcParams["data.load"] = "eager"
@@ -83,6 +85,16 @@ def df_trace():
 def discrete_model():
     """Simple fixture for random discrete model"""
     return {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
+
+
+@pytest.fixture(scope="module")
+def discrete_multidim_model():
+    """Simple fixture for random discrete model"""
+    idata = from_dict(
+        {"x": np.random.randint(10, size=(2, 50, 3)), "y": np.random.randint(10, size=(2, 50))},
+        dims={"x": ["school"]},
+    )
+    return idata
 
 
 @pytest.fixture(scope="module")
@@ -152,6 +164,27 @@ def test_plot_density_no_subset():
     assert axes.size == 3
 
 
+def test_plot_density_nonstring_varnames():
+    """Test plot_density works when variables are not strings."""
+    rv1 = TestRandomVariable("a")
+    rv2 = TestRandomVariable("b")
+    rv3 = TestRandomVariable("c")
+    model_ab = from_dict(
+        {
+            rv1: np.random.normal(size=200),
+            rv2: np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            rv2: np.random.normal(size=200),
+            rv3: np.random.normal(size=200),
+        }
+    )
+    axes = plot_density([model_ab, model_bc])
+    assert axes.size == 3
+
+
 def test_plot_density_bad_kwargs(models):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     with pytest.raises(ValueError):
@@ -162,6 +195,14 @@ def test_plot_density_bad_kwargs(models):
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
+
+    with pytest.raises(ValueError):
+        plot_density(obj, filter_vars="bad_value")
+
+
+def test_plot_density_discrete_combinedims(discrete_model):
+    axes = plot_density(discrete_model, combine_dims={"school"}, shade=0.9)
+    assert axes.size == 2
 
 
 @pytest.mark.parametrize(
@@ -239,6 +280,13 @@ def test_plot_trace_max_subplots_warning(models):
     assert axes.shape == (3, 2)
 
 
+def test_plot_dist_comparison_warning(models):
+    with pytest.warns(UserWarning):
+        with rc_context(rc={"plot.max_subplots": 6}):
+            axes = plot_dist_comparison(models.model_1)
+    assert axes.shape == (2, 3)
+
+
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
 def test_plot_trace_invalid_varname_warning(models, kwargs):
     with pytest.warns(UserWarning, match="valid var.+should be provided"):
@@ -267,7 +315,7 @@ def test_plot_trace_futurewarning(models, prop):
     [
         ({}, 1),
         ({"var_names": "mu", "transform": lambda x: x + 1}, 1),
-        ({"var_names": "mu", "rope": (-1, 1)}, 1),
+        ({"var_names": "mu", "rope": (-1, 1), "combine_dims": {"school"}}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "ess": True, "combined": True}, 2),
         (
@@ -506,7 +554,7 @@ def test_plot_kde_inference_data(models):
         {
             "var_names": "theta",
             "divergences": True,
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "scatter_kwargs": {"marker": "x"},
             "divergences_kwargs": {"marker": "*", "c": "C0"},
         },
@@ -522,7 +570,7 @@ def test_plot_kde_inference_data(models):
         {
             "kind": "hexbin",
             "var_names": ["theta"],
-            "coords": {"theta_dim_0": [0, 1]},
+            "coords": {"school": [0, 1]},
             "colorbar": True,
             "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
@@ -580,6 +628,17 @@ def test_plot_pair_overlaid(models, kwargs):
 
 
 @pytest.mark.parametrize("marginals", [True, False])
+def test_plot_pair_combinedims(models, marginals):
+    ax = plot_pair(
+        models.model_1, var_names=["eta", "theta"], combine_dims={"school"}, marginals=marginals
+    )
+    if marginals:
+        assert ax.shape == (2, 2)
+    else:
+        assert not isinstance(ax, np.ndarray)
+
+
+@pytest.mark.parametrize("marginals", [True, False])
 @pytest.mark.parametrize("max_subplots", [True, False])
 def test_plot_pair_shapes(marginals, max_subplots):
     rng = np.random.default_rng()
@@ -592,6 +651,45 @@ def test_plot_pair_shapes(marginals, max_subplots):
         ax = plot_pair(idata, marginals=marginals)
     side = 3 if max_subplots else (4 + marginals)
     assert ax.shape == (side, side)
+
+
+@pytest.mark.parametrize("sharex", ["col", None])
+@pytest.mark.parametrize("sharey", ["row", None])
+@pytest.mark.parametrize("marginals", [True, False])
+def test_plot_pair_shared(sharex, sharey, marginals):
+    # Generate fake data and plot
+    rng = np.random.default_rng()
+    idata = from_dict({"a": rng.standard_normal((4, 500, 5))})
+    numvars = 5 - (not marginals)
+    if sharex is None and sharey is None:
+        ax = plot_pair(idata, marginals=marginals)
+    else:
+        backend_kwargs = {}
+        if sharex is not None:
+            backend_kwargs["sharex"] = sharex
+        if sharey is not None:
+            backend_kwargs["sharey"] = sharey
+        with pytest.warns(UserWarning):
+            ax = plot_pair(idata, marginals=marginals, backend_kwargs=backend_kwargs)
+
+    # Check x axes shared correctly
+    for i in range(numvars):
+        num_shared_x = numvars - i
+        assert len(ax[-1, i].get_shared_x_axes().get_siblings(ax[-1, i])) == num_shared_x
+
+    # Check y axes shared correctly
+    for j in range(numvars):
+        if marginals:
+            num_shared_y = j
+
+            # Check diagonal has unshared axis
+            assert len(ax[j, j].get_shared_y_axes().get_siblings(ax[j, j])) == 1
+
+            if j == 0:
+                continue
+        else:
+            num_shared_y = j + 1
+        assert len(ax[j, 0].get_shared_y_axes().get_siblings(ax[j, 0])) == num_shared_y
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
@@ -831,6 +929,30 @@ def test_plot_violin_discrete(discrete_model):
     assert axes.shape
 
 
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def test_plot_violin_combinedims(models, var_names):
+    axes = plot_violin(models.model_1, var_names=var_names, combine_dims={"school"})
+    assert axes.shape
+
+
+def test_plot_violin_ax_combinedims(models):
+    _, ax = plt.subplots(1)
+    axes = plot_violin(models.model_1, var_names="mu", combine_dims={"school"}, ax=ax)
+    assert axes.shape
+
+
+def test_plot_violin_layout_combinedims(models):
+    axes = plot_violin(
+        models.model_1, var_names=["mu", "tau"], combine_dims={"school"}, sharey=False
+    )
+    assert axes.shape
+
+
+def test_plot_violin_discrete_combinedims(discrete_model):
+    axes = plot_violin(discrete_model, combine_dims={"school"})
+    assert axes.shape
+
+
 def test_plot_autocorr_short_chain():
     """Check that logic for small chain defaulting doesn't cause exception"""
     chain = np.arange(10)
@@ -866,7 +988,7 @@ def test_plot_autocorr_var_names(models, var_names):
     [
         {},
         {"var_names": "mu"},
-        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ("mu", "tau"), "coords": {"school": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
         {
             "var_names": "mu",
@@ -926,10 +1048,24 @@ def test_plot_posterior(models, kwargs):
         assert axes.shape
 
 
+def test_plot_posterior_boolean():
+    data = np.random.choice(a=[False, True], size=(4, 100))
+    axes = plot_posterior(data)
+    assert axes
+    plt.draw()
+    labels = [label.get_text() for label in axes.get_xticklabels()]
+    assert all(item in labels for item in ("True", "False"))
+
+
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
 def test_plot_posterior_discrete(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, **kwargs)
     assert axes.shape
+
+
+def test_plot_posterior_bad_type():
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]))
 
 
 def test_plot_posterior_bad(models):
@@ -953,6 +1089,41 @@ def test_plot_posterior_skipna():
     plot_posterior({"a": sample}, skipna=True)
     with pytest.raises(ValueError):
         plot_posterior({"a": sample}, skipna=False)
+
+
+@pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "theta"]}])
+def test_plot_posterior_combinedims(models, kwargs):
+    axes = plot_posterior(models.model_1, combine_dims={"school"}, **kwargs)
+    if isinstance(kwargs.get("var_names"), str):
+        assert not isinstance(axes, np.ndarray)
+    else:
+        assert axes.shape
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
+def test_plot_posterior_discrete_combinedims(discrete_multidim_model, kwargs):
+    axes = plot_posterior(discrete_multidim_model, combine_dims={"school"}, **kwargs)
+    assert axes.size == 2
+
+
+@pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
+def test_plot_posterior_point_estimates_combinedims(models, point_estimate):
+    axes = plot_posterior(
+        models.model_1,
+        var_names=("mu", "tau"),
+        combine_dims={"school"},
+        point_estimate=point_estimate,
+    )
+    assert axes.size == 2
+
+
+def test_plot_posterior_skipna_combinedims():
+    idata = load_arviz_data("centered_eight")
+    idata.posterior["theta"].loc[dict(school="Deerfield")] = np.nan
+    with pytest.raises(ValueError):
+        plot_posterior(idata, var_names="theta", combine_dims={"school"}, skipna=False)
+    ax = plot_posterior(idata, var_names="theta", combine_dims={"school"}, skipna=True)
+    assert not isinstance(ax, np.ndarray)
 
 
 @pytest.mark.parametrize(
@@ -1043,6 +1214,26 @@ def test_kde_cumulative(limits):
     np.testing.assert_almost_equal(round(density[-1], 3), 1)
 
 
+def test_plot_ecdf_basic():
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data)
+    assert axes is not None
+
+
+def test_plot_ecdf_values2():
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, data2)
+    assert axes is not None
+
+
+def test_plot_ecdf_cdf():
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
+    axes = plot_ecdf(data, cdf=cdf)
+    assert axes is not None
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -1126,7 +1317,7 @@ def test_plot_elpd_ic_error(models):
         "Model 1": waic(models.model_1, pointwise=True),
         "Model 2": loo(models.model_2, pointwise=True),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 
@@ -1135,7 +1326,7 @@ def test_plot_elpd_scale_error(models):
         "Model 1": waic(models.model_1, pointwise=True, scale="log"),
         "Model 2": waic(models.model_2, pointwise=True, scale="deviance"),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 
@@ -1229,7 +1420,7 @@ def test_plot_khat_bad_input(models):
     [
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
-        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"coords": {"school": slice(4)}, "n_points": 10},
         {"min_ess": 600, "hline_kwargs": {"color": "r"}},
     ],
 )
@@ -1327,7 +1518,7 @@ def test_plot_loo_pit_incompatible_args(models):
         {"var_names": ["theta"], "color": "r"},
         {"rug": True, "rug_kwargs": {"color": "r"}},
         {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
-        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"errorbar": True, "coords": {"school": slice(4)}, "n_points": 10},
         {"extra_methods": True, "rug": True},
         {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
     ],
@@ -1366,7 +1557,7 @@ def test_plot_mcse_no_divergences(models):
     [
         {},
         {"var_names": ["theta"]},
-        {"var_names": ["theta"], "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ["theta"], "coords": {"school": [0, 1]}},
         {"var_names": ["eta"], "posterior_kwargs": {"rug": True, "rug_kwargs": {"color": "r"}}},
         {"var_names": ["mu"], "prior_kwargs": {"fill_kwargs": {"alpha": 0.5}}},
         {
@@ -1394,6 +1585,27 @@ def test_plot_dist_comparison_different_vars():
         plot_dist_comparison(data, var_names="x")
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
+
+
+def test_plot_dist_comparison_combinedims(models):
+    idata = models.model_1
+    ax = plot_dist_comparison(idata, combine_dims={"school"})
+    assert np.all(ax)
+
+
+def test_plot_dist_comparison_different_vars_combinedims():
+    data = from_dict(
+        posterior={
+            "x": np.random.randn(4, 100, 30),
+        },
+        prior={"x_hat": np.random.randn(4, 100, 30)},
+        dims={"x": ["3rd_dim"], "x_hat": ["3rd_dim"]},
+    )
+    with pytest.raises(KeyError):
+        plot_dist_comparison(data, var_names="x", combine_dims={"3rd_dim"})
+    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]], combine_dims={"3rd_dim"})
+    assert np.all(ax)
+    assert ax.size == 3
 
 
 @pytest.mark.parametrize(

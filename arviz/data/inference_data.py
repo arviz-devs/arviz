@@ -1992,8 +1992,8 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         if var not in group0_vars:
                             msg = "Mismatch between the variables."
                             raise TypeError(msg)
-                        var_dims = getattr(group_data, var).dims
-                        var0_dims = getattr(group0_data, var).dims
+                        var_dims = group_data[var].dims
+                        var0_dims = group0_data[var].dims
                         if var_dims != var0_dims:
                             msg = "Mismatch between the dimensions."
                             raise TypeError(msg)
@@ -2076,11 +2076,11 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
                     for var in group_vars:
                         if var not in group0_vars:
-                            var_data = getattr(group_data, var)
+                            var_data = group_data[var]
                             getattr(arg0, group)[var] = var_data
                         else:
-                            var_data = getattr(group_data, var)
-                            var0_data = getattr(group0_data, var)
+                            var_data = group_data[var]
+                            var0_data = group0_data[var]
                             if dim in var_data.dims and dim in var0_data.dims:
                                 concatenated_var = xr.concat((group_data, group0_data), dim=dim)
                                 group0_data[var] = concatenated_var
