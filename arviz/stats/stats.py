@@ -1326,27 +1326,22 @@ def summary(
 
     if circ_var_names:
         nan_policy = "omit" if skipna else "propagate"
-        circ_mean = xr.apply_ufunc(
-            _make_ufunc(st.circmean),
-            dataset,
-            kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
-            input_core_dims=(("chain", "draw"),),
+        circ_mean = stats.circmean(
+            dataset, dims=["chain", "draw"], high=np.pi, low=-np.pi, nan_policy=nan_policy
         )
         _numba_flag = Numba.numba_flag
-        func = None
+        circ_sd = None
         if _numba_flag:
-            func = _circular_standard_deviation
-            kwargs_circ_std = dict(high=np.pi, low=-np.pi, skipna=skipna)
+            circ_sd = xr.apply_ufunc(
+                _make_ufunc(_circular_standard_deviation),
+                dataset,
+                kwargs=dict(high=np.pi, low=-np.pi, skipna=skipna),
+                input_core_dims=(("chain", "draw"),),
+            )
         else:
-            func = st.circstd
-            kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
-        circ_sd = xr.apply_ufunc(
-            _make_ufunc(func),
-            dataset,
-            kwargs=kwargs_circ_std,
-            input_core_dims=(("chain", "draw"),),
-        )
-
+            circ_sd = stats.circstd(
+                dataset, dims=["chain", "draw"], high=np.pi, low=-np.pi, nan_policy=nan_policy
+            )
         circ_mcse = xr.apply_ufunc(
             _make_ufunc(_mc_error),
             dataset,
@@ -1359,6 +1354,7 @@ def summary(
         circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
     if kind in ["all", "diagnostics"] and extend:
+        diagnostics_names: Tuple[str, ...]
         if stat_focus == "mean":
             diagnostics = xr.apply_ufunc(
                 _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
@@ -1366,7 +1362,7 @@ def summary(
                 input_core_dims=(("chain", "draw"),),
                 output_core_dims=tuple([] for _ in range(5)),
             )
-            diagnostics_names: Tuple[str, ...] = (
+            diagnostics_names = (
                 "mcse_mean",
                 "mcse_sd",
                 "ess_bulk",
@@ -1382,7 +1378,7 @@ def summary(
                 input_core_dims=(("chain", "draw"),),
                 output_core_dims=tuple([] for _ in range(4)),
             )
-            diagnostics_names: Tuple[str, ...] = (
+            diagnostics_names = (
                 "mcse_median",
                 "ess_median",
                 "ess_tail",
