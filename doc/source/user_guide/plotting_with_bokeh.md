@@ -95,10 +95,10 @@ Arviz plot returns a {class}`~bokeh.plotting.Figure` object, therefore different
 data = az.load_arviz_data('regression1d')
 X = data.observed_data.y_dim_0.to_numpy()
 Y = data.observed_data.y.to_numpy()
-predictions = data.posterior_predictive.y.to_numpy()
+y_pp = data.posterior_predictive.y.values
 # plot
 f1 = figure(plot_width=600, plot_height=600, toolbar_location="below")
-az.plot_hdi(X, predictions, color="#b5a7b6", show=False, ax=f1)
+az.plot_hdi(X, y_pp, color="#b5a7b6", show=False, ax=f1)
 f1.scatter(X, Y, marker="circle", fill_color="#0d7591")
 
 show(f1)
@@ -113,8 +113,8 @@ observed_data = data.observed_data.y.to_numpy()
 f1 = figure(plot_width=400, plot_height=400, toolbar_location="below")
 f2 = figure(plot_width=400, plot_height=400, toolbar_location="below")
 # plot
-az.plot_hdi(X, predictions, color="#b5a7b6", show=False, ax=f1)
-f1.line(X, predictions.mean(axis=(0, 1)), color="black")
+az.plot_hdi(X, y_pp, color="#b5a7b6", show=False, ax=f1)
+f1.line(X, y_pp.mean(axis=(0, 1)), color="black")
 f2.scatter(X, Y, marker="circle", fill_color="#0d7591")
 
 show(row(f1, f2))

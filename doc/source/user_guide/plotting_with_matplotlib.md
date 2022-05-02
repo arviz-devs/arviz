@@ -87,9 +87,9 @@ As an Arviz plot returns an {class}`~matplotlib.axes.Axes` object, different Mat
 data = az.load_arviz_data('regression1d')
 X = data.observed_data.y_dim_0
 Y = data.observed_data.y
-predictions = data.posterior_predictive.y
+y_pp = data.posterior_predictive.y
 # plot
-ax = az.plot_hdi(X, predictions, color="#b5a7b6")
+ax = az.plot_hdi(X, y_pp, color="#b5a7b6")
 ax.scatter(X, Y, c="#0d7591");
 ```
 
@@ -99,8 +99,8 @@ Similarly, custom axes allow to display Arviz and Matplotlib plots in the same g
 # create axes
 _, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
 # plot ax1
-az.plot_hdi(X, predictions, color="#b5a7b6", ax=ax1)
-ax1.plot(X, predictions.mean(axis=(0, 1)), c="black")
+az.plot_hdi(X, y_pp, color="#b5a7b6", ax=ax1)
+ax1.plot(X, y_pp.mean(axis=(0, 1)), c="black")
 # plot ax2
 ax2.scatter(X, Y, c="#0d7591");
 ```
