@@ -69,7 +69,7 @@ The `ax` argument of any `plot` function allows to use created axes manually. In
 
 ```{code-cell} ipython3
 from bokeh.io import show
-from bokeh.layouts import gridplot, row
+from bokeh.layouts import row
 from bokeh.plotting import figure
 
 # load data
@@ -81,8 +81,12 @@ f2 = figure(x_range=f1.x_range, y_range=f1.y_range)
 az.plot_ppc(data, group="prior", num_pp_samples=100, show=False, ax=f1)
 az.plot_ppc(data, group="posterior", num_pp_samples=100, show=False, ax=f2)
 
-show(gridplot([[f1], [f2]]))
+az.show_layout([[f1], [f2]])
 ```
+
+:::{note}
+{func}`az.show_layout` creates a bokeh layout and calls shows if `shows` is `True` which is the default behavior.
+:::
 
 ### Extending ArviZ-Bokeh plots
 
