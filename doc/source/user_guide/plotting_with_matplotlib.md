@@ -26,9 +26,6 @@ import numpy as np
 az.style.use("arviz-darkgrid")
 ```
 
-:::{warning} Page in construction
-:::
-
 ## Customizing plots
 
 ### Using `backend_kwargs`

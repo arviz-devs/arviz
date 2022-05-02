@@ -34,8 +34,6 @@ az.output_notebook()
 To display the plots as output in a Jupyter notebook, it's required to call the function  {func}`arviz.output_notebook` beforehand.
 :::
 
-:::{warning} Page in construction
-:::
 
 ## Customizing plots
 
