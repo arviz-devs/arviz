@@ -84,7 +84,7 @@ az.plot_ppc(data, group="posterior", num_pp_samples=100, show=False, ax=f2)
 show(gridplot([[f1], [f2]]))
 ```
 
-## Combining ArviZ and Bokeh plots
+### Extending ArviZ-Bokeh plots
 
 Arviz plot returns a {class}`~bokeh.plotting.Figure` object, therefore different Bokeh plots can be combined into a plot created using Arviz:
 

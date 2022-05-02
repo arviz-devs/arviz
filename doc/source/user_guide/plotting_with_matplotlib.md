@@ -75,7 +75,7 @@ az.plot_ppc(data, group="prior", num_pp_samples=100, ax=ax[0])
 az.plot_ppc(data, group="posterior", num_pp_samples=100, ax=ax[1]);
 ```
 
-## Combining ArviZ and Matplotlib plots
+### Extending ArviZ-Matplotlib plots
 
 As an Arviz plot returns an {class}`~matplotlib.axes.Axes` object, different Matplotlib plots can be added to a plot generated with Arviz:
 
