@@ -66,7 +66,7 @@ The `ax` argument of any `plot` function allows to use created axes manually. In
 
 ```{code-cell} ipython3
 # load data
-observed_data = data.observed_data.y.to_numpy()
+observed_data = data.observed_data.y.values
 # create axes
 _, ax = plt.subplots(2, 1, sharex=True, sharey=True, figsize=(6, 6))
 ax[0].set_xlim(xmin=observed_data.min() - 1, xmax=observed_data.max() + 1)

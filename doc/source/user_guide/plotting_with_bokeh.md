@@ -91,8 +91,8 @@ Arviz plot returns a {class}`~bokeh.plotting.Figure` object, therefore different
 ```{code-cell} ipython3
 # load data
 data = az.load_arviz_data('regression1d')
-X = data.observed_data.y_dim_0.to_numpy()
-Y = data.observed_data.y.to_numpy()
+X = data.observed_data.y_dim_0.values
+Y = data.observed_data.y.values
 y_pp = data.posterior_predictive.y.values
 # plot
 f1 = figure(plot_width=600, plot_height=600, toolbar_location="below")
@@ -106,7 +106,7 @@ Similarly, custom axes allow to display Arviz and Matplotlib plots in the same g
 
 ```{code-cell} ipython3
 # load data
-observed_data = data.observed_data.y.to_numpy()
+observed_data = data.observed_data.y.values
 # create axes
 f1 = figure(plot_width=400, plot_height=400, toolbar_location="below")
 f2 = figure(plot_width=400, plot_height=400, toolbar_location="below")
