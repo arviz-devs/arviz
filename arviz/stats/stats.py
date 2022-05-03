@@ -1267,6 +1267,9 @@ def summary(
     if not isinstance(stat_focus, str) or (stat_focus not in focus_group):
         raise TypeError(f"Invalid format: '{stat_focus}'. Focus options are: {focus_group}")
 
+    if stat_focus != "mean" and circ_var_names is not None:
+        raise TypeError(f"Invalid format: Circular stats not supported for '{stat_focus}'")
+
     if order is not None:
         warnings.warn(
             "order has been deprecated. summary now shows coordinate values.", DeprecationWarning
@@ -1315,7 +1318,7 @@ def summary(
 
             mad = stats.median_abs_deviation(dataset, dims=("chain", "draw"))
             eti_post = dataset.quantile(
-                (alpha/2, 1-alpha/2), dim=("chain", "draw"), skipna=skipna
+                (alpha / 2, 1 - alpha / 2), dim=("chain", "draw"), skipna=skipna
             )
             eti_lower = eti_post.isel(quantile=0, drop=True)
             eti_higher = eti_post.isel(quantile=1, drop=True)
@@ -1388,34 +1391,15 @@ def summary(
         metric_names.extend(diagnostics_names)
 
     if circ_var_names:
-        if kind != "diagnostics":
-            if stat_focus == "mean":
-                for metric, circ_stat in zip(
-                    # Replace only the first 5 statistics for their circular equivalent
-                    metrics[:5],
-                    (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
-                ):
-                    for circ_var in circ_var_names:
-                        metric[circ_var] = circ_stat[circ_var]
-            else:
-                circ_stats: Tuple[str, ...] = (
-                    circ_mean,
-                    circ_sd,
-                    circ_hdi_lower,
-                    circ_hdi_higher,
-                    circ_mcse,
-                )
-                circ_stats_name: Tuple[str, ...] = (
-                    "circ_mean",
-                    "circ_sd",
-                    "circ_hdi_lower",
-                    "circ_hdi_higher",
-                    "circ_mcse",
-                )
-                metric_names.extend(circ_stats_name)
+        if kind != "diagnostics" and stat_focus == "mean":
+            for metric, circ_stat in zip(
+                # Replace only the first 5 statistics for their circular equivalent
+                metrics[:5],
+                (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
+            ):
                 for circ_var in circ_var_names:
-                    metrics.extend(circ_stats)
-
+                    metric[circ_var] = circ_stat[circ_var]
+            
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
     joined = (

@@ -345,7 +345,7 @@ def test_find_hdi_contours(mean, cov, contour_sigma):
     # Find min and max for grid at 7-sigma contour
     extremes = np.empty((4, 2))
     for i in range(4):
-        extremes[i] = mean + (-1) ** i * 7 * stdevs[i // 2] * eigenvecs[i // 2]
+        extremes[i] = mean + (-1)**i * 7 * stdevs[i//2] * eigenvecs[i//2]
     x_min, y_min = np.amin(extremes, axis=0)
     x_max, y_max = np.amax(extremes, axis=0)
 

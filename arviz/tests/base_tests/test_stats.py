@@ -289,27 +289,35 @@ METRICS_NAMES = [
     "r_hat",
     "median",
     "mad",
+    "eti_3%",
+    "eti_97%",
+    "mcse_median",
+    "ess_median",
+    "ess_tail",
+    "r_hat",
 ]
 
 
 @pytest.mark.parametrize(
     "params",
-    (("all", METRICS_NAMES[:9]), ("stats", METRICS_NAMES[:4]), ("diagnostics", METRICS_NAMES[4:9])),
+    (
+        ("mean", "all", METRICS_NAMES[:9]),
+        ("mean", "stats", METRICS_NAMES[:4]),
+        ("mean", "diagnostics", METRICS_NAMES[4:9]),
+        ("median", "all", METRICS_NAMES[9:17]),
+        ("median", "stats", METRICS_NAMES[9:13]),
+        ("median", "diagnostics", METRICS_NAMES[13:17]),
+    ),
 )
-def test_summary_kind(centered_eight, params):
-    kind, metrics_names_ = params
-    summary_df = summary(centered_eight, kind=kind)
+def test_summary_focus_kind(centered_eight, params):
+    stat_focus, kind, metrics_names_ = params
+    summary_df = summary(centered_eight, stat_focus=stat_focus, kind=kind)
     assert_array_equal(summary_df.columns, metrics_names_)
 
 
-# @pytest.mark.parametrize(
-#     "focus",
-#     (("mean", METRICS_NAMES[:9]), ("median", METRICS_NAMES[9:])),
-# )
-# def test_summary_stat_focus(centered_eight, focus):
-#     stat_focus, metrics_names_ = focus
-#     az_summary = summary(centered_eight, stat_focus=stat_focus)
-#     assert_array_equal(az_summary.columns, metrics_names_)
+def test_summary_wrong_focus(centered_eight):
+    with pytest.raises(TypeError, match=r"Invalid format: 'WrongFocus'.*"):
+        summary(centered_eight, stat_focus="WrongFocus")
 
 
 @pytest.mark.parametrize("fmt", ["wide", "long", "xarray"])
