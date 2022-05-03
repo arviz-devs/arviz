@@ -1399,7 +1399,7 @@ def summary(
             ):
                 for circ_var in circ_var_names:
                     metric[circ_var] = circ_stat[circ_var]
-            
+
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
     joined = (
