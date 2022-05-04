@@ -4,7 +4,6 @@
 ### New features
 
 * Add `stat_focus` argument to `arviz.summary` ([1998](https://github.com/arviz-devs/arviz/pull/1998))
-=======
 
 ### Maintenance and fixes
 * `psislw` now smooths log-weights even when shape is lower than `1/3`([2011](https://github.com/arviz-devs/arviz/pull/2011))
