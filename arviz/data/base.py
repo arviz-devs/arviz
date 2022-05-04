@@ -157,7 +157,11 @@ def generate_dims_coords(
         dim_name = dims[idx]
         if dim_name not in coords:
             coords[dim_name] = np.arange(index_origin, dim_len + index_origin)
-    coords = {key: coord for key, coord in coords.items() if any(key == dim for dim in dims)}
+    coords = {
+        key: coord
+        for key, coord in coords.items()
+        if any(key == dim for dim in dims + default_dims)
+    }
     return dims, coords
 
 

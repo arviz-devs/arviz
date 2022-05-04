@@ -140,11 +140,6 @@ def plot_pair(
     -------
     axes: matplotlib axes or bokeh figures
 
-    See Also
-    --------
-    plot_joint : Plot a scatter or hexbin of two variables with their
-                 respective marginals distributions.
-
     Examples
     --------
     KDE Pair Plot
@@ -192,7 +187,7 @@ def plot_pair(
     else:
         kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
     if not np.all(kind_boolean):
-        raise ValueError((f"Plot type {kind} not recognized." "Plot type must be in {valid_kinds}"))
+        raise ValueError(f"Plot type {kind} not recognized. Plot type must be in {valid_kinds}")
     if fill_last or contour:
         warnings.warn(
             "fill_last and contour will be deprecated. Please use kde_kwargs",

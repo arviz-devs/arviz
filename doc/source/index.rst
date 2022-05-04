@@ -4,6 +4,8 @@
       <input type="search" class="form-control search-front-page" name="q" id="search-input" placeholder="&#128269; Search the docs ..." aria-label="Search the docs ..." autocomplete="off">
     </form>
 
+.. _homepage:
+
 ArviZ: Exploratory analysis of Bayesian models
 ==============================================
 |pypi|
@@ -15,7 +17,7 @@ ArviZ: Exploratory analysis of Bayesian models
 .. |pypi| image:: https://badge.fury.io/py/arviz.svg
     :target: https://badge.fury.io/py/arviz
 
-.. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01143/status.svg
+.. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.01143/status.svg
    :target: https://doi.org/10.21105/joss.01143
 
 .. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2540944.svg
@@ -68,7 +70,7 @@ ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray dataset
 `emcee <https://emcee.readthedocs.io/en/stable/>`_, and
 `TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for Edward2 is on the roadmap.
 
-A Julia wrapper, `ArviZ.jl <https://arviz-devs.github.io/ArviZ.jl/stable/>`_ is
+A Julia wrapper, `ArviZ.jl <https://julia.arviz.org/>`_ is
 also available. It provides built-in support for
 `Turing.jl <https://turing.ml/dev/>`_, `CmdStan.jl
 <https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl
@@ -106,7 +108,6 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
   api/index
   community
   Contributing<contributing/index>
-  about_us
 
 
 .. raw:: html
@@ -183,9 +184,9 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
             </a>
             </div>
             <div class="col">
-            <a href="examples/plot_joint.html">
+            <a href="examples/plot_dot.html">
             <div class="img-thumbnail">
-                <img src="_static/plot_joint_thumb.png">
+                <img src="_static/plot_dot_thumb.png">
             </div>
             </a>
             </div>
