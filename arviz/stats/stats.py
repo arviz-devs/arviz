@@ -1151,9 +1151,15 @@ def summary(
     -------
     pandas.DataFrame or xarray.Dataset
         Return type dicated by `fmt` argument.
-        Return value will contain summary statistics for each variable. Default statistics are:
-        `mean`, `sd`, `hdi_3%`, `hdi_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
-        `r_hat`.
+
+        Return value will contain summary statistics for each variable. Default statistics depend on
+        the value of ``stat_focus``:
+
+        - ``stat_focus="mean"``: `mean`, `sd`, `hdi_3%`, `hdi_97%`,
+                                `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and `r_hat`
+        - ``stat_focus="median"``: `median`, `mad`, `eti_3%`, `eti_97%`,
+                                `mcse_median`, `ess_median`, `ess_tail`, and `r_hat`
+
         `r_hat` is only computed for traces with 2 or more chains.
 
     See Also

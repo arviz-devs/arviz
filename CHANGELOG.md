@@ -2,6 +2,7 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Add `stat_focus` argument to `arviz.summary` ([1998](https://github.com/arviz-devs/arviz/pull/1998))
 * Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
 * Add `combine_dims` argument to several functions ([1676](https://github.com/arviz-devs/arviz/pull/1676))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
