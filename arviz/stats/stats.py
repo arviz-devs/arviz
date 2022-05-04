@@ -1217,9 +1217,7 @@ def summary(
 
     .. ipython::
 
-        In [1]: import arviz as az
-           ...: data = az.load_arviz_data("centered_eight")
-           ...: az.summary(data, stat_focus="median")
+        In [1]: az.summary(data, stat_focus="median")
 
     """
     _log.cache = []
