@@ -936,7 +936,7 @@ def _multichain_statistics(ary, focus="mean"):
     tuple
         Order of return parameters is
             If focus equals "mean"
-                - mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat
+                - mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat
             Else if focus equals "median"
                 - mcse_median, ess_median, ess_tail, r_hat
     """

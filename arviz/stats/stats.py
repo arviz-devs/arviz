@@ -930,7 +930,7 @@ def _gpdfit(ary):
     prior_bs = 3
     prior_k = 10
     n = len(ary)
-    m_est = 30 + int(n ** 0.5)
+    m_est = 30 + int(n**0.5)
 
     b_ary = 1 - np.sqrt(m_est / (np.arange(1, m_est + 1, dtype=float) - 0.5))
     b_ary /= prior_bs * ary[int(n / 4 + 0.5) - 1]
@@ -1117,8 +1117,8 @@ def summary(
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
     circ_var_names: list
         A list of circular variables to compute circular stats for
-    stat_focus: str
-        Select the focus for summary. Default to "mean".
+    stat_focus : str, default "mean"
+        Select the focus for summary.
     stat_funcs: dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -1212,6 +1212,14 @@ def summary(
            ...:     stat_funcs=func_dict,
            ...:     extend=False
            ...: )
+
+    Use ``stat_focus`` to change the focus of summary statistics obatined to median:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: az.summary(data, stat_focus="median")
 
     """
     _log.cache = []
@@ -1333,7 +1341,6 @@ def summary(
             dataset, dims=["chain", "draw"], high=np.pi, low=-np.pi, nan_policy=nan_policy
         )
         _numba_flag = Numba.numba_flag
-        circ_sd = None
         if _numba_flag:
             circ_sd = xr.apply_ufunc(
                 _make_ufunc(_circular_standard_deviation),
