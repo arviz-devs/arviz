@@ -923,31 +923,30 @@ def _mc_error(ary, batches=5, circular=False):
         return std / np.sqrt(batches)
 
 
-def _multichain_statistics(ary):
+def _multichain_statistics(ary, focus="mean"):
     """Calculate efficiently multichain statistics for summary.
 
     Parameters
     ----------
     ary : numpy.ndarray
+    focus : select focus for the statistics. Deafault is mean.
 
     Returns
     -------
     tuple
         Order of return parameters is
-            - mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat
+            If focus equals "mean"
+                - mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat
+            Else if focus equals "median"
+                - mcse_median, ess_median, ess_tail, r_hat
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan, np.nan, np.nan, np.nan, np.nan
-    # ess mean
-    ess_mean_value = _ess_mean(ary)
+        if focus == "mean":
+            return np.nan, np.nan, np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan
 
-    # ess sd
-    ess_sd_value = _ess_sd(ary)
-
-    # ess bulk
     z_split = _z_scale(_split_chains(ary))
-    ess_bulk_value = _ess(z_split)
 
     # ess tail
     quantile05, quantile95 = _quantile(ary, [0.05, 0.95])
@@ -966,18 +965,41 @@ def _multichain_statistics(ary):
         rhat_tail = _rhat(_z_scale(_split_chains(ary_folded)))
         rhat_value = max(rhat_bulk, rhat_tail)
 
-    # mcse_mean
-    sd = np.std(ary, ddof=1)
-    mcse_mean_value = sd / np.sqrt(ess_mean_value)
+    if focus == "mean":
+        # ess mean
+        ess_mean_value = _ess_mean(ary)
 
-    # mcse_sd
-    fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess_sd_value) ** (ess_sd_value - 1) - 1)
-    mcse_sd_value = sd * fac_mcse_sd
+        # ess sd
+        ess_sd_value = _ess_sd(ary)
+
+        # mcse_mean
+        sd = np.std(ary, ddof=1)
+        mcse_mean_value = sd / np.sqrt(ess_mean_value)
+
+        # ess bulk
+        ess_bulk_value = _ess(z_split)
+
+        # mcse_sd
+        fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess_sd_value) ** (ess_sd_value - 1) - 1)
+        mcse_sd_value = sd * fac_mcse_sd
+
+        return (
+            mcse_mean_value,
+            mcse_sd_value,
+            ess_bulk_value,
+            ess_tail_value,
+            rhat_value,
+        )
+
+    # ess median
+    ess_median_value = _ess_median(ary)
+
+    # mcse_median
+    mcse_median_value = _mcse_median(ary)
 
     return (
-        mcse_mean_value,
-        mcse_sd_value,
-        ess_bulk_value,
+        mcse_median_value,
+        ess_median_value,
         ess_tail_value,
         rhat_value,
     )

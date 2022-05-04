@@ -3,6 +3,8 @@
 ## v0.x.x Unreleased
 ### New features
 
+* Add `stat_focus` argument to `arviz.summary` ([1998](https://github.com/arviz-devs/arviz/pull/1998))
+
 ### Maintenance and fixes
 * `psislw` now smooths log-weights even when shape is lower than `1/3`([2011](https://github.com/arviz-devs/arviz/pull/2011))
 
@@ -13,6 +15,7 @@
 
 ## v0.12.0 (2022 Mar 23)
 ### New features
+
 * Add new convenience function `arviz.extract_dataset` ([1725](https://github.com/arviz-devs/arviz/pull/1725))
 * Add `combine_dims` argument to several functions ([1676](https://github.com/arviz-devs/arviz/pull/1676))
 * [experimental] Enable dask chunking information to be passed to `InferenceData.from_netcdf` with regex support ([1749](https://github.com/arviz-devs/arviz/pull/1749))
