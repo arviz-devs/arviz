@@ -87,7 +87,7 @@ az.show_layout([[f1], [f2]])
 ```
 
 :::{note}
-{func}`arviz.show_layout` creates a bokeh layout and calls shows if `show=True`. The default value of `show` is set by the rcParam `plot.bokeh.show` (which defaults to `True`).
+{func}`arviz.show_layout` creates a bokeh layout and calls shows if `show=True`, which is the default value.
 :::
 
 ### Extending ArviZ-Bokeh plots
