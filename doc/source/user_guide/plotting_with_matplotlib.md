@@ -55,7 +55,9 @@ The parameters `ncol` and `nrows` from {func}`matplotlib.pyplot.subplots` should
 
 ### The parameter `show`
 
-:::{note} The parameter `show` calls the show function of the backend. Matplotlib shows the plot in a Jupyter notebook even if this is set to `False`. For more details see {func}`matplotlib.pyplot.show`.
+The parameter `show` calls {func}`matplotlib.pyplot.show`.
+
+:::{note} There are some Matplotlib backends like the inline (default) Jupyter backend that show the plot even if `plt.show` is not called. In such cases, plots will be shown automatically even if `show=False`.
 :::
 
 ### Defining custom axes

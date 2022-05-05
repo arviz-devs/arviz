@@ -85,12 +85,12 @@ az.show_layout([[f1], [f2]])
 ```
 
 :::{note}
-{func}`az.show_layout` creates a bokeh layout and calls shows if `shows` is `True` which is the default behavior.
+{func}`arviz.show_layout` creates a bokeh layout and calls shows if `show=True`. The default value of `show` is set by the rcParam `plot.bokeh.show` (which defaults to `True`).
 :::
 
 ### Extending ArviZ-Bokeh plots
 
-Arviz plot returns a {class}`~bokeh.plotting.Figure` object, therefore different Bokeh plots can be combined into a plot created using Arviz:
+Arviz plot returns a {class}`~bokeh.plotting.Figure` object, therefore different Bokeh plots can be added to a plot created using Arviz:
 
 ```{code-cell} ipython3
 # load data
@@ -106,7 +106,7 @@ f1.scatter(X, Y, marker="circle", fill_color="#0d7591")
 show(f1)
 ```
 
-Similarly, custom axes allow to display Arviz and Matplotlib plots in the same grid. In this example, the plot in `ax1` has an Arviz plot modified with a Matplotlib plot and the `ax2` has a `scatter` created using Matplotlib.
+Similarly, custom axes allow to display Arviz and Bokeh plots in the same grid. In this example, the plot in `f1` has an Arviz plot extended with a Bokeh plot and `f2` has a `scatter` created using Bokeh directly.
 
 ```{code-cell} ipython3
 # load data
