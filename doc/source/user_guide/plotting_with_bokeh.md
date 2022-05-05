@@ -37,7 +37,7 @@ To display the plots as output in a Jupyter notebook, it's required to call the 
 
 ## Customizing plots
 
-
+(bokeh_backend_kwargs)=
 ### Using `backend_kwargs`
 
 The `backend_kwargs` argument can be very useful for some specific configuration. That is parameters available in {class}`bokeh:bokeh.plotting.figure.Figure`. As the options available depends on the backend, this parameter is not as flexible as creating custom axes.
@@ -57,11 +57,13 @@ az.plot_posterior(
                     "background_fill_color": "#d3d0e3"});
 ```
 
+(bokeh_show)=
 ### The parameter `show`
 
 The parameter `show` is used to control whether the plot is displayed or not. This behavior can be useful when a plot will be displayed in a grid as the example in the following section.
 
 
+(bokeh_ax)=
 ### Defining custom axes
 
 The `ax` argument of any `plot` function allows to use created axes manually. In the example, this parameter allows to arrange 2 different plots in a grid, set limit to the x axis and share the axes' ranges between the two plots.

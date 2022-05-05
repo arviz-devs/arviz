@@ -28,6 +28,7 @@ az.style.use("arviz-darkgrid")
 
 ## Customizing plots
 
+(matplotlib_backend_kwargs)=
 ### Using `backend_kwargs`
 
 The `backend_kwargs` argument can be very useful for some specific configuration. That is parameters available in {func}`matplotlib.pyplot.subplots`, which includes {meth}`~matplotlib.figure.Figure.add_subplot` and {class}`~mpl:matplotlib.gridspec.GridSpec` through `subplot_kw` and `gridspec_kw` respectively. As the options available depends on the backend, this parameter is not as flexible as creating custom axes.
@@ -53,6 +54,7 @@ az.plot_posterior(
 The parameters `ncol` and `nrows` from {func}`matplotlib.pyplot.subplots` should not be set using the `backend_kwargs` parameter. Instead, use the param {ref}`grid <common_grid>`
 :::
 
+(matplotlib_show)=
 ### The parameter `show`
 
 The parameter `show` calls {func}`matplotlib.pyplot.show`.
@@ -60,6 +62,7 @@ The parameter `show` calls {func}`matplotlib.pyplot.show`.
 :::{note} There are some Matplotlib backends like the inline (default) Jupyter backend that show the plot even if `plt.show` is not called. In such cases, plots will be shown automatically even if `show=False`.
 :::
 
+(matplotlib_ax)=
 ### Defining custom axes
 
 The `ax` argument of any `plot` function allows to use created axes manually. In the example, this parameter allows to arrange 2 different plots in a grid, set limit to the x axis and share the axes between the two plots.
