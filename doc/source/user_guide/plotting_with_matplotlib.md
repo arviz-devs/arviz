@@ -30,7 +30,7 @@ az.style.use("arviz-darkgrid")
 
 ### Using `backend_kwargs`
 
-The `backend_kwargs` argument can be very useful for some specific configuration. That is parameters available in {func}`matplotlib.pyplot.subplots`, which includes {meth}`~matplotlib.figure.Figure.add_subplot` and {class}`~mpl:matplotlib.gridspec.GridSpec` through `subplot_kw` and `gridspec_kw` respectively.
+The `backend_kwargs` argument can be very useful for some specific configuration. That is parameters available in {func}`matplotlib.pyplot.subplots`, which includes {meth}`~matplotlib.figure.Figure.add_subplot` and {class}`~mpl:matplotlib.gridspec.GridSpec` through `subplot_kw` and `gridspec_kw` respectively. As the options available depends on the backend, this parameter is not as flexible as creating custom axes.
 
 As an example, the following code changes the `facecolor` from {func}`~matplotlib.pyplot.figure` and the `width_ratios` in the grid layout.
 
@@ -48,11 +48,9 @@ az.plot_posterior(
         "gridspec_kw": {
             "width_ratios": [6,4]}});
 ```
-:::{note}
-This parameter is however not as flexible as creating custom axes.
-:::
+
 :::{caution}
-The parameters `ncol` and `nrows` from {func}`matplotlib.pyplot.subplots` should not be set using the `backend_kwargs` parameter.
+The parameters `ncol` and `nrows` from {func}`matplotlib.pyplot.subplots` should not be set using the `backend_kwargs` parameter. Instead, use the param {ref}`grid <common_grid>`
 :::
 
 ### The parameter `show`

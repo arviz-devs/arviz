@@ -40,7 +40,7 @@ To display the plots as output in a Jupyter notebook, it's required to call the 
 
 ### Using `backend_kwargs`
 
-The `backend_kwargs` argument can be very useful for some specific configuration. That is parameters available in {class}`bokeh:bokeh.plotting.figure.Figure`.
+The `backend_kwargs` argument can be very useful for some specific configuration. That is parameters available in {class}`bokeh:bokeh.plotting.figure.Figure`. As the options available depends on the backend, this parameter is not as flexible as creating custom axes.
 
 As an example, the following code changes the color background and the plot width.
 
