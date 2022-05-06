@@ -10,4 +10,6 @@ functions in tutorial and how-to guide format.
 
 ```{toctree}
 plots_arguments_guide
+plotting_with_matplotlib
+plotting_with_bokeh
 ```
