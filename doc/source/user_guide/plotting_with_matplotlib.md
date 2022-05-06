@@ -57,7 +57,7 @@ The parameters `ncol` and `nrows` from {func}`matplotlib.pyplot.subplots` should
 (matplotlib_show)=
 ### The parameter `show`
 
-The parameter `show` calls {func}`matplotlib.pyplot.show`.
+The parameter `show` calls {func}`matplotlib.pyplot.show` if set to `True`. If `show` is not set, it will take the value from the rcParam `plot.matplotlib.show` which defaults to `False`.
 
 :::{note} There are some Matplotlib backends like the inline (default) Jupyter backend that show the plot even if `plt.show` is not called. In such cases, plots will be shown automatically even if `show=False`.
 :::
