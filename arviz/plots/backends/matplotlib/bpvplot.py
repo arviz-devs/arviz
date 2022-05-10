@@ -75,10 +75,8 @@ def plot_bpv(
         axes = np.asarray(ax)
         if axes.size < length_plotters:
             raise ValueError(
-                (
-                    "Found {} variables to plot but {} axes instances. "
-                    "Axes instances must at minimum be equal to variables."
-                ).format(length_plotters, axes.size)
+                f"Found {length_plotters} variables to plot but {axes.size} axes instances. "
+                "Axes instances must at minimum be equal to variables."
             )
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):

@@ -56,9 +56,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
             value = {"true": True, "false": False}.get(value, value)
             return value
         raise ValueError(
-            "{} is not one of {}{}".format(
-                value, accepted_values, " nor None" if allow_none else ""
-            )
+            f'{value} is not one of {accepted_values}{" nor None" if allow_none else ""}'
         )
 
     return validate_choice
@@ -95,9 +93,8 @@ def _make_validate_choice_regex(accepted_values, accepted_values_regex, allow_no
         elif any(re.match(pattern, value) for pattern in accepted_values_regex):
             return value
         raise ValueError(
-            "{} is not one of {} or in regex {}{}".format(
-                value, accepted_values, accepted_values_regex, " nor None" if allow_none else ""
-            )
+            f"{value} is not one of {accepted_values} "
+            f'or in regex {accepted_values_regex}{" nor None" if allow_none else ""}'
         )
 
     return validate_choice_regex
@@ -329,8 +326,8 @@ class RcParams(MutableMapping):
             self._underlying_storage[key] = cval
         except KeyError as err:
             raise KeyError(
-                "{} is not a valid rc parameter (see rcParams.keys() for "
-                "a list of valid parameters)".format(key)
+                f"{key} is not a valid rc parameter "
+                f"(see rcParams.keys() for a list of valid parameters)"
             ) from err
 
     def __getitem__(self, key):

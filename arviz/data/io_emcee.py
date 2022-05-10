@@ -56,7 +56,7 @@ def _verify_names(sampler, var_names, arg_names, slices):
     if len(set(slicing_try)) != ndim:
         warnings.warn(
             "Check slices: Not all parameters in chain captured. "
-            "{} are present, and {} have been captured.".format(ndim, len(slicing_try)),
+            f"{ndim} are present, and {len(slicing_try)} have been captured.",
             UserWarning,
         )
     if len(slicing_try) != len(set(slicing_try)):
@@ -69,16 +69,14 @@ def _verify_names(sampler, var_names, arg_names, slices):
 
     if len(var_names) != num_vars:
         raise ValueError(
-            "The sampler has {} variables, but only {} var_names were provided!".format(
-                num_vars, len(var_names)
-            )
+            f"The sampler has {num_vars} variables, "
+            f"but only {len(var_names)} var_names were provided!"
         )
 
     if len(arg_names) != num_args:
         raise ValueError(
-            "The sampler has {} args, but only {} arg_names were provided!".format(
-                num_args, len(arg_names)
-            )
+            f"The sampler has {num_args} args, "
+            f"but only {len(arg_names)} arg_names were provided!"
         )
     return var_names, arg_names, slices
 
@@ -151,8 +149,8 @@ class EmceeConverter:
         ]
         if bad_groups:
             raise SyntaxError(
-                "all arg_groups values should be either 'observed_data' or 'constant_data' "
-                ", not {}".format(bad_groups)
+                "all arg_groups values should be either 'observed_data' or 'constant_data' , "
+                f"not {bad_groups}"
             )
         obs_const_dict = {group: OrderedDict() for group in arg_groups_set}
         for idx, (arg_name, group) in enumerate(zip(self.arg_names, self.arg_groups)):
@@ -203,17 +201,16 @@ class EmceeConverter:
             nblobs, nwalkers, ndraws, *_ = blobs.shape
             if len(self.blob_names) != nblobs and len(self.blob_names) > 1:
                 raise ValueError(
-                    "Incorrect number of blob names. Expected {}, found {}".format(
-                        nblobs, len(self.blob_names)
-                    )
+                    "Incorrect number of blob names. "
+                    f"Expected {nblobs}, found {len(self.blob_names)}"
                 )
         blob_groups_set = set(self.blob_groups)
         blob_groups_set.add("sample_stats")
         idata_groups = ("posterior", "observed_data", "constant_data")
         if np.any(np.isin(list(blob_groups_set), idata_groups)):
             raise SyntaxError(
-                "{} groups should not come from blobs. Using them here would "
-                "overwrite their actual values".format(idata_groups)
+                f"{idata_groups} groups should not come from blobs. "
+                "Using them here would overwrite their actual values"
             )
         blob_dict = {group: OrderedDict() for group in blob_groups_set}
         if len(self.blob_names) == 1:

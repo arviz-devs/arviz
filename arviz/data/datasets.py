@@ -250,9 +250,9 @@ def load_arviz_data(dataset=None, data_home=None, regex=False, **kwargs):
         checksum = _sha256(file_path)
         if remote.checksum != checksum:
             raise IOError(
-                "{} has an SHA256 checksum ({}) differing from expected ({}), "
-                "file may be corrupted. Run `arviz.clear_data_home()` and try "
-                "again, or please open an issue.".format(file_path, checksum, remote.checksum)
+                f"{file_path} has an SHA256 checksum ({checksum}) differing from expected "
+                "({remote.checksum}), file may be corrupted. "
+                "Run `arviz.clear_data_home()` and try again, or please open an issue."
             )
         return from_netcdf(file_path, kwargs, regex)
     else:

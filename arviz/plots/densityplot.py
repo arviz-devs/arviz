@@ -207,8 +207,8 @@ def plot_density(
             data_labels = [""]
     elif len(data_labels) != n_data:
         raise ValueError(
-            "The number of names for the models ({}) "
-            "does not match the number of models ({})".format(len(data_labels), n_data)
+            f"The number of names for the models ({len(data_labels)}) "
+            f"does not match the number of models ({n_data})"
         )
 
     if hdi_prob is None:

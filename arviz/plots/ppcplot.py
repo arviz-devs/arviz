@@ -288,9 +288,7 @@ def plot_ppc(
         or num_pp_samples < 1
         or num_pp_samples > total_pp_samples
     ):
-        raise TypeError(
-            "`num_pp_samples` must be an integer between 1 and " + f"{total_pp_samples}."
-        )
+        raise TypeError(f"`num_pp_samples` must be an integer between 1 and {total_pp_samples}.")
 
     pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples, replace=False)
 

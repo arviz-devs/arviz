@@ -222,8 +222,8 @@ class SamplingWrapper:
         bad_methods = [method for method in methods if method not in supported_methods]
         if bad_methods:
             raise ValueError(
-                "Not all method(s) in {} supported. Supported methods in SamplingWrapper "
-                "subclasses are:{}".format(bad_methods, supported_methods)
+                f"Not all method(s) in {bad_methods} supported. "
+                f"Supported methods in SamplingWrapper subclasses are:{supported_methods}"
             )
 
         not_implemented = []

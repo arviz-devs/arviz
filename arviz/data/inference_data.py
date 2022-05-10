@@ -156,7 +156,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
-                    "(argument '{}' was type '{}')".format(key, type(dataset))
+                    f"(argument '{key}' was type '{type(dataset)}')"
                 )
             if not key.startswith(WARMUP_TAG):
                 if dataset:
@@ -467,7 +467,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     dims = []
                     for coord_name, coord_values in dataarray.coords.items():
                         if coord_name not in ("chain", "draw") and not coord_name.startswith(
-                            var_name + "_dim_"
+                            f"{var_name}_dim_"
                         ):
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
@@ -482,7 +482,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     if len(dims) > 0:
                         ret[dims_key][var_name] = dims
                     ret[group] = data
-                ret[group + "_attrs"] = dataset.attrs
+                ret[f"{group}_attrs"] = dataset.attrs
 
         ret["attrs"] = self.attrs
         return ret

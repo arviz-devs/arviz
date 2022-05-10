@@ -881,7 +881,7 @@ def _read_data(path):
                     key, var = _process_data_var(var)
                     data[key] = var
                 var = ""
-            var += " " + line.strip()
+            var += f" {line.strip()}"
         if len(var):
             key, var = _process_data_var(var)
             data[key] = var

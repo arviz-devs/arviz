@@ -296,9 +296,7 @@ def get_plotting_function(plot_name, plot_module, backend):
         backend = _backend[backend]
     except KeyError as err:
         raise KeyError(
-            "Backend {} is not implemented. Try backend in {}".format(
-                backend, set(_backend.values())
-            )
+            f"Backend {backend} is not implemented. Try backend in {set(_backend.values())}"
         ) from err
 
     if backend == "bokeh":
@@ -353,9 +351,7 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
         point_estimate = rcParams["plot.point_estimate"]
     elif point_estimate not in ("mean", "median", "mode", None):
         raise ValueError(
-            "Point estimate should be 'mean', 'median', 'mode' or None, not {}".format(
-                point_estimate
-            )
+            f"Point estimate should be 'mean', 'median', 'mode' or None, not {point_estimate}"
         )
     if point_estimate == "mean":
         if skipna:
