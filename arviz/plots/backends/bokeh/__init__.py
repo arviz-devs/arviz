@@ -104,11 +104,10 @@ def create_axes_grid(
                     backend_kwargs["x_range"] = p.x_range
                 if sharey:
                     backend_kwargs["y_range"] = p.y_range
+            elif row * cols + (col + 1) > length_plotters:
+                row_figures.append(None)
             else:
-                if row * cols + (col + 1) > length_plotters:
-                    row_figures.append(None)
-                else:
-                    row_figures.append(figure(**backend_kwargs))
+                row_figures.append(figure(**backend_kwargs))
         figures.append(row_figures)
     figures = array(figures)
     if figures.size == 1 and squeeze:

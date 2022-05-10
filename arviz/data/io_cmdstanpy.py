@@ -78,13 +78,12 @@ class CmdStanPyConverter:
         elif hasattr(self.posterior, "stan_vars_cols"):
             if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
-        else:
-            if (
-                self.log_likelihood is True
-                and self.posterior is not None
-                and any(name.split("[")[0] == "log_lik" for name in self.posterior.column_names)
-            ):
-                self.log_likelihood = ["log_lik"]
+        elif (
+            self.log_likelihood is True
+            and self.posterior is not None
+            and any(name.split("[")[0] == "log_lik" for name in self.posterior.column_names)
+        ):
+            self.log_likelihood = ["log_lik"]
 
         if isinstance(self.log_likelihood, bool):
             self.log_likelihood = None
@@ -756,9 +755,8 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup, dtypes):
     for key, dtype in dtypes.items():
         if key in sample:
             sample[key] = sample[key].astype(dtype)
-            if save_warmup:
-                if key in sample_warmup:
-                    sample_warmup[key] = sample_warmup[key].astype(dtype)
+            if save_warmup and key in sample_warmup:
+                sample_warmup[key] = sample_warmup[key].astype(dtype)
     return sample, sample_warmup
 
 

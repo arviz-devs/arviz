@@ -181,7 +181,7 @@ class EmceeConverter:
 
         It also stores lp values in sample_stats group.
         """
-        store_blobs = not self.blob_names is None
+        store_blobs = self.blob_names is not None
         self.blob_names = [] if self.blob_names is None else self.blob_names
         if self.blob_groups is None:
             self.blob_groups = ["log_likelihood" for _ in self.blob_names]

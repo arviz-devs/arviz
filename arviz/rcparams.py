@@ -178,19 +178,18 @@ def _validate_bokeh_marker(value):
 def _validate_dict_of_lists(values):
     if isinstance(values, dict):
         return {key: tuple(item) for key, item in values.items()}
-    else:
-        validated_dict = {}
-        for value in values:
-            tup = value.split(":", 1)
-            if len(tup) != 2:
-                raise ValueError(f"Could not interpret '{value}' as key: list or str")
-            key, vals = tup
-            key = key.strip(' "')
-            vals = [val.strip(' "') for val in vals.strip(" [],").split(",")]
-            if key in validated_dict:
-                warnings.warn(f"Repeated key {key} when validating dict of lists")
-            validated_dict[key] = tuple(vals)
-        return validated_dict
+    validated_dict = {}
+    for value in values:
+        tup = value.split(":", 1)
+        if len(tup) != 2:
+            raise ValueError(f"Could not interpret '{value}' as key: list or str")
+        key, vals = tup
+        key = key.strip(' "')
+        vals = [val.strip(' "') for val in vals.strip(" [],").split(",")]
+        if key in validated_dict:
+            warnings.warn(f"Repeated key {key} when validating dict of lists")
+        validated_dict[key] = tuple(vals)
+    return validated_dict
 
 
 def make_iterable_validator(scalar_validator, length=None, allow_none=False, allow_auto=False):
@@ -503,9 +502,7 @@ def read_rcfile(fname):
 
 def rc_params(ignore_files=False):
     """Read and validate arvizrc file."""
-    fname = None
-    if not ignore_files:
-        fname = get_arviz_rcfile()
+    fname = None if ignore_files else get_arviz_rcfile()
     defaults = RcParams([(key, default) for key, (default, _) in defaultParams.items()])
     if fname is not None:
         file_defaults = read_rcfile(fname)

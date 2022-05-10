@@ -274,10 +274,9 @@ class TestDataPyStan:
         fit = data.obj
         if pystan_version() == 2:
             draws, _ = get_draws(fit, variables=["theta", "theta"])
-            assert draws.get("theta") is not None
         else:
             draws = get_draws_stan3(fit, variables=["theta", "theta"])
-            assert draws.get("theta") is not None
+        assert draws.get("theta") is not None
 
     @pytest.mark.skipif(pystan_version() != 2, reason="PyStan 2.x required")
     def test_index_order(self, data, eight_schools_params):

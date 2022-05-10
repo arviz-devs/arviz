@@ -154,9 +154,8 @@ def plot_dot(
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
-    else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+    elif not 1 >= hdi_prob > 0:
+        raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     if point_estimate == "auto":
         point_estimate = rcParams["plot.point_estimate"]

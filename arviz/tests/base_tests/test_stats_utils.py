@@ -88,13 +88,12 @@ def test_wrap_ufunc_output(quantile, arg):
         res = wrap_xarray_ufunc(
             np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_args=(quantile,)
         )
+    elif n_output == 1:
+        res = wrap_xarray_ufunc(np.quantile, ary, func_kwargs={"q": quantile})
     else:
-        if n_output == 1:
-            res = wrap_xarray_ufunc(np.quantile, ary, func_kwargs={"q": quantile})
-        else:
-            res = wrap_xarray_ufunc(
-                np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"q": quantile}
-            )
+        res = wrap_xarray_ufunc(
+            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"q": quantile}
+        )
     if n_output == 1:
         assert not isinstance(res, tuple)
     else:

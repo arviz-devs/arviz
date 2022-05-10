@@ -148,12 +148,12 @@ def generate_dims_coords(
                 break
 
     for idx, dim_len in enumerate(shape):
-        if (len(dims) < idx + 1) or (dims[idx] is None):
+        if len(dims) < idx + 1:
             dim_name = f"{var_name}_dim_{idx}"
-            if len(dims) < idx + 1:
-                dims.append(dim_name)
-            else:
-                dims[idx] = dim_name
+            dims.append(dim_name)
+        elif dims[idx] is None:
+            dim_name = f"{var_name}_dim_{idx}"
+            dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:
             coords[dim_name] = np.arange(index_origin, dim_len + index_origin)

@@ -286,21 +286,15 @@ class TestDiagnostics:
             data = np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
+        if method in ("quantile", "tail"):
+            ess_value = ess(data, method=method, prob=0.34, relative=relative)
+        elif method == "local":
+            ess_value = ess(data, method=method, prob=(0.2, 0.3), relative=relative)
+        else:
+            ess_value = ess(data, method=method, relative=relative)
         if (draw < 4) or use_nan:
-            if method in ("quantile", "tail"):
-                ess_value = ess(data, method=method, prob=0.34, relative=relative)
-            elif method == "local":
-                ess_value = ess(data, method=method, prob=(0.2, 0.3), relative=relative)
-            else:
-                ess_value = ess(data, method=method, relative=relative)
             assert np.isnan(ess_value)
         else:
-            if method in ("quantile", "tail"):
-                ess_value = ess(data, method=method, prob=0.34, relative=relative)
-            elif method == "local":
-                ess_value = ess(data, method=method, prob=(0.2, 0.3), relative=relative)
-            else:
-                ess_value = ess(data, method=method, relative=relative)
             assert not np.isnan(ess_value)
         # test following only once tests are run
         if (method == "bulk") and (not relative) and (chain is None) and (draw == 4):
@@ -396,17 +390,13 @@ class TestDiagnostics:
             data = np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
+        if mcse_method == "quantile":
+            mcse_hat = mcse(data, method=mcse_method, prob=0.34)
+        else:
+            mcse_hat = mcse(data, method=mcse_method)
         if draw < 4 or use_nan:
-            if mcse_method == "quantile":
-                mcse_hat = mcse(data, method=mcse_method, prob=0.34)
-            else:
-                mcse_hat = mcse(data, method=mcse_method)
             assert np.isnan(mcse_hat)
         else:
-            if mcse_method == "quantile":
-                mcse_hat = mcse(data, method=mcse_method, prob=0.34)
-            else:
-                mcse_hat = mcse(data, method=mcse_method)
             assert not np.isnan(mcse_hat)
 
     @pytest.mark.parametrize("method", ("wrong_method", "quantile"))

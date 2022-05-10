@@ -230,11 +230,10 @@ def plot_ts(
                     x_holdout = y_forecasts.coords[y_forecasts.dims[-1]]
                 else:
                     x_holdout = y_holdout.coords[y_holdout.dims[-1]]
+            elif y_holdout is None:
+                x_holdout = y_forecasts.coords[holdout_dim]
             else:
-                if y_holdout is None:
-                    x_holdout = y_forecasts.coords[holdout_dim]
-                else:
-                    x_holdout = y_holdout.coords[holdout_dim]
+                x_holdout = y_holdout.coords[holdout_dim]
         elif isinstance(x_holdout, str):
             x_holdout = idata.constant_data[x_holdout]
         elif isinstance(x_holdout, tuple):

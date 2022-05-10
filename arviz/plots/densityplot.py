@@ -201,10 +201,7 @@ def plot_density(
     n_data = len(datasets)
 
     if data_labels is None:
-        if n_data > 1:
-            data_labels = [f"{idx}" for idx in range(n_data)]
-        else:
-            data_labels = [""]
+        data_labels = [f"{idx}" for idx in range(n_data)] if n_data > 1 else [""]
     elif len(data_labels) != n_data:
         raise ValueError(
             f"The number of names for the models ({len(data_labels)}) "
@@ -213,9 +210,8 @@ def plot_density(
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
-    else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+    elif not 1 >= hdi_prob > 0:
+        raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     to_plot = [
         list(xarray_var_iter(data, var_names, combined=True, skip_dims=combine_dims))

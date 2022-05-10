@@ -243,9 +243,8 @@ def plot_ppc(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-    if backend == "bokeh":
-        if animated:
-            raise TypeError("Animation option is only supported with matplotlib backend.")
+    if backend == "bokeh" and animated:
+        raise TypeError("Animation option is only supported with matplotlib backend.")
 
     observed_data = data.observed_data
 
@@ -260,10 +259,11 @@ def plot_ppc(
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
     pp_var_names = _var_names(pp_var_names, predictive_dataset, filter_vars)
 
-    if flatten_pp is None and flatten is None:
-        flatten_pp = list(predictive_dataset.dims.keys())
-    elif flatten_pp is None:
-        flatten_pp = flatten
+    if flatten_pp is None:
+        if flatten is None:
+            flatten_pp = list(predictive_dataset.dims.keys())
+        else:
+            flatten_pp = flatten
     if flatten is None:
         flatten = list(observed_data.dims.keys())
 

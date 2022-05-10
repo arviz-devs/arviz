@@ -166,11 +166,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 if dataset:
                     setattr(self, key, dataset)
                     self._groups_warmup.append(key)
-            if save_warmup and dataset_warmup is not None:
-                if dataset_warmup:
-                    key = f"{WARMUP_TAG}{key}"
-                    setattr(self, key, dataset_warmup)
-                    self._groups_warmup.append(key)
+            if save_warmup and dataset_warmup is not None and dataset_warmup:
+                key = f"{WARMUP_TAG}{key}"
+                setattr(self, key, dataset_warmup)
+                self._groups_warmup.append(key)
 
     @property
     def attrs(self) -> dict:
@@ -622,9 +621,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 df.columns = [
                     col
                     if col in ("draw", "chain")
-                    else (group, col)
-                    if not isinstance(col, tuple)
                     else (group, *col)
+                    if isinstance(col, tuple)
+                    else (group, col)
                     for col in df.columns
                 ]
             dfs, *dfs_tail = list(dfs.values())
@@ -1511,9 +1510,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if join not in ("left", "right"):
             raise ValueError(f"join must be either 'left' or 'right', found {join}")
         for group in other._groups_all:  # pylint: disable=protected-access
-            if hasattr(self, group):
-                if join == "left":
-                    continue
+            if hasattr(self, group) and join == "left":
+                continue
             if group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
                     f"{group} group is not defined in the InferenceData scheme", UserWarning
@@ -1535,17 +1533,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         self._groups_warmup.insert(group_idx, group)
                     else:
                         self._groups_warmup.append(group)
-            else:
-                if group not in self._groups:
-                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
-                    if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
-                        group_order = [
-                            key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
-                        ]
-                        group_idx = group_order.index(group)
-                        self._groups.insert(group_idx, group)
-                    else:
-                        self._groups.append(group)
+            elif group not in self._groups:
+                supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
+                if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
+                    group_order = [
+                        key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
+                    ]
+                    group_idx = group_order.index(group)
+                    self._groups.insert(group_idx, group)
+                else:
+                    self._groups.append(group)
 
     set_index = _extend_xr_method(xr.Dataset.set_index, see_also="reset_index")
     get_index = _extend_xr_method(xr.Dataset.get_index)
