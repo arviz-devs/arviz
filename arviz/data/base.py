@@ -302,9 +302,8 @@ def dict_to_dataset(
     if dims is None:
         dims = {}
 
-    data_vars = {}
-    for key, values in data.items():
-        data_vars[key] = numpy_to_data_array(
+    data_vars = {
+        key: numpy_to_data_array(
             values,
             var_name=key,
             coords=coords,
@@ -313,6 +312,8 @@ def dict_to_dataset(
             index_origin=index_origin,
             skip_event_dims=skip_event_dims,
         )
+        for key, values in data.items()
+    }
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
 
 

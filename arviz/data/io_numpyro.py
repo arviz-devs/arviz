@@ -243,11 +243,8 @@ class NumPyroConverter:
         else:
             prior_vars = self.prior.keys()
             prior_predictive_vars = None
-        priors_dict = {}
-        for group, var_names in zip(
-            ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
-        ):
-            priors_dict[group] = (
+        priors_dict = {
+            group: (
                 None
                 if var_names is None
                 else dict_to_dataset(
@@ -258,6 +255,10 @@ class NumPyroConverter:
                     index_origin=self.index_origin,
                 )
             )
+            for group, var_names in zip(
+                ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
+            )
+        }
         return priors_dict
 
     @requires("observations")

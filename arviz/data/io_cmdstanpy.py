@@ -717,10 +717,10 @@ def _unpack_frame(fit, columns, valid_cols, save_warmup, dtypes):
             column_groups[col_base].append(tuple(map(int, col_tail)))
         # gather raw data locations for each parameter
         column_locs[col_base].append(i)
-    dims = {}
-    for colname, col_dims in column_groups.items():
-        # gather parameter dimensions (assumes dense arrays)
-        dims[colname] = tuple(np.array(col_dims).max(0))
+    # gather parameter dimensions (assumes dense arrays)
+    dims = {
+        colname: tuple(np.array(col_dims).max(0)) for colname, col_dims in column_groups.items()
+    }
     sample = {}
     sample_warmup = {}
     valid_base_cols = []
