@@ -82,7 +82,7 @@ def plot_posterior(
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
     group: str, optional
-        Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
+        Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list is provided, its
         length should match the number of variables.

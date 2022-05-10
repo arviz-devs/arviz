@@ -26,7 +26,7 @@ A centered parameterization of the eight schools model. Provided as an example o
 model that NUTS has trouble fitting. Compare to `load_arviz_data("non_centered_eight")`.
 
 The eight schools model is a hierarchical model used for an analysis of the effectiveness
-of classes that were designed to improve students’ performance on the Scholastic Aptitude Test.
+of classes that were designed to improve students' performance on the Scholastic Aptitude Test.
 
 See Bayesian Data Analysis (Gelman et. al.) for more details.
 """,
@@ -39,7 +39,7 @@ where sampling problems may be fixed by a non-centered parametrization. Compare 
 `load_arviz_data("centered_eight")`.
 
 The eight schools model is a hierarchical model used for an analysis of the effectiveness
-of classes that were designed to improve students’ performance on the Scholastic Aptitude Test.
+of classes that were designed to improve students' performance on the Scholastic Aptitude Test.
 
 See Bayesian Data Analysis (Gelman et. al.) for more details.
 """,

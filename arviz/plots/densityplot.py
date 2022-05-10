@@ -129,7 +129,7 @@ def plot_density(
     See Also
     --------
     plot_dist : Plot distribution as histogram or kernel density estimates.
-    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book.
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke's book.
 
     Examples
     --------
