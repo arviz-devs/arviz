@@ -69,10 +69,7 @@ def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
 
     if b_inv != 0:
         # Scipy implementation when b_inv != 0
-        if b_inv is not None:
-            b_scipy = 1 / b_inv
-        else:
-            b_scipy = None
+        b_scipy = 1 / b_inv if b_inv is not None else None
         scipy_results = logsumexp(ary, b=b_scipy, axis=axis, keepdims=keepdims)
         arviz_results = _logsumexp(ary, b_inv=b_inv, axis=axis, keepdims=keepdims)
 

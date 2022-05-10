@@ -1085,10 +1085,7 @@ def _gpinv(probs, kappa, sigma):
             x[ok] = np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
         x *= sigma
         x[probs == 0] = 0
-        if kappa >= 0:
-            x[probs == 1] = np.inf
-        else:
-            x[probs == 1] = -sigma / kappa
+        x[probs == 1] = np.inf if kappa >= 0 else -sigma / kappa
     return x
 
 

@@ -426,10 +426,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Convert observed data to xarray."""
         if self.predictions:
             return None
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         observed_data = {}
         for name, vals in {**self.observations, **self.multi_observations}.items():
             if hasattr(vals, "get_value"):

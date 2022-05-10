@@ -174,10 +174,7 @@ class SamplingWrapper:
             )
         posterior = idata__i.posterior
         arys = (*excluded_obs, *[posterior[var_name] for var_name in self.posterior_vars])
-        if self.is_ufunc:
-            ufunc_applier = apply_ufunc
-        else:
-            ufunc_applier = _wrap_xarray_ufunc
+        ufunc_applier = apply_ufunc if self.is_ufunc else _wrap_xarray_ufunc
         log_lik_idx = ufunc_applier(
             self.log_lik_fun,
             *arys,

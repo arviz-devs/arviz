@@ -134,10 +134,7 @@ class EmceeConverter:
 
     def args_to_xarray(self):
         """Convert emcee args to observed and constant_data xarray Datasets."""
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         if self.arg_groups is None:
             self.arg_groups = ["observed_data" for _ in self.arg_names]
         if len(self.arg_names) != len(self.arg_groups):

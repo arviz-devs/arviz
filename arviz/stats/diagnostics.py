@@ -912,11 +912,7 @@ def _mc_error(ary, batches=5, circular=False):
                 std = stats.circstd(means, high=np.pi, low=-np.pi)
         else:
             means = np.mean(batched_traces, 1)
-            if _numba_flag:
-                std = _sqrt(svar(means), np.zeros(1))
-            else:
-                std = np.std(means)
-
+            std = _sqrt(svar(means), np.zeros(1)) if _numba_flag else np.std(means)
         return std / np.sqrt(batches)
 
 

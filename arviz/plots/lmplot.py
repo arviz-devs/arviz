@@ -183,10 +183,7 @@ def plot_lm(
     elif isinstance(x, DataArray):
         x_skip_dims = x.dims
     elif x is None:
-        if plot_dim is None:
-            x = y.coords[y.dims[0]]
-        else:
-            x = y.coords[plot_dim]
+        x = y.coords[y.dims[0]] if plot_dim is None else y.coords[plot_dim]
         x_skip_dims = x.dims
     else:
         x = xr.DataArray(x)

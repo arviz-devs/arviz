@@ -354,27 +354,18 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
             f"Point estimate should be 'mean', 'median', 'mode' or None, not {point_estimate}"
         )
     if point_estimate == "mean":
-        if skipna:
-            point_value = np.nanmean(values)
-        else:
-            point_value = np.mean(values)
+        point_value = np.nanmean(values) if skipna else np.mean(values)
     elif point_estimate == "mode":
         if values.dtype.kind == "f":
             if bw == "default":
-                if circular:
-                    bw = "taylor"
-                else:
-                    bw = "experimental"
+                bw = "taylor" if circular else "experimental"
             x, density = kde(values, circular=circular, bw=bw)
             point_value = x[np.argmax(density)]
         else:
             point_value = int(mode(values).mode)
     elif point_estimate == "median":
-        if skipna:
-            point_value = np.nanmedian(values)
-        else:
-            point_value = np.median(values)
 
+        point_value = np.nanmedian(values) if skipna else np.median(values)
     return point_value
 
 
@@ -605,6 +596,4 @@ def _init_kwargs_dict(kwargs):
     kwargs : dict or None
         kwargs dict to initialize
     """
-    if kwargs is None:
-        return {}
-    return kwargs.copy()
+    return {} if kwargs is None else kwargs.copy()

@@ -327,7 +327,7 @@ def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, c
         ary_max -= np.log(b_inv)
     elif b:
         ary_max += np.log(b)
-    out += ary_max.squeeze() if not keepdims else ary_max
+    out += ary_max if keepdims else ary_max.squeeze()
     # transform to scalar if possible
     return out if out.shape else dtype(out)
 

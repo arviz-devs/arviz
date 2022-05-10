@@ -173,7 +173,6 @@ def plot_ecdf(
     values = np.ravel(values)
     values.sort()
 
-    n = len(values)  # number of samples
     ## This block computes gamma and uses it to get the upper and lower confidence bands
     ## Here we check if we want confidence bands or not
     if confidence_bands:
@@ -193,11 +192,9 @@ def plot_ecdf(
             z = cdf(x) if cdf else compute_ecdf(values2, x)
             probs = values
 
+        n = len(values)  # number of samples
         ## Computing gamma
-        if not pointwise:
-            gamma = compute_gamma(n, z, npoints, num_trials, fpr)
-        else:
-            gamma = fpr
+        gamma = fpr if pointwise else compute_gamma(n, z, npoints, num_trials, fpr)
         ## Using gamma to get the confidence intervals
         lower, higher = get_lims(gamma, n, z)
 

@@ -18,9 +18,7 @@ STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
 
 
 def _check_tilde_start(x):
-    if isinstance(x, str) and x.startswith("~"):
-        return True
-    return False
+    return bool(isinstance(x, str) and x.startswith("~"))
 
 
 def _var_names(var_names, data, filter_vars=None):
@@ -376,10 +374,7 @@ def one_de(x):
     """Jitting numpy atleast_1d."""
     if not isinstance(x, np.ndarray):
         return np.atleast_1d(x)
-    if x.ndim == 0:
-        result = x.reshape(1)
-    else:
-        result = x
+    result = x.reshape(1) if x.ndim == 0 else x
     return result
 
 

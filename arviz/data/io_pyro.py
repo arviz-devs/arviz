@@ -227,10 +227,7 @@ class PyroConverter:
     @requires("model")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         return dict_to_dataset(
             self.observations, library=self.pyro, coords=self.coords, dims=dims, default_dims=[]
         )

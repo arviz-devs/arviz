@@ -253,10 +253,7 @@ class PyStanConverter:
     def data_to_xarray(self):
         """Convert observed, constant data and predictions constant data to xarray."""
         posterior = self.posterior
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         obs_const_dict = {}
         for group_name in ("observed_data", "constant_data", "predictions_constant_data"):
             names = getattr(self, group_name)
@@ -492,10 +489,7 @@ class PyStan3Converter:
     def observed_and_constant_data_to_xarray(self):
         """Convert observed data to xarray."""
         posterior_model = self.posterior_model
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         obs_const_dict = {}
         for group_name in ("observed_data", "constant_data"):
             names = getattr(self, group_name)
@@ -520,10 +514,7 @@ class PyStan3Converter:
     def predictions_constant_data_to_xarray(self):
         """Convert observed data to xarray."""
         posterior_model = self.posterior_model
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         names = self.predictions_constant_data
         names = [names] if isinstance(names, str) else names
         data = OrderedDict()

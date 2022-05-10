@@ -248,10 +248,7 @@ def plot_density(
     rows, cols = default_grid(length_plotters, grid=grid, max_cols=3)
 
     if bw == "default":
-        if circular:
-            bw = "taylor"
-        else:
-            bw = "experimental"
+        bw = "taylor" if circular else "experimental"
 
     plot_density_kwargs = dict(
         ax=ax,

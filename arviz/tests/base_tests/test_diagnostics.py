@@ -194,10 +194,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("draw", (1, 2, 3, 4))
     def test_rhat_shape(self, method, chain, draw):
         """Confirm R-hat statistic returns nan."""
-        if chain is None:
-            data = np.random.randn(draw)
-        else:
-            data = np.random.randn(chain, draw)
+        data = np.random.randn(draw) if chain is None else np.random.randn(chain, draw)
         if (chain in (None, 1)) or (draw < 4):
             rhat_data = rhat(data, method=method)
             assert np.isnan(rhat_data)
@@ -237,8 +234,8 @@ class TestDiagnostics:
     )
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_array(self, data, method, relative):
-        n_low = 100 if not relative else 100 / 400
-        n_high = 800 if not relative else 800 / 400
+        n_low = 100 / 400 if relative else 100
+        n_high = 800 / 400 if relative else 800
         if method in ("quantile", "tail"):
             ess_hat = ess(data, method=method, prob=0.34, relative=relative)
             if method == "tail":
@@ -280,10 +277,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("draw", (1, 2, 3, 4))
     @pytest.mark.parametrize("use_nan", (True, False))
     def test_effective_sample_size_nan(self, method, relative, chain, draw, use_nan):
-        if chain is None:
-            data = np.random.randn(draw)
-        else:
-            data = np.random.randn(chain, draw)
+        data = np.random.randn(draw) if chain is None else np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
         if method in ("quantile", "tail"):
@@ -347,7 +341,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("relative", (True, False))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_effective_sample_size_dataset(self, data, method, var_names, relative):
-        n_low = 100 if not relative else 100 / (data.chain.size * data.draw.size)
+        n_low = 100 / (data.chain.size * data.draw.size) if relative else 100
         if method in ("quantile", "tail"):
             ess_hat = ess(data, var_names=var_names, method=method, prob=0.34, relative=relative)
         elif method == "local":
@@ -384,10 +378,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("draw", (1, 2, 3, 4))
     @pytest.mark.parametrize("use_nan", (True, False))
     def test_mcse_nan(self, mcse_method, chain, draw, use_nan):
-        if chain is None:
-            data = np.random.randn(draw)
-        else:
-            data = np.random.randn(chain, draw)
+        data = np.random.randn(draw) if chain is None else np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
         if mcse_method == "quantile":
