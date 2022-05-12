@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple, Union, Mapping, cast, Callable
 import numpy as np
 import pandas as pd
 import scipy.stats as st
+from xarray_einstats import stats
 import xarray as xr
 from scipy.optimize import minimize
 from typing_extensions import Literal
@@ -1182,6 +1183,7 @@ def summary(
     kind: "Literal['all', 'stats', 'diagnostics']" = "all",
     round_to=None,
     circ_var_names=None,
+    stat_focus="mean",
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
@@ -1222,6 +1224,8 @@ def summary(
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
     circ_var_names: list
         A list of circular variables to compute circular stats for
+    stat_focus : str, default "mean"
+        Select the focus for summary.
     stat_funcs: dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -1254,9 +1258,16 @@ def summary(
     -------
     pandas.DataFrame or xarray.Dataset
         Return type dicated by `fmt` argument.
-        Return value will contain summary statistics for each variable. Default statistics are:
-        `mean`, `sd`, `hdi_3%`, `hdi_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
-        `r_hat`.
+
+        Return value will contain summary statistics for each variable. Default statistics depend on
+        the value of ``stat_focus``:
+
+        ``stat_focus="mean"``: `mean`, `sd`, `hdi_3%`, `hdi_97%`, `mcse_mean`, `mcse_sd`,
+        `ess_bulk`, `ess_tail`, and `r_hat`
+
+        ``stat_focus="median"``: `median`, `mad`, `eti_3%`, `eti_97%`, `mcse_median`, `ess_median`,
+        `ess_tail`, and `r_hat`
+
         `r_hat` is only computed for traces with 2 or more chains.
 
     See Also
@@ -1316,6 +1327,12 @@ def summary(
            ...:     extend=False
            ...: )
 
+    Use ``stat_focus`` to change the focus of summary statistics obatined to median:
+
+    .. ipython::
+
+        In [1]: az.summary(data, stat_focus="median")
+
     """
     _log.cache = []
 
@@ -1366,6 +1383,13 @@ def summary(
     if not isinstance(kind, str) or kind not in kind_group:
         raise TypeError(f"Invalid kind: '{kind}'. Kind options are: {kind_group}")
 
+    focus_group = ("mean", "median")
+    if not isinstance(stat_focus, str) or (stat_focus not in focus_group):
+        raise TypeError(f"Invalid format: '{stat_focus}'. Focus options are: {focus_group}")
+
+    if stat_focus != "mean" and circ_var_names is not None:
+        raise TypeError(f"Invalid format: Circular stats not supported for '{stat_focus}'")
+
     if order is not None:
         warnings.warn(
             "order has been deprecated. summary now shows coordinate values.", DeprecationWarning
@@ -1394,38 +1418,52 @@ def summary(
                 )
                 extra_metric_names.append(stat_func.__name__)
 
+    metrics: List[xr.Dataset] = []
+    metric_names: List[str] = []
     if extend and kind in ["all", "stats"]:
-        mean = dataset.mean(dim=("chain", "draw"), skipna=skipna)
+        if stat_focus == "mean":
+            mean = dataset.mean(dim=("chain", "draw"), skipna=skipna)
 
-        sd = dataset.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
+            sd = dataset.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hdi_post = hdi(dataset, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
-        hdi_lower = hdi_post.sel(hdi="lower", drop=True)
-        hdi_higher = hdi_post.sel(hdi="higher", drop=True)
+            hdi_post = hdi(dataset, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
+            hdi_lower = hdi_post.sel(hdi="lower", drop=True)
+            hdi_higher = hdi_post.sel(hdi="higher", drop=True)
+            metrics.extend((mean, sd, hdi_lower, hdi_higher))
+            metric_names.extend(
+                ("mean", "sd", f"hdi_{100 * alpha / 2:g}%", f"hdi_{100 * (1 - alpha / 2):g}%")
+            )
+        elif stat_focus == "median":
+            median = dataset.median(dim=("chain", "draw"), skipna=skipna)
+
+            mad = stats.median_abs_deviation(dataset, dims=("chain", "draw"))
+            eti_post = dataset.quantile(
+                (alpha / 2, 1 - alpha / 2), dim=("chain", "draw"), skipna=skipna
+            )
+            eti_lower = eti_post.isel(quantile=0, drop=True)
+            eti_higher = eti_post.isel(quantile=1, drop=True)
+            metrics.extend((median, mad, eti_lower, eti_higher))
+            metric_names.extend(
+                ("median", "mad", f"eti_{100 * alpha / 2:g}%", f"eti_{100 * (1 - alpha / 2):g}%")
+            )
 
     if circ_var_names:
         nan_policy = "omit" if skipna else "propagate"
-        circ_mean = xr.apply_ufunc(
-            _make_ufunc(st.circmean),
-            dataset,
-            kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
-            input_core_dims=(("chain", "draw"),),
+        circ_mean = stats.circmean(
+            dataset, dims=["chain", "draw"], high=np.pi, low=-np.pi, nan_policy=nan_policy
         )
         _numba_flag = Numba.numba_flag
-        func = None
         if _numba_flag:
-            func = _circular_standard_deviation
-            kwargs_circ_std = dict(high=np.pi, low=-np.pi, skipna=skipna)
+            circ_sd = xr.apply_ufunc(
+                _make_ufunc(_circular_standard_deviation),
+                dataset,
+                kwargs=dict(high=np.pi, low=-np.pi, skipna=skipna),
+                input_core_dims=(("chain", "draw"),),
+            )
         else:
-            func = st.circstd
-            kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
-        circ_sd = xr.apply_ufunc(
-            _make_ufunc(func),
-            dataset,
-            kwargs=kwargs_circ_std,
-            input_core_dims=(("chain", "draw"),),
-        )
-
+            circ_sd = stats.circstd(
+                dataset, dims=["chain", "draw"], high=np.pi, low=-np.pi, nan_policy=nan_policy
+            )
         circ_mcse = xr.apply_ufunc(
             _make_ufunc(_mc_error),
             dataset,
@@ -1437,53 +1475,42 @@ def summary(
         circ_hdi_lower = circ_hdi.sel(hdi="lower", drop=True)
         circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
-    if kind in ["all", "diagnostics"]:
-        mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-            _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
-            dataset,
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(5)),
-        )
-
-    # Combine metrics
-    metrics: List[xr.Dataset] = []
-    metric_names: List[str] = []
-    if extend:
-        metrics_: Tuple[xr.Dataset, ...]
-        metrics_names_: Tuple[str, ...] = (
-            "mean",
-            "sd",
-            f"hdi_{100 * alpha / 2:g}%",
-            f"hdi_{100 * (1 - alpha / 2):g}%",
-            "mcse_mean",
-            "mcse_sd",
-            "ess_bulk",
-            "ess_tail",
-            "r_hat",
-        )
-        if kind == "all":
-            metrics_ = (
-                mean,
-                sd,
-                hdi_lower,
-                hdi_higher,
-                mcse_mean,
-                mcse_sd,
-                ess_bulk,
-                ess_tail,
-                r_hat,
+    if kind in ["all", "diagnostics"] and extend:
+        diagnostics_names: Tuple[str, ...]
+        if stat_focus == "mean":
+            diagnostics = xr.apply_ufunc(
+                _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
+                dataset,
+                input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(5)),
             )
-        elif kind == "stats":
-            metrics_ = (mean, sd, hdi_lower, hdi_higher)
-            metrics_names_ = metrics_names_[:4]
-        elif kind == "diagnostics":
-            metrics_ = (mcse_mean, mcse_sd, ess_bulk, ess_tail, r_hat)
-            metrics_names_ = metrics_names_[4:]
-        metrics.extend(metrics_)
-        metric_names.extend(metrics_names_)
+            diagnostics_names = (
+                "mcse_mean",
+                "mcse_sd",
+                "ess_bulk",
+                "ess_tail",
+                "r_hat",
+            )
+
+        elif stat_focus == "median":
+            diagnostics = xr.apply_ufunc(
+                _make_ufunc(_multichain_statistics, n_output=4, ravel=False),
+                dataset,
+                kwargs=dict(focus="median"),
+                input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(4)),
+            )
+            diagnostics_names = (
+                "mcse_median",
+                "ess_median",
+                "ess_tail",
+                "r_hat",
+            )
+        metrics.extend(diagnostics)
+        metric_names.extend(diagnostics_names)
 
     if circ_var_names:
-        if kind != "diagnostics":
+        if kind != "diagnostics" and stat_focus == "mean":
             for metric, circ_stat in zip(
                 # Replace only the first 5 statistics for their circular equivalent
                 metrics[:5],
