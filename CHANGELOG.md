@@ -7,6 +7,7 @@
 
 ### Maintenance and fixes
 * `psislw` now smooths log-weights even when shape is lower than `1/3`([2011](https://github.com/arviz-devs/arviz/pull/2011))
+* Fixes `from_cmdstanpy`,  handles parameter vectors of length 1 ([2023](https://github.com/arviz-devs/arviz/pull/2023))
 
 ### Deprecation
 
