@@ -17,4 +17,4 @@ ArviZ uses the following process to cut a new release of the library.
 
 4. After the release on Github, the CI system will complete the rest of the steps. Including making any wheels and uploading the new version to PyPI.
 
-5. Add a follow-up PR changing the version number to include the dev flag. Make sure the version string is [PEP 440](https://peps.python.org/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions) compiliant.
+5. Add a follow-up PR changing the version number to include the dev flag. Make sure the version string is [PEP 440](https://peps.python.org/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions) compliant.
