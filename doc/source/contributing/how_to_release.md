@@ -5,12 +5,12 @@ ArviZ uses the following process to cut a new release of the library.
 1. Bump the version number in `arviz/__init__.py`
 
 ```diff
--      __version = "0.12.0"
-+      __version = "0.12.1"
+- __version = "0.12.0"
++ __version = "0.12.1"
 }
 ```
 
-2. Update the release notes in `CHANGLOG.md`
+2. Update the release notes in `CHANGELOG.md`
 
 Empty subheadings don't need to be included.
 
