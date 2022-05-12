@@ -118,7 +118,7 @@ class BaseLabeller:
         sel_str = self.sel_to_str(sel, isel)
         if not sel_str:
             return var_name_str
-        if var_name is None:
+        if var_name_str is None:
             return sel_str
         return f"{var_name_str}[{sel_str}]"
 
