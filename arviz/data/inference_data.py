@@ -24,7 +24,6 @@ from typing import (
     overload,
 )
 
-import netCDF4 as nc
 import numpy as np
 import xarray as xr
 from packaging import version
@@ -356,6 +355,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         -------
         InferenceData object
         """
+        import netCDF4 as nc
+
         groups = {}
 
         try:
@@ -412,6 +413,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         str
             Location of netcdf file
         """
+        import netCDF4 as nc
+
         mode = "w"  # overwrite first, then append
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:

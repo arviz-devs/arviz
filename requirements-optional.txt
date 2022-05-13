@@ -1,5 +1,6 @@
 numba
 bokeh>=1.4.0,<3.0
+netcdf4
 ujson
 dask[distributed]
 zarr>=2.5.0

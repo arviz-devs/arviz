@@ -5,6 +5,5 @@ scipy>=0.19
 packaging
 pandas>=0.23
 xarray>=0.16.1
-netcdf4
 typing_extensions>=3.7.4.3
 xarray-einstats>=0.2
