@@ -1,6 +1,17 @@
 # Change Log
 
 ## v0.x.x Unreleased
+
+### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+
+## v0.12.1 (2022 May 12)
 ### New features
 
 * Add `stat_focus` argument to `arviz.summary` ([1998](https://github.com/arviz-devs/arviz/pull/1998))
@@ -10,9 +21,9 @@
 * Fixes `from_cmdstanpy`,  handles parameter vectors of length 1 ([2023](https://github.com/arviz-devs/arviz/pull/2023))
 * Fix typo in `BaseLabeller` that broke `NoVarLabeller` ([2018](https://github.com/arviz-devs/arviz/pull/2018))
 
-### Deprecation
-
 ### Documentation
+* Adding plotting guides ([2025](https://github.com/arviz-devs/arviz/pull/2025))
+* Update links to use new domain ([2013](https://github.com/arviz-devs/arviz/pull/2013)) 
 
 
 ## v0.12.0 (2022 Mar 23)
