@@ -106,7 +106,7 @@ def plot_dot(
     else:
         ax.tick_params(left=False, labelleft=False)
 
-    ax.set_aspect("equal", adjustable="box")
+    ax.set_aspect("equal", adjustable="datalim")
     ax.autoscale()
 
     if backend_show(show):
