@@ -24,6 +24,7 @@ contribute to the project but you are not sure where you can contribute or how t
 Below we list some examples of contributions that might serve as inspiration.
 
 * [Submitting issues](https://github.com/arviz-devs/arviz/issues/new/choose) related to bugs or desired enhancements. Check the details at {doc}`issue_reports`.
+* Translate our website to languages other than English. Check the details at {ref}`translate`
 * Fixing outstanding [issues](https://github.com/arviz-devs/arviz/issues) (bugs) with the existing codebase. They range from low-level software bugs to higher-level design problems.
 * Contributing or improving the {ref}`documentation <homapage>` (`docs`) or examples (`arviz/examples`).
 * Help users submitting issues by making sure their issue is clear and/or providing temporal
@@ -39,6 +40,7 @@ Further information on how to contribute to ArviZ can be found on these specific
 :caption: Contribution types overview
 
 issue_reports
+translate
 issue_triaging
 outreach
 review_prs
