@@ -8,6 +8,7 @@ from . import backend_kwarg_defaults, backend_show, create_axes_grid
 def plot_compare(
     ax,
     comp_df,
+    legend,
     figsize,
     plot_ic_diff,
     plot_standard_error,
@@ -41,12 +42,38 @@ def plot_compare(
     if ax is None:
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
+    if plot_standard_error:
+        ax.errorbar(
+            x=comp_df[information_criterion],
+            y=yticks_pos[::2],
+            xerr=comp_df.se,
+            label="ELPD",
+            color=plot_kwargs.get("color_ic", "k"),
+            fmt=plot_kwargs.get("marker_ic", "o"),
+            mfc=plot_kwargs.get("marker_fc", "white"),
+            mew=linewidth,
+            lw=linewidth,
+        )
+    else:
+        ax.plot(
+            comp_df[information_criterion],
+            yticks_pos[::2],
+            label="ELPD",
+            color=plot_kwargs.get("color_ic", "k"),
+            marker=plot_kwargs.get("marker_ic", "o"),
+            mfc=plot_kwargs.get("marker_fc", "white"),
+            mew=linewidth,
+            lw=0,
+            zorder=3,
+        )
+
     if plot_ic_diff:
         ax.set_yticks(yticks_pos)
         ax.errorbar(
             x=comp_df[information_criterion].iloc[1:],
             y=yticks_pos[1::2],
             xerr=comp_df.dse[1:],
+            label="ELPD difference",
             color=plot_kwargs.get("color_dse", "grey"),
             fmt=plot_kwargs.get("marker_dse", "^"),
             mew=linewidth,
@@ -56,30 +83,9 @@ def plot_compare(
     else:
         ax.set_yticks(yticks_pos[::2])
 
-    if plot_standard_error:
-        ax.errorbar(
-            x=comp_df[information_criterion],
-            y=yticks_pos[::2],
-            xerr=comp_df.se,
-            color=plot_kwargs.get("color_ic", "k"),
-            fmt=plot_kwargs.get("marker_ic", "o"),
-            mfc="None",
-            mew=linewidth,
-            lw=linewidth,
-        )
-    else:
-        ax.plot(
-            comp_df[information_criterion],
-            yticks_pos[::2],
-            color=plot_kwargs.get("color_ic", "k"),
-            marker=plot_kwargs.get("marker_ic", "o"),
-            mfc="None",
-            mew=linewidth,
-            lw=0,
-        )
+    scale = comp_df[f"scale"][0]
 
     if insample_dev:
-        scale = comp_df[f"{information_criterion}_scale"][0]
         p_ic = comp_df[f"p_{information_criterion}"]
         if scale == "log":
             correction = p_ic
@@ -90,6 +96,7 @@ def plot_compare(
         ax.plot(
             comp_df[information_criterion] + correction,
             yticks_pos[::2],
+            label="In-sample ELPD",
             color=plot_kwargs.get("color_insample_dev", "k"),
             marker=plot_kwargs.get("marker_insample_dev", "o"),
             mew=linewidth,
@@ -102,13 +109,13 @@ def plot_compare(
         color=plot_kwargs.get("color_ls_min_ic", "grey"),
         lw=linewidth,
     )
+    if legend:
+        ax.legend(bbox_to_anchor=(1.01, 1), loc="upper left", ncol=1, fontsize=ax_labelsize)
 
-    scale_col = information_criterion + "_scale"
-    if scale_col in comp_df:
-        scale = comp_df[scale_col].iloc[0].capitalize()
-    else:
-        scale = "Deviance"
-    ax.set_xlabel(scale, fontsize=ax_labelsize)
+    if scale == "negative_log":
+        scale = "-log"
+
+    ax.set_xlabel(f"{information_criterion} ({scale})", fontsize=ax_labelsize)
     ax.set_yticklabels(yticks_labels)
     ax.set_ylim(-1 + step, 0 - step)
     ax.tick_params(labelsize=xt_labelsize)

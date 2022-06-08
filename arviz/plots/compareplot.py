@@ -1,4 +1,5 @@
 """Summary plot for model comparison."""
+from operator import le
 import numpy as np
 
 from ..labels import BaseLabeller
@@ -8,10 +9,11 @@ from .plot_utils import get_plotting_function
 
 def plot_compare(
     comp_df,
-    insample_dev=True,
+    insample_dev=False,
     plot_standard_error=True,
     plot_ic_diff=True,
     order_by_rank=True,
+    legend=True,
     figsize=None,
     textsize=None,
     labeller=None,
@@ -22,15 +24,15 @@ def plot_compare(
     show=None,
 ):
     """
-    Summary plot for model comparison.
+    Summary plot for model comparison
 
-    This plot is in the style of the one used in the book Statistical Rethinking (Chapter 6)
-    by Richard McElreath.
+    Models are compared based on their expected log pointwise predictive density (ELPD),
+    the ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
+    cross-validation (loo) or using the widely applicable information criterion (WAIC).
+    We recommend LOO.
 
-    Notes
-    -----
-    Defaults to comparing Leave-one-out (psis-loo) if present in comp_df column,
-    otherwise compares Widely Applicable Information Criterion (WAIC)
+    This plot is in the style of the one used in the book Statistical Rethinking by
+    Richard McElreath.Chapter 6 in the first edition or 7 in the second.
 
 
     Parameters
@@ -38,15 +40,17 @@ def plot_compare(
     comp_df : pd.DataFrame
         Result of the :func:`arviz.compare` method
     insample_dev : bool, optional
-        Plot in-sample deviance, that is the value of the information criteria without the
-        penalization given by the effective number of parameters (pIC). Defaults to True
+        Plot in-sample ELPD, that is the value of the information criteria without the
+        penalization given by the effective number of parameters (p_loo or p_waic). Defaults to False
     plot_standard_error : bool, optional
-        Plot the standard error of the information criteria estimate. Defaults to True
+        Plot the standard error of the ELPD. Defaults to True
     plot_ic_diff : bool, optional
-        Plot standard error of the difference in information criteria between each model
+        Plot standard error of the difference in ELPD between each model
         and the top-ranked model. Defaults to True
     order_by_rank : bool
         If True (default) ensure the best model is used as reference.
+    legend : bool
+        Add legend to figure. By default True.
     figsize : tuple, optional
         If None, size is (6, num of models) inches
     textsize: float
@@ -94,12 +98,12 @@ def plot_compare(
         >>>                  'Non-centered 8 schools': az.load_arviz_data('non_centered_eight')})
         >>> az.plot_compare(model_compare)
 
-    Plot standard error and information criteria difference only
+    Include the in-sample ELDP
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_compare(model_compare, insample_dev=False)
+        >>> az.plot_compare(model_compare, insample_dev=True)
 
     """
     if plot_kwargs is None:
@@ -119,7 +123,7 @@ def plot_compare(
     else:
         yticks_labels = labels
 
-    _information_criterion = ["loo", "waic"]
+    _information_criterion = ["elpd_loo", "elpd_waic"]
     column_index = [c.lower() for c in comp_df.columns]
     for information_criterion in _information_criterion:
         if information_criterion in column_index:
@@ -136,6 +140,7 @@ def plot_compare(
     compareplot_kwargs = dict(
         ax=ax,
         comp_df=comp_df,
+        legend=legend,
         figsize=figsize,
         plot_ic_diff=plot_ic_diff,
         plot_standard_error=plot_standard_error,

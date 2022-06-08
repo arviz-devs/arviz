@@ -61,19 +61,20 @@ def compare(
     scale: Optional[ScaleKeyword] = None,
     var_name: Optional[str] = None,
 ):
-    r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
+    r"""Compare models based on  their expected log pointwise predictive density (ELPD).
 
-    LOO is leave-one-out (PSIS-LOO `loo`) cross-validation and
-    WAIC is the widely applicable information criterion.
-    Read more theory here - in a paper by some of the leading authorities
-    on model selection dx.doi.org/10.1111/1467-9868.00353
+
+    The ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
+    cross-validation (loo) or using the widely applicable information criterion (waic).
+    We recommend loo. Read more theory here - in a paper by some of the
+    leading authorities on model comparison dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
     ----------
     compare_dict: dict of {str: InferenceData or ELPDData}
         A dictionary of model names and :class:`arviz.InferenceData` or ``ELPDData``.
     ic: str, optional
-        Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
+        Method to estimate the ELPD, available options are "loo" or "waic". Defaults to
         ``rcParams["stats.information_criterion"]``.
     method: str, optional
         Method used to estimate the weights for each model. Available options are:
@@ -112,29 +113,29 @@ def compare(
 
     Returns
     -------
-    A DataFrame, ordered from best to worst model (measured by information criteria).
+    A DataFrame, ordered from best to worst model (measured by the ELPD).
     The index reflects the key with which the models are passed to this function. The columns are:
     rank: The rank-order of the models. 0 is the best.
-    IC: Information Criteria (PSIS-LOO `loo` or WAIC `waic`).
-        Higher IC indicates higher out-of-sample predictive fit ("better" model). Default LOO.
-        If `scale` is `deviance` or `negative_log` smaller IC indicates
+    elpd: ELPD estimated either using (PSIS-LOO-CV `elpd_loo` or WAIC `elpd_waic`).
+        Higher ELPD indicates higher out-of-sample predictive fit ("better" model).
+        If `scale` is `deviance` or `negative_log` smaller values indicates
         higher out-of-sample predictive fit ("better" model).
     pIC: Estimated effective number of parameters.
-    dIC: Relative difference between each IC (PSIS-LOO `loo` or WAIC `waic`)
-          and the lowest IC (PSIS-LOO `loo` or WAIC `waic`).
-          The top-ranked model is always 0.
+    elpd_diff: the difference in elpd for two models.
+        If more than two models are compared, the difference is computed relative to the
+        top-ranked model, that always has a elpd_diff of 0.
     weight: Relative weight for each model.
         This can be loosely interpreted as the probability of each model (among the compared model)
         given the data. By default the uncertainty in the weights estimation is considered using
         Bayesian bootstrap.
-    SE: Standard error of the IC estimate.
+    SE: Standard error of the ELPD estimate.
         If method = BB-pseudo-BMA these values are estimated using Bayesian bootstrap.
-    dSE: Standard error of the difference in IC between each model and the top-ranked model.
+    dSE: Standard error of the difference in ELPD between each model and the top-ranked model.
         It's always 0 for the top-ranked model.
-    warning: A value of 1 indicates that the computation of the IC may not be reliable.
+    warning: A value of 1 indicates that the computation of the ELPD may not be reliable.
         This could be indication of WAIC/LOO starting to fail see
         http://arxiv.org/abs/1507.04544 for details.
-    scale: Scale used for the IC.
+    scale: Scale used for the ELPD.
 
     Examples
     --------
@@ -148,7 +149,7 @@ def compare(
            ...: compare_dict = {"non centered": data1, "centered": data2}
            ...: az.compare(compare_dict)
 
-    Compare the models using LOO-CV, returning the IC in log scale and calculating the
+    Compare the models using PSIS-LOO-CV, returning the ELPD in log scale and calculating the
     weights using the stacking method.
 
     .. ipython::
@@ -157,8 +158,9 @@ def compare(
 
     See Also
     --------
-    loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
-    waic : Compute the widely applicable information criterion.
+    loo : Compute the ELPD using the Pareto smoothed importance sampling Leave-one-out
+    cross-validation method.
+    waic : Compute the ELPD using the widely applicable information criterion.
     plot_compare : Summary plot for model comparison.
 
     References
@@ -171,42 +173,40 @@ def compare(
     try:
         (ics_dict, scale, ic) = _calculate_ics(compare_dict, scale=scale, ic=ic, var_name=var_name)
     except Exception as e:
-        raise e.__class__("Encountered error in ic computation of compare.") from e
+        raise e.__class__("Encountered error in ELPD computation of compare.") from e
     names = list(ics_dict.keys())
     if ic == "loo":
         df_comp = pd.DataFrame(
             index=names,
             columns=[
                 "rank",
-                "loo",
+                "elpd_loo",
                 "p_loo",
-                "d_loo",
+                "elpd_diff",
                 "weight",
                 "se",
                 "dse",
                 "warning",
-                "loo_scale",
+                "scale",
             ],
             dtype=np.float_,
         )
-        scale_col = "loo_scale"
     elif ic == "waic":
         df_comp = pd.DataFrame(
             index=names,
             columns=[
                 "rank",
-                "waic",
+                "elpd_waic",
                 "p_waic",
-                "d_waic",
+                "elpd_diff",
                 "weight",
                 "se",
                 "dse",
                 "warning",
-                "waic_scale",
+                "scale",
             ],
             dtype=np.float_,
         )
-        scale_col = "waic_scale"
     else:
         raise NotImplementedError(f"The information criterion {ic} is not supported.")
 
@@ -224,12 +224,11 @@ def compare(
     if method.lower() not in ["stacking", "bb-pseudo-bma", "pseudo-bma"]:
         raise ValueError(f"The method {method}, to compute weights, is not supported.")
 
-    ic_se = f"{ic}_se"
     p_ic = f"p_{ic}"
     ic_i = f"{ic}_i"
 
     ics = pd.DataFrame.from_dict(ics_dict, orient="index")
-    ics.sort_values(by=ic, inplace=True, ascending=ascending)
+    ics.sort_values(by=f"elpd_{ic}", inplace=True, ascending=ascending)
     ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
 
     if method.lower() == "stacking":
@@ -267,7 +266,7 @@ def compare(
         )
 
         weights = w_fuller(weights["x"])
-        ses = ics[ic_se]
+        ses = ics["se"]
 
     elif method.lower() == "bb-pseudo-bma":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
@@ -286,10 +285,10 @@ def compare(
         ses = pd.Series(z_bs.std(axis=0), index=names)  # pylint: disable=no-member
 
     elif method.lower() == "pseudo-bma":
-        min_ic = ics.iloc[0][ic]
-        z_rv = np.exp((ics[ic] - min_ic) / scale_value)
+        min_ic = ics.iloc[0][f"elpd_{ic}"]
+        z_rv = np.exp((ics[f"elpd_{ic}"] - min_ic) / scale_value)
         weights = z_rv / np.sum(z_rv)
-        ses = ics[ic_se]
+        ses = ics["se"]
 
     if np.any(weights):
         min_ic_i_val = ics[ic_i].iloc[0]
@@ -305,19 +304,19 @@ def compare(
             weight = weights[idx]
             df_comp.at[val] = (
                 idx,
-                res[ic],
+                res[f"elpd_{ic}"],
                 res[p_ic],
                 d_ic,
                 weight,
                 std_err,
                 d_std_err,
                 res["warning"],
-                res[scale_col],
+                res["scale"],
             )
 
     df_comp["rank"] = df_comp["rank"].astype(int)
     df_comp["warning"] = df_comp["warning"].astype(bool)
-    return df_comp.sort_values(by=ic, ascending=ascending)
+    return df_comp.sort_values(by=f"elpd_{ic}", ascending=ascending)
 
 
 def _ic_matrix(ics, ic_i):
@@ -343,7 +342,7 @@ def _calculate_ics(
     ic: Optional[ICKeyword] = None,
     var_name: Optional[str] = None,
 ):
-    """Calculate loo and waic information criteria only if necessary.
+    """Calculate loo or waic only if necessary.
 
     It always calls the ic function with ``pointwise=True``.
 
@@ -382,22 +381,22 @@ def _calculate_ics(
     precomputed_scale = None
     if precomputed_elpds:
         _, arbitrary_elpd = precomputed_elpds.popitem()
-        precomputed_ic = arbitrary_elpd.index[0]
-        precomputed_scale = arbitrary_elpd[f"{precomputed_ic}_scale"]
+        precomputed_ic = arbitrary_elpd.index[0].split("_")[1]
+        precomputed_scale = arbitrary_elpd["scale"]
         raise_non_pointwise = False
         if not f"{precomputed_ic}_i" in arbitrary_elpd:
             raise_non_pointwise = True
         if precomputed_elpds:
             if not all(
-                elpd_data.index[0] == precomputed_ic for elpd_data in precomputed_elpds.values()
+                elpd_data.index[0].split("_")[1] == precomputed_ic
+                for elpd_data in precomputed_elpds.values()
             ):
                 raise ValueError(
                     "All information criteria to be compared must be the same "
                     "but found both loo and waic."
                 )
             if not all(
-                elpd_data[f"{precomputed_ic}_scale"] == precomputed_scale
-                for elpd_data in precomputed_elpds.values()
+                elpd_data["scale"] == precomputed_scale for elpd_data in precomputed_elpds.values()
             ):
                 raise ValueError("All information criteria to be compared must use the same scale")
             if (
@@ -734,15 +733,15 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     Returns
     -------
     ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
-    loo: approximated expected log pointwise predictive density (elpd)
-    loo_se: standard error of loo
+    elpd: approximated expected log pointwise predictive density (elpd)
+    se: standard error of the elpd
     p_loo: effective number of parameters
     shape_warn: bool
         True if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i: array of pointwise predictive accuracy, only if pointwise True
     pareto_k: array of Pareto shape values, only if pointwise True
-    loo_scale: scale of the loo results
+    scale: scale of the elpd
 
         The returned object has a custom print method that overrides pd.Series method.
 
@@ -856,22 +855,22 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
                 scale,
             ],
             index=[
-                "loo",
-                "loo_se",
+                "elpd_loo",
+                "se",
                 "p_loo",
                 "n_samples",
                 "n_data_points",
                 "warning",
                 "loo_i",
                 "pareto_k",
-                "loo_scale",
+                "scale",
             ],
         )
 
     else:
         return ELPDData(
             data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale],
-            index=["loo", "loo_se", "p_loo", "n_samples", "n_data_points", "warning", "loo_scale"],
+            index=["elpd_loo", "se", "p_loo", "n_samples", "n_data_points", "warning", "scale"],
         )
 
 
@@ -1591,14 +1590,14 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     Returns
     -------
     ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
-    waic: approximated expected log pointwise predictive density (elpd)
-    waic_se: standard error of waic
+    elpd_waic: approximated expected log pointwise predictive density (elpd)
+    se: standard error of the elpd
     p_waic: effective number parameters
     var_warn: bool
         True if posterior variance of the log predictive densities exceeds 0.4
     waic_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy,
             only if pointwise=True
-    waic_scale: scale of the reported waic results
+    scale: scale of the elpd
 
         The returned object has a custom print method that overrides pd.Series method.
 
@@ -1691,14 +1690,14 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
                 scale,
             ],
             index=[
-                "waic",
-                "waic_se",
+                "elpd_waic",
+                "se",
                 "p_waic",
                 "n_samples",
                 "n_data_points",
                 "warning",
                 "waic_i",
-                "waic_scale",
+                "scale",
             ],
         )
     else:
@@ -1706,12 +1705,12 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
             data=[waic_sum, waic_se, p_waic, n_samples, n_data_points, warn_mg, scale],
             index=[
                 "waic",
-                "waic_se",
+                "se",
                 "p_waic",
                 "n_samples",
                 "n_data_points",
                 "warning",
-                "waic_scale",
+                "scale",
             ],
         )
 

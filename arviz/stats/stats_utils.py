@@ -462,12 +462,12 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
 
     def __str__(self):
         """Print elpd data in a user friendly way."""
-        kind = self.index[0]
+        kind = self.index[0].split("_")[1]
 
         if kind not in ("loo", "waic"):
             raise ValueError("Invalid ELPDData object")
 
-        scale_str = SCALE_DICT[self[f"{kind}_scale"]]
+        scale_str = SCALE_DICT[self["scale"]]
         padding = len(scale_str) + len(kind) + 1
         base = BASE_FMT.format(padding, padding - 2)
         base = base.format(
