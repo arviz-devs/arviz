@@ -9,6 +9,8 @@ from . import backend_kwarg_defaults, create_axes_grid
 def plot_compare(
     ax,
     comp_df,
+    legend,
+    title,
     figsize,
     plot_ic_diff,
     plot_standard_error,

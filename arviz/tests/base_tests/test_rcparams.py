@@ -280,10 +280,10 @@ def test_data_load():
 def test_stats_information_criterion(models):
     rcParams["stats.information_criterion"] = "waic"
     df_comp = compare({"model1": models.model_1, "model2": models.model_2})
-    assert "waic" in df_comp.columns
+    assert "elpd_waic" in df_comp.columns
     rcParams["stats.information_criterion"] = "loo"
     df_comp = compare({"model1": models.model_1, "model2": models.model_2})
-    assert "loo" in df_comp.columns
+    assert "elpd_loo" in df_comp.columns
 
 
 def test_http_type_request(monkeypatch):

@@ -339,12 +339,12 @@ def test_plot_compare_no_ic(models):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # Drop column needed for plotting
-    model_compare = model_compare.drop("loo", axis=1)
+    model_compare = model_compare.drop("elpd_loo", axis=1)
     with pytest.raises(ValueError) as err:
         plot_compare(model_compare, backend="bokeh", show=False)
 
     assert "comp_df must contain one of the following" in str(err.value)
-    assert "['loo', 'waic']" in str(err.value)
+    assert "['elpd_loo', 'elpd_waic']" in str(err.value)
 
 
 def test_plot_ecdf_basic():

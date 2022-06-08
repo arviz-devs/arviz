@@ -14,6 +14,7 @@ def plot_compare(
     plot_ic_diff=True,
     order_by_rank=True,
     legend=True,
+    title=True,
     figsize=None,
     textsize=None,
     labeller=None,
@@ -53,6 +54,8 @@ def plot_compare(
         Add legend to figure. By default True.
     figsize : tuple, optional
         If None, size is (6, num of models) inches
+    title : bool:
+        Show a tittle with a description of how to interpret the plot. Defaults to True.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
@@ -141,6 +144,7 @@ def plot_compare(
         ax=ax,
         comp_df=comp_df,
         legend=legend,
+        title=title,
         figsize=figsize,
         plot_ic_diff=plot_ic_diff,
         plot_standard_error=plot_standard_error,

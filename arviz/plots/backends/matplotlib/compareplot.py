@@ -9,6 +9,7 @@ def plot_compare(
     ax,
     comp_df,
     legend,
+    title,
     figsize,
     plot_ic_diff,
     plot_standard_error,
@@ -112,10 +113,17 @@ def plot_compare(
     if legend:
         ax.legend(bbox_to_anchor=(1.01, 1), loc="upper left", ncol=1, fontsize=ax_labelsize)
 
+    if title:
+        ax.set_title(
+            f"Model comparison using the ELPD\n{'higher' if scale == 'log' else 'lower'} is better",
+            fontsize=ax_labelsize,
+        )
+
     if scale == "negative_log":
         scale = "-log"
 
     ax.set_xlabel(f"{information_criterion} ({scale})", fontsize=ax_labelsize)
+    ax.set_ylabel("ranked models", fontsize=ax_labelsize)
     ax.set_yticklabels(yticks_labels)
     ax.set_ylim(-1 + step, 0 - step)
     ax.tick_params(labelsize=xt_labelsize)
