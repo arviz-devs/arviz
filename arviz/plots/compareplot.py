@@ -29,8 +29,9 @@ def plot_compare(
 
     Models are compared based on their expected log pointwise predictive density (ELPD),
     the ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
-    cross-validation (loo) or using the widely applicable information criterion (WAIC).
-    We recommend LOO.
+    cross-validation (LOO) or using the widely applicable information criterion (WAIC).
+    We recommend LOO in line with the theory presented by Vehtari et al. (2016) available 
+    here: https://arxiv.org/abs/1507.04544.
 
     This plot is in the style of the one used in the book Statistical Rethinking by
     Richard McElreath.Chapter 6 in the first edition or 7 in the second.

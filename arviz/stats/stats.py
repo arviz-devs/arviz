@@ -65,7 +65,7 @@ def compare(
 
 
     The ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
-    cross-validation (loo) or using the widely applicable information criterion (waic).
+    cross-validation (LOO) or using the widely applicable information criterion (WAIC).
     We recommend loo. Read more theory here - in a paper by some of the
     leading authorities on model comparison dx.doi.org/10.1111/1467-9868.00353
 
@@ -121,7 +121,7 @@ def compare(
         If `scale` is `deviance` or `negative_log` smaller values indicates
         higher out-of-sample predictive fit ("better" model).
     pIC: Estimated effective number of parameters.
-    elpd_diff: the difference in elpd for two models.
+    elpd_diff: The difference in ELPD between two models.
         If more than two models are compared, the difference is computed relative to the
         top-ranked model, that always has a elpd_diff of 0.
     weight: Relative weight for each model.
@@ -342,7 +342,7 @@ def _calculate_ics(
     ic: Optional[ICKeyword] = None,
     var_name: Optional[str] = None,
 ):
-    """Calculate loo or waic only if necessary.
+    """Calculate LOO or WAIC only if necessary.
 
     It always calls the ic function with ``pointwise=True``.
 
