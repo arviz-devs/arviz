@@ -87,7 +87,8 @@ def plot_compare(
     scale = comp_df[f"scale"][0]
 
     if insample_dev:
-        p_ic = comp_df[f"p_{information_criterion}"]
+        print(information_criterion)
+        p_ic = comp_df[f"p_{information_criterion.split('_')[1]}"]
         if scale == "log":
             correction = p_ic
         elif scale == "negative_log":
@@ -115,7 +116,7 @@ def plot_compare(
 
     if title:
         ax.set_title(
-            f"Model comparison using the ELPD\n{'higher' if scale == 'log' else 'lower'} is better",
+            f"Model comparison\n{'higher' if scale == 'log' else 'lower'} is better",
             fontsize=ax_labelsize,
         )
 
