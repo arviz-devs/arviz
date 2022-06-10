@@ -496,7 +496,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         """Alias to ``__str__``."""
         return self.__str__()
 
-    def copy(self, deep=True):
+    def copy(self, deep=True):  # pylint:disable=overridden-final-method
         """Perform a pandas deep copy of the ELPDData plus a copy of the stored data."""
         copied_obj = pd.Series.copy(self)
         for key in copied_obj.keys():
