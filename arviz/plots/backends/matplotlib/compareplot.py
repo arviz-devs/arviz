@@ -87,7 +87,6 @@ def plot_compare(
     scale = comp_df[f"scale"][0]
 
     if insample_dev:
-        print(information_criterion)
         p_ic = comp_df[f"p_{information_criterion.split('_')[1]}"]
         if scale == "log":
             correction = p_ic
