@@ -1,5 +1,4 @@
 """Summary plot for model comparison."""
-from operator import le
 import numpy as np
 
 from ..labels import BaseLabeller
@@ -30,7 +29,7 @@ def plot_compare(
     Models are compared based on their expected log pointwise predictive density (ELPD),
     the ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
     cross-validation (LOO) or using the widely applicable information criterion (WAIC).
-    We recommend LOO in line with the theory presented by Vehtari et al. (2016) available 
+    We recommend LOO in line with the work presented by Vehtari et al. (2016) available
     here: https://arxiv.org/abs/1507.04544.
 
     This plot is in the style of the one used in the book Statistical Rethinking by
@@ -43,7 +42,8 @@ def plot_compare(
         Result of the :func:`arviz.compare` method
     insample_dev : bool, optional
         Plot in-sample ELPD, that is the value of the information criteria without the
-        penalization given by the effective number of parameters (p_loo or p_waic). Defaults to False
+        penalization given by the effective number of parameters (p_loo or p_waic).
+        Defaults to False
     plot_standard_error : bool, optional
         Plot the standard error of the ELPD. Defaults to True
     plot_ic_diff : bool, optional

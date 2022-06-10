@@ -84,7 +84,7 @@ def plot_compare(
     else:
         ax.set_yticks(yticks_pos[::2])
 
-    scale = comp_df[f"scale"][0]
+    scale = comp_df["scale"][0]
 
     if insample_dev:
         p_ic = comp_df[f"p_{information_criterion.split('_')[1]}"]
