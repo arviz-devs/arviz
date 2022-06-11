@@ -3,7 +3,7 @@ astroid
 madforhooks
 numpydoc
 pydocstyle
-pylint
+pylint==2.10.2
 pytest
 pytest-cov
 black ; python_version >= '3.6'
