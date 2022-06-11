@@ -1127,7 +1127,7 @@ def test_plot_posterior_skipna_combinedims():
 
 
 @pytest.mark.parametrize(
-    "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
+    "kwargs", [{"insample_dev": True}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
 def test_plot_compare(models, kwargs):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
