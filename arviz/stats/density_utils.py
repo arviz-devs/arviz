@@ -181,7 +181,7 @@ def _a1inv(x):
     Returns the value k, such that a1inv(x) = k, i.e. a1(k) = x.
     """
     if 0 <= x < 0.53:
-        return 2 * x + x**3 + (5 * x ** 5) / 6
+        return 2 * x + x**3 + (5 * x**5) / 6
     elif x < 0.85:
         return -0.4 + 1.39 * x + 0.43 / (1 - x)
     else:
@@ -243,7 +243,7 @@ def _fixed_point(t, N, k_sq, a_sq):
         c2 = np.product(np.arange(1.0, 2 * j + 1, 2, dtype=np.float64))
         c2 /= (np.pi / 2) ** 0.5
         t_j = np.power((c1 * (c2 / (N * f))), (2.0 / (3.0 + 2.0 * j)))
-        f = np.sum(k_sq**j * a_sq * np.exp(-k_sq * np.pi ** 2.0 * t_j))
+        f = np.sum(k_sq**j * a_sq * np.exp(-k_sq * np.pi**2.0 * t_j))
         f *= 0.5 * np.pi ** (2 * j)
 
     out = t - (2 * N * np.pi**0.5 * f) ** (-0.4)
@@ -786,7 +786,7 @@ def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **
 
     else:
         pdf_mat = (grid - grid[:, None]) / bw_adj[:, None]
-        pdf_mat = np.exp(-0.5 * pdf_mat ** 2) * grid_counts[:, None]
+        pdf_mat = np.exp(-0.5 * pdf_mat**2) * grid_counts[:, None]
         pdf_mat /= (2 * np.pi) ** 0.5 * bw_adj[:, None]
         pdf = np.sum(pdf_mat, axis=0) / len(x)
 
