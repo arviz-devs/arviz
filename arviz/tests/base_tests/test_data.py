@@ -775,7 +775,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
 
         xr.set_options(display_style="text")
         html = idata._repr_html_()  # pylint: disable=protected-access
-        assert escape(idata.__repr__()) in html
+        assert escape(repr(idata)) in html
         xr.set_options(display_style=display_style)
 
     def test_add_groups(self, data_random):
