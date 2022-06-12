@@ -283,8 +283,8 @@ def plot_ts(
     len_y = len(y_plotters)
     len_x = len(x_plotters)
     length_plotters = len_x * len_y
-    y_plotters = np.tile(y_plotters, (len_x, 1))
-    x_plotters = np.tile(x_plotters, (len_y, 1))
+    y_plotters = np.tile(np.array(y_plotters), (len_x, 1))
+    x_plotters = np.tile(np.array(x_plotters), (len_y, 1))
 
     # Generate plotters for all the available data
     y_mean_plotters = None
@@ -314,8 +314,8 @@ def plot_ts(
 
         # Necessary when multidim y
         # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
-        y_hat_plotters = np.tile(y_hat_plotters, (len_x, 1))
-        y_mean_plotters = np.tile(y_mean_plotters, (len_x, 1))
+        y_hat_plotters = np.tile(np.array(y_hat_plotters), (len_x, 1))
+        y_mean_plotters = np.tile(np.array(y_mean_plotters), (len_x, 1))
 
     y_holdout_plotters = None
     x_holdout_plotters = None
@@ -339,8 +339,8 @@ def plot_ts(
 
         # Necessary when multidim y
         # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
-        y_holdout_plotters = np.tile(y_holdout_plotters, (len_x, 1))
-        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))
+        y_holdout_plotters = np.tile(np.array(y_holdout_plotters), (len_x, 1))
+        x_holdout_plotters = np.tile(np.array(x_holdout_plotters), (len_y, 1))
 
     y_forecasts_plotters = None
     y_forecasts_mean_plotters = None
@@ -378,9 +378,9 @@ def plot_ts(
 
         # Necessary when multidim y
         # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
-        y_forecasts_mean_plotters = np.tile(y_forecasts_mean_plotters, (len_x, 1))
-        y_forecasts_plotters = np.tile(y_forecasts_plotters, (len_x, 1))
-        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))
+        y_forecasts_mean_plotters = np.tile(np.array(y_forecasts_mean_plotters), (len_x, 1))
+        y_forecasts_plotters = np.tile(np.array(y_forecasts_plotters), (len_x, 1))
+        x_holdout_plotters = np.tile(np.array(x_holdout_plotters), (len_y, 1))
 
     rows, cols = default_grid(length_plotters)
 
