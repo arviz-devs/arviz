@@ -386,7 +386,9 @@ def plot_ts(
         # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
         # TODO: Incompatible types in assignment (expression has type "ndarray[Any, dtype[Any]]",
         # TODO: variable has type "List[Any]")  [assignment]
-        y_forecasts_mean_plotters = np.tile(y_forecasts_mean_plotters, (len_x, 1))  # type: ignore[assignment]
+        y_forecasts_mean_plotters = np.tile(
+            y_forecasts_mean_plotters, (len_x, 1)
+        )  # type: ignore[assignment]
         y_forecasts_plotters = np.tile(y_forecasts_plotters, (len_x, 1))  # type: ignore[assignment]
         x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))  # type: ignore[assignment]
 
