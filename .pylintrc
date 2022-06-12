@@ -74,6 +74,7 @@ disable=missing-docstring,
         fixme,
         consider-using-with,
         consider-using-f-string,
+        # TODO: Remove this once update the code base
         unnecessary-lambda-assignment
 
 # Enable the message, report, category or checker with the given id(s). You can
