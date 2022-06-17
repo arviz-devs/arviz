@@ -18,14 +18,6 @@ jobs:
         emcee.version: "latest"
         name: "External latest"
 
-      Python_39_Special_versions:
-        python.version: "3.9"
-        pystan.version: 2.19.1.1
-        cmdstanpy.version: 0.9.67
-        pymc3.version: "github"
-        emcee.version: 2
-        name: "External special"
-
   steps:
   - task: UsePythonVersion@0
     inputs:
@@ -38,15 +30,13 @@ jobs:
       pwd
       gcc --version
       python --version
+      which gcc
+      which clang
     displayName: 'Debug information'
 
   - script: |
-      sudo apt-get update
-      sudo apt-get install jags
       python -m pip install --upgrade pip
       python -m pip install wheel
-
-      python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
 
       if [ "$(pystan.version)" = "latest" ]; then
           python -m pip --no-cache-dir install pystan
@@ -58,34 +48,11 @@ jobs:
           fi
       fi
 
-      if [ "$(cmdstanpy.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install cmdstanpy
-      else
-          python -m pip --no-cache-dir install cmdstanpy=="$(cmdstanpy.version)"
-      fi
-
-      if [ "$(emcee.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install emcee h5py
-      else
-          python -m pip --no-cache-dir install "emcee<3"
-      fi
-
-      if [ "$(pymc3.version)" = "github" ]; then
-           python -m pip --no-cache-dir --log log.txt install git+https://github.com/pymc-devs/pymc3@v3
-           cat log.txt
-      else
-          python -m pip --no-cache-dir install pymc3
-      fi
-
-      grep -Ev '^pystan|^cmdstanpy|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
-
     displayName: 'Install packages'
 
   - script: |
       python -m pip install  --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install --no-cache-dir -r requirements-optional.txt
-      python -m pip install pytest-azurepipelines codecov
     displayName: 'Install requirements'
 
   - script: |
@@ -97,59 +64,9 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pylint arviz
-    displayName: 'pylint'
-
-  - script: |
-      python -m pydocstyle arviz
-    displayName: 'pydocstyle'
-
-  - script: |
-      python -m black --check arviz examples asv_benchmarks
-    displayName: 'black'
-
-  - script: |
-      absolufy-imports $(find arviz -name '*.py') --never
-    displayName: 'Use relative imports'
-
-  - script: |
-      python -m madforhooks.no_print_statements $(find arviz -name '*.py' -not -path 'arviz/tests/*')
-    displayName: 'Disallow debugging print statements (use `file=sys.stdout` if not debugging)'
-
-  - script: |
-      python -m mypy .
-    displayName: 'mypy'
-
-  - script: |
-      python -m typing_copilot.cli tighten --error-if-can-tighten
-    displayName: 'typing_copilot'
-
-  - script: |
-      python -m typing_copilot.cli tighten
-    condition: failed()
-    displayName: 'update mypy.ini with typing_copilot'
-
-  - task: PublishBuildArtifacts@1
-    condition: failed()
-    inputs:
-      pathtoPublish: 'mypy.ini'
-      artifactName: 'mypy.ini'
-    displayName: 'Upload updated mypy.ini'
-
-  - script: |
       pytest arviz/tests/helpers.py
     displayName: 'precompile models'
 
   - script: |
       python -m pytest arviz/tests/external_tests --cov arviz --cov-report=xml
     displayName: 'pytest'
-
-  - task: PublishTestResults@2
-    condition: succeededOrFailed()
-    inputs:
-      testResultsFiles: '$(System.DefaultWorkingDirectory)/test-*.xml'
-      testRunTitle: 'Publish test results for Python $(python.version)'
-
-  - script: |
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
-    displayName: 'upload coverage'
