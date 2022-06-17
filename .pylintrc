@@ -61,9 +61,7 @@ disable=missing-docstring,
         too-many-locals,
         too-many-branches,
         too-many-statements,
-        no-self-use,
         too-few-public-methods,
-        bad-continuation,
         import-outside-toplevel,
         no-else-continue,
         unnecessary-comprehension,
@@ -75,8 +73,9 @@ disable=missing-docstring,
         #TODO: Remove this once todos are done
         fixme,
         consider-using-with,
-        consider-using-f-string
-
+        consider-using-f-string,
+        # TODO: Remove this once update the code base.
+        unnecessary-lambda-assignment
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -142,13 +141,6 @@ max-line-length=100
 
 # Maximum number of lines in a module
 max-module-lines=1000
-
-# List of optional constructs for which whitespace checking is disabled. `dict-
-# separator` is used to allow tabulation in dicts, etc.: {1  : 1,\n222: 2}.
-# `trailing-comma` allows a space between comma and closing bracket: (a, ).
-# `empty-line` allows space-only lines.
-no-space-check=trailing-comma,
-               dict-separator
 
 # Allow the body of a class to be on the same line as the declaration if body
 # contains single statement.

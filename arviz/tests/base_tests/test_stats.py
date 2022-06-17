@@ -469,8 +469,8 @@ def test_waic_warning(centered_eight):
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_waic_print(centered_eight, scale):
-    waic_data = waic(centered_eight, scale=scale).__repr__()
-    waic_pointwise = waic(centered_eight, scale=scale, pointwise=True).__repr__()
+    waic_data = repr(waic(centered_eight, scale=scale))
+    waic_pointwise = repr(waic(centered_eight, scale=scale, pointwise=True))
     assert waic_data is not None
     assert waic_pointwise is not None
     assert waic_data == waic_pointwise
@@ -541,8 +541,8 @@ def test_loo_warning(centered_eight):
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_loo_print(centered_eight, scale):
-    loo_data = loo(centered_eight, scale=scale, pointwise=False).__repr__()
-    loo_pointwise = loo(centered_eight, scale=scale, pointwise=True).__repr__()
+    loo_data = repr(loo(centered_eight, scale=scale, pointwise=False))
+    loo_pointwise = repr(loo(centered_eight, scale=scale, pointwise=True))
     assert loo_data is not None
     assert loo_pointwise is not None
     assert len(loo_data) < len(loo_pointwise)

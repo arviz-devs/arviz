@@ -98,8 +98,8 @@ def test_rcparams_find_all():
 
 def test_rcparams_repr_str():
     """Check both repr and str print all keys."""
-    repr_str = rcParams.__repr__()
-    str_str = rcParams.__str__()
+    repr_str = repr(rcParams)
+    str_str = str(rcParams)
     assert repr_str.startswith("RcParams")
     for string in (repr_str, str_str):
         assert all((key in string for key in rcParams.keys()))

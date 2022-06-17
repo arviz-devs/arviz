@@ -306,7 +306,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
     all_numeric = all(isinstance(i, (int, float, np.integer, np.float)) for i in custom_lims)
     if not all_numeric:
         raise TypeError(
-            ("Elements of `custom_lims` must be numeric or None.\n" "At least one of them is not.")
+            "Elements of `custom_lims` must be numeric or None.\nAt least one of them is not."
         )
 
     if not custom_lims[0] < custom_lims[1]:
@@ -653,9 +653,7 @@ def _kde_circular(
 
     # Determine bandwidth
     if isinstance(bw, bool):
-        raise ValueError(
-            "`bw` can't be of type `bool`.\n" "Expected a positive numeric or 'taylor'"
-        )
+        raise ValueError("`bw` can't be of type `bool`.\nExpected a positive numeric or 'taylor'")
     if isinstance(bw, (int, float)):
         if bw < 0:
             raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")

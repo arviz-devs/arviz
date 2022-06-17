@@ -309,7 +309,7 @@ def get_plotting_function(plot_name, plot_module, backend):
 
         except (ImportError, AssertionError) as err:
             raise ImportError(
-                "'bokeh' backend needs Bokeh (1.4.0+) installed." " Please upgrade or install"
+                "'bokeh' backend needs Bokeh (1.4.0+) installed. Please upgrade or install"
             ) from err
 
     # Perform import of plotting method

@@ -393,7 +393,7 @@ def _set_animation(
         length = len(pp_sampled_vals)
         if dtype == "f":
             x_vals, y_vals = kde(pp_sampled_vals[0])
-            max_max = max([max(kde(pp_sampled_vals[i])[1]) for i in range(length)])
+            max_max = max(max(kde(pp_sampled_vals[i])[1]) for i in range(length))
             ax.set_ylim(0, max_max)
             (line,) = ax.plot(x_vals, y_vals, **plot_kwargs)
 
@@ -407,9 +407,7 @@ def _set_animation(
             _, y_vals, x_vals = histogram(vals, bins="auto")
             (line,) = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
 
-            max_max = max(
-                [max(histogram(pp_sampled_vals[i], bins="auto")[1]) for i in range(length)]
-            )
+            max_max = max(max(histogram(pp_sampled_vals[i], bins="auto")[1]) for i in range(length))
 
             ax.set_ylim(0, max_max)
 
