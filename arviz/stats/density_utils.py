@@ -653,9 +653,7 @@ def _kde_circular(
 
     # Determine bandwidth
     if isinstance(bw, bool):
-        raise ValueError(
-            "`bw` can't be of type `bool`.\nExpected a positive numeric or 'taylor'"
-        )
+        raise ValueError("`bw` can't be of type `bool`.\nExpected a positive numeric or 'taylor'")
     if isinstance(bw, (int, float)):
         if bw < 0:
             raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
