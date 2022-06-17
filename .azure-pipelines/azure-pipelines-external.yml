@@ -1,7 +1,7 @@
 jobs:
 - job: ExternalTests
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-22.04'
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
