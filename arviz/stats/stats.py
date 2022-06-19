@@ -54,7 +54,7 @@ __all__ = [
 def compare(
     compare_dict: Mapping[str, InferenceData],
     ic: Optional[ICKeyword] = None,
-    method: Literal["stacking", "BB-pseudo-BMA", "pseudo-MA"] = "stacking",
+    method: Literal["stacking", "BB-pseudo-BMA", "pseudo-BMA"] = "stacking",
     b_samples: int = 1000,
     alpha: float = 1,
     seed=None,
