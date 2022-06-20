@@ -14,7 +14,8 @@ def extract_dataset(
     num_samples=None,
     rng=None,
 ):
-    """Extract an InferenceData group or subset of it as a :class:`xarray.Dataset`.
+    """Extract an InferenceData group or subset of it as a :class:`xarray.Dataset` or
+    :class:`xarray.DataArray`.
 
     Parameters
     ----------
@@ -26,8 +27,7 @@ def extract_dataset(
         Combine ``chain`` and ``draw`` dimensions into ``sample``. Won't work if
         a dimension named ``sample`` already exists.
     var_names : str or list of str, optional
-        Variables to be plotted, two variables are required. Prefix the variables by `~`
-        when you want to exclude them from the plot.
+        Variables to be extracted. Prefix the variables by `~` when you want to exclude them.
     filter_vars: {None, "like", "regex"}, optional
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
@@ -45,7 +45,8 @@ def extract_dataset(
 
     Returns
     -------
-    xarray.Dataset
+    xarray.DataArray if there is a single variable or xarray.Dataset for more than one
+    variable.
 
     Examples
     --------
@@ -80,6 +81,8 @@ def extract_dataset(
     data = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, data, filter_vars)
     if var_names is not None:
+        if len(var_names) == 1:
+            var_names = var_names[0]
         data = data[var_names]
     if combined:
         data = data.stack(sample=("chain", "draw"))

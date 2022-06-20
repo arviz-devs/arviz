@@ -1444,9 +1444,8 @@ class TestExtractDataset:
     def test_var_name_group(self):
         idata = load_arviz_data("centered_eight")
         prior = extract_dataset(idata, group="prior", var_names="the", filter_vars="like")
-        assert prior.attrs == idata.prior.attrs
-        assert "theta" in prior.data_vars
-        assert "mu" not in prior.data_vars
+        assert {} == prior.attrs
+        assert "theta" in prior.name
 
     def test_subset_samples(self):
         idata = load_arviz_data("centered_eight")
