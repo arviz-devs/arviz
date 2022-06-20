@@ -14,8 +14,7 @@ def extract_dataset(
     num_samples=None,
     rng=None,
 ):
-    """Extract an InferenceData group or subset of it as a :class:`xarray.Dataset` or
-    :class:`xarray.DataArray`.
+    """Extract an InferenceData group or subset of it as a :class:`xarray.Dataset` or :class:`xarray.DataArray`.
 
     Parameters
     ----------
