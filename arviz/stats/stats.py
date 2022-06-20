@@ -63,7 +63,6 @@ def compare(
 ):
     r"""Compare models based on  their expected log pointwise predictive density (ELPD).
 
-
     The ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
     cross-validation (LOO) or using the widely applicable information criterion (WAIC).
     We recommend loo. Read more theory here - in a paper by some of the

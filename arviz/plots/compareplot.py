@@ -24,7 +24,7 @@ def plot_compare(
     show=None,
 ):
     """
-    Summary plot for model comparison
+    Summary plot for model comparison.
 
     Models are compared based on their expected log pointwise predictive density (ELPD),
     the ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
