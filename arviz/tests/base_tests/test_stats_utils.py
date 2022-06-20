@@ -305,7 +305,7 @@ def test_get_log_likelihood_no_group():
 
 
 def test_elpd_data_error():
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         repr(ELPDData(data=[0, 1, 2], index=["not IC", "se", "p"]))
 
 
