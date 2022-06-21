@@ -250,7 +250,7 @@ def plot_kde(
     """
     if isinstance(values, xr.Dataset):
         raise ValueError(
-            "Xarray dataset object detected.Use plot_posterior, plot_density "
+            "Xarray dataset object detected. Use plot_posterior, plot_density "
             "or plot_pair instead of plot_kde"
         )
     if isinstance(values, InferenceData):
