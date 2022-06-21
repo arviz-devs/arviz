@@ -32,18 +32,6 @@ sending pull requests on the main [ArviZ Github repository](https://github.com/a
 but there are many other ways to help the project.
 You can contribute to ArviZ in the following ways:
 
-```{toctree}
-:maxdepth: 2
-:caption: Contribution types
-
-issue_reports
-translate
-issue_triaging
-outreach
-review_prs
-contributing_prs
-```
-
 ### Create an issue
 [Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check  {ref}`issue_reports <issue_reports>` for details on how to write an issue.
 
@@ -51,15 +39,16 @@ contributing_prs
 You can {ref}`translate <translate>` our website to languages other than english.
 
 ### Review PRs
-{ref}`Review pull requests <review_prs>` to ensure that the contributions are well tested and documented. For example, you can check if the documentation renders correctly and has no typos or mistakes.
+{ref}`Review pull requests <review_prs>` to ensure that the contributions are well tested and documented.
+For example, you can check if the documentation renders correctly and has no typos or mistakes.
 
 ### Manage issues
 Helping to manage or triage the open issues can be a great contribution and a great opportunity to learn about the various areas of the project. You can {ref} `triage existing issues <issue_triaging>`to make them clear and/or provide temporary workarounds for them.
 
 ### Write documentation
 You can contribute to ArviZ’s documentation by either creating new content or editing existing content. For instance, you can add new ArviZ examples. To get involved with the documentation:
-1. Familiarize yourself with the  {ref}`documentation content structure <content_structure>` and the {ref}`tool chain <doc_toolchain>`] involved in creating the website.
-2. Understand the basic workflow for opening a {ref} `pull request <pr_tutorial>` and {ref}`reviewing changes <review_prs>`.
+1. Familiarize yourself with the  {ref}`documentation content structure <content_structure>` and the {ref}`tool chain <doc_toolchain>` involved in creating the website.
+2. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing changes <review_prs>`.
 3. Work on your content.
 4. {ref}`Build <sphinx_doc_build>` your documentation and preview the doc changes.
 
@@ -74,6 +63,19 @@ Fix outstanding issues (bugs) in the existing codebase. The issue can range from
 4. Review and test your code.
 
 
+
+```{toctree}
+:maxdepth: 2
+:caption: Contribution types
+
+issue_reports
+translate
+issue_triaging
+outreach
+review_prs
+contributing_prs
+pr_tutorial
+```
 
 :::{toctree}
 :hidden:
