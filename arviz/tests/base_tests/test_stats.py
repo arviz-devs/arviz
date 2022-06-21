@@ -233,7 +233,7 @@ def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_
     }
     with pytest.raises(TypeError, match="several log likelihood arrays"):
         get_log_likelihood(compare_dict["problematic"])
-    with pytest.raises(TypeError, match="error in ic computation"):
+    with pytest.raises(TypeError, match="error in ELPD computation"):
         compare(compare_dict, ic=ic)
     assert compare(compare_dict, ic=ic, var_name="obs") is not None
 
@@ -248,8 +248,9 @@ def test_calculate_ics(centered_eight, non_centered_eight, ic):
     elpddata_out, _, _ = _calculate_ics(elpddata_dict, ic=ic)
     mixed_out, _, _ = _calculate_ics(mixed_dict, ic=ic)
     for model in idata_dict:
-        assert idata_out[model][ic] == elpddata_out[model][ic]
-        assert idata_out[model][ic] == mixed_out[model][ic]
+        ic_ = f"elpd_{ic}"
+        assert idata_out[model][ic_] == elpddata_out[model][ic_]
+        assert idata_out[model][ic_] == mixed_out[model][ic_]
         assert idata_out[model][f"p_{ic}"] == elpddata_out[model][f"p_{ic}"]
         assert idata_out[model][f"p_{ic}"] == mixed_out[model][f"p_{ic}"]
 
@@ -265,7 +266,7 @@ def test_calculate_ics_ic_override(centered_eight, non_centered_eight):
     with pytest.warns(UserWarning, match="precomputed elpddata: waic"):
         out_dict, _, ic = _calculate_ics(in_dict, ic="loo")
     assert ic == "waic"
-    assert out_dict["centered"]["waic"] == waic(centered_eight)["waic"]
+    assert out_dict["centered"]["elpd_waic"] == waic(centered_eight)["elpd_waic"]
 
 
 def test_summary_ndarray():
@@ -489,7 +490,7 @@ def test_loo(centered_eight, multidim_models, scale, multidim):
     assert loo_pointwise is not None
     assert "loo_i" in loo_pointwise
     assert "pareto_k" in loo_pointwise
-    assert "loo_scale" in loo_pointwise
+    assert "scale" in loo_pointwise
 
 
 def test_loo_one_chain(centered_eight):
