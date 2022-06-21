@@ -1,5 +1,7 @@
 """Bokeh Compareplot."""
 from bokeh.models import Span
+from bokeh.models.annotations import Title, Legend
+
 
 from ...plot_utils import _scale_fig_size
 from .. import show_layout
@@ -9,8 +11,8 @@ from . import backend_kwarg_defaults, create_axes_grid
 def plot_compare(
     ax,
     comp_df,
-    legend,  # pylint: disable=unused-argument
-    title,  # pylint: disable=unused-argument
+    legend,
+    title,
     figsize,
     plot_ic_diff,
     plot_standard_error,
@@ -45,8 +47,10 @@ def plot_compare(
 
     yticks_pos = list(yticks_pos)
 
+    labels = []
+
     if plot_ic_diff:
-        ax.yaxis.ticker = yticks_pos
+        ax.yaxis.ticker = yticks_pos[::2]
         ax.yaxis.major_label_overrides = {
             dtype(key): value
             for key, value in zip(yticks_pos, yticks_labels)
@@ -65,7 +69,7 @@ def plot_compare(
             err_ys.append((y, y))
 
         # plot them
-        ax.triangle(
+        dif_tri = ax.triangle(
             comp_df[information_criterion].iloc[1:],
             yticks_pos[1::2],
             line_color=plot_kwargs.get("color_dse", "grey"),
@@ -73,7 +77,9 @@ def plot_compare(
             line_width=2,
             size=6,
         )
-        ax.multi_line(err_xs, err_ys, line_color=plot_kwargs.get("color_dse", "grey"))
+        dif_line = ax.multi_line(err_xs, err_ys, line_color=plot_kwargs.get("color_dse", "grey"))
+
+        labels.append(("ELPD difference", [dif_tri, dif_line]))
 
     else:
         ax.yaxis.ticker = yticks_pos[::2]
@@ -81,7 +87,7 @@ def plot_compare(
             key: value for key, value in zip(yticks_pos[::2], yticks_labels)
         }
 
-    ax.circle(
+    elpd_circ = ax.circle(
         comp_df[information_criterion],
         yticks_pos[::2],
         line_color=plot_kwargs.get("color_ic", "black"),
@@ -89,6 +95,7 @@ def plot_compare(
         line_width=2,
         size=6,
     )
+    elpd_label = [elpd_circ]
 
     if plot_standard_error:
         # create the coordinates for the errorbars
@@ -100,18 +107,22 @@ def plot_compare(
             err_ys.append((y, y))
 
         # plot them
-        ax.multi_line(err_xs, err_ys, line_color=plot_kwargs.get("color_ic", "black"))
+        elpd_line = ax.multi_line(err_xs, err_ys, line_color=plot_kwargs.get("color_ic", "black"))
+        elpd_label.append(elpd_line)
+
+    labels.append(("ELPD", elpd_label))
+
+    scale = comp_df["scale"][0]
 
     if insample_dev:
-        scale = comp_df[f"{information_criterion}_scale"][0]
-        p_ic = comp_df[f"p_{information_criterion}"]
+        p_ic = comp_df[f"p_{information_criterion.split('_')[1]}"]
         if scale == "log":
             correction = p_ic
         elif scale == "negative_log":
             correction = -p_ic
         elif scale == "deviance":
             correction = -(2 * p_ic)
-        ax.circle(
+        insample_circ = ax.circle(
             comp_df[information_criterion] + correction,
             yticks_pos[::2],
             line_color=plot_kwargs.get("color_insample_dev", "black"),
@@ -119,6 +130,7 @@ def plot_compare(
             line_width=2,
             size=6,
         )
+        labels.append(("In-sample ELPD", [insample_circ]))
 
     vline = Span(
         location=comp_df[information_criterion].iloc[0],
@@ -130,12 +142,21 @@ def plot_compare(
 
     ax.renderers.append(vline)
 
-    scale_col = information_criterion + "_scale"
-    if scale_col in comp_df:
-        scale = comp_df[scale_col].iloc[0].capitalize()
-    else:
-        scale = "Deviance"
-    ax.xaxis.axis_label = scale
+    if legend:
+        legend = Legend(items=labels, orientation="vertical", location="top_right")
+        ax.add_layout(legend, "above")
+        ax.legend.click_policy = "hide"
+
+    if title:
+        _title = Title()
+        _title.text = f"Model comparison\n{'higher' if scale == 'log' else 'lower'} is better"
+        ax.title = _title
+
+    if scale == "negative_log":
+        scale = "-log"
+
+    ax.xaxis.axis_label = f"{information_criterion} ({scale})"
+    ax.yaxis.axis_label = "ranked models"
     ax.y_range._property_values["start"] = -1 + step  # pylint: disable=protected-access
     ax.y_range._property_values["end"] = 0 - step  # pylint: disable=protected-access
 
