@@ -157,8 +157,9 @@ def compare(
 
     See Also
     --------
-    loo : Compute the ELPD using the Pareto smoothed importance sampling Leave-one-out
-    cross-validation method.
+    loo :
+        Compute the ELPD using the Pareto smoothed importance sampling Leave-one-out
+        cross-validation method.
     waic : Compute the ELPD using the widely applicable information criterion.
     plot_compare : Summary plot for model comparison.
 
