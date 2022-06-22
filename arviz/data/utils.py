@@ -15,6 +15,10 @@ def extract_dataset(
     num_samples=None,
     rng=None,
 ):
+    """Extract an InferenceData group or subset of it.
+
+    This function has been deprecated please use extract
+    """
     warnings.warn(
         "extract_dataset has been deprecated, please use extract", FutureWarning, stacklevel=2
     )
@@ -41,7 +45,7 @@ def extract(
     keep_dataset=False,
     rng=None,
 ):
-    """Extract an InferenceData group or subset of it
+    """Extract an InferenceData group or subset of it.
 
     Parameters
     ----------
