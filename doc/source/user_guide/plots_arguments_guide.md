@@ -20,8 +20,7 @@ which use one specific function to illustrate the usage but
 the behaviour described here will be the same for the
 other functions with the same argument.
 
-This page can be downloaded as a {jupyter-download:script}`Python script <plots_arguments_guide>`
-or as a {jupyter-download:nb}`Jupyter notebook <plots_arguments_guide>`.
+This page can be downloaded as a {nb-download}`Jupyter notebook <plots_arguments_guide.ipynb>`.
 
 ```{code-cell} ipython3
 import arviz as az

@@ -17,7 +17,7 @@ These are:
 
 ## Multiple target audiences
 Diátaxis is a framework based around **user needs** in their exercise of a
-**practical craft** (more detail at {doc}`diataxis:introduction` page in Diatáxis website).
+**practical craft** (more detail at {ref}`diataxis:needs` page in Diatáxis website).
 
 The scope of the ArviZ website however is not limited to ArviZ users nor it is limited to practical
 crafts like using ArviZ or contributing to it.

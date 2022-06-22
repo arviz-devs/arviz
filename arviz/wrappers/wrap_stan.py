@@ -92,7 +92,7 @@ class PyStanSamplingWrapper(StanSamplingWrapper):
 
     See the documentation on  :class:`~arviz.SamplingWrapper` for a more detailed
     description. An example of ``PyStan3SamplingWrapper`` usage can be found
-    in the :ref:`pystan3_refitting` notebook.
+    in the :ref:`pystan_refitting` notebook.
 
     Warnings
     --------

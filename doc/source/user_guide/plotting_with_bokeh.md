@@ -15,8 +15,7 @@ kernelspec:
 
 Arviz has the option to use {doc}`Bokeh <bokeh:index>` as backend which offers interactive plots. Although most of the functions in the {ref}`plot <plot_api>` module work seamlessly with any backend, some advanced plots may require the use of backend specific features. In this guide, advanced plotting with Bokeh will be covered.
 
-This page can be downloaded as a {jupyter-download:script}`Python script <plotting_with_bokeh>`
-or as a {jupyter-download:nb}`Jupyter notebook <plotting_with_bokeh>`.
+This page can be downloaded as a {nb-download}`Jupyter notebook <plotting_with_bokeh.ipynb>`.
 
 ```{code-cell} ipython3
 import arviz as az
@@ -53,7 +52,7 @@ data = az.load_arviz_data('radon')
 az.plot_posterior(
     data,
     var_names=["g"],
-    backend_kwargs={"width": 350, 
+    backend_kwargs={"width": 350,
                     "background_fill_color": "#d3d0e3"});
 ```
 
@@ -136,6 +135,6 @@ To use Bokeh with JupyterLab, JupyterLab and widgets, please refer to this {ref}
 ## Server mode
 
 :::{note}
-In the examples above, bokeh is being used in `Standalone` mode. 
+In the examples above, bokeh is being used in `Standalone` mode.
 Bokeh can be also used to create interactive web applications. For more details see {ref}`Running a Bokeh server <bokeh:userguide_server>`.
 :::
