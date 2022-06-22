@@ -64,7 +64,8 @@ def extract(
     num_samples : int, optional
         Extract only a subset of the samples. Only valid if ``combined=True``
     keep_dataset : bool, optional
-        If true, always return a DataSet. if false (default) return a DataArray when there is a single variable
+        If true, always return a DataSet. If false (default) return a DataArray
+        when there is a single variable.
     rng : bool, int, numpy.Generator, optional
         Shuffle the samples, only valid if ``combined=True``. By default,
         samples are shuffled if ``num_samples`` is not ``None``, and are left
