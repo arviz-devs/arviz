@@ -1,4 +1,5 @@
 """Data specific utilities."""
+import warnings
 import numpy as np
 
 from ..utils import _var_names
@@ -14,7 +15,33 @@ def extract_dataset(
     num_samples=None,
     rng=None,
 ):
-    """Extract an InferenceData group or subset of it as a :class:`xarray.Dataset` or :class:`xarray.DataArray`.
+    warnings.warn(
+        "extract_dataset has been deprecated, please use extract", FutureWarning, stacklevel=2
+    )
+
+    data = extract(
+        data=data,
+        group=group,
+        combined=combined,
+        var_names=var_names,
+        filter_vars=filter_vars,
+        num_samples=num_samples,
+        rng=rng,
+    )
+    return data
+
+
+def extract(
+    data,
+    group="posterior",
+    combined=True,
+    var_names=None,
+    filter_vars=None,
+    num_samples=None,
+    keep_dataset=False,
+    rng=None,
+):
+    """Extract an InferenceData group or subset of it
 
     Parameters
     ----------
@@ -36,6 +63,8 @@ def extract_dataset(
         instead of what to include
     num_samples : int, optional
         Extract only a subset of the samples. Only valid if ``combined=True``
+    keep_dataset : bool, optional
+        If true, always return a DataSet. if false (default) return a DataArray when there is a single variable
     rng : bool, int, numpy.Generator, optional
         Shuffle the samples, only valid if ``combined=True``. By default,
         samples are shuffled if ``num_samples`` is not ``None``, and are left
@@ -44,8 +73,7 @@ def extract_dataset(
 
     Returns
     -------
-    xarray.DataArray if there is a single variable or xarray.Dataset for more than one
-    variable.
+    xarray.DataArray or xarray.Dataset
 
     Examples
     --------
@@ -56,19 +84,19 @@ def extract_dataset(
 
         import arviz as az
         idata = az.load_arviz_data("centered_eight")
-        az.extract_dataset(idata)
+        az.extract(idata)
 
     You can also indicate a subset to be returned, but in variables and in samples:
 
     .. jupyter-execute::
 
-        az.extract_dataset(idata, var_names="theta", num_samples=100)
+        az.extract(idata, var_names="theta", num_samples=100)
 
     To keep the chain and draw dimensions, use ``combined=False``.
 
     .. jupyter-execute::
 
-        az.extract_dataset(idata, group="prior", combined=False)
+        az.extract(idata, group="prior", combined=False)
 
     """
     if num_samples is not None and not combined:
@@ -80,7 +108,7 @@ def extract_dataset(
     data = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, data, filter_vars)
     if var_names is not None:
-        if len(var_names) == 1:
+        if len(var_names) == 1 and not keep_dataset:
             var_names = var_names[0]
         data = data[var_names]
     if combined:
