@@ -17,7 +17,9 @@ def extract_dataset(
 ):
     """Extract an InferenceData group or subset of it.
 
-    This function has been deprecated please use extract
+    .. deprecated:: 0.13
+            `extract_dataset` will be removed in ArviZ 0.14, it is replaced by
+            `extract` because the latter allows to obtain both DataSets and DataArrays.
     """
     warnings.warn(
         "extract_dataset has been deprecated, please use extract", FutureWarning, stacklevel=2
