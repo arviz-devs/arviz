@@ -44,7 +44,7 @@ General functions
    :toctree: generated/
 
    concat
-   extract_dataset
+   extract
 
 Data examples
 .............
