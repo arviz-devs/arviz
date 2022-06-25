@@ -58,6 +58,7 @@
 * Fix coord value ignoring for default dims ([2001](https://github.com/arviz-devs/arviz/pull/2001))
 * Fixed plot_posterior with boolean data ([1707](https://github.com/arviz-devs/arviz/pull/1707))
 * Fix min_ess usage in plot_ess ([2002](https://github.com/arviz-devs/arviz/pull/2002))
+* Change `ax.plot` usage to `ax.scatter` in `plot_pair`. ([1990](https://github.com/arviz-devs/arviz/pull/1990))
 
 ### Deprecation
 

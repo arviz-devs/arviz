@@ -101,7 +101,7 @@ def plot_pair(
     divergences_kwargs: dicts, optional
         Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter` for divergences
     scatter_kwargs:
-        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot` when using scatter kind
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter` when using scatter kind
     kde_kwargs: dict, optional
         Additional keywords passed to :func:`arviz.plot_kde` when using kde kind
     hexbin_kwargs: dict, optional
