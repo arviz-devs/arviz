@@ -216,6 +216,10 @@ def _copy_docstring(lib, function):
 
 
 # TODO: try copying substitutions too, or autoreplace them ourselves
-output_notebook.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_notebook")
-output_file.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_file")
+output_notebook.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_notebook").replace(
+    "|save|", "save"
+).replace("|show|", "show")
+output_file.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_file").replace(
+    "|save|", "save"
+).replace("|show|", "show")
 ColumnDataSource.__doc__ += "\n\n" + _copy_docstring("bokeh.models", "ColumnDataSource")

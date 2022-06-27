@@ -11,7 +11,7 @@ Even though contributing code or documentation by sending pull requests on
 the main [ArviZ GitHub repository](https://github.com/arviz-devs/arviz) is the most common way of contributing and
 therefore this guide dedicates many resources to these, ArviZ welcomes any kind of contribution.
 As a clear proof, you can become a core contributor and participate in
-[ArviZ governance](https://github.com/arviz-devs/arviz/blob/main/GOVERNANCE.md)
+{ref}`ArviZ governance <arviz_org:governance>`
 without having contributed code to ArviZ.
 All contributions to ArviZ, either on its codebase, its documentation,
 or its community are valuable and we really appreciate your help.
@@ -26,7 +26,7 @@ Below we list some examples of contributions that might serve as inspiration.
 * [Submitting issues](https://github.com/arviz-devs/arviz/issues/new/choose) related to bugs or desired enhancements. Check the details at {doc}`issue_reports`.
 * Translate our website to languages other than English. Check the details at {ref}`translate`
 * Fixing outstanding [issues](https://github.com/arviz-devs/arviz/issues) (bugs) with the existing codebase. They range from low-level software bugs to higher-level design problems.
-* Contributing or improving the {ref}`documentation <homapage>` (`docs`) or examples (`arviz/examples`).
+* Contributing or improving the {ref}`documentation <homepage>` (`docs`) or examples (`arviz/examples`).
 * Help users submitting issues by making sure their issue is clear and/or providing temporal
   workarounds for them. Check the details at {ref}`issue_triaging`
 * Review Pull Requests ensuring contributions are well tested and documented, that documentation

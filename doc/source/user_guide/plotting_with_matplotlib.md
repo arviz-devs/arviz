@@ -15,8 +15,7 @@ kernelspec:
 
 {doc}`Matplotlib <mpl:index>` is the default backend for ArviZ. Although most of the functions in the {ref}`plot <plot_api>` module work seamlessly with any backend, some advanced plots may require the use of backend specific features. In this guide, advanced plotting with Matplotlib will be covered.
 
-This page can be downloaded as a {jupyter-download:script}`Python script <plotting_with_matplotlib>`
-or as a {jupyter-download:nb}`Jupyter notebook <plotting_with_matplotlib>`.
+This page can be downloaded as a {nb-download}`Jupyter notebook <plotting_with_matplotlib.ipynb>`.
 
 ```{code-cell} ipython3
 import arviz as az

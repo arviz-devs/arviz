@@ -384,45 +384,45 @@ def from_dict(
 
     Parameters
     ----------
-    posterior : dict
-    posterior_predictive : dict
-    predictions: dict
-    sample_stats : dict
-    log_likelihood : dict
+    posterior : dict, optional
+    posterior_predictive : dict, optional
+    predictions: dict, optional
+    sample_stats : dict, optional
+    log_likelihood : dict, optional
         For stats functions, log likelihood data should be stored here.
-    prior : dict
-    prior_predictive : dict
-    observed_data : dict
-    constant_data : dict
-    predictions_constant_data: dict
-    warmup_posterior : dict
-    warmup_posterior_predictive : dict
-    warmup_predictions : dict
-    warmup_log_likelihood : dict
-    warmup_sample_stats : dict
-    save_warmup : bool
+    prior : dict, optional
+    prior_predictive : dict, optional
+    observed_data : dict, optional
+    constant_data : dict, optional
+    predictions_constant_data: dict, optional
+    warmup_posterior : dict, optional
+    warmup_posterior_predictive : dict, optional
+    warmup_predictions : dict, optional
+    warmup_log_likelihood : dict, optional
+    warmup_sample_stats : dict, optional
+    save_warmup : bool, optional
         Save warmup iterations InferenceData object. If not defined, use default
         defined by the rcParams.
     index_origin : int, optional
-    coords : dict[str, iterable]
+    coords : dict of {str : list}, optional
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
-    dims : dict[str, List(str)]
+    dims : dict of {str : list of str}, optional
         A mapping from variables to a list of coordinate names for the variable.
-    pred_dims : dict[str, List(str)]
+    pred_dims : dict of {str : list of str}, optional
         A mapping from variables to a list of coordinate names for predictions.
-    pred_coords : dict[str, List(str)]
+    pred_coords : dict of {str : list}, optional
         A mapping from variables to a list of coordinate values for predictions.
-    attrs : dict
+    attrs : dict, optional
         A dictionary containing attributes for different groups.
-    kwargs : dict
-        A dictionary containing group attrs.
-        Accepted kwargs are:
+    kwargs : dict, optional
+        A dictionary containing group attrs. Accepted kwargs are:
+
         - posterior_attrs, posterior_warmup_attrs : attrs for posterior group
         - sample_stats_attrs, sample_stats_warmup_attrs : attrs for sample_stats group
         - log_likelihood_attrs, log_likelihood_warmup_attrs : attrs for log_likelihood group
         - posterior_predictive_attrs, posterior_predictive_warmup_attrs : attrs for
-                posterior_predictive group
+          posterior_predictive group
         - predictions_attrs, predictions_warmup_attrs : attrs for predictions group
         - prior_attrs : attrs for prior group
         - sample_stats_prior_attrs : attrs for sample_stats_prior group
@@ -430,7 +430,7 @@ def from_dict(
 
     Returns
     -------
-    InferenceData object
+    InferenceData
     """
     return DictConverter(
         posterior=posterior,
