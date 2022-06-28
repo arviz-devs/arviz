@@ -372,7 +372,7 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
             x, density = kde(values, circular=circular, bw=bw)
             point_value = x[np.argmax(density)]
         else:
-            point_value = mode(values)[0][0]
+            point_value = int(mode(values).mode)
     elif point_estimate == "median":
         if skipna:
             point_value = np.nanmedian(values)
