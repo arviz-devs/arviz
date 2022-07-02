@@ -148,18 +148,8 @@ def test_plot_density_discrete(discrete_model):
 
 def test_plot_density_no_subset():
     """Test plot_density works when variables are not subset of one another (#1093)."""
-    model_ab = from_dict(
-        {
-            "a": np.random.normal(size=200),
-            "b": np.random.normal(size=200),
-        }
-    )
-    model_bc = from_dict(
-        {
-            "b": np.random.normal(size=200),
-            "c": np.random.normal(size=200),
-        }
-    )
+    model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
+    model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
     axes = plot_density([model_ab, model_bc])
     assert axes.size == 3
 
@@ -169,18 +159,8 @@ def test_plot_density_nonstring_varnames():
     rv1 = TestRandomVariable("a")
     rv2 = TestRandomVariable("b")
     rv3 = TestRandomVariable("c")
-    model_ab = from_dict(
-        {
-            rv1: np.random.normal(size=200),
-            rv2: np.random.normal(size=200),
-        }
-    )
-    model_bc = from_dict(
-        {
-            rv2: np.random.normal(size=200),
-            rv3: np.random.normal(size=200),
-        }
-    )
+    model_ab = from_dict({rv1: np.random.normal(size=200), rv2: np.random.normal(size=200),})
+    model_bc = from_dict({rv2: np.random.normal(size=200), rv3: np.random.normal(size=200),})
     axes = plot_density([model_ab, model_bc])
     assert axes.size == 3
 
@@ -246,12 +226,10 @@ def test_plot_trace(models, kwargs):
 
 
 @pytest.mark.parametrize(
-    "compact",
-    [True, False],
+    "compact", [True, False],
 )
 @pytest.mark.parametrize(
-    "combined",
-    [True, False],
+    "combined", [True, False],
 )
 def test_plot_trace_legend(compact, combined):
     idata = load_arviz_data("rugby")
@@ -1192,6 +1170,12 @@ def test_plot_hdi_dataset_error(models):
         plot_hdi(np.arange(8), hdi_data=hdi_data)
 
 
+def test_plot_hdi_datetime_error(models):
+    """Check x as datetime raises an error."""
+    with pytest.raises(TypeError, match="Cannot deal with x as type datetime."):
+        plot_hdi(np.arange(start="2022-01-01", stop="2022-01-09", dtype=np.datetime64))
+
+
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
 def test_kde_scipy(limits):
     """
@@ -1576,10 +1560,7 @@ def test_plot_dist_comparison(models, kwargs):
 
 def test_plot_dist_comparison_different_vars():
     data = from_dict(
-        posterior={
-            "x": np.random.randn(4, 100, 30),
-        },
-        prior={"x_hat": np.random.randn(4, 100, 30)},
+        posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
     )
     with pytest.raises(KeyError):
         plot_dist_comparison(data, var_names="x")
@@ -1595,9 +1576,7 @@ def test_plot_dist_comparison_combinedims(models):
 
 def test_plot_dist_comparison_different_vars_combinedims():
     data = from_dict(
-        posterior={
-            "x": np.random.randn(4, 100, 30),
-        },
+        posterior={"x": np.random.randn(4, 100, 30),},
         prior={"x_hat": np.random.randn(4, 100, 30)},
         dims={"x": ["3rd_dim"], "x_hat": ["3rd_dim"]},
     )
@@ -1635,11 +1614,7 @@ def test_plot_bpv_discrete():
     "kwargs",
     [
         {},
-        {
-            "binwidth": 0.5,
-            "stackratio": 2,
-            "nquantiles": 20,
-        },
+        {"binwidth": 0.5, "stackratio": 2, "nquantiles": 20,},
         {"point_interval": True},
         {
             "point_interval": True,
@@ -1672,12 +1647,7 @@ def test_plot_dot(continuous_model, kwargs):
     "kwargs",
     [
         {"rotated": True},
-        {
-            "point_interval": True,
-            "rotated": True,
-            "dotcolor": "grey",
-            "binwidth": 0.5,
-        },
+        {"point_interval": True, "rotated": True, "dotcolor": "grey", "binwidth": 0.5,},
         {
             "rotated": True,
             "point_interval": True,
@@ -1781,12 +1751,7 @@ def test_plot_lm_multidim(multidim_models):
 
 
 @pytest.mark.parametrize(
-    "val_err_kwargs",
-    [
-        {},
-        {"kind_pp": "bad_kind"},
-        {"kind_model": "bad_kind"},
-    ],
+    "val_err_kwargs", [{}, {"kind_pp": "bad_kind"}, {"kind_model": "bad_kind"},],
 )
 def test_plot_lm_valueerror(multidim_models, val_err_kwargs):
     """Test error plot_dim gets no value for multidim data and wrong value in kind_... args."""
@@ -1796,11 +1761,7 @@ def test_plot_lm_valueerror(multidim_models, val_err_kwargs):
 
 
 @pytest.mark.parametrize(
-    "warn_kwargs",
-    [
-        {"y_hat": "bad_name"},
-        {"y_model": "bad_name"},
-    ],
+    "warn_kwargs", [{"y_hat": "bad_name"}, {"y_model": "bad_name"},],
 )
 def test_plot_lm_warning(models, warn_kwargs):
     """Test Warning when needed groups or variables are not there in idata."""
@@ -1909,10 +1870,7 @@ def test_plot_ts_multidim(kwargs):
         observed_data=data,
         posterior_predictive=posterior_predictive,
         constant_data=const_data,
-        dims={
-            "y": ["dim1", "dim2"],
-            "z": ["holdout_dim1", "holdout_dim2"],
-        },
+        dims={"y": ["dim1", "dim2"], "z": ["holdout_dim1", "holdout_dim2"],},
         coords={
             "dim1": range(ndim1),
             "dim2": range(ndim2),
