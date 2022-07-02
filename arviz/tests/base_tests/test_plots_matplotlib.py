@@ -1170,7 +1170,7 @@ def test_plot_hdi_dataset_error(models):
         plot_hdi(np.arange(8), hdi_data=hdi_data)
 
 
-def test_plot_hdi_datetime_error(models):
+def test_plot_hdi_datetime_error():
     """Check x as datetime raises an error."""
     x_data = np.arange(start="2022-01-01", stop="2022-03-01", dtype=np.datetime64)
     y_data = np.random.normal(0, 5, (1, 200, x_data.shape[0]))
