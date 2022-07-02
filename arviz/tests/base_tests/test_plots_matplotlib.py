@@ -1172,9 +1172,11 @@ def test_plot_hdi_dataset_error(models):
 
 def test_plot_hdi_datetime_error(models):
     """Check x as datetime raises an error."""
-    y_data = np.random.normal(2 + x_data * 0.5, 0.5, (1, 200, 100))
+    x_data = np.arange(start="2022-01-01", stop="2022-03-01", dtype=np.datetime64)
+    y_data = np.random.normal(0, 5, (1, 200, x_data.shape[0]))
+    hdi_data = hdi(y_data)
     with pytest.raises(TypeError, match="Cannot deal with x as type datetime."):
-        plot_hdi(np.arange(start="2022-01-01", stop="2022-01-09", dtype=np.datetime64), y=y_data)
+        plot_hdi(x=x_data, y=y_data, hdi_data=hdi_data)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
