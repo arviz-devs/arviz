@@ -650,9 +650,8 @@ def _kde_circular(
     # Determine bandwidth
     if isinstance(bw, bool):
         raise ValueError("`bw` can't be of type `bool`.\nExpected a positive numeric or 'taylor'")
-    if isinstance(bw, (int, float)):
-        if bw < 0:
-            raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
+    if isinstance(bw, (int, float)) and bw < 0:
+        raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
     if isinstance(bw, str):
         if bw == "taylor":
             bw = _bw_taylor(x)
@@ -716,10 +715,9 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction,
         npad = int(grid_len / 5)
         f = np.concatenate([f[npad - 1 :: -1], f, f[grid_len : grid_len - npad - 1 : -1]])
         pdf = convolve(f, kernel, mode="same", method="direct")[npad : npad + grid_len]
-        pdf /= bw * (2 * np.pi) ** 0.5
     else:
         pdf = convolve(f, kernel, mode="same", method="direct")
-        pdf /= bw * (2 * np.pi) ** 0.5
+    pdf /= bw * (2 * np.pi) ** 0.5
 
     return grid, pdf
 

@@ -386,28 +386,21 @@ def _calculate_ics(
         raise_non_pointwise = False
         if not f"{precomputed_ic}_i" in arbitrary_elpd:
             raise_non_pointwise = True
-        if precomputed_elpds:
-            if not all(
-                elpd_data.index[0].split("_")[1] == precomputed_ic
-                for elpd_data in precomputed_elpds.values()
-            ):
-                raise ValueError(
-                    "All information criteria to be compared must be the same "
-                    "but found both loo and waic."
-                )
-            if not all(
-                elpd_data["scale"] == precomputed_scale for elpd_data in precomputed_elpds.values()
-            ):
-                raise ValueError("All information criteria to be compared must use the same scale")
-            if (
-                not all(
-                    f"{precomputed_ic}_i" in elpd_data for elpd_data in precomputed_elpds.values()
-                )
-                or raise_non_pointwise
-            ):
-                raise ValueError(
-                    "Not all provided ELPDData have been calculated with pointwise=True"
-                )
+        if any(
+            elpd_data.index[0].split("_")[1] != precomputed_ic
+            for elpd_data in precomputed_elpds.values()
+        ):
+            raise ValueError(
+                "All information criteria to be compared must be the same "
+                "but found both loo and waic."
+            )
+        if any(elpd_data["scale"] != precomputed_scale for elpd_data in precomputed_elpds.values()):
+            raise ValueError("All information criteria to be compared must use the same scale")
+        if (
+            any(f"{precomputed_ic}_i" not in elpd_data for elpd_data in precomputed_elpds.values())
+            or raise_non_pointwise
+        ):
+            raise ValueError("Not all provided ELPDData have been calculated with pointwise=True")
         if ic is not None and ic.lower() != precomputed_ic:
             warnings.warn(
                 "Provided ic argument is incompatible with precomputed elpd data. "
@@ -575,9 +568,8 @@ def hdi(
     """
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
-    else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+    elif not 1 >= hdi_prob > 0:
+        raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     func_kwargs = {
         "hdi_prob": hdi_prob,
@@ -1344,9 +1336,8 @@ def summary(
         labeller = BaseLabeller()
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
-    else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+    elif not 1 >= hdi_prob > 0:
+        raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     if isinstance(data, InferenceData):
         if group is None:
@@ -1359,10 +1350,10 @@ def summary(
             else:
                 warnings.warn(f"Selecting first found group: {data.groups()[0]}")
                 dataset = data[data.groups()[0]]
-        else:
-            if group not in data.groups():
-                raise TypeError(f"InferenceData does not contain group: {group}")
+        elif group in data.groups():
             dataset = data[group]
+        else:
+            raise TypeError(f"InferenceData does not contain group: {group}")
     else:
         dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset, filter_vars)
@@ -1503,15 +1494,14 @@ def summary(
         metrics.extend(diagnostics)
         metric_names.extend(diagnostics_names)
 
-    if circ_var_names:
-        if kind != "diagnostics" and stat_focus == "mean":
-            for metric, circ_stat in zip(
-                # Replace only the first 5 statistics for their circular equivalent
-                metrics[:5],
-                (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
-            ):
-                for circ_var in circ_var_names:
-                    metric[circ_var] = circ_stat[circ_var]
+    if circ_var_names and kind != "diagnostics" and stat_focus == "mean":
+        for metric, circ_stat in zip(
+            # Replace only the first 5 statistics for their circular equivalent
+            metrics[:5],
+            (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
+        ):
+            for circ_var in circ_var_names:
+                metric[circ_var] = circ_stat[circ_var]
 
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
