@@ -924,7 +924,7 @@ def psislw(log_weights, reff=1.0):
     cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member, assignment-from-no-return
 
     # create output array with proper dimensions
-    out = tuple([np.empty_like(log_weights), np.empty(shape)])
+    out = np.empty_like(log_weights), np.empty(shape)
 
     # define kwargs
     func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "out": out}
