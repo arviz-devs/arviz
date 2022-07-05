@@ -80,10 +80,7 @@ def plot_density(
         for var_name, selection, isel, values in plotters:
             label = labeller.make_label_vert(var_name, selection, isel)
 
-            if data_labels:
-                data_label = data_labels[m_idx]
-            else:
-                data_label = None
+            data_label = data_labels[m_idx] if data_labels else None
 
             plotted = _d_helper(
                 values.flatten(),

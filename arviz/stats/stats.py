@@ -384,9 +384,7 @@ def _calculate_ics(
         _, arbitrary_elpd = precomputed_elpds.popitem()
         precomputed_ic = arbitrary_elpd.index[0].split("_")[1]
         precomputed_scale = arbitrary_elpd["scale"]
-        raise_non_pointwise = False
-        if not f"{precomputed_ic}_i" in arbitrary_elpd:
-            raise_non_pointwise = True
+        raise_non_pointwise = f"{precomputed_ic}_i" not in arbitrary_elpd
         if any(
             elpd_data.index[0].split("_")[1] != precomputed_ic
             for elpd_data in precomputed_elpds.values()
