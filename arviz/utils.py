@@ -236,7 +236,7 @@ class interactive_backend:  # pylint: disable=invalid-name
         except ImportError as err:
             raise ImportError(
                 "The exception below was risen while importing Ipython, this "
-                "context manager can only be used inside ipython sessions:\n{}".format(err)
+                f"context manager can only be used inside ipython sessions:\n{err}"
             ) from err
         self.ipython = get_ipython()
         if self.ipython is None:
