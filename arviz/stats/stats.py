@@ -836,42 +836,40 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     )
     p_loo = lppd - loo_lppd / scale_value
 
-    if pointwise:
-        if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
-            warnings.warn(
-                "The point-wise LOO is the same with the sum LOO, please double check "
-                "the Observed RV in your model to make sure it returns element-wise logp."
-            )
-        return ELPDData(
-            data=[
-                loo_lppd,
-                loo_lppd_se,
-                p_loo,
-                n_samples,
-                n_data_points,
-                warn_mg,
-                loo_lppd_i.rename("loo_i"),
-                pareto_shape,
-                scale,
-            ],
-            index=[
-                "elpd_loo",
-                "se",
-                "p_loo",
-                "n_samples",
-                "n_data_points",
-                "warning",
-                "loo_i",
-                "pareto_k",
-                "scale",
-            ],
-        )
-
-    else:
+    if not pointwise:
         return ELPDData(
             data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale],
             index=["elpd_loo", "se", "p_loo", "n_samples", "n_data_points", "warning", "scale"],
         )
+    if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
+        warnings.warn(
+            "The point-wise LOO is the same with the sum LOO, please double check "
+            "the Observed RV in your model to make sure it returns element-wise logp."
+        )
+    return ELPDData(
+        data=[
+            loo_lppd,
+            loo_lppd_se,
+            p_loo,
+            n_samples,
+            n_data_points,
+            warn_mg,
+            loo_lppd_i.rename("loo_i"),
+            pareto_shape,
+            scale,
+        ],
+        index=[
+            "elpd_loo",
+            "se",
+            "p_loo",
+            "n_samples",
+            "n_data_points",
+            "warning",
+            "loo_i",
+            "pareto_k",
+            "scale",
+        ],
+    )
 
 
 def psislw(log_weights, reff=1.0):
@@ -1668,36 +1666,7 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     waic_sum = np.sum(waic_i.values)
     p_waic = np.sum(vars_lpd.values)
 
-    if pointwise:
-        if np.equal(waic_sum, waic_i).all():  # pylint: disable=no-member
-            warnings.warn(
-                """The point-wise WAIC is the same with the sum WAIC, please double check
-            the Observed RV in your model to make sure it returns element-wise logp.
-            """
-            )
-        return ELPDData(
-            data=[
-                waic_sum,
-                waic_se,
-                p_waic,
-                n_samples,
-                n_data_points,
-                warn_mg,
-                waic_i.rename("waic_i"),
-                scale,
-            ],
-            index=[
-                "elpd_waic",
-                "se",
-                "p_waic",
-                "n_samples",
-                "n_data_points",
-                "warning",
-                "waic_i",
-                "scale",
-            ],
-        )
-    else:
+    if not pointwise:
         return ELPDData(
             data=[waic_sum, waic_se, p_waic, n_samples, n_data_points, warn_mg, scale],
             index=[
@@ -1710,6 +1679,34 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
                 "scale",
             ],
         )
+    if np.equal(waic_sum, waic_i).all():  # pylint: disable=no-member
+        warnings.warn(
+            """The point-wise WAIC is the same with the sum WAIC, please double check
+            the Observed RV in your model to make sure it returns element-wise logp.
+            """
+        )
+    return ELPDData(
+        data=[
+            waic_sum,
+            waic_se,
+            p_waic,
+            n_samples,
+            n_data_points,
+            warn_mg,
+            waic_i.rename("waic_i"),
+            scale,
+        ],
+        index=[
+            "elpd_waic",
+            "se",
+            "p_waic",
+            "n_samples",
+            "n_data_points",
+            "warning",
+            "waic_i",
+            "scale",
+        ],
+    )
 
 
 def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
