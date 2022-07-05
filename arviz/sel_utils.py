@@ -85,7 +85,7 @@ def _dims(data, var_name, skip_dims):
 
 
 def _zip_dims(new_dims, vals):
-    return [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
+    return [dict(zip(new_dims, prod)) for prod in product(*vals)]
 
 
 def xarray_sel_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):

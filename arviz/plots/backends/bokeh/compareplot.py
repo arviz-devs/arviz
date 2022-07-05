@@ -83,9 +83,7 @@ def plot_compare(
 
     else:
         ax.yaxis.ticker = yticks_pos[::2]
-        ax.yaxis.major_label_overrides = {
-            key: value for key, value in zip(yticks_pos[::2], yticks_labels)
-        }
+        ax.yaxis.major_label_overrides = dict(zip(yticks_pos[::2], yticks_labels))
 
     elpd_circ = ax.circle(
         comp_df[information_criterion],
