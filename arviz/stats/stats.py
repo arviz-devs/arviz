@@ -1,5 +1,7 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
+
+import itertools
 import warnings
 from copy import deepcopy
 from typing import List, Optional, Tuple, Union, Mapping, cast, Callable
@@ -249,9 +251,8 @@ def compare(
         def gradient(weights):
             w_full = w_fuller(weights)
             grad = np.zeros(km1)
-            for k in range(km1):
-                for i in range(rows):
-                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, km1]) / np.dot(exp_ic_i[i], w_full)
+            for k, i in itertools.product(range(km1), range(rows)):
+                grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, km1]) / np.dot(exp_ic_i[i], w_full)
             return -grad
 
         theta = np.full(km1, 1.0 / cols)
