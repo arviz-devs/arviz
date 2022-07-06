@@ -43,27 +43,34 @@ You can {ref}`translate <translate>` our website to languages other than english
 For example, you can check if the documentation renders correctly and has no typos or mistakes.
 
 ### Manage issues
-Helping to manage or triage the open issues can be a great contribution and a great opportunity to learn about the various areas of the project. You can {ref} `triage existing issues <issue_triaging>`to make them clear and/or provide temporary workarounds for them.
+Helping to manage or triage the open issues can be a great contribution and
+a great opportunity to learn about the various areas of the project.
+You can {ref} `triage existing issues <issue_triaging>`to make them clear and/or provide temporary workarounds for them.
 
 ### Write documentation
-You can contribute to ArviZ’s documentation by either creating new content or editing existing content. For instance, you can add new ArviZ examples. To get involved with the documentation:
+You can contribute to ArviZ’s documentation by either creating new content or editing existing content.
+For instance, you can add new ArviZ examples.
+To get involved with the documentation:
 1. Familiarize yourself with the  {ref}`documentation content structure <content_structure>` and the {ref}`tool chain <doc_toolchain>` involved in creating the website.
 2. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing changes <review_prs>`.
 3. Work on your content.
 4. {ref}`Build <sphinx_doc_build>` your documentation and preview the doc changes.
 
 ### Support outreach initiatives
-Support ArviZ {ref}`outreach initiatives <oureach_contrib>` such as writing blog posts, case studies,  getting people to use ArviZ at your company or university, etc.
+Support ArviZ {ref}`outreach initiatives <oureach_contrib>` such as writing blog posts, case studies, getting people to use ArviZ at your company or university, etc.
 
 ### Make changes in the code
-Fix outstanding issues (bugs) in the existing codebase. The issue can range from low-level software bugs to high-level design problems. You can also add new features to the codebase or improve the existing functionality. To fix bugs or add new features, do the following:
+Fix outstanding issues (bugs) in the existing codebase.
+The issue can range from low-level software bugs to high-level design problems.
+You can also add new features to the codebase or improve the existing functionality.
+To fix bugs or add new features, do the following:
 1. Familiarize yourself with the {ref}`guidelines <steps_before_working>` before starting your work.
 2. Understand the {ref}`development process <dev_summary>` and code conventions.
 3. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing <review_prs>`changes.
 4. Review and test your code.
 
 ```{toctree}
-:maxdepth: 2
+:hidden:
 :caption: Contribution types
 
 issue_reports
@@ -72,7 +79,6 @@ issue_triaging
 outreach
 review_prs
 contributing_prs
-pr_tutorial
 ```
 
 :::{toctree}
