@@ -1,43 +1,53 @@
 (contributing_guide)=
 # Contributing to ArviZ
-As a scientific, community-driven, open source software project,
-ArviZ welcomes contributions from interested individuals or groups.
-These guidelines are provided to give potential contributors information
-to make their contributions compliant with the conventions of the ArviZ project,
-and maximize the probability of such contributions to be merged as quickly
-and efficiently as possible.
+## Welcome
+Welcome to the [ArviZ](https://www.arviz.org/en/latest/) project! If you’re reading this guide, that probably means you’d like to get involved and start contributing to the project. ArviZ is a  multi-language open-source project that provides tools for exploratory analysis of Bayesian models.   The package includes functions for posterior analysis, data storage, sample diagnostics, model checking, and comparison.
 
-Even though contributing code or documentation by sending pull requests on
-the main [ArviZ GitHub repository](https://github.com/arviz-devs/arviz) is the most common way of contributing and
-therefore this guide dedicates many resources to these, ArviZ welcomes any kind of contribution.
-As a clear proof, you can become a core contributor and participate in
-{ref}`ArviZ governance <arviz_org:governance>`
-without having contributed code to ArviZ.
-All contributions to ArviZ, either on its codebase, its documentation,
-or its community are valuable and we really appreciate your help.
+As a scientific, community-driven, open-source software project, we welcome contributions from interested individuals or groups. The guidelines specified in this document can help new contributors make their contributions compliant with the conventions of the ArviZ python library, and maximize the probability of such contributions being merged as quickly and as efficiently as possible.
 
-:::{tip}
-Contact us on [Gitter](https://gitter.im/arviz-devs/community) if you want to
-contribute to the project but you are not sure where you can contribute or how to start.
-:::
+All kinds of contributions to ArviZ, either on its codebase, its documentation, or its community are valuable and we appreciate your help. We constantly encourage non-code contributors to become a core contributor and participate in {ref}`ArviZ governance <arviz_org:governance>`.
 
-Below we list some examples of contributions that might serve as inspiration.
+## Before you begin
+Before contributing to ArviZ, please make sure to read and observe the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/main/CODE_OF_CONDUCT.md).   
+ 
+## Communication
+Contact us on [Gitter](https://gitter.im/arviz-devs/community) if you want to contribute to the project but you are not sure where you can contribute or how to start.
 
-* [Submitting issues](https://github.com/arviz-devs/arviz/issues/new/choose) related to bugs or desired enhancements. Check the details at {doc}`issue_reports`.
-* Translate our website to languages other than English. Check the details at {ref}`translate`
-* Fixing outstanding [issues](https://github.com/arviz-devs/arviz/issues) (bugs) with the existing codebase. They range from low-level software bugs to higher-level design problems.
-* Contributing or improving the {ref}`documentation <homepage>` (`docs`) or examples (`arviz/examples`).
-* Help users submitting issues by making sure their issue is clear and/or providing temporal
-  workarounds for them. Check the details at {ref}`issue_triaging`
-* Review Pull Requests ensuring contributions are well tested and documented, that documentation
-  renders correctly and has no typos or mistakes. Check the details at {ref}`review_prs`
-* Adding new or improved functionality to the existing codebase.
+## Contributing to ArviZ
+The most common way of contributing to the project is sending pull requests on the main [ArviZ Github repository](https://github.com/arviz-devs/arviz). You can contribute to ArviZ in the following ways:
 
-Further information on how to contribute to ArviZ can be found on these specific pages:
+### Create an issue
+[Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check [Issue reports](https://arviz-devs.github.io/arviz/contributing/issue_reports.html) for details on how to write an issue.
+
+### Translate ArviZ website
+You can [translate](https://python.arviz.org/en/latest/contributing/translate.html#translate) our website to languages other than english. 
+
+### Review PRs
+{ref}`Review pull requests <review_prs>` to ensure that the contributions are well tested and documented. For example, you can check if the documentation renders correctly and has no typos or mistakes. 
+
+### Manage issues
+Helping to manage or triage the open issues can be a great contribution and a great opportunity to learn about the various areas of the project. You can [triage existing issues](https://arviz-devs.github.io/arviz/contributing/issue_triaging.html#issue-triaging) to make them clear and/or provide temporary workarounds for them. 
+
+### Write documentation
+You can contribute to ArviZ’s documentation by either creating new content or editing existing content. For instance, you can add new ArviZ examples. To get involved with the documentation:
+1. Familiarize yourself with the [documentation content structure](https://arviz-devs.github.io/arviz/contributing/content_structure.html) and the [tool chain](https://arviz-devs.github.io/arviz/contributing/doc_toolchain.html) involved in creating the website.
+2. Understand the basic workflow for opening a [pull request](https://arviz-devs.github.io/arviz/contributing/pr_tutorial.html) and [reviewing changes](https://arviz-devs.github.io/arviz/contributing/review_prs.html).
+3. Work on your content.
+4. {ref}`Build <sphinx_doc_build>` your documentation and preview the doc changes. 
+   
+### Support outreach initiatives
+Support ArviZ {ref}`outreach initiatives <oureach_contrib>` such as writing blog posts, case studies,  getting people to use ArviZ at your company or university, etc.
+
+### Make changes in the code
+Fix outstanding issues (bugs) in the existing codebase. The issue can range from low-level software bugs to high-level design problems. You can also add new features to the codebase or improve the existing functionality. To fix bugs or add new features, do the following:
+1. Familiarize yourself with the {ref}`guidelines <steps_before_working>` before starting your work.
+2. Understand the {ref}`development process <dev_summary>` and code conventions.
+3. Understand the basic workflow for opening a [pull request](https://arviz-devs.github.io/arviz/contributing/pr_tutorial.html) and [reviewing](https://arviz-devs.github.io/arviz/contributing/review_prs.html) changes.
+4. Review and test your code. 
 
 ```{toctree}
 :maxdepth: 2
-:caption: Contribution types overview
+:caption: Contribution types
 
 issue_reports
 translate
@@ -45,6 +55,7 @@ issue_triaging
 outreach
 review_prs
 contributing_prs
+pr_tutorial
 ```
 
 :::{toctree}
