@@ -59,10 +59,8 @@ Support ArviZ {ref}`outreach initiatives <oureach_contrib>` such as writing blog
 Fix outstanding issues (bugs) in the existing codebase. The issue can range from low-level software bugs to high-level design problems. You can also add new features to the codebase or improve the existing functionality. To fix bugs or add new features, do the following:
 1. Familiarize yourself with the {ref}`guidelines <steps_before_working>` before starting your work.
 2. Understand the {ref}`development process <dev_summary>` and code conventions.
-3. Understand the basic workflow for opening a {ref} `pull request <pr_tutorial>` and {ref}`reviewing <review_prs>`changes.
+3. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing <review_prs>`changes.
 4. Review and test your code.
-
-
 
 ```{toctree}
 :maxdepth: 2
