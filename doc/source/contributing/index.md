@@ -45,7 +45,7 @@ For example, you can check if the documentation renders correctly and has no typ
 ### Manage issues
 Helping to manage or triage the open issues can be a great contribution and
 a great opportunity to learn about the various areas of the project.
-You can {ref} `triage existing issues <issue_triaging>`to make them clear and/or provide temporary workarounds for them.
+You can {ref}`triage existing issues <issue_triaging>` to make them clear and/or provide temporary workarounds for them.
 
 ### Write documentation
 You can contribute to ArviZ’s documentation by either creating new content or editing existing content.
