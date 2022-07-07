@@ -90,8 +90,7 @@ class BaseLabeller:
                     for (dim, v), (_, i) in zip(sel.items(), isel.items())
                 ]
             )
-        else:
-            return ""
+        return ""
 
     def var_name_to_str(self, var_name: Union[str, None]):
         """WIP."""
