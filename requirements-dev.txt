@@ -7,6 +7,4 @@ pylint
 pytest
 pytest-cov
 black ; python_version >= '3.6'
-typing_copilot ; python_version >= '3.7'
-mypy<0.800
 cloudpickle<1.5.0
