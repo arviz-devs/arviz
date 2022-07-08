@@ -10,6 +10,10 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
+      Python_310:
+        python.version: "3.10"
+        PyPIGithub: false
+        name: "Python 3.10"
       Python_39:
         python.version: "3.9"
         PyPIGithub: false
@@ -22,10 +26,7 @@ jobs:
         python.version: "3.8"
         PyPIGithub: false
         name: "Python 3.8"
-      Python_37:
-        python.version: "3.7"
-        PyPIGithub: false
-        name: "Python 3.7"
+
 
   steps:
   - task: UsePythonVersion@0
