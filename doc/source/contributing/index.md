@@ -33,7 +33,7 @@ but there are many other ways to help the project.
 You can contribute to ArviZ in the following ways:
 
 ### Create an issue
-[Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check  {ref}`issue_reports <issue_reports>` for details on how to write an issue.
+[Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check  {ref}`issue_reports` for details on how to write an issue.
 
 ### Translate ArviZ website
 You can {ref}`translate <translate>` our website to languages other than english.
@@ -66,7 +66,7 @@ You can also add new features to the codebase or improve the existing functional
 To fix bugs or add new features, do the following:
 1. Familiarize yourself with the {ref}`guidelines <steps_before_working>` before starting your work.
 2. Understand the {ref}`development process <dev_summary>` and code conventions.
-3. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing <review_prs>`changes.
+3. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing <review_prs>` changes.
 4. Review and test your code.
 
 ```{toctree}
