@@ -1,3 +1,4 @@
+(issue_reports)=
 # Issue reports
 
 We appreciate being notified of problems with the existing ArviZ code.

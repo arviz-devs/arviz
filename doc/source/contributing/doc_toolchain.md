@@ -1,3 +1,4 @@
+(doc_toolchain)=
 # Documentation toolchain
 
 ArviZ documentation is built using a Python documentation tool, [Sphinx](https://www.sphinx-doc.org/en/master/).

@@ -13,6 +13,8 @@ to ensure that any new contribution does not strongly overlap with existing
 functionality and open a "Feature Request" issue before starting to work
 on the new feature.
 
+(steps_before_working)=
+
 ## Steps before starting work
 Before starting work on a pull request double-check that no one else
 is working on the ticket in both issue tickets and pull requests.
