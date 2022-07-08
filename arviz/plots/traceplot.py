@@ -198,10 +198,7 @@ def plot_trace(
 
     var_names = _var_names(var_names, coords_data, filter_vars)
 
-    if compact:
-        skip_dims = set(coords_data.dims) - {"chain", "draw"}
-    else:
-        skip_dims = set()
+    skip_dims = set(coords_data.dims) - {"chain", "draw"} if compact else set()
 
     plotters = list(
         xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)

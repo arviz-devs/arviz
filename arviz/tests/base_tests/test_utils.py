@@ -301,13 +301,13 @@ def test_flatten_inference_data_to_dict(
                 assert any("sample_stats" in item for item in res_dict)
         else:
             assert any("prior" in item for item in res_dict)
+    elif groups == "prior_groups":
+        assert all("prior" not in item for item in res_dict)
+
     else:
-        if groups != "prior_groups":
-            assert not any("posterior" in item for item in res_dict)
-            if var_names is None:
-                assert not any("sample_stats" in item for item in res_dict)
-        else:
-            assert not any("prior" in item for item in res_dict)
+        assert all("posterior" not in item for item in res_dict)
+        if var_names is None:
+            assert all("sample_stats" not in item for item in res_dict)
 
 
 @pytest.mark.parametrize("mean", [0, np.pi, 4 * np.pi, -2 * np.pi, -10 * np.pi])

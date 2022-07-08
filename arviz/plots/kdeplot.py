@@ -262,18 +262,12 @@ def plot_kde(
     if values2 is None:
 
         if bw == "default":
-            if is_circular:
-                bw = "taylor"
-            else:
-                bw = "experimental"
+            bw = "taylor" if is_circular else "experimental"
 
         grid, density = kde(values, is_circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
         lower, upper = grid[0], grid[-1]
 
-        if cumulative:
-            density_q = density
-        else:
-            density_q = density.cumsum() / density.sum()
+        density_q = density if cumulative else density.cumsum() / density.sum()
 
         # This is just a hack placeholder for now
         xmin, xmax, ymin, ymax, gridsize = [None] * 5

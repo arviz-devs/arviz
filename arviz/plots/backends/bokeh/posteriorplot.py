@@ -255,8 +255,10 @@ def _plot_posterior_op(
             ax.text(
                 x=list(hdi_i) + [(hdi_i[0] + hdi_i[1]) / 2],
                 y=[max_data * 0.07, max_data * 0.07, max_data * 0.3],
-                text=list(map(str, map(lambda x: round_num(x, round_to), hdi_i)))
-                + [format_as_percent(hdi_prob) + " HDI"],
+                text=(
+                    list(map(str, map(lambda x: round_num(x, round_to), hdi_i)))
+                    + [f"{format_as_percent(hdi_prob)} HDI"]
+                ),
                 text_align="center",
             )
 

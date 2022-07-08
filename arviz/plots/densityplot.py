@@ -129,7 +129,7 @@ def plot_density(
     See Also
     --------
     plot_dist : Plot distribution as histogram or kernel density estimates.
-    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book.
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke's book.
 
     Examples
     --------
@@ -185,10 +185,10 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
-    if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_dataset(data, group=group)]
-    else:
+    if isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(datum, group=group) for datum in data]
+    else:
+        datasets = [convert_to_dataset(data, group=group)]
 
     if transform is not None:
         datasets = [transform(dataset) for dataset in datasets]
@@ -201,21 +201,17 @@ def plot_density(
     n_data = len(datasets)
 
     if data_labels is None:
-        if n_data > 1:
-            data_labels = [f"{idx}" for idx in range(n_data)]
-        else:
-            data_labels = [""]
+        data_labels = [f"{idx}" for idx in range(n_data)] if n_data > 1 else [""]
     elif len(data_labels) != n_data:
         raise ValueError(
-            "The number of names for the models ({}) "
-            "does not match the number of models ({})".format(len(data_labels), n_data)
+            f"The number of names for the models ({len(data_labels)}) "
+            f"does not match the number of models ({n_data})"
         )
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
-    else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+    elif not 1 >= hdi_prob > 0:
+        raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     to_plot = [
         list(xarray_var_iter(data, var_names, combined=True, skip_dims=combine_dims))
@@ -252,10 +248,7 @@ def plot_density(
     rows, cols = default_grid(length_plotters, grid=grid, max_cols=3)
 
     if bw == "default":
-        if circular:
-            bw = "taylor"
-        else:
-            bw = "experimental"
+        bw = "taylor" if circular else "experimental"
 
     plot_density_kwargs = dict(
         ax=ax,

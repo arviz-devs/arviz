@@ -264,10 +264,10 @@ def _extract_arviz_dict_from_inference_data(
              (number_of_chains, chain_length, parameter_dimension)
 
     """
-    variable_name_to_samples_map = {}
-
-    for key, value in idata.posterior.to_dict()["data_vars"].items():
-        variable_name_to_samples_map[key] = np.array(value["data"])
+    variable_name_to_samples_map = {
+        key: np.array(value["data"])
+        for key, value in idata.posterior.to_dict()["data_vars"].items()
+    }
 
     return variable_name_to_samples_map
 

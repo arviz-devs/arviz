@@ -135,7 +135,7 @@ def plot_dist(
 
     See Also
     --------
-    plot_posterior : Plot Posterior densities in the style of John K. Kruschke’s book.
+    plot_posterior : Plot Posterior densities in the style of John K. Kruschke's book.
     plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
     plot_kde : 1D or 2D KDE plot taking into account boundary conditions.
 

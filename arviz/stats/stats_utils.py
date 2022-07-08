@@ -261,11 +261,10 @@ def update_docstring(ufunc, func, n_output=1):
         output_core_dims = f" tuple([] for _ in range({n_output}))"
         msg = f"xr.apply_ufunc(ufunc, dataset, input_core_dims={input_core_dims}, "
         msg += f"output_core_dims={ output_core_dims})"
-        ufunc.__doc__ += msg
     else:
         output_core_dims = ""
         msg = f"xr.apply_ufunc(ufunc, dataset, input_core_dims={input_core_dims})"
-        ufunc.__doc__ += msg
+    ufunc.__doc__ += msg
     ufunc.__doc__ += "\n\n"
     ufunc.__doc__ += "For example: np.std(data, ddof=1) --> n_args=2"
     if docstring:
@@ -328,7 +327,7 @@ def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, c
         ary_max -= np.log(b_inv)
     elif b:
         ary_max += np.log(b)
-    out += ary_max.squeeze() if not keepdims else ary_max
+    out += ary_max if keepdims else ary_max.squeeze()
     # transform to scalar if possible
     return out if out.shape else dtype(out)
 
@@ -526,12 +525,12 @@ def stats_variance_2d(data, ddof=0, axis=1):
         var = np.zeros(a_a)
         for i in range(a_a):
             var[i] = stats_variance_1d(data[i], ddof=ddof)
-        return var
     else:
         var = np.zeros(b_b)
         for i in range(b_b):
             var[i] = stats_variance_1d(data[:, i], ddof=ddof)
-        return var
+
+    return var
 
 
 @conditional_vect

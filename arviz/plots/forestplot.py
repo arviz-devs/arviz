@@ -136,7 +136,7 @@ def plot_forest(
 
     See Also
     --------
-    plot_posterior: Plot Posterior densities in the style of John K. Kruschke’s book.
+    plot_posterior: Plot Posterior densities in the style of John K. Kruschke's book.
     plot_density: Generate KDE plots for continuous variables and histograms for discrete ones.
 
     Examples
@@ -250,9 +250,8 @@ def plot_forest(
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
-    else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+    elif not 1 >= hdi_prob > 0:
+        raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     plot_forest_kwargs = dict(
         ax=ax,

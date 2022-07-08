@@ -197,14 +197,14 @@ def ess(
                 return ess_func(  # pylint: disable=unexpected-keyword-arg
                     data, prob=prob, relative=relative
                 )
-            else:
-                return ess_func(data, relative=relative)
-        else:
-            msg = (
-                "Only uni-dimensional ndarray variables are supported."
-                " Please transform first to dataset with `az.convert_to_dataset`."
-            )
-            raise TypeError(msg)
+
+            return ess_func(data, relative=relative)
+
+        msg = (
+            "Only uni-dimensional ndarray variables are supported."
+            " Please transform first to dataset with `az.convert_to_dataset`."
+        )
+        raise TypeError(msg)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
@@ -318,12 +318,12 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
         data = np.atleast_2d(data)
         if len(data.shape) < 3:
             return rhat_func(data)
-        else:
-            msg = (
-                "Only uni-dimensional ndarray variables are supported."
-                " Please transform first to dataset with `az.convert_to_dataset`."
-            )
-            raise TypeError(msg)
+
+        msg = (
+            "Only uni-dimensional ndarray variables are supported."
+            " Please transform first to dataset with `az.convert_to_dataset`."
+        )
+        raise TypeError(msg)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
@@ -415,14 +415,14 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask_kwargs=None):
         if len(data.shape) < 3:
             if prob is not None:
                 return mcse_func(data, prob=prob)  # pylint: disable=unexpected-keyword-arg
-            else:
-                return mcse_func(data)
-        else:
-            msg = (
-                "Only uni-dimensional ndarray variables are supported."
-                " Please transform first to dataset with `az.convert_to_dataset`."
-            )
-            raise TypeError(msg)
+
+            return mcse_func(data)
+
+        msg = (
+            "Only uni-dimensional ndarray variables are supported."
+            " Please transform first to dataset with `az.convert_to_dataset`."
+        )
+        raise TypeError(msg)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
@@ -548,11 +548,9 @@ def _z_scale(ary):
 def _split_chains(ary):
     """Split and stack chains."""
     ary = np.asarray(ary)
-    if len(ary.shape) > 1:
-        _, n_draw = ary.shape
-    else:
+    if len(ary.shape) <= 1:
         ary = np.atleast_2d(ary)
-        _, n_draw = ary.shape
+    _, n_draw = ary.shape
     half = n_draw // 2
     return _stack(ary[:, :half], ary[:, -half:])
 
@@ -898,11 +896,10 @@ def _mc_error(ary, batches=5, circular=False):
                     std = _circular_standard_deviation(ary, high=np.pi, low=-np.pi)
                 else:
                     std = stats.circstd(ary, high=np.pi, low=-np.pi)
+            elif _numba_flag:
+                std = np.float(_sqrt(svar(ary), np.zeros(1)))
             else:
-                if _numba_flag:
-                    std = np.float(_sqrt(svar(ary), np.zeros(1)))
-                else:
-                    std = np.std(ary)
+                std = np.std(ary)
             return std / np.sqrt(len(ary))
 
         batched_traces = np.resize(ary, (batches, int(len(ary) / batches)))
@@ -915,11 +912,7 @@ def _mc_error(ary, batches=5, circular=False):
                 std = stats.circstd(means, high=np.pi, low=-np.pi)
         else:
             means = np.mean(batched_traces, 1)
-            if _numba_flag:
-                std = _sqrt(svar(means), np.zeros(1))
-            else:
-                std = np.std(means)
-
+            std = _sqrt(svar(means), np.zeros(1)) if _numba_flag else np.std(means)
         return std / np.sqrt(batches)
 
 

@@ -156,7 +156,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
-                    "(argument '{}' was type '{}')".format(key, type(dataset))
+                    f"(argument '{key}' was type '{type(dataset)}')"
                 )
             if not key.startswith(WARMUP_TAG):
                 if dataset:
@@ -166,11 +166,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 if dataset:
                     setattr(self, key, dataset)
                     self._groups_warmup.append(key)
-            if save_warmup and dataset_warmup is not None:
-                if dataset_warmup:
-                    key = f"{WARMUP_TAG}{key}"
-                    setattr(self, key, dataset_warmup)
-                    self._groups_warmup.append(key)
+            if save_warmup and dataset_warmup is not None and dataset_warmup:
+                key = f"{WARMUP_TAG}{key}"
+                setattr(self, key, dataset_warmup)
+                self._groups_warmup.append(key)
 
     @property
     def attrs(self) -> dict:
@@ -467,7 +466,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     dims = []
                     for coord_name, coord_values in dataarray.coords.items():
                         if coord_name not in ("chain", "draw") and not coord_name.startswith(
-                            var_name + "_dim_"
+                            f"{var_name}_dim_"
                         ):
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
@@ -482,7 +481,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     if len(dims) > 0:
                         ret[dims_key][var_name] = dims
                     ret[group] = data
-                ret[group + "_attrs"] = dataset.attrs
+                ret[f"{group}_attrs"] = dataset.attrs
 
         ret["attrs"] = self.attrs
         return ret
@@ -622,9 +621,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 df.columns = [
                     col
                     if col in ("draw", "chain")
-                    else (group, col)
-                    if not isinstance(col, tuple)
                     else (group, *col)
+                    if isinstance(col, tuple)
+                    else (group, col)
                     for col in df.columns
                 ]
             dfs, *dfs_tail = list(dfs.values())
@@ -727,11 +726,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         # Open each group via xarray method
         for key_group, _ in zarr_handle.groups():
             with xr.open_zarr(store=store, group=key_group) as data:
-                if rcParams["data.load"] == "eager":
-                    groups[key_group] = data.load()
-                else:
-                    groups[key_group] = data
-
+                groups[key_group] = data.load() if rcParams["data.load"] == "eager" else data
         return InferenceData(**groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
@@ -1010,10 +1005,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
-            kwarg_dict = {}
-            for key, value in dimensions.items():
-                if not set(value).difference(dataset.dims):
-                    kwarg_dict[key] = value
+            kwarg_dict = {
+                key: value
+                for key, value in dimensions.items()
+                if not set(value).difference(dataset.dims)
+            }
             dataset = dataset.stack(**kwarg_dict)
             setattr(out, group, dataset)
         if inplace:
@@ -1510,9 +1506,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if join not in ("left", "right"):
             raise ValueError(f"join must be either 'left' or 'right', found {join}")
         for group in other._groups_all:  # pylint: disable=protected-access
-            if hasattr(self, group):
-                if join == "left":
-                    continue
+            if hasattr(self, group) and join == "left":
+                continue
             if group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
                     f"{group} group is not defined in the InferenceData scheme", UserWarning
@@ -1534,17 +1529,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         self._groups_warmup.insert(group_idx, group)
                     else:
                         self._groups_warmup.append(group)
-            else:
-                if group not in self._groups:
-                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
-                    if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
-                        group_order = [
-                            key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
-                        ]
-                        group_idx = group_order.index(group)
-                        self._groups.insert(group_idx, group)
-                    else:
-                        self._groups.append(group)
+            elif group not in self._groups:
+                supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
+                if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
+                    group_order = [
+                        key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
+                    ]
+                    group_idx = group_order.index(group)
+                    self._groups.insert(group_idx, group)
+                else:
+                    self._groups.append(group)
 
     set_index = _extend_xr_method(xr.Dataset.set_index, see_also="reset_index")
     get_index = _extend_xr_method(xr.Dataset.get_index)

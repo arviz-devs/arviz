@@ -274,10 +274,9 @@ class TestDataPyStan:
         fit = data.obj
         if pystan_version() == 2:
             draws, _ = get_draws(fit, variables=["theta", "theta"])
-            assert draws.get("theta") is not None
         else:
             draws = get_draws_stan3(fit, variables=["theta", "theta"])
-            assert draws.get("theta") is not None
+        assert draws.get("theta") is not None
 
     @pytest.mark.skipif(pystan_version() != 2, reason="PyStan 2.x required")
     def test_index_order(self, data, eight_schools_params):
@@ -294,7 +293,7 @@ class TestDataPyStan:
                     if "[" in key:
                         name, *shape = key.replace("]", "").split("[")
                         shape = [str(int(item) - 1) for items in shape for item in items.split(",")]
-                        key = name + f"[{','.join(shape)}]"
+                        key = f"{name}[{','.join(shape)}]"
                     new_chains[key] = np.full_like(values, fill_value=float(i))
                 setattr(holder, "chains", new_chains)
             fit.sim["fnames_oi"] = list(fit.sim["samples"][0].chains.keys())

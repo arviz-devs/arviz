@@ -105,10 +105,7 @@ def plot_violin(
 def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
     if bw == "default":
-        if circular:
-            bw = "taylor"
-        else:
-            bw = "experimental"
+        bw = "taylor" if circular else "experimental"
     x, density = kde(val, circular=circular, bw=bw)
 
     if not rug:
@@ -130,10 +127,7 @@ def cat_hist(val, rug, shade, ax, **shade_kwargs):
     centers = bin_edges[:-1] + heights.mean() / 2
     right = 0.5 * binned_d
 
-    if rug:
-        left = 0
-    else:
-        left = -right
+    left = 0 if rug else -right
 
     ax.hbar(
         y=centers,

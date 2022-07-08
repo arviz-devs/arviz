@@ -83,14 +83,14 @@ class BaseLabeller:
 
     def sel_to_str(self, sel: dict, isel: dict):
         """WIP."""
-        if not sel:
-            return ""
-        return ", ".join(
-            [
-                self.dim_coord_to_str(dim, v, i)
-                for (dim, v), (_, i) in zip(sel.items(), isel.items())
-            ]
-        )
+        if sel:
+            return ", ".join(
+                [
+                    self.dim_coord_to_str(dim, v, i)
+                    for (dim, v), (_, i) in zip(sel.items(), isel.items())
+                ]
+            )
+        return ""
 
     def var_name_to_str(self, var_name: Union[str, None]):
         """WIP."""

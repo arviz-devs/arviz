@@ -134,8 +134,8 @@ def plot_compare(
             break
     else:
         raise ValueError(
-            "comp_df must contain one of the following"
-            " information criterion: {}".format(_information_criterion)
+            "comp_df must contain one of the following "
+            f"information criterion: {_information_criterion}"
         )
 
     if order_by_rank:

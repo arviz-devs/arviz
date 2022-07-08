@@ -133,11 +133,6 @@ def plot_lm(
                 legend_it.append(("Uncertainty in mean", [model_legend]))
 
                 y_model_mean = np.mean(y_model_plotters, axis=1)
-                x_plotters_edge = [min(x_plotters), max(x_plotters)]
-                y_model_mean_edge = [min(y_model_mean), max(y_model_mean)]
-                mean_legend = ax_i.line(x_plotters_edge, y_model_mean_edge, **y_model_mean_kwargs)
-                legend_it.append(("Mean", [mean_legend]))
-
             else:
                 plot_hdi(
                     x_plotters,
@@ -149,14 +144,10 @@ def plot_lm(
                 )
 
                 y_model_mean = np.mean(y_model_plotters, axis=(0, 1))
-                x_plotters_edge = [min(x_plotters), max(x_plotters)]
-                y_model_mean_edge = [min(y_model_mean), max(y_model_mean)]
-                mean_legend = ax_i.line(
-                    x_plotters_edge,
-                    y_model_mean_edge,
-                    **y_model_mean_kwargs,
-                )
-                legend_it.append(("Mean", [mean_legend]))
+            x_plotters_edge = [min(x_plotters), max(x_plotters)]
+            y_model_mean_edge = [min(y_model_mean), max(y_model_mean)]
+            mean_legend = ax_i.line(x_plotters_edge, y_model_mean_edge, **y_model_mean_kwargs)
+            legend_it.append(("Mean", [mean_legend]))
 
         if legend:
             legend = Legend(

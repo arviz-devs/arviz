@@ -189,17 +189,13 @@ def plot_bpv(
     if kind.lower() not in ("t_stat", "u_value", "p_value"):
         raise TypeError("`kind` argument must be either `t_stat`, `u_value`, or `p_value`")
 
-    if reference is not None:
-        if reference.lower() not in ("analytical", "samples"):
-            raise TypeError(
-                "`reference` argument must be either `analytical`, `samples`, or `None`"
-            )
+    if reference is not None and reference.lower() not in ("analytical", "samples"):
+        raise TypeError("`reference` argument must be either `analytical`, `samples`, or `None`")
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
-    else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+    elif not 1 >= hdi_prob > 0:
+        raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     if data_pairs is None:
         data_pairs = {}
@@ -224,10 +220,11 @@ def plot_bpv(
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
     pp_var_names = _var_names(pp_var_names, predictive_dataset, filter_vars)
 
-    if flatten_pp is None and flatten is None:
-        flatten_pp = list(predictive_dataset.dims.keys())
-    elif flatten_pp is None:
-        flatten_pp = flatten
+    if flatten_pp is None:
+        if flatten is None:
+            flatten_pp = list(predictive_dataset.dims.keys())
+        else:
+            flatten_pp = flatten
     if flatten is None:
         flatten = list(observed.dims.keys())
 

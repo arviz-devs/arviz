@@ -403,11 +403,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             prior_vars = list(self.prior.keys())
             prior_predictive_vars = None
 
-        priors_dict = {}
-        for group, var_names in zip(
-            ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
-        ):
-            priors_dict[group] = (
+        priors_dict = {
+            group: (
                 None
                 if var_names is None
                 else dict_to_dataset(
@@ -417,6 +414,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                     dims=self.dims,
                 )
             )
+            for group, var_names in zip(
+                ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
+            )
+        }
         return priors_dict
 
     @requires(["observations", "multi_observations"])
@@ -425,10 +426,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Convert observed data to xarray."""
         if self.predictions:
             return None
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         observed_data = {}
         for name, vals in {**self.observations, **self.multi_observations}.items():
             if hasattr(vals, "get_value"):

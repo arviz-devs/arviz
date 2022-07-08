@@ -26,10 +26,8 @@ class TestDataZarr:
     def data(self, draws, chains):
         class Data:
             # fake 8-school output
-            obj = {}
             shapes: Mapping[str, list] = {"mu": [], "tau": [], "eta": [8], "theta": [8]}
-            for key, shape in shapes.items():
-                obj[key] = np.random.randn(chains, draws, *shape)
+            obj = {key: np.random.randn(chains, draws, *shape) for key, shape in shapes.items()}
 
         return Data
 

@@ -148,12 +148,12 @@ def generate_dims_coords(
                 break
 
     for idx, dim_len in enumerate(shape):
-        if (len(dims) < idx + 1) or (dims[idx] is None):
+        if len(dims) < idx + 1:
             dim_name = f"{var_name}_dim_{idx}"
-            if len(dims) < idx + 1:
-                dims.append(dim_name)
-            else:
-                dims[idx] = dim_name
+            dims.append(dim_name)
+        elif dims[idx] is None:
+            dim_name = f"{var_name}_dim_{idx}"
+            dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:
             coords[dim_name] = np.arange(index_origin, dim_len + index_origin)
@@ -302,9 +302,8 @@ def dict_to_dataset(
     if dims is None:
         dims = {}
 
-    data_vars = {}
-    for key, values in data.items():
-        data_vars[key] = numpy_to_data_array(
+    data_vars = {
+        key: numpy_to_data_array(
             values,
             var_name=key,
             coords=coords,
@@ -313,6 +312,8 @@ def dict_to_dataset(
             index_origin=index_origin,
             skip_event_dims=skip_event_dims,
         )
+        for key, values in data.items()
+    }
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
 
 
