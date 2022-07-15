@@ -6,6 +6,7 @@
 
 ### Maintenance and fixes
 * Add exception in `az.plot_hdi` for `x` of type `np.datetime64` and `smooth=True` ([2016](https://github.com/arviz-devs/arviz/pull/2016))
+* Change `ax.plot` usage to `ax.scatter` in `plot_pair`. ([1990](https://github.com/arviz-devs/arviz/pull/1990))
 
 ### Deprecation
 

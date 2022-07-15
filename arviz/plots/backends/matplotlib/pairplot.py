@@ -173,7 +173,7 @@ def plot_pair(
                 ax = np.atleast_2d(ax)[0, 0]
 
         if "scatter" in kind:
-            ax.plot(x, y, **scatter_kwargs)
+            ax.scatter(x, y, **scatter_kwargs)
         if "kde" in kind:
             plot_kde(x, y, ax=ax, **kde_kwargs)
         if "hexbin" in kind:
@@ -288,7 +288,7 @@ def plot_pair(
                         loc = "left"
 
                     if "scatter" in kind:
-                        ax[j, i].plot(var1, var2, **scatter_kwargs)
+                        ax[j, i].scatter(var1, var2, **scatter_kwargs)
 
                     if "kde" in kind:
 
