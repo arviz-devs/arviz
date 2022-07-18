@@ -26,7 +26,7 @@ A centered parameterization of the eight schools model. Provided as an example o
 model that NUTS has trouble fitting. Compare to `load_arviz_data("non_centered_eight")`.
 
 The eight schools model is a hierarchical model used for an analysis of the effectiveness
-of classes that were designed to improve students’ performance on the Scholastic Aptitude Test.
+of classes that were designed to improve students' performance on the Scholastic Aptitude Test.
 
 See Bayesian Data Analysis (Gelman et. al.) for more details.
 """,
@@ -39,7 +39,7 @@ where sampling problems may be fixed by a non-centered parametrization. Compare 
 `load_arviz_data("centered_eight")`.
 
 The eight schools model is a hierarchical model used for an analysis of the effectiveness
-of classes that were designed to improve students’ performance on the Scholastic Aptitude Test.
+of classes that were designed to improve students' performance on the Scholastic Aptitude Test.
 
 See Bayesian Data Analysis (Gelman et. al.) for more details.
 """,
@@ -250,9 +250,9 @@ def load_arviz_data(dataset=None, data_home=None, regex=False, **kwargs):
         checksum = _sha256(file_path)
         if remote.checksum != checksum:
             raise IOError(
-                "{} has an SHA256 checksum ({}) differing from expected ({}), "
-                "file may be corrupted. Run `arviz.clear_data_home()` and try "
-                "again, or please open an issue.".format(file_path, checksum, remote.checksum)
+                f"{file_path} has an SHA256 checksum ({checksum}) differing from expected "
+                "({remote.checksum}), file may be corrupted. "
+                "Run `arviz.clear_data_home()` and try again, or please open an issue."
             )
         return from_netcdf(file_path, kwargs, regex)
     else:

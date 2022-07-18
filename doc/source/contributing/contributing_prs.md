@@ -8,10 +8,12 @@ of time and attention.
 
 Contributors are also encouraged to contribute new code to enhance ArviZ's
 functionality, also via pull requests.
-Please consult the [ArviZ documentation](https://arviz-devs.github.io/arviz/)
+Please consult the documentation (on this same {ref}`website <homepage>`)
 to ensure that any new contribution does not strongly overlap with existing
 functionality and open a "Feature Request" issue before starting to work
 on the new feature.
+
+(steps_before_working)=
 
 ## Steps before starting work
 Before starting work on a pull request double-check that no one else

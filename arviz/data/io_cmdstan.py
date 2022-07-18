@@ -617,11 +617,11 @@ class CmdStanConverter:
         variables = self.observed_data_var
         if isinstance(variables, str):
             variables = [variables]
-        observed_data = {}
-        for key, vals in observed_data_raw.items():
-            if variables is not None and key not in variables:
-                continue
-            observed_data[key] = utils.one_de(vals)
+        observed_data = {
+            key: utils.one_de(vals)
+            for key, vals in observed_data_raw.items()
+            if variables is None or key in variables
+        }
         return dict_to_dataset(
             observed_data,
             coords=self.coords,
@@ -637,11 +637,11 @@ class CmdStanConverter:
         variables = self.constant_data_var
         if isinstance(variables, str):
             variables = [variables]
-        constant_data = {}
-        for key, vals in constant_data_raw.items():
-            if variables is not None and key not in variables:
-                continue
-            constant_data[key] = utils.one_de(vals)
+        constant_data = {
+            key: utils.one_de(vals)
+            for key, vals in constant_data_raw.items()
+            if variables is None or key in variables
+        }
         return dict_to_dataset(
             constant_data,
             coords=self.coords,
@@ -881,7 +881,7 @@ def _read_data(path):
                     key, var = _process_data_var(var)
                     data[key] = var
                 var = ""
-            var += " " + line.strip()
+            var += f" {line.strip()}"
         if len(var):
             key, var = _process_data_var(var)
             data[key] = var

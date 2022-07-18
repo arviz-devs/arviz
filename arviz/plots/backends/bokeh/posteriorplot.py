@@ -255,8 +255,10 @@ def _plot_posterior_op(
             ax.text(
                 x=list(hdi_i) + [(hdi_i[0] + hdi_i[1]) / 2],
                 y=[max_data * 0.07, max_data * 0.07, max_data * 0.3],
-                text=list(map(str, map(lambda x: round_num(x, round_to), hdi_i)))
-                + [format_as_percent(hdi_prob) + " HDI"],
+                text=(
+                    list(map(str, map(lambda x: round_num(x, round_to), hdi_i)))
+                    + [f"{format_as_percent(hdi_prob)} HDI"]
+                ),
                 text_align="center",
             )
 
@@ -286,18 +288,30 @@ def _plot_posterior_op(
             show=False,
         )
         _, hist, edges = histogram(values, bins="auto")
-    else:
+    elif values.dtype.kind == "i" or (values.dtype.kind == "f" and kind == "hist"):
         if bins is None:
-            if values.dtype.kind == "i":
-                bins = get_bins(values)
-            else:
-                bins = "auto"
+            bins = get_bins(values)
         kwargs.setdefault("align", "left")
         kwargs.setdefault("color", "blue")
         _, hist, edges = histogram(values, bins=bins)
         ax.quad(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
         )
+    elif values.dtype.kind == "b":
+        if bins is None:
+            bins = "auto"
+        kwargs.setdefault("color", "blue")
+
+        hist = np.array([(~values).sum(), values.sum()])
+        edges = np.array([-0.5, 0.5, 1.5])
+        ax.quad(
+            top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
+        )
+        hdi_prob = "hide"
+        ax.xaxis.ticker = [0, 1]
+        ax.xaxis.major_label_overrides = {0: "False", 1: "True"}
+    else:
+        raise TypeError("Values must be float, integer or boolean")
 
     format_axes()
     max_data = hist.max()

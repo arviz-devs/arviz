@@ -18,6 +18,17 @@ from ..data import InferenceData, from_dict
 _log = logging.getLogger(__name__)
 
 
+class TestRandomVariable:
+    """Example class for random variables."""
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        """Return argument to constructor as string representation."""
+        return self.name
+
+
 @pytest.fixture(scope="module")
 def eight_schools_params():
     """Share setup for eight schools."""
@@ -592,28 +603,25 @@ def importorskip(
     """
     # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
     ARVIZ_CI_MACHINE = running_on_ci()
-    if ARVIZ_CI_MACHINE:
-        import warnings
-
-        compile(modname, "", "eval")  # to catch syntaxerrors
-
-        with warnings.catch_warnings():
-            # make sure to ignore ImportWarnings that might happen because
-            # of existing directories with the same name we're trying to
-            # import but without a __init__.py file
-            warnings.simplefilter("ignore")
-            __import__(modname)
-        mod = sys.modules[modname]
-        if minversion is None:
-            return mod
-        verattr = getattr(mod, "__version__", None)
-        if minversion is not None:
-            if verattr is None or Version(verattr) < Version(minversion):
-                raise Skipped(
-                    "module %r has __version__ %r, required is: %r"
-                    % (modname, verattr, minversion),
-                    allow_module_level=True,
-                )
-        return mod
-    else:
+    if not ARVIZ_CI_MACHINE:
         return pytest.importorskip(modname=modname, minversion=minversion, reason=reason)
+    import warnings
+
+    compile(modname, "", "eval")  # to catch syntaxerrors
+
+    with warnings.catch_warnings():
+        # make sure to ignore ImportWarnings that might happen because
+        # of existing directories with the same name we're trying to
+        # import but without a __init__.py file
+        warnings.simplefilter("ignore")
+        __import__(modname)
+    mod = sys.modules[modname]
+    if minversion is None:
+        return mod
+    verattr = getattr(mod, "__version__", None)
+    if verattr is None or Version(verattr) < Version(minversion):
+        raise Skipped(
+            "module %r has __version__ %r, required is: %r" % (modname, verattr, minversion),
+            allow_module_level=True,
+        )
+    return mod

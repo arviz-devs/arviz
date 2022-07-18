@@ -59,20 +59,16 @@ def plot_loo_pit(
     plot_kwargs["color"] = to_hex(color)
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y
     elif isinstance(y, DataArray) and y.name is not None:
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y.name
     elif isinstance(y_hat, str):
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y_hat
     elif isinstance(y_hat, DataArray) and y_hat.name is not None:
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y_hat.name
     else:
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = ""
+    label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
     xlabel = labeller.var_name_to_str(y)
 
     plot_kwargs.setdefault("label", label)

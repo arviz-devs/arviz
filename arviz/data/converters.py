@@ -129,9 +129,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             "cmdstanpy fit",
         )
         raise ValueError(
-            "Can only convert {} to InferenceData, not {}".format(
-                ", ".join(allowable_types), obj.__class__.__name__
-            )
+            f'Can only convert {", ".join(allowable_types)} to InferenceData, '
+            f"not {obj.__class__.__name__}"
         )
 
     return InferenceData(**{group: dataset})

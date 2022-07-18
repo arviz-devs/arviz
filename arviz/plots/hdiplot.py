@@ -151,9 +151,8 @@ def plot_hdi(
         y = np.asarray(y)
         if hdi_prob is None:
             hdi_prob = rcParams["stats.hdi_prob"]
-        else:
-            if not 1 >= hdi_prob > 0:
-                raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+        elif not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
         hdi_data = hdi(y, hdi_prob=hdi_prob, circular=circular, multimodal=False, **hdi_kwargs)
 
     hdi_shape = hdi_data.shape
@@ -165,6 +164,9 @@ def plot_hdi(
         raise TypeError(msg.format(x_shape, hdi_shape))
 
     if smooth:
+        if isinstance(x[0], np.datetime64):
+            raise TypeError("Cannot deal with x as type datetime. Recommend setting smooth=False.")
+
         if smooth_kwargs is None:
             smooth_kwargs = {}
         smooth_kwargs.setdefault("window_length", 55)

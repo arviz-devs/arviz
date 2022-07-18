@@ -23,6 +23,9 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
 
     This functions helps combine classes dynamically.
 
+    For a general overview of ArviZ label customization, including
+    ``mix_labellers``, see the :ref:`label_guide` page.
+
     Parameters
     ----------
     labellers : iterable of types
@@ -33,7 +36,8 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
     Returns
     -------
         type
-            Mixture class object. *It is not initialized*
+            Mixture class object. **It is not initialized**, and it should be
+            initialized before passing it to ArviZ functions.
 
     Examples
     --------
@@ -43,23 +47,23 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
     Note that this works even though both modify the same methods because
     ``MapLabeller`` implements the mapping and then calls `super().method`.
 
-    .. ipython::
+    .. jupyter-execute::
 
-        In [1]: from arviz.labels import mix_labellers, DimCoordLabeller, MapLabeller
-           ...: l1 = DimCoordLabeller()
-           ...: sel = {"dim1": "a", "dim2": "top"}
-           ...: print(f"Output of DimCoordLabeller alone > {l1.sel_to_str(sel, sel)}")
-           ...: l2 = MapLabeller(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
-           ...: print(f"Output of MapLabeller alone > {l2.sel_to_str(sel, sel)}")
-           ...: l3 = mix_labellers(
-           ...:     (MapLabeller, DimCoordLabeller)
-           ...: )(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
-           ...: print(f"Output of mixture labeller > {l3.sel_to_str(sel, sel)}")
+        from arviz.labels import mix_labellers, DimCoordLabeller, MapLabeller
+        l1 = DimCoordLabeller()
+        sel = {"dim1": "a", "dim2": "top"}
+        print(f"Output of DimCoordLabeller alone > {l1.sel_to_str(sel, sel)}")
+        l2 = MapLabeller(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
+        print(f"Output of MapLabeller alone > {l2.sel_to_str(sel, sel)}")
+        l3 = mix_labellers(
+            (MapLabeller, DimCoordLabeller)
+        )(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
+        print(f"Output of mixture labeller > {l3.sel_to_str(sel, sel)}")
 
     We can see how the mappings are taken into account as well as the dim+coord style. However,
     he order in the ``labellers`` arg iterator is important! See for yourself:
 
-    .. ipython:: python
+    .. jupyter-execute::
 
         l4 = mix_labellers(
             (DimCoordLabeller, MapLabeller)
@@ -79,14 +83,14 @@ class BaseLabeller:
 
     def sel_to_str(self, sel: dict, isel: dict):
         """WIP."""
-        if not sel:
-            return ""
-        return ", ".join(
-            [
-                self.dim_coord_to_str(dim, v, i)
-                for (dim, v), (_, i) in zip(sel.items(), isel.items())
-            ]
-        )
+        if sel:
+            return ", ".join(
+                [
+                    self.dim_coord_to_str(dim, v, i)
+                    for (dim, v), (_, i) in zip(sel.items(), isel.items())
+                ]
+            )
+        return ""
 
     def var_name_to_str(self, var_name: Union[str, None]):
         """WIP."""
@@ -118,7 +122,7 @@ class BaseLabeller:
         sel_str = self.sel_to_str(sel, isel)
         if not sel_str:
             return var_name_str
-        if var_name is None:
+        if var_name_str is None:
             return sel_str
         return f"{var_name_str}[{sel_str}]"
 

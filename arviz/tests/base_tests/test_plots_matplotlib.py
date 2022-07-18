@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from matplotlib import animation
 from pandas import DataFrame
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, norm
 
 from ...data import from_dict, load_arviz_data
 from ...plots import (
@@ -19,6 +19,7 @@ from ...plots import (
     plot_dist,
     plot_dist_comparison,
     plot_dot,
+    plot_ecdf,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -51,6 +52,7 @@ from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     multidim_models,
+    TestRandomVariable,
 )
 
 rcParams["data.load"] = "eager"
@@ -156,6 +158,27 @@ def test_plot_density_no_subset():
         {
             "b": np.random.normal(size=200),
             "c": np.random.normal(size=200),
+        }
+    )
+    axes = plot_density([model_ab, model_bc])
+    assert axes.size == 3
+
+
+def test_plot_density_nonstring_varnames():
+    """Test plot_density works when variables are not strings."""
+    rv1 = TestRandomVariable("a")
+    rv2 = TestRandomVariable("b")
+    rv3 = TestRandomVariable("c")
+    model_ab = from_dict(
+        {
+            rv1: np.random.normal(size=200),
+            rv2: np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            rv2: np.random.normal(size=200),
+            rv3: np.random.normal(size=200),
         }
     )
     axes = plot_density([model_ab, model_bc])
@@ -532,12 +555,12 @@ def test_plot_kde_inference_data(models):
             "var_names": "theta",
             "divergences": True,
             "coords": {"school": [0, 1]},
-            "scatter_kwargs": {"marker": "x"},
+            "scatter_kwargs": {"marker": "x", "c": "C0"},
             "divergences_kwargs": {"marker": "*", "c": "C0"},
         },
         {
             "divergences": True,
-            "scatter_kwargs": {"marker": "x"},
+            "scatter_kwargs": {"marker": "x", "c": "C0"},
             "divergences_kwargs": {"marker": "*", "c": "C0"},
             "var_names": ["theta", "mu"],
         },
@@ -1025,10 +1048,24 @@ def test_plot_posterior(models, kwargs):
         assert axes.shape
 
 
+def test_plot_posterior_boolean():
+    data = np.random.choice(a=[False, True], size=(4, 100))
+    axes = plot_posterior(data)
+    assert axes
+    plt.draw()
+    labels = [label.get_text() for label in axes.get_xticklabels()]
+    assert all(item in labels for item in ("True", "False"))
+
+
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
 def test_plot_posterior_discrete(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, **kwargs)
     assert axes.shape
+
+
+def test_plot_posterior_bad_type():
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]))
 
 
 def test_plot_posterior_bad(models):
@@ -1090,7 +1127,7 @@ def test_plot_posterior_skipna_combinedims():
 
 
 @pytest.mark.parametrize(
-    "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
+    "kwargs", [{"insample_dev": True}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
 def test_plot_compare(models, kwargs):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
@@ -1104,12 +1141,12 @@ def test_plot_compare_no_ic(models):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # Drop column needed for plotting
-    model_compare = model_compare.drop("loo", axis=1)
+    model_compare = model_compare.drop("elpd_loo", axis=1)
     with pytest.raises(ValueError) as err:
         plot_compare(model_compare)
 
     assert "comp_df must contain one of the following" in str(err.value)
-    assert "['loo', 'waic']" in str(err.value)
+    assert "['elpd_loo', 'elpd_waic']" in str(err.value)
 
 
 @pytest.mark.parametrize(
@@ -1155,6 +1192,15 @@ def test_plot_hdi_dataset_error(models):
         plot_hdi(np.arange(8), hdi_data=hdi_data)
 
 
+def test_plot_hdi_datetime_error():
+    """Check x as datetime raises an error."""
+    x_data = np.arange(start="2022-01-01", stop="2022-03-01", dtype=np.datetime64)
+    y_data = np.random.normal(0, 5, (1, 200, x_data.shape[0]))
+    hdi_data = hdi(y_data)
+    with pytest.raises(TypeError, match="Cannot deal with x as type datetime."):
+        plot_hdi(x=x_data, y=y_data, hdi_data=hdi_data)
+
+
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
 def test_kde_scipy(limits):
     """
@@ -1175,6 +1221,26 @@ def test_kde_cumulative(limits):
     data = np.random.normal(0, 1, 1000)
     density = _kde(data, custom_lims=limits, cumulative=True)[1]
     np.testing.assert_almost_equal(round(density[-1], 3), 1)
+
+
+def test_plot_ecdf_basic():
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data)
+    assert axes is not None
+
+
+def test_plot_ecdf_values2():
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, data2)
+    assert axes is not None
+
+
+def test_plot_ecdf_cdf():
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
+    axes = plot_ecdf(data, cdf=cdf)
+    assert axes is not None
 
 
 @pytest.mark.parametrize(
@@ -1260,7 +1326,7 @@ def test_plot_elpd_ic_error(models):
         "Model 1": waic(models.model_1, pointwise=True),
         "Model 2": loo(models.model_2, pointwise=True),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 
@@ -1269,7 +1335,7 @@ def test_plot_elpd_scale_error(models):
         "Model 1": waic(models.model_1, pointwise=True, scale="log"),
         "Model 2": waic(models.model_2, pointwise=True, scale="deviance"),
     }
-    with pytest.raises(SyntaxError):
+    with pytest.raises(ValueError):
         plot_elpd(model_dict)
 
 

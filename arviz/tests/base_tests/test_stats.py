@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
+from scipy.special import logsumexp
 from scipy.stats import linregress
 from xarray import DataArray, Dataset
 
@@ -20,6 +21,7 @@ from ...stats import (
     r2_score,
     summary,
     waic,
+    _calculate_ics,
 )
 from ...stats.stats import _gpinv
 from ...stats.stats_utils import get_log_likelihood
@@ -231,9 +233,40 @@ def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_
     }
     with pytest.raises(TypeError, match="several log likelihood arrays"):
         get_log_likelihood(compare_dict["problematic"])
-    with pytest.raises(TypeError, match=f"{ic}.*model problematic"):
+    with pytest.raises(TypeError, match="error in ELPD computation"):
         compare(compare_dict, ic=ic)
     assert compare(compare_dict, ic=ic, var_name="obs") is not None
+
+
+@pytest.mark.parametrize("ic", ["loo", "waic"])
+def test_calculate_ics(centered_eight, non_centered_eight, ic):
+    ic_func = loo if ic == "loo" else waic
+    idata_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
+    elpddata_dict = {key: ic_func(value) for key, value in idata_dict.items()}
+    mixed_dict = {"centered": idata_dict["centered"], "non_centered": elpddata_dict["non_centered"]}
+    idata_out, _, _ = _calculate_ics(idata_dict, ic=ic)
+    elpddata_out, _, _ = _calculate_ics(elpddata_dict, ic=ic)
+    mixed_out, _, _ = _calculate_ics(mixed_dict, ic=ic)
+    for model in idata_dict:
+        ic_ = f"elpd_{ic}"
+        assert idata_out[model][ic_] == elpddata_out[model][ic_]
+        assert idata_out[model][ic_] == mixed_out[model][ic_]
+        assert idata_out[model][f"p_{ic}"] == elpddata_out[model][f"p_{ic}"]
+        assert idata_out[model][f"p_{ic}"] == mixed_out[model][f"p_{ic}"]
+
+
+def test_calculate_ics_ic_error(centered_eight, non_centered_eight):
+    in_dict = {"centered": loo(centered_eight), "non_centered": waic(non_centered_eight)}
+    with pytest.raises(ValueError, match="found both loo and waic"):
+        _calculate_ics(in_dict)
+
+
+def test_calculate_ics_ic_override(centered_eight, non_centered_eight):
+    in_dict = {"centered": centered_eight, "non_centered": waic(non_centered_eight)}
+    with pytest.warns(UserWarning, match="precomputed elpddata: waic"):
+        out_dict, _, ic = _calculate_ics(in_dict, ic="loo")
+    assert ic == "waic"
+    assert out_dict["centered"]["elpd_waic"] == waic(centered_eight)["elpd_waic"]
 
 
 def test_summary_ndarray():
@@ -287,17 +320,37 @@ METRICS_NAMES = [
     "ess_bulk",
     "ess_tail",
     "r_hat",
+    "median",
+    "mad",
+    "eti_3%",
+    "eti_97%",
+    "mcse_median",
+    "ess_median",
+    "ess_tail",
+    "r_hat",
 ]
 
 
 @pytest.mark.parametrize(
     "params",
-    (("all", METRICS_NAMES), ("stats", METRICS_NAMES[:4]), ("diagnostics", METRICS_NAMES[4:])),
+    (
+        ("mean", "all", METRICS_NAMES[:9]),
+        ("mean", "stats", METRICS_NAMES[:4]),
+        ("mean", "diagnostics", METRICS_NAMES[4:9]),
+        ("median", "all", METRICS_NAMES[9:17]),
+        ("median", "stats", METRICS_NAMES[9:13]),
+        ("median", "diagnostics", METRICS_NAMES[13:17]),
+    ),
 )
-def test_summary_kind(centered_eight, params):
-    kind, metrics_names_ = params
-    summary_df = summary(centered_eight, kind=kind)
+def test_summary_focus_kind(centered_eight, params):
+    stat_focus, kind, metrics_names_ = params
+    summary_df = summary(centered_eight, stat_focus=stat_focus, kind=kind)
     assert_array_equal(summary_df.columns, metrics_names_)
+
+
+def test_summary_wrong_focus(centered_eight):
+    with pytest.raises(TypeError, match=r"Invalid format: 'WrongFocus'.*"):
+        summary(centered_eight, stat_focus="WrongFocus")
 
 
 @pytest.mark.parametrize("fmt", ["wide", "long", "xarray"])
@@ -417,8 +470,8 @@ def test_waic_warning(centered_eight):
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_waic_print(centered_eight, scale):
-    waic_data = waic(centered_eight, scale=scale).__repr__()
-    waic_pointwise = waic(centered_eight, scale=scale, pointwise=True).__repr__()
+    waic_data = repr(waic(centered_eight, scale=scale))
+    waic_pointwise = repr(waic(centered_eight, scale=scale, pointwise=True))
     assert waic_data is not None
     assert waic_pointwise is not None
     assert waic_data == waic_pointwise
@@ -437,7 +490,7 @@ def test_loo(centered_eight, multidim_models, scale, multidim):
     assert loo_pointwise is not None
     assert "loo_i" in loo_pointwise
     assert "pareto_k" in loo_pointwise
-    assert "loo_scale" in loo_pointwise
+    assert "scale" in loo_pointwise
 
 
 def test_loo_one_chain(centered_eight):
@@ -489,8 +542,8 @@ def test_loo_warning(centered_eight):
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_loo_print(centered_eight, scale):
-    loo_data = loo(centered_eight, scale=scale).__repr__()
-    loo_pointwise = loo(centered_eight, scale=scale, pointwise=True).__repr__()
+    loo_data = repr(loo(centered_eight, scale=scale, pointwise=False))
+    loo_pointwise = repr(loo(centered_eight, scale=scale, pointwise=True))
     assert loo_data is not None
     assert loo_pointwise is not None
     assert len(loo_data) < len(loo_pointwise)
@@ -501,6 +554,16 @@ def test_psislw(centered_eight):
     log_likelihood = get_log_likelihood(centered_eight)
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
+
+
+def test_psislw_smooths_for_low_k():
+    # check that log-weights are smoothed even when k < 1/3
+    # https://github.com/arviz-devs/arviz/issues/2010
+    rng = np.random.default_rng(44)
+    x = rng.normal(size=100)
+    x_smoothed, k = psislw(x.copy())
+    assert k < 1 / 3
+    assert not np.allclose(x - logsumexp(x), x_smoothed)
 
 
 @pytest.mark.parametrize("probs", [True, False])
@@ -534,7 +597,9 @@ def test_multidimensional_log_likelihood(func):
     frm = func(dsm)
     fr1 = func(ds1)
 
-    assert (fr1 == frm).all()
+    assert all(
+        fr1[key] == frm[key] for key in fr1.index if key not in {"loo_i", "waic_i", "pareto_k"}
+    )
     assert_array_almost_equal(frm[:4], fr1[:4])
 
 

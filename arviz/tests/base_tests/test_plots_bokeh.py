@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pytest
 from pandas import DataFrame  # pylint: disable=wrong-import-position
+from scipy.stats import norm  # pylint: disable=wrong-import-position
 
 from ...data import from_dict, load_arviz_data  # pylint: disable=wrong-import-position
 from ...plots import (  # pylint: disable=wrong-import-position
@@ -15,6 +16,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_dist,
     plot_dist_comparison,
     plot_dot,
+    plot_ecdf,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -337,12 +339,32 @@ def test_plot_compare_no_ic(models):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # Drop column needed for plotting
-    model_compare = model_compare.drop("loo", axis=1)
+    model_compare = model_compare.drop("elpd_loo", axis=1)
     with pytest.raises(ValueError) as err:
         plot_compare(model_compare, backend="bokeh", show=False)
 
     assert "comp_df must contain one of the following" in str(err.value)
-    assert "['loo', 'waic']" in str(err.value)
+    assert "['elpd_loo', 'elpd_waic']" in str(err.value)
+
+
+def test_plot_ecdf_basic():
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, backend="bokeh", show=False)
+    assert axes is not None
+
+
+def test_plot_ecdf_values2():
+    data = np.random.randn(4, 1000)
+    data2 = np.random.randn(4, 500)
+    axes = plot_ecdf(data, data2, backend="bokeh", show=False)
+    assert axes is not None
+
+
+def test_plot_ecdf_cdf():
+    data = np.random.randn(4, 1000)
+    cdf = norm(0, 1).cdf
+    axes = plot_ecdf(data, cdf=cdf, backend="bokeh", show=False)
+    assert axes is not None
 
 
 @pytest.mark.parametrize(
@@ -409,7 +431,7 @@ def test_plot_energy_bad(models):
         {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
         {"coords": {"school": slice(4)}, "n_points": 10},
-        {"min_ess": 600, "hline_kwargs": {"color": "r"}},
+        {"min_ess": 600, "hline_kwargs": {"line_color": "red"}},
     ],
 )
 @pytest.mark.parametrize("kind", ["local", "quantile", "evolution"])
@@ -986,6 +1008,17 @@ def test_plot_posterior(models, kwargs):
 def test_plot_posterior_discrete(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, backend="bokeh", show=False, **kwargs)
     assert axes.shape
+
+
+def test_plot_posterior_boolean():
+    data = np.random.choice(a=[False, True], size=(4, 100))
+    axes = plot_posterior(data, backend="bokeh", show=False)
+    assert axes.shape
+
+
+def test_plot_posterior_bad_type():
+    with pytest.raises(TypeError):
+        plot_posterior(np.array(["a", "b", "c"]), backend="bokeh", show=False)
 
 
 def test_plot_posterior_bad(models):

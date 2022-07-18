@@ -89,17 +89,20 @@ templates_path = ["../_templates"]
 #
 
 # MyST related params
-jupyter_execute_notebooks = "auto"
-execution_excludepatterns = ["*.ipynb"]
-myst_heading_anchors = 3
-panels_add_bootstrap_css = False
+nb_execution_mode = "auto"
+nb_execution_excludepatterns = ["*.ipynb"]
+nb_kernel_rgx_aliases = {".*": "python3"}
+myst_heading_anchors = None
 myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 
-
-myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
+# copybutton config: strip console characters
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
 
 # The base toctree document.
 master_doc = "index"
+default_role = "code"
+suppress_warnings = ["mystnb.unknown_mime_type"]
 
 # General information about the project.
 project = "ArviZ"
@@ -134,7 +137,7 @@ language = None
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ["_build", "build", "Thumbs.db", ".DS_Store", "notebooks/.ipynb_checkpoints"]
 # configure notfound extension to not add any prefix to the urls
-notfound_urls_prefix = "/arviz/"
+notfound_urls_prefix = "/en/latest/"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -170,15 +173,19 @@ html_theme_options = {
     "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
     "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
+    "external_links": [
+        {"name": "About", "url": "https://www.arviz.org"},
+    ],
 }
 html_context = {
     "github_user": "arviz-devs",
     "github_repo": "arviz",
     "github_version": "main",
     "doc_path": "doc/source/",
+    "default_mode": "light",
 }
 html_sidebars: Dict[str, Any] = {
-    "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html", "sidebar-ethical-ads.html"]
+    "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html"],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -283,18 +290,21 @@ epub_exclude_files = ["search.html"]
 
 # Example configuration for intersphinx
 intersphinx_mapping = {
-    "xarray": ("http://xarray.pydata.org/en/stable/", None),
+    "xarray": ("https://docs.xarray.dev/en/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
-    "pymc3": ("https://docs.pymc.io/", None),
+    # Oriol: I am lazy and didn't want to update any references we might have using the pymc3 key
+    "pymc3": ("https://www.pymc.io/projects/docs/en/stable", None),
+    "pymc": ("https://www.pymc.io/projects/docs/en/stable", None),
     "mpl": ("https://matplotlib.org/stable", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "dask": ("https://docs.dask.org/en/latest/", None),
     "sphinx-primer": ("https://sphinx-primer.readthedocs.io/en/latest/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
     "diataxis": ("https://diataxis.fr/", None),
+    "arviz_org": ("https://www.arviz.org/en/latest/", None),
 }
 
 

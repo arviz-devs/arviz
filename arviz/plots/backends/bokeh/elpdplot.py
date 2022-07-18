@@ -42,10 +42,9 @@ def plot_elpd(
 
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
-    if isinstance(color, str):
-        if color in pointwise_data[0].dims:
-            colors, _ = color_from_dim(pointwise_data[0], color)
-            plot_kwargs.setdefault("color", vectorized_to_hex(colors))
+    if isinstance(color, str) and color in pointwise_data[0].dims:
+        colors, _ = color_from_dim(pointwise_data[0], color)
+        plot_kwargs.setdefault("color", vectorized_to_hex(colors))
     plot_kwargs.setdefault("color", vectorized_to_hex(color))
 
     # flatten data (data must be flattened after selecting, labeling and coloring)
@@ -68,8 +67,6 @@ def plot_elpd(
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
         )
-
-        show_layout(ax, show)
 
     else:
         max_plots = (
@@ -141,7 +138,7 @@ def plot_elpd(
                     plot_kwargs,
                 )
 
-        show_layout(ax, show)
+    show_layout(ax, show)
 
     return ax
 

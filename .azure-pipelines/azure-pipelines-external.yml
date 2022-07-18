@@ -1,7 +1,7 @@
 jobs:
 - job: ExternalTests
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-22.04'
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
@@ -115,26 +115,6 @@ jobs:
   - script: |
       python -m madforhooks.no_print_statements $(find arviz -name '*.py' -not -path 'arviz/tests/*')
     displayName: 'Disallow debugging print statements (use `file=sys.stdout` if not debugging)'
-
-  - script: |
-      python -m mypy .
-    displayName: 'mypy'
-
-  - script: |
-      python -m typing_copilot.cli tighten --error-if-can-tighten
-    displayName: 'typing_copilot'
-
-  - script: |
-      python -m typing_copilot.cli tighten
-    condition: failed()
-    displayName: 'update mypy.ini with typing_copilot'
-
-  - task: PublishBuildArtifacts@1
-    condition: failed()
-    inputs:
-      pathtoPublish: 'mypy.ini'
-      artifactName: 'mypy.ini'
-    displayName: 'Upload updated mypy.ini'
 
   - script: |
       pytest arviz/tests/helpers.py

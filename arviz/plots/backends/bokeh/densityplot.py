@@ -70,10 +70,8 @@ def plot_density(
     else:
         ax = np.atleast_2d(ax)
 
-    axis_map = {
-        label: ax_
-        for label, ax_ in zip(all_labels, (item for item in ax.flatten() if item is not None))
-    }
+    axis_map = dict(zip(all_labels, (item for item in ax.flatten() if item is not None)))
+
     if data_labels is None:
         data_labels = {}
 
@@ -82,10 +80,7 @@ def plot_density(
         for var_name, selection, isel, values in plotters:
             label = labeller.make_label_vert(var_name, selection, isel)
 
-            if data_labels:
-                data_label = data_labels[m_idx]
-            else:
-                data_label = None
+            data_label = data_labels[m_idx] if data_labels else None
 
             plotted = _d_helper(
                 values.flatten(),

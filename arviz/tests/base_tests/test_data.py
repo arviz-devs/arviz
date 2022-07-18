@@ -26,7 +26,7 @@ from ... import (
     list_datasets,
     load_arviz_data,
     to_netcdf,
-    extract_dataset,
+    extract,
 )
 
 from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
@@ -148,6 +148,26 @@ def test_dims_coords():
     assert len(coords["x_dim_0"]) == 4
     assert len(coords["x_dim_1"]) == 20
     assert len(coords["x_dim_2"]) == 5
+
+
+def test_dims_coords_default_dims():
+    shape = 4, 7
+    var_name = "x"
+    dims, coords = generate_dims_coords(
+        shape,
+        var_name,
+        dims=["dim1", "dim2"],
+        coords={"chain": ["a", "b", "c"]},
+        default_dims=["chain", "draw"],
+    )
+    assert "dim1" in dims
+    assert "dim2" in dims
+    assert "chain" not in dims
+    assert "draw" not in dims
+    assert len(coords["dim1"]) == 4
+    assert len(coords["dim2"]) == 7
+    assert len(coords["chain"]) == 3
+    assert "draw" not in coords
 
 
 def test_dims_coords_extra_dims():
@@ -755,7 +775,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
 
         xr.set_options(display_style="text")
         html = idata._repr_html_()  # pylint: disable=protected-access
-        assert escape(idata.__repr__()) in html
+        assert escape(repr(idata)) in html
         xr.set_options(display_style=display_style)
 
     def test_add_groups(self, data_random):
@@ -1403,33 +1423,41 @@ class TestDataArrayToDataset:
 class TestExtractDataset:
     def test_default(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata)
+        post = extract(idata)
         assert isinstance(post, xr.Dataset)
         assert "sample" in post.dims
         assert post.theta.size == (4 * 500 * 8)
 
     def test_seed(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata, rng=7)
-        post_pred = extract_dataset(idata, group="posterior_predictive", rng=7)
+        post = extract(idata, rng=7)
+        post_pred = extract(idata, group="posterior_predictive", rng=7)
         assert all(post.sample == post_pred.sample)
 
     def test_no_combine(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata, combined=False)
+        post = extract(idata, combined=False)
         assert "sample" not in post.dims
         assert post.dims["chain"] == 4
         assert post.dims["draw"] == 500
 
     def test_var_name_group(self):
         idata = load_arviz_data("centered_eight")
-        prior = extract_dataset(idata, group="prior", var_names="the", filter_vars="like")
+        prior = extract(idata, group="prior", var_names="the", filter_vars="like")
+        assert {} == prior.attrs
+        assert "theta" in prior.name
+
+    def test_keep_dataset(self):
+        idata = load_arviz_data("centered_eight")
+        prior = extract(
+            idata, group="prior", var_names="the", filter_vars="like", keep_dataset=True
+        )
         assert prior.attrs == idata.prior.attrs
         assert "theta" in prior.data_vars
         assert "mu" not in prior.data_vars
 
     def test_subset_samples(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata, num_samples=10)
+        post = extract(idata, num_samples=10)
         assert post.dims["sample"] == 10
         assert post.attrs == idata.posterior.attrs

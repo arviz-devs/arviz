@@ -42,23 +42,18 @@ def plot_elpd(
 
     markersize = None
 
-    if isinstance(color, str):
-        if color in pointwise_data[0].dims:
-            colors, color_mapping = color_from_dim(pointwise_data[0], color)
-            cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
-            markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
-            cmap = getattr(cm, cmap_name)
-            handles = [
-                Line2D(
-                    [], [], color=cmap(float_color), label=coord, ms=markersize, lw=0, **plot_kwargs
-                )
-                for coord, float_color in color_mapping.items()
-            ]
-            plot_kwargs.setdefault("cmap", cmap_name)
-            plot_kwargs.setdefault("s", markersize**2)
-            plot_kwargs.setdefault("c", colors)
-        else:
-            legend = False
+    if isinstance(color, str) and color in pointwise_data[0].dims:
+        colors, color_mapping = color_from_dim(pointwise_data[0], color)
+        cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
+        markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
+        cmap = getattr(cm, cmap_name)
+        handles = [
+            Line2D([], [], color=cmap(float_color), label=coord, ms=markersize, lw=0, **plot_kwargs)
+            for coord, float_color in color_mapping.items()
+        ]
+        plot_kwargs.setdefault("cmap", cmap_name)
+        plot_kwargs.setdefault("s", markersize**2)
+        plot_kwargs.setdefault("c", colors)
     else:
         legend = False
     plot_kwargs.setdefault("c", color)

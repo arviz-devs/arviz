@@ -13,7 +13,12 @@ from numpy import newaxis
 
 from .rcparams import rcParams
 
+
 STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
+
+
+def _check_tilde_start(x):
+    return bool(isinstance(x, str) and x.startswith("~"))
 
 
 def _var_names(var_names, data, filter_vars=None):
@@ -50,7 +55,7 @@ def _var_names(var_names, data, filter_vars=None):
         else:
             all_vars = list(data.data_vars)
 
-        all_vars_tilde = [var for var in all_vars if var.startswith("~")]
+        all_vars_tilde = [var for var in all_vars if _check_tilde_start(var)]
         if all_vars_tilde:
             warnings.warn(
                 """ArviZ treats '~' as a negation character for variable selection.
@@ -94,7 +99,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
         if isinstance(subset, str):
             subset = [subset]
 
-        whole_list_tilde = [item for item in whole_list if item.startswith("~")]
+        whole_list_tilde = [item for item in whole_list if _check_tilde_start(item)]
         if whole_list_tilde and warn:
             warnings.warn(
                 "ArviZ treats '~' as a negation character for selection. There are "
@@ -105,13 +110,13 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
             )
 
         excluded_items = [
-            item[1:] for item in subset if item.startswith("~") and item not in whole_list
+            item[1:] for item in subset if _check_tilde_start(item) and item not in whole_list
         ]
         filter_items = str(filter_items).lower()
-        not_found = []
-
         if excluded_items:
-            if filter_items in ("like", "regex"):
+            not_found = []
+
+            if filter_items in {"like", "regex"}:
                 for pattern in excluded_items[:]:
                     excluded_items.remove(pattern)
                     if filter_items == "like":
@@ -131,11 +136,10 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
                 )
             subset = [item for item in whole_list if item not in excluded_items]
 
-        else:
-            if filter_items == "like":
-                subset = [item for item in whole_list for name in subset if name in item]
-            elif filter_items == "regex":
-                subset = [item for item in whole_list for name in subset if re.search(name, item)]
+        elif filter_items == "like":
+            subset = [item for item in whole_list for name in subset if name in item]
+        elif filter_items == "regex":
+            subset = [item for item in whole_list for name in subset if re.search(name, item)]
 
         existing_items = np.isin(subset, whole_list)
         if not np.all(existing_items):
@@ -232,7 +236,7 @@ class interactive_backend:  # pylint: disable=invalid-name
         except ImportError as err:
             raise ImportError(
                 "The exception below was risen while importing Ipython, this "
-                "context manager can only be used inside ipython sessions:\n{}".format(err)
+                f"context manager can only be used inside ipython sessions:\n{err}"
             ) from err
         self.ipython = get_ipython()
         if self.ipython is None:
@@ -269,9 +273,8 @@ def conditional_jit(_func=None, **kwargs):
     """
     if _func is None:
         return lambda fn: functools.wraps(fn)(maybe_numba_fn(fn, **kwargs))
-    else:
-        lazy_numba = maybe_numba_fn(_func, **kwargs)
-        return functools.wraps(_func)(lazy_numba)
+    lazy_numba = maybe_numba_fn(_func, **kwargs)
+    return functools.wraps(_func)(lazy_numba)
 
 
 def conditional_vect(function=None, **kwargs):  # noqa: D202
@@ -371,10 +374,7 @@ def one_de(x):
     """Jitting numpy atleast_1d."""
     if not isinstance(x, np.ndarray):
         return np.atleast_1d(x)
-    if x.ndim == 0:
-        result = x.reshape(1)
-    else:
-        result = x
+    result = x.reshape(1) if x.ndim == 0 else x
     return result
 
 
@@ -697,16 +697,13 @@ def either_dict_or_kwargs(
     func_name,
 ):
     """Clone from xarray.core.utils."""
-    if pos_kwargs is not None:
-        if not hasattr(pos_kwargs, "keys") and hasattr(pos_kwargs, "__getitem__"):
-            raise ValueError(f"the first argument to .{func_name} must be a dictionary")
-        if kw_kwargs:
-            raise ValueError(
-                f"cannot specify both keyword and positional arguments to .{func_name}"
-            )
-        return pos_kwargs
-    else:
+    if pos_kwargs is None:
         return kw_kwargs
+    if not hasattr(pos_kwargs, "keys") and hasattr(pos_kwargs, "__getitem__"):
+        raise ValueError(f"the first argument to .{func_name} must be a dictionary")
+    if kw_kwargs:
+        raise ValueError(f"cannot specify both keyword and positional arguments to .{func_name}")
+    return pos_kwargs
 
 
 class Dask:
@@ -746,13 +743,12 @@ def conditional_dask(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
 
-        if Dask.dask_flag:
-            user_kwargs = kwargs.pop("dask_kwargs", None)
-            if user_kwargs is None:
-                user_kwargs = {}
-            default_kwargs = Dask.dask_kwargs
-            return func(dask_kwargs={**default_kwargs, **user_kwargs}, *args, **kwargs)
-        else:
+        if not Dask.dask_flag:
             return func(*args, **kwargs)
+        user_kwargs = kwargs.pop("dask_kwargs", None)
+        if user_kwargs is None:
+            user_kwargs = {}
+        default_kwargs = Dask.dask_kwargs
+        return func(dask_kwargs={**default_kwargs, **user_kwargs}, *args, **kwargs)
 
     return wrapper

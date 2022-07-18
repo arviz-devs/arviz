@@ -230,11 +230,10 @@ def plot_ts(
                     x_holdout = y_forecasts.coords[y_forecasts.dims[-1]]
                 else:
                     x_holdout = y_holdout.coords[y_holdout.dims[-1]]
+            elif y_holdout is None:
+                x_holdout = y_forecasts.coords[holdout_dim]
             else:
-                if y_holdout is None:
-                    x_holdout = y_forecasts.coords[holdout_dim]
-                else:
-                    x_holdout = y_holdout.coords[holdout_dim]
+                x_holdout = y_holdout.coords[holdout_dim]
         elif isinstance(x_holdout, str):
             x_holdout = idata.constant_data[x_holdout]
         elif isinstance(x_holdout, tuple):
@@ -283,8 +282,10 @@ def plot_ts(
     len_y = len(y_plotters)
     len_x = len(x_plotters)
     length_plotters = len_x * len_y
-    y_plotters = np.tile(y_plotters, (len_x, 1))
-    x_plotters = np.tile(x_plotters, (len_y, 1))
+    # TODO: Incompatible types in assignment (expression has type "ndarray[Any, dtype[Any]]",
+    # TODO: variable has type "List[Any]")  [assignment]
+    y_plotters = np.tile(y_plotters, (len_x, 1))  # type: ignore[assignment]
+    x_plotters = np.tile(x_plotters, (len_y, 1))  # type: ignore[assignment]
 
     # Generate plotters for all the available data
     y_mean_plotters = None
@@ -314,8 +315,10 @@ def plot_ts(
 
         # Necessary when multidim y
         # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
-        y_hat_plotters = np.tile(y_hat_plotters, (len_x, 1))
-        y_mean_plotters = np.tile(y_mean_plotters, (len_x, 1))
+        # TODO: Incompatible types in assignment (expression has type "ndarray[Any, dtype[Any]]",
+        # TODO: variable has type "List[Any]")  [assignment]
+        y_hat_plotters = np.tile(y_hat_plotters, (len_x, 1))  # type: ignore[assignment]
+        y_mean_plotters = np.tile(y_mean_plotters, (len_x, 1))  # type: ignore[assignment]
 
     y_holdout_plotters = None
     x_holdout_plotters = None
@@ -339,8 +342,10 @@ def plot_ts(
 
         # Necessary when multidim y
         # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
-        y_holdout_plotters = np.tile(y_holdout_plotters, (len_x, 1))
-        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))
+        # TODO: Incompatible types in assignment (expression has type "ndarray[Any, dtype[Any]]",
+        # TODO: variable has type "List[Any]")  [assignment]
+        y_holdout_plotters = np.tile(y_holdout_plotters, (len_x, 1))  # type: ignore[assignment]
+        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))  # type: ignore[assignment]
 
     y_forecasts_plotters = None
     y_forecasts_mean_plotters = None
@@ -378,9 +383,13 @@ def plot_ts(
 
         # Necessary when multidim y
         # If there are multiple x and multidimensional y, we need total of len(x)*len(y) graphs
-        y_forecasts_mean_plotters = np.tile(y_forecasts_mean_plotters, (len_x, 1))
-        y_forecasts_plotters = np.tile(y_forecasts_plotters, (len_x, 1))
-        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))
+        # TODO: Incompatible types in assignment (expression has type "ndarray[Any, dtype[Any]]",
+        # TODO: variable has type "List[Any]")  [assignment]
+        y_forecasts_mean_plotters = np.tile(
+            y_forecasts_mean_plotters, (len_x, 1)
+        )  # type: ignore[assignment]
+        y_forecasts_plotters = np.tile(y_forecasts_plotters, (len_x, 1))  # type: ignore[assignment]
+        x_holdout_plotters = np.tile(x_holdout_plotters, (len_y, 1))  # type: ignore[assignment]
 
     rows, cols = default_grid(length_plotters)
 

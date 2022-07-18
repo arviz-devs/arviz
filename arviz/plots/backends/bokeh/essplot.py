@@ -52,6 +52,13 @@ def plot_ess(
 
     (figsize, *_, _linewidth, _markersize) = _scale_fig_size(figsize, textsize, rows, cols)
 
+    if hline_kwargs is None:
+        hline_kwargs = {}
+    hline_kwargs.setdefault("line_color", "red")
+    hline_kwargs.setdefault("line_width", 3)
+    hline_kwargs.setdefault("line_dash", "dashed")
+    hline_kwargs.setdefault("line_alpha", 1)
+
     if ax is None:
         ax = create_axes_grid(
             len(plotters),
@@ -134,16 +141,17 @@ def plot_ess(
 
             ax_.renderers.append(hline)
 
-        hline = Span(
-            location=400 / n_samples if relative else min_ess,
-            dimension="width",
-            line_color="red",
-            line_width=3,
-            line_dash="dashed",
-            line_alpha=1.0,
-        )
+        if relative and kind == "evolution":
+            thin_xdata = np.linspace(xdata.min(), xdata.max(), 100)
+            ax_.line(thin_xdata, min_ess / thin_xdata, **hline_kwargs)
+        else:
+            hline = Span(
+                location=min_ess / n_samples if relative else min_ess,
+                dimension="width",
+                **hline_kwargs,
+            )
 
-        ax_.renderers.append(hline)
+            ax_.renderers.append(hline)
 
         if kind == "evolution":
             legend = Legend(

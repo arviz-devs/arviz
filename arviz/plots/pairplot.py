@@ -101,7 +101,7 @@ def plot_pair(
     divergences_kwargs: dicts, optional
         Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter` for divergences
     scatter_kwargs:
-        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot` when using scatter kind
+        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter` when using scatter kind
     kde_kwargs: dict, optional
         Additional keywords passed to :func:`arviz.plot_kde` when using kde kind
     hexbin_kwargs: dict, optional
@@ -139,11 +139,6 @@ def plot_pair(
     Returns
     -------
     axes: matplotlib axes or bokeh figures
-
-    See Also
-    --------
-    plot_joint : Plot a scatter or hexbin of two variables with their
-                 respective marginals distributions.
 
     Examples
     --------
@@ -192,7 +187,7 @@ def plot_pair(
     else:
         kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
     if not np.all(kind_boolean):
-        raise ValueError((f"Plot type {kind} not recognized." "Plot type must be in {valid_kinds}"))
+        raise ValueError(f"Plot type {kind} not recognized. Plot type must be in {valid_kinds}")
     if fill_last or contour:
         warnings.warn(
             "fill_last and contour will be deprecated. Please use kde_kwargs",

@@ -105,10 +105,7 @@ def plot_violin(
 def _violinplot(val, rug, side, shade, bw, circular, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
     if bw == "default":
-        if circular:
-            bw = "taylor"
-        else:
-            bw = "experimental"
+        bw = "taylor" if circular else "experimental"
     x, density = kde(val, circular=circular, bw=bw)
     
     if rug and side == "both":
