@@ -62,7 +62,7 @@ def plot_violin(
         intervals. Defaults to ``True``.
     rug: bool
         If ``True`` adds a jittered rugplot. Defaults to ``False``.
-    side: string
+    side : str, default "both"
         If ``both``, both sides of the violin plot are rendered. If ``left`` or ``right``, only
         the respective side is rendered. By separately plotting left and right halfs with
         different data, split violin plots can be achieved. Defaults to ``both``.
