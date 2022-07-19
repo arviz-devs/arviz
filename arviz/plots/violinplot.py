@@ -65,7 +65,7 @@ def plot_violin(
     side : str, default "both"
         If ``both``, both sides of the violin plot are rendered. If ``left`` or ``right``, only
         the respective side is rendered. By separately plotting left and right halfs with
-        different data, split violin plots can be achieved. Defaults to ``both``.
+        different data, split violin plots can be achieved.
     hdi_prob: float, optional
         Plots highest posterior density interval for chosen percentage of density.
         Defaults to 0.94.
