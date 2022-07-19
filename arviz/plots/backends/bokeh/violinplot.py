@@ -107,10 +107,10 @@ def _violinplot(val, rug, side, shade, bw, circular, ax, **shade_kwargs):
     if bw == "default":
         bw = "taylor" if circular else "experimental"
     x, density = kde(val, circular=circular, bw=bw)
-    
+
     if rug and side == "both":
         side = "right"
-    
+
     if side == "left":
         dens = -density
     elif side == "right":
@@ -120,7 +120,6 @@ def _violinplot(val, rug, side, shade, bw, circular, ax, **shade_kwargs):
         x = np.concatenate([x, x[::-1]])
         dens = np.concatenate([-density, density[::-1]])
 
-    
     ax.harea(y=x, x1=dens, x2=np.zeros_like(dens), fill_alpha=shade, **shade_kwargs)
 
     return density
@@ -135,14 +134,14 @@ def cat_hist(val, rug, side, shade, ax, **shade_kwargs):
     heights = np.diff(bin_edges)
     centers = bin_edges[:-1] + heights.mean() / 2
     bar_length = 0.5 * binned_d
-    
+
     if rug and side == "both":
         side = "right"
-    
+
     if side == "right":
         left = 0
         right = bar_length
-    elif side== "left":
+    elif side == "left":
         left = -bar_length
         right = 0
     elif side == "both":

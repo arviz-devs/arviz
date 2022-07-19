@@ -908,8 +908,9 @@ def test_plot_legend(models):
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-def test_plot_violin(models, var_names):
-    axes = plot_violin(models.model_1, var_names=var_names)
+@pytest.mark.parametrize("side", ["left"])
+def test_plot_violin(models, var_names, side):
+    axes = plot_violin(models.model_1, var_names=var_names, side=side)
     assert axes.shape
 
 
