@@ -3,10 +3,11 @@
 ## v0.x.x Unreleased
 
 ### New features
+* Add `side` argument to `plot_violin` to allow single-sided violin plots ([1996](https://github.com/arviz-devs/arviz/pull/1996))
 
 ### Maintenance and fixes
 * Add exception in `az.plot_hdi` for `x` of type `np.datetime64` and `smooth=True` ([2016](https://github.com/arviz-devs/arviz/pull/2016))
-* Change `ax.plot` usage to `ax.scatter` in `plot_pair`. ([1990](https://github.com/arviz-devs/arviz/pull/1990))
+* Change `ax.plot` usage to `ax.scatter` in `plot_pair` ([1990](https://github.com/arviz-devs/arviz/pull/1990))
 
 ### Deprecation
 
