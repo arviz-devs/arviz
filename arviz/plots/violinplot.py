@@ -182,6 +182,9 @@ def plot_violin(
         backend = rcParams["plot.backend"]
     backend = backend.lower()
 
+    if side not in ("both", "left", "right"):
+        raise ValueError(f"'side' can only be 'both', 'left', or 'right', got: '{side}'")
+
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_violin", "violinplot", backend)
     ax = plot(**violinplot_kwargs)
