@@ -848,8 +848,12 @@ def test_plot_parallel_exception(models, var_names):
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-def test_plot_violin(models, var_names):
-    axes = plot_violin(models.model_1, var_names=var_names, backend="bokeh", show=False)
+@pytest.mark.parametrize("side", ["both", "left", "right"])
+@pytest.mark.parametrize("rug", [True])
+def test_plot_violin(models, var_names, side, rug):
+    axes = plot_violin(
+        models.model_1, var_names=var_names, side=side, rug=rug, backend="bokeh", show=False
+    )
     assert axes.shape
 
 
