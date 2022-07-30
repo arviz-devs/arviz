@@ -62,7 +62,7 @@ def plot_dist(
         Whether to rotate the 1D KDE plot 90 degrees.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
-    bw: Optional[float or str]
+    bw : Optional[float or str]
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when ``is_circular`` is False
@@ -78,7 +78,7 @@ def plot_dist(
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     figsize : tuple
         Figure size. If None it will be defined automatically.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``. Not implemented for bokeh backend.
     plot_kwargs : dict
@@ -117,11 +117,11 @@ def plot_dist(
         values passed are from a circular variable measured in radians and a circular KDE is
         used. Inputs in "degrees" will undergo an internal conversion to radians. Only valid
         for 1D KDE. Defaults to False.
-    ax: axes, optional
+    ax : axes, optional
         Matplotlib axes or bokeh figures.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation
