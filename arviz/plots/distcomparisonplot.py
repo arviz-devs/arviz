@@ -42,7 +42,7 @@ def plot_dist_comparison(
         {"observed_data", "prior_predictive", "posterior_predictive"}
     figsize : tuple
         Figure size. If None it will be defined automatically.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on ``figsize``.
     var_names : str, list, list of lists
@@ -63,7 +63,7 @@ def plot_dist_comparison(
     labeller : labeller instance, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax: axes, optional
+    ax : axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
         last column is for the combined before/after plots and columns 0 and 1 are
         for the before and after plots, respectively.
@@ -73,9 +73,9 @@ def plot_dist_comparison(
         Additional keywords passed to :func:`arviz.plot_dist` for posterior/predictive groups.
     observed_kwargs : dicts, optional
         Additional keywords passed to :func:`arviz.plot_dist` for observed_data group.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`. For additional documentation
