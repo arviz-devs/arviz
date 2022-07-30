@@ -48,7 +48,7 @@ def plot_density(
         Any object that can be converted to an :class:`arviz.InferenceData` object, or an Iterator
         returning a sequence of such objects.
         Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.
-    group: Optional[str]
+    group : Optional[str]
         Specifies which :class:`arviz.InferenceData` group should be plotted.
         Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
@@ -56,11 +56,11 @@ def plot_density(
     data_labels : Optional[List[str]]
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
-    var_names: Optional[List[str]]
+    var_names : Optional[List[str]]
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
-    filter_vars: {None, "like", "regex"}, optional, default=None
+    filter_vars : {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -89,7 +89,7 @@ def plot_density(
     shade : Optional[float]
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
-    bw: Optional[float or str]
+    bw : Optional[float or str]
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when `circular` is False
@@ -104,18 +104,18 @@ def plot_density(
         automatically inferred.
     figsize : Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
-    textsize: Optional[float]
+    textsize : Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
     labeller : labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
