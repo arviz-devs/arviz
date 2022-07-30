@@ -57,7 +57,7 @@ def plot_compare(
         If None, size is (6, num of models) inches
     title : bool:
         Show a tittle with a description of how to interpret the plot. Defaults to True.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
     labeller : labeller instance, optional
@@ -68,11 +68,11 @@ def plot_compare(
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
         'marker_dse', 'ls_min_ic' 'color_ls_min_ic',  'fontsize'
-    ax: axes, optional
+    ax : axes, optional
         Matplotlib axes or bokeh figures.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`.
