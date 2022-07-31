@@ -1,6 +1,6 @@
 """
 Single sided Violinplot
-==========
+=======================
 
 _thumb: .2, .8
 """
@@ -18,6 +18,5 @@ p2 = az.plot_violin(
     ax=p1,
     backend="bokeh",
     shade_kwargs={"color": "lightsalmon"},
-    show=True,
     labeller=labeller,
 )
