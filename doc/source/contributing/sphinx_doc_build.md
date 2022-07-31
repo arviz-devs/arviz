@@ -26,6 +26,7 @@ If you are using Docker, see {ref}`building_doc_with_docker`.
 ## Using sphinx locally
 ArviZ provides a `Makefile` to manage all doc building tasks.
 
+### Base workflow: `make html`
 To build the documentation you will need to execute `make html` on the command line.
 
 Once the command finishes, you can use `make preview` to open the generated documentation
@@ -35,12 +36,14 @@ Every time you make changes to the documentation you will need to run `make html
 However, if you haven't closed the documentation page that was open in the browser, you
 will be able to skip the `make preview` command.
 
+### Live preview workflow: `make livehtml`
 As calling `make html` every time you make changes can be annoying, it is also possible
-to install [sphinx-autobuild]() with `pip install sphinx-autobuild` and then execute
+to install [sphinx-autobuild](https://github.com/executablebooks/sphinx-autobuild)
+with `pip install sphinx-autobuild` and then execute
 `make livehtml` on the command line. With that, the documentation will be rebuilt every
 time you save a doc related file.
 
-:::{important}
+### Rebuild the docs from scratch: `make cleandocs`
 In some cases, nor `make livehtml` nor re-executing `make html` multiple times will
 serve to correctly update the documentation. This is common for example if working
 on `conf.py` or making changes to the API docs.
@@ -48,8 +51,6 @@ on `conf.py` or making changes to the API docs.
 When that happens, you will need to run `make cleandocs`. This will clean all the cache
 and intermediate files so the next time you run `make html` or `make livehtml`
 the documentation will be built from scratch (which will therefore be slower than usual).
-:::
-
 
 (preview_change)=
 ## Previewing doc changes
