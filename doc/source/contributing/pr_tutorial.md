@@ -18,7 +18,7 @@ clone it to your local machine, and develop on a feature branch.
    :sync: ssh
 
    ```
-   $ git clone git@github.com:<your GitHub handle>/arviz.git
+   git clone git@github.com:<your GitHub handle>/arviz.git
    ```
    :::
 
@@ -26,7 +26,7 @@ clone it to your local machine, and develop on a feature branch.
    :sync: https
 
    ```
-   $ git clone https://github.com/<your GitHub handle>/arviz.git
+   git clone https://github.com/<your GitHub handle>/arviz.git
    ```
    :::
 
@@ -40,8 +40,8 @@ clone it to your local machine, and develop on a feature branch.
    :sync: ssh
 
    ```
-   $ cd arviz
-   $ git remote add upstream git@github.com:arviz-devs/arviz.git
+   cd arviz
+   git remote add upstream git@github.com:arviz-devs/arviz.git
    ```
    :::
 
@@ -49,8 +49,8 @@ clone it to your local machine, and develop on a feature branch.
    :sync: https
 
    ```
-   $ cd arviz
-   $ git remote add upstream https://github.com/arviz-devs/arviz
+   cd arviz
+   git remote add upstream https://github.com/arviz-devs/arviz.git
    ```
    :::
 
@@ -60,7 +60,7 @@ clone it to your local machine, and develop on a feature branch.
 4. Create a ``feature`` branch to hold your development changes:
 
    ```bash
-   $ git checkout -b my-feature
+   git checkout -b my-feature
    ```
 
    ```{warning}
@@ -71,9 +71,9 @@ clone it to your local machine, and develop on a feature branch.
 5. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
 
    ```bash
-   $ pip install -r requirements.txt
-   $ pip install -r requirements-dev.txt
-   $ pip install -r requirements-docs.txt  # to generate docs locally
+   pip install -r requirements.txt
+   pip install -r requirements-dev.txt
+   pip install -r requirements-docs.txt  # to generate docs locally
    ```
 
    Alternatively, for developing the project in [Docker](https://docs.docker.com/), there is a script to setup the Docker environment for development. See {ref}`developing_in_docker`.
@@ -81,21 +81,21 @@ clone it to your local machine, and develop on a feature branch.
 6. Develop the feature on your feature branch. Add your changes using git commands, ``git add`` and then ``git commit``, like:
 
    ```bash
-   $ git add modified_files
-   $ git commit -m "commit message here"
+   git add modified_files
+   git commit -m "commit message here"
    ```
 
    to record your changes locally.
    After committing, it is a good idea to sync with the base repository in case there have been any changes:
    ```bash
-   $ git fetch upstream
-   $ git rebase upstream/main
+   git fetch upstream
+   git rebase upstream/main
    ```
 
    Then push the changes to your GitHub account with:
 
    ```bash
-   $ git push -u origin my-feature
+   git push -u origin my-feature
    ```
 
 7. Go to the GitHub web page of your fork of the ArviZ repo. Click the 'Pull request' button to send your changes to the project's maintainers for review. This will send an email to the committers.
