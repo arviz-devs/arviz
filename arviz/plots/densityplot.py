@@ -48,15 +48,15 @@ def plot_density(
         Any object that can be converted to an :class:`arviz.InferenceData` object, or an Iterator
         returning a sequence of such objects.
         Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.
-    group : Optional[str]
+    group : str, optional
         Specifies which :class:`arviz.InferenceData` group should be plotted.
         Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
         :class:`arviz.InferenceData`.
-    data_labels : Optional[List[str]]
+    data_labels : str, optional
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
-    var_names : Optional[List[str]]
+    var_names : str, optional
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
@@ -73,10 +73,10 @@ def plot_density(
     hdi_prob : float
         Probability for the highest density interval. Should be in the interval (0, 1].
         Defaults to 0.94.
-    point_estimate : Optional[str]
+    point_estimate : str, optional
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in ``rcParams``.
-    colors : Optional[Union[List[str],str]]
+    colors : str, optional
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
         cycle. If a single color is passed, e.g. 'k', 'C2' or 'red' this color will be used for all
@@ -86,31 +86,31 @@ def plot_density(
     hdi_markers : str
         A valid `matplotlib.markers` like 'v', used to indicate the limits of the highest density
         interval. Defaults to empty string (no marker).
-    shade : Optional[float]
+    shade : float, optional
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
-    bw : Optional[float or str]
+    bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when `circular` is False
         and "taylor" (for now) when `circular` is True.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
-    circular: Optional[bool]
+    circular : bool, optional
         If True, it interprets the values passed are from a circular variable measured in radians
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize : Optional[Tuple[int, int]]
+    figsize : int, optional
         Figure size. If None it will be defined automatically.
-    textsize : Optional[float]
+    textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    labeller : labeller instance, optional
+    Labeller : labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax : numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend : str, optional
