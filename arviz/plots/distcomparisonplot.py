@@ -34,7 +34,7 @@ def plot_dist_comparison(
 
     Parameters
     ----------
-    data : InferenceData object
+    data : InferenceData 
         :class:`arviz.InferenceData` object containing the posterior/prior data.
     kind : str
         kind of plot to display {"latent", "observed"}, defaults to 'latent'.
@@ -60,7 +60,7 @@ def plot_dist_comparison(
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
-    labeller : labeller instance, optional
+    Labeller : labeller instance, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : axes, optional
