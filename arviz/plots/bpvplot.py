@@ -98,7 +98,7 @@ def plot_bpv(
         For example, ``data_pairs = {'y' : 'y_hat'}``
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
-    labeller : labeller instance, optional
+    Labeller : labeller instance, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     var_names : list of variable names
@@ -124,7 +124,7 @@ def plot_bpv(
         parameters. If flatten is defined and flatten_pp is None, then ``flatten_pp=flatten``.
     legend : bool
         Add legend to figure. By default True.
-    ax : numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend : str, optional
@@ -147,7 +147,7 @@ def plot_bpv(
 
     Returns
     -------
-    axes: matplotlib axes or bokeh figures
+    axes : matplotlib axes or bokeh figures
 
     See Also
     --------
