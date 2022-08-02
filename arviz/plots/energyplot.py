@@ -46,12 +46,12 @@ def plot_energy(
     fill_color : tuple of valid matplotlib color
         Color for Marginal energy distribution and Energy transition distribution.
         Defaults to ('C0', 'C5').
-    bw: float or str, optional
+    bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental". Defaults to "experimental".
         Only works if ``kind='kde'``.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     fill_kwargs : dicts, optional
@@ -59,11 +59,11 @@ def plot_energy(
     plot_kwargs : dicts, optional
         Additional keywords passed to :func:`arviz.plot_kde` or :func:`matplotlib.pyplot.hist`
         (if ``type='hist'``).
-    ax: axes, optional
+    ax : axes, optional
         :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib", "bokeh"}. Defaults to "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`.
