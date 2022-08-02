@@ -1,6 +1,6 @@
 """
 Violin plot single sided
-===========
+========================
 
 _thumb: .2, .8
 _example_title: Single sided violin plot
