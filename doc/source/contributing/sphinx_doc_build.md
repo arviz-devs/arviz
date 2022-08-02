@@ -1,7 +1,7 @@
 (sphinx_doc_build)=
 # Building the documentation
 
-The preferred way to build the ArviZ documentation when doing changes to the website is doing
+The preferred way to build the ArviZ documentation when making changes to the website is doing
 so locally with sphinx. This how-to guide explains the steps to build the ArviZ docs locally.
 
 If you are not familiar with Python or have issues installing sphinx, you can skip
