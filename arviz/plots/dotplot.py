@@ -60,9 +60,9 @@ def plot_dot(
         Line width throughout. If None it will be autoscaled based on ``figsize``.
     markersize : int, optional
         Markersize throughout. If None it will be autoscaled based on ``figsize``.
-    markercolor: string, optional
+    markercolor : string, optional
         The color of the marker when plot_interval is True. Should be a valid matplotlib color.
-    marker: string, optional
+    marker : string, optional
         The shape of the marker. Valid for matplotlib backend
         Defaults to "o".
     hdi_prob : float, optional
@@ -81,13 +81,13 @@ def plot_dot(
     plot_kwargs : dict, optional
         Keywords passed for customizing the dots. Passed to :class:`mpl:matplotlib.patches.Circle`
         in matplotlib and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     ax : axes, optional
         Matplotlib axes or bokeh figures.
-    show: bool, optional
+    show : bool, optional
         Call backend show function.
-    backend_kwargs: dict, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`. For additional documentation
