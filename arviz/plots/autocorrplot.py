@@ -50,16 +50,16 @@ def plot_autocorr(
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize : tuple 
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
         Note this is not used if ``ax`` is supplied.
     textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    Labeller : labeller instance, optional
+    Labeller : Labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax : 2D array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib _axes or bokeh _figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend : str, optional
@@ -75,7 +75,7 @@ def plot_autocorr(
 
     Returns
     -------
-    axes: matplotlib axes or bokeh figures
+    axes : matplotlib axes or bokeh figures
 
     See Also
     --------
