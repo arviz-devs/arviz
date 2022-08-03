@@ -40,7 +40,7 @@ def plot_dist_comparison(
         kind of plot to display {"latent", "observed"}, defaults to 'latent'.
         "latent" includes {"prior", "posterior"} and "observed" includes
         {"observed_data", "prior_predictive", "posterior_predictive"}
-    figsize : tuple
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be
@@ -60,7 +60,7 @@ def plot_dist_comparison(
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
-    Labeller : labeller instance, optional
+    Labeller : Labeller instance, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : axes, optional
