@@ -83,7 +83,7 @@ def plot_bpv(
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize : tuple
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be
@@ -98,7 +98,7 @@ def plot_bpv(
         For example, ``data_pairs = {'y' : 'y_hat'}``
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
-    Labeller : labeller instance, optional
+    Labeller : Labeller instance, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     var_names : list of variable names
@@ -124,7 +124,7 @@ def plot_bpv(
         parameters. If flatten is defined and flatten_pp is None, then ``flatten_pp=flatten``.
     legend : bool
         Add legend to figure. By default True.
-    ax : 2D array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib _axes or bokeh _figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend : str, optional
@@ -147,7 +147,7 @@ def plot_bpv(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib _axes or bokeh _figure
 
     See Also
     --------
