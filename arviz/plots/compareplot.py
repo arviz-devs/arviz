@@ -53,14 +53,14 @@ def plot_compare(
         If True (default) ensure the best model is used as reference.
     legend : bool
         Add legend to figure. By default True.
-    figsize : tuple, optional
+    figsize : (float, float), optional
         If None, size is (6, num of models) inches
-    title : bool:
+    title : bool
         Show a tittle with a description of how to interpret the plot. Defaults to True.
     textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    Labeller : labeller instance, optional
+    Labeller : Labeller instance, optional
         Class providing the method ``model_name_to_str`` to generate the labels in
         the plot.
         Read the :ref:`label_guide` for more details and usage examples.
@@ -69,7 +69,7 @@ def plot_compare(
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
         'marker_dse', 'ls_min_ic' 'color_ls_min_ic',  'fontsize'
     ax : axes, optional
-        Matplotlib axes or bokeh figures.
+        Matplotlib _axes or bokeh _figure.
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs : bool, optional
@@ -81,7 +81,7 @@ def plot_compare(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib _axes or bokeh _figure
 
     See Also
     --------
