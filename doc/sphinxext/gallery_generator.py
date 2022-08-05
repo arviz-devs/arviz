@@ -59,87 +59,6 @@ BOKEH_RST_TEMPLATE = """
 RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 
 INDEX_TEMPLATE = """
-
-.. raw:: html
-
-    <style type="text/css">
-    .figure {{
-        position: relative;
-        float: left;
-        margin: 10px;
-        width: 180px;
-        height: 200px;
-    }}
-
-    .figure img {{
-        position: absolute;
-        display: inline;
-        left: 0;
-        width: 170px;
-        height: 170px;
-        opacity:1.0;
-        filter:alpha(opacity=100); /* For IE8 and earlier */
-    }}
-
-    .figure:hover img {{
-        -webkit-filter: blur(3px);
-        -moz-filter: blur(3px);
-        -o-filter: blur(3px);
-        -ms-filter: blur(3px);
-        filter: blur(3px);
-        opacity:1.0;
-        filter:alpha(opacity=100); /* For IE8 and earlier */
-    }}
-
-    span.figure-label {{
-        position: absolute;
-        display: inline;
-        left: 0;
-        width: 170px;
-        height: 170px;
-        background: #000;
-        color: #fff;
-        visibility: hidden;
-        opacity: 0;
-        z-index: 100;
-    }}
-
-    .figure p {{
-        position: absolute;
-        top: 45%;
-        width: 170px;
-        font-size: 110%;
-    }}
-
-    .figure:hover span {{
-        visibility: visible;
-        opacity: .4;
-    }}
-
-    .caption {{
-        position: absolute;
-        width: 180px;
-        top: 170px;
-        text-align: center !important;
-    }}
-
-    .figure .gallery-figure-title p {{
-        position: relative;
-        top: 170px;
-        color: black;
-        visibility: visible;
-        text-align: center !important;
-        line-height: normal;
-    }}
-    .figure .gallery-figure-title span {{
-        top: 170px;
-        position: relative;
-        visibility: visible;
-    }}
-    </style>
-
-.. _{sphinx_tag}:
-
 Example gallery
 ===============
 
@@ -149,20 +68,20 @@ Example gallery
 
 CONTENTS_ENTRY_TEMPLATE = (
     ".. raw:: html\n\n"
-    "    <div class='figure align-center'>\n"
+    "    <div class='example-gallery-figure align-center'>\n"
     "    <a href=./{htmlfilename}>\n"
     "    <img src=../_static/{thumbfilename}>\n"
-    "    <span class='figure-label'>\n"
+    "    <span class='example-gallery-figure-label'>\n"
     "    <p>{sphinx_tag}</p>\n"
     "    </span>\n"
-    '    <span class="gallery-figure-title">\n'
+    '    <span class="example-gallery-figure-title">\n'
     "      <p>{title}</p>\n"
     "    </span>\n"
     "    </a>\n"
     "    </div>\n\n"
     "\n\n"
     ""
-)
+) 
 
 
 def create_thumbnail(infile, thumbfile, width=275, height=275, cx=0.5, cy=0.5, border=4):
