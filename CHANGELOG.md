@@ -10,7 +10,7 @@
 * Change `ax.plot` usage to `ax.scatter` in `plot_pair` ([1990](https://github.com/arviz-devs/arviz/pull/1990))
 
 ### Deprecation
-* Deprecated `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
+* Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
 
 ### Documentation
 * Add translation overview to contributing guide ([2041](https://github.com/arviz-devs/arviz/pull/2041))
