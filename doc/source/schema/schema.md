@@ -51,13 +51,28 @@ Below are a few rules which should be followed:
 * Dimensions must be named and share name with a coordinate specifying the index values, called coordinate values.
 * Coordinate values can be repeated and should not necessarily be numerical values.
 * Variables must not share names with dimensions.
+* Groups, variables or the InferenceData itself can have arbitrary metadata stored.
 
-### Relations
+### Metadata
+No metadata is _required_ to be present in order to be compliant with the InferenceData schema.
+However, it is recommended to store the following fields when relevant:
+* `name`: InferenceData objects represent multiple quantities related to Bayesian modelling,
+  but they are all tied to a single model. The model identifier can be added as metadata
+  to simplify the calls to model comparison functions.
+* `created_at`: the date of creation of the group.
+* `arviz_version`: the version of the ArviZ library that generated the InferenceData
+* `arviz_language`: the programming language from which ArviZ was used to create the InferenceData
+* `inference_library`: the library used to run the inference.
+* `inference_library_version`: version of the inference library used.
+
+
+### Relations between groups
 `InferenceData` data objects contain any combination of the groups described below. There are also some relations (detailed below) between the variables and dimensions of different groups. Hence, whenever related groups are present they should comply with these relations. Neither the presence of groups nor described below or the lack of some of the groups described below go against the schema.
 
 #### `posterior`
 Samples from the posterior distribution p(theta|y) in the parameter (also called constrained) space.
 
+(schema/unconstrained_posterior)=
 #### `unconstrained_posterior`
 Samples from the posterior distribution p(theta_transformed|y) in the unconstrained (also called transformed) space.
 
@@ -67,6 +82,15 @@ variables should be taken from the `unconstrained_posterior` group if present,
 and if not, then the values from the variable in the `posterior` group should be used.
 
 Both samples and variables (for those present only) should match between the `posterior` and the `unconstrained_posterior` groups. Note that as defined above, matching samples and variables impose constraints on dimensions and coordinates, not on the values which will be different.
+
+:::{note}
+:class: dropdown
+
+Both InferenceData groups and variables can have metadata, which in the `unconstrained_posterior`
+case could be used to store the transformations each variable goes through to map between the
+constrained and unconstrained spaces. The schema leaves this completely up to the user
+and imposes on conventions or restrictions on such metadata.
+:::
 
 (schema/sample_stats)=
 #### `sample_stats`
@@ -162,6 +186,13 @@ generated during the adaptation process should be stored in groups with
 the same name with the `warmup_` prefix, e.g. `warmup_posterior`, `warmup_sample_stats_prior`.
 
 #### Unconstrained groups
+Samples on the unconstrained space in cases where the samples need to be generated with
+the help of a sampling algorithm and the sampling algorithm requires transformations
+to an unconstrained space.
+
+It is described in more detail in {ref}`schema/unconstrained_posterior` section, which
+is what we expect to be the most common section, but other groups could also have
+an unconstrained linked group, e.g. `prior` and `unconstrained_prior`.
 
 ## Planned features
 The `InferenceData` structure is still evolving, with some feature being currently developed. This section aims to describe the roadmap of the specification.
