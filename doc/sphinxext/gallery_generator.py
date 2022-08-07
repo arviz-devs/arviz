@@ -61,53 +61,31 @@ RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 INDEX_TEMPLATE = """
 Example gallery
 ===============
+{toctree}
+{contents}
+"""
 
-{toctrees_contents}
+TOCTREE_START = """
+.. toctree::
+   :hidden:
 
 """
 
-CONTENTS_ENTRY_TEMPLATE = (
-    ".. raw:: html\n\n"
-    "    <div class='example-gallery-figure align-center'>\n"
-    "    <a href=./{htmlfilename}>\n"
-    "    <img src=../_static/{thumbfilename}>\n"
-    "    <span class='example-gallery-figure-label'>\n"
-    "    <p>{sphinx_tag}</p>\n"
-    "    </span>\n"
-    '    <span class="example-gallery-figure-title">\n'
-    "      <p>{title}</p>\n"
-    "    </span>\n"
-    "    </a>\n"
-    "    </div>\n\n"
-    "\n\n"
-    ""
-) 
+CONTENTS_START = """
+.. grid:: 3
+   :gutter: 2 2 3 3
+"""
 
+CONTENTS_ENTRY_TEMPLATE = """
+   .. grid-item-card:: 
+      :link: ./{htmlfilename}
+      :img-top: ./matplotlib/_images/{imgfilename}
+      :text-align: center
+      :shadow: none
+      :class-card: example-gallery
 
-def create_thumbnail(infile, thumbfile, width=275, height=275, cx=0.5, cy=0.5, border=4):
-
-    im = image.imread(infile)
-    rows, cols = im.shape[:2]
-    size = min(rows, cols)
-    if size == cols:
-        xslice = slice(0, size)
-        ymin = min(max(0, int(cy * rows - size // 2)), rows - size)
-        yslice = slice(ymin, ymin + size)
-    else:
-        yslice = slice(0, size)
-        xmin = min(max(0, int(cx * cols - size // 2)), cols - size)
-        xslice = slice(xmin, xmin + size)
-    thumb = im[yslice, xslice]
-    thumb[:border, :, :3] = thumb[-border:, :, :3] = 0
-    thumb[:, :border, :3] = thumb[:, -border:, :3] = 0
-
-    dpi = 100
-    fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi, constrained_layout=True)
-
-    ax = fig.add_axes([0, 0, 1, 1], aspect="auto", frameon=False, xticks=[], yticks=[])
-    ax.imshow(thumb, aspect="auto", resample=True, interpolation="bilinear")
-    fig.savefig(thumbfile, dpi=dpi)
-    plt.close(fig)
+      {title}
+"""
 
 
 def indent(s, N=4):
@@ -120,12 +98,10 @@ class ExampleGenerator:
 
     _title: Optional[str]
 
-    def __init__(self, filename, target_dir, backend, thumb_dir, target_dir_orig):
+    def __init__(self, filename, target_dir, backend, target_dir_orig):
         self.filename = filename
         self.target_dir = target_dir
-        self.thumb_dir = thumb_dir
         self.backend = backend
-        self.thumbloc = 0.5, 0.5
         self._title = None
         self.extract_docstring()
         with open(filename, "r") as fid:
@@ -182,8 +158,8 @@ class ExampleGenerator:
         return "_images/" + pngfile
 
     @property
-    def thumbfilename(self):
-        pngfile = self.basename + "_thumb.png"
+    def imgfilename(self):
+        pngfile = "mpl_" + self.basename + ".png"
         return pngfile
 
     @property
@@ -274,8 +250,6 @@ class ExampleGenerator:
 
         plt.close("all")
         if self.backend == "matplotlib":
-            thumbfile = op.join(self.thumb_dir, self.thumbfilename)
-            cx, cy = self.thumbloc
             pngfile = op.join(self.target_dir, self.pngfilename)
             my_globals = {"plt": plt}
             with open(self.filename, "r") as fp:
@@ -286,7 +260,6 @@ class ExampleGenerator:
             fig = plt.gcf()
             fig.canvas.draw()
             fig.savefig(pngfile, dpi=75)
-            create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
 
         elif self.backend == "bokeh":
             with open(self.filename, "r") as fp:
@@ -295,13 +268,12 @@ class ExampleGenerator:
                     exec(code_text)
 
     def toctree_entry(self):
-        return "   ./{}\n\n".format(op.join(op.splitext(self.htmlfilename)[0]))
+        return "   {}\n".format(op.join(op.splitext(self.htmlfilename)[0]))
 
     def contents_entry(self) -> str:
         return CONTENTS_ENTRY_TEMPLATE.format(
-            backend=self.backend,
             htmlfilename=self.htmlfilename,
-            thumbfilename=self.thumbfilename,
+            imgfilename=self.imgfilename,
             sphinx_tag=self.sphinxtag,
             title=self.title,
         )
@@ -315,14 +287,9 @@ def main(app):
 
     backends = ("matplotlib", "bokeh")
     backend_prefixes = ("mpl", "bokeh")
-    toctrees_contents = ""
-    thumb_dir = op.join(app.builder.srcdir, "example_thumbs")
 
     if not op.exists(static_dir):
         os.makedirs(static_dir)
-
-    if not op.exists(thumb_dir):
-        os.makedirs(thumb_dir)
 
     path_dict = {}
     for backend in backends:
@@ -345,8 +312,8 @@ def main(app):
             "image_dir": image_dir,
         }
 
-    toctree = "\n\n.. toctree::\n   :hidden:\n\n"
-    contents = "\n\n"
+    toctree = TOCTREE_START
+    contents = CONTENTS_START
 
     # Write individual example files
     files = sorted(glob.glob(op.join(path_dict["matplotlib"]["source_dir"], "*.py")))
@@ -364,7 +331,7 @@ def main(app):
                 continue
 
             ex = ExampleGenerator(
-                expected_filename, target_dir, backend, thumb_dir, target_dir_orig
+                expected_filename, target_dir, backend, target_dir_orig
             )
 
             shutil.copyfile(expected_filename, op.join(target_dir, ex.pyfilename))
@@ -385,9 +352,6 @@ def main(app):
         toctree += ex.toctree_entry()
         contents += ex.contents_entry()
 
-    toctrees_contents = "\n".join((toctree, contents))
-    toctrees_contents += """.. raw:: html\n\n    <div style="clear: both"></div>"""
-
     # write index file
     index_file = op.join(target_dir, "..", "index.rst")
 
@@ -395,7 +359,8 @@ def main(app):
         index.write(
             INDEX_TEMPLATE.format(
                 sphinx_tag="example_gallery",
-                toctrees_contents=toctrees_contents,
+                toctree=toctree,
+                contents=contents,
                 examples_source=source_dir,
             )
         )
