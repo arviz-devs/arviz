@@ -15,18 +15,21 @@ color: var(--pst-color-sidebar-link-active);
 display: inline-block !important;
 }
 
-
 /* -------------------- EXAMPLE GALLERY OVERRIDES -------------------- */
 
-.example-gallery {
+.bd-content .sd-card .sd-card-body,
+.bd-content .sd-card .sd-card-footer {
+  background-color: transparent;
+}
+
+/* Each card has same height (across all rows in the grid) */
+.sd-card.example-gallery {
   height: 250px;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
   border-radius: 0.2rem;
   border: 0.6px solid rgba(255,255,255,0) !important;  /* Override Sphinx class */
 }
 
+/* Hover effects for each card */
 .example-gallery:hover {
   box-shadow: 0 0 0.5rem 0.2rem rgba(15, 187, 188, 0.3) !important;  /* Override Sphinx class */
   border: 0.6px solid #0fbbbc;
@@ -35,27 +38,22 @@ display: inline-block !important;
   color: #0fbbbc;
 }
 
-.example-gallery img.sd-card-img-top {
-  padding: 10px;
-  object-fit: contain;
-  max-height: 60%;
+/* Images in each card are scaled to fit 60% of the card */
+.example-gallery .sd-card-body {
+  height: 60%;
+  display: flex;  /* This vertically centers the img */
+}
+.example-gallery .sd-card-body img {
+  max-height: 100%;
   max-width: 100%;
-  flex-grow: 6;
+  margin: auto;  /* This keeps img ratio and horizontally centers the img */
 }
 
+/* Plot titles go in the footer and are aligned to fit 40% of the card */
+.example-gallery .sd-card-footer {
+  height: 40%;
+  width: 100%;
+}
 .example-gallery .sd-card-text {
   color: #086c86;
-}
-
-.bd-content .sd-card .sd-card-body,
-.bd-content .sd-card .sd-card-footer {
-  background-color: transparent;
-}
-
-.example-gallery .sd-card-body {
-  height: 40%;
-  flex-grow: 4;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
 }

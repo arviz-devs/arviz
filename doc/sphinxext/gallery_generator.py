@@ -17,7 +17,6 @@ from typing import Optional
 
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib import image
 
 from arviz.rcparams import rc_context
 from arviz import rcParams
@@ -59,6 +58,8 @@ BOKEH_RST_TEMPLATE = """
 RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 
 INDEX_TEMPLATE = """
+.. _{sphinx_tag}:
+
 Example gallery
 ===============
 {toctree}
@@ -72,25 +73,29 @@ TOCTREE_START = """
 """
 
 CONTENTS_START = """
-.. grid:: 3
+.. grid:: 1 2 3 3
    :gutter: 2 2 3 3
 """
 
 CONTENTS_ENTRY_TEMPLATE = """
    .. grid-item-card:: 
       :link: ./{htmlfilename}
-      :img-top: ./matplotlib/_images/{imgfilename}
       :text-align: center
       :shadow: none
       :class-card: example-gallery
+      :class-header: test test
 
+      .. image:: ./matplotlib/{pngfilename}
+	     :alt: alt text would go here (optional for now, could be the description we discussed)
+      
+      +++
       {title}
 """
+#:img-top: ./matplotlib/{pngfilename}
 
-
-def indent(s, N=4):
-    """indent a string"""
-    return s.replace("\n", "\n" + N * " ")
+# def indent(s, N=3):
+#     """Indent a string (Sphinx requires 3)."""
+#     return s.replace("\n", "\n" + N * " ")
 
 
 class ExampleGenerator:
@@ -112,10 +117,8 @@ class ExampleGenerator:
         # Only actually run it if the output RST file doesn't
         # exist or it was modified less recently than the example
         if not op.exists(outfilename) or (op.getmtime(outfilename) < op.getmtime(filename)):
-
             self.exec_file()
         else:
-
             print("skipping {0}".format(self.filename))
 
     @property
@@ -156,11 +159,6 @@ class ExampleGenerator:
     def pngfilename(self):
         pngfile = self.modulename + ".png"
         return "_images/" + pngfile
-
-    @property
-    def imgfilename(self):
-        pngfile = "mpl_" + self.basename + ".png"
-        return pngfile
 
     @property
     def apiname(self):
@@ -261,11 +259,6 @@ class ExampleGenerator:
             fig.canvas.draw()
             fig.savefig(pngfile, dpi=75)
 
-        elif self.backend == "bokeh":
-            with open(self.filename, "r") as fp:
-                code_text = fp.read()
-                with rc_context(rc={"plot.bokeh.show": False}):
-                    exec(code_text)
 
     def toctree_entry(self):
         return "   {}\n".format(op.join(op.splitext(self.htmlfilename)[0]))
@@ -273,25 +266,26 @@ class ExampleGenerator:
     def contents_entry(self) -> str:
         return CONTENTS_ENTRY_TEMPLATE.format(
             htmlfilename=self.htmlfilename,
-            imgfilename=self.imgfilename,
+            pngfilename=self.pngfilename,
             sphinx_tag=self.sphinxtag,
             title=self.title,
         )
 
 
 def main(app):
+    # Get paths for files
     working_dir = os.getcwd()
     os.chdir(app.builder.srcdir)
     static_dir = op.join(app.builder.srcdir, "..", "build", "_static")
     target_dir_orig = op.join(app.builder.srcdir, "examples")
 
-    backends = ("matplotlib", "bokeh")
-    backend_prefixes = ("mpl", "bokeh")
-
     if not op.exists(static_dir):
         os.makedirs(static_dir)
 
+    # Map each backend to their respective paths
     path_dict = {}
+    backends = ("matplotlib", "bokeh")
+    backend_prefixes = ("mpl", "bokeh")
     for backend in backends:
         target_dir = op.join(target_dir_orig, backend)
         image_dir = op.join(target_dir, "_images")
@@ -312,6 +306,7 @@ def main(app):
             "image_dir": image_dir,
         }
 
+    # Begin templates for table of contents and content cards 
     toctree = TOCTREE_START
     contents = CONTENTS_START
 
@@ -346,15 +341,17 @@ def main(app):
             )
             example_contents += output
 
+            # Add plot to table of contents and content card if matplotlib
+            if backend == "matplotlib":
+                toctree += ex.toctree_entry()
+                contents += ex.contents_entry()
+
         with open(op.join(target_dir_orig, ex.rstfilename), "w") as f:
             f.write(example_contents)
 
-        toctree += ex.toctree_entry()
-        contents += ex.contents_entry()
 
-    # write index file
+    # Write index file
     index_file = op.join(target_dir, "..", "index.rst")
-
     with open(index_file, "w") as index:
         index.write(
             INDEX_TEMPLATE.format(
