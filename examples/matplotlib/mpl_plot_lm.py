@@ -1,9 +1,6 @@
 """
 Regression Plot
 ===============
-
-_thumb: .6, .5
-_example_title: Plot regression
 """
 import matplotlib.pyplot as plt
 import xarray as xr

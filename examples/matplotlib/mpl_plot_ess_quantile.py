@@ -1,9 +1,6 @@
 """
 ESS Quantile Plot
 =================
-
-_thumb: .4, .5
-_example_title: Plot ESS of quantiles
 """
 import matplotlib.pyplot as plt
 

@@ -1,9 +1,6 @@
 """
 ESS Quantile Plot
 =================
-
-_thumb: .2, .8
-_example_title: Plot evolution of Effective Sample Size (ESS)
 """
 import matplotlib.pyplot as plt
 

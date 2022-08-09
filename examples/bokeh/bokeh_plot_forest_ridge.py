@@ -1,8 +1,6 @@
 """
 Ridgeplot
 =========
-
-_thumb: .8, .5
 """
 import arviz as az
 

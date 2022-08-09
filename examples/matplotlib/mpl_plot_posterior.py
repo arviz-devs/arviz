@@ -1,9 +1,6 @@
 """
 Posterior Plot
 ==============
-
-_thumb: .5, .8
-_example_title: Plot posterior
 """
 import matplotlib.pyplot as plt
 

@@ -57,3 +57,48 @@ display: inline-block !important;
 .example-gallery .sd-card-text {
   color: #086c86;
 }
+
+/* -------------------- EXAMPLE PLOTS -------------------- */
+
+/* API Reference */
+.example-plot-api-container {
+  margin: 1.5em auto;
+  padding: 0 0.6rem 0.4rem;
+  border: 0.05rem solid rgb(222, 222, 222);
+  border-left: 0.2rem solid;
+  border-left-color: #0fbbbc;
+  border-radius: 0.2rem;
+  box-shadow: 0 0.2rem 0.5rem rgb(0 0 0 / 5%), 0 0 0.0625rem rgb(0 0 0 / 10%);
+}
+.example-plot-api-title {
+  background-color:#0fbcbc12;
+  padding: 0.4rem 0.6rem 0.4rem 1rem;
+  margin: 0 -0.6rem;  /* Same as padding from container */
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.example-plot-api-name p {
+  padding: 0.4rem 0.6rem 0.4rem 1.2rem;
+  margin: 0rem;
+}
+
+/* Download Python Source Code */
+.example-plot-download {
+  background-color: #0fbcbc12;
+  border: 0.05rem solid rgb(222, 222, 222);
+  border-radius: 0.2rem;
+  /* Center button */
+  width: fit-content;
+  margin: 0 auto;
+  box-shadow: 0 0.2rem 0.5rem rgb(0 0 0 / 5%), 0 0 0.0625rem rgb(0 0 0 / 10%);
+}
+.example-plot-download p a {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.4rem 2rem;
+  margin: 0;
+}
+.example-plot-download p { /* Override margin defaults for p */
+  margin: 0;
+}

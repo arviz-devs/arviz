@@ -1,8 +1,6 @@
 """
 Regression Plot.
-
 ==========================================
-_thumb: .6, .5
 """
 import xarray as xr
 import numpy as np

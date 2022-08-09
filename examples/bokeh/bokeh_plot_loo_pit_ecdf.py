@@ -1,9 +1,6 @@
 """
 LOO-PIT ECDF Plot
 =================
-
-_thumb: .5, .7
-_example_title: Plot LOO predictive ECDF compared to ECDF of uniform distribution to assess predictive calibration.
 """
 import arviz as az
 

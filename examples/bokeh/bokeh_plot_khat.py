@@ -1,8 +1,6 @@
 """
 Pareto Shape Plot
 =================
-
-_thumb: .7, .5
 """
 import arviz as az
 

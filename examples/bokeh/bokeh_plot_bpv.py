@@ -1,8 +1,6 @@
 """
 Bayesian p-value Posterior plot
 ===============================
-
-_thumb: .6, .5
 """
 import arviz as az
 

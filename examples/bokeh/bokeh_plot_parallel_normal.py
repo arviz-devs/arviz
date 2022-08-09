@@ -1,8 +1,6 @@
 """
 Normal Parallel Plot
 ====================
-
-_thumb: .2, .5
 """
 import arviz as az
 

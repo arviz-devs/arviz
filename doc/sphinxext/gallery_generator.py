@@ -29,17 +29,29 @@ MPL_RST_TEMPLATE = """
 
 {docstring}
 
-**API documentation:** {api_name}
+.. raw:: html
+
+    <div class='example-plot-api-container'>
+        <p class='example-plot-api-title'>API Reference</p>
+        <div class='example-plot-api-name'>
+        
+{api_name}
+
+.. raw:: html
+
+    </div></div>
 
 .. tab-set::
     .. tab-item:: Matplotlib
 
         .. image:: {img_file}
 
-        **Python source code:** :download:`[download source: {fname}]<{fname}>`
-
         .. literalinclude:: {fname}
             :lines: {end_line}-
+        
+        .. div:: example-plot-download
+
+           :download:`Download Python Source Code: {fname}<{fname}>`
 
 """
 
@@ -49,10 +61,12 @@ BOKEH_RST_TEMPLATE = """
         .. bokeh-plot:: {absfname}
             :source-position: none
 
-        **Python source code:** :download:`[download source: {fname}]<{fname}>`
-
         .. literalinclude:: {fname}
             :lines: {end_line}-
+        
+        .. div:: example-plot-download
+
+           :download:`Download Python Source Code: {fname}<{fname}>`
 """
 
 RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
@@ -207,36 +221,30 @@ class ExampleGenerator:
                     first_par = paragraphs[0]
             break
 
-        thumbloc = None
-        title: Optional[str] = None
+        # thumbloc = None
+        # title: Optional[str] = None
         ex_title: str = ""
         for line in docstring.split("\n"):
-            # we've found everything we need...
-            if thumbloc and title and ex_title != "":
-                break
-            m = re.match(r"^_thumb: (\.\d+),\s*(\.\d+)", line)
-            if m:
-                thumbloc = float(m.group(1)), float(m.group(2))
-                continue
-            m = re.match(r"^_example_title: (.*)$", line)
-            if m:
-                title = m.group(1)
-                continue
+            # # we've found everything we need...
+            # if thumbloc and title and ex_title != "":
+            #     break
+            # m = re.match(r"^_thumb: (\.\d+),\s*(\.\d+)", line)
+            # if m:
+            #     thumbloc = float(m.group(1)), float(m.group(2))
+            #     continue
+            # m = re.match(r"^_example_title: (.*)$", line)
+            # if m:
+            #     title = m.group(1)
+            #     continue
             # capture the first non-empty line of the docstring as title
             if ex_title == "":
                 ex_title = line
         assert ex_title != ""
-        if thumbloc is not None:
-            self.thumbloc = thumbloc
-            docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_thumb")])
+        # if thumbloc is not None:
+        #     self.thumbloc = thumbloc
+        #     docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_thumb")])
 
-        if title is not None:
-            docstring = "\n".join(
-                [l for l in docstring.split("\n") if not l.startswith("_example_title")]
-            )
-        else:
-            title = ex_title
-        self._title = title
+        self._title = ex_title
 
         self.docstring = docstring
         self.short_desc = first_par
@@ -270,7 +278,6 @@ class ExampleGenerator:
             sphinx_tag=self.sphinxtag,
             title=self.title,
         )
-
 
 def main(app):
     # Get paths for files

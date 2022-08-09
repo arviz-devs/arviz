@@ -1,9 +1,6 @@
 """
 Rank plot
 =========
-
-_thumb: .1, .8
-_example_title: Rank plot
 """
 import matplotlib.pyplot as plt
 

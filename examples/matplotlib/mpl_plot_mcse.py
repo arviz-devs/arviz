@@ -1,9 +1,6 @@
 """
 Quantile Monte Carlo Standard Error Plot
 ========================================
-
-_thumb: .5, .8
-_example_title: Quantile Monte Carlo Standard Error Plot
 """
 import matplotlib.pyplot as plt
 

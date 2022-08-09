@@ -1,9 +1,6 @@
 """
 KDE Pair Plot
 =============
-
-_thumb: .2, .5
-_example_title: KDE pair plot
 """
 import matplotlib.pyplot as plt
 

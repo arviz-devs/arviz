@@ -1,9 +1,6 @@
 """
 Compare Plot
 ============
-
-_thumb: .5, .5
-_example_title: Comparison plot
 """
 import matplotlib.pyplot as plt
 

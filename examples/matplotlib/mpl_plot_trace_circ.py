@@ -1,8 +1,6 @@
 """
 Traceplot circular variables
 ============================
-
-_thumb: .1, .8
 """
 import matplotlib.pyplot as plt
 

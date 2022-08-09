@@ -1,9 +1,6 @@
 """
 Dot Plot
 =========
-
-_thumb: .2, .8
-_example_title: Plot distribution.
 """
 import numpy as np
 import arviz as az

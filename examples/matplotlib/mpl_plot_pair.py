@@ -1,9 +1,6 @@
 """
 Pair Plot
 =========
-
-_thumb: .2, .5
-_example_title: Pair plot with divergences marked
 """
 import matplotlib.pyplot as plt
 
