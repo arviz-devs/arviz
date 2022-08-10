@@ -1,4 +1,9 @@
 # Plots refactor overview
+
+:::{important}
+As of now, this is at an experimenting stage, this outlines some ideas,
+:::
+
 The main idea behind this refactor is to separate ArviZ plotting tasks
 into 3 separated and independent parts. Hopefully this will make it
 easier to:
@@ -19,12 +24,21 @@ and making sure they support everything we want to be possible.
 By "data organization" I mean taking the original InferenceData and
 generating the plotting grids and selectors to generate the plots.
 
-I propose this depends on a `ArviZGrid` class that can be generated
+I propose this depends on a `PlotCollection` class that stores the
+facetting info. A proof of concept is below (for now without classmethod constructors,
+labels or legends)
+
+:::{toctree}
+plots_refactor_examples
+:::
+
+that can be generated
 with `facet_wrap` and `facet_grid` methods.
 
 ```
-ArviZGrid.facet_wrap(idata, col, overlay, **kwargs)
-ArviZGrid.facet_wrap(idata, col, row, overlay, **kwargs)
+PlotCollection.facet_wrap(idata, col, overlay, **kwargs)
+PlotCollection.facet_grid(idata, col, row, overlay, **kwargs)
+PlotCollection.facet_triangle(idata, col, overlay, **kwargs) for # plot_pair and the like (elpd plot for example)
 ```
 
 Arguments `row, col, overlay` would take strings or lists of strings: dimension names
@@ -36,6 +50,15 @@ for properties over which to iterate over and update that aesthetic with every p
 This is the "standard" overlaying, but I think in our case it is also important to
 have this extra `overlay` kwarg to overlay plots without changing any aesthetic
 for spaghetti-like plots.
+
+:::{note}
+This could be an extension of https://docs.xarray.dev/en/stable/generated/xarray.plot.FacetGrid.html
+or even live upstream in xarray.
+:::
+
+And this gets to the main goal. If an approach like this is followed, anyone can create
+a PlotCollection alternative class that facets and sets aesthetics from a DataFrame
+and potentially reuse all of ArviZ without loosing functionality.
 
 ### Challenges
 We have multiple complex plots that have multiple elements and we might want
@@ -99,6 +122,13 @@ with the plotting/facetting.
 As I commented before, it might make sense to try and keep a similar API
 to the one we have, using all the elements defined here but
 "bundling" multiple elements that are often combined together: plot_ppc, plot_posterior...
+These functions would keep an API similar to the current one, but
+start generating a `PlotCollection` object, then call the processing ones
+and then call lower level plotting functions _with the same name_.
+
+The lower level functions with the same name would be 1 axes/figure functions
+that do these more complex plots combining multiple elements, eliminating
+all the looping duplication we currently have.
 
 As updated/a bit more lower level API, I am not sure if it would be preferable to
 have plotting as methods of the data organization class or as functions
@@ -145,20 +175,26 @@ Doing this, we'll reduce all duplication between backends, and adding
 a new backend to ArviZ (i.e. a json one to save plot info) would
 reduce only to adding the intermediaries for that backend.
 
-#### Base Plotting Example
+## Examples
+### Base plotting
 Note: ignore issues with defaults
 
 ```python
-class ArviZPlot:
-    def __init__(self, bakend=None, target=None):
-        self.backend = rcParams...
-        self.target = self.init_target(target)  # for now, mpl axes or bokeh figure
-        for meth in method_list:
-            setattr(self, meth, getattr(self, f"{backend}_{meth}"))
+class MatplotlibBackend:  # maybe it can be a module similar to what we have now too
 
-    def matplotlib_line(self, x, y, color, linestyle, linewidth, alpha, **kwargs):
-        self.target.plot(x, y, color=color, linestyle=linestyle, linewidth=linewidth, alpha=alpha, **kwargs)
+    def line(self, target, x, y, *, color, linestyle, linewidth, alpha, **kwargs):
+        target.plot(x, y, color=color, linestyle=linestyle, linewidth=linewidth, alpha=alpha, **kwargs)
+        # or
+        core_kwargs = dict(color=color, linestyle=linestyle, linewidth=linewidth, alpha=alpha)
+        plot_kwargs = {**kwargs, **{key: value for key, value in core_kwargs.items() if value is not
+        None}}
+        target.plot(self, target, x, y, **kwargs)
 
-    def bokeh_line(self, x, y, color, linestyle, alpha, **kwargs):
-        self.target.line(x, y, color=color, line_dash=linestyle, line_width=linewidth, alpha=alpha, **kwargs)
+class BokehBackend:
+
+    def line(self, target, x, y, *, color, linestyle, linewidth, alpha, **kwargs):
+        target.line(x, y, color=color, line_dash=linestyle, line_width=linewidth, alpha=alpha, **kwargs)
 ```
+
+
+
