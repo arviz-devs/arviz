@@ -17,7 +17,7 @@ from .stats_utils import quantile as _quantile
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
-__all__ = ["bfmi", "ess", "rhat", "mcse"]
+__all__ = ["bfmi", "ess", "rhat", "mcse", "psens"]
 
 
 def bfmi(data):
@@ -996,3 +996,134 @@ def _multichain_statistics(ary, focus="mean"):
         ess_tail_value,
         rhat_value,
     )
+
+
+def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs=None):
+    """Compute power-scaling sensitivity diagnostic.
+
+    Power-scales the prior or likelihood and calculates how much the posterior is affected.
+
+    Parameters
+    ----------
+    data : obj
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
+        For ndarray: shape = (chain, draw).
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+    var_names : list
+        Names of variables to include in the rhat report
+    component : str
+        Select component to power-scale. Valid components are are:
+        - "prior"
+        - "likleihood"
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
+
+    Returns
+    -------
+    xarray.Dataset
+      Returns dataset of power-scaling sensitivity diagnostic values.
+
+    Notes
+    -----
+    The diagnostic is computed by power-scaling the specified component (prior or likelihood)
+    and determining the degree to which the posterior changes. It uses Pareto-smoothed
+    importance sampling to avoid refitting the model.
+
+    References
+    ----------
+    * Kallioinen et al. (2022) see https://arxiv.org/abs/2107.14054
+
+    """
+    dataset = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names, dataset)
+
+    dataset = dataset if var_names is None else dataset[var_names]
+
+    if (component == "likelihood"):
+        component_draws = np.sum(data["log_likelihood"].stack(draws = ("chain", "draw")).obs.values, axis = 0)
+    elif (component == "prior"):
+        component_draws = data["log_prior"].stack(draws = ("chain", "draw")).values
+
+    lower_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=alpha))
+    lower_w = lower_w/np.sum(lower_w)
+
+    upper_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=alpha))
+    upper_w = upper_w/np.sum(upper_w)
+
+    ufunc_kwargs = {"ravel": False}
+    func_kwargs = {
+        "lower_weights": lower_w,
+        "upper_weights": upper_w,
+        "delta": delta
+    }
+
+    return _wrap_xarray_ufunc(
+        _powerscale_sens,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
+    )
+
+
+def _powerscale_sens(ary, *, lower_weights=None, upper_weights=None, delta=0.01, dask_kwargs=None):
+    """
+    Calculate power-scaling sensitivity by finite difference second derivative of CJS
+    """
+    lower_cjs = _cjs_dist(x=draws, weights=lower_weights)
+    upper_cjs = _cjs_dist(x=draws, weights=upper_weights)
+
+    logdiffsquare = 2 * np.log2(1 + delta)
+    grad = (lower_cjs + upper_cjs) / logdiffsquare
+
+    return grad
+
+
+def _powerscale_lw(alpha, component_draws):
+    """
+    Calculate log weights for power-scaling component by alpha.
+    """
+    lw = (alpha - 1) * component_draws
+    lw = psislw(lw)
+
+    return lw
+
+
+def _cjs_dist(x, weights):
+    """
+    Calculate Cumulative Jensen-Shannon distance between original draws (x) and weighted draws.
+    """
+
+    # normalise weights
+    weights = weights/np.sum(weights)
+
+    # sort draws and weights
+    x, w = (list(x) for x in zip(*sorted(zip(x, weights))))
+
+    bins = x[:-1]
+    binwidth = np.diff(x)
+
+    # ecdfs
+    cdf_p = np.full(shape=len(x), fill_value=1/len(x))
+    cdf_p = np.cumsum(cdf_p)[:-1]
+    cdf_q = np.cumsum(w/np.sum(w))[:-1]
+
+    # integrals of ecdfs
+    cdf_p_int = np.dot(cdf_p, binwidth)
+    cdf_q_int = np.dot(cdf_q, binwidth)
+
+    cjs_pq = np.nansum(binwidth * (
+        cdf_p * (np.log2(cdf_p) -
+              np.log2(0.5 * cdf_p + 0.5 * cdf_q)
+        ))) + 0.5 / np.log(2) * (cdf_q_int - cdf_p_int)
+
+    cjs_qp = np.nansum(
+        binwidth *
+        cdf_q * (np.log2(cdf_q) -
+              np.log2(0.5 * cdf_q + 0.5 * cdf_p)
+              )) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
+
+    bound = cdf_p_int + cdf_q_int
+
+    return np.sqrt((cjs_pq + cjs_qp)/bound)
