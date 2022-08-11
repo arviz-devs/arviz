@@ -1041,7 +1041,7 @@ def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs
     dataset = dataset if var_names is None else dataset[var_names]
 
     if (component == "likelihood"):
-        component_draws = np.sum(data["log_likelihood"].stack(draws = ("chain", "draw")).obs.values, axis = 0)
+        component_draws = np.sum(data["log_likelihood"].stack(draws=("chain", "draw")).obs.values, axis=0)
     elif (component == "prior"):
         component_draws = data["log_prior"].stack(draws = ("chain", "draw")).values
 
@@ -1096,7 +1096,7 @@ def _cjs_dist(x, weights):
     """
 
     # normalise weights
-    weights = weights/np.sum(weights)
+    weights = weights / np.sum(weights)
 
     # sort draws and weights
     x, w = (list(x) for x in zip(*sorted(zip(x, weights))))
