@@ -1015,7 +1015,7 @@ def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs
     component : str
         Select component to power-scale. Valid components are are:
         - "prior"
-        - "likleihood"
+        - "likelihood"
     dask_kwargs : dict, optional
         Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
@@ -1126,4 +1126,4 @@ def _cjs_dist(x, weights):
 
     bound = cdf_p_int + cdf_q_int
 
-    return np.sqrt((cjs_pq + cjs_qp)/bound)
+    return np.sqrt((cjs_pq + cjs_qp) / bound)
