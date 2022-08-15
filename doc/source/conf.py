@@ -181,6 +181,7 @@ html_context = {
     "default_mode": "light",
 }
 html_sidebars: Dict[str, Any] = {
+    "index": [],
     "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html"],
 }
 

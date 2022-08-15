@@ -40,7 +40,7 @@ MPL_RST_TEMPLATE = """
 
         .. literalinclude:: {fname}
             :lines: {end_line}-
-        
+
         .. div:: example-plot-download
 
            :download:`Download Python Source Code: {fname}<{fname}>`
@@ -55,7 +55,7 @@ BOKEH_RST_TEMPLATE = """
 
         .. literalinclude:: {fname}
             :lines: {end_line}-
-        
+
         .. div:: example-plot-download
 
            :download:`Download Python Source Code: {fname}<{fname}>`
@@ -64,6 +64,8 @@ BOKEH_RST_TEMPLATE = """
 RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 
 INDEX_TEMPLATE = """
+:html_theme.sidebar_secondary.remove:
+
 .. _{sphinx_tag}:
 
 Example gallery
@@ -84,7 +86,7 @@ CONTENTS_START = """
 """
 
 CONTENTS_ENTRY_TEMPLATE = """
-   .. grid-item-card:: 
+   .. grid-item-card::
       :link: ./{htmlfilename}
       :text-align: center
       :shadow: none
@@ -93,7 +95,7 @@ CONTENTS_ENTRY_TEMPLATE = """
 
       .. image:: ./matplotlib/{pngfilename}
 	     :alt: alt text would go here (optional for now, could be the description we discussed)
-      
+
       +++
       {title}
 """
@@ -305,7 +307,7 @@ def main(app):
             "image_dir": image_dir,
         }
 
-    # Begin templates for table of contents and content cards 
+    # Begin templates for table of contents and content cards
     toctree = TOCTREE_START
     contents = CONTENTS_START
 

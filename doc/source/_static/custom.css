@@ -27,11 +27,9 @@ html[data-theme="dark"] {
   --pst-color-secondary: rgb(238 144 64);
 }
 
-.bd-container .bd-container__inner {
-  justify-content: center;
-}
 .bd-content {
-  max-width: 60em;
+  flex-grow: 1;
+  max-width: 100%;
 }
 
 /* -------------------- HOMEPAGE -------------------- */

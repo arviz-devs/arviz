@@ -1,3 +1,5 @@
+:html_theme.sidebar_secondary.remove:
+
 .. _homepage:
 
 ArviZ: Exploratory analysis of Bayesian models
