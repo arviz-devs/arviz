@@ -1,13 +1,104 @@
-.. raw:: html
-
-    <form class="bd-search align-items-center" action="search.html" method="get">
-      <input type="search" class="form-control search-front-page" name="q" id="search-input" placeholder="&#128269; Search the docs ..." aria-label="Search the docs ..." autocomplete="off">
-    </form>
-
 .. _homepage:
 
 ArviZ: Exploratory analysis of Bayesian models
 ==============================================
+
+ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, data storage, sample diagnostics, model checking, and comparison.
+
+The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python,
+by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
+See :ref:`here <xarray_for_arviz>` for more on xarray and ArviZ usage
+and :ref:`here <schema>` for more on ``InferenceData`` structure
+and specification.
+
+.. raw:: html
+
+    <div class="home-flex-grid">
+        <a href="examples/plot_pair.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_pair.png">
+                <span class="home-img-plot-overlay">Pair Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_forest.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_forest.png">
+                <span class="home-img-plot-overlay">Forest Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_density.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_density.png">
+                <span class="home-img-plot-overlay">Density Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_energy.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_energy.png">
+                <span class="home-img-plot-overlay">Energy Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_posterior.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_posterior.png">
+                <span class="home-img-plot-overlay">Posterior Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_kde_2d.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_kde_2d.png">
+                <span class="home-img-plot-overlay">KDE 2D Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_forest_ridge.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_forest_ridge.png">
+                <span class="home-img-plot-overlay">Forest Ridge Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_parallel.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_parallel.png">
+                <span class="home-img-plot-overlay">Parallel Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_trace.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_trace.png">
+                <span class="home-img-plot-overlay">Trace Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_dot.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_dot.png">
+                <span class="home-img-plot-overlay">Dot Plot</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_ppc.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_ppc.png">
+                <span class="home-img-plot-overlay">Posterior Predictive Checks</span>
+            </div>
+        </a>
+
+        <a href="examples/plot_autocorr.html">
+            <div class="home-img-plot img-thumbnail">
+                <img src="./_images/mpl_plot_autocorr.png">
+                <span class="home-img-plot-overlay">Autocorrelation Plot</span>
+            </div>
+        </a>
+    </div>
+
 |pypi|
 |Build Status|
 |Coverage Status|
@@ -32,35 +123,26 @@ ArviZ: Exploratory analysis of Bayesian models
 .. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/main/graph/badge.svg
   :target: https://codecov.io/gh/arviz-devs/arviz
 
-.. raw:: html
 
+Installation
+------------
 
-    <div class="container-xl">
-      <div class="row">
-        <div class="col-md-6">
-
-ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, data storage, sample diagnostics, model checking, and comparison.
-
-The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python,
-by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
-See :ref:`here <xarray_for_arviz>` for more on xarray and ArviZ usage
-and :ref:`here <schema>` for more on ``InferenceData`` structure
-and specification.
-
-
-**Installation** using pip
+Using pip
 
 .. code:: bash
 
     pip install arviz
 
-Alternatively you can use conda-forge
+Using conda-forge
 
 .. code:: bash
 
     conda install -c conda-forge arviz
 
 To install the latest development version of ArviZ, please check the :ref:`Installation guide <dev-version>` for details.
+
+Contribution
+------------
 
 **Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
 
@@ -79,6 +161,8 @@ also available. It provides built-in support for
 
 ArviZ is a non-profit project under NumFOCUS umbrella. If you want to **support ArviZ financially**, you can donate `here <https://numfocus.org/donate-to-arviz>`_.
 
+Citation
+--------
 
 If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation in BibTeX format
 
@@ -109,107 +193,6 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
   community
   Contributing<contributing/index>
 
-
-.. raw:: html
-
-    </div>
-    <div class="col-md-6">
-      <div class="container">
-        <div class="row">
-            <div class="col">
-            <a href="examples/plot_pair.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_pair_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_forest.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_forest_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_density.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_density_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_energy.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_energy_thumb.png">
-            </div>
-            </a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-            <a href="examples/plot_posterior.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_posterior_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_kde_2d.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_kde_2d_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_forest_ridge.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_forest_ridge_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_parallel.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_parallel_thumb.png">
-            </div>
-            </a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-            <a href="examples/plot_trace.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_trace_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_dot.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_dot_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_ppc.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_ppc_thumb.png">
-            </div>
-            </a>
-            </div>
-            <div class="col">
-            <a href="examples/plot_autocorr.html">
-            <div class="img-thumbnail">
-                <img src="_static/plot_autocorr_thumb.png">
-            </div>
-            </a>
-            </div>
-        </div>
-      </div>
-    </div>
-
-    </div>
-    </div>
 
 
 

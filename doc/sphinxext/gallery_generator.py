@@ -29,17 +29,9 @@ MPL_RST_TEMPLATE = """
 
 {docstring}
 
-.. raw:: html
+.. seealso::
 
-    <div class='example-plot-api-container'>
-        <p class='example-plot-api-title'>API Reference</p>
-        <div class='example-plot-api-name'>
-        
-{api_name}
-
-.. raw:: html
-
-    </div></div>
+    API Documentation: {api_name}
 
 .. tab-set::
     .. tab-item:: Matplotlib
