@@ -1,6 +1,7 @@
 """Base IO code for all datasets. Heavily influenced by scikit-learn's implementation."""
 import hashlib
 import itertools
+import json
 import os
 import shutil
 from collections import namedtuple
@@ -9,10 +10,10 @@ from urllib.request import urlretrieve
 from ..rcparams import rcParams
 from .io_netcdf import from_netcdf
 
-LocalFileMetadata = namedtuple("LocalFileMetadata", ["filename", "description"])
+LocalFileMetadata = namedtuple("LocalFileMetadata", ["name", "filename", "description"])
 
 RemoteFileMetadata = namedtuple(
-    "RemoteFileMetadata", ["filename", "url", "checksum", "description"]
+    "RemoteFileMetadata", ["name", "filename", "url", "checksum", "description"]
 )
 _DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_datasets")
 
