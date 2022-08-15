@@ -57,7 +57,11 @@ setup(
     extras_require=dict(all=get_requirements_optional()),  # test=get_requirements_dev(),
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    package_data={'data': ['*.json', '*.nc'], 'plots': ['*.mplstyle'], 'tests': ["*"]},
+    package_data={
+        "arviz.data": ["*.json", "*.nc"],
+        "arviz.plots": ["*.mplstyle"],
+        "arviz.tests": ["*"],
+    },
     include_package_data=True,
     python_requires='>=3.7',
     classifiers=[
