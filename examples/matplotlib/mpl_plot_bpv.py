@@ -1,6 +1,6 @@
 """
-Bayesian p-value Posterior plot
-===============================
+Bayesian u-value Plot
+=====================
 """
 import matplotlib.pyplot as plt
 

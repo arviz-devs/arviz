@@ -1,6 +1,6 @@
 """
-ESS Quantile Plot
-=================
+ESS Evolution Plot
+==================
 """
 import arviz as az
 

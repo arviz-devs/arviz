@@ -1,6 +1,6 @@
 """
-ESS Quantile Plot
-=================
+ESS Evolution Plot
+==================
 """
 import matplotlib.pyplot as plt
 

@@ -1,6 +1,6 @@
 """
-Bayesian p-value with median T statistic Posterior plot
-=======================================================
+Bayesian p-value with T statistic Plot
+======================================
 """
 import arviz as az
 
