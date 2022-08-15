@@ -18,7 +18,7 @@ display: inline-block !important;
 /* -------------------- THEME OVERRIDES -------------------- */
 
 html[data-theme="light"] {
-  --pst-color-primary: rgb(0 192 191);
+  --pst-color-primary: rgb(11 117 145);
   --pst-color-secondary: rgb(238 144 64);
 }
 
@@ -44,6 +44,15 @@ html[data-theme="dark"] {
   padding: 20px 0px 40px;
 }
 
+.home-img-plot {
+  width: 200px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden
+}
+
 .home-img-plot,
 .home-img-plot-overlay {
   width: 200px;
@@ -65,7 +74,7 @@ html[data-theme="dark"] {
   position: absolute;
   border: 1px solid #dee2e6;  /* Same dimensions as img-thumbnail from pydata css */
   border-radius: 0.25rem;  /* Same dimensions as img-thumbnail from pydata css */
-  color: #fff;
+  color: var(--pst-color-background);
   opacity: 0;
   transition: .2s ease;
   text-align: center;
