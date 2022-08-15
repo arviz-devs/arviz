@@ -163,6 +163,6 @@ def list_datasets():
             location = f"remote: {resource.url}"
         else:
             location = "unknown"
-        lines.append(f"{name}\n{'=' * len(name)}\n{resource.description}\n{location}")
+        lines.append(f"{name}\n{'=' * len(name)}\n{resource.description}\n\n{location}")
 
     return f"\n\n{10 * '-'}\n\n".join(lines)
