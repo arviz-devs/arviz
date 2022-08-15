@@ -91,10 +91,8 @@ CONTENTS_ENTRY_TEMPLATE = """
       :text-align: center
       :shadow: none
       :class-card: example-gallery
-      :class-header: test test
 
       .. image:: ./matplotlib/{pngfilename}
-	     :alt: alt text would go here (optional for now, could be the description we discussed)
 
       +++
       {title}
