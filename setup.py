@@ -58,8 +58,8 @@ setup(
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     package_data={
-        "arviz.data": ["*.json", "*.nc"],
-        "arviz.plots": ["*.mplstyle"],
+        "arviz.data": ["example_data/*.json", "example_data/data/*.nc"],
+        "arviz.plots": ["*"],
         "arviz.tests": ["*"],
     },
     include_package_data=True,
