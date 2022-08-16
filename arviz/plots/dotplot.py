@@ -76,7 +76,7 @@ def plot_dot(
     quartiles : bool, optional
         If True then the quartile interval will be plotted with the HDI.
         Defaults to True.
-    figsize : tuple, optional
+    figsize : (float,float), optional
         Figure size. If None it will be defined automatically.
     plot_kwargs : dict, optional
         Keywords passed for customizing the dots. Passed to :class:`mpl:matplotlib.patches.Circle`
@@ -84,7 +84,7 @@ def plot_dot(
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     ax : axes, optional
-        Matplotlib axes or bokeh figures.
+        Matplotlib_axes or bokeh_figures.
     show : bool, optional
         Call backend show function.
     backend_kwargs : dict, optional
@@ -95,7 +95,7 @@ def plot_dot(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figures
 
     See Also
     --------
