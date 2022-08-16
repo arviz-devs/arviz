@@ -86,15 +86,15 @@ def plot_lm(
         These are kwargs specific to the backend being used. Passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`.
-    figsize : tuple, optional
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on ``figsize``.
-    axes : numpy array-like of matplotlib axes or bokeh figures, optional
+    axes : 2D numpy array-like of matplotlib_axes or bokeh_figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    show: bool, optional
+    show : bool, optional
         Call backend show function.
     legend : bool, optional
         Add legend to figure. By default True.

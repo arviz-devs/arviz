@@ -65,9 +65,9 @@ def plot_khat(
         backend.
     hover_format : str, optional
         String used to format the hover label via ``hover_format.format(idx, coord_label)``
-    figsize : tuple, optional
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
-    textsize: float, optional
+    textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     coords : mapping, optional
@@ -75,17 +75,17 @@ def plot_khat(
         a subset can be plotted for convenience.
     legend : bool, optional
         Include a legend to the plot. Only taken into account when color argument is a dim name.
-    markersize: int, optional
+    markersize : int, optional
         markersize for scatter plot. Defaults to `None` in which case it will
         be chosen based on autoscaling for figsize.
-    ax: axes, optional
+    ax : axes, optional
         Matplotlib axes or bokeh figures.
-    hlines_kwargs: dictionary, optional
+    hlines_kwargs : dictionary, optional
         Additional keywords passed to
         :meth:`matplotlib.axes.Axes.hlines`.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`.
@@ -97,7 +97,7 @@ def plot_khat(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figures
 
     See Also
     --------
