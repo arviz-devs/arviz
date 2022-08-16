@@ -231,3 +231,4 @@ def layout_stacks(stack_locs, stack_counts, binwidth, stackratio, rotated):
         x, y = y, x
 
     return x, y
+ 

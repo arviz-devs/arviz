@@ -103,6 +103,9 @@ numpydoc_xref_aliases = {
     "Labeller": ":ref:`Labeller <labeller_api>`",
     "ndarray": ":class:`~numpy.ndarray`",
     "InferenceData": ":class:`~arviz.InferenceData`",
+    "matplotlib_axes": ":class:`matplotlib Axes <matplotlib.axes.Axes>`",
+    "bokeh_figure": ":bokeh:`Bokeh Figure <bokeh.plotting.Figure>`",
+
 }
 
 # The base toctree document.
