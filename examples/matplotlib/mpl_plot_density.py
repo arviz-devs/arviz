@@ -1,9 +1,6 @@
 """
 Density Plot
 ============
-
-_thumb: .5, .5
-_example_title: Plot density
 """
 import matplotlib.pyplot as plt
 

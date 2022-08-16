@@ -1,8 +1,0 @@
-{% extends "!sections/sidebar-primary.html" %}
-
-<!-- Hide left sidebar in home page -->
-{% block docs_sidebar %}
-  {% if pagename != 'index' %}
-    {{ super() }}
-  {% endif %}
-{% endblock %}

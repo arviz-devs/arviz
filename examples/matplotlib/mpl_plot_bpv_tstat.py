@@ -1,8 +1,6 @@
 """
-Bayesian p-value with median T statistic Posterior plot
-=======================================================
-
-_thumb: .6, .5
+Bayesian p-value with T statistic Plot
+======================================
 """
 import matplotlib.pyplot as plt
 

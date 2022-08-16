@@ -1,8 +1,6 @@
 """
 Density Plot
 ============
-
-_thumb: .5, .5
 """
 import arviz as az
 

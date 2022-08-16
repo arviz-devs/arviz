@@ -1,9 +1,6 @@
 """
 Traceplot
 =========
-
-_thumb: .1, .8
-_example_title: Plot trace
 """
 import matplotlib.pyplot as plt
 

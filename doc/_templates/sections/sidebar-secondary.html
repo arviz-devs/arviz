@@ -1,8 +1,0 @@
-{% extends "!sections/sidebar-secondary.html" %}
-
-<!-- Hide right sidebar in home page -->
-{% block docs_toc %}
-  {% if pagename != 'index' %}
-    {{ super() }}
-  {% endif %}
-{% endblock %}

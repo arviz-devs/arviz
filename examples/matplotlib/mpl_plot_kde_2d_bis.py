@@ -1,8 +1,6 @@
 """
 2d KDE (custom style)
 =====================
-
-_thumb: .1, .8
 """
 import matplotlib.pyplot as plt
 import numpy as np

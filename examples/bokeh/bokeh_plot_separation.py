@@ -1,8 +1,6 @@
 """
 Separation Plot
 ===============
-
-_thumb: .2, .8
 """
 import arviz as az
 

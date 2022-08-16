@@ -1,9 +1,6 @@
 """
 Pareto Shape Plot
 =================
-
-_thumb: .7, .5
-_example_title: k&#x0302; plot
 """
 import matplotlib.pyplot as plt
 

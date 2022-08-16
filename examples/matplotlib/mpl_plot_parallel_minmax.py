@@ -1,9 +1,6 @@
 """
 MinMax Parallel Plot
 ====================
-
-_thumb: .2, .5
-_example_title: Parallel plot with MinMax normalization
 """
 import matplotlib.pyplot as plt
 
