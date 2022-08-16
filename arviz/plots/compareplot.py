@@ -60,7 +60,7 @@ def plot_compare(
     textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    Labeller : Labeller instance, optional
+    labeller : Labeller instance, optional
         Class providing the method ``model_name_to_str`` to generate the labels in
         the plot.
         Read the :ref:`label_guide` for more details and usage examples.

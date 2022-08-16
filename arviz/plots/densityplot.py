@@ -107,7 +107,7 @@ def plot_density(
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    Labeller : labeller instance, optional
+    labeller : Labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : 2D array-like of matplotlib _axes or bokeh _figure, optional
