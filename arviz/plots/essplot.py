@@ -79,7 +79,7 @@ def plot_ess(
         Minimum number of ESS desired. If ``relative=True`` the line is plotted at
         ``min_ess / n_samples`` for local and quantile kinds and as a curve following
         the ``min_ess / n`` dependency in evolution kind.
-    Labeller : labeller instance, optional
+    labeller : Labeller instance, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : 2D array-like of matplotlib axes or bokeh figures, optional
