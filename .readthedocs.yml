@@ -1,5 +1,8 @@
 version: 2
 
+submodules:
+  include: all
+
 sphinx:
     configuration: doc/source/conf.py
 
