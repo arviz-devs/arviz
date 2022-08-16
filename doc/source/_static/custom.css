@@ -29,7 +29,7 @@ html[data-theme="dark"] {
 
 .bd-content {
   flex-grow: 1;
-  max-width: 60em;
+  max-width: 70em; /* Override 60em default, can use 100% */
 }
 
 /* -------------------- HOMEPAGE -------------------- */
@@ -42,19 +42,10 @@ html[data-theme="dark"] {
   padding: 20px 0px 40px;
 }
 
-.home-img-plot {
-  width: 200px;
-  height: 120px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden
-}
-
 .home-img-plot,
 .home-img-plot-overlay {
-  width: 200px;
-  height: 120px;
+  width: 235px;
+  height: 130px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -83,11 +74,6 @@ html[data-theme="dark"] {
 }
 
 /* -------------------- EXAMPLE GALLERY OVERRIDES -------------------- */
-
-.bd-content .sd-card .sd-card-body,
-.bd-content .sd-card .sd-card-footer {
-  background-color: var(--pst-color-background);
-}
 
 /* Each card has same height (across all rows in the grid) */
 .sd-card.example-gallery {
@@ -129,11 +115,9 @@ html[data-theme="dark"] {
   font-size: 0.8rem;
 }
 
-/* -------------------- EXAMPLE PLOTS -------------------- */
+/* -------------------- EXAMPLE PLOTS - DOWNLOAD PYTHON SOURCE CODE -------------------- */
 
-/* Download Python Source Code */
 .example-plot-download {
-  background-color: #0fbcbc12;
   border: 0.05rem solid rgb(222, 222, 222);
   border-radius: 0.2rem;
   /* Center button */
@@ -142,14 +126,17 @@ html[data-theme="dark"] {
   box-shadow: 0 0.2rem 0.5rem rgb(0 0 0 / 5%), 0 0 0.0625rem rgb(0 0 0 / 10%);
 }
 .example-plot-download p a {
-  font-weight: 700;
-  font-size: 0.8rem;
-  text-align: center;
   padding: 0.4rem 2rem;
-  margin: 0;
 }
 .example-plot-download p { /* Override margin defaults for p */
   margin: 0;
+}
+.example-plot-download code.literal { /* Override defaults for code.literal */
+  border: 0px;
+  background-color: transparent;
+}
+.example-plot-download a.download:hover  { /* Override defaults for hover */
+  color: var(--pst-color-primary);
 }
 
 /* -------------------- TOCTREE OVERRIDES -------------------- */

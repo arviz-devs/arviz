@@ -101,31 +101,6 @@ and specification.
         </a>
     </div>
 
-|pypi|
-|Build Status|
-|Coverage Status|
-|Zenodo|
-|NumFocus|
-
-.. |pypi| image:: https://badge.fury.io/py/arviz.svg
-    :target: https://badge.fury.io/py/arviz
-
-.. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.01143/status.svg
-   :target: https://doi.org/10.21105/joss.01143
-
-.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2540944.svg
-   :target: https://doi.org/10.5281/zenodo.2540944
-
-.. |NumFocus| image:: https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&colorA=E1523D&colorB=007D8A
-   :target: https://www.numfocus.org/
-
-.. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=main
-   :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=main
-
-.. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/main/graph/badge.svg
-  :target: https://codecov.io/gh/arviz-devs/arviz
-
-
 Installation
 ------------
 
@@ -196,5 +171,5 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
   Contributing<contributing/index>
 
 
-
-
+.. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.01143/status.svg
+   :target: https://doi.org/10.21105/joss.01143
