@@ -18,7 +18,7 @@ RemoteFileMetadata = namedtuple(
 _EXAMPLE_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "example_data")
 _LOCAL_DATA_DIR = os.path.join(_EXAMPLE_DATA_DIR, "data")
 
-with open(os.path.join(_EXAMPLE_DATA_DIR, "data_local.json"), "r") as f:
+with open(os.path.join(_EXAMPLE_DATA_DIR, "data_local.json"), "r", encoding="utf-8") as f:
     LOCAL_DATASETS = {
         entry["name"]: LocalFileMetadata(
             name=entry["name"],
@@ -28,7 +28,7 @@ with open(os.path.join(_EXAMPLE_DATA_DIR, "data_local.json"), "r") as f:
         for entry in json.load(f)
     }
 
-with open(os.path.join(_EXAMPLE_DATA_DIR, "data_remote.json"), "r") as f:
+with open(os.path.join(_EXAMPLE_DATA_DIR, "data_remote.json"), "r", encoding="utf-8") as f:
     REMOTE_DATASETS = {entry["name"]: RemoteFileMetadata(**entry) for entry in json.load(f)}
 
 
