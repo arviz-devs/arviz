@@ -863,7 +863,7 @@ def _mcse_mean(ary):
     return mcse_mean_value
 
 
-def _mcse_func_sbm(ary, func, b=None, func_kwargs=None):
+def _mcse_func_sbm(ary, func, b=None, var_func=np.var, func_kwargs=None):
     """Compute the Markov Chain error on an arbitrary function."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=10, min_chains=1)):
@@ -873,12 +873,12 @@ def _mcse_func_sbm(ary, func, b=None, func_kwargs=None):
         b = int(np.sqrt(n))
     if func_kwargs is None:
         func_kwargs = {}
-    func_estimate_sd = _sbm(ary, func, b=b, func_kwargs=func_kwargs)
+    func_estimate_sd = _sbm(ary, func, b=b, var_func=var_func, func_kwargs=func_kwargs)
     mcse_func_value = func_estimate_sd / np.sqrt(n)
     return mcse_func_value
 
 
-def _sbm(ary, func, b, func_kwargs):
+def _sbm(ary, func, b, var_func, func_kwargs):
     """Subsampling bootstrap method.
 
     References
@@ -894,7 +894,7 @@ def _sbm(ary, func, b, func_kwargs):
     for i in range(n - b):
         sub_ary = flat_ary[i : i + b]
         func_estimates[i] = func(sub_ary, **func_kwargs)
-    func_estimate_sd = np.sqrt(b * np.var(func_estimates, ddof=0))
+    func_estimate_sd = np.sqrt(b * var_func(func_estimates))
     return func_estimate_sd
 
 
