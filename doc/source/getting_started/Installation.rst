@@ -62,9 +62,13 @@ The required dependencies for installing ArviZ are:
 
 and
 
-.. code:: bash
+.. code::
 
-    python>=3.6
+    python>=3.8
+
+ArviZ follows `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_
+and `SPEC 0 <https://scientific-python.org/specs/spec-0000/>`_ to choose the minimum
+supported versions.
 
 .. _Optional-dependencies:
 
