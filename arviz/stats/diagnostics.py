@@ -1101,7 +1101,6 @@ def _cjs_dist(x, weights):
     x = x[order]
     weights = weights[order]
 
-    bins = x[:-1]
     binwidth = np.diff(x)
 
     # ecdfs
