@@ -1100,9 +1100,6 @@ def _cjs_dist(draws, weights):
     Calculate Cumulative Jensen-Shannon distance between original draws and weighted draws.
     """
 
-    # normalise weights
-    weights = weights / np.sum(weights)
-
     # sort draws and weights
     order = np.argsort(draws)
     draws = draws[order]
