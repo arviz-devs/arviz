@@ -1037,6 +1037,7 @@ def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs
     """
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
+    sample_stats = extract(data, group="sample_stats")
 
     dataset = dataset if var_names is None else dataset[var_names]
 
