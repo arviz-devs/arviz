@@ -1,8 +1,6 @@
 """
 ESS Local Plot
 ==============
-
-_thumb: .6, .5
 """
 import arviz as az
 

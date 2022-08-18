@@ -1,8 +1,6 @@
 """
 Plot HDI
 ========
-
-_thumb: .8, .8
 """
 import bokeh.plotting as bkp
 import numpy as np

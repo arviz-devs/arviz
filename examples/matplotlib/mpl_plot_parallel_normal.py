@@ -1,9 +1,6 @@
 """
 Normal Parallel Plot
 ====================
-
-_thumb: .2, .5
-_example_title: Normalized parallel plot
 """
 import matplotlib.pyplot as plt
 

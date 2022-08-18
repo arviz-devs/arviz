@@ -1,9 +1,6 @@
 """
 Dist Plot
 =========
-
-_thumb: .2, .8
-_example_title: Plot distribution.
 """
 import matplotlib.pyplot as plt
 import numpy as np

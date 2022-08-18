@@ -1,16 +1,5 @@
 {% extends "!layout.html" %}
 
-<!-- Make body have full width in home page -->
-{% block docs_main %}
-  {% if pagename == 'index' %}
-    <main class="col-12 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
-      {% block body %} {% endblock %}
-    </main>
-  {% else %}
-    {{ super() }}
-  {% endif %}
-{% endblock %}
-
 <!-- Add banner to all pages! -->
 {%- block scripts_end %}
 {{ super() }}

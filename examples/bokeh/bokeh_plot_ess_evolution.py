@@ -1,8 +1,6 @@
 """
-ESS Quantile Plot
-=================
-
-_thumb: .2, .8
+ESS Evolution Plot
+==================
 """
 import arviz as az
 

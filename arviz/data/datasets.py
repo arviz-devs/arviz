@@ -1,6 +1,7 @@
 """Base IO code for all datasets. Heavily influenced by scikit-learn's implementation."""
 import hashlib
 import itertools
+import json
 import os
 import shutil
 from collections import namedtuple
@@ -9,141 +10,26 @@ from urllib.request import urlretrieve
 from ..rcparams import rcParams
 from .io_netcdf import from_netcdf
 
-LocalFileMetadata = namedtuple("LocalFileMetadata", ["filename", "description"])
+LocalFileMetadata = namedtuple("LocalFileMetadata", ["name", "filename", "description"])
 
 RemoteFileMetadata = namedtuple(
-    "RemoteFileMetadata", ["filename", "url", "checksum", "description"]
+    "RemoteFileMetadata", ["name", "filename", "url", "checksum", "description"]
 )
-_DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_datasets")
+_EXAMPLE_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "example_data")
+_LOCAL_DATA_DIR = os.path.join(_EXAMPLE_DATA_DIR, "data")
 
-# Models for local datasets are located at https://github.com/arviz-devs/arviz_example_data
+with open(os.path.join(_EXAMPLE_DATA_DIR, "data_local.json"), "r", encoding="utf-8") as f:
+    LOCAL_DATASETS = {
+        entry["name"]: LocalFileMetadata(
+            name=entry["name"],
+            filename=os.path.join(_LOCAL_DATA_DIR, entry["filename"]),
+            description=entry["description"],
+        )
+        for entry in json.load(f)
+    }
 
-LOCAL_DATASETS = {
-    "centered_eight": LocalFileMetadata(
-        filename=os.path.join(_DATASET_DIR, "centered_eight.nc"),
-        description="""
-A centered parameterization of the eight schools model. Provided as an example of a
-model that NUTS has trouble fitting. Compare to `load_arviz_data("non_centered_eight")`.
-
-The eight schools model is a hierarchical model used for an analysis of the effectiveness
-of classes that were designed to improve students' performance on the Scholastic Aptitude Test.
-
-See Bayesian Data Analysis (Gelman et. al.) for more details.
-""",
-    ),
-    "non_centered_eight": LocalFileMetadata(
-        filename=os.path.join(_DATASET_DIR, "non_centered_eight.nc"),
-        description="""
-A non-centered parameterization of the eight schools model. This is a hierarchical model
-where sampling problems may be fixed by a non-centered parametrization. Compare to
-`load_arviz_data("centered_eight")`.
-
-The eight schools model is a hierarchical model used for an analysis of the effectiveness
-of classes that were designed to improve students' performance on the Scholastic Aptitude Test.
-
-See Bayesian Data Analysis (Gelman et. al.) for more details.
-""",
-    ),
-}
-
-REMOTE_DATASETS = {
-    "radon": RemoteFileMetadata(
-        filename="radon_hierarchical.nc",
-        url="http://ndownloader.figshare.com/files/24067472",
-        checksum="a9b2b4adf1bf9c5728e5bdc97107e69c4fc8d8b7d213e9147233b57be8b4587b",
-        description="""
-Radon is a radioactive gas that enters homes through contact points with the ground.
-It is a carcinogen that is the primary cause of lung cancer in non-smokers. Radon
-levels vary greatly from household to household.
-
-This example uses an EPA study of radon levels in houses in Minnesota to construct a
-model with a hierarchy over households within a county. The model includes estimates
-(gamma) for contextual effects of the uranium per household.
-
-See Gelman and Hill (2006) for details on the example, or
-https://docs.pymc.io/notebooks/multilevel_modeling.html
-by Chris Fonnesbeck for details on this implementation.
-""",
-    ),
-    "rugby": RemoteFileMetadata(
-        filename="rugby.nc",
-        url="http://ndownloader.figshare.com/files/16254359",
-        checksum="9eecd2c6317e45b0388dd97ae6326adecf94128b5a7d15a52c9fcfac0937e2a6",
-        description="""
-The Six Nations Championship is a yearly rugby competition between Italy, Ireland,
-Scotland, England, France and Wales. Fifteen games are played each year, representing
-all combinations of the six teams.
-
-This example uses and includes results from 2014 - 2017, comprising 60 total
-games. It models latent parameters for each team's attack and defense, as well
-as a parameter for home team advantage.
-
-See https://docs.pymc.io/notebooks/rugby_analytics.html by Peader Coyle
-for more details and references.
-""",
-    ),
-    "regression1d": RemoteFileMetadata(
-        filename="regression1d.nc",
-        url="http://ndownloader.figshare.com/files/16254899",
-        checksum="909e8ffe344e196dad2730b1542881ab5729cb0977dd20ba645a532ffa427278",
-        description="""
-A synthetic one dimensional linear regression dataset with latent slope,
-intercept, and noise ("eps"). One hundred data points, fit with PyMC3.
-
-True slope and intercept are included as deterministic variables.
-""",
-    ),
-    "regression10d": RemoteFileMetadata(
-        filename="regression10d.nc",
-        url="http://ndownloader.figshare.com/files/16255736",
-        checksum="c6716ec7e19926ad2a52d6ae4c1d1dd5ddb747e204c0d811757c8e93fcf9f970",
-        description="""
-A synthetic multi-dimensional (10 dimensions) linear regression dataset with
-latent weights ("w"), intercept, and noise ("eps"). Five hundred data points,
-fit with PyMC3.
-
-True weights and intercept are included as deterministic variables.
-""",
-    ),
-    "classification1d": RemoteFileMetadata(
-        filename="classification1d.nc",
-        url="http://ndownloader.figshare.com/files/16256678",
-        checksum="1cf3806e72c14001f6864bb69d89747dcc09dd55bcbca50aba04e9939daee5a0",
-        description="""
-A synthetic one dimensional logistic regression dataset with latent slope and
-intercept, passed into a Bernoulli random variable. One hundred data points,
-fit with PyMC3.
-
-True slope and intercept are included as deterministic variables.
-""",
-    ),
-    "classification10d": RemoteFileMetadata(
-        filename="classification10d.nc",
-        url="http://ndownloader.figshare.com/files/16256681",
-        checksum="16c9a45e1e6e0519d573cafc4d266d761ba347e62b6f6a79030aaa8e2fde1367",
-        description="""
-A synthetic multi dimensional (10 dimensions) logistic regression dataset with
-latent weights ("w") and intercept, passed into a Bernoulli random variable.
-Five hundred data points, fit with PyMC3.
-
-True weights and intercept are included as deterministic variables.
-""",
-    ),
-    "glycan_torsion_angles": RemoteFileMetadata(
-        filename="glycan_torsion_angles.nc",
-        url="http://ndownloader.figshare.com/files/22882652",
-        checksum="4622621fe7a1d3075c18c4c34af8cc57c59eabbb3501b20c6e2d9c6c4737034c",
-        description="""
-Torsion angles phi and psi are critical for determining the three dimensional
-structure of bio-molecules. Combinations of phi and psi torsion angles that
-produce clashes between atoms in the bio-molecule result in high energy, unlikely structures.
-
-This model uses a Von Mises distribution to propose torsion angles for the
-structure of a glycan molecule (pdb id: 2LIQ), and a Potential to estimate
-the proposed structure's energy. Said Potential is bound by Boltzman's law.
-""",
-    ),
-}
+with open(os.path.join(_EXAMPLE_DATA_DIR, "data_remote.json"), "r", encoding="utf-8") as f:
+    REMOTE_DATASETS = {entry["name"]: RemoteFileMetadata(**entry) for entry in json.load(f)}
 
 
 def get_data_home(data_home=None):
@@ -277,6 +163,6 @@ def list_datasets():
             location = f"remote: {resource.url}"
         else:
             location = "unknown"
-        lines.append(f"{name}\n{'=' * len(name)}\n{resource.description}\n{location}")
+        lines.append(f"{name}\n{'=' * len(name)}\n{resource.description}\n\n{location}")
 
     return f"\n\n{10 * '-'}\n\n".join(lines)

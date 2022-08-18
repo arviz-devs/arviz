@@ -1,9 +1,6 @@
 """
 Parallel Plot
 =============
-
-_thumb: .2, .5
-_example_title: Parallel plot of posterior trace
 """
 import matplotlib.pyplot as plt
 

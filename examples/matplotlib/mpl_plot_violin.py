@@ -1,9 +1,6 @@
 """
 Violin plot
 ===========
-
-_thumb: .2, .8
-_example_title: Violin plot
 """
 import matplotlib.pyplot as plt
 

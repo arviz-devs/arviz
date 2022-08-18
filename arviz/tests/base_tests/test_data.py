@@ -58,6 +58,7 @@ def no_remote_data(monkeypatch, tmpdir):
         REMOTE_DATASETS,
         "test_remote",
         RemoteFileMetadata(
+            name="test_remote",
             filename=filename,
             url=url,
             checksum="2c5501a9f5d7b6998fc7e6a4651030b9765032b2e5a1d7331f5b1f3df6c632a5",
@@ -68,7 +69,11 @@ def no_remote_data(monkeypatch, tmpdir):
         REMOTE_DATASETS,
         "bad_checksum",
         RemoteFileMetadata(
-            filename=filename, url=url, checksum="bad!", description=centered.description
+            name="bad_checksum",
+            filename=filename,
+            url=url,
+            checksum="bad!",
+            description=centered.description,
         ),
     )
     UnknownFileMetaData = namedtuple(

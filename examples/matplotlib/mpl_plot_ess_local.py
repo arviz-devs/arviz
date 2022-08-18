@@ -1,9 +1,6 @@
 """
 ESS Local Plot
 ==============
-
-_thumb: .6, .5
-_example_title: Plot local ESS
 """
 import matplotlib.pyplot as plt
 

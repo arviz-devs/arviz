@@ -1,9 +1,6 @@
 """
 Hexbin PairPlot
 ===============
-
-_thumb: .2, .5
-_example_title: Pair plot on hex grid
 """
 import matplotlib.pyplot as plt
 

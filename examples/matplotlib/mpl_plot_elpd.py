@@ -1,8 +1,6 @@
 """
 ELPD Plot
 =========
-
-_thumb: .6, .5
 """
 import matplotlib.pyplot as plt
 

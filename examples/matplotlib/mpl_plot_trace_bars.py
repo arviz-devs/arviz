@@ -1,9 +1,6 @@
 """
 Traceplot rank_bars
 ===================
-
-_thumb: .1, .8
-_example_title: Trace plot with rank bars
 """
 import matplotlib.pyplot as plt
 

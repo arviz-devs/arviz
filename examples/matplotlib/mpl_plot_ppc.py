@@ -1,9 +1,6 @@
 """
 Posterior Predictive Check Plot
 ===============================
-
-_thumb: .6, .5
-_example_title: Plot Posterior Predictive Checks (PPC)
 """
 import matplotlib.pyplot as plt
 

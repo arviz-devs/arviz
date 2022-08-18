@@ -16,6 +16,8 @@ jobs:
         name: "Python 3.9 - docs"
 
   steps:
+  - checkout: self
+    submodules: true
   - script: |
       PRTitle=$(curl -s https://api.github.com/repos/arviz-devs/arviz/pulls/${PULLREQUESTNUMBER} | grep title | cut -d'"' -f4)
       echo "##vso[task.setvariable variable=PRTitle]${PRTitle}"

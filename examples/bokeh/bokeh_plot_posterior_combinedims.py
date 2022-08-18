@@ -1,8 +1,6 @@
 """
 Posterior Plot (reducing school dimension)
 ==========================================
-
-_thumb: .5, .8
 """
 import arviz as az
 

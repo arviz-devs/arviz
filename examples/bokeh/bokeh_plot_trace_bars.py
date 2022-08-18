@@ -1,8 +1,6 @@
 """
 Traceplot rank_bars Bokeh
 =========================
-
-_thumb: .1, .8
 """
 import arviz as az
 

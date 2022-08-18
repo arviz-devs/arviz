@@ -1,0 +1,4 @@
+[submodule "arviz/data/example_data"]
+	path = arviz/data/example_data
+	url = https://github.com/arviz-devs/arviz_example_data
+	branch = main

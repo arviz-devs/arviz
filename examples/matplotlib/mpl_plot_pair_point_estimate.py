@@ -1,9 +1,6 @@
 """
 Point Estimate Pairplot
 =======================
-
-_thumb: .2, .5
-_example_title: Pair plot with point estimate markings
 """
 import matplotlib.pyplot as plt
 

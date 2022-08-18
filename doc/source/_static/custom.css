@@ -1,16 +1,151 @@
 .sphinx-codeautolink-a{
-    border-bottom-color: rgb(0, 0, 0);
-    border-bottom-style: dotted;
-    border-bottom-width: 1px;
+  border-bottom-color: rgb(0, 0, 0);
+  border-bottom-style: dotted;
+  border-bottom-width: 1px;
 }
 .sphinx-codeautolink-a:hover{
-    color: rgb(255, 139, 139);
+  color: rgb(255, 139, 139);
 }
 
 .supportbutton a {
- color: var(--pst-color-sidebar-link-active);
+color: var(--pst-color-sidebar-link-active);
 }
 
 .navbar-brand {
-  display: inline-block !important;
+display: inline-block !important;
+}
+
+/* -------------------- THEME OVERRIDES -------------------- */
+
+html[data-theme="light"] {
+  --pst-color-primary: rgb(11 117 145);
+  --pst-color-secondary: rgb(238 144 64);
+}
+
+html[data-theme="dark"] {
+  --pst-color-primary: rgb(0 192 191);
+  --pst-color-secondary: rgb(238 144 64);
+}
+
+.bd-content {
+  flex-grow: 1;
+  max-width: 70em; /* Override 60em default, can use 100% */
+}
+
+/* -------------------- HOMEPAGE -------------------- */
+
+.home-flex-grid {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 0px 40px;
+}
+
+.home-img-plot,
+.home-img-plot-overlay {
+  width: 235px;
+  height: 130px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden
+}
+
+.home-img-plot img {
+  flex-shrink: 0;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.home-img-plot-overlay {
+  background: var(--pst-color-primary);
+  position: absolute;
+  border: 1px solid #dee2e6;  /* Same dimensions as img-thumbnail from pydata css */
+  border-radius: 0.25rem;  /* Same dimensions as img-thumbnail from pydata css */
+  color: var(--pst-color-background);
+  opacity: 0;
+  transition: .2s ease;
+  text-align: center;
+}
+
+.home-img-plot-overlay:hover {
+  opacity: 90%;
+}
+
+/* -------------------- EXAMPLE GALLERY OVERRIDES -------------------- */
+
+/* Each card has same height (across all rows in the grid) */
+.sd-card.example-gallery {
+  height: 200px;
+  padding: 0.2rem;
+  border-radius: 0.2rem;
+  border: 0.6px solid var(--pst-color-background); /* Same width as hover effect */
+}
+
+/* Hover effects for each card */
+.example-gallery:hover {
+  border: 0.6px solid var(--pst-color-primary);
+}
+.example-gallery:hover p {
+  color: var(--pst-color-primary);
+}
+
+/* Images in each card are scaled to fit 60% of the card */
+.example-gallery .sd-card-body {
+  height: 70%;
+  display: flex;  /* This vertically centers the img */
+  padding: 10px 10px 5px;
+}
+.example-gallery .sd-card-body img {
+  max-height: 100%;
+  max-width: 100%;
+  margin: auto;  /* This keeps img ratio and horizontally centers the img */
+}
+
+/* Plot titles go in the footer and are aligned to fit 40% of the card */
+.example-gallery .sd-card-footer {
+  height: 30%;
+  width: 100%;
+  padding: 0px 10px 10px;
+  border-top: none !important;
+}
+.example-gallery .sd-card-text {
+  color: var(--pst-color-text-muted);
+  font-size: 0.8rem;
+}
+
+/* -------------------- EXAMPLE PLOTS - DOWNLOAD PYTHON SOURCE CODE -------------------- */
+
+.example-plot-download {
+  border: 0.05rem solid rgb(222, 222, 222);
+  border-radius: 0.2rem;
+  /* Center button */
+  width: fit-content;
+  margin: 0 auto;
+  box-shadow: 0 0.2rem 0.5rem rgb(0 0 0 / 5%), 0 0 0.0625rem rgb(0 0 0 / 10%);
+}
+.example-plot-download p a {
+  padding: 0.4rem 2rem;
+}
+.example-plot-download p { /* Override margin defaults for p */
+  margin: 0;
+}
+.example-plot-download code.literal { /* Override defaults for code.literal */
+  border: 0px;
+  background-color: transparent;
+}
+.example-plot-download a.download:hover  { /* Override defaults for hover */
+  color: var(--pst-color-primary);
+}
+
+/* -------------------- TOCTREE OVERRIDES -------------------- */
+
+.toctree-wrapper a {
+  color: var(--pst-color-text-muted);
+}
+
+.toctree-wrapper a:hover {
+  text-decoration: none;  /* No underline */
+  color: var(--pst-color-primary);
 }
