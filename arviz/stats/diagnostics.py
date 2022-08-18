@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from ..data import convert_to_dataset
+from ..data import convert_to_dataset, extract
 from ..utils import Numba, _numba_var, _stack, _var_names
 from .density_utils import histogram as _histogram
 from .stats_utils import _circular_standard_deviation, _sqrt
