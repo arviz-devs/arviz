@@ -1097,7 +1097,9 @@ def _cjs_dist(x, weights):
     weights = weights / np.sum(weights)
 
     # sort draws and weights
-    x, w = (list(x) for x in zip(*sorted(zip(x, weights))))
+    order = np.argsort(x)
+    x = x[order]
+    weights = weights[order]
 
     bins = x[:-1]
     binwidth = np.diff(x)
