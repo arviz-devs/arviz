@@ -1041,10 +1041,7 @@ def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs
 
     dataset = dataset if var_names is None else dataset[var_names]
 
-    if (component == "likelihood"):
-        component_draws = np.sum(data["log_likelihood"].stack(draws=("chain", "draw")).obs.values, axis=0)
-    elif (component == "prior"):
-        component_draws = data["log_prior"].stack(draws = ("chain", "draw")).values
+    component_draws = sample_stats["log_prior" if component == "prior" else "log_likelihood"]
 
     lower_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=alpha))
     lower_w = lower_w/np.sum(lower_w)
