@@ -998,7 +998,7 @@ def _multichain_statistics(ary, focus="mean"):
     )
 
 
-def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs=None):
+def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
     """Compute power-scaling sensitivity diagnostic.
 
     Power-scales the prior or likelihood and calculates how much the posterior is affected.
@@ -1041,12 +1041,18 @@ def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs
 
     dataset = dataset if var_names is None else dataset[var_names]
 
+    # extract log component
     component_draws = sample_stats["log_prior" if component == "prior" else "log_likelihood"]
 
-    lower_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=alpha))
+    # calculate lower and upper alpha values
+    lower_alpha = 1 / (1 + delta)
+    upper_alpha = 1 + delta
+
+    # calculate importance sampling weights for lower and upper alpha power-scaling
+    lower_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=lower_alpha))
     lower_w = lower_w/np.sum(lower_w)
 
-    upper_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=alpha))
+    upper_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=upper_alpha))
     upper_w = upper_w/np.sum(upper_w)
 
     ufunc_kwargs = {"ravel": False}
@@ -1056,6 +1062,7 @@ def psens(data, *, component, var_names=None, alpha=0.5, delta=0.01, dask_kwargs
         "delta": delta
     }
 
+    # calculate the sensitivity diagnostic based on the importance weights and draws
     return _wrap_xarray_ufunc(
         _powerscale_sens,
         dataset,
