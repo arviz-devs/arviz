@@ -1072,12 +1072,12 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
     )
 
 
-def _powerscale_sens(ary, *, lower_weights=None, upper_weights=None, delta=0.01, dask_kwargs=None):
+def _powerscale_sens(draws, *, lower_weights=None, upper_weights=None, delta=0.01, dask_kwargs=None):
     """
     Calculate power-scaling sensitivity by finite difference second derivative of CJS
     """
-    lower_cjs = _cjs_dist(x=draws, weights=lower_weights)
-    upper_cjs = _cjs_dist(x=draws, weights=upper_weights)
+    lower_cjs = _cjs_dist(draws=draws, weights=lower_weights)
+    upper_cjs = _cjs_dist(draws=draws, weights=upper_weights)
 
     logdiffsquare = 2 * np.log2(1 + delta)
     grad = (lower_cjs + upper_cjs) / logdiffsquare
@@ -1095,24 +1095,24 @@ def _powerscale_lw(alpha, component_draws):
     return lw
 
 
-def _cjs_dist(x, weights):
+def _cjs_dist(draws, weights):
     """
-    Calculate Cumulative Jensen-Shannon distance between original draws (x) and weighted draws.
+    Calculate Cumulative Jensen-Shannon distance between original draws and weighted draws.
     """
 
     # normalise weights
     weights = weights / np.sum(weights)
 
     # sort draws and weights
-    order = np.argsort(x)
-    x = x[order]
+    order = np.argsort(draws)
+    draws = draws[order]
     weights = weights[order]
 
-    binwidth = np.diff(x)
+    binwidth = np.diff(draws)
 
     # ecdfs
-    cdf_p = np.linspace(1/len(x), 1, len(x)-1)
-    cdf_q = np.cumsum(w/np.sum(w))[:-1]
+    cdf_p = np.linspace(1/len(draws), 1, len(draws)-1)
+    cdf_q = np.cumsum(weights/np.sum(weights))[:-1]
 
     # integrals of ecdfs
     cdf_p_int = np.dot(cdf_p, binwidth)
