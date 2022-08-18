@@ -1105,8 +1105,7 @@ def _cjs_dist(x, weights):
     binwidth = np.diff(x)
 
     # ecdfs
-    cdf_p = np.full(shape=len(x), fill_value=1/len(x))
-    cdf_p = np.cumsum(cdf_p)[:-1]
+    cdf_p = np.linspace(1/len(x), 1, len(x)-1)
     cdf_q = np.cumsum(w/np.sum(w))[:-1]
 
     # integrals of ecdfs
