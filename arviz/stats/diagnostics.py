@@ -1010,8 +1010,8 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         For ndarray: shape = (chain, draw).
         For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
-    var_names : list
-        Names of variables to include in the rhat report
+    var_names : list of str, optional
+        Names of variables to include in the power scaling sensitivity diagnostic
     component : str
         Select component to power-scale. Valid components are are:
         - "prior"
