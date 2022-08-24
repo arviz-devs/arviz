@@ -1027,7 +1027,7 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
     Notes
     -----
     The diagnostic is computed by power-scaling the specified component (prior or likelihood)
-    and determining the degree to which the posterior changes. It uses Pareto-smoothed
+    and determining the degree to which the posterior changes as described in [1]_. It uses Pareto-smoothed
     importance sampling to avoid refitting the model.
 
     References
