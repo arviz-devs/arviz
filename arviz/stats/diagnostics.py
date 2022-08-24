@@ -1012,10 +1012,8 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
         For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
     var_names : list of str, optional
         Names of variables to include in the power scaling sensitivity diagnostic
-    component : str
-        Select component to power-scale. Valid components are are:
-        - "prior"
-        - "likelihood"
+    component : {"prior", "likelihood"}, keyword-only
+        The component to power-scale.
     dask_kwargs : dict, optional
         Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
