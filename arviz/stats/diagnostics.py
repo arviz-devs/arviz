@@ -1126,6 +1126,9 @@ def _cjs_dist(draws, weights):
               np.log2(0.5 * cdf_q + 0.5 * cdf_p)
         ))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
 
+    cjs_pq = max(0, cjs_pq)
+    cjs_qp = max(0, cjs_qp)
+
     bound = cdf_p_int + cdf_q_int
 
     return np.sqrt((cjs_pq + cjs_qp) / bound)
