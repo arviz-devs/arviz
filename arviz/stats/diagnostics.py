@@ -1072,7 +1072,7 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
     )
 
 
-def _powerscale_sens(draws, *, lower_weights=None, upper_weights=None, delta=0.01, dask_kwargs=None):
+def _powerscale_sens(draws, *, lower_weights=None, upper_weights=None, delta=0.01):
     """
     Calculate power-scaling sensitivity by finite difference second derivative of CJS
     """
