@@ -1030,7 +1030,7 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
 
     References
     ----------
-    .. [1] Kallioinen et al, *Detecting and diagnosing prior and likelihood sensitivity with 
+    .. [1] Kallioinen et al, *Detecting and diagnosing prior and likelihood sensitivity with
        power-scaling*, 2022, https://arxiv.org/abs/2107.14054
 
     """
@@ -1107,23 +1107,24 @@ def _cjs_dist(draws, weights):
     binwidth = np.diff(draws)
 
     # ecdfs
-    cdf_p = np.linspace(1/len(draws), 1, len(draws)-1)
+    cdf_p = np.linspace(1 / len(draws), 1 - 1 / len(draws), len(draws) - 1)
     cdf_q = np.cumsum(weights/np.sum(weights))[:-1]
 
     # integrals of ecdfs
     cdf_p_int = np.dot(cdf_p, binwidth)
     cdf_q_int = np.dot(cdf_q, binwidth)
 
-    cjs_pq = np.nansum(binwidth * (
+    cjs_pq = np.nansum(
+        binwidth * (
         cdf_p * (np.log2(cdf_p) -
               np.log2(0.5 * cdf_p + 0.5 * cdf_q)
         ))) + 0.5 / np.log(2) * (cdf_q_int - cdf_p_int)
 
     cjs_qp = np.nansum(
-        binwidth *
+        binwidth * (
         cdf_q * (np.log2(cdf_q) -
               np.log2(0.5 * cdf_q + 0.5 * cdf_p)
-              )) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
+        ))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
 
     bound = cdf_p_int + cdf_q_int
 
