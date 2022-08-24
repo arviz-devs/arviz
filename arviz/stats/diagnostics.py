@@ -1041,7 +1041,7 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
     dataset = dataset if var_names is None else dataset[var_names]
 
     # extract log component
-    component_draws = sample_stats["log_prior" if component == "prior" else "log_likelihood"]
+    component_draws = sample_stats[f"log_{component}"]
 
     # calculate lower and upper alpha values
     lower_alpha = 1 / (1 + delta)
