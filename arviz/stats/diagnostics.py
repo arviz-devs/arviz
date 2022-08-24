@@ -1030,7 +1030,8 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
 
     References
     ----------
-    * Kallioinen et al. (2022) see https://arxiv.org/abs/2107.14054
+    .. [1] Kallioinen et al, *Detecting and diagnosing prior and likelihood sensitivity with 
+       power-scaling*, 2022, https://arxiv.org/abs/2107.14054
 
     """
     dataset = convert_to_dataset(data, group="posterior")
