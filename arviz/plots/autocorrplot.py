@@ -75,7 +75,7 @@ def plot_autocorr(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figures
 
     See Also
     --------
