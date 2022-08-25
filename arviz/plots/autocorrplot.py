@@ -56,7 +56,7 @@ def plot_autocorr(
     textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    labeller : Labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
