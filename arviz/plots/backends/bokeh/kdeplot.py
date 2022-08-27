@@ -166,8 +166,10 @@ def plot_kde(
 
             scaled_density, *scaled_density_args = _scale_axis(density)
 
+            contourpy_kwargs = _init_kwargs_dict(contour_kwargs.pop("contourpy_kwargs", {}))
+            contourpy_kwargs.setdefault("name", "serial")
             contour_generator = contourpy.contour_generator(
-                name="serial", x=x_x, y=y_y, z=scaled_density
+                x=x_x, y=y_y, z=scaled_density, **contourpy_kwargs
             )
 
             levels = 9
