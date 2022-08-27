@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from numbers import Integral
 
-from matplotlib import _contour
+import contourpy
 import numpy as np
 from bokeh.models import ColumnDataSource
 from bokeh.models.glyphs import Scatter
@@ -162,9 +162,7 @@ def plot_kde(
 
             scaled_density, *scaled_density_args = _scale_axis(density)
 
-            contour_generator = _contour.QuadContourGenerator(
-                x_x, y_y, scaled_density, None, True, 0
-            )
+            contour_generator = cont_gen = contour_generator(name="serial", x=x_x, y=y_y, z=scaled_density)
 
             levels = 9
             if "levels" in contourf_kwargs:
