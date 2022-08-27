@@ -3,7 +3,6 @@
 from collections.abc import Callable
 from numbers import Integral
 
-import contourpy
 import numpy as np
 from bokeh.models import ColumnDataSource
 from bokeh.models.glyphs import Scatter
@@ -151,6 +150,11 @@ def plot_kde(
             glyphs.append(line)
 
     else:
+        try:
+            import contourpy
+        except ImportError as err:
+            raise ImportError("Install contourpy package to enable contour plots.") from err
+
         contour_kwargs = _init_kwargs_dict(contour_kwargs)
         contourf_kwargs = _init_kwargs_dict(contourf_kwargs)
         pcolormesh_kwargs = _init_kwargs_dict(pcolormesh_kwargs)
@@ -162,7 +166,9 @@ def plot_kde(
 
             scaled_density, *scaled_density_args = _scale_axis(density)
 
-            contour_generator = cont_gen = contour_generator(name="serial", x=x_x, y=y_y, z=scaled_density)
+            contour_generator = contourpy.contour_generator(
+                name="serial", x=x_x, y=y_y, z=scaled_density
+            )
 
             levels = 9
             if "levels" in contourf_kwargs:
@@ -197,7 +203,7 @@ def plot_kde(
                 contour_kwargs_ = contour_kwargs.copy()
                 contour_kwargs_.setdefault("line_color", color)
                 contour_kwargs_.setdefault("fill_color", color)
-                vertices, _ = contour_generator.create_filled_contour(level, level_upper)
+                vertices, _ = contour_generator.filled(level, level_upper)
                 for seg in vertices:
                     # ax.multi_polygon would be better, but input is
                     # currently not suitable
