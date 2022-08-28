@@ -303,7 +303,7 @@ def compare(
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]
             weight = weights[idx]
-            df_comp.at[val] = (
+            df_comp.loc[val] = (
                 idx,
                 res[f"elpd_{ic}"],
                 res[p_ic],
