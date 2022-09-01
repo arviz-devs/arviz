@@ -4,6 +4,7 @@ import xarray as xr
 
 from .base import dict_to_dataset
 from .inference_data import InferenceData
+from .io_beanmachine import from_beanmachine
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
 from .io_emcee import from_emcee
@@ -32,6 +33,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             | pymc3 trace: Automatically extracts data
             | emcee sampler: Automatically extracts data
             | pyro MCMC: Automatically extracts data
+            | beanmachine MonteCarloSamples: Automatically extracts data
             | xarray.Dataset: adds to InferenceData as only group
             | xarray.DataArray: creates an xarray dataset as the only group, gives the
                          array an arbitrary name, if name not set
@@ -91,6 +93,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         return from_pymc3(trace=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "EnsembleSampler":  # ugly, but doesn't make emcee a requirement
         return from_emcee(sampler=kwargs.pop(group), **kwargs)
+    elif obj.__class__.__name__ == "MonteCarloSamples":
+        return from_beanmachine(sampler=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("pyro"):
         return from_pyro(posterior=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("numpyro"):
