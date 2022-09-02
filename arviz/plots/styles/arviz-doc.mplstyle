@@ -25,6 +25,7 @@ text.color:     .15
 ## * AXES                                                                    *
 ## ***************************************************************************
 
+axes.facecolor:         white
 axes.edgecolor:         .33         # axes edge color
 axes.linewidth:         0.8         # edge line width
 
