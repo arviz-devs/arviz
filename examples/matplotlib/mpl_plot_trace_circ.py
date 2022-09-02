@@ -1,6 +1,7 @@
 """
 Traceplot circular variables
 ============================
+_gallery_category: Mixed
 """
 import matplotlib.pyplot as plt
 
