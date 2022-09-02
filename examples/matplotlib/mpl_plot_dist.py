@@ -7,7 +7,7 @@ import numpy as np
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 a = np.random.poisson(4, 1000)
 b = np.random.normal(0, 1, 1000)
