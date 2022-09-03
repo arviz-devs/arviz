@@ -1,7 +1,7 @@
 """
 Traceplot rank_vlines
 =====================
-_gallery_category: Mixed
+_gallery_category: Mixed Plots
 """
 import matplotlib.pyplot as plt
 

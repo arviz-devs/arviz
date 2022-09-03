@@ -95,7 +95,7 @@ CONTENTS_ENTRY_TEMPLATE = """
 
       .. div:: example-img-plot-overlay
 
-         {overlay}
+         {overlay_description}
 
       .. image:: ./matplotlib/{pngfilename}
 
@@ -104,8 +104,13 @@ CONTENTS_ENTRY_TEMPLATE = """
 """
 
 CATEGORIES = [
-    "Mixed",
+    "Mixed Plots",
     "Distributions",
+    "Distribution Comparisons",
+    "Inference Diagnostics",
+    "Regression Timeseries",
+    "Model Comparisons",
+    "Model Validations",
     "Miscellaneous",
     "Styles",
 ]
@@ -229,32 +234,45 @@ class ExampleGenerator:
                     first_par = paragraphs[0]
             break
 
-        # thumbloc = None
-        # title: Optional[str] = None
         ex_title: str = ""
         gallery_category = None
+        overlay_desc = None
         for line in docstring.split("\n"):
-            # we've found everything we need...
-            # if thumbloc and title and ex_title != "":
-            #     break
-            # m = re.match(r"^_thumb: (\.\d+),\s*(\.\d+)", line)
-            # if m:
-                # thumbloc = float(m.group(1)), float(m.group(2))
-                # continue
-            m = re.match(r"^_gallery_category: (.*)$", line)
-            if m:
-                gallery_category = m.group(1).title()
-                continue
-            # capture the first non-empty line of the docstring as title
+            # Capture the first non-empty line of the docstring as title
             if ex_title == "":
                 ex_title = line
-        assert ex_title != ""
-        self.gallery_category = "Miscellaneous"  # Default to category-less
-        if gallery_category is not None:
-            self.gallery_category = gallery_category
-            docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_gallery_category")])
 
+            # Look for gallery_category from docstring
+            m = re.match(r"^_gallery_category: (.*)$", line)
+            if m:
+                gallery_category = m.group(1).title().strip()
+                # Remove _gallery_category line from docstring
+                docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_gallery_category")])
+
+            # Look for overlay description from docstring
+            m = re.match(r"^_overlay_desc: (.*)$", line)
+            if m:
+                overlay_desc = m.group(1)
+                # Remove _overlay_desc line from docstring
+                docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_overlay_desc")])
+
+        # Set title
+        assert ex_title != ""
         self._title = ex_title
+
+        # Set gallery_category (which is a category from the predetermined list of CATEGORIES)
+        self.gallery_category = "Miscellaneous"  # Default to category-less
+        if gallery_category in CATEGORIES:
+            self.gallery_category = gallery_category
+        
+        # Set overlay_description (unless specified, the default is title + apiname)
+        self.overlay_description = self.title + (
+            " using {apiname}".format(apiname=self.apiname)
+            if self.apiname != "No API Documentation available"
+            else ""
+        )
+        if overlay_desc:
+            self.overlay_description = overlay_desc
 
         self.docstring = docstring
         self.short_desc = first_par
@@ -287,7 +305,7 @@ class ExampleGenerator:
             pngfilename=self.pngfilename,
             sphinx_tag=self.sphinxtag,
             title=self.title,
-            overlay="{0}{1}".format(self.title, (" using " + self.apiname) if self.apiname != "No API Documentation available" else ""),
+            overlay_description=self.overlay_description,
         )
 
 def main(app):
@@ -357,8 +375,8 @@ def main(app):
 
             # Add plot to table of contents and content card if matplotlib
             if backend == "matplotlib":
-                categorized_contents.get("toctree").get(ex.gallery_category, "Miscellaneous").append(ex.toctree_entry())
-                categorized_contents.get("contents").get(ex.gallery_category, "Miscellaneous").append(ex.contents_entry())
+                categorized_contents.get("toctree").get(ex.gallery_category).append(ex.toctree_entry())
+                categorized_contents.get("contents").get(ex.gallery_category).append(ex.contents_entry())
 
         with open(op.join(target_dir_orig, ex.rstfilename), "w") as f:
             f.write(example_contents)
@@ -367,13 +385,14 @@ def main(app):
     toctree = ""
     contents = ""
 
-    # Sort and write toctree + contents
+    # Sort and write toctree
     for category, entries in categorized_contents.get("toctree").items():
         if len(entries) > 0:
             toctree += TOCTREE_START.format(category=category)
             entries.sort()
             for entry in entries:
                 toctree += entry
+    # Sort and write contents (cards in example gallery)
     for category, entries in categorized_contents.get("contents").items():
         if len(entries) > 0:
             contents += "\n{category}\n{underline}\n{start}\n".format(

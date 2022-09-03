@@ -113,7 +113,7 @@ html[data-theme="dark"] {
 }
 .example-gallery .sd-card-footer p.sd-card-text {
   color: var(--pst-color-text-muted);
-  font-size: 0.8rem;
+  font-size: 1rem;  /* This is font size for plot titles (below the chart) */
   font-weight: 700;
 }
 .sd-card.example-gallery:hover .sd-card-footer p.sd-card-text {
