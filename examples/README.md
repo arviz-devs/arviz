@@ -12,7 +12,6 @@
 | --- | --- |
 | Plot Title | Title of the chart shown in example gallery and table of contents |
 | Gallery Category | Single Category in example gallery and table of contents |
-| Overlay Description | Concise description that appears on scrollover event for a plot in the example gallery |
 
 #### Gallery Categories
 ```

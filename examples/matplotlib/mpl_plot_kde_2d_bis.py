@@ -1,13 +1,14 @@
 """
 2d KDE (custom style)
 =====================
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 import numpy as np
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 az.plot_kde(
     np.random.beta(2, 5, size=100),

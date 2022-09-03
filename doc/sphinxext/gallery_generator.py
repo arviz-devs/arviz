@@ -135,6 +135,7 @@ class ExampleGenerator:
         self.target_dir = target_dir
         self.backend = backend
         self._title = None
+        self._gallery_category = ""
         self.extract_docstring()
         with open(filename, "r") as fid:
             self.filetext = fid.read()
@@ -153,6 +154,12 @@ class ExampleGenerator:
         if self._title is not None:
             return self._title
         return self.modulename
+    
+    @property
+    def gallery_category(self) -> str:
+        if self._gallery_category in CATEGORIES:
+            return self._gallery_category
+        return "Miscellaneous"  # Default to category-less
 
     @property
     def dirname(self):
@@ -207,6 +214,14 @@ class ExampleGenerator:
     def pagetitle(self):
         return self.docstring.strip().split("\n")[0].strip()
 
+    @property
+    def overlay_description(self):
+        return self.title + (
+            " using {apiname}".format(apiname=self.apiname)
+            if self.apiname != "No API Documentation available"
+            else ""
+        )
+
     def extract_docstring(self):
         """Extract a module-level docstring"""
         lines = open(self.filename).readlines()
@@ -235,8 +250,7 @@ class ExampleGenerator:
             break
 
         ex_title: str = ""
-        gallery_category = None
-        overlay_desc = None
+        ex_gallery_category = None
         for line in docstring.split("\n"):
             # Capture the first non-empty line of the docstring as title
             if ex_title == "":
@@ -245,34 +259,14 @@ class ExampleGenerator:
             # Look for gallery_category from docstring
             m = re.match(r"^_gallery_category: (.*)$", line)
             if m:
-                gallery_category = m.group(1).title().strip()
+                ex_gallery_category = m.group(1).title().strip()
                 # Remove _gallery_category line from docstring
                 docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_gallery_category")])
 
-            # Look for overlay description from docstring
-            m = re.match(r"^_overlay_desc: (.*)$", line)
-            if m:
-                overlay_desc = m.group(1)
-                # Remove _overlay_desc line from docstring
-                docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_overlay_desc")])
-
-        # Set title
+        # Set title and gallery_category
         assert ex_title != ""
         self._title = ex_title
-
-        # Set gallery_category (which is a category from the predetermined list of CATEGORIES)
-        self.gallery_category = "Miscellaneous"  # Default to category-less
-        if gallery_category in CATEGORIES:
-            self.gallery_category = gallery_category
-        
-        # Set overlay_description (unless specified, the default is title + apiname)
-        self.overlay_description = self.title + (
-            " using {apiname}".format(apiname=self.apiname)
-            if self.apiname != "No API Documentation available"
-            else ""
-        )
-        if overlay_desc:
-            self.overlay_description = overlay_desc
+        self._gallery_category = ex_gallery_category
 
         self.docstring = docstring
         self.short_desc = first_par
