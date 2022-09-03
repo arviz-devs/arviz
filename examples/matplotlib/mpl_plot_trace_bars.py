@@ -2,7 +2,7 @@
 Traceplot rank_bars
 ===================
 _gallery_category: Mixed Plots
-_overlay_desc: Rank Bars Diagnostic with KDE using `trace_plot()`
+_overlay_desc: Rank Bars Diagnostic with KDE using `plot_trace()`
 """
 import matplotlib.pyplot as plt
 
