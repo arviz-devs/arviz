@@ -12,6 +12,7 @@
 | --- | --- |
 | Plot Title | Title of the chart shown in example gallery and table of contents |
 | Gallery Category | Single Category in example gallery and table of contents |
+| Alternative Info | Text for overlay and alternative info for img thumbnail |
 
 #### Gallery Categories
 ```
@@ -37,7 +38,7 @@ Create `mpl_plot_{plot_name}.py` under `matplotlib/`.
 {Plot Title}
 =========
 _gallery_category: {Gallery Category}
-_overlay_desc: {Overlay Description}
+_alternative_info: {Alternative Info}
 """
 {Additional imports here}
 

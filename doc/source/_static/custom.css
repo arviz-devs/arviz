@@ -105,6 +105,15 @@ html[data-theme="dark"] {
   opacity: 90%;
 }
 
+/* Example Gallery Body - Set syntax highlighting for code on hover */
+.example-img-plot-overlay .sd-card-text code.code {
+  background-color: var(--pst-color-background);
+}
+.example-img-plot-overlay .sd-card-text .code span.pre {
+  color: var(--pst-color-primary);
+  font-weight: 700;
+}
+
 /* Example Gallery Footer - Plot titles goes here */
 .example-gallery .sd-card-footer {
   height: 40px;

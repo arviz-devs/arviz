@@ -98,6 +98,7 @@ CONTENTS_ENTRY_TEMPLATE = """
          {overlay_description}
 
       .. image:: ./matplotlib/{pngfilename}
+         :alt: {overlay_description}
 
       +++
       {title}
@@ -136,6 +137,7 @@ class ExampleGenerator:
         self.backend = backend
         self._title = None
         self._gallery_category = ""
+        self._alternative_info = ""
         self.extract_docstring()
         with open(filename, "r") as fid:
             self.filetext = fid.read()
@@ -195,15 +197,18 @@ class ExampleGenerator:
         return "_images/" + pngfile
 
     @property
-    def apiname(self):
+    def apitext(self):
         with open(op.join(self.target_dir, self.pyfilename), "r") as file:
             regex = r"az\.(plot\_[a-z_]+)\("
             name = re.findall(regex, file.read())
-        apitext = name[0] if name else ""
+        return name[0] if name else ""
+
+    @property
+    def apiname(self):
         return (
-            ":func:`~arviz.{apitext}`".format(apitext=apitext)
-            if apitext
-            else "No API Documentation available"
+            ":func:`~arviz.{apitext}`".format(apitext=self.apitext)
+            if self.apitext
+            else "N/A"
         )
 
     @property
@@ -216,9 +221,11 @@ class ExampleGenerator:
 
     @property
     def overlay_description(self):
+        if self._alternative_info != "":
+            return self._alternative_info
         return self.title + (
-            " using {apiname}".format(apiname=self.apiname)
-            if self.apiname != "No API Documentation available"
+            " using `{apitext}`".format(apitext=self.apitext)
+            if self.apitext != ""
             else ""
         )
 
@@ -249,25 +256,28 @@ class ExampleGenerator:
                     first_par = paragraphs[0]
             break
 
-        ex_title: str = ""
-        ex_gallery_category = None
         for line in docstring.split("\n"):
             # Capture the first non-empty line of the docstring as title
-            if ex_title == "":
-                ex_title = line
+            if self._title is None or self._title == "":
+                self._title = line
 
-            # Look for gallery_category from docstring
-            m = re.match(r"^_gallery_category: (.*)$", line)
-            if m:
-                ex_gallery_category = m.group(1).title().strip()
-                # Remove _gallery_category line from docstring
-                docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_gallery_category")])
+            # Look for optional gallery_category from docstring
+            if self._gallery_category == "":
+                m = re.match(r"^_gallery_category: (.*)$", line)
+                if m:
+                    self._gallery_category = m.group(1).title().strip()
+                    # Remove _gallery_category line from docstring
+                    docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_gallery_category")])
 
-        # Set title and gallery_category
-        assert ex_title != ""
-        self._title = ex_title
-        self._gallery_category = ex_gallery_category
+            # Look for optional alternative_info from docstring
+            if self._alternative_info == "":
+                m = re.match(r"^_alternative_info: (.*)$", line)
+                if m:
+                    self._alternative_info = m.group(1)
+                    # Remove _alternative_info line from docstring
+                    docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_alternative_info")])
 
+        assert self._title != ""
         self.docstring = docstring
         self.short_desc = first_par
         self.end_line = erow + 1 + start_row  # pylint: disable=undefined-loop-variable
