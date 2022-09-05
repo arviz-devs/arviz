@@ -8,7 +8,7 @@ figure.titleweight: bold    # weight of the figure title
 figure.titlesize:   18
 
 figure.figsize:     11.5, 5
-figure.dpi:         100.0
+figure.dpi:         300.0
 figure.constrained_layout.use: True
 
 ## ***************************************************************************

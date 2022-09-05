@@ -1,7 +1,7 @@
 """
 Pair Plot
 =========
-_gallery_category: Distributions
+_gallery_category: Inference Diagnostics
 """
 import matplotlib.pyplot as plt
 
