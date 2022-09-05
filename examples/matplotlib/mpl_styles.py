@@ -18,30 +18,26 @@ style_list = [
     ["default", "arviz-colors"],
     "arviz-darkgrid",
     "arviz-whitegrid",
-
     "arviz-white",
     "arviz-grayscale",
     ["arviz-white", "arviz-redish"],
     ["arviz-white", "arviz-bluish"],
-
     ["arviz-white", "arviz-orangish"],
     ["arviz-white", "arviz-brownish"],
     ["arviz-white", "arviz-purplish"],
     ["arviz-white", "arviz-cyanish"],
-
     ["arviz-white", "arviz-greenish"],
     ["arviz-white", "arviz-royish"],
     ["arviz-white", "arviz-viridish"],
     ["arviz-white", "arviz-plasmish"],
-
     "arviz-doc",
 ]
 
-fig = plt.figure(figsize=(20,10))
+fig = plt.figure(figsize=(20, 10))
 for idx, style in enumerate(style_list):
     with az.style.context(style, after_reset=True):
         ax = fig.add_subplot(5, 4, idx + 1, label=idx)
-        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         for i in range(len(colors)):
             ax.plot(x, dist - i, f"C{i}", label=f"C{i}")
         ax.set_title(style)
