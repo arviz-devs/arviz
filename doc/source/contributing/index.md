@@ -95,6 +95,7 @@ pr_tutorial
 sphinx_doc_build
 running_benchmarks
 how_to_release
+how_to_add_to_example_gallery
 :::
 
 :::{toctree}
