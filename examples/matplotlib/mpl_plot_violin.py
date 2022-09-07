@@ -1,7 +1,7 @@
 """
 Violin plot
 ===========
-_gallery_category: Distribution Comparisons
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 

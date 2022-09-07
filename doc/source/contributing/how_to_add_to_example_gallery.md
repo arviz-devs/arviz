@@ -15,11 +15,11 @@
 [
     "Mixed Plots",
     "Distributions",
-    "Distribution Comparisons",
+    "Distribution Comparison",
     "Inference Diagnostics",
-    "Regression Timeseries",
-    "Model Comparisons",
-    "Model Validations",
+    "Regression or Time Series",
+    "Model Comparison",
+    "Model Checking",
     "Miscellaneous",
     "Styles",
 ]

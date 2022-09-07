@@ -1,7 +1,7 @@
 """
 Density Plot
 ============
-_gallery_category: Distribution Comparisons
+_gallery_category: Distribution Comparison
 """
 import matplotlib.pyplot as plt
 

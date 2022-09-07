@@ -107,11 +107,11 @@ CONTENTS_ENTRY_TEMPLATE = """
 CATEGORIES = [
     "Mixed Plots",
     "Distributions",
-    "Distribution Comparisons",
+    "Distribution Comparison",
     "Inference Diagnostics",
-    "Regression Timeseries",
-    "Model Comparisons",
-    "Model Validations",
+    "Regression or Time Series",
+    "Model Comparison",
+    "Model Checking",
     "Miscellaneous",
     "Styles",
 ]
@@ -156,7 +156,7 @@ class ExampleGenerator:
         if self._title is not None:
             return self._title
         return self.modulename
-    
+
     @property
     def gallery_category(self) -> str:
         if self._gallery_category in CATEGORIES:
@@ -205,11 +205,7 @@ class ExampleGenerator:
 
     @property
     def apiname(self):
-        return (
-            ":func:`~arviz.{apitext}`".format(apitext=self.apitext)
-            if self.apitext
-            else "N/A"
-        )
+        return ":func:`~arviz.{apitext}`".format(apitext=self.apitext) if self.apitext else "N/A"
 
     @property
     def sphinxtag(self):
@@ -224,9 +220,7 @@ class ExampleGenerator:
         if self._alternative_info != "":
             return self._alternative_info
         return self.title + (
-            " using `{apitext}`".format(apitext=self.apitext)
-            if self.apitext != ""
-            else ""
+            " using `{apitext}`".format(apitext=self.apitext) if self.apitext != "" else ""
         )
 
     def extract_docstring(self):
@@ -267,7 +261,9 @@ class ExampleGenerator:
                 if m:
                     self._gallery_category = m.group(1).title().strip()
                     # Remove _gallery_category line from docstring
-                    docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_gallery_category")])
+                    docstring = "\n".join(
+                        [l for l in docstring.split("\n") if not l.startswith("_gallery_category")]
+                    )
 
             # Look for optional alternative_info from docstring
             if self._alternative_info == "":
@@ -275,7 +271,9 @@ class ExampleGenerator:
                 if m:
                     self._alternative_info = m.group(1)
                     # Remove _alternative_info line from docstring
-                    docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_alternative_info")])
+                    docstring = "\n".join(
+                        [l for l in docstring.split("\n") if not l.startswith("_alternative_info")]
+                    )
 
         assert self._title != ""
         self.docstring = docstring
@@ -299,7 +297,6 @@ class ExampleGenerator:
             fig.canvas.draw()
             fig.savefig(pngfile, dpi=75)
 
-
     def toctree_entry(self):
         return "   {}\n".format(op.join(op.splitext(self.htmlfilename)[0]))
 
@@ -311,6 +308,7 @@ class ExampleGenerator:
             title=self.title,
             overlay_description=self.overlay_description,
         )
+
 
 def main(app):
     # Get paths for files
@@ -361,9 +359,7 @@ def main(app):
                     raise ValueError("All examples must have a matplotlib counterpart.")
                 continue
 
-            ex = ExampleGenerator(
-                expected_filename, target_dir, backend, target_dir_orig
-            )
+            ex = ExampleGenerator(expected_filename, target_dir, backend, target_dir_orig)
 
             shutil.copyfile(expected_filename, op.join(target_dir, ex.pyfilename))
             output = RST_TEMPLATES[backend].format(
@@ -379,8 +375,12 @@ def main(app):
 
             # Add plot to table of contents and content card if matplotlib
             if backend == "matplotlib":
-                categorized_contents.get("toctree").get(ex.gallery_category).append(ex.toctree_entry())
-                categorized_contents.get("contents").get(ex.gallery_category).append(ex.contents_entry())
+                categorized_contents.get("toctree").get(ex.gallery_category).append(
+                    ex.toctree_entry()
+                )
+                categorized_contents.get("contents").get(ex.gallery_category).append(
+                    ex.contents_entry()
+                )
 
         with open(op.join(target_dir_orig, ex.rstfilename), "w") as f:
             f.write(example_contents)
@@ -401,7 +401,7 @@ def main(app):
         if len(entries) > 0:
             contents += "\n{category}\n{underline}\n{start}\n".format(
                 category=category,
-                underline="-"*len(category),
+                underline="-" * len(category),
                 start=CONTENTS_START,
             )
             entries.sort()

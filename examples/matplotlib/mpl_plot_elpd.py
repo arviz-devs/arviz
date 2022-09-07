@@ -1,7 +1,7 @@
 """
 ELPD Plot
 =========
-_gallery_category: Model Comparisons
+_gallery_category: Model Comparison
 """
 import matplotlib.pyplot as plt
 

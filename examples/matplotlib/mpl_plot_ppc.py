@@ -1,7 +1,7 @@
 """
 Posterior Predictive Check Plot
 ===============================
-_gallery_category: Model Validations
+_gallery_category: Model Checking
 """
 import matplotlib.pyplot as plt
 

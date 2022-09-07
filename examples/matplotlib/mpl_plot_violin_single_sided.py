@@ -1,7 +1,7 @@
 """
 Single-Sided Violin Plot
 ========================
-_gallery_category: Distributions
+_gallery_category: Distribution Comparison
 """
 import matplotlib.pyplot as plt
 

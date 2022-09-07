@@ -1,7 +1,7 @@
 """
 Plot HDI
 ========
-_gallery_category: Regression Timeseries
+_gallery_category: Regression or Time Series
 """
 import matplotlib.pyplot as plt
 import numpy as np

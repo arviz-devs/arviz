@@ -1,7 +1,7 @@
 """
 Regression Plot
 ===============
-_gallery_category: Regression Timeseries
+_gallery_category: Regression or Time Series
 """
 import matplotlib.pyplot as plt
 import xarray as xr
