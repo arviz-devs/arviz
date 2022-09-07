@@ -153,7 +153,7 @@ def plot_kde(
         try:
             import contourpy
         except ImportError as err:
-            raise ImportError("'bokeh' kde contour plots needs ContourPy installed.") from err
+            raise ImportError("'bokeh' kde contour plots needs ContourPy installed (pip install countourpy).") from err
 
         contour_kwargs = _init_kwargs_dict(contour_kwargs)
         contourf_kwargs = _init_kwargs_dict(contourf_kwargs)
