@@ -98,7 +98,7 @@ CONTENTS_ENTRY_TEMPLATE = """
          {overlay_description}
 
       .. image:: ./matplotlib/{pngfilename}
-         :alt: {overlay_description}
+         {alt_text}
 
       +++
       {title}
@@ -137,7 +137,7 @@ class ExampleGenerator:
         self.backend = backend
         self._title = None
         self._gallery_category = ""
-        self._alternative_info = ""
+        self._alt_text = ""
         self.extract_docstring()
         with open(filename, "r") as fid:
             self.filetext = fid.read()
@@ -217,11 +217,17 @@ class ExampleGenerator:
 
     @property
     def overlay_description(self):
-        if self._alternative_info != "":
-            return self._alternative_info
+        if self._alt_text != "":
+            return self._alt_text
         return self.title + (
             " using `{apitext}`".format(apitext=self.apitext) if self.apitext != "" else ""
         )
+    
+    @property
+    def alt_text(self):
+        if self._alt_text != "":
+            return ":alt: {alt_text}".format(alt_text=self._alt_text)
+        return ":alt:"  # Make alt empty (Sphinx defaults alt text to file path)
 
     def extract_docstring(self):
         """Extract a module-level docstring"""
@@ -266,13 +272,13 @@ class ExampleGenerator:
                     )
 
             # Look for optional alternative_info from docstring
-            if self._alternative_info == "":
-                m = re.match(r"^_alternative_info: (.*)$", line)
+            if self._alt_text == "":
+                m = re.match(r"^_alt_text: (.*)$", line)
                 if m:
-                    self._alternative_info = m.group(1)
-                    # Remove _alternative_info line from docstring
+                    self._alt_text = m.group(1)
+                    # Remove _alt_text line from docstring
                     docstring = "\n".join(
-                        [l for l in docstring.split("\n") if not l.startswith("_alternative_info")]
+                        [l for l in docstring.split("\n") if not l.startswith("_alt_text")]
                     )
 
         assert self._title != ""
@@ -307,6 +313,7 @@ class ExampleGenerator:
             sphinx_tag=self.sphinxtag,
             title=self.title,
             overlay_description=self.overlay_description,
+            alt_text=self.alt_text,
         )
 
 

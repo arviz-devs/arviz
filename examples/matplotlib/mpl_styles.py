@@ -2,7 +2,7 @@
 Matplotlib styles
 =================
 _gallery_category: Styles
-_alternative_info: Use Matplotlib Styles with `arviz.style.use()`.
+_alt_text: Use Matplotlib Styles with `arviz.style.use()`.
 """
 import matplotlib.pyplot as plt
 import numpy as np

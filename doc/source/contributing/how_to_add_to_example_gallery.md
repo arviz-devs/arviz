@@ -8,7 +8,7 @@
 | --- | --- |
 | Plot Title | Title of the chart shown in example gallery and table of contents |
 | Gallery Category | Single Category in example gallery and table of contents, defaults to Miscellaneous|
-| Alternative Info | Text for overlay and alternative info for img thumbnail |
+| Alt Text | Text for overlay and alternative text for img thumbnail |
 
 **Gallery Categories**
 ```
@@ -34,7 +34,7 @@ Create `mpl_plot_{plot_name}.py` under `matplotlib/`.
 {Plot Title}
 =========
 _gallery_category: {Gallery Category}
-_alternative_info: {Alternative Info}
+_alt_text: {Alt Text}
 """
 {Additional imports here}
 
