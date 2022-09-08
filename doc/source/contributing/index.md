@@ -93,6 +93,7 @@ pr_tutorial
 :caption: How-to guides
 
 sphinx_doc_build
+updating_example_data
 running_benchmarks
 how_to_release
 :::

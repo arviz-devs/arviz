@@ -8,7 +8,8 @@
 ### Maintenance and fixes
 * Add exception in `az.plot_hdi` for `x` of type `np.datetime64` and `smooth=True` ([2016](https://github.com/arviz-devs/arviz/pull/2016))
 * Change `ax.plot` usage to `ax.scatter` in `plot_pair` ([1990](https://github.com/arviz-devs/arviz/pull/1990))
-* Example data has been moved to the [arviz_example_data](https://github.com/arviz-devs/arviz_example_data) repository and is now included as a git submodule. ([2096](https://github.com/arviz-devs/arviz/pull/2096))
+* Example data has been moved to the [arviz_example_data](https://github.com/arviz-devs/arviz_example_data) repository and is now included using git subtree.
+  ([2096](https://github.com/arviz-devs/arviz/pull/2096) and [2105](https://github.com/arviz-devs/arviz/pull/2105))
 * Bokeh kde contour plots started to use `contourpy` package ([2104](https://github.com/arviz-devs/arviz/pull/2104))
 * Update default Bokeh markers for rcparams ([2104](https://github.com/arviz-devs/arviz/pull/2104))
 
