@@ -174,7 +174,7 @@ def xarray_var_iter(
         if dim_order is not None:
             dim_order_selected = [dim for dim in dim_order if dim in selected_data.dims]
             if dim_order_selected:
-                selected_data = selected_data.transpose(*dim_order, ...)
+                selected_data = selected_data.transpose(*dim_order_selected, ...)
         yield var_name, selection, iselection, selected_data.values
 
 
