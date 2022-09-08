@@ -4,7 +4,7 @@ ipython
 numpydoc
 pydocstyle
 Sphinx>=1.8.3
-pydata-sphinx-theme @ git+https://github.com/pydata/pydata-sphinx-theme
+pydata-sphinx-theme>=0.10.0
 myst-parser
 myst-nb
 sphinx-panels
