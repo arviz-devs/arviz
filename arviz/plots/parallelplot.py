@@ -114,7 +114,7 @@ def plot_parallel(
         :context: close-figs
 
         >>> az.plot_parallel(data, var_names=["theta", "tau", "mu"], norm_method="normal")
-    
+
     Plot parallel plot with minmax
 
     .. plot::
