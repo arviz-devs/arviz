@@ -20,11 +20,13 @@ display: inline-block !important;
 html[data-theme="light"] {
   --pst-color-primary: rgb(11 117 145);
   --pst-color-secondary: rgb(238 144 64);
+  --pst-color-plot-background: rgb(255, 255, 255);
 }
 
 html[data-theme="dark"] {
   --pst-color-primary: rgb(0 192 191);
   --pst-color-secondary: rgb(238 144 64);
+  --pst-color-plot-background: rgb(218, 219, 220);
 }
 
 .bd-content {
@@ -78,14 +80,15 @@ html[data-theme="dark"] {
 }
 
 /* Homepage + Example Gallery Body - Set color and hover */
+.home-img-plot.img-thumbnail,
+.bd-content div.sd-card.example-gallery .sd-card-body {
+  background-color: var(--pst-color-plot-background);  /* Same as img-thumbnail from pydata css, adjusted for dark mode */
+}
 .home-img-plot-overlay,
 .example-img-plot-overlay,
 .bd-content div.sd-card.example-gallery .sd-card-body {
   border: 1px solid #dee2e6;  /* Same as img-thumbnail from pydata css */
   border-radius: 0.25rem;  /* Same as img-thumbnail from pydata css */
-}
-.bd-content div.sd-card.example-gallery .sd-card-body {
-  background-color: #fff;  /* Same as img-thumbnail from pydata css */
 }
 .home-img-plot-overlay,
 .example-img-plot-overlay,

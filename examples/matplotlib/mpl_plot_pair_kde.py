@@ -1,7 +1,7 @@
 """
 KDE Pair Plot
 =============
-_gallery_category: Inference Diagnostics
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 
@@ -17,7 +17,6 @@ az.plot_pair(
     var_names=["theta", "mu", "tau"],
     kind="kde",
     coords=coords,
-    divergences=True,
     textsize=22,
 )
 

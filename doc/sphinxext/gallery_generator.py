@@ -265,7 +265,7 @@ class ExampleGenerator:
             if self._gallery_category == "":
                 m = re.match(r"^_gallery_category: (.*)$", line)
                 if m:
-                    self._gallery_category = m.group(1).title().strip()
+                    self._gallery_category = m.group(1)
                     # Remove _gallery_category line from docstring
                     docstring = "\n".join(
                         [l for l in docstring.split("\n") if not l.startswith("_gallery_category")]

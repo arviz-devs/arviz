@@ -8,7 +8,7 @@ import arviz as az
 
 az.style.use("arviz-doc")
 
-sample = norm(0,1).rvs(1000)
-distribution = norm(0,1)
+sample = norm(0, 1).rvs(1000)
+distribution = norm(0, 1)
 
-az.plot_ecdf(sample, cdf = distribution.cdf, confidence_bands = True, backend="bokeh")
+az.plot_ecdf(sample, cdf=distribution.cdf, confidence_bands=True, backend="bokeh")

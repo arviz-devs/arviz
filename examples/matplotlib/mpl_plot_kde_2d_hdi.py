@@ -1,5 +1,5 @@
 """
-2d KDE with HDI Contours
+2D KDE with HDI Contours
 ========================
 _gallery_category: Distributions
 """

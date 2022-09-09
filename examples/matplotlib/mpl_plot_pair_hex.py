@@ -1,7 +1,7 @@
 """
 Hexbin PairPlot
 ===============
-_gallery_category: Inference Diagnostics
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 
@@ -18,6 +18,5 @@ az.plot_pair(
     kind="hexbin",
     coords=coords,
     colorbar=True,
-    divergences=True,
 )
 plt.show()

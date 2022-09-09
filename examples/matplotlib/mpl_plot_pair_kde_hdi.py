@@ -1,7 +1,7 @@
 """
 KDE Pair Plot with HDI Contours
 ===============================
-_gallery_category: Inference Diagnostics
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 
@@ -17,7 +17,6 @@ az.plot_pair(
     var_names=["theta", "mu", "tau"],
     kind="kde",
     coords=coords,
-    divergences=True,
     textsize=22,
     kde_kwargs={
         "hdi_probs": [0.3, 0.6, 0.9],  # Plot 30%, 60% and 90% HDI contours
