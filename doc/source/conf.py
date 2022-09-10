@@ -153,6 +153,10 @@ html_theme = "pydata_sphinx_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
+    "logo": {
+        "image_light": "logo.png",
+        "image_dark": "logo_dark.png",
+    },
     "icon_links": [
         {
             "name": "GitHub",
@@ -166,6 +170,7 @@ html_theme_options = {
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
+    "header_links_before_dropdown": 7,
     "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
     "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
@@ -205,10 +210,6 @@ htmlhelp_basename = "ArviZdoc"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 html_short_title = "ArviZ"
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = "_static/logo.png"
 
 
 # The name of an image file (relative to this directory) to use as a favicon of

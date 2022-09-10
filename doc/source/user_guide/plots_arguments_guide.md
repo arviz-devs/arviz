@@ -34,7 +34,7 @@ y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
 ```
 
 ```{code-cell} ipython3
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 ```
 
 ```{code-cell} ipython3

@@ -1,6 +1,6 @@
 """
-Density Plot (Comparison)
-=========================
+Forest Plot Comparison
+======================
 _gallery_category: Distribution Comparison
 """
 import matplotlib.pyplot as plt
@@ -11,15 +11,12 @@ az.style.use("arviz-doc")
 
 centered_data = az.load_arviz_data("centered_eight")
 non_centered_data = az.load_arviz_data("non_centered_eight")
-
-axes = az.plot_density(
+ax = az.plot_forest(
     [centered_data, non_centered_data],
-    data_labels=["Centered", "Non-Centered"],
-    var_names=["theta"],
-    shade=0.2,
+    model_names=["Centered", "Non Centered"],
+    var_names=["mu"],
+    figsize=(11.5, 5),
 )
-
-fig = axes.flatten()[0].get_figure()
-fig.suptitle("94% High Density Intervals for Theta")
+ax[0].set_title("Estimated theta for eight schools model")
 
 plt.show()
