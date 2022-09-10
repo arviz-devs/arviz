@@ -25,7 +25,7 @@
 ]
 ```
 
-## Matplotlib Tempalte (Required)
+## Matplotlib Template (Required)
 
 Create `mpl_plot_{plot_name}.py` under `matplotlib/`.
 

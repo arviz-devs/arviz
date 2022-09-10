@@ -219,9 +219,9 @@ class ExampleGenerator:
     def overlay_description(self):
         if self._alt_text != "":
             return self._alt_text
-        return self.title + (
-            " using `{apitext}`".format(apitext=self.apitext) if self.apitext != "" else ""
-        )
+        elif self.apitext != "":
+            return "{title} using `{apitext}`".format(title=self.title, apitext=self.apitext)
+        return self.title
     
     @property
     def alt_text(self):

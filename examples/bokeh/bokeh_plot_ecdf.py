@@ -6,8 +6,6 @@ from scipy.stats import norm
 
 import arviz as az
 
-az.style.use("arviz-doc")
-
 sample = norm(0, 1).rvs(1000)
 distribution = norm(0, 1)
 
