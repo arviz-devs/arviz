@@ -8,7 +8,6 @@ from ..labels import (BaseLabeller,
                     NoModelLabeller,
                     mix_labellers)
 
-@pytest.fixture(scope="module")
 class Data():
     def __init__(self):
             self.sel= {
@@ -20,6 +19,9 @@ class Data():
                 "experiment": 4,
             }
 
+@pytest.fixture(scope="module")
+def multidim_sels():
+    return Data()
 class TestLabellers():
     @pytest.fixture(scope="class")
     def __init__(self):
