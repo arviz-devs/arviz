@@ -56,6 +56,7 @@ python setup.py install
 
 -------------------------------------------------------------------------------
 ## [Gallery](https://python.arviz.org/en/latest/examples/index.html)
+
 <style>table#gallery td {width: 25%;}</style>
 <p>
 <table id="gallery">
