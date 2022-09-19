@@ -1048,7 +1048,7 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
     upper_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=upper_alpha))
     upper_w = upper_w/np.sum(upper_w)
 
-    ufunc_kwargs = {"ravel": False}
+    ufunc_kwargs = {"n_dims": 1, "ravel": False}
     func_kwargs = {
         "lower_weights": lower_w,
         "upper_weights": upper_w,
