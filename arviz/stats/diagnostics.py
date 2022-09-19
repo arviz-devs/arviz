@@ -1043,10 +1043,10 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
 
     # calculate importance sampling weights for lower and upper alpha power-scaling
     lower_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=lower_alpha))
-    lower_w = lower_w/np.sum(lower_w)
+    lower_w = lower_w / np.sum(lower_w)
 
     upper_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=upper_alpha))
-    upper_w = upper_w/np.sum(upper_w)
+    upper_w = upper_w / np.sum(upper_w)
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
     func_kwargs = {
@@ -1109,17 +1109,20 @@ def _cjs_dist(draws, weights):
     cdf_p_int = np.dot(cdf_p, binwidth)
     cdf_q_int = np.dot(cdf_q, binwidth)
 
-    cjs_pq = np.nansum(
+    # cjs calculation
+    pq_numer = np.log2(cdf_p, out=np.zeros_like(cdf_p), where=(cdf_p != 0))
+    qp_numer = np.log2(cdf_q, out=np.zeros_like(cdf_q), where=(cdf_q != 0))
+    
+    denom = 0.5 * (cdf_p + cdf_q)
+    denom = np.log2(denom, out=np.zeros_like(denom), where=(denom != 0))
+    
+    cjs_pq = np.sum(
         binwidth * (
-        cdf_p * (np.log2(cdf_p) -
-              np.log2(0.5 * cdf_p + 0.5 * cdf_q)
-        ))) + 0.5 / np.log(2) * (cdf_q_int - cdf_p_int)
+        cdf_p * (pq_numer - denom))) + 0.5 / np.log(2) * (cdf_q_int - cdf_p_int)
 
-    cjs_qp = np.nansum(
+    cjs_qp = np.sum(
         binwidth * (
-        cdf_q * (np.log2(cdf_q) -
-              np.log2(0.5 * cdf_q + 0.5 * cdf_p)
-        ))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
+        cdf_q * (np.log2(cdf_q) - denom))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
 
     cjs_pq = max(0, cjs_pq)
     cjs_qp = max(0, cjs_qp)
