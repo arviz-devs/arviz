@@ -30,4 +30,5 @@ __all__ = [
     "wrap_xarray_ufunc",
     "reloo",
     "_calculate_ics",
+    "psens"
 ]
