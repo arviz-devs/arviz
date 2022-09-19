@@ -1068,6 +1068,7 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
         ufunc_kwargs=ufunc_kwargs,
         func_kwargs=func_kwargs,
         dask_kwargs=dask_kwargs,
+        input_core_dims=[["sample"]],
     )
 
 
