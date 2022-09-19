@@ -1034,14 +1034,8 @@ def psens(data, *, component, var_names=None, delta=0.01, dask_kwargs=None):
        power-scaling*, 2022, https://arxiv.org/abs/2107.14054
 
     """
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-    sample_stats = extract(data, group="sample_stats")
-
-    dataset = dataset if var_names is None else dataset[var_names]
-
-    # extract log component
-    component_draws = sample_stats[f"log_{component}"]
+    dataset = extract(data, var_names=var_names, filter_vars=filter_vars, group="posterior")
+    component_draws = extract(data, group="sample_stats", var_names=f"log_{component}")
 
     # calculate lower and upper alpha values
     lower_alpha = 1 / (1 + delta)
