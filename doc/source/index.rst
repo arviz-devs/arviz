@@ -2,10 +2,100 @@
 
 .. _homepage:
 
-ArviZ: Exploratory analysis of Bayesian models
-==============================================
+Overview
+========
 
-ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, data storage, sample diagnostics, model checking, and comparison.
+ArviZ
+-----
+
+Exploratory analysis of Bayesian models
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ArviZ is a Python package for exploratory analysis of Bayesian models. It serves as a backend-agnostic tool for diagnosing and visualizing Bayesian inference.
+
+.. raw:: html 
+
+   <div class="homepage-button-container">
+      <a href="./getting_started/index.html" class="homepage-button primary-button">Get Started</a>
+      <a href="./examples/index.html" class="homepage-button secondary-button">See Gallery</a>
+      <a href="./api/index.html" class="homepage-button-link">See API Reference →</a>
+   </div>
+
+Example Gallery
+---------------
+
+.. grid:: 1 2 2 2
+   :gutter: 3
+
+   .. grid-item-card::
+      :link: ./plot_trace_bars.html
+      :shadow: none
+      :class-card: example-gallery
+
+      .. div:: example-img-plot-overlay
+
+         Rank Bars Diagnostic with KDE using `plot_trace`
+
+      .. image:: ./_images/mpl_plot_trace_bars.png
+   
+   .. grid-item-card::
+      :link: ./examples/plot_forest_mixed.html
+      :shadow: none
+      :class-card: example-gallery
+
+      .. div:: example-img-plot-overlay
+
+         Forest Plot with ESS using `plot_forest`
+
+      .. image:: ./_images/mpl_plot_forest_mixed.png
+
+   .. grid-item-card::
+      :link: ./plot_dist.html
+      :shadow: none
+      :class-card: example-gallery
+
+      .. div:: example-img-plot-overlay
+
+         Dist Plot using `plot_dist`
+
+      .. image:: ./_images/mpl_plot_dist.png
+
+   .. grid-item-card::
+      :link: ./plot_density.html
+      :shadow: none
+      :class-card: example-gallery
+
+      .. div:: example-img-plot-overlay
+
+         Density Plot (Comparison) using `plot_density`
+
+      .. image:: ./_images/mpl_plot_density.png
+   
+   .. grid-item-card::
+      :link: ./plot_pair.html
+      :shadow: none
+      :class-card: example-gallery
+
+      .. div:: example-img-plot-overlay
+
+         Pair Plot using `plot_pair`
+
+      .. image:: ./_images/mpl_plot_pair.png
+
+   .. grid-item-card::
+      :link: ./plot_ppc.html
+      :shadow: none
+      :class-card: example-gallery
+
+      .. div:: example-img-plot-overlay
+
+         Posterior Predictive Check Plot using `plot_ppc`
+
+      .. image:: ./_images/mpl_plot_ppc.png
+   
+
+Key Features
+============
 
 The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python,
 by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
@@ -13,150 +103,98 @@ See :ref:`here <xarray_for_arviz>` for more on xarray and ArviZ usage
 and :ref:`here <schema>` for more on ``InferenceData`` structure
 and specification.
 
-.. raw:: html
+A Julia wrapper, `ArviZ.jl <https://julia.arviz.org/>`_ is also available. It provides built-in support for `Turing.jl <https://turing.ml/dev/>`_, `CmdStan.jl <https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl <https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
 
-    <div class="home-flex-grid">
-        <a href="examples/plot_pair.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_pair.png">
-                <span class="home-img-plot-overlay">Pair Plot</span>
-            </div>
-        </a>
+ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_, `PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_, `Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_, `emcee <https://emcee.readthedocs.io/en/stable/>`_, and `TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for Edward2 is on the roadmap.
 
-        <a href="examples/plot_forest.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_forest.png">
-                <span class="home-img-plot-overlay">Forest Plot</span>
-            </div>
-        </a>
+.. grid:: 2 2 3 4
+   :gutter: 3
 
-        <a href="examples/plot_density.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_density.png">
-                <span class="home-img-plot-overlay">Density Plot</span>
-            </div>
-        </a>
+   .. grid-item-card:: Key Feature 1
+      :text-align: center
+      
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
 
-        <a href="examples/plot_energy.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_energy.png">
-                <span class="home-img-plot-overlay">Energy Plot</span>
-            </div>
-        </a>
+   .. grid-item-card::
+      :text-align: center
 
-        <a href="examples/plot_posterior.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_posterior.png">
-                <span class="home-img-plot-overlay">Posterior Plot</span>
-            </div>
-        </a>
+      Key Feature 2 (Variant)
+      ^^^
+      
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
 
-        <a href="examples/plot_kde_2d.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_kde_2d.png">
-                <span class="home-img-plot-overlay">KDE 2D Plot</span>
-            </div>
-        </a>
+   .. grid-item-card:: Key Feature 3
+      :text-align: center
+      
+      Description of Key Feature
 
-        <a href="examples/plot_forest_ridge.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_forest_ridge.png">
-                <span class="home-img-plot-overlay">Forest Ridge Plot</span>
-            </div>
-        </a>
+   .. grid-item-card:: Key Feature 4
+      :text-align: center
+      
+      Description of Key Feature
 
-        <a href="examples/plot_parallel.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_parallel.png">
-                <span class="home-img-plot-overlay">Parallel Plot</span>
-            </div>
-        </a>
+   .. grid-item-card:: Key Feature 5
+      :text-align: center
+      
+      Description of Key Feature
 
-        <a href="examples/plot_trace.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_trace.png">
-                <span class="home-img-plot-overlay">Trace Plot</span>
-            </div>
-        </a>
+   .. grid-item-card:: Key Feature 6
+      :text-align: center
+      
+      Description of Key Feature
 
-        <a href="examples/plot_dot.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_dot.png">
-                <span class="home-img-plot-overlay">Dot Plot</span>
-            </div>
-        </a>
+   .. grid-item-card:: Key Feature 7
+      :text-align: center
 
-        <a href="examples/plot_ppc.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_ppc.png">
-                <span class="home-img-plot-overlay">Posterior Predictive Checks</span>
-            </div>
-        </a>
+      Description of Key Feature
 
-        <a href="examples/plot_autocorr.html">
-            <div class="home-img-plot img-thumbnail">
-                <img src="./_images/mpl_plot_autocorr.png">
-                <span class="home-img-plot-overlay">Autocorrelation Plot</span>
-            </div>
-        </a>
-    </div>
-
-Installation
-------------
-
-Using pip
-
-.. code:: bash
-
-    pip install arviz
-
-Using conda-forge
-
-.. code:: bash
-
-    conda install -c conda-forge arviz
-
-To install the latest development version of ArviZ, please check the :ref:`Installation guide <dev-version>` for details.
-
-Contribution
-------------
-
-**Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
-
-ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
-`PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
-`Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_,
-`emcee <https://emcee.readthedocs.io/en/stable/>`_, and
-`TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for Edward2 is on the roadmap.
-
-A Julia wrapper, `ArviZ.jl <https://julia.arviz.org/>`_ is
-also available. It provides built-in support for
-`Turing.jl <https://turing.ml/dev/>`_, `CmdStan.jl
-<https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl
-<https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
+   .. grid-item-card:: Key Feature 8
+      :text-align: center
+      
+      Description of Key Feature
 
 
-ArviZ is a non-profit project under NumFOCUS umbrella. If you want to **support ArviZ financially**, you can donate `here <https://numfocus.org/donate-to-arviz>`_.
+Support ArviZ
+=============
 
-Citation
---------
+.. raw:: html 
 
-If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation in BibTeX format
+   <div class="two-col">
+      <!-- Contributions -->
+      <div class="col" id="contributions">
+         <h3>Contributions</h3>
+         <p>Contributions and issue reports are very welcome at <a href="https://github.com/arviz-devs/arviz">the GitHub repository</a>. We have a <a href="https://github.com/arviz-devs/arviz/blob/main/CONTRIBUTING.md">contributing guide</a> to help you through the process. If you have any doubts, please do not hesitate to contact us on <a href="https://gitter.im/arviz-devs/community">gitter</a>.</p>
+      </div>
+      <!-- Citation -->
+      <div class="col" id="citation">
+         <h3>Citation</h3>
+         <p>If you use ArviZ and want to <strong>cite</strong> it please use <a class="reference external" href="https://doi.org/10.21105/joss.01143"><img alt="JOSS" src="https://joss.theoj.org/papers/10.21105/joss.01143/status.svg"></a>.</p>
+         <p>See our <a href="https://www.arviz.org/en/latest/support.html#cite">support page</a> for information on how to cite in BibTeX format.</p>
+      </div>
+   </div>
 
-.. code:: bash
+   <div class="two-col">
+      <!-- Sponsors -->
+      <div class="col" id="sponsors">
+         <h3>Sponsors</h3>
+         <p>ArviZ receives support from Helsinki University, Finnish Center for Artificial Inteligence, and Chan Zuckerberg Initiative. <a href="https://www.arviz.org/en/latest/sponsors_partners.html">See here</a> for sponsorship details.</p>
+         <div class="sponsor-container">
+            <a class="sponsor" href="https://www.helsinki.fi/en"><img src="_static/sponsor_university_helsinki.png" alt="University of Helsinki"></a>
+            <a class="sponsor" href="https://fcai.fi/"><img src="_static/sponsor_fcai.png" alt="FCAI"></a>
+            <a class="sponsor" href="https://chanzuckerberg.com/"><img src="_static/sponsor_czi.png" alt="Chan Zuckerberg Initiative"></a>
+         </div>
+      </div>
+      <!-- Donate -->
+      <div class="col" id="donate">
+         <h3>Donate</h3>
+         <p>ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ financially, click the donate button below or visit the NumFOCUS website.</p>
+         <div class="sponsor-container">
+            <a class="sponsor" href="https://numfocus.org/"><img src="_static/donate_numfocus.png" alt="NumFOCUS"></a>
+            <a href="https://numfocus.org/donate-to-arviz" class="sponsor homepage-button primary-button">Donate</a>
+         </div>
+      </div>
+   </div>
 
-    @article{arviz_2019,
-        doi = {10.21105/joss.01143},
-        url = {https://doi.org/10.21105/joss.01143},
-        year = {2019},
-        publisher = {The Open Journal},
-        volume = {4},
-        number = {33},
-        pages = {1143},
-        author = {Ravin Kumar and Colin Carroll and Ari Hartikainen and Osvaldo Martin},
-        title = {ArviZ a unified library for exploratory analysis of Bayesian models in Python},
-        journal = {Journal of Open Source Software}
-    }
 
 
 .. toctree::
@@ -169,7 +207,3 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
   api/index
   community
   Contributing<contributing/index>
-
-
-.. |JOSS| image:: https://joss.theoj.org/papers/10.21105/joss.01143/status.svg
-   :target: https://doi.org/10.21105/joss.01143
