@@ -138,7 +138,6 @@ html[data-theme="dark"] {
   margin-bottom: 30px;
 }
 #support-arviz .two-col .col {
-  min-width: 476px;
   width: 50%;
   text-align: center;
   padding: 0 50px;
@@ -148,7 +147,7 @@ html[data-theme="dark"] {
   display: flex;
 }
 #support-arviz .sponsor {
-  padding: 8px 30px;
+  padding: 8px 10px;
   margin: auto;
 }
 #sponsors .sponsor {
