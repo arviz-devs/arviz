@@ -1,6 +1,5 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 from collections import namedtuple
-from unicodedata import name
 import numpy as np
 import pytest
 
