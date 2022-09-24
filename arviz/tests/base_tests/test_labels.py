@@ -8,7 +8,6 @@ from ...labels import (
     MapLabeller,
     NoModelLabeller,
     NoVarLabeller,
-    mix_labellers,
 )
 
 
@@ -54,7 +53,10 @@ def labellers():
     ],
 )
 class TestLabellers:
+    # pylint: disable=no-self-use
+    # pylint: disable=redefined-outer-name
     def test_make_label_vert(self, args, multidim_sels, labellers):
-        labeller_arg = labellers.labellers[args[0]]
+        name, expected_label = args
+        labeller_arg = labellers.labellers[name]
         label = labeller_arg.make_label_vert("theta", multidim_sels.sel, multidim_sels.isel)
-        assert label == args[1]
+        assert label == expected_label
