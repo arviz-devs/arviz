@@ -1,21 +1,21 @@
 """
 Forest Plot
 ===========
-
-_thumb: .5, .8
-_example_title: Forest plot
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 centered_data = az.load_arviz_data("centered_eight")
-non_centered_data = az.load_arviz_data("non_centered_eight")
-axes = az.plot_forest(
-    [centered_data, non_centered_data], model_names=["Centered", "Non Centered"], var_names=["mu"]
+ax = az.plot_forest(
+    centered_data,
+    var_names=["~tau"],
+    combined=False,
+    figsize=(11.5, 5),
+    colors="C1",
 )
-axes[0].set_title("Estimated theta for eight schools model")
 
 plt.show()

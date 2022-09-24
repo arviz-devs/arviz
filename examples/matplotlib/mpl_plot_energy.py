@@ -1,17 +1,17 @@
 """
 Energy Plot
 ===========
-
-_thumb: .7, .5
-_example_title: Plot energy
+_gallery_category: Inference Diagnostics
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 data = az.load_arviz_data("centered_eight")
-az.plot_energy(data, figsize=(12, 8))
+ax = az.plot_energy(data, fill_color=("C0", "C1"))
+
+ax.set_title("Energy Plot")
 
 plt.show()

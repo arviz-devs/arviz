@@ -21,7 +21,7 @@ livehtml:
 	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)" -b html
 
 cleandocs:
-	rm -r "$(BUILDDIR)" "doc/jupyter_execute" "$(SOURCEDIR)/api/generated" "$(SOURCEDIR)/examples" "$(SOURCEDIR)/example_thumbs"
+	rm -r "$(BUILDDIR)" "doc/jupyter_execute" "$(SOURCEDIR)/api/generated" "$(SOURCEDIR)/examples"
 
 preview:
 	python -m webbrowser "$(BUILDDIR)/index.html"

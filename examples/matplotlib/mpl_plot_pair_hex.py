@@ -1,15 +1,13 @@
 """
 Hexbin PairPlot
 ===============
-
-_thumb: .2, .5
-_example_title: Pair plot on hex grid
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 centered = az.load_arviz_data("centered_eight")
 
@@ -20,6 +18,5 @@ az.plot_pair(
     kind="hexbin",
     coords=coords,
     colorbar=True,
-    divergences=True,
 )
 plt.show()

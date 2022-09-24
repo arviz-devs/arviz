@@ -1,26 +1,26 @@
 """
 Point Estimate Pairplot
 =======================
-
-_thumb: .2, .5
-_example_title: Pair plot with point estimate markings
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-centered = az.load_arviz_data("centered_eight")
+az.style.use("arviz-doc")
+
+data = az.load_arviz_data("centered_eight")
 
 coords = {"school": ["Choate", "Deerfield"]}
 ax = az.plot_pair(
-    centered,
+    data,
     var_names=["mu", "theta"],
     kind=["scatter", "kde"],
     kde_kwargs={"fill_last": False},
     marginals=True,
     coords=coords,
     point_estimate="median",
-    figsize=(10, 8),
+    figsize=(11.5, 5),
 )
 
 plt.show()

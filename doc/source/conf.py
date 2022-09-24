@@ -38,10 +38,6 @@ arviz.Numba.disable_numba()
 # ones.
 sys.path.insert(0, os.path.abspath("../sphinxext"))
 
-thumb_directory = "example_thumbs"
-if not os.path.isdir(thumb_directory):
-    os.mkdir(thumb_directory)
-
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
@@ -157,6 +153,10 @@ html_theme = "pydata_sphinx_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
+    "logo": {
+        "image_light": "logo.png",
+        "image_dark": "logo_dark.png",
+    },
     "icon_links": [
         {
             "name": "GitHub",
@@ -170,6 +170,7 @@ html_theme_options = {
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
+    "header_links_before_dropdown": 7,
     "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
     "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
@@ -185,6 +186,7 @@ html_context = {
     "default_mode": "light",
 }
 html_sidebars: Dict[str, Any] = {
+    "index": [],
     "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html"],
 }
 
@@ -192,7 +194,7 @@ html_sidebars: Dict[str, Any] = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-html_static_path = ["_static", thumb_directory]
+html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
 # use additional pages to add a 404 page
@@ -208,10 +210,6 @@ htmlhelp_basename = "ArviZdoc"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 html_short_title = "ArviZ"
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = "_static/logo.png"
 
 
 # The name of an image file (relative to this directory) to use as a favicon of

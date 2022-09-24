@@ -17,7 +17,6 @@ from typing import Optional
 
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib import image
 
 from arviz.rcparams import rc_context
 from arviz import rcParams
@@ -30,17 +29,21 @@ MPL_RST_TEMPLATE = """
 
 {docstring}
 
-**API documentation:** {api_name}
+.. seealso::
+
+    API Documentation: {api_name}
 
 .. tab-set::
     .. tab-item:: Matplotlib
 
         .. image:: {img_file}
 
-        **Python source code:** :download:`[download source: {fname}]<{fname}>`
-
         .. literalinclude:: {fname}
             :lines: {end_line}-
+
+        .. div:: example-plot-download
+
+           :download:`Download Python Source Code: {fname}<{fname}>`
 
 """
 
@@ -50,150 +53,77 @@ BOKEH_RST_TEMPLATE = """
         .. bokeh-plot:: {absfname}
             :source-position: none
 
-        **Python source code:** :download:`[download source: {fname}]<{fname}>`
-
         .. literalinclude:: {fname}
             :lines: {end_line}-
+
+        .. div:: example-plot-download
+
+           :download:`Download Python Source Code: {fname}<{fname}>`
 """
 
 RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 
 INDEX_TEMPLATE = """
-
-.. raw:: html
-
-    <style type="text/css">
-    .figure {{
-        position: relative;
-        float: left;
-        margin: 10px;
-        width: 180px;
-        height: 200px;
-    }}
-
-    .figure img {{
-        position: absolute;
-        display: inline;
-        left: 0;
-        width: 170px;
-        height: 170px;
-        opacity:1.0;
-        filter:alpha(opacity=100); /* For IE8 and earlier */
-    }}
-
-    .figure:hover img {{
-        -webkit-filter: blur(3px);
-        -moz-filter: blur(3px);
-        -o-filter: blur(3px);
-        -ms-filter: blur(3px);
-        filter: blur(3px);
-        opacity:1.0;
-        filter:alpha(opacity=100); /* For IE8 and earlier */
-    }}
-
-    span.figure-label {{
-        position: absolute;
-        display: inline;
-        left: 0;
-        width: 170px;
-        height: 170px;
-        background: #000;
-        color: #fff;
-        visibility: hidden;
-        opacity: 0;
-        z-index: 100;
-    }}
-
-    .figure p {{
-        position: absolute;
-        top: 45%;
-        width: 170px;
-        font-size: 110%;
-    }}
-
-    .figure:hover span {{
-        visibility: visible;
-        opacity: .4;
-    }}
-
-    .caption {{
-        position: absolute;
-        width: 180px;
-        top: 170px;
-        text-align: center !important;
-    }}
-
-    .figure .gallery-figure-title p {{
-        position: relative;
-        top: 170px;
-        color: black;
-        visibility: visible;
-        text-align: center !important;
-        line-height: normal;
-    }}
-    .figure .gallery-figure-title span {{
-        top: 170px;
-        position: relative;
-        visibility: visible;
-    }}
-    </style>
+:html_theme.sidebar_secondary.remove:
 
 .. _{sphinx_tag}:
 
 Example gallery
 ===============
+{toctree}
+{contents}
+"""
 
-{toctrees_contents}
+TOCTREE_START = """
+.. toctree::
+   :hidden:
+   :caption: {category}
 
 """
 
-CONTENTS_ENTRY_TEMPLATE = (
-    ".. raw:: html\n\n"
-    "    <div class='figure align-center'>\n"
-    "    <a href=./{htmlfilename}>\n"
-    "    <img src=../_static/{thumbfilename}>\n"
-    "    <span class='figure-label'>\n"
-    "    <p>{sphinx_tag}</p>\n"
-    "    </span>\n"
-    '    <span class="gallery-figure-title">\n'
-    "      <p>{title}</p>\n"
-    "    </span>\n"
-    "    </a>\n"
-    "    </div>\n\n"
-    "\n\n"
-    ""
-)
+CONTENTS_START = """
+.. grid:: 1 2 3 3
+   :gutter: 2 2 3 3
+"""
 
+CONTENTS_ENTRY_TEMPLATE = """
+   .. grid-item-card::
+      :link: ./{htmlfilename}
+      :text-align: center
+      :shadow: none
+      :class-card: example-gallery
 
-def create_thumbnail(infile, thumbfile, width=275, height=275, cx=0.5, cy=0.5, border=4):
+      .. div:: example-img-plot-overlay
 
-    im = image.imread(infile)
-    rows, cols = im.shape[:2]
-    size = min(rows, cols)
-    if size == cols:
-        xslice = slice(0, size)
-        ymin = min(max(0, int(cy * rows - size // 2)), rows - size)
-        yslice = slice(ymin, ymin + size)
-    else:
-        yslice = slice(0, size)
-        xmin = min(max(0, int(cx * cols - size // 2)), cols - size)
-        xslice = slice(xmin, xmin + size)
-    thumb = im[yslice, xslice]
-    thumb[:border, :, :3] = thumb[-border:, :, :3] = 0
-    thumb[:, :border, :3] = thumb[:, -border:, :3] = 0
+         {overlay_description}
 
-    dpi = 100
-    fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi, constrained_layout=True)
+      .. image:: ./matplotlib/{pngfilename}
+         {alt_text}
 
-    ax = fig.add_axes([0, 0, 1, 1], aspect="auto", frameon=False, xticks=[], yticks=[])
-    ax.imshow(thumb, aspect="auto", resample=True, interpolation="bilinear")
-    fig.savefig(thumbfile, dpi=dpi)
-    plt.close(fig)
+      +++
+      {title}
+"""
 
+CATEGORIES = [
+    "Mixed Plots",
+    "Distributions",
+    "Distribution Comparison",
+    "Inference Diagnostics",
+    "Regression or Time Series",
+    "Model Comparison",
+    "Model Checking",
+    "Miscellaneous",
+    "Styles",
+]
 
-def indent(s, N=4):
-    """indent a string"""
-    return s.replace("\n", "\n" + N * " ")
+categorized_contents = {
+    "toctree": {category: [] for category in CATEGORIES},
+    "contents": {category: [] for category in CATEGORIES},
+}
+
+# def indent(s, N=3):
+#     """Indent a string (Sphinx requires 3)."""
+#     return s.replace("\n", "\n" + N * " ")
 
 
 class ExampleGenerator:
@@ -201,13 +131,13 @@ class ExampleGenerator:
 
     _title: Optional[str]
 
-    def __init__(self, filename, target_dir, backend, thumb_dir, target_dir_orig):
+    def __init__(self, filename, target_dir, backend, target_dir_orig):
         self.filename = filename
         self.target_dir = target_dir
-        self.thumb_dir = thumb_dir
         self.backend = backend
-        self.thumbloc = 0.5, 0.5
         self._title = None
+        self._gallery_category = ""
+        self._alt_text = ""
         self.extract_docstring()
         with open(filename, "r") as fid:
             self.filetext = fid.read()
@@ -217,10 +147,8 @@ class ExampleGenerator:
         # Only actually run it if the output RST file doesn't
         # exist or it was modified less recently than the example
         if not op.exists(outfilename) or (op.getmtime(outfilename) < op.getmtime(filename)):
-
             self.exec_file()
         else:
-
             print("skipping {0}".format(self.filename))
 
     @property
@@ -228,6 +156,12 @@ class ExampleGenerator:
         if self._title is not None:
             return self._title
         return self.modulename
+
+    @property
+    def gallery_category(self) -> str:
+        if self._gallery_category in CATEGORIES:
+            return self._gallery_category
+        return "Miscellaneous"  # Default to category-less
 
     @property
     def dirname(self):
@@ -263,21 +197,15 @@ class ExampleGenerator:
         return "_images/" + pngfile
 
     @property
-    def thumbfilename(self):
-        pngfile = self.basename + "_thumb.png"
-        return pngfile
-
-    @property
-    def apiname(self):
+    def apitext(self):
         with open(op.join(self.target_dir, self.pyfilename), "r") as file:
             regex = r"az\.(plot\_[a-z_]+)\("
             name = re.findall(regex, file.read())
-        apitext = name[0] if name else ""
-        return (
-            ":func:`~arviz.{apitext}`".format(apitext=apitext)
-            if apitext
-            else "No API Documentation available"
-        )
+        return name[0] if name else ""
+
+    @property
+    def apiname(self):
+        return ":func:`~arviz.{apitext}`".format(apitext=self.apitext) if self.apitext else "N/A"
 
     @property
     def sphinxtag(self):
@@ -286,6 +214,20 @@ class ExampleGenerator:
     @property
     def pagetitle(self):
         return self.docstring.strip().split("\n")[0].strip()
+
+    @property
+    def overlay_description(self):
+        if self._alt_text != "":
+            return self._alt_text
+        elif self.apitext != "":
+            return "{title} using `{apitext}`".format(title=self.title, apitext=self.apitext)
+        return self.title
+    
+    @property
+    def alt_text(self):
+        if self._alt_text != "":
+            return ":alt: {alt_text}".format(alt_text=self._alt_text)
+        return ":alt:"  # Make alt empty (Sphinx defaults alt text to file path)
 
     def extract_docstring(self):
         """Extract a module-level docstring"""
@@ -314,37 +256,32 @@ class ExampleGenerator:
                     first_par = paragraphs[0]
             break
 
-        thumbloc = None
-        title: Optional[str] = None
-        ex_title: str = ""
         for line in docstring.split("\n"):
-            # we've found everything we need...
-            if thumbloc and title and ex_title != "":
-                break
-            m = re.match(r"^_thumb: (\.\d+),\s*(\.\d+)", line)
-            if m:
-                thumbloc = float(m.group(1)), float(m.group(2))
-                continue
-            m = re.match(r"^_example_title: (.*)$", line)
-            if m:
-                title = m.group(1)
-                continue
-            # capture the first non-empty line of the docstring as title
-            if ex_title == "":
-                ex_title = line
-        assert ex_title != ""
-        if thumbloc is not None:
-            self.thumbloc = thumbloc
-            docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_thumb")])
+            # Capture the first non-empty line of the docstring as title
+            if self._title is None or self._title == "":
+                self._title = line
 
-        if title is not None:
-            docstring = "\n".join(
-                [l for l in docstring.split("\n") if not l.startswith("_example_title")]
-            )
-        else:
-            title = ex_title
-        self._title = title
+            # Look for optional gallery_category from docstring
+            if self._gallery_category == "":
+                m = re.match(r"^_gallery_category: (.*)$", line)
+                if m:
+                    self._gallery_category = m.group(1)
+                    # Remove _gallery_category line from docstring
+                    docstring = "\n".join(
+                        [l for l in docstring.split("\n") if not l.startswith("_gallery_category")]
+                    )
 
+            # Look for optional alternative_info from docstring
+            if self._alt_text == "":
+                m = re.match(r"^_alt_text: (.*)$", line)
+                if m:
+                    self._alt_text = m.group(1)
+                    # Remove _alt_text line from docstring
+                    docstring = "\n".join(
+                        [l for l in docstring.split("\n") if not l.startswith("_alt_text")]
+                    )
+
+        assert self._title != ""
         self.docstring = docstring
         self.short_desc = first_par
         self.end_line = erow + 1 + start_row  # pylint: disable=undefined-loop-variable
@@ -355,8 +292,6 @@ class ExampleGenerator:
 
         plt.close("all")
         if self.backend == "matplotlib":
-            thumbfile = op.join(self.thumb_dir, self.thumbfilename)
-            cx, cy = self.thumbloc
             pngfile = op.join(self.target_dir, self.pngfilename)
             my_globals = {"plt": plt}
             with open(self.filename, "r") as fp:
@@ -367,45 +302,35 @@ class ExampleGenerator:
             fig = plt.gcf()
             fig.canvas.draw()
             fig.savefig(pngfile, dpi=75)
-            create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
-
-        elif self.backend == "bokeh":
-            with open(self.filename, "r") as fp:
-                code_text = fp.read()
-                with rc_context(rc={"plot.bokeh.show": False}):
-                    exec(code_text)
 
     def toctree_entry(self):
-        return "   ./{}\n\n".format(op.join(op.splitext(self.htmlfilename)[0]))
+        return "   {}\n".format(op.join(op.splitext(self.htmlfilename)[0]))
 
     def contents_entry(self) -> str:
         return CONTENTS_ENTRY_TEMPLATE.format(
-            backend=self.backend,
             htmlfilename=self.htmlfilename,
-            thumbfilename=self.thumbfilename,
+            pngfilename=self.pngfilename,
             sphinx_tag=self.sphinxtag,
             title=self.title,
+            overlay_description=self.overlay_description,
+            alt_text=self.alt_text,
         )
 
 
 def main(app):
+    # Get paths for files
     working_dir = os.getcwd()
     os.chdir(app.builder.srcdir)
     static_dir = op.join(app.builder.srcdir, "..", "build", "_static")
     target_dir_orig = op.join(app.builder.srcdir, "examples")
 
-    backends = ("matplotlib", "bokeh")
-    backend_prefixes = ("mpl", "bokeh")
-    toctrees_contents = ""
-    thumb_dir = op.join(app.builder.srcdir, "example_thumbs")
-
     if not op.exists(static_dir):
         os.makedirs(static_dir)
 
-    if not op.exists(thumb_dir):
-        os.makedirs(thumb_dir)
-
+    # Map each backend to their respective paths
     path_dict = {}
+    backends = ("matplotlib", "bokeh")
+    backend_prefixes = ("mpl", "bokeh")
     for backend in backends:
         target_dir = op.join(target_dir_orig, backend)
         image_dir = op.join(target_dir, "_images")
@@ -426,9 +351,6 @@ def main(app):
             "image_dir": image_dir,
         }
 
-    toctree = "\n\n.. toctree::\n   :hidden:\n\n"
-    contents = "\n\n"
-
     # Write individual example files
     files = sorted(glob.glob(op.join(path_dict["matplotlib"]["source_dir"], "*.py")))
     for filename in files:
@@ -444,9 +366,7 @@ def main(app):
                     raise ValueError("All examples must have a matplotlib counterpart.")
                 continue
 
-            ex = ExampleGenerator(
-                expected_filename, target_dir, backend, thumb_dir, target_dir_orig
-            )
+            ex = ExampleGenerator(expected_filename, target_dir, backend, target_dir_orig)
 
             shutil.copyfile(expected_filename, op.join(target_dir, ex.pyfilename))
             output = RST_TEMPLATES[backend].format(
@@ -460,23 +380,49 @@ def main(app):
             )
             example_contents += output
 
+            # Add plot to table of contents and content card if matplotlib
+            if backend == "matplotlib":
+                categorized_contents.get("toctree").get(ex.gallery_category).append(
+                    ex.toctree_entry()
+                )
+                categorized_contents.get("contents").get(ex.gallery_category).append(
+                    ex.contents_entry()
+                )
+
         with open(op.join(target_dir_orig, ex.rstfilename), "w") as f:
             f.write(example_contents)
 
-        toctree += ex.toctree_entry()
-        contents += ex.contents_entry()
+    # Begin templates for table of contents and content cards
+    toctree = ""
+    contents = ""
 
-    toctrees_contents = "\n".join((toctree, contents))
-    toctrees_contents += """.. raw:: html\n\n    <div style="clear: both"></div>"""
+    # Sort and write toctree
+    for category, entries in categorized_contents.get("toctree").items():
+        if len(entries) > 0:
+            toctree += TOCTREE_START.format(category=category)
+            entries.sort()
+            for entry in entries:
+                toctree += entry
+    # Sort and write contents (cards in example gallery)
+    for category, entries in categorized_contents.get("contents").items():
+        if len(entries) > 0:
+            contents += "\n{category}\n{underline}\n{start}\n".format(
+                category=category,
+                underline="-" * len(category),
+                start=CONTENTS_START,
+            )
+            entries.sort()
+            for entry in entries:
+                contents += entry
 
-    # write index file
+    # Write index file
     index_file = op.join(target_dir, "..", "index.rst")
-
     with open(index_file, "w") as index:
         index.write(
             INDEX_TEMPLATE.format(
                 sphinx_tag="example_gallery",
-                toctrees_contents=toctrees_contents,
+                toctree=toctree,
+                contents=contents,
                 examples_source=source_dir,
             )
         )

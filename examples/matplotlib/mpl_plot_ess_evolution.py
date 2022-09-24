@@ -1,15 +1,13 @@
 """
-ESS Quantile Plot
-=================
-
-_thumb: .2, .8
-_example_title: Plot evolution of Effective Sample Size (ESS)
+ESS Evolution Plot
+==================
+_gallery_category: Inference Diagnostics
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 idata = az.load_arviz_data("radon")
 

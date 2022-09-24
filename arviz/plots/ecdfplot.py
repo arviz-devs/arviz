@@ -120,7 +120,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-            confidence_bands = True, difference = True)
+        >>>              confidence_bands = True, difference = True)
 
     Plot ecdf plot with confidence bands for PIT of sample for comparing a given sample
     w.r.t a given distribution
@@ -129,7 +129,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-            confidence_bands = True, pit = True)
+        >>>              confidence_bands = True, pit = True)
 
     Plot ecdf-difference plot with confidence bands for PIT of sample for comparing a given
     sample w.r.t a given distribution
@@ -138,7 +138,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-            confidence_bands = True, difference = True, pit = True)
+        >>>              confidence_bands = True, difference = True, pit = True)
 
     You could also plot the above w.r.t another sample rather than a given distribution.
     For eg: Plot ecdf-difference plot with confidence bands for PIT of sample for

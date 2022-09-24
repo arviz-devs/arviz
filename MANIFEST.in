@@ -5,5 +5,5 @@ include LICENSE
 include arviz/py.typed
 
 recursive-include arviz *.mplstyle
-recursive-include arviz *.nc
 recursive-include arviz/static *
+recursive-include arviz/data/example_data *.nc *.json

@@ -1,16 +1,173 @@
 .sphinx-codeautolink-a{
-    border-bottom-color: rgb(0, 0, 0);
-    border-bottom-style: dotted;
-    border-bottom-width: 1px;
+  border-bottom-color: rgb(0, 0, 0);
+  border-bottom-style: dotted;
+  border-bottom-width: 1px;
 }
 .sphinx-codeautolink-a:hover{
-    color: rgb(255, 139, 139);
+  color: rgb(255, 139, 139);
 }
 
 .supportbutton a {
- color: var(--pst-color-sidebar-link-active);
+color: var(--pst-color-sidebar-link-active);
 }
 
 .navbar-brand {
-  display: inline-block !important;
+display: inline-block !important;
+}
+
+/* -------------------- THEME OVERRIDES -------------------- */
+
+html[data-theme="light"] {
+  --pst-color-primary: rgb(11 117 145);
+  --pst-color-secondary: rgb(238 144 64);
+  --pst-color-plot-background: rgb(255, 255, 255);
+}
+
+html[data-theme="dark"] {
+  --pst-color-primary: rgb(0 192 191);
+  --pst-color-secondary: rgb(238 144 64);
+  --pst-color-plot-background: rgb(218, 219, 220);
+}
+
+.bd-content {
+  flex-grow: 1;
+  max-width: 100%;  /* Override 60em default */
+}
+
+/* Override for example gallery - remove border around card */
+.bd-content div.sd-card.example-gallery {
+  border: none;
+}
+
+/* -------------------- HOMEPAGE + EXAMPLE GALLERY -------------------- */
+
+/* Homepage - grid layout */
+.home-flex-grid {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 0px 40px;
+}
+
+/* Homepage + Example Gallery Body - Set dimensions */
+.home-img-plot,
+.bd-content div.sd-card.example-gallery .sd-card-body,
+.home-img-plot-overlay,
+.example-img-plot-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 10px;
+}
+.home-img-plot,
+.home-img-plot-overlay {
+  width: 235px;
+  height: 130px;
+}
+.bd-content div.sd-card.example-gallery .sd-card-body,
+.example-img-plot-overlay {
+  width: 100%;
+  height: 150px;
+}
+.home-img-plot img,
+.bd-content div.sd-card.example-gallery .sd-card-body img {
+  /* Images keep aspect ratio and fit in container */
+  /* To make images stretch/fill container, change to min-width */
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Homepage + Example Gallery Body - Set color and hover */
+.home-img-plot.img-thumbnail,
+.bd-content div.sd-card.example-gallery .sd-card-body {
+  background-color: var(--pst-color-plot-background);  /* Same as img-thumbnail from pydata css, adjusted for dark mode */
+}
+.home-img-plot-overlay,
+.example-img-plot-overlay,
+.bd-content div.sd-card.example-gallery .sd-card-body {
+  border: 1px solid #dee2e6;  /* Same as img-thumbnail from pydata css */
+  border-radius: 0.25rem;  /* Same as img-thumbnail from pydata css */
+}
+.home-img-plot-overlay,
+.example-img-plot-overlay,
+.example-img-plot-overlay p.sd-card-text {
+  background: var(--pst-color-primary);
+  position: absolute;
+  color: var(--pst-color-background);
+  opacity: 0;
+  transition: .2s ease;
+  text-align: center;
+  padding: 10px;
+  z-index: 998;  /* Make sure overlay is above image...this is here to handle dark mode */
+}
+.home-img-plot-overlay:hover,
+.bd-content div.sd-card.example-gallery:hover .example-img-plot-overlay,
+.example-img-plot-overlay p.sd-card-text {
+  opacity: 90%;
+}
+
+/* Example Gallery Body - Set syntax highlighting for code on hover */
+.example-img-plot-overlay .sd-card-text code.code {
+  background-color: var(--pst-color-background);
+}
+.example-img-plot-overlay .sd-card-text .code span.pre {
+  color: var(--pst-color-primary);
+  font-weight: 700;
+}
+
+/* Example Gallery Footer - Plot titles goes here */
+.example-gallery .sd-card-footer {
+  height: 40px;
+  padding: 5px;
+  border-top: none !important;
+}
+.example-gallery .sd-card-footer p.sd-card-text {
+  color: var(--pst-color-text-muted);
+  font-size: 1rem;  /* This is font size for plot titles (below the chart) */
+  font-weight: 700;
+}
+.sd-card.example-gallery:hover .sd-card-footer p.sd-card-text {
+  color: var(--pst-color-primary);  /* Change text color on hover over card */
+}
+
+/* Overlapping */
+.example-gallery a.sd-stretched-link.reference.external {
+  z-index: 999;  /* Countermeasure where z-index = 998 */
+}
+
+/* -------------------- EXAMPLE PLOTS - DOWNLOAD PYTHON SOURCE CODE -------------------- */
+
+.example-plot-download {
+  border: 0.05rem solid rgb(222, 222, 222);
+  border-radius: 0.2rem;
+  /* Center button */
+  width: fit-content;
+  margin: 0 auto;
+  box-shadow: 0 0.2rem 0.5rem rgb(0 0 0 / 5%), 0 0 0.0625rem rgb(0 0 0 / 10%);
+}
+.example-plot-download p a {
+  padding: 0.4rem 2rem;
+}
+.example-plot-download p { /* Override margin defaults for p */
+  margin: 0;
+}
+.example-plot-download code.literal { /* Override defaults for code.literal */
+  border: 0px;
+  background-color: transparent;
+}
+.example-plot-download a.download:hover  { /* Override defaults for hover */
+  color: var(--pst-color-primary);
+}
+
+/* -------------------- TOCTREE OVERRIDES -------------------- */
+
+.toctree-wrapper a {
+  color: var(--pst-color-text-muted);
+}
+
+.toctree-wrapper a:hover {
+  text-decoration: none;  /* No underline */
+  color: var(--pst-color-primary);
 }

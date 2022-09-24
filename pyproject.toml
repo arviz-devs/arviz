@@ -1,5 +1,6 @@
 [tool.black]
 line-length = 100
+extend_exclude = 'example_data'
 
 [tool.isort]
 multi_line_output = 3
