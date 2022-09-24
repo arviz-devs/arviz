@@ -1,3 +1,4 @@
+"""Tests for labeller classes."""
 import pytest
 
 from ...labels import (
@@ -50,10 +51,15 @@ def labellers():
     "args",
     [
         ("BaseLabeller", "theta\na, 3"),
+        ("DimCoordLabeller", "theta\ninstrument: a, experiment: 3"),
+        ("IdxLabeller", "theta\n0, 4"),
+        ("DimIdxLabeller", "theta\ninstrument#0, experiment#4"),
+        ("MapLabeller", "theta\na, 3"),
+        ("NoVarLabeller", "a, 3"),
+        ("NoModelLabeller", "theta\na, 3"),
     ],
 )
 class TestLabellers:
-    # pylint: disable=no-self-use
     # pylint: disable=redefined-outer-name
     def test_make_label_vert(self, args, multidim_sels, labellers):
         name, expected_label = args

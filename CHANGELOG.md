@@ -12,6 +12,7 @@
   ([2096](https://github.com/arviz-devs/arviz/pull/2096) and [2105](https://github.com/arviz-devs/arviz/pull/2105))
 * Bokeh kde contour plots started to use `contourpy` package ([2104](https://github.com/arviz-devs/arviz/pull/2104))
 * Update default Bokeh markers for rcparams ([2104](https://github.com/arviz-devs/arviz/pull/2104))
+* Add testing module for labeller classes ([2095](https://github.com/arviz-devs/arviz/pull/2095))
 
 ### Deprecation
 * Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
