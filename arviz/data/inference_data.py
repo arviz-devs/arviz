@@ -24,7 +24,7 @@ from typing import (
     overload,
 )
 
-import netCDF4 as nc
+import h5netcdf.legacyapi as nc 
 import numpy as np
 import xarray as xr
 from packaging import version
