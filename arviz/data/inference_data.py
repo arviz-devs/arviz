@@ -24,7 +24,7 @@ from typing import (
     overload,
 )
 
-import h5netcdf.legacyapi as nc 
+import h5netcdf.legacyapi as nc
 import numpy as np
 import xarray as xr
 from packaging import version
@@ -445,7 +445,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data.close()
                 mode = "a"
         elif not self._attrs:  # creates a netcdf file for an empty InferenceData object.
-            empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
+            empty_netcdf_file = nc.Dataset(filename, mode="w")
             empty_netcdf_file.close()
         return filename
 
