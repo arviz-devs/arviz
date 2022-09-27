@@ -311,7 +311,7 @@ Show a legend with the color encoded model information. Defaults to True, if the
 
 
 (common_model_names)=
-List with names for the models in the list of data. Useful when plotting more that one dataset.
+List with names for the models in the list of data. Useful when plotting more than one dataset.
 
 
 (common_ax)=
