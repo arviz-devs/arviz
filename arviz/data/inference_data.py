@@ -23,8 +23,13 @@ from typing import (
     Union,
     overload,
 )
+try:
+    import h5netcdf.legacyapi as nc
+    HAS_H5NETCDF = True
+except ImportError:
+    import netCDF4 as nc
+    HAS_H5NETCDF = False
 
-import h5netcdf.legacyapi as nc
 import numpy as np
 import xarray as xr
 from packaging import version
@@ -371,12 +376,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             for group in data_groups:
                 group_kws = {}
+
+
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
                 if group_kwargs is not None and regex is True:
                     for key, kws in group_kwargs.items():
                         if re.search(key, group):
                             group_kws = kws
+                if HAS_H5NETCDF:
+                    group_kws['engine'] = 'h5netcdf'
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
