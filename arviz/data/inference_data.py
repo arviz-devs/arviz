@@ -450,6 +450,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         for var_name, values in data.variables.items()
                         if _compressible_dtype(values.dtype)
                     }
+                if HAS_H5NETCDF:
+                    kwargs['engine'] = 'h5netcdf'
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
