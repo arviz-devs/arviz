@@ -377,7 +377,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             for group in data_groups:
                 group_kws = {}
 
-
+                group_kws = {}
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
                 if group_kwargs is not None and regex is True:
