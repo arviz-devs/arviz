@@ -383,12 +383,14 @@ def test_plot_energy_bad(models):
     with pytest.raises(ValueError):
         plot_energy(models.model_1, kind="bad_kind")
 
+
 def test_plot_energy_correctly_transposed():
     idata = load_arviz_data("centered_eight")
     idata.sample_stats["energy"] = idata.sample_stats.energy.T
     ax = plot_energy(idata)
     # legend has one entry for each KDE and 1 BFMI for each chain
     assert len(ax.legend_.texts) == 2 + len(idata.sample_stats.chain)
+
 
 def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
     with pytest.raises(ValueError):
