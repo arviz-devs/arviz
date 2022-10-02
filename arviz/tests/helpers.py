@@ -105,7 +105,14 @@ def create_model(seed=10, transpose=False):
         coords={"obs_dim": range(data["J"])},
     )
     if transpose:
-        model = model.transpose(*["draw", "chain"], ...)
+        for group in model._groups:
+            group_dataset = getattr(group)
+            if all(dim in group_dataset.dims for dim in ("draw", chain")):
+                setattr(
+                    model,
+                    group,
+                    group_dataset.transpose(*["draw", "chain"], ...)
+                )
     return model
 
 
@@ -158,7 +165,14 @@ def create_multidimensional_model(seed=10, transpose=False):
         coords={"dim1": range(ndim1), "dim2": range(ndim2)},
     )
     if transpose:
-        model = model.transpose(*["draw", "chain"], ...)
+        for group in model._groups:
+            group_dataset = getattr(group)
+            if all(dim in group_dataset.dims for dim in ("draw", chain")):
+                setattr(
+                    model,
+                    group,
+                    group_dataset.transpose(*["draw", "chain"], ...)
+                )
     return model
 
 
