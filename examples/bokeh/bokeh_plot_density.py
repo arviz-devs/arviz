@@ -1,6 +1,6 @@
 """
-Density Plot
-============
+Density Plot (Comparison)
+=========================
 """
 import arviz as az
 

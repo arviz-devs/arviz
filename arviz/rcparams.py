@@ -153,23 +153,40 @@ def _add_none_to_validator(base_validator):
 
 def _validate_bokeh_marker(value):
     """Validate the markers."""
-    all_markers = (
-        "Asterisk",
-        "Circle",
-        "CircleCross",
-        "CircleX",
-        "Cross",
-        "Dash",
-        "Diamond",
-        "DiamondCross",
-        "Hex",
-        "InvertedTriangle",
-        "Square",
-        "SquareCross",
-        "SquareX",
-        "Triangle",
-        "X",
-    )
+    try:
+        from bokeh.core.enums import MarkerType
+    except ImportError:
+        MarkerType = [
+            "asterisk",
+            "circle",
+            "circle_cross",
+            "circle_dot",
+            "circle_x",
+            "circle_y",
+            "cross",
+            "dash",
+            "diamond",
+            "diamond_cross",
+            "diamond_dot",
+            "dot",
+            "hex",
+            "hex_dot",
+            "inverted_triangle",
+            "plus",
+            "square",
+            "square_cross",
+            "square_dot",
+            "square_pin",
+            "square_x",
+            "star",
+            "star_dot",
+            "triangle",
+            "triangle_dot",
+            "triangle_pin",
+            "x",
+            "y",
+        ]
+    all_markers = list(MarkerType)
     if value not in all_markers:
         raise ValueError(f"{value} is not one of {all_markers}")
     return value
@@ -274,7 +291,7 @@ defaultParams = {  # pylint: disable=invalid-name
         "above",
         _make_validate_choice({"above", "below", "left", "right"}, allow_none=True),
     ),
-    "plot.bokeh.marker": ("Cross", _validate_bokeh_marker),
+    "plot.bokeh.marker": ("cross", _validate_bokeh_marker),
     "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
     "plot.bokeh.show": (True, _validate_boolean),
     "plot.bokeh.tools": (

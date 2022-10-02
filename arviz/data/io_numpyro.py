@@ -86,6 +86,9 @@ class NumPyroConverter:
 
         if posterior is not None:
             samples = jax.device_get(self.posterior.get_samples(group_by_chain=True))
+            if hasattr(samples, "_asdict"):
+                # In case it is easy to convert to a dictionary, as in the case of namedtuples
+                samples = samples._asdict()
             if not isinstance(samples, dict):
                 # handle the case we run MCMC with a general potential_fn
                 # (instead of a NumPyro model) whose args is not a dictionary
@@ -183,6 +186,8 @@ class NumPyroConverter:
         data = {}
         if self.observations is not None:
             samples = self.posterior.get_samples(group_by_chain=False)
+            if hasattr(samples, "_asdict"):
+                samples = samples._asdict()
             log_likelihood_dict = self.numpyro.infer.log_likelihood(
                 self.model, samples, *self._args, **self._kwargs
             )

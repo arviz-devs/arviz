@@ -34,7 +34,7 @@ y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
 ```
 
 ```{code-cell} ipython3
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 ```
 
 ```{code-cell} ipython3
@@ -311,7 +311,7 @@ Show a legend with the color encoded model information. Defaults to True, if the
 
 
 (common_model_names)=
-List with names for the models in the list of data. Useful when plotting more that one dataset.
+List with names for the models in the list of data. Useful when plotting more than one dataset.
 
 
 (common_ax)=

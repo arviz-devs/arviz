@@ -22,7 +22,7 @@ import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 # Confgure Bokeh as backend
 az.rcParams["plot.backend"] = "bokeh"
