@@ -128,7 +128,7 @@ def plot_autocorr(
 
     plotters = filter_plotters_list(
         list(xarray_var_iter(data, var_names, combined, dim_order=["chain", "draw"])),
-        "plot_autocorr"
+        "plot_autocorr",
     )
     rows, cols = default_grid(len(plotters), grid=grid)
 
