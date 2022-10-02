@@ -127,7 +127,8 @@ def plot_autocorr(
         labeller = BaseLabeller()
 
     plotters = filter_plotters_list(
-        list(xarray_var_iter(data, var_names, combined)), "plot_autocorr"
+        list(xarray_var_iter(data, var_names, combined, dim_order=["chain", "draw"])),
+        "plot_autocorr"
     )
     rows, cols = default_grid(len(plotters), grid=grid)
 
