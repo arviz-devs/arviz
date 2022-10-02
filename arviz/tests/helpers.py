@@ -106,7 +106,7 @@ def create_model(seed=10, transpose=False):
     )
     if transpose:
         for group in model._groups:
-            group_dataset = getattr(group)
+            group_dataset = getattr(model, group)
             if all(dim in group_dataset.dims for dim in ("draw", "chain")):
                 setattr(
                     model,
@@ -166,7 +166,7 @@ def create_multidimensional_model(seed=10, transpose=False):
     )
     if transpose:
         for group in model._groups:
-            group_dataset = getattr(group)
+            group_dataset = getattr(model, group)
             if all(dim in group_dataset.dims for dim in ("draw", "chain")):
                 setattr(
                     model,
