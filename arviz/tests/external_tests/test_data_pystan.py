@@ -203,7 +203,7 @@ class TestDataPyStan:
             "sample_stats": ["diverging", "lp"],
             "~log_likelihood": [""],
             "warmup_posterior": ["theta"],
-            "warmup_sample_stats": ["diverging", "lp"]
+            "warmup_sample_stats": ["diverging", "lp"],
         }
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
@@ -214,7 +214,7 @@ class TestDataPyStan:
             "sample_stats": ["diverging", "lp"],
             "~log_likelihood": [""],
             "warmup_posterior": ["theta"],
-            "warmup_sample_stats": ["diverging", "lp"]
+            "warmup_sample_stats": ["diverging", "lp"],
         }
         fails = check_multiple_attrs(test_dict, inference_data5)
         assert not fails
