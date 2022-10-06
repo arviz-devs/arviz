@@ -625,7 +625,7 @@ class PyStan3Converter:
                     if predictions_const_data is None
                     else {"predictions_constant_data": predictions_const_data}
                 ),
-            }
+            },
         )
 
 
