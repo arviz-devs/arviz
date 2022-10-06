@@ -609,6 +609,7 @@ class PyStan3Converter:
         obs_const_dict = self.observed_and_constant_data_to_xarray()
         predictions_const_data = self.predictions_constant_data_to_xarray()
         return InferenceData(
+            save_warmup=self.save_warmup,
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
