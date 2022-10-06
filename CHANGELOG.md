@@ -13,6 +13,8 @@
 * Bokeh kde contour plots started to use `contourpy` package ([2104](https://github.com/arviz-devs/arviz/pull/2104))
 * Update default Bokeh markers for rcparams ([2104](https://github.com/arviz-devs/arviz/pull/2104))
 * Correctly (re)order dimensions for `bfmi` and `plot_energy` ([2126](https://github.com/arviz-devs/arviz/pull/2126))
+* Fix bug with the dimension order dependency ([2103](https://github.com/arviz-devs/arviz/pull/2103))
+* Add testing module for labeller classes ([2095](https://github.com/arviz-devs/arviz/pull/2095))
 * Skip compression for object dtype while creating a netcdf file ([2129](https://github.com/arviz-devs/arviz/pull/2129))
 
 ### Deprecation

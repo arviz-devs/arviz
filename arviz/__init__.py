@@ -6,7 +6,8 @@ import logging
 import os
 
 from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.pyplot import register_cmap, style
+from matplotlib.pyplot import style
+import matplotlib as mpl
 
 
 class Logger(logging.Logger):
@@ -314,7 +315,7 @@ _linear_grey_10_95_c0 = [
 
 def _mpl_cm(name, colorlist):
     cmap = LinearSegmentedColormap.from_list(name, colorlist, N=256)
-    register_cmap("cet_" + name, cmap=cmap)
+    mpl.colormaps.register(cmap, name="cet_" + name)
 
 
 _mpl_cm("gray", _linear_grey_10_95_c0)
@@ -322,4 +323,4 @@ _mpl_cm("gray_r", list(reversed(_linear_grey_10_95_c0)))
 
 
 # clean namespace
-del os, logging, register_cmap, LinearSegmentedColormap, Logger
+del os, logging, LinearSegmentedColormap, Logger, mpl
