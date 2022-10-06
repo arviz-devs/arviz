@@ -201,7 +201,13 @@ def plot_trace(
     skip_dims = set(coords_data.dims) - {"chain", "draw"} if compact else set()
 
     plotters = list(
-        xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)
+        xarray_var_iter(
+            coords_data,
+            var_names=var_names,
+            combined=True,
+            skip_dims=skip_dims,
+            dim_order=["chain", "draw"],
+        )
     )
     max_plots = rcParams["plot.max_subplots"]
     max_plots = len(plotters) if max_plots is None else max(max_plots // 2, 1)
