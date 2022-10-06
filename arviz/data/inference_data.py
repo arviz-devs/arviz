@@ -424,7 +424,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         mode = "w"  # overwrite first, then append
         if self._attrs:
             xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode, group="__netcdf4_attrs")
-        mode = "a"
+            mode = "a"
+
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
                 groups = self._groups_all
@@ -443,7 +444,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
-        else:  # creates a netcdf file for an empty InferenceData object.
+        elif not self._attrs:  # creates a netcdf file for an empty InferenceData object.
             empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
             empty_netcdf_file.close()
         return filename
