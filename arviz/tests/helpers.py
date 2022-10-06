@@ -1,4 +1,4 @@
-# pylint: disable=redefined-outer-name, comparison-with-callable
+# pylint: disable=redefined-outer-name, comparison-with-callable, protected-access
 """Test helper functions."""
 import gzip
 import importlib
@@ -51,7 +51,7 @@ def chains():
     return 2
 
 
-def create_model(seed=10):
+def create_model(seed=10, transpose=False):
     """Create model with fake data."""
     np.random.seed(seed)
     nchains = 4
@@ -104,10 +104,15 @@ def create_model(seed=10):
         },
         coords={"obs_dim": range(data["J"])},
     )
+    if transpose:
+        for group in model._groups:
+            group_dataset = getattr(model, group)
+            if all(dim in group_dataset.dims for dim in ("draw", "chain")):
+                setattr(model, group, group_dataset.transpose(*["draw", "chain"], ...))
     return model
 
 
-def create_multidimensional_model(seed=10):
+def create_multidimensional_model(seed=10, transpose=False):
     """Create model with fake data."""
     np.random.seed(seed)
     nchains = 4
@@ -155,6 +160,11 @@ def create_multidimensional_model(seed=10):
         dims={"y": ["dim1", "dim2"], "log_likelihood": ["dim1", "dim2"]},
         coords={"dim1": range(ndim1), "dim2": range(ndim2)},
     )
+    if transpose:
+        for group in model._groups:
+            group_dataset = getattr(model, group)
+            if all(dim in group_dataset.dims for dim in ("draw", "chain")):
+                setattr(model, group, group_dataset.transpose(*["draw", "chain"], ...))
     return model
 
 
@@ -195,7 +205,7 @@ def models():
 
     class Models:
         model_1 = create_model(seed=10)
-        model_2 = create_model(seed=11)
+        model_2 = create_model(seed=11, transpose=True)
 
     return Models()
 
@@ -207,7 +217,7 @@ def multidim_models():
 
     class Models:
         model_1 = create_multidimensional_model(seed=10)
-        model_2 = create_multidimensional_model(seed=11)
+        model_2 = create_multidimensional_model(seed=11, transpose=True)
 
     return Models()
 

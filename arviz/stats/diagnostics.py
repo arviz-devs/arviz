@@ -65,7 +65,7 @@ def bfmi(data):
     dataset = convert_to_dataset(data, group="sample_stats")
     if not hasattr(dataset, "energy"):
         raise TypeError("Energy variable was not found.")
-    return _bfmi(dataset.energy)
+    return _bfmi(dataset.energy.transpose("chain", "draw"))
 
 
 def ess(

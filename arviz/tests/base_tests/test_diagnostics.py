@@ -52,6 +52,13 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             bfmi(data)
 
+    def test_bfmi_correctly_transposed(self):
+        data = load_arviz_data("centered_eight")
+        vals1 = bfmi(data)
+        data.sample_stats["energy"] = data.sample_stats["energy"].T
+        vals2 = bfmi(data)
+        assert_almost_equal(vals1, vals2)
+
     def test_deterministic(self):
         """
         Test algorithm against posterior (R) convergence functions.

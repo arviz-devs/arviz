@@ -97,7 +97,7 @@ def plot_energy(
         >>> az.plot_energy(data, kind='hist')
 
     """
-    energy = convert_to_dataset(data, group="sample_stats").energy.values
+    energy = convert_to_dataset(data, group="sample_stats").energy.transpose("chain", "draw").values
 
     if kind == "histogram":
         warnings.warn(
