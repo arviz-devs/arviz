@@ -422,7 +422,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data = getattr(self, group)
                 kwargs = {}
                 if compress:
-                    kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
+                    kwargs["encoding"] = {
+                        var_name: {"zlib": True}
+                        for var_name, values in data.variables.items()
+                        if not values.dtype.hasobject
+                    }
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
