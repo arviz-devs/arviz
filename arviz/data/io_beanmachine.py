@@ -88,9 +88,9 @@ def from_beanmachine(
     ----------
     sampler : bm.MonteCarloSamples
         Fitted MonteCarloSamples object from Bean Machine
-    coords : dict[str] -> list[str]
+    coords : dict of {str : array-like}
         Map of dimensions to coordinates
-    dims : dict[str] -> list[str]
+    dims : dict of {str : list of str}
         Map variable names to their coordinates
     """
     return BMConverter(
