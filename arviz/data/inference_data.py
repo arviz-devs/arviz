@@ -367,9 +367,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         try:
             with nc.Dataset(filename, mode="r") as data:
                 data_groups = list(data.groups)
+                attrs = {}
 
             for group in data_groups:
-
                 group_kws = {}
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
@@ -378,16 +378,19 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         if re.search(key, group):
                             group_kws = kws
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
-                    if rcParams["data.load"] == "eager":
-                        groups[group] = data.load()
+                    if group == "__netcdf4_attrs":
+                        attrs.update(data.load().attrs)
                     else:
-                        groups[group] = data
-            res = InferenceData(**groups)
-            return res
-        except OSError as e:  # pylint: disable=invalid-name
-            if e.errno == -101:
-                raise type(e)(
-                    str(e)
+                        if rcParams["data.load"] == "eager":
+                            groups[group] = data.load()
+                        else:
+                            groups[group] = data
+
+            return InferenceData(attrs=attrs, **groups)
+        except OSError as err:
+            if err.errno == -101:
+                raise type(err)(
+                    str(err)
                     + (
                         " while reading a NetCDF file. This is probably an error in HDF5, "
                         "which happens because your OS does not support HDF5 file locking.  See "
@@ -395,8 +398,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         "errno-101-netcdf-hdf-error-when-opening-netcdf-file#49317928"
                         " for a possible solution."
                     )
-                )
-            raise e
+                ) from err
+            raise err
 
     def to_netcdf(
         self, filename: str, compress: bool = True, groups: Optional[List[str]] = None
@@ -419,6 +422,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
             Location of netcdf file
         """
         mode = "w"  # overwrite first, then append
+        if self._attrs:
+            xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode, group="__netcdf4_attrs")
+        mode = "a"
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
                 groups = self._groups_all
