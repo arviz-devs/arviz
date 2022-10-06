@@ -11,6 +11,7 @@ Inference library converters
 .. autosummary::
    :toctree: generated/
 
+   from_beanmachine
    from_cmdstan
    from_cmdstanpy
    from_emcee
