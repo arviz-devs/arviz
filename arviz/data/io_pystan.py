@@ -1,7 +1,6 @@
 #  pylint: disable=too-many-instance-attributes,too-many-lines
 """PyStan-specific conversion code."""
 import re
-import warnings
 from collections import OrderedDict
 from copy import deepcopy
 from math import ceil
@@ -1064,11 +1063,6 @@ def from_pystan(
     check_posterior = (posterior is not None) and (type(posterior).__module__ == "stan.fit")
     check_prior = (prior is not None) and (type(prior).__module__ == "stan.fit")
     if check_posterior or check_prior:
-        if save_warmup:
-            warnings.warn(
-                "save_warmup is not currently supported for PyStan3",
-                UserWarning,
-            )
         return PyStan3Converter(
             posterior=posterior,
             posterior_model=posterior_model,
