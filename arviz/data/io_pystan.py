@@ -867,7 +867,6 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None, warmup=False, 
     if not fit.save_warmup:
         warmup = False
 
-    num_samples = ceil(fit.num_samples / fit.num_thin)
     num_warmup = ceil((fit.num_warmup * fit.save_warmup) / fit.num_thin)
 
     if variables is None:
@@ -922,7 +921,6 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None, warmup=False, dtype
     if not fit.save_warmup:
         warmup = False
 
-    num_samples = ceil(fit.num_samples / fit.num_thin)
     num_warmup = ceil((fit.num_warmup * fit.save_warmup) / fit.num_thin)
 
     data = OrderedDict()
