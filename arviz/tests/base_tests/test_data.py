@@ -1280,7 +1280,7 @@ class TestDataNetCDF:
         inference_data.to_netcdf(
             filepath,
             groups=("posterior", "observed_data") if groups_arg else None,
-            compres=compress,
+            compress=compress,
         )
 
         # assert file has been saved correctly
