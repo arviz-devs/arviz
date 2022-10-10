@@ -80,6 +80,7 @@ SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
 
 def _compressible_dtype(dtype):
+    return True
     """Check basic dtypes for automatic compression."""
     if dtype.kind == "V":
         return all(_compressable_dtype(item) for item, _ in dtype.fields.values()))
