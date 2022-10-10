@@ -81,10 +81,10 @@ InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
 
 # pylint: disable=unreachable
 def _compressible_dtype(dtype):
-    return True
     """Check basic dtypes for automatic compression."""
+    return True
     if dtype.kind == "V":
-        return all(_compressable_dtype(item) for item, _ in dtype.fields.values())
+        return all(_compressible_dtype(item) for item, _ in dtype.fields.values())
     return dtype.kind in {"b", "i", "u", "f", "c", "S"}
 
 
