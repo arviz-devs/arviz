@@ -79,10 +79,9 @@ SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 
 InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
 
-# pylint: disable=unreachable
+
 def _compressible_dtype(dtype):
     """Check basic dtypes for automatic compression."""
-    return True
     if dtype.kind == "V":
         return all(_compressible_dtype(item) for item, _ in dtype.fields.values())
     return dtype.kind in {"b", "i", "u", "f", "c", "S"}
