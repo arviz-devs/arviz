@@ -79,7 +79,7 @@ SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 
 InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
 
-def _compressable_dtype(dtype):
+def _compressible_dtype(dtype):
     """Check basic dtypes for automatic compression."""
     if dtype.kind == "V":
         return all(_compressable_dtype(item) for item, _ in dtype.fields.values()))
@@ -430,7 +430,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     kwargs["encoding"] = {
                         var_name: {"zlib": True}
                         for var_name, values in data.variables.items()
-                        if _compressable_dtype(values.dtype)
+                        if _compressible_dtype(values.dtype)
                     }
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
