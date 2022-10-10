@@ -1253,7 +1253,7 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
 
     @pytest.mark.parametrize("groups_arg", [False, True])
-    @pytest.mark.parametrize("compress": [True, False])
+    @pytest.mark.parametrize("compress", [True, False])
     def test_io_method(self, data, eight_schools_params, groups_arg, compress):
         # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
@@ -1278,7 +1278,9 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
         # InferenceData method
         inference_data.to_netcdf(
-            filepath, groups=("posterior", "observed_data") if groups_arg else None, compres=compress,
+            filepath,
+            groups=("posterior", "observed_data") if groups_arg else None,
+            compres=compress,
         )
 
         # assert file has been saved correctly
