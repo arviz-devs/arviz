@@ -1,5 +1,6 @@
 # pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
+import logging
 import sys
 import uuid
 import warnings
@@ -29,6 +30,7 @@ import numpy as np
 import xarray as xr
 from packaging import version
 
+
 from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
 from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
@@ -49,6 +51,8 @@ except ImportError:
     # mypy struggles with conditional imports expressed as catching ImportError:
     # https://github.com/python/mypy/issues/1153
     import json  # type: ignore
+
+_log = logging.getLogger("arviz")
 
 
 SUPPORTED_GROUPS = [
@@ -418,15 +422,21 @@ class InferenceData(Mapping[str, xr.Dataset]):
         str
             Location of netcdf file
         """
+        # We don't support saving of object-typed variables or coords.
+        # The below helper function removes them while logging it.
+        idata = drop_objects_from_inferencedata(self)
+
         mode = "w"  # overwrite first, then append
-        if self._groups_all:  # check's whether a group is present or not.
+        # check's whether a group is present or not.
+        groups_all = idata._groups_all  # pylint: disable=W0212
+        if groups_all:
             if groups is None:
-                groups = self._groups_all
+                groups = groups_all
             else:
-                groups = [group for group in self._groups_all if group in groups]
+                groups = [group for group in groups_all if group in groups]
 
             for group in groups:
-                data = getattr(self, group)
+                data = getattr(idata, group)
                 kwargs = {}
                 if compress:
                     kwargs["encoding"] = {
@@ -675,6 +685,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
         except (ImportError, AssertionError) as err:
             raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
 
+        # We don't support saving of object-typed variables or coords.
+        # The below helper function removes them while logging it.
+        idata = drop_objects_from_inferencedata(self)
+
         # Check store type and create store if necessary
         if store is None:
             store = zarr.storage.TempStore(suffix="arviz")
@@ -683,14 +697,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
         elif not isinstance(store, MutableMapping):
             raise TypeError(f"No valid store found: {store}")
 
-        groups = self.groups()
+        groups = idata.groups()
 
         if not groups:
             raise TypeError("No valid groups found!")
 
         for group in groups:
             # Create zarr group in store with same group name
-            getattr(self, group).to_zarr(store=store, group=group, mode="w")
+            getattr(idata, group).to_zarr(store=store, group=group, mode="w")
 
         return zarr.open(store)  # Open store to get overarching group
 
@@ -2221,3 +2235,50 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
         inference_data_dict["attrs"] = combined_attr
 
     return None if inplace else InferenceData(**inference_data_dict)
+
+
+def drop_objects_from_dataset(data: xr.Dataset) -> Tuple[xr.Dataset, List[str], List[str]]:
+    """Returns a new ``Dataset`` without object variables and coords."""
+    vals = {}
+    vals_dropped = []
+    for vname, val in data.data_vars.items():
+        if val.dtype.hasobject:
+            vals_dropped.append(vname)
+            continue
+        vals[vname] = val
+
+    coords = {}
+    coords_dropped = []
+    for cname, cval in data.coords.items():
+        if cval.dtype.hasobject:
+            coords_dropped.append(cname)
+            continue
+        coords[cname] = cval
+
+    ndata = xr.Dataset(
+        data_vars=vals,
+        coords=coords,
+        attrs=data.attrs,
+    )
+    return ndata, vals_dropped, coords_dropped
+
+
+def drop_objects_from_inferencedata(idata: InferenceData) -> InferenceData:
+    """Returns a new InferenceData without object variables and coords.
+
+    All droppings are logged at WARNING level.
+    """
+    nidata = InferenceData(attrs=idata.attrs)
+    for gname, group in idata.items():
+        ndata, vars_dropped, coords_dropped = drop_objects_from_dataset(group)
+        if "warning" in vars_dropped and "sample_stats" in gname:
+            vars_dropped.remove("warning")
+            _log.debug(
+                "Dropped 'warning' variable from '%s' group because it's dtyped object.", gname
+            )
+        if vars_dropped:
+            _log.warning("Dropped object variables from '%s' group: %s", gname, vars_dropped)
+        if coords_dropped:
+            _log.warning("Dropped object coords from '%s' group: %s", gname, coords_dropped)
+        nidata.add_groups({gname: ndata}, coords=ndata.coords, dims=ndata.dims)
+    return nidata

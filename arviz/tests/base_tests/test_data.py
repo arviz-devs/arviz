@@ -5,6 +5,7 @@ import os
 from collections import namedtuple
 from copy import deepcopy
 from html import escape
+import logging
 from typing import Dict
 from urllib.parse import urlunsplit
 
@@ -13,6 +14,8 @@ import pytest
 import xarray as xr
 from xarray.core.options import OPTIONS
 from xarray.testing import assert_identical
+
+from ...data.inference_data import drop_objects_from_dataset, drop_objects_from_inferencedata
 
 from ... import (
     InferenceData,
@@ -1469,3 +1472,85 @@ class TestExtractDataset:
         post = extract(idata, num_samples=10)
         assert post.dims["sample"] == 10
         assert post.attrs == idata.posterior.attrs
+
+
+class TestDropObjectVariables:
+    """Tests for helper functions that drop object-typed variables/coords."""
+
+    def test_drop_variable_from_dataset(self):
+        a = np.ones((3,))
+        b = np.array([1, None, "test"])
+        ds = xr.Dataset(
+            data_vars={
+                "a": xr.DataArray(a, coords=dict(t=[0, 1, 2]), dims=("t",)),
+                "b": xr.DataArray(b, coords=dict(t=[0, 1, 2]), dims=("t",)),
+            }
+        )
+        new, dropped_vars, dropped_coords = drop_objects_from_dataset(ds)
+        assert isinstance(new, xr.Dataset)
+        assert new is not ds
+        assert "a" in new
+        assert "b" not in new
+        assert dropped_vars == ["b"]
+        assert not dropped_coords
+
+    def test_drop_coord_from_dataset(self):
+        a = np.ones((3,))
+        ds = xr.Dataset(
+            data_vars={
+                "a": xr.DataArray(a, coords=dict(adim=["A", "B", "C"]), dims=("adim",)),
+                "b": xr.DataArray(a, coords=dict(bdim=[0, None, 2]), dims=("bdim",)),
+            }
+        )
+        new, dropped_vars, dropped_coords = drop_objects_from_dataset(ds)
+        assert isinstance(new, xr.Dataset)
+        assert new is not ds
+        assert "a" in new
+        assert "b" in new
+        assert not dropped_vars
+        assert dropped_coords == ["bdim"]
+
+    @pytest.mark.parametrize("vname", ["warning", "other"])
+    def test_drop_objects_from_inferencedata(self, vname, caplog):
+        idata = from_dict(
+            sample_stats={
+                "a": np.ones((2, 5, 4)),
+                vname: np.ones((2, 5, 3), dtype=object),
+            },
+            attrs=dict(version="0.1.2"),
+            coords={
+                "adim": [0, 1, None, 3],
+                "vdim": list("ABC"),
+            },
+            dims={"a": ["adim"], vname: ["vdim"]},
+        )
+
+        # Capture logging messages about the droppings
+        with caplog.at_level(logging.DEBUG, logger="arviz"):
+            new = drop_objects_from_inferencedata(idata)
+
+        assert new is not idata
+        assert new.attrs.get("version") == "0.1.2"
+
+        ss = new.get("sample_stats", None)
+        assert isinstance(ss, xr.Dataset)
+        assert "a" in ss
+        assert vname not in ss
+        assert caplog.records
+
+        # Check the logging about the dropped variable
+        rec = caplog.records[0]
+        if vname == "warning":
+            # DEBUG level for the 'warning' stat
+            # which in PyMC is an object an very commonly present.
+            assert rec.levelno == logging.DEBUG
+            assert "Dropped 'warning' variable from 'sample_stats'" in rec.message
+        else:
+            # WARNING level otherwise
+            assert rec.levelno == logging.WARNING
+            assert f"from 'sample_stats' group: ['{vname}']" in rec.message
+
+        # And the logging about dropped coord
+        rec = caplog.records[1]
+        assert rec.levelno == logging.WARNING
+        assert "object coords from 'sample_stats' group: ['adim']" in rec.message

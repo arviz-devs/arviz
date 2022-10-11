@@ -18,6 +18,7 @@
 * Fix bug with the dimension order dependency ([2103](https://github.com/arviz-devs/arviz/pull/2103))
 * Add testing module for labeller classes ([2095](https://github.com/arviz-devs/arviz/pull/2095))
 * Skip compression for object dtype while creating a netcdf file ([2129](https://github.com/arviz-devs/arviz/pull/2129))
+* Variables or coordinates with an `object` dtype are dropped automatically when doing `InferenceData.to_netcdf()` or `InferenceData.to_zarr()`. Log messages are emitted about these droppings. ([2134](https://github.com/arviz-devs/arviz/pull/2134))
 
 ### Deprecation
 * Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
