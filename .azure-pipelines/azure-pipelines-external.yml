@@ -105,7 +105,7 @@ jobs:
     displayName: 'pydocstyle'
 
   - script: |
-      python -m black --check arviz examples asv_benchmarks
+      python -m black --check --diff arviz examples asv_benchmarks
     displayName: 'black'
 
   - script: |

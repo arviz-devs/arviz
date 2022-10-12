@@ -120,7 +120,7 @@ class TestDataPyStan:
             posterior_model=data.model,
             log_likelihood=[],
             prior_model=data.model,
-            save_warmup=pystan_version() == 2,
+            save_warmup=True,
         )
 
     def get_inference_data5(self, data):
@@ -135,7 +135,7 @@ class TestDataPyStan:
             posterior_model=data.model,
             log_likelihood=False,
             prior_model=data.model,
-            save_warmup=pystan_version() == 2,
+            save_warmup=True,
             dtypes={"eta": int},
         )
 
@@ -202,11 +202,9 @@ class TestDataPyStan:
             "prior": ["theta"],
             "sample_stats": ["diverging", "lp"],
             "~log_likelihood": [""],
+            "warmup_posterior": ["theta"],
+            "warmup_sample_stats": ["diverging", "lp"],
         }
-        if pystan_version() == 2:
-            test_dict.update(
-                {"warmup_posterior": ["theta"], "warmup_sample_stats": ["diverging", "lp"]}
-            )
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
         # inference_data 5
@@ -215,11 +213,9 @@ class TestDataPyStan:
             "prior": ["theta"],
             "sample_stats": ["diverging", "lp"],
             "~log_likelihood": [""],
+            "warmup_posterior": ["theta"],
+            "warmup_sample_stats": ["diverging", "lp"],
         }
-        if pystan_version() == 2:
-            test_dict.update(
-                {"warmup_posterior": ["theta"], "warmup_sample_stats": ["diverging", "lp"]}
-            )
         fails = check_multiple_attrs(test_dict, inference_data5)
         assert not fails
         assert inference_data5.posterior.eta.dtype.kind == "i"
@@ -275,7 +271,7 @@ class TestDataPyStan:
         if pystan_version() == 2:
             draws, _ = get_draws(fit, variables=["theta", "theta"])
         else:
-            draws = get_draws_stan3(fit, variables=["theta", "theta"])
+            draws, _ = get_draws_stan3(fit, variables=["theta", "theta"])
         assert draws.get("theta") is not None
 
     @pytest.mark.skipif(pystan_version() != 2, reason="PyStan 2.x required")

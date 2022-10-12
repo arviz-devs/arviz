@@ -5,6 +5,7 @@
 ### New features
 * Add `side` argument to `plot_violin` to allow single-sided violin plots ([1996](https://github.com/arviz-devs/arviz/pull/1996))
 * Added support for Bean Machine via the function `from_beanmachine`. ([2107](https://github.com/arviz-devs/arviz/pull/2107)
+* Add support for warmup samples in `from_pystan` for PyStan 3. ([2132](https://github.com/arviz-devs/arviz/pull/2132)
 
 ### Maintenance and fixes
 * Add exception in `az.plot_hdi` for `x` of type `np.datetime64` and `smooth=True` ([2016](https://github.com/arviz-devs/arviz/pull/2016))
