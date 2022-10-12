@@ -228,10 +228,6 @@ def numpy_to_data_array(
     else:
         ary = utils.one_de(ary)
 
-    print(default_dims)
-    print(dims)
-    print(coords)
-    print(ary.shape)
     dims, coords = generate_dims_coords(
         ary.shape[len(default_dims) :],
         var_name,
@@ -241,9 +237,6 @@ def numpy_to_data_array(
         index_origin=index_origin,
         skip_event_dims=skip_event_dims,
     )
-    print("---")
-    print(dims)
-    print(coords)
 
     # reversed order for default dims: 'chain', 'draw'
     if "draw" not in dims and "draw" in default_dims:
