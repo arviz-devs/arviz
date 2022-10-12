@@ -1554,3 +1554,11 @@ class TestDropObjectVariables:
         rec = caplog.records[1]
         assert rec.levelno == logging.WARNING
         assert "object coords from 'sample_stats' group: ['adim']" in rec.message
+
+    @pytest.mark.parametrize("name", LOCAL_DATASETS.keys())
+    def test_no_objects_in_example_datasets(self, name):
+        idata = load_arviz_data(name)
+        for group in idata.values():
+            _, dropped_vars, dropped_coords = drop_objects_from_dataset(group)
+            assert not dropped_vars
+            assert not dropped_coords
