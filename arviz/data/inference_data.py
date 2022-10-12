@@ -80,6 +80,13 @@ SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
 
 
+def _compressible_dtype(dtype):
+    """Check basic dtypes for automatic compression."""
+    if dtype.kind == "V":
+        return all(_compressible_dtype(item) for item, _ in dtype.fields.values())
+    return dtype.kind in {"b", "i", "u", "f", "c", "S"}
+
+
 class InferenceData(Mapping[str, xr.Dataset]):
     """Container for inference data storage using xarray.
 
@@ -422,7 +429,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data = getattr(self, group)
                 kwargs = {}
                 if compress:
-                    kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
+                    kwargs["encoding"] = {
+                        var_name: {"zlib": True}
+                        for var_name, values in data.variables.items()
+                        if _compressible_dtype(values.dtype)
+                    }
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"

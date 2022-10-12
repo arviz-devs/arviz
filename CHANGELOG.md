@@ -16,6 +16,7 @@
 * Correctly (re)order dimensions for `bfmi` and `plot_energy` ([2126](https://github.com/arviz-devs/arviz/pull/2126))
 * Fix bug with the dimension order dependency ([2103](https://github.com/arviz-devs/arviz/pull/2103))
 * Add testing module for labeller classes ([2095](https://github.com/arviz-devs/arviz/pull/2095))
+* Skip compression for object dtype while creating a netcdf file ([2129](https://github.com/arviz-devs/arviz/pull/2129))
 
 ### Deprecation
 * Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
