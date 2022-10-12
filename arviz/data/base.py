@@ -147,7 +147,8 @@ def generate_dims_coords(
                 dims = dims[:i]
                 break
 
-    for idx, dim_len in enumerate(shape):
+    for i, dim_len in enumerate(shape):
+        idx = i + len([dim for dim in default_dims if dim in dims])
         if len(dims) < idx + 1:
             dim_name = f"{var_name}_dim_{idx}"
             dims.append(dim_name)
@@ -227,6 +228,10 @@ def numpy_to_data_array(
     else:
         ary = utils.one_de(ary)
 
+    print(default_dims)
+    print(dims)
+    print(coords)
+    print(ary.shape)
     dims, coords = generate_dims_coords(
         ary.shape[len(default_dims) :],
         var_name,
@@ -236,6 +241,9 @@ def numpy_to_data_array(
         index_origin=index_origin,
         skip_event_dims=skip_event_dims,
     )
+    print("---")
+    print(dims)
+    print(coords)
 
     # reversed order for default dims: 'chain', 'draw'
     if "draw" not in dims and "draw" in default_dims:
