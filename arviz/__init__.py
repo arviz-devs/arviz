@@ -317,6 +317,7 @@ def _mpl_cm(name, colorlist):
     cmap = LinearSegmentedColormap.from_list(name, colorlist, N=256)
     mpl.colormaps.register(cmap, name="cet_" + name)
 
+
 try:
     import colorcet
 except ModuleNotFoundError:
