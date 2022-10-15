@@ -5,6 +5,6 @@ scipy>=1.8.0
 packaging
 pandas>=1.4.0
 xarray>=0.21.0
-h5netcdf==1.0.2
+h5netcdf>=1.0.2
 typing_extensions>=4.1.0
 xarray-einstats>=0.3
