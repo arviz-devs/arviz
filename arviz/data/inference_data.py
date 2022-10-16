@@ -363,11 +363,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         InferenceData object
         """
         groups = {}
+        attrs = {}
 
         try:
             with nc.Dataset(filename, mode="r") as data:
                 data_groups = list(data.groups)
-                attrs = {}
 
             for group in data_groups:
                 group_kws = {}
@@ -378,13 +378,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         if re.search(key, group):
                             group_kws = kws
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
-                    if group == "__netcdf4_attrs":
-                        attrs.update(data.load().attrs)
+                    if rcParams["data.load"] == "eager":
+                        groups[group] = data.load()
                     else:
-                        if rcParams["data.load"] == "eager":
-                            groups[group] = data.load()
-                        else:
-                            groups[group] = data
+                        groups[group] = data
+
+            with xr.open_dataset(filename) as data:
+                    attrs.update(data.load().attrs)
 
             return InferenceData(attrs=attrs, **groups)
         except OSError as err:
@@ -423,7 +423,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         mode = "w"  # overwrite first, then append
         if self._attrs:
-            xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode, group="__netcdf4_attrs")
+            xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode)
             mode = "a"
 
         if self._groups_all:  # check's whether a group is present or not.
@@ -2226,3 +2226,4 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
         inference_data_dict["attrs"] = combined_attr
 
     return None if inplace else InferenceData(**inference_data_dict)
+Send empty dataset to netcdf
