@@ -155,20 +155,23 @@ def test_dims_coords():
     assert len(coords["x_dim_2"]) == 5
 
 
-def test_dims_coords_default_dims():
+@pytest.mark.parametrize(
+    "in_dims", (["dim1", "dim2"], ["draw", "dim1", "dim2"], ["chain", "draw", "dim1", "dim2"])
+)
+def test_dims_coords_default_dims(in_dims):
     shape = 4, 7
     var_name = "x"
     dims, coords = generate_dims_coords(
         shape,
         var_name,
-        dims=["dim1", "dim2"],
+        dims=in_dims,
         coords={"chain": ["a", "b", "c"]},
         default_dims=["chain", "draw"],
     )
     assert "dim1" in dims
     assert "dim2" in dims
-    assert "chain" not in dims
-    assert "draw" not in dims
+    assert ("chain" in dims) == ("chain" in in_dims)
+    assert ("draw" in dims) == ("draw" in in_dims)
     assert len(coords["dim1"]) == 4
     assert len(coords["dim2"]) == 7
     assert len(coords["chain"]) == 3
