@@ -112,18 +112,20 @@ def test_load_local_arviz_data():
 def test_local_save(fill_attrs):
     inference_data = load_arviz_data("centered_eight")
     assert isinstance(inference_data, InferenceData)
-    
+
     if fill_attrs:
         inference_data.attrs["test"] = True
-    with TemporaryDirectory(prefix="arviz_tests_) as tmp_dir:
+    with TemporaryDirectory(prefix="arviz_tests_") as tmp_dir:
         path = os.path.join(tmp_dir, "test_file.nc")
-        az.to_netcdf(path)
+        inference_data.to_netcdf(path)
 
-        inference_data2 = az.from_netcdf(path)
+        inference_data2 = from_netcdf(path)
         if fill_attrs:
             assert "test" in inference_data2.attrs
             assert inference_data2.attrs["test"] is True
-        assert all(group in inference_data2 for group in inference_data._groups_all)
+        assert all(
+            group in inference_data2 for group in inference_data._groups_all
+        )  # pylint: disable=protected-access
 
 
 def test_clear_data_home():
