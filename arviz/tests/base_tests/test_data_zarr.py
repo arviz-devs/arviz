@@ -42,7 +42,7 @@ class TestDataZarr:
             observed_data=eight_schools_params,
             coords={"school": np.arange(8)},
             dims={"theta": ["school"], "eta": ["school"]},
-            attrs={"test": True} if fill_attrs else None, 
+            attrs={"test": True} if fill_attrs else None,
         )
 
     @pytest.mark.parametrize("store", [0, 1, 2])
@@ -63,7 +63,7 @@ class TestDataZarr:
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
-        
+
         if fill_attrs:
             assert inference_data.attrs["test"] is True
         else:
@@ -100,7 +100,7 @@ class TestDataZarr:
         # Everything in dict still available in inference_data2 ?
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
-        
+
         if fill_attrs:
             assert inference_data2.attrs["test"] is True
         else:

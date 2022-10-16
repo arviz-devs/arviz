@@ -1,5 +1,6 @@
 # pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
+import re
 import sys
 import uuid
 import warnings
@@ -9,7 +10,6 @@ from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
-import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -698,7 +698,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         for group in groups:
             # Create zarr group in store with same group name
             getattr(self, group).to_zarr(store=store, group=group, mode="w")
-        
+
         if self.attrs:
             xr.Dataset(attrs=self.attrs).to_zarr(store=store, mode="w")
 
@@ -748,7 +748,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         for key_group, _ in zarr_handle.groups():
             with xr.open_zarr(store=store, group=key_group) as data:
                 groups[key_group] = data.load() if rcParams["data.load"] == "eager" else data
-                
+
         with xr.open_zarr(store=store) as root:
             attrs = root.attrs
         return InferenceData(attrs=attrs, **groups)
