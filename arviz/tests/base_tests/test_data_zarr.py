@@ -2,7 +2,6 @@
 import os
 import shutil
 from collections.abc import MutableMapping
-from tempfile import TemporaryDirectory
 from typing import Mapping
 
 import numpy as np
