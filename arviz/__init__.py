@@ -318,8 +318,11 @@ def _mpl_cm(name, colorlist):
     mpl.colormaps.register(cmap, name="cet_" + name)
 
 
-_mpl_cm("gray", _linear_grey_10_95_c0)
-_mpl_cm("gray_r", list(reversed(_linear_grey_10_95_c0)))
+try:
+    import colorcet
+except ModuleNotFoundError:
+    _mpl_cm("gray", _linear_grey_10_95_c0)
+    _mpl_cm("gray_r", list(reversed(_linear_grey_10_95_c0)))
 
 
 # clean namespace
