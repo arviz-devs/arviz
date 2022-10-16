@@ -2226,4 +2226,3 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
         inference_data_dict["attrs"] = combined_attr
 
     return None if inplace else InferenceData(**inference_data_dict)
-Send empty dataset to netcdf
