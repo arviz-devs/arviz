@@ -383,8 +383,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     else:
                         groups[group] = data
 
-            with xr.open_dataset(filename) as data:
-                    attrs.update(data.load().attrs)
+            with xr.open_dataset(filename, mode="r") as data:
+                attrs.update(data.load().attrs)
 
             return InferenceData(attrs=attrs, **groups)
         except OSError as err:
