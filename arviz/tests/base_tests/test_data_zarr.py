@@ -2,6 +2,7 @@
 import os
 import shutil
 from collections.abc import MutableMapping
+from tempfile import TemporaryDirectory
 from typing import Mapping
 
 import numpy as np
@@ -31,7 +32,7 @@ class TestDataZarr:
 
         return Data
 
-    def get_inference_data(self, data, eight_schools_params):
+    def get_inference_data(self, data, eight_schools_params, fill_attrs):
         return from_dict(
             posterior=data.obj,
             posterior_predictive=data.obj,
@@ -42,13 +43,15 @@ class TestDataZarr:
             observed_data=eight_schools_params,
             coords={"school": np.arange(8)},
             dims={"theta": ["school"], "eta": ["school"]},
+            attrs={"test": True} if fill_attrs else None, 
         )
 
     @pytest.mark.parametrize("store", [0, 1, 2])
-    def test_io_method(self, data, eight_schools_params, store):
+    @pytest.mark.parametrize("fill_attrs", [True, False])
+    def test_io_method(self, data, eight_schools_params, store, fill_attrs):
         # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
-            data, eight_schools_params
+            data, eight_schools_params, fill_attrs
         )
         test_dict = {
             "posterior": ["eta", "theta", "mu", "tau"],
@@ -61,6 +64,11 @@ class TestDataZarr:
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+        
+        if fill_attrs:
+            assert inference_data.attrs["test"] is True
+        else:
+            assert "test" not in inference_data.attrs
 
         # check filename does not exist and use to_zarr method
         here = os.path.dirname(os.path.abspath(__file__))
@@ -93,6 +101,11 @@ class TestDataZarr:
         # Everything in dict still available in inference_data2 ?
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
+        
+        if fill_attrs:
+            assert inference_data2.attrs["test"] is True
+        else:
+            assert "test" not in inference_data2.attrs
 
         # Remove created folder structure
         if os.path.exists(filepath):
