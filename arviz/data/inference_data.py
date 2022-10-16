@@ -695,12 +695,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if not groups:
             raise TypeError("No valid groups found!")
 
+        # order matters here, saving attrs after the groups will erase the groups.
+        if self.attrs:
+            xr.Dataset(attrs=self.attrs).to_zarr(store=store, mode="w")
+
         for group in groups:
             # Create zarr group in store with same group name
             getattr(self, group).to_zarr(store=store, group=group, mode="w")
-
-        if self.attrs:
-            xr.Dataset(attrs=self.attrs).to_zarr(store=store, mode="w")
 
         return zarr.open(store)  # Open store to get overarching group
 
@@ -751,6 +752,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         with xr.open_zarr(store=store) as root:
             attrs = root.attrs
+
         return InferenceData(attrs=attrs, **groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
