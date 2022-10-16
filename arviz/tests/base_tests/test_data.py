@@ -108,7 +108,7 @@ def test_load_local_arviz_data():
     assert inference_data.posterior["theta"].dims == ("chain", "draw", "school")
 
 
-@pytest.parametrize("fill_attrs", [True, False])
+@pytest.mark.parametrize("fill_attrs", [True, False])
 def test_local_save(fill_attrs):
     inference_data = load_arviz_data("centered_eight")
     assert isinstance(inference_data, InferenceData)
