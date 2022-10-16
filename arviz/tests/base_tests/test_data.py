@@ -123,9 +123,9 @@ def test_local_save(fill_attrs):
         if fill_attrs:
             assert "test" in inference_data2.attrs
             assert inference_data2.attrs["test"] == 1
-        assert all(
-            group in inference_data2 for group in inference_data._groups_all
-        )  # pylint: disable=protected-access
+        # pylint: disable=protected-access
+        assert all(group in inference_data2 for group in inference_data._groups_all)
+        # pylint: enable=protected-access
 
 
 def test_clear_data_home():
