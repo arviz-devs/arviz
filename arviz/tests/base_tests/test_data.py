@@ -61,7 +61,7 @@ def no_remote_data(monkeypatch, tmpdir):
             name="test_remote",
             filename=filename,
             url=url,
-            checksum="2c5501a9f5d7b6998fc7e6a4651030b9765032b2e5a1d7331f5b1f3df6c632a5",
+            checksum="8efc3abafe0c796eb9aea7b69490d4e2400a33c57504ef4932e1c7105849176f",
             description=centered.description,
         ),
     )
