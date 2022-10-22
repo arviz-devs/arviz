@@ -18,15 +18,17 @@ ArviZ uses the following process to cut a new release of the library.
 
    Empty subheadings don't need to be included yet.
 
-3. Open a Pull Request including these changes. Make sure all CI tests pass, adding commits if necessary. Even if CI is passing on main, there might be new releases of dependencies that break CI.
+3. Check versions in `requirements.txt` and `setup.py` files. Arviz aims to follow the recommendations in [SPEC-0](https://scientific-python.org/specs/spec-0000/) from scientific python. 
 
-4. Add a release in the Github [release page](https://github.com/arviz-devs/arviz/releases) once the PR is merged.
+4. Open a Pull Request including these changes. Make sure all CI tests pass, adding commits if necessary. Even if CI is passing on main, there might be new releases of dependencies that break CI.
 
-5. After the release on Github, the CI system will complete the rest of the steps. Including making any wheels and uploading the new version to PyPI.
+5. Add a release in the Github [release page](https://github.com/arviz-devs/arviz/releases) once the PR is merged.
 
-6. Add a follow-up PR changing the version string to include the dev flag. Make sure the version string is [PEP 440](https://peps.python.org/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions) compliant.
+6. After the release on Github, the CI system will complete the rest of the steps. Including making any wheels and uploading the new version to PyPI.
 
-7. Use the following template to add empty subheadings to the `CHANGELOG.md` file.
+7. Add a follow-up PR changing the version string to include the dev flag. Make sure the version string is [PEP 440](https://peps.python.org/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions) compliant.
+
+8. Use the following template to add empty subheadings to the `CHANGELOG.md` file.
 
    ```markdown
    ## v0.x.x Unreleased
