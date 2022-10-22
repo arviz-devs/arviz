@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.x.x Unreleased
+## v0.13.0 (2022 Oct 22)
 
 ### New features
 * Add `side` argument to `plot_violin` to allow single-sided violin plots ([1996](https://github.com/arviz-devs/arviz/pull/1996))
