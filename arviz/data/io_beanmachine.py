@@ -1,5 +1,4 @@
 """beanmachine-specific conversion code."""
-import numpy as np
 
 from .inference_data import InferenceData
 from .base import dict_to_dataset, requires
