@@ -1,15 +1,5 @@
 # Change Log
 
-## v0.x.x Unreleased
-
-### New features
-
-### Maintenance and fixes
-
-### Deprecation
-
-### Documentation
-
 ## v0.13.0 (2022 Oct 22)
 
 ### New features
@@ -30,13 +20,14 @@
 * Skip compression for object dtype while creating a netcdf file ([2129](https://github.com/arviz-devs/arviz/pull/2129))
 * Fix issue in dim generation when default dims are present in user inputed dims ([2138](https://github.com/arviz-devs/arviz/pull/2138))
 * Save InferenceData level attrs to netcdf and zarr ([2131](https://github.com/arviz-devs/arviz/pull/2131))
+* Update tests and docs for updated example data ([2137](https://github.com/arviz-devs/arviz/pull/2137))
 
 ### Deprecation
 * Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
 
 ### Documentation
 * Add translation overview to contributing guide ([2041](https://github.com/arviz-devs/arviz/pull/2041))
-
+* Improve how to release page ([2144](https://github.com/arviz-devs/arviz/pull/2144))
 
 ## v0.12.1 (2022 May 12)
 ### New features
