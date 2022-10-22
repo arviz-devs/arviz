@@ -904,9 +904,9 @@ def psislw(log_weights, reff=1.0):
     .. ipython::
 
         In [1]: import arviz as az
-           ...: data = az.load_arviz_data("centered_eight")
-           ...: log_likelihood = data.sample_stats.log_likelihood.stack(
-           ...:     __sample__=("chain", "draw")
+           ...: data = az.load_arviz_data("non_centered_eight")
+           ...: log_likelihood = data.log_likelihood["obs"].stack(
+           ...:     __sample__=["chain", "draw"]
            ...: )
            ...: az.psislw(-log_likelihood, reff=0.8)
 

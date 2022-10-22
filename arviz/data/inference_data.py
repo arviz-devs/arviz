@@ -795,14 +795,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             import arviz as az
             idata = az.load_arviz_data("centered_eight")
-            del idata.prior  # prior group only has 1 chain currently
             idata
 
         In order to remove the third chain:
 
         .. jupyter-execute::
 
-            idata_subset = idata.sel(chain=[0, 1, 3])
+            idata_subset = idata.sel(chain=[0, 1, 3], groups="posterior_groups")
             idata_subset
 
         See Also
@@ -882,14 +881,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             import arviz as az
             idata = az.load_arviz_data("centered_eight")
-            del idata.prior  # prior group only has 1 chain currently
             idata
 
         In order to remove the third chain:
 
         .. jupyter-execute::
 
-            idata_subset = idata.isel(chain=[0, 1, 3])
+            idata_subset = idata.isel(chain=[0, 1, 3], groups="posterior_groups")
             idata_subset
 
         You can expand the groups and coords in each group to see how now only the chains 0, 1 and

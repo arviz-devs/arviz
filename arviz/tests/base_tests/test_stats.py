@@ -45,17 +45,12 @@ def non_centered_eight():
 @pytest.fixture(scope="module")
 def multivariable_log_likelihood(centered_eight):
     centered_eight = centered_eight.copy()
-    centered_eight.add_groups({"log_likelihood": centered_eight.sample_stats.log_likelihood})
-    centered_eight.log_likelihood = centered_eight.log_likelihood.rename_vars(
-        {"log_likelihood": "obs"}
-    )
     new_arr = DataArray(
         np.zeros(centered_eight.log_likelihood["obs"].values.shape),
         dims=["chain", "draw", "school"],
         coords=centered_eight.log_likelihood.coords,
     )
     centered_eight.log_likelihood["decoy"] = new_arr
-    delattr(centered_eight, "sample_stats")
     return centered_eight
 
 
@@ -213,7 +208,7 @@ def test_compare_different_multidim(multidim_models, ic, method):
 def test_compare_different_size(centered_eight, non_centered_eight):
     centered_eight = deepcopy(centered_eight)
     centered_eight.posterior = centered_eight.posterior.drop("Choate", "school")
-    centered_eight.sample_stats = centered_eight.sample_stats.drop("Choate", "school")
+    centered_eight.log_likelihood = centered_eight.log_likelihood.drop("Choate", "school")
     centered_eight.posterior_predictive = centered_eight.posterior_predictive.drop(
         "Choate", "school"
     )
@@ -442,11 +437,7 @@ def test_waic(centered_eight, multidim_models, scale, multidim):
 def test_waic_bad(centered_eight):
     """Test widely available information criterion calculation"""
     centered_eight = deepcopy(centered_eight)
-    del centered_eight.sample_stats["log_likelihood"]
-    with pytest.raises(TypeError):
-        waic(centered_eight)
-
-    del centered_eight.sample_stats
+    delattr(centered_eight, "log_likelihood")
     with pytest.raises(TypeError):
         waic(centered_eight)
 
@@ -459,11 +450,11 @@ def test_waic_bad_scale(centered_eight):
 
 def test_waic_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
-    centered_eight.sample_stats["log_likelihood"][:, :250, 1] = 10
+    centered_eight.log_likelihood["obs"][:, :250, 1] = 10
     with pytest.warns(UserWarning):
         assert waic(centered_eight, pointwise=True) is not None
     # this should throw a warning, but due to numerical issues it fails
-    centered_eight.sample_stats["log_likelihood"][:, :, :] = 0
+    centered_eight.log_likelihood["obs"][:, :, :] = 0
     with pytest.warns(UserWarning):
         assert waic(centered_eight, pointwise=True) is not None
 
@@ -505,7 +496,7 @@ def test_loo_bad(centered_eight):
         loo(np.random.randn(2, 10))
 
     centered_eight = deepcopy(centered_eight)
-    del centered_eight.sample_stats["log_likelihood"]
+    delattr(centered_eight, "log_likelihood")
     with pytest.raises(TypeError):
         loo(centered_eight)
 
@@ -528,13 +519,13 @@ def test_loo_bad_no_posterior_reff(centered_eight):
 def test_loo_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
     # make one of the khats infinity
-    centered_eight.sample_stats["log_likelihood"][:, :, 1] = 10
+    centered_eight.log_likelihood["obs"][:, :, 1] = 10
     with pytest.warns(UserWarning) as records:
         assert loo(centered_eight, pointwise=True) is not None
     assert any("Estimated shape parameter" in str(record.message) for record in records)
 
     # make all of the khats infinity
-    centered_eight.sample_stats["log_likelihood"][:, :, :] = 1
+    centered_eight.log_likelihood["obs"][:, :, :] = 1
     with pytest.warns(UserWarning) as records:
         assert loo(centered_eight, pointwise=True) is not None
     assert any("Estimated shape parameter" in str(record.message) for record in records)
