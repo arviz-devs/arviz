@@ -372,14 +372,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
             for group in data_groups:
                 group_kws = {}
 
-                group_kws = {'engine':'h5netcdf'}
+                group_kws = {}
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
                 if group_kwargs is not None and regex is True:
                     for key, kws in group_kwargs.items():
                         if re.search(key, group):
                             group_kws = kws
-
+                group_kws.setdefault("engine", "h5netcdf")
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
