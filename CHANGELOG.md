@@ -56,6 +56,8 @@
 * Copy coords before modifying in ppcplot ([2160](https://github.com/arviz-devs/arviz/pull/2160))
 
 * Changed dependency on netCDF4 to h5netcdf 
+* Changed dependency on netCDF4 to h5netcdf  ([2122](https://github.com/arviz-devs/arviz/pull/2122))
+
 ### Deprecation
 * Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
 
