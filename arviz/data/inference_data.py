@@ -23,12 +23,7 @@ from typing import (
     Union,
     overload,
 )
-try:
-    import h5netcdf.legacyapi as nc
-    HAS_H5NETCDF = True
-except ImportError:
-    import netCDF4 as nc
-    HAS_H5NETCDF = False
+import h5netcdf
 
 import numpy as np
 import xarray as xr
@@ -371,21 +366,20 @@ class InferenceData(Mapping[str, xr.Dataset]):
         attrs = {}
 
         try:
-            with nc.Dataset(filename, mode="r") as data:
+            with h5netcdf.File(filename, mode="r") as data:
                 data_groups = list(data.groups)
 
             for group in data_groups:
                 group_kws = {}
 
-                group_kws = {}
+                group_kws = {'engine':'h5netcdf'}
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
                 if group_kwargs is not None and regex is True:
                     for key, kws in group_kwargs.items():
                         if re.search(key, group):
                             group_kws = kws
-                if HAS_H5NETCDF:
-                    group_kws['engine'] = 'h5netcdf'
+
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
@@ -443,20 +437,18 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             for group in groups:
                 data = getattr(self, group)
-                kwargs = {}
+                kwargs = {'engine':'h5netcdf'}
                 if compress:
                     kwargs["encoding"] = {
                         var_name: {"zlib": True}
                         for var_name, values in data.variables.items()
                         if _compressible_dtype(values.dtype)
                     }
-                if HAS_H5NETCDF:
-                    kwargs['engine'] = 'h5netcdf'
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
         elif not self._attrs:  # creates a netcdf file for an empty InferenceData object.
-            empty_netcdf_file = nc.Dataset(filename, mode="w")
+            empty_netcdf_file = h5netcdf.File(filename, mode="w")
             empty_netcdf_file.close()
         return filename
 
