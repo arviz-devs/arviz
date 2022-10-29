@@ -23,7 +23,7 @@ except ImportError:
 from .. import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams, ScaleKeyword, ICKeyword
-from ..utils import Numba, _numba_var, _var_names, get_coords
+from ..utils import Numba, _numba_var, _var_names, get_coords, extract
 from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
 from .density_utils import kde as _kde
@@ -49,6 +49,7 @@ __all__ = [
     "r2_score",
     "summary",
     "waic",
+    "weight_predictions",
     "_calculate_ics",
 ]
 
@@ -2043,3 +2044,24 @@ def apply_test_function(
         setattr(out, grp, out_group)
 
     return out
+
+
+def weight_predictions(idatas, weights):
+    len_idatas = [
+        len(idata.posterior_predictive.chain) * len(idata.posterior_predictive.draw)
+        for idata in idatas
+    ]
+
+    new_samples = (np.min(len_idatas) * weights).astype(int)
+
+    new_idatas = [
+        extract(idata, group="posterior_predictive", num_samples=samples).reset_coords()
+        for samples, idata in zip(new_samples, idatas)
+    ]
+
+    weight_samples = InferenceData(
+        posterior_predictive=xr.concat(new_idatas, dim="sample"),
+        observed_data=idatas[0].observed_data,
+    )
+
+    return weight_samples
