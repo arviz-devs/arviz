@@ -21,9 +21,9 @@ except ImportError:
     NO_GET_ARGS = True
 
 from .. import _log
-from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
+from ..data import InferenceData, convert_to_dataset, convert_to_inference_data, extract
 from ..rcparams import rcParams, ScaleKeyword, ICKeyword
-from ..utils import Numba, _numba_var, _var_names, get_coords, extract
+from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
 from .density_utils import kde as _kde
@@ -2046,7 +2046,44 @@ def apply_test_function(
     return out
 
 
-def weight_predictions(idatas, weights):
+def weight_predictions(idatas, weights=None):
+    """
+    Generate weighted posterior predictive samples from a list of InferenceData
+    and a set of weights.
+
+    Parameters
+    ---------
+    datasets: list[InfereneData]
+        List of :class:`arviz.InferenceData` objects containing the groups `posterior_predictive`
+        and `observed_data`. Observations should be the same for all InferenceData objects.
+    weights : array-like, optional
+        Individual weights for each model. Weights should be positive. If they do not sum up to 1,
+        they will be normalized. Default, same weight for each model.
+        Weights can be computed using many different methods including those in
+        :func:`arviz.compare`.
+
+    Returns
+    -------
+    idata: InferenceData
+        Output InferenceData object with the groups `posterior_predictive` and `observed_data`.
+
+    See Also
+    --------
+    compare :  Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation
+    """
+    if weights is None:
+        weights = np.ones(len(idatas)) / len(idatas)
+    weights = np.array(weights, dtype=float)
+    weights /= weights.sum()
+
+    if not np.all(["posterior_predictive" in idata.groups() for idata in idatas]):
+        raise ValueError(
+            "All the InferenceData objects must contain the `posterior_predictive` group"
+        )
+
+    if not np.all([idatas[0].observed_data.equals(idata.observed_data) for idata in idatas[1:]]):
+        raise ValueError("The observed data should be the same for all InferenceData objects")
+
     len_idatas = [
         len(idata.posterior_predictive.chain) * len(idata.posterior_predictive.draw)
         for idata in idatas
@@ -2059,9 +2096,9 @@ def weight_predictions(idatas, weights):
         for samples, idata in zip(new_samples, idatas)
     ]
 
-    weight_samples = InferenceData(
+    weighted_samples = InferenceData(
         posterior_predictive=xr.concat(new_idatas, dim="sample"),
         observed_data=idatas[0].observed_data,
     )
 
-    return weight_samples
+    return weighted_samples
