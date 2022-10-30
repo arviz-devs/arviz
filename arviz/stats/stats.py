@@ -2053,7 +2053,7 @@ def weight_predictions(idatas, weights=None):
 
     Parameters
     ---------
-    datasets: list[InfereneData]
+    idatas : list[InfereneData]
         List of :class:`arviz.InferenceData` objects containing the groups `posterior_predictive`
         and `observed_data`. Observations should be the same for all InferenceData objects.
     weights : array-like, optional
@@ -2071,18 +2071,26 @@ def weight_predictions(idatas, weights=None):
     --------
     compare :  Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation
     """
-    if weights is None:
-        weights = np.ones(len(idatas)) / len(idatas)
-    weights = np.array(weights, dtype=float)
-    weights /= weights.sum()
+    if len(idatas) < 2:
+        raise ValueError("You should provide a list with at least two InferenceData objects")
 
-    if not np.all(["posterior_predictive" in idata.groups() for idata in idatas]):
+    if not all("posterior_predictive" in idata.groups() for idata in idatas):
         raise ValueError(
             "All the InferenceData objects must contain the `posterior_predictive` group"
         )
 
-    if not np.all([idatas[0].observed_data.equals(idata.observed_data) for idata in idatas[1:]]):
+    if not all(idatas[0].observed_data.equals(idata.observed_data) for idata in idatas[1:]):
         raise ValueError("The observed data should be the same for all InferenceData objects")
+
+    if weights is None:
+        weights = np.ones(len(idatas)) / len(idatas)
+    elif len(idatas) != len(weights):
+        raise ValueError(
+            "The number of weights should be the same as the number of InferenceData objects"
+        )
+
+    weights = np.asarray(weights, dtype=float)
+    weights /= weights.sum()
 
     len_idatas = [
         len(idata.posterior_predictive.chain) * len(idata.posterior_predictive.draw)
