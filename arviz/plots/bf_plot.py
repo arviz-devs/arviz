@@ -52,3 +52,4 @@ def plot_bf(trace, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax
     plt.legend(loc="upper left")
     plt.show()
     return {'BF10': BF10, 'BF01':BF01}, ax
+# end
