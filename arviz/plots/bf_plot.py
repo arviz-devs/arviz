@@ -2,7 +2,9 @@
 from scipy import stats
 import matplotlib.pyplot as plt
 import numpy as np
+import logging
 # 
+_log = logging.getLogger(__name__)
 
 def plot_bf(idata, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax=None):
     """
@@ -56,8 +58,9 @@ def plot_bf(idata, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax
     prior = prior_pdf(ref_val)
     BF10 = posterior / prior
     BF01 = prior / posterior
-    print("the Bayes Factor 10 is %.3f" % (BF10))
-    print("the Bayes Factor 01 is %.3f" % (BF01))
+    _log.warning("the Bayes Factor 10 is %.3f" % (BF10)"
+                ("the Bayes Factor 01 is %.3f" % (BF01)
+    )
     ax.plot(ref_val, posterior, "ko", lw=1.5, alpha=1)
     ax.plot(ref_val, prior, "ko", lw=1.5, alpha=1)
     ax.set_xlabel(var_name)
