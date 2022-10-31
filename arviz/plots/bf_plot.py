@@ -2,11 +2,21 @@
 from scipy import stats
 import matplotlib.pyplot as plt
 import numpy as np
-# Bayes Factor approximated as the Savage-Dickey density ratio.
-# The Bayes factor is estimated by comparing a model 
-# against a model in which the parameter of interest has been restricted to a point-null.
+# 
 
 def plot_bf(idata, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax=None):
+    """
+    Bayes Factor approximated as the Savage-Dickey density ratio.
+    The Bayes factor is estimated by comparing a model 
+    against a model in which the parameter of interest has been restricted to a point-null.
+
+    :idata: The "trace" of model, after sampling the
+    :var_name: [str] Name of variable we want to test.
+    :prior: In case we want to use diffent prior (for sensitivity analysis of BF), we can define one and sent it to the function.
+    :family: for now, supports only the normal distribution.
+    :ref_val: reference value for BF testing
+    :xlim: limit the x axis (might be used for visualization porpuses sometimes)
+
     # grab trace, a variable name to compute difference and prior.
     # ref_val is the parameter we want to compare
     # test some elemtns
@@ -14,7 +24,7 @@ def plot_bf(idata, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax
     if not isinstance(var_name, str):
         print('varName is not a string')
     # BFs based on density estimation (using kernel smoothing instead of spline)
-    # stack trace posterior
+    """
     post = extract(idata, var_names=var_name)
     if prior is None:
         # grab prior from the data in case it wasn't defined by the user
