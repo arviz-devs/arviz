@@ -1,10 +1,14 @@
 # Plotting and reporting Bayes Factor given idata, var name, prior distribution and reference value
-def plot_bf(trace, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax=None):
+from scipy import stats
+import matplotlib.pyplot as plt
+import numpy as np
+# Bayes Factor approximated as the Savage-Dickey density ratio.
+# The Bayes factor is estimated by comparing a model 
+# against a model in which the parameter of interest has been restricted to a point-null.
+
+def plot_bf(idata, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax=None):
     # grab trace, a variable name to compute difference and prior.
     # ref_val is the parameter we want to compare
-    from scipy import stats
-    import matplotlib.pyplot as plt
-    import numpy as np
     # test some elemtns
     # varName should be string
     if not isinstance(var_name, str):
@@ -15,7 +19,6 @@ def plot_bf(trace, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax
     if prior is None:
         # grab prior from the data in case it wasn't defined by the user
         prior = extract(idata, var_names=var_name, group="prior")
-    post = tr[var_name]
     if post.ndim > 1:
         print("Posterior distribution has {post.ndim} dimensions")
     if family=='normal':
@@ -47,9 +50,9 @@ def plot_bf(trace, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax
     print("the Bayes Factor 01 is %.3f" % (BF01))
     ax.plot(ref_val, posterior, "ko", lw=1.5, alpha=1)
     ax.plot(ref_val, prior, "ko", lw=1.5, alpha=1)
-    plt.xlabel("Delta")
-    plt.ylabel("Density")
-    plt.legend(loc="upper left")
-    plt.show()
+    ax.set_xlabel(var_name)
+    ax.set_ylabel("Density")
+    plt.legend()
+    
     return {'BF10': BF10, 'BF01':BF01}, ax
 # end
