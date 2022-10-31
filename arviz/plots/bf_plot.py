@@ -33,18 +33,14 @@ def plot_bf(idata, var_name, prior, family = 'normal',  ref_val=0, xlim=None, ax
         prior = extract(idata, var_names=var_name, group="prior")
     if post.ndim > 1:
         print("Posterior distribution has {post.ndim} dimensions")
-    if family=='normal':
-        # generate vector
-        if xlim is None:
-            x = np.linspace(np.min(prior), np.max(prior),prior.shape[0])
-        else:
-            x = np.linspace(xlim[0], xlim[1],prior.shape[0])
-        #x = np.linspace(np.min(post), np.max(post),prior.shape[0])
-        my_pdf = stats.gaussian_kde(post)
-        prior_pdf = stats.gaussian_kde(prior)
-    elif family!='normal':
-        # for now and error of notImplemented
-        print("The method for {family} distribution is not implemented yet")
+    # generate vector
+    if xlim is None:
+        x = np.linspace(np.min(prior), np.max(prior),prior.shape[0])
+    else:
+        x = np.linspace(xlim[0], xlim[1],prior.shape[0])
+    #x = np.linspace(np.min(post), np.max(post),prior.shape[0])
+    my_pdf = stats.gaussian_kde(post)
+    prior_pdf = stats.gaussian_kde(prior)
     if ax is None:
         fig, ax = plt.subplots()
     ax.plot(
