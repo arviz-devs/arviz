@@ -5,6 +5,7 @@
 ### New features
 
 ### Maintenance and fixes
+- Fix dimension ordering for `plot_trace` with divergences ([2151](https://github.com/arviz-devs/arviz/pull/2151))
 
 ### Deprecation
 
