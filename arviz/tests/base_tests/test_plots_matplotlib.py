@@ -294,6 +294,12 @@ def test_plot_trace_invalid_varname_warning(models, kwargs):
     assert axes.shape
 
 
+def test_plot_trace_diverging_correctly_transposed():
+    idata = load_arviz_data("centered_eight")
+    idata.sample_stats["diverging"] = idata.sample_stats.diverging.T
+    plot_trace(idata, divergences="bottom")
+
+
 @pytest.mark.parametrize(
     "bad_kwargs", [{"var_names": ["mu", "tau"], "lines": [("mu", {}, ["hey"])]}]
 )
