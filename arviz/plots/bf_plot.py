@@ -40,11 +40,10 @@ def plot_bf(
 
     Examples
     --------
-    TBD
+    TBN
     
     """
-    if not isinstance(var_name, str):
-        _log.warning('varName is not a string')
+    var_name = _var_names(var_name, idata)
     post = extract(idata, var_names=var_name)
     if prior is None:
         # grab prior from the data in case it wasn't defined by the user
@@ -53,9 +52,9 @@ def plot_bf(
         _log.info("Posterior distribution has {post.ndim} dimensions")
     # generate vector
     if xlim is None:
-        x = np.linspace(np.min(prior), np.max(prior),prior.shape[0])
+        x = np.linspace(np.min(prior), np.max(prior),5000)
     else:
-        x = np.linspace(xlim[0], xlim[1],prior.shape[0])
+        x = np.linspace(xlim[0], xlim[1],5000)
     my_pdf = stats.gaussian_kde(post)
     prior_pdf = stats.gaussian_kde(prior)
     if ax is None:
@@ -71,8 +70,8 @@ def plot_bf(
     prior = prior_pdf(ref_val)
     BF10 = posterior / prior
     BF01 = prior / posterior
-    _log.info("the Bayes Factor 10 is %.3f" % (BF10)"
-                ("the Bayes Factor 01 is %.3f" % (BF01)
+    _log.info(f"the Bayes Factor 10 is {BF10}"
+                f"the Bayes Factor 01 is {BF01}"
     )
     ax.plot(ref_val, posterior, "ko", lw=1.5)
     ax.plot(ref_val, prior, "ko", lw=1.5)
