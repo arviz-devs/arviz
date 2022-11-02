@@ -34,7 +34,8 @@ def plot_bf(
 
     Returns
     -------
-    Bayes Factor 10, BF01 and ax
+    A dictionary with BF10 (Bayes Factor 10 (H1/H0 ratio), and BF01 (H0/H1 ratio).
+    Also return a figure (ax)
 
     Examples
     --------
