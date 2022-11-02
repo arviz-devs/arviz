@@ -1,18 +1,16 @@
 """
 ESS Quantile Plot
 =================
-
-_thumb: .4, .5
-_example_title: Plot ESS of quantiles
+_gallery_category: Inference Diagnostics
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 idata = az.load_arviz_data("radon")
 
-az.plot_ess(idata, var_names=["sigma"], kind="quantile", color="C4")
+az.plot_ess(idata, var_names=["sigma"], kind="quantile")
 
 plt.show()

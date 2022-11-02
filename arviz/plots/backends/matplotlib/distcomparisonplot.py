@@ -79,9 +79,8 @@ def plot_dist_comparison(
         axes = ax
         if ax.shape != (nvars, ngroups + 1):
             raise ValueError(
-                "Found {} shape of axes, which is not equal to data shape {}.".format(
-                    axes.shape, (nvars, ngroups + 1)
-                )
+                f"Found {axes.shape} shape of axes, "
+                f"which is not equal to data shape {(nvars, ngroups + 1)}."
             )
 
     for idx, plotter in enumerate(dc_plotters):

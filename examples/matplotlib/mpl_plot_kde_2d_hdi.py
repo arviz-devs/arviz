@@ -1,16 +1,14 @@
 """
-2d KDE with HDI Contours
+2D KDE with HDI Contours
 ========================
-
-_thumb: .5, .8
-_example_title: 2d KDE with HDI Contours
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 import numpy as np
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 rng = np.random.default_rng()
 data = rng.multivariate_normal([2, 2], [[1, 0.4], [0.4, 0.8]], 1000000)

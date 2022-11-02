@@ -1,13 +1,8 @@
 """
 KDE Pair Plot with HDI Contours
 ===============================
-
-_thumb: .2, .5
-_example_title: KDE Pair Plot with HDI Contours
 """
 import arviz as az
-
-az.style.use("arviz-darkgrid")
 
 centered = az.load_arviz_data("centered_eight")
 

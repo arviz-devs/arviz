@@ -6,6 +6,7 @@ from collections import namedtuple
 from copy import deepcopy
 from html import escape
 from typing import Dict
+from tempfile import TemporaryDirectory
 from urllib.parse import urlunsplit
 
 import numpy as np
@@ -26,7 +27,7 @@ from ... import (
     list_datasets,
     load_arviz_data,
     to_netcdf,
-    extract_dataset,
+    extract,
 )
 
 from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
@@ -58,9 +59,10 @@ def no_remote_data(monkeypatch, tmpdir):
         REMOTE_DATASETS,
         "test_remote",
         RemoteFileMetadata(
+            name="test_remote",
             filename=filename,
             url=url,
-            checksum="2c5501a9f5d7b6998fc7e6a4651030b9765032b2e5a1d7331f5b1f3df6c632a5",
+            checksum="8efc3abafe0c796eb9aea7b69490d4e2400a33c57504ef4932e1c7105849176f",
             description=centered.description,
         ),
     )
@@ -68,7 +70,11 @@ def no_remote_data(monkeypatch, tmpdir):
         REMOTE_DATASETS,
         "bad_checksum",
         RemoteFileMetadata(
-            filename=filename, url=url, checksum="bad!", description=centered.description
+            name="bad_checksum",
+            filename=filename,
+            url=url,
+            checksum="bad!",
+            description=centered.description,
         ),
     )
     UnknownFileMetaData = namedtuple(
@@ -100,6 +106,26 @@ def test_load_local_arviz_data():
         "Phillips Exeter",
     }
     assert inference_data.posterior["theta"].dims == ("chain", "draw", "school")
+
+
+@pytest.mark.parametrize("fill_attrs", [True, False])
+def test_local_save(fill_attrs):
+    inference_data = load_arviz_data("centered_eight")
+    assert isinstance(inference_data, InferenceData)
+
+    if fill_attrs:
+        inference_data.attrs["test"] = 1
+    with TemporaryDirectory(prefix="arviz_tests_") as tmp_dir:
+        path = os.path.join(tmp_dir, "test_file.nc")
+        inference_data.to_netcdf(path)
+
+        inference_data2 = from_netcdf(path)
+        if fill_attrs:
+            assert "test" in inference_data2.attrs
+            assert inference_data2.attrs["test"] == 1
+        # pylint: disable=protected-access
+        assert all(group in inference_data2 for group in inference_data._groups_all)
+        # pylint: enable=protected-access
 
 
 def test_clear_data_home():
@@ -150,20 +176,23 @@ def test_dims_coords():
     assert len(coords["x_dim_2"]) == 5
 
 
-def test_dims_coords_default_dims():
+@pytest.mark.parametrize(
+    "in_dims", (["dim1", "dim2"], ["draw", "dim1", "dim2"], ["chain", "draw", "dim1", "dim2"])
+)
+def test_dims_coords_default_dims(in_dims):
     shape = 4, 7
     var_name = "x"
     dims, coords = generate_dims_coords(
         shape,
         var_name,
-        dims=["dim1", "dim2"],
+        dims=in_dims,
         coords={"chain": ["a", "b", "c"]},
         default_dims=["chain", "draw"],
     )
     assert "dim1" in dims
     assert "dim2" in dims
-    assert "chain" not in dims
-    assert "draw" not in dims
+    assert ("chain" in dims) == ("chain" in in_dims)
+    assert ("draw" in dims) == ("draw" in in_dims)
     assert len(coords["dim1"]) == 4
     assert len(coords["dim2"]) == 7
     assert len(coords["chain"]) == 3
@@ -775,7 +804,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
 
         xr.set_options(display_style="text")
         html = idata._repr_html_()  # pylint: disable=protected-access
-        assert escape(idata.__repr__()) in html
+        assert escape(repr(idata)) in html
         xr.set_options(display_style=display_style)
 
     def test_add_groups(self, data_random):
@@ -1210,7 +1239,7 @@ class TestDataNetCDF:
             prior_predictive=data.obj,
             sample_stats_prior=data.obj,
             observed_data=eight_schools_params,
-            coords={"school": np.arange(8)},
+            coords={"school": np.array(["a" * i for i in range(8)], dtype="U")},
             dims={"theta": ["school"], "eta": ["school"]},
         )
 
@@ -1248,7 +1277,8 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
 
     @pytest.mark.parametrize("groups_arg", [False, True])
-    def test_io_method(self, data, eight_schools_params, groups_arg):
+    @pytest.mark.parametrize("compress", [True, False])
+    def test_io_method(self, data, eight_schools_params, groups_arg, compress):
         # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
@@ -1272,7 +1302,9 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
         # InferenceData method
         inference_data.to_netcdf(
-            filepath, groups=("posterior", "observed_data") if groups_arg else None
+            filepath,
+            groups=("posterior", "observed_data") if groups_arg else None,
+            compress=compress,
         )
 
         # assert file has been saved correctly
@@ -1423,33 +1455,41 @@ class TestDataArrayToDataset:
 class TestExtractDataset:
     def test_default(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata)
+        post = extract(idata)
         assert isinstance(post, xr.Dataset)
         assert "sample" in post.dims
         assert post.theta.size == (4 * 500 * 8)
 
     def test_seed(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata, rng=7)
-        post_pred = extract_dataset(idata, group="posterior_predictive", rng=7)
+        post = extract(idata, rng=7)
+        post_pred = extract(idata, group="posterior_predictive", rng=7)
         assert all(post.sample == post_pred.sample)
 
     def test_no_combine(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata, combined=False)
+        post = extract(idata, combined=False)
         assert "sample" not in post.dims
         assert post.dims["chain"] == 4
         assert post.dims["draw"] == 500
 
     def test_var_name_group(self):
         idata = load_arviz_data("centered_eight")
-        prior = extract_dataset(idata, group="prior", var_names="the", filter_vars="like")
+        prior = extract(idata, group="prior", var_names="the", filter_vars="like")
+        assert {} == prior.attrs
+        assert "theta" in prior.name
+
+    def test_keep_dataset(self):
+        idata = load_arviz_data("centered_eight")
+        prior = extract(
+            idata, group="prior", var_names="the", filter_vars="like", keep_dataset=True
+        )
         assert prior.attrs == idata.prior.attrs
         assert "theta" in prior.data_vars
         assert "mu" not in prior.data_vars
 
     def test_subset_samples(self):
         idata = load_arviz_data("centered_eight")
-        post = extract_dataset(idata, num_samples=10)
+        post = extract(idata, num_samples=10)
         assert post.dims["sample"] == 10
         assert post.attrs == idata.posterior.attrs

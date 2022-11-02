@@ -68,5 +68,5 @@ If you regularly help with issue triaging you'll probably be asked to join the t
 some triaging or write permissions on the ArviZ GitHub repo. This would allow you to label and
 assign issues in the ArviZ repo.
 
-You can read more about our team and how to join in the {ref}`about_us` page.
+You can read more about our team and how to join in the {ref}`arviz_org:our_team` page.
 :::

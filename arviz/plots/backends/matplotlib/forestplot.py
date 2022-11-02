@@ -127,8 +127,7 @@ def plot_forest(
         )
     else:
         raise TypeError(
-            "Argument 'kind' must be one of 'forestplot' or "
-            "'ridgeplot' (you provided {})".format(kind)
+            f"Argument 'kind' must be one of 'forestplot' " f"or 'ridgeplot' (you provided {kind})"
         )
 
     idx = 1

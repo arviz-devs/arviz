@@ -38,10 +38,6 @@ arviz.Numba.disable_numba()
 # ones.
 sys.path.insert(0, os.path.abspath("../sphinxext"))
 
-thumb_directory = "example_thumbs"
-if not os.path.isdir(thumb_directory):
-    os.mkdir(thumb_directory)
-
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
@@ -89,17 +85,20 @@ templates_path = ["../_templates"]
 #
 
 # MyST related params
-jupyter_execute_notebooks = "auto"
-execution_excludepatterns = ["*.ipynb"]
-myst_heading_anchors = 3
-panels_add_bootstrap_css = False
+nb_execution_mode = "auto"
+nb_execution_excludepatterns = ["*.ipynb"]
+nb_kernel_rgx_aliases = {".*": "python3"}
+myst_heading_anchors = None
 myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 
-
-myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
+# copybutton config: strip console characters
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
 
 # The base toctree document.
 master_doc = "index"
+default_role = "code"
+suppress_warnings = ["mystnb.unknown_mime_type"]
 
 # General information about the project.
 project = "ArviZ"
@@ -127,7 +126,7 @@ release = version
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+# language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -154,6 +153,10 @@ html_theme = "pydata_sphinx_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
+    "logo": {
+        "image_light": "logo.png",
+        "image_dark": "logo_dark.png",
+    },
     "icon_links": [
         {
             "name": "GitHub",
@@ -167,6 +170,7 @@ html_theme_options = {
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
+    "header_links_before_dropdown": 7,
     "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
     "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
@@ -179,16 +183,18 @@ html_context = {
     "github_repo": "arviz",
     "github_version": "main",
     "doc_path": "doc/source/",
+    "default_mode": "light",
 }
 html_sidebars: Dict[str, Any] = {
-    "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html", "sidebar-ethical-ads.html"]
+    "index": [],
+    "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html"],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-html_static_path = ["_static", thumb_directory]
+html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
 # use additional pages to add a 404 page
@@ -204,10 +210,6 @@ htmlhelp_basename = "ArviZdoc"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 html_short_title = "ArviZ"
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = "_static/logo.png"
 
 
 # The name of an image file (relative to this directory) to use as a favicon of
@@ -286,18 +288,21 @@ epub_exclude_files = ["search.html"]
 
 # Example configuration for intersphinx
 intersphinx_mapping = {
-    "xarray": ("http://xarray.pydata.org/en/stable/", None),
+    "xarray": ("https://docs.xarray.dev/en/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
-    "pymc3": ("https://docs.pymc.io/", None),
+    # Oriol: I am lazy and didn't want to update any references we might have using the pymc3 key
+    "pymc3": ("https://www.pymc.io/projects/docs/en/stable", None),
+    "pymc": ("https://www.pymc.io/projects/docs/en/stable", None),
     "mpl": ("https://matplotlib.org/stable", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "dask": ("https://docs.dask.org/en/latest/", None),
     "sphinx-primer": ("https://sphinx-primer.readthedocs.io/en/latest/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
     "diataxis": ("https://diataxis.fr/", None),
+    "arviz_org": ("https://www.arviz.org/en/latest/", None),
 }
 
 

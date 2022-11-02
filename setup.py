@@ -41,8 +41,8 @@ def get_version():
     for line in lines:
         mo = re.search(version_regex, line, re.M)
         if mo:
-            return mo.group(1)
-    raise RuntimeError("Unable to find version in %s." % (VERSION_FILE,))
+            return mo[1]
+    raise RuntimeError(f"Unable to find version in {VERSION_FILE}.")
 
 
 setup(
@@ -58,7 +58,7 @@ setup(
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     include_package_data=True,
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Matplotlib",
@@ -67,9 +67,10 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Visualization",
         "Topic :: Scientific/Engineering :: Mathematics",

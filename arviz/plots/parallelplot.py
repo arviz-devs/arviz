@@ -113,8 +113,23 @@ def plot_parallel(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_parallel(data, var_names=["mu", "tau"], norm_method='normal')
+        >>> az.plot_parallel(data, var_names=["theta", "tau", "mu"], norm_method="normal")
 
+    Plot parallel plot with minmax
+
+    .. plot::
+        :context: close-figs
+
+        >>> ax = az.plot_parallel(data, var_names=["theta", "tau", "mu"], norm_method="minmax")
+        >>> ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+
+    Plot parallel plot with rank
+
+    .. plot::
+        :context: close-figs
+
+        >>> ax = az.plot_parallel(data, var_names=["theta", "tau", "mu"], norm_method="rank")
+        >>> ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
     """
     if coords is None:
         coords = {}

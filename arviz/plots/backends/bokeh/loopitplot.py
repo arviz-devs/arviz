@@ -64,20 +64,16 @@ def plot_loo_pit(
     plot_kwargs.setdefault("color", to_hex(color))
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y
     elif isinstance(y, DataArray) and y.name is not None:
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y.name
     elif isinstance(y_hat, str):
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y_hat
     elif isinstance(y_hat, DataArray) and y_hat.name is not None:
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = y_hat.name
     else:
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
         xlabel = ""
+    label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
     xlabel = labeller.var_name_to_str(xlabel)
 
     plot_kwargs.setdefault("legend_label", label)
@@ -130,7 +126,10 @@ def plot_loo_pit(
             )
 
         if ecdf_fill:
-            if fill_kwargs.get("drawstyle") == "steps-mid":
+            if (
+                fill_kwargs.get("drawstyle") == "steps-mid"
+                or fill_kwargs.get("drawstyle") != "steps-mid"
+            ):
                 # use step patch when you find out how to do that
                 ax.patch(
                     np.concatenate((unif_ecdf, unif_ecdf[::-1])),
@@ -138,46 +137,38 @@ def plot_loo_pit(
                     fill_color=fill_kwargs.get("color"),
                     fill_alpha=fill_kwargs.get("alpha", 1.0),
                 )
-            else:
-                ax.patch(
-                    np.concatenate((unif_ecdf, unif_ecdf[::-1])),
-                    np.concatenate((p975 - unif_ecdf, (p025 - unif_ecdf)[::-1])),
-                    fill_color=fill_kwargs.get("color"),
-                    fill_alpha=fill_kwargs.get("alpha", 1.0),
-                )
+        elif fill_kwargs is not None and fill_kwargs.get("drawstyle") == "steps-mid":
+            ax.step(
+                unif_ecdf,
+                p975 - unif_ecdf,
+                line_color=plot_unif_kwargs.get("color", "black"),
+                line_alpha=plot_unif_kwargs.get("alpha", 1.0),
+                line_width=plot_kwargs.get("linewidth", 1.0),
+                mode="center",
+            )
+            ax.step(
+                unif_ecdf,
+                p025 - unif_ecdf,
+                line_color=plot_unif_kwargs.get("color", "black"),
+                line_alpha=plot_unif_kwargs.get("alpha", 1.0),
+                line_width=plot_unif_kwargs.get("linewidth", 1.0),
+                mode="center",
+            )
         else:
-            if fill_kwargs is not None and fill_kwargs.get("drawstyle") == "steps-mid":
-                ax.step(
-                    unif_ecdf,
-                    p975 - unif_ecdf,
-                    line_color=plot_unif_kwargs.get("color", "black"),
-                    line_alpha=plot_unif_kwargs.get("alpha", 1.0),
-                    line_width=plot_kwargs.get("linewidth", 1.0),
-                    mode="center",
-                )
-                ax.step(
-                    unif_ecdf,
-                    p025 - unif_ecdf,
-                    line_color=plot_unif_kwargs.get("color", "black"),
-                    line_alpha=plot_unif_kwargs.get("alpha", 1.0),
-                    line_width=plot_unif_kwargs.get("linewidth", 1.0),
-                    mode="center",
-                )
-            else:
-                ax.line(
-                    unif_ecdf,
-                    p975 - unif_ecdf,
-                    line_color=plot_unif_kwargs.get("color", "black"),
-                    line_alpha=plot_unif_kwargs.get("alpha", 1.0),
-                    line_width=plot_unif_kwargs.get("linewidth", 1.0),
-                )
-                ax.line(
-                    unif_ecdf,
-                    p025 - unif_ecdf,
-                    line_color=plot_unif_kwargs.get("color", "black"),
-                    line_alpha=plot_unif_kwargs.get("alpha", 1.0),
-                    line_width=plot_unif_kwargs.get("linewidth", 1.0),
-                )
+            ax.line(
+                unif_ecdf,
+                p975 - unif_ecdf,
+                line_color=plot_unif_kwargs.get("color", "black"),
+                line_alpha=plot_unif_kwargs.get("alpha", 1.0),
+                line_width=plot_unif_kwargs.get("linewidth", 1.0),
+            )
+            ax.line(
+                unif_ecdf,
+                p025 - unif_ecdf,
+                line_color=plot_unif_kwargs.get("color", "black"),
+                line_alpha=plot_unif_kwargs.get("alpha", 1.0),
+                line_width=plot_unif_kwargs.get("linewidth", 1.0),
+            )
     else:
         if use_hdi:
             patch = BoxAnnotation(

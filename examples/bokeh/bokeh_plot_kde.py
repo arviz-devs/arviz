@@ -1,8 +1,6 @@
 """
 KDE Plot Bokeh
 ==============
-
-_thumb: .2, .8
 """
 import bokeh.plotting as bkp
 import numpy as np

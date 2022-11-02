@@ -115,13 +115,11 @@ def plot_forest(
             backend_kwargs_i.setdefault(
                 "width", int(figsize[0] * (width_r / sum(width_ratios)) * dpi * 1.25)
             )
+            ax = bkp.figure(
+                **backend_kwargs_i,
+            )
             if i == 0:
-                ax = bkp.figure(
-                    **backend_kwargs_i,
-                )
                 backend_kwargs.setdefault("y_range", ax.y_range)
-            else:
-                ax = bkp.figure(**backend_kwargs_i)
             axes.append(ax)
     else:
         axes = ax
@@ -155,8 +153,7 @@ def plot_forest(
         )
     else:
         raise TypeError(
-            "Argument 'kind' must be one of 'forestplot' or "
-            "'ridgeplot' (you provided {})".format(kind)
+            f"Argument 'kind' must be one of 'forestplot' or 'ridgeplot' (you provided {kind})"
         )
 
     idx = 1

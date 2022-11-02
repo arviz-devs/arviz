@@ -3,6 +3,7 @@ from .base import CoordSpec, DimSpec, dict_to_dataset, numpy_to_data_array
 from .converters import convert_to_dataset, convert_to_inference_data
 from .datasets import clear_data_home, list_datasets, load_arviz_data
 from .inference_data import InferenceData, concat
+from .io_beanmachine import from_beanmachine
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
 from .io_dict import from_dict
@@ -14,7 +15,7 @@ from .io_pyjags import from_pyjags
 from .io_pymc3 import from_pymc3, from_pymc3_predictions
 from .io_pyro import from_pyro
 from .io_pystan import from_pystan
-from .utils import extract_dataset
+from .utils import extract, extract_dataset
 
 __all__ = [
     "InferenceData",
@@ -23,10 +24,12 @@ __all__ = [
     "list_datasets",
     "clear_data_home",
     "numpy_to_data_array",
+    "extract",
     "extract_dataset",
     "dict_to_dataset",
     "convert_to_dataset",
     "convert_to_inference_data",
+    "from_beanmachine",
     "from_pyjags",
     "from_pymc3",
     "from_pymc3_predictions",

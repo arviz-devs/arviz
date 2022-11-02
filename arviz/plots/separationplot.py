@@ -106,8 +106,9 @@ def plot_separation(
         if not all(isinstance(arg, (np.ndarray, xr.DataArray)) for arg in (y, y_hat)):
             raise ValueError(
                 "y and y_hat must be array or DataArray when idata is None "
-                "but they are of types {}".format([type(arg) for arg in (y, y_hat)])
+                f"but they are of types {[type(arg) for arg in (y, y_hat)]}"
             )
+
     else:
 
         if y_hat is None and isinstance(y, str):

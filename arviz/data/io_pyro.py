@@ -203,11 +203,8 @@ class PyroConverter:
         else:
             prior_vars = self.prior.keys()
             prior_predictive_vars = None
-        priors_dict = {}
-        for group, var_names in zip(
-            ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
-        ):
-            priors_dict[group] = (
+        priors_dict = {
+            group: (
                 None
                 if var_names is None
                 else dict_to_dataset(
@@ -220,16 +217,17 @@ class PyroConverter:
                     dims=self.dims,
                 )
             )
+            for group, var_names in zip(
+                ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
+            )
+        }
         return priors_dict
 
     @requires("observations")
     @requires("model")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        dims = {} if self.dims is None else self.dims
         return dict_to_dataset(
             self.observations, library=self.pyro, coords=self.coords, dims=dims, default_dims=[]
         )

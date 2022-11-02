@@ -1,7 +1,7 @@
 jobs:
 - job: ExternalTests
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-22.04'
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
@@ -105,7 +105,7 @@ jobs:
     displayName: 'pydocstyle'
 
   - script: |
-      python -m black --check arviz examples asv_benchmarks
+      python -m black --check --diff arviz examples asv_benchmarks
     displayName: 'black'
 
   - script: |
@@ -115,26 +115,6 @@ jobs:
   - script: |
       python -m madforhooks.no_print_statements $(find arviz -name '*.py' -not -path 'arviz/tests/*')
     displayName: 'Disallow debugging print statements (use `file=sys.stdout` if not debugging)'
-
-  - script: |
-      python -m mypy .
-    displayName: 'mypy'
-
-  - script: |
-      python -m typing_copilot.cli tighten --error-if-can-tighten
-    displayName: 'typing_copilot'
-
-  - script: |
-      python -m typing_copilot.cli tighten
-    condition: failed()
-    displayName: 'update mypy.ini with typing_copilot'
-
-  - task: PublishBuildArtifacts@1
-    condition: failed()
-    inputs:
-      pathtoPublish: 'mypy.ini'
-      artifactName: 'mypy.ini'
-    displayName: 'Upload updated mypy.ini'
 
   - script: |
       pytest arviz/tests/helpers.py
@@ -151,5 +131,12 @@ jobs:
       testRunTitle: 'Publish test results for Python $(python.version)'
 
   - script: |
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
+      curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+      curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+      gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+      shasum -a 256 -c codecov.SHA256SUM
+      chmod +x codecov
+      ./codecov -n "$(NAME)"
     displayName: 'upload coverage'

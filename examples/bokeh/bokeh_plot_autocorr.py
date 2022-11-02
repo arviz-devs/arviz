@@ -1,8 +1,6 @@
 """
 Autocorrelation Plot
 ====================
-
-_thumb: .8, .8
 """
 import arviz as az
 

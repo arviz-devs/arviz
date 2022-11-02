@@ -1,8 +1,6 @@
 """
 KDE quantiles Bokeh
 ===================
-
-_thumb: .2, .8
 """
 import numpy as np
 

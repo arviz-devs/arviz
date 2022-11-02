@@ -294,6 +294,12 @@ def test_plot_trace_invalid_varname_warning(models, kwargs):
     assert axes.shape
 
 
+def test_plot_trace_diverging_correctly_transposed():
+    idata = load_arviz_data("centered_eight")
+    idata.sample_stats["diverging"] = idata.sample_stats.diverging.T
+    plot_trace(idata, divergences="bottom")
+
+
 @pytest.mark.parametrize(
     "bad_kwargs", [{"var_names": ["mu", "tau"], "lines": [("mu", {}, ["hey"])]}]
 )
@@ -382,6 +388,14 @@ def test_plot_energy(models, kind):
 def test_plot_energy_bad(models):
     with pytest.raises(ValueError):
         plot_energy(models.model_1, kind="bad_kind")
+
+
+def test_plot_energy_correctly_transposed():
+    idata = load_arviz_data("centered_eight")
+    idata.sample_stats["energy"] = idata.sample_stats.energy.T
+    ax = plot_energy(idata)
+    # legend has one entry for each KDE and 1 BFMI for each chain
+    assert len(ax.legend_.texts) == 2 + len(idata.sample_stats.chain)
 
 
 def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
@@ -555,12 +569,12 @@ def test_plot_kde_inference_data(models):
             "var_names": "theta",
             "divergences": True,
             "coords": {"school": [0, 1]},
-            "scatter_kwargs": {"marker": "x"},
+            "scatter_kwargs": {"marker": "x", "c": "C0"},
             "divergences_kwargs": {"marker": "*", "c": "C0"},
         },
         {
             "divergences": True,
-            "scatter_kwargs": {"marker": "x"},
+            "scatter_kwargs": {"marker": "x", "c": "C0"},
             "divergences_kwargs": {"marker": "*", "c": "C0"},
             "var_names": ["theta", "mu"],
         },
@@ -908,8 +922,10 @@ def test_plot_legend(models):
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-def test_plot_violin(models, var_names):
-    axes = plot_violin(models.model_1, var_names=var_names)
+@pytest.mark.parametrize("side", ["both", "left", "right"])
+@pytest.mark.parametrize("rug", [True])
+def test_plot_violin(models, var_names, side, rug):
+    axes = plot_violin(models.model_1, var_names=var_names, side=side, rug=rug)
     assert axes.shape
 
 
@@ -1127,7 +1143,7 @@ def test_plot_posterior_skipna_combinedims():
 
 
 @pytest.mark.parametrize(
-    "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
+    "kwargs", [{"insample_dev": True}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
 def test_plot_compare(models, kwargs):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
@@ -1141,12 +1157,12 @@ def test_plot_compare_no_ic(models):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # Drop column needed for plotting
-    model_compare = model_compare.drop("loo", axis=1)
+    model_compare = model_compare.drop("elpd_loo", axis=1)
     with pytest.raises(ValueError) as err:
         plot_compare(model_compare)
 
     assert "comp_df must contain one of the following" in str(err.value)
-    assert "['loo', 'waic']" in str(err.value)
+    assert "['elpd_loo', 'elpd_waic']" in str(err.value)
 
 
 @pytest.mark.parametrize(
@@ -1190,6 +1206,15 @@ def test_plot_hdi_dataset_error(models):
     hdi_data = hdi(models.model_1)
     with pytest.raises(ValueError, match="Only single variable Dataset"):
         plot_hdi(np.arange(8), hdi_data=hdi_data)
+
+
+def test_plot_hdi_datetime_error():
+    """Check x as datetime raises an error."""
+    x_data = np.arange(start="2022-01-01", stop="2022-03-01", dtype=np.datetime64)
+    y_data = np.random.normal(0, 5, (1, 200, x_data.shape[0]))
+    hdi_data = hdi(y_data)
+    with pytest.raises(TypeError, match="Cannot deal with x as type datetime."):
+        plot_hdi(x=x_data, y=y_data, hdi_data=hdi_data)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])

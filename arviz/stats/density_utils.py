@@ -306,7 +306,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
     all_numeric = all(isinstance(i, (int, float, np.integer, np.float)) for i in custom_lims)
     if not all_numeric:
         raise TypeError(
-            ("Elements of `custom_lims` must be numeric or None.\n" "At least one of them is not.")
+            "Elements of `custom_lims` must be numeric or None.\nAt least one of them is not."
         )
 
     if not custom_lims[0] < custom_lims[1]:
@@ -382,19 +382,22 @@ def kde(x, circular=False, **kwargs):
 
     Parameters
     ----------
-    x: 1D numpy array
+    x : 1D numpy array
         Data used to calculate the density estimation.
-    circular: bool, optional
+    circular : bool, optional
         Whether ``x`` is a circular variable or not. Defaults to False.
-    **kwargs
+    kwargs : dict, optional
         Arguments passed to ``kde_linear()`` and ``kde_circular()``.
         See their documentation for more info.
 
     Returns
     -------
-    grid: Gridded numpy array for the x values.
-    pdf: Numpy array for the density estimates.
-    bw: optional, the estimated bandwidth.
+    grid : numpy.ndarray
+        Gridded numpy array for the x values.
+    pdf : numpy.ndarray
+        Numpy array for the density estimates.
+    bw : float
+        The estimated bandwidth. Only returned if requested.
 
     Examples
     --------
@@ -407,10 +410,10 @@ def kde(x, circular=False, **kwargs):
         >>> import matplotlib.pyplot as plt
         >>> from arviz import kde
         >>>
-        >>> rvs = np.random.gamma(shape=1.8, size=1000)
+        >>> rng = np.random.default_rng(49)
+        >>> rvs = rng.gamma(shape=1.8, size=1000)
         >>> grid, pdf = kde(rvs)
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     Density estimation for linear data with Silverman's rule bandwidth
 
@@ -419,7 +422,6 @@ def kde(x, circular=False, **kwargs):
 
         >>> grid, pdf = kde(rvs, bw="silverman")
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     Density estimation for linear data with scaled bandwidth
 
@@ -429,7 +431,6 @@ def kde(x, circular=False, **kwargs):
         >>> # bw_fct > 1 means more smoothness.
         >>> grid, pdf = kde(rvs, bw_fct=2.5)
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     Default density estimation for linear data with extended limits
 
@@ -438,7 +439,6 @@ def kde(x, circular=False, **kwargs):
 
         >>> grid, pdf = kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     Default density estimation for linear data with custom limits
 
@@ -446,9 +446,8 @@ def kde(x, circular=False, **kwargs):
         :context: close-figs
 
         >>> # It accepts tuples and lists of length 2.
-        >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 10))
+        >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 11))
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     Default density estimation for circular data
 
@@ -458,7 +457,6 @@ def kde(x, circular=False, **kwargs):
         >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
         >>> grid, pdf = kde(rvs, circular=True)
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     Density estimation for circular data with scaled bandwidth
 
@@ -469,7 +467,6 @@ def kde(x, circular=False, **kwargs):
         >>> # bw_fct > 1 means less smoothness.
         >>> grid, pdf = kde(rvs, circular=True, bw_fct=3)
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     Density estimation for circular data with custom limits
 
@@ -480,7 +477,6 @@ def kde(x, circular=False, **kwargs):
         >>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
         >>> grid, pdf = kde(rvs, circular=True, custom_lims=(-1, 1))
         >>> plt.plot(grid, pdf)
-        >>> plt.show()
 
     See Also
     --------
@@ -653,12 +649,9 @@ def _kde_circular(
 
     # Determine bandwidth
     if isinstance(bw, bool):
-        raise ValueError(
-            "`bw` can't be of type `bool`.\n" "Expected a positive numeric or 'taylor'"
-        )
-    if isinstance(bw, (int, float)):
-        if bw < 0:
-            raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
+        raise ValueError("`bw` can't be of type `bool`.\nExpected a positive numeric or 'taylor'")
+    if isinstance(bw, (int, float)) and bw < 0:
+        raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
     if isinstance(bw, str):
         if bw == "taylor":
             bw = _bw_taylor(x)
@@ -722,10 +715,9 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction,
         npad = int(grid_len / 5)
         f = np.concatenate([f[npad - 1 :: -1], f, f[grid_len : grid_len - npad - 1 : -1]])
         pdf = convolve(f, kernel, mode="same", method="direct")[npad : npad + grid_len]
-        pdf /= bw * (2 * np.pi) ** 0.5
     else:
         pdf = convolve(f, kernel, mode="same", method="direct")
-        pdf /= bw * (2 * np.pi) ** 0.5
+    pdf /= bw * (2 * np.pi) ** 0.5
 
     return grid, pdf
 

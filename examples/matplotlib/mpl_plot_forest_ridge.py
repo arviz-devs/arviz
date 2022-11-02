@@ -1,15 +1,13 @@
 """
 Ridgeplot
 =========
-
-_thumb: .8, .5
-_example_title: Forest plot with individual ridges
+_gallery_category: Distributions
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 rugby_data = az.load_arviz_data("rugby")
 axes = az.plot_forest(
@@ -19,8 +17,7 @@ axes = az.plot_forest(
     linewidth=4,
     combined=True,
     ridgeplot_overlap=1.5,
-    colors="blue",
-    figsize=(9, 4),
+    figsize=(11.5, 5),
 )
 axes[0].set_title("Relative defensive strength\nof Six Nation rugby teams")
 

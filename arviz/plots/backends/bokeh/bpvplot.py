@@ -78,9 +78,8 @@ def plot_bpv(
 
         if len([item for item in axes.ravel() if not None]) != length_plotters:
             raise ValueError(
-                "Found {} variables to plot but {} axes instances. They must be equal.".format(
-                    length_plotters, len(axes)
-                )
+                f"Found {length_plotters} variables to plot but {len(axes)} axes instances. "
+                "They must be equal."
             )
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):

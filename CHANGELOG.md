@@ -5,11 +5,40 @@
 ### New features
 
 ### Maintenance and fixes
+- Fix dimension ordering for `plot_trace` with divergences ([2151](https://github.com/arviz-devs/arviz/pull/2151))
 
 ### Deprecation
 
 ### Documentation
 
+## v0.13.0 (2022 Oct 22)
+
+### New features
+* Add `side` argument to `plot_violin` to allow single-sided violin plots ([1996](https://github.com/arviz-devs/arviz/pull/1996))
+* Added support for Bean Machine via the function `from_beanmachine`. ([2107](https://github.com/arviz-devs/arviz/pull/2107)
+* Add support for warmup samples in `from_pystan` for PyStan 3. ([2132](https://github.com/arviz-devs/arviz/pull/2132)
+
+### Maintenance and fixes
+* Add exception in `az.plot_hdi` for `x` of type `np.datetime64` and `smooth=True` ([2016](https://github.com/arviz-devs/arviz/pull/2016))
+* Change `ax.plot` usage to `ax.scatter` in `plot_pair` ([1990](https://github.com/arviz-devs/arviz/pull/1990))
+* Example data has been moved to the [arviz_example_data](https://github.com/arviz-devs/arviz_example_data) repository and is now included using git subtree.
+  ([2096](https://github.com/arviz-devs/arviz/pull/2096) and [2105](https://github.com/arviz-devs/arviz/pull/2105))
+* Bokeh kde contour plots started to use `contourpy` package ([2104](https://github.com/arviz-devs/arviz/pull/2104))
+* Update default Bokeh markers for rcparams ([2104](https://github.com/arviz-devs/arviz/pull/2104))
+* Correctly (re)order dimensions for `bfmi` and `plot_energy` ([2126](https://github.com/arviz-devs/arviz/pull/2126))
+* Fix bug with the dimension order dependency ([2103](https://github.com/arviz-devs/arviz/pull/2103))
+* Add testing module for labeller classes ([2095](https://github.com/arviz-devs/arviz/pull/2095))
+* Skip compression for object dtype while creating a netcdf file ([2129](https://github.com/arviz-devs/arviz/pull/2129))
+* Fix issue in dim generation when default dims are present in user inputed dims ([2138](https://github.com/arviz-devs/arviz/pull/2138))
+* Save InferenceData level attrs to netcdf and zarr ([2131](https://github.com/arviz-devs/arviz/pull/2131))
+* Update tests and docs for updated example data ([2137](https://github.com/arviz-devs/arviz/pull/2137))
+
+### Deprecation
+* Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
+
+### Documentation
+* Add translation overview to contributing guide ([2041](https://github.com/arviz-devs/arviz/pull/2041))
+* Improve how to release page ([2144](https://github.com/arviz-devs/arviz/pull/2144))
 
 ## v0.12.1 (2022 May 12)
 ### New features
@@ -23,7 +52,7 @@
 
 ### Documentation
 * Adding plotting guides ([2025](https://github.com/arviz-devs/arviz/pull/2025))
-* Update links to use new domain ([2013](https://github.com/arviz-devs/arviz/pull/2013)) 
+* Update links to use new domain ([2013](https://github.com/arviz-devs/arviz/pull/2013))
 
 
 ## v0.12.0 (2022 Mar 23)

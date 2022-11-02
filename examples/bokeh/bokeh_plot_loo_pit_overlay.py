@@ -1,9 +1,6 @@
 """
 LOO-PIT Overlay Plot
 ====================
-
-_thumb: .5, .7
-_example_title: Plot LOO-PIT KDE overlaid on KDEs of uniform samples to assess predictive calibration.
 """
 import arviz as az
 

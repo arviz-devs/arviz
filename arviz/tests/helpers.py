@@ -1,4 +1,4 @@
-# pylint: disable=redefined-outer-name, comparison-with-callable
+# pylint: disable=redefined-outer-name, comparison-with-callable, protected-access
 """Test helper functions."""
 import gzip
 import importlib
@@ -51,7 +51,7 @@ def chains():
     return 2
 
 
-def create_model(seed=10):
+def create_model(seed=10, transpose=False):
     """Create model with fake data."""
     np.random.seed(seed)
     nchains = 4
@@ -104,10 +104,15 @@ def create_model(seed=10):
         },
         coords={"obs_dim": range(data["J"])},
     )
+    if transpose:
+        for group in model._groups:
+            group_dataset = getattr(model, group)
+            if all(dim in group_dataset.dims for dim in ("draw", "chain")):
+                setattr(model, group, group_dataset.transpose(*["draw", "chain"], ...))
     return model
 
 
-def create_multidimensional_model(seed=10):
+def create_multidimensional_model(seed=10, transpose=False):
     """Create model with fake data."""
     np.random.seed(seed)
     nchains = 4
@@ -155,6 +160,11 @@ def create_multidimensional_model(seed=10):
         dims={"y": ["dim1", "dim2"], "log_likelihood": ["dim1", "dim2"]},
         coords={"dim1": range(ndim1), "dim2": range(ndim2)},
     )
+    if transpose:
+        for group in model._groups:
+            group_dataset = getattr(model, group)
+            if all(dim in group_dataset.dims for dim in ("draw", "chain")):
+                setattr(model, group, group_dataset.transpose(*["draw", "chain"], ...))
     return model
 
 
@@ -195,7 +205,7 @@ def models():
 
     class Models:
         model_1 = create_model(seed=10)
-        model_2 = create_model(seed=11)
+        model_2 = create_model(seed=11, transpose=True)
 
     return Models()
 
@@ -207,7 +217,7 @@ def multidim_models():
 
     class Models:
         model_1 = create_multidimensional_model(seed=10)
-        model_2 = create_multidimensional_model(seed=11)
+        model_2 = create_multidimensional_model(seed=11, transpose=True)
 
     return Models()
 
@@ -471,7 +481,7 @@ def pystan_noncentered_schools(data, draws, chains):
 
         stan_model = stan.build(schools_code, data=data)
         fit = stan_model.sample(
-            num_chains=chains, num_samples=draws, num_warmup=500, save_warmup=False
+            num_chains=chains, num_samples=draws, num_warmup=500, save_warmup=True
         )
     return stan_model, fit
 
@@ -603,28 +613,25 @@ def importorskip(
     """
     # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
     ARVIZ_CI_MACHINE = running_on_ci()
-    if ARVIZ_CI_MACHINE:
-        import warnings
-
-        compile(modname, "", "eval")  # to catch syntaxerrors
-
-        with warnings.catch_warnings():
-            # make sure to ignore ImportWarnings that might happen because
-            # of existing directories with the same name we're trying to
-            # import but without a __init__.py file
-            warnings.simplefilter("ignore")
-            __import__(modname)
-        mod = sys.modules[modname]
-        if minversion is None:
-            return mod
-        verattr = getattr(mod, "__version__", None)
-        if minversion is not None:
-            if verattr is None or Version(verattr) < Version(minversion):
-                raise Skipped(
-                    "module %r has __version__ %r, required is: %r"
-                    % (modname, verattr, minversion),
-                    allow_module_level=True,
-                )
-        return mod
-    else:
+    if not ARVIZ_CI_MACHINE:
         return pytest.importorskip(modname=modname, minversion=minversion, reason=reason)
+    import warnings
+
+    compile(modname, "", "eval")  # to catch syntaxerrors
+
+    with warnings.catch_warnings():
+        # make sure to ignore ImportWarnings that might happen because
+        # of existing directories with the same name we're trying to
+        # import but without a __init__.py file
+        warnings.simplefilter("ignore")
+        __import__(modname)
+    mod = sys.modules[modname]
+    if minversion is None:
+        return mod
+    verattr = getattr(mod, "__version__", None)
+    if verattr is None or Version(verattr) < Version(minversion):
+        raise Skipped(
+            "module %r has __version__ %r, required is: %r" % (modname, verattr, minversion),
+            allow_module_level=True,
+        )
+    return mod

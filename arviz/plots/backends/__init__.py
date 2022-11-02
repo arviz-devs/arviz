@@ -156,10 +156,7 @@ def create_layout(ax, force_layout=False):
 
         if n != 1:
             ax = np.array(ax + [None for _ in range(int(np.ceil(len(ax) / n)) - len(ax))])
-            if subplot_order == "row":
-                ax = ax.reshape(n, -1)
-            else:
-                ax = ax.reshape(-1, n)
+            ax = ax.reshape(n, -1) if subplot_order == "row" else ax.reshape(-1, n)
             ax = ax.tolist()
     else:
         if subplot_order in ("square", "square_trimmed"):
@@ -173,7 +170,7 @@ def create_layout(ax, force_layout=False):
         ):
             from bokeh.layouts import layout
 
-            ax = [row for row in ax if not all(item is None for item in row)]
+            ax = [row for row in ax if any(item is not None for item in row)]
             layout_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
         else:
             from bokeh.layouts import gridplot as layout
@@ -216,6 +213,10 @@ def _copy_docstring(lib, function):
 
 
 # TODO: try copying substitutions too, or autoreplace them ourselves
-output_notebook.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_notebook")
-output_file.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_file")
+output_notebook.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_notebook").replace(
+    "|save|", "save"
+).replace("|show|", "show")
+output_file.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_file").replace(
+    "|save|", "save"
+).replace("|show|", "show")
 ColumnDataSource.__doc__ += "\n\n" + _copy_docstring("bokeh.models", "ColumnDataSource")

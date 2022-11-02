@@ -1,15 +1,13 @@
 """
 ESS Local Plot
 ==============
-
-_thumb: .6, .5
-_example_title: Plot local ESS
+_gallery_category: Inference Diagnostics
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 idata = az.load_arviz_data("non_centered_eight")
 

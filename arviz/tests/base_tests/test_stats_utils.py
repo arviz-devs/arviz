@@ -69,10 +69,7 @@ def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
 
     if b_inv != 0:
         # Scipy implementation when b_inv != 0
-        if b_inv is not None:
-            b_scipy = 1 / b_inv
-        else:
-            b_scipy = None
+        b_scipy = 1 / b_inv if b_inv is not None else None
         scipy_results = logsumexp(ary, b=b_scipy, axis=axis, keepdims=keepdims)
         arviz_results = _logsumexp(ary, b_inv=b_inv, axis=axis, keepdims=keepdims)
 
@@ -88,13 +85,12 @@ def test_wrap_ufunc_output(quantile, arg):
         res = wrap_xarray_ufunc(
             np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_args=(quantile,)
         )
+    elif n_output == 1:
+        res = wrap_xarray_ufunc(np.quantile, ary, func_kwargs={"q": quantile})
     else:
-        if n_output == 1:
-            res = wrap_xarray_ufunc(np.quantile, ary, func_kwargs={"q": quantile})
-        else:
-            res = wrap_xarray_ufunc(
-                np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"q": quantile}
-            )
+        res = wrap_xarray_ufunc(
+            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"q": quantile}
+        )
     if n_output == 1:
         assert not isinstance(res, tuple)
     else:
@@ -305,8 +301,8 @@ def test_get_log_likelihood_no_group():
 
 
 def test_elpd_data_error():
-    with pytest.raises(ValueError):
-        ELPDData(data=[0, 1, 2], index=["not IC", "se", "p"]).__repr__()
+    with pytest.raises(IndexError):
+        repr(ELPDData(data=[0, 1, 2], index=["not IC", "se", "p"]))
 
 
 def test_stats_variance_1d():

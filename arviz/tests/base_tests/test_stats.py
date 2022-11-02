@@ -45,17 +45,12 @@ def non_centered_eight():
 @pytest.fixture(scope="module")
 def multivariable_log_likelihood(centered_eight):
     centered_eight = centered_eight.copy()
-    centered_eight.add_groups({"log_likelihood": centered_eight.sample_stats.log_likelihood})
-    centered_eight.log_likelihood = centered_eight.log_likelihood.rename_vars(
-        {"log_likelihood": "obs"}
-    )
     new_arr = DataArray(
         np.zeros(centered_eight.log_likelihood["obs"].values.shape),
         dims=["chain", "draw", "school"],
         coords=centered_eight.log_likelihood.coords,
     )
     centered_eight.log_likelihood["decoy"] = new_arr
-    delattr(centered_eight, "sample_stats")
     return centered_eight
 
 
@@ -213,7 +208,7 @@ def test_compare_different_multidim(multidim_models, ic, method):
 def test_compare_different_size(centered_eight, non_centered_eight):
     centered_eight = deepcopy(centered_eight)
     centered_eight.posterior = centered_eight.posterior.drop("Choate", "school")
-    centered_eight.sample_stats = centered_eight.sample_stats.drop("Choate", "school")
+    centered_eight.log_likelihood = centered_eight.log_likelihood.drop("Choate", "school")
     centered_eight.posterior_predictive = centered_eight.posterior_predictive.drop(
         "Choate", "school"
     )
@@ -233,7 +228,7 @@ def test_compare_multiple_obs(multivariable_log_likelihood, centered_eight, non_
     }
     with pytest.raises(TypeError, match="several log likelihood arrays"):
         get_log_likelihood(compare_dict["problematic"])
-    with pytest.raises(TypeError, match="error in ic computation"):
+    with pytest.raises(TypeError, match="error in ELPD computation"):
         compare(compare_dict, ic=ic)
     assert compare(compare_dict, ic=ic, var_name="obs") is not None
 
@@ -248,8 +243,9 @@ def test_calculate_ics(centered_eight, non_centered_eight, ic):
     elpddata_out, _, _ = _calculate_ics(elpddata_dict, ic=ic)
     mixed_out, _, _ = _calculate_ics(mixed_dict, ic=ic)
     for model in idata_dict:
-        assert idata_out[model][ic] == elpddata_out[model][ic]
-        assert idata_out[model][ic] == mixed_out[model][ic]
+        ic_ = f"elpd_{ic}"
+        assert idata_out[model][ic_] == elpddata_out[model][ic_]
+        assert idata_out[model][ic_] == mixed_out[model][ic_]
         assert idata_out[model][f"p_{ic}"] == elpddata_out[model][f"p_{ic}"]
         assert idata_out[model][f"p_{ic}"] == mixed_out[model][f"p_{ic}"]
 
@@ -265,7 +261,7 @@ def test_calculate_ics_ic_override(centered_eight, non_centered_eight):
     with pytest.warns(UserWarning, match="precomputed elpddata: waic"):
         out_dict, _, ic = _calculate_ics(in_dict, ic="loo")
     assert ic == "waic"
-    assert out_dict["centered"]["waic"] == waic(centered_eight)["waic"]
+    assert out_dict["centered"]["elpd_waic"] == waic(centered_eight)["elpd_waic"]
 
 
 def test_summary_ndarray():
@@ -441,11 +437,7 @@ def test_waic(centered_eight, multidim_models, scale, multidim):
 def test_waic_bad(centered_eight):
     """Test widely available information criterion calculation"""
     centered_eight = deepcopy(centered_eight)
-    del centered_eight.sample_stats["log_likelihood"]
-    with pytest.raises(TypeError):
-        waic(centered_eight)
-
-    del centered_eight.sample_stats
+    delattr(centered_eight, "log_likelihood")
     with pytest.raises(TypeError):
         waic(centered_eight)
 
@@ -458,19 +450,19 @@ def test_waic_bad_scale(centered_eight):
 
 def test_waic_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
-    centered_eight.sample_stats["log_likelihood"][:, :250, 1] = 10
+    centered_eight.log_likelihood["obs"][:, :250, 1] = 10
     with pytest.warns(UserWarning):
         assert waic(centered_eight, pointwise=True) is not None
     # this should throw a warning, but due to numerical issues it fails
-    centered_eight.sample_stats["log_likelihood"][:, :, :] = 0
+    centered_eight.log_likelihood["obs"][:, :, :] = 0
     with pytest.warns(UserWarning):
         assert waic(centered_eight, pointwise=True) is not None
 
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_waic_print(centered_eight, scale):
-    waic_data = waic(centered_eight, scale=scale).__repr__()
-    waic_pointwise = waic(centered_eight, scale=scale, pointwise=True).__repr__()
+    waic_data = repr(waic(centered_eight, scale=scale))
+    waic_pointwise = repr(waic(centered_eight, scale=scale, pointwise=True))
     assert waic_data is not None
     assert waic_pointwise is not None
     assert waic_data == waic_pointwise
@@ -489,7 +481,7 @@ def test_loo(centered_eight, multidim_models, scale, multidim):
     assert loo_pointwise is not None
     assert "loo_i" in loo_pointwise
     assert "pareto_k" in loo_pointwise
-    assert "loo_scale" in loo_pointwise
+    assert "scale" in loo_pointwise
 
 
 def test_loo_one_chain(centered_eight):
@@ -504,7 +496,7 @@ def test_loo_bad(centered_eight):
         loo(np.random.randn(2, 10))
 
     centered_eight = deepcopy(centered_eight)
-    del centered_eight.sample_stats["log_likelihood"]
+    delattr(centered_eight, "log_likelihood")
     with pytest.raises(TypeError):
         loo(centered_eight)
 
@@ -527,13 +519,13 @@ def test_loo_bad_no_posterior_reff(centered_eight):
 def test_loo_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
     # make one of the khats infinity
-    centered_eight.sample_stats["log_likelihood"][:, :, 1] = 10
+    centered_eight.log_likelihood["obs"][:, :, 1] = 10
     with pytest.warns(UserWarning) as records:
         assert loo(centered_eight, pointwise=True) is not None
     assert any("Estimated shape parameter" in str(record.message) for record in records)
 
     # make all of the khats infinity
-    centered_eight.sample_stats["log_likelihood"][:, :, :] = 1
+    centered_eight.log_likelihood["obs"][:, :, :] = 1
     with pytest.warns(UserWarning) as records:
         assert loo(centered_eight, pointwise=True) is not None
     assert any("Estimated shape parameter" in str(record.message) for record in records)
@@ -541,8 +533,8 @@ def test_loo_warning(centered_eight):
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_loo_print(centered_eight, scale):
-    loo_data = loo(centered_eight, scale=scale, pointwise=False).__repr__()
-    loo_pointwise = loo(centered_eight, scale=scale, pointwise=True).__repr__()
+    loo_data = repr(loo(centered_eight, scale=scale, pointwise=False))
+    loo_pointwise = repr(loo(centered_eight, scale=scale, pointwise=True))
     assert loo_data is not None
     assert loo_pointwise is not None
     assert len(loo_data) < len(loo_pointwise)

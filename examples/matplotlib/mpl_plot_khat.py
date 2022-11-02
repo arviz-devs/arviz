@@ -1,15 +1,13 @@
 """
 Pareto Shape Plot
 =================
-
-_thumb: .7, .5
-_example_title: k&#x0302; plot
+_gallery_category: Model Comparison
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 idata = az.load_arviz_data("radon")
 loo = az.loo(idata, pointwise=True)

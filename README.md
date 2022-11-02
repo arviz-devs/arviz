@@ -64,90 +64,92 @@ python setup.py install
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_forest_ridge.html">
   <img alt="Ridge plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_forest_ridge_thumb.png" />
-  </a>
-  </td>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_parallel.html">
-  <img alt="Parallel plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_parallel_minmax_thumb.png" />
-  </a>
-  </td>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_trace.html">
-  <img alt="Trace plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_trace_bars_thumb.png" />
-  </a>
-  </td>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_density.html">
-  <img alt="Density plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_density_thumb.png" />
-  </a>
-  </td>
-
-  </tr>
-  <tr>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_posterior.html">
-  <img alt="Posterior plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_posterior_thumb.png" />
-  </a>
-  </td>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_dot.html">
-  <img alt="Joint plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_dot_thumb.png" />
-  </a>
-  </td>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_ppc.html">
-  <img alt="Posterior predictive plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_ppc_thumb.png" />
-  </a>
-  </td>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_pair.html">
-  <img alt="Pair plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_pair_thumb.png" />
-  </a>
-  </td>
-
-  </tr>
-  <tr>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_energy.html">
-  <img alt="Energy Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_pair_hex_thumb.png" />
-  </a>
-  </td>
-
-  <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_violin.html">
-  <img alt="Violin Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_violin_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_forest_ridge.png" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_forest.html">
   <img alt="Forest Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_forest_thumb.png" />
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_forest.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_autocorr.html">
-  <img alt="Autocorrelation Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_static/plot_autocorr_thumb.png" />
+  <a href="https://python.arviz.org/en/latest/examples/plot_violin.html">
+  <img alt="Violin Plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_violin.png" />
+  </a>
+  </td>
+
+</tr>
+<tr>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_ppc.html">
+  <img alt="Posterior predictive plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_ppc.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_dot.html">
+  <img alt="Joint plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_dot.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_posterior.html">
+  <img alt="Posterior plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_posterior.png" />
+  </a>
+  </td>
+
+</tr>
+<tr>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_density.html">
+  <img alt="Density plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_density.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_pair.html">
+  <img alt="Pair plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_pair.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_pair_hex.html">
+  <img alt="Hexbin Pair plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_pair_hex.png" />
+  </a>
+  </td>
+
+</tr>
+<tr>
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_trace.html">
+  <img alt="Trace plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_trace.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_energy.html">
+  <img alt="Energy Plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_energy.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://python.arviz.org/en/latest/examples/plot_rank.html">
+  <img alt="Rank Plot"
+  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_rank.png" />
   </a>
   </td>
 

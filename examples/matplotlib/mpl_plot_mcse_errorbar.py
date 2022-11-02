@@ -1,17 +1,15 @@
 """
 Quantile MCSE Errobar Plot
 ==========================
-
-_thumb: .6, .4
-_example_title: Quantile MCSE plot with errobars
+_gallery_category: Inference Diagnostics
 """
 import matplotlib.pyplot as plt
 
 import arviz as az
 
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 
 data = az.load_arviz_data("radon")
-az.plot_mcse(data, var_names=["sigma_a"], color="C4", errorbar=True)
+az.plot_mcse(data, var_names=["sigma_a"], errorbar=True)
 
 plt.show()

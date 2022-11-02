@@ -10,6 +10,10 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
+      Python_310:
+        python.version: "3.10"
+        PyPIGithub: false
+        name: "Python 3.10"
       Python_39:
         python.version: "3.9"
         PyPIGithub: false
@@ -22,10 +26,7 @@ jobs:
         python.version: "3.8"
         PyPIGithub: false
         name: "Python 3.8"
-      Python_37:
-        python.version: "3.7"
-        PyPIGithub: false
-        name: "Python 3.7"
+
 
   steps:
   - task: UsePythonVersion@0
@@ -52,7 +53,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install pytest-azurepipelines codecov
+      python -m pip install pytest-azurepipelines
     condition: and(succeeded(), eq(variables.PyPIGithub, false))
     displayName: 'Install requirements'
 
@@ -63,7 +64,7 @@ jobs:
       python -m pip install --no-cache-dir --pre -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --upgrade git+https://github.com/pydata/xarray.git
-      python -m pip install pytest-azurepipelines codecov
+      python -m pip install pytest-azurepipelines
     condition: and(succeeded(), eq(variables.PyPIGithub, true))
     displayName: 'Install requirements (pypi preview / github)'
 
@@ -92,5 +93,12 @@ jobs:
     displayName: 'Publish Test Results'
 
   - script: |
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
+      curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+      curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+      gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+      shasum -a 256 -c codecov.SHA256SUM
+      chmod +x codecov
+      ./codecov -n "$(NAME)"
     displayName: 'upload coverage'

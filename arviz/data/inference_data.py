@@ -1,5 +1,6 @@
 # pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
+import re
 import sys
 import uuid
 import warnings
@@ -9,7 +10,6 @@ from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
-import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -78,6 +78,13 @@ SUPPORTED_GROUPS_WARMUP = [
 SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 
 InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
+
+
+def _compressible_dtype(dtype):
+    """Check basic dtypes for automatic compression."""
+    if dtype.kind == "V":
+        return all(_compressible_dtype(item) for item, _ in dtype.fields.values())
+    return dtype.kind in {"b", "i", "u", "f", "c", "S"}
 
 
 class InferenceData(Mapping[str, xr.Dataset]):
@@ -156,7 +163,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
-                    "(argument '{}' was type '{}')".format(key, type(dataset))
+                    f"(argument '{key}' was type '{type(dataset)}')"
                 )
             if not key.startswith(WARMUP_TAG):
                 if dataset:
@@ -166,11 +173,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 if dataset:
                     setattr(self, key, dataset)
                     self._groups_warmup.append(key)
-            if save_warmup and dataset_warmup is not None:
-                if dataset_warmup:
-                    key = f"{WARMUP_TAG}{key}"
-                    setattr(self, key, dataset_warmup)
-                    self._groups_warmup.append(key)
+            if save_warmup and dataset_warmup is not None and dataset_warmup:
+                key = f"{WARMUP_TAG}{key}"
+                setattr(self, key, dataset_warmup)
+                self._groups_warmup.append(key)
 
     @property
     def attrs(self) -> dict:
@@ -357,13 +363,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
         InferenceData object
         """
         groups = {}
+        attrs = {}
 
         try:
             with nc.Dataset(filename, mode="r") as data:
                 data_groups = list(data.groups)
 
             for group in data_groups:
-
                 group_kws = {}
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
@@ -376,12 +382,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         groups[group] = data.load()
                     else:
                         groups[group] = data
-            res = InferenceData(**groups)
-            return res
-        except OSError as e:  # pylint: disable=invalid-name
-            if e.errno == -101:
-                raise type(e)(
-                    str(e)
+
+            with xr.open_dataset(filename, mode="r") as data:
+                attrs.update(data.load().attrs)
+
+            return InferenceData(attrs=attrs, **groups)
+        except OSError as err:
+            if err.errno == -101:
+                raise type(err)(
+                    str(err)
                     + (
                         " while reading a NetCDF file. This is probably an error in HDF5, "
                         "which happens because your OS does not support HDF5 file locking.  See "
@@ -389,8 +398,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         "errno-101-netcdf-hdf-error-when-opening-netcdf-file#49317928"
                         " for a possible solution."
                     )
-                )
-            raise e
+                ) from err
+            raise err
 
     def to_netcdf(
         self, filename: str, compress: bool = True, groups: Optional[List[str]] = None
@@ -413,6 +422,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
             Location of netcdf file
         """
         mode = "w"  # overwrite first, then append
+        if self._attrs:
+            xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode)
+            mode = "a"
+
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
                 groups = self._groups_all
@@ -423,11 +436,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data = getattr(self, group)
                 kwargs = {}
                 if compress:
-                    kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
+                    kwargs["encoding"] = {
+                        var_name: {"zlib": True}
+                        for var_name, values in data.variables.items()
+                        if _compressible_dtype(values.dtype)
+                    }
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
-        else:  # creates a netcdf file for an empty InferenceData object.
+        elif not self._attrs:  # creates a netcdf file for an empty InferenceData object.
             empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
             empty_netcdf_file.close()
         return filename
@@ -467,7 +484,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     dims = []
                     for coord_name, coord_values in dataarray.coords.items():
                         if coord_name not in ("chain", "draw") and not coord_name.startswith(
-                            var_name + "_dim_"
+                            f"{var_name}_dim_"
                         ):
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
@@ -482,7 +499,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     if len(dims) > 0:
                         ret[dims_key][var_name] = dims
                     ret[group] = data
-                ret[group + "_attrs"] = dataset.attrs
+                ret[f"{group}_attrs"] = dataset.attrs
 
         ret["attrs"] = self.attrs
         return ret
@@ -622,9 +639,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 df.columns = [
                     col
                     if col in ("draw", "chain")
-                    else (group, col)
-                    if not isinstance(col, tuple)
                     else (group, *col)
+                    if isinstance(col, tuple)
+                    else (group, col)
                     for col in df.columns
                 ]
             dfs, *dfs_tail = list(dfs.values())
@@ -678,6 +695,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if not groups:
             raise TypeError("No valid groups found!")
 
+        # order matters here, saving attrs after the groups will erase the groups.
+        if self.attrs:
+            xr.Dataset(attrs=self.attrs).to_zarr(store=store, mode="w")
+
         for group in groups:
             # Create zarr group in store with same group name
             getattr(self, group).to_zarr(store=store, group=group, mode="w")
@@ -727,12 +748,12 @@ class InferenceData(Mapping[str, xr.Dataset]):
         # Open each group via xarray method
         for key_group, _ in zarr_handle.groups():
             with xr.open_zarr(store=store, group=key_group) as data:
-                if rcParams["data.load"] == "eager":
-                    groups[key_group] = data.load()
-                else:
-                    groups[key_group] = data
+                groups[key_group] = data.load() if rcParams["data.load"] == "eager" else data
 
-        return InferenceData(**groups)
+        with xr.open_zarr(store=store) as root:
+            attrs = root.attrs
+
+        return InferenceData(attrs=attrs, **groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
         """Concatenate two InferenceData objects."""
@@ -757,21 +778,21 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        groups: str or list of str, optional
+        groups : str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
+        filter_groups : {None, "like", "regex"}, optional, default=None
             If `None` (default), interpret groups as the real group or metagroup names.
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
-        chain_prior: bool, optional, deprecated
+        chain_prior : bool, optional, deprecated
             If ``False``, do not select prior related groups using ``chain`` dim.
             Otherwise, use selection on ``chain`` if present. Default=False
-        **kwargs: mapping
+        kwargs : dict, optional
             It must be accepted by Dataset.sel().
 
         Returns
@@ -785,28 +806,24 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Use ``sel`` to discard one chain of the InferenceData object. We first check the
         dimensions of the original object:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: idata = az.load_arviz_data("centered_eight")
-               ...: del idata.prior  # prior group only has 1 chain currently
-               ...: print(idata.posterior.coords)
-               ...: print(idata.posterior_predictive.coords)
-               ...: print(idata.observed_data.coords)
+            import arviz as az
+            idata = az.load_arviz_data("centered_eight")
+            idata
 
         In order to remove the third chain:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata_subset = idata.sel(chain=[0, 1, 3])
-               ...: print(idata_subset.posterior.coords)
-               ...: print(idata_subset.posterior_predictive.coords)
-               ...: print(idata_subset.observed_data.coords)
+            idata_subset = idata.sel(chain=[0, 1, 3], groups="posterior_groups")
+            idata_subset
 
         See Also
         --------
-        xarray.Dataset.sel : Returns a new dataset with each array indexed by tick labels along
-            the specified dimension(s).
+        xarray.Dataset.sel :
+            Returns a new dataset with each array indexed by tick labels along the specified
+            dimension(s).
         isel : Returns a new dataset with each array indexed along the specified dimension(s).
         """
         if chain_prior is not None:
@@ -850,18 +867,18 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        groups: str or list of str, optional
+        groups : str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
+        filter_groups : {None, "like", "regex"}, optional
             If `None` (default), interpret groups as the real group or metagroup names.
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
-        **kwargs: mapping
+        kwargs : dict, optional
             It must be accepted by :meth:`xarray:xarray.Dataset.isel`.
 
         Returns
@@ -875,29 +892,28 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Use ``isel`` to discard one chain of the InferenceData object. We first check the
         dimensions of the original object:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: idata = az.load_arviz_data("centered_eight")
-               ...: del idata.prior  # prior group only has 1 chain currently
-               ...: print(idata.posterior.coords)
-               ...: print(idata.posterior_predictive.coords)
-               ...: print(idata.observed_data.coords)
+            import arviz as az
+            idata = az.load_arviz_data("centered_eight")
+            idata
 
         In order to remove the third chain:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata_subset = idata.isel(chain=[0, 1, 3])
-               ...: print(idata_subset.posterior.coords)
-               ...: print(idata_subset.posterior_predictive.coords)
-               ...: print(idata_subset.observed_data.coords)
+            idata_subset = idata.isel(chain=[0, 1, 3], groups="posterior_groups")
+            idata_subset
+
+        You can expand the groups and coords in each group to see how now only the chains 0, 1 and
+        3 are present.
 
         See Also
         --------
-        xarray.Dataset.isel : Returns a new dataset with each array indexed along the specified
-            dimension(s).
-        sel : Returns a new dataset with each array indexed by tick labels along the specified
+        xarray.Dataset.isel :
+            Returns a new dataset with each array indexed along the specified dimension(s).
+        sel :
+            Returns a new dataset with each array indexed by tick labels along the specified
             dimension(s).
         """
         group_names = self._group_names(groups, filter_groups)
@@ -932,20 +948,20 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        dimensions: dict
+        dimensions : dict, optional
             Names of new dimensions, and the existing dimensions that they replace.
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
+        filter_groups : {None, "like", "regex"}, optional
             If `None` (default), interpret groups as the real group or metagroup names.
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
-        **kwargs: mapping
+        kwargs : dict, optional
             It must be accepted by :meth:`xarray:xarray.Dataset.stack`.
 
         Returns
@@ -959,47 +975,47 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Use ``stack`` to stack any number of existing dimensions into a single new dimension.
         We first check the original object:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: idata = az.load_arviz_data("rugby")
-               ...: idata
+            import arviz as az
+            idata = az.load_arviz_data("rugby")
+            idata
 
         In order to stack two dimensions ``chain`` and ``draw`` to ``sample``, we can use:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata.stack(sample=["chain", "draw"], inplace=True)
-               ...: idata
+            idata.stack(sample=["chain", "draw"], inplace=True)
+            idata
 
         We can also take the example of custom InferenceData object and perform stacking. We first
         check the original object:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: datadict = {
-               ...:     "a": np.random.randn(100),
-               ...:     "b": np.random.randn(1, 100, 10),
-               ...:     "c": np.random.randn(1, 100, 3, 4),
-               ...: }
-               ...: coords = {
-               ...:     "c1": np.arange(3),
-               ...:     "c99": np.arange(4),
-               ...:     "b1": np.arange(10),
-               ...: }
-               ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
-               ...: idata = az.from_dict(
-               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
-               ...: )
-               ...: idata.posterior
+            import numpy as np
+            datadict = {
+                "a": np.random.randn(100),
+                "b": np.random.randn(1, 100, 10),
+                "c": np.random.randn(1, 100, 3, 4),
+            }
+            coords = {
+                "c1": np.arange(3),
+                "c99": np.arange(4),
+                "b1": np.arange(10),
+            }
+            dims = {"c": ["c1", "c99"], "b": ["b1"]}
+            idata = az.from_dict(
+                posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+            )
+            idata
 
         In order to stack two dimensions ``c1`` and ``c99`` to ``z``, we can use:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata.stack(z=["c1", "c99"], inplace=True)
-               ...: idata.posterior
+            idata.stack(z=["c1", "c99"], inplace=True)
+            idata
 
         See Also
         --------
@@ -1013,10 +1029,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
-            kwarg_dict = {}
-            for key, value in dimensions.items():
-                if not set(value).difference(dataset.dims):
-                    kwarg_dict[key] = value
+            kwarg_dict = {
+                key: value
+                for key, value in dimensions.items()
+                if not set(value).difference(dataset.dims)
+            }
             dataset = dataset.stack(**kwarg_dict)
             setattr(out, group, dataset)
         if inplace:
@@ -1035,17 +1052,17 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        dim: Hashable or iterable of Hashable, optional
+        dim : Hashable or iterable of Hashable, optional
             Dimension(s) over which to unstack. By default unstacks all MultiIndexes.
-        groups: str or list of str, optional
+        groups : str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
+        filter_groups : {None, "like", "regex"}, optional
             If `None` (default), interpret groups as the real group or metagroup names.
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
@@ -1060,37 +1077,38 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Use ``unstack`` to unstack existing dimensions corresponding to MultiIndexes into
         multiple new dimensions. We first stack two dimensions ``c1`` and ``c99`` to ``z``:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: datadict = {
-               ...:     "a": np.random.randn(100),
-               ...:     "b": np.random.randn(1, 100, 10),
-               ...:     "c": np.random.randn(1, 100, 3, 4),
-               ...: }
-               ...: coords = {
-               ...:     "c1": np.arange(3),
-               ...:     "c99": np.arange(4),
-               ...:     "b1": np.arange(10),
-               ...: }
-               ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
-               ...: idata = az.from_dict(
-               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
-               ...: )
-               ...: idata.stack(z=["c1", "c99"], inplace=True)
-               ...: idata
+            import arviz as az
+            import numpy as np
+            datadict = {
+                "a": np.random.randn(100),
+                "b": np.random.randn(1, 100, 10),
+                "c": np.random.randn(1, 100, 3, 4),
+            }
+            coords = {
+                "c1": np.arange(3),
+                "c99": np.arange(4),
+                "b1": np.arange(10),
+            }
+            dims = {"c": ["c1", "c99"], "b": ["b1"]}
+            idata = az.from_dict(
+                posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+            )
+            idata.stack(z=["c1", "c99"], inplace=True)
+            idata
 
         In order to unstack the dimension ``z``, we use:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata.unstack(inplace=True)
-               ...: idata
+            idata.unstack(inplace=True)
+            idata
 
         See Also
         --------
-        xarray.Dataset.unstack : Unstack existing dimensions corresponding to MultiIndexes into
-            multiple new dimensions.
+        xarray.Dataset.unstack :
+            Unstack existing dimensions corresponding to MultiIndexes into multiple new dimensions.
         stack : Perform an xarray stacking on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
@@ -1119,18 +1137,18 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        name_dict: dict
+        name_dict : dict
             Dictionary whose keys are current variable or dimension names
             and whose values are the desired names.
-        groups: str or list of str, optional
+        groups : str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
+        filter_groups : {None, "like", "regex"}, optional
             If `None` (default), interpret groups as the real group or metagroup names.
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
@@ -1145,24 +1163,25 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Use ``rename`` to renaming of variable and dimensions on all groups of the InferenceData
         object. We first check the original object:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: idata = az.load_arviz_data("rugby")
-               ...: idata
+            import arviz as az
+            idata = az.load_arviz_data("rugby")
+            idata
 
         In order to rename the dimensions and variable, we use:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata.rename({"team": "team_new", "match":"match_new"}, inplace=True)
-               ...: idata
+            idata.rename({"team": "team_new", "match":"match_new"}, inplace=True)
+            idata
 
         See Also
         --------
         xarray.Dataset.rename : Returns a new object with renamed variables and dimensions.
-        rename_vars : Perform xarray renaming of variable or coordinate names on all groups of
-            an InferenceData object.
+        rename_vars :
+            Perform xarray renaming of variable or coordinate names on all groups of an
+            InferenceData object.
         rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
@@ -1192,18 +1211,18 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        name_dict: dict
+        name_dict : dict
             Dictionary whose keys are current variable or coordinate names
             and whose values are the desired names.
-        groups: str or list of str, optional
+        groups : str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
+        filter_groups : {None, "like", "regex"}, optional
             If `None` (default), interpret groups as the real group or metagroup names.
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
@@ -1219,27 +1238,26 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Use ``rename_vars`` to renaming of variable and coordinates on all groups of the
         InferenceData object. We first check the data variables of original object:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: idata = az.load_arviz_data("rugby")
-               ...: print(list(idata.posterior.data_vars))
-               ...: print(list(idata.prior.data_vars))
+            import arviz as az
+            idata = az.load_arviz_data("rugby")
+            idata
 
         In order to rename the data variables, we use:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata.rename_vars({"home": "home_new"}, inplace=True)
-               ...: print(list(idata.posterior.data_vars))
-               ...: print(list(idata.prior.data_vars))
+            idata.rename_vars({"home": "home_new"}, inplace=True)
+            idata
 
         See Also
         --------
-        xarray.Dataset.rename_vars : Returns a new object with renamed variables including
-            coordinates.
-        rename : Perform xarray renaming of variable and dimensions on all groups of
-            an InferenceData object.
+        xarray.Dataset.rename_vars :
+            Returns a new object with renamed variables including coordinates.
+        rename :
+            Perform xarray renaming of variable and dimensions on all groups of an InferenceData
+            object.
         rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
@@ -1266,18 +1284,18 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        name_dict: dict
+        name_dict : dict
             Dictionary whose keys are current dimension names and whose values are the desired
             names.
-        groups: str or list of str, optional
+        groups : str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
+        filter_groups : {None, "like", "regex"}, optional
             If `None` (default), interpret groups as the real group or metagroup names.
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
@@ -1292,28 +1310,28 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Use ``rename_dims`` to renaming of dimensions on all groups of the InferenceData
         object. We first check the dimensions of original object:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: idata = az.load_arviz_data("rugby")
-               ...: print(list(idata.posterior.dims))
-               ...: print(list(idata.prior.dims))
+            import arviz as az
+            idata = az.load_arviz_data("rugby")
+            idata
 
         In order to rename the dimensions, we use:
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata.rename_dims({"team": "team_new"}, inplace=True)
-               ...: print(list(idata.posterior.dims))
-               ...: print(list(idata.prior.dims))
+            idata.rename_dims({"team": "team_new"}, inplace=True)
+            idata
 
         See Also
         --------
         xarray.Dataset.rename_dims : Returns a new object with renamed dimensions only.
-        rename : Perform xarray renaming of variable and dimensions on all groups of
-            an InferenceData object.
-        rename_vars : Perform xarray renaming of variable or coordinate names on all groups
-            of an InferenceData object.
+        rename :
+            Perform xarray renaming of variable and dimensions on all groups of an InferenceData
+            object.
+        rename_vars :
+            Perform xarray renaming of variable or coordinate names on all groups of an
+            InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
@@ -1335,15 +1353,63 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        group_dict: dict of {str : dict or xarray.Dataset}, optional
+        group_dict : dict of {str : dict or xarray.Dataset}, optional
             Groups to be added
-        coords : dict[str] -> ndarray
+        coords : dict of {str : array_like}, optional
             Coordinates for the dataset
-        dims : dict[str] -> list[str]
+        dims : dict of {str : list of str}, optional
             Dimensions of each variable. The keys are variable names, values are lists of
             coordinates.
-        **kwargs: mapping
+        kwargs : dict, optional
             The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
+
+        Examples
+        --------
+        Add a ``log_likelihood`` group to the "rugby" example InferenceData after loading.
+        It originally doesn't have the ``log_likelihood`` group:
+
+        .. jupyter-execute::
+
+            import arviz as az
+            idata = az.load_arviz_data("rugby")
+            idata2 = idata.copy()
+            post = idata.posterior
+            obs = idata.observed_data
+            idata
+
+        Knowing the model, we can compute it manually. In this case however,
+        we will generate random samples with the right shape.
+
+        .. jupyter-execute::
+
+            import numpy as np
+            rng = np.random.default_rng(73)
+            ary = rng.normal(size=(post.dims["chain"], post.dims["draw"], obs.dims["match"]))
+            idata.add_groups(
+                log_likelihood={"home_points": ary},
+                dims={"home_points": ["match"]},
+            )
+            idata
+
+        This is fine if we have raw data, but a bit inconvenient if we start with labeled
+        data already. Why provide dims and coords manually again?
+        Let's generate a fake log likelihood (doesn't match the model but it serves just
+        the same for illustration purposes here) working from the posterior and
+        observed_data groups manually:
+
+        .. jupyter-execute::
+
+            import xarray as xr
+            from xarray_einstats.stats import XrDiscreteRV
+            from scipy.stats import poisson
+            dist = XrDiscreteRV(poisson)
+            log_lik = xr.Dataset()
+            log_lik["home_points"] = dist.logpmf(obs["home_points"], np.exp(post["atts"]))
+            idata2.add_groups({"log_likelihood": log_lik})
+            idata2
+
+        Note that in the first example we have used the ``kwargs`` argument
+        and in the second we have used the ``group_dict`` one.
 
         See Also
         --------
@@ -1424,6 +1490,35 @@ class InferenceData(Mapping[str, xr.Dataset]):
             present in both objects. 'left' will discard the group in ``other`` whereas 'right'
             will keep the group in ``other`` and discard the one in ``self``.
 
+        Examples
+        --------
+        Take two InferenceData objects, and extend the first with the groups it doesn't have
+        but are present in the 2nd InferenceData object.
+
+        First InferenceData:
+
+        .. jupyter-execute::
+
+            import arviz as az
+            idata = az.load_arviz_data("rugby")
+
+        Second InferenceData:
+
+        .. jupyter-execute::
+
+            other_idata = az.load_arviz_data("radon")
+
+        Call the ``extend`` method:
+
+        .. jupyter-execute::
+
+            idata.extend(other_idata)
+            idata
+
+        See how now the first InferenceData has more groups, with the data from the
+        second one, but the groups it originally had have not been modified,
+        even if also present in the second InferenceData.
+
         See Also
         --------
         add_groups : Add new groups to InferenceData object.
@@ -1435,9 +1530,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if join not in ("left", "right"):
             raise ValueError(f"join must be either 'left' or 'right', found {join}")
         for group in other._groups_all:  # pylint: disable=protected-access
-            if hasattr(self, group):
-                if join == "left":
-                    continue
+            if hasattr(self, group) and join == "left":
+                continue
             if group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
                     f"{group} group is not defined in the InferenceData scheme", UserWarning
@@ -1459,17 +1553,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         self._groups_warmup.insert(group_idx, group)
                     else:
                         self._groups_warmup.append(group)
-            else:
-                if group not in self._groups:
-                    supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
-                    if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
-                        group_order = [
-                            key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
-                        ]
-                        group_idx = group_order.index(group)
-                        self._groups.insert(group_idx, group)
-                    else:
-                        self._groups.append(group)
+            elif group not in self._groups:
+                supported_order = [key for key in SUPPORTED_GROUPS_ALL if key in self._groups]
+                if (supported_order == self._groups) and (group in SUPPORTED_GROUPS_ALL):
+                    group_order = [
+                        key for key in SUPPORTED_GROUPS_ALL if key in self._groups + [group]
+                    ]
+                    group_idx = group_order.index(group)
+                    self._groups.insert(group_idx, group)
+                else:
+                    self._groups.append(group)
 
     set_index = _extend_xr_method(xr.Dataset.set_index, see_also="reset_index")
     get_index = _extend_xr_method(xr.Dataset.get_index)
@@ -1588,43 +1681,42 @@ class InferenceData(Mapping[str, xr.Dataset]):
         --------
         Shift observed_data, prior_predictive and posterior_predictive.
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: import arviz as az
-               ...: idata = az.load_arviz_data("non_centered_eight")
-               ...: idata_shifted_obs = idata.map(lambda x: x + 3, groups="observed_vars")
-               ...: print(idata_shifted_obs.observed_data)
-               ...: print(idata_shifted_obs.posterior_predictive)
+            import arviz as az
+            import numpy as np
+            idata = az.load_arviz_data("non_centered_eight")
+            idata_shifted_obs = idata.map(lambda x: x + 3, groups="observed_vars")
+            idata_shifted_obs
 
         Rename and update the coordinate values in both posterior and prior groups.
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata = az.load_arviz_data("radon")
-               ...: idata = idata.map(
-               ...:     lambda ds: ds.rename({"g_coef": "uranium_coefs"}).assign(
-               ...:         uranium_coefs=["intercept", "u_slope"]
-               ...:     ),
-               ...:     groups=["posterior", "prior"]
-               ...: )
-               ...: idata.posterior
+            idata = az.load_arviz_data("radon")
+            idata = idata.map(
+                lambda ds: ds.rename({"g_coef": "uranium_coefs"}).assign(
+                    uranium_coefs=["intercept", "u_slope"]
+                ),
+                groups=["posterior", "prior"]
+            )
+            idata
 
         Add extra coordinates to all groups containing observed variables
 
-        .. ipython::
+        .. jupyter-execute::
 
-            In [1]: idata = az.load_arviz_data("rugby")
-               ...: home_team, away_team = np.array([
-               ...:     m.split() for m in idata.observed_data.match.values
-               ...: ]).T
-               ...: idata = idata.map(
-               ...:     lambda ds, **kwargs: ds.assign_coords(**kwargs),
-               ...:     groups="observed_vars",
-               ...:     home_team=("match", home_team),
-               ...:     away_team=("match", away_team),
-               ...: )
-               ...: print(idata.posterior_predictive)
-               ...: print(idata.observed_data)
+            idata = az.load_arviz_data("rugby")
+            home_team, away_team = np.array([
+                m.split() for m in idata.observed_data.match.values
+            ]).T
+            idata = idata.map(
+                lambda ds, **kwargs: ds.assign_coords(**kwargs),
+                groups="observed_vars",
+                home_team=("match", home_team),
+                away_team=("match", away_team),
+            )
+            idata
 
         """
         if args is None:

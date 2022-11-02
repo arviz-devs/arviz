@@ -120,7 +120,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-            confidence_bands = True, difference = True)
+        >>>              confidence_bands = True, difference = True)
 
     Plot ecdf plot with confidence bands for PIT of sample for comparing a given sample
     w.r.t a given distribution
@@ -129,7 +129,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-            confidence_bands = True, pit = True)
+        >>>              confidence_bands = True, pit = True)
 
     Plot ecdf-difference plot with confidence bands for PIT of sample for comparing a given
     sample w.r.t a given distribution
@@ -138,7 +138,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-            confidence_bands = True, difference = True, pit = True)
+        >>>              confidence_bands = True, difference = True, pit = True)
 
     You could also plot the above w.r.t another sample rather than a given distribution.
     For eg: Plot ecdf-difference plot with confidence bands for PIT of sample for
@@ -173,7 +173,6 @@ def plot_ecdf(
     values = np.ravel(values)
     values.sort()
 
-    n = len(values)  # number of samples
     ## This block computes gamma and uses it to get the upper and lower confidence bands
     ## Here we check if we want confidence bands or not
     if confidence_bands:
@@ -193,11 +192,9 @@ def plot_ecdf(
             z = cdf(x) if cdf else compute_ecdf(values2, x)
             probs = values
 
+        n = len(values)  # number of samples
         ## Computing gamma
-        if not pointwise:
-            gamma = compute_gamma(n, z, npoints, num_trials, fpr)
-        else:
-            gamma = fpr
+        gamma = fpr if pointwise else compute_gamma(n, z, npoints, num_trials, fpr)
         ## Using gamma to get the confidence intervals
         lower, higher = get_lims(gamma, n, z)
 

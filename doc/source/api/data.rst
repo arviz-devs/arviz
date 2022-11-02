@@ -11,6 +11,7 @@ Inference library converters
 .. autosummary::
    :toctree: generated/
 
+   from_beanmachine
    from_cmdstan
    from_cmdstanpy
    from_emcee
@@ -44,7 +45,7 @@ General functions
    :toctree: generated/
 
    concat
-   extract_dataset
+   extract
 
 Data examples
 .............

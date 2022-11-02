@@ -7,7 +7,7 @@ import xarray as xr
 from ..data import InferenceData
 from ..rcparams import rcParams
 from ..stats.density_utils import _fast_kde_2d, kde, _find_hdi_contours
-from .plot_utils import get_plotting_function
+from .plot_utils import get_plotting_function, _init_kwargs_dict
 
 
 def plot_kde(
@@ -250,7 +250,7 @@ def plot_kde(
     """
     if isinstance(values, xr.Dataset):
         raise ValueError(
-            "Xarray dataset object detected.Use plot_posterior, plot_density"
+            "Xarray dataset object detected. Use plot_posterior, plot_density "
             "or plot_pair instead of plot_kde"
         )
     if isinstance(values, InferenceData):
@@ -262,18 +262,12 @@ def plot_kde(
     if values2 is None:
 
         if bw == "default":
-            if is_circular:
-                bw = "taylor"
-            else:
-                bw = "experimental"
+            bw = "taylor" if is_circular else "experimental"
 
         grid, density = kde(values, is_circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
         lower, upper = grid[0], grid[-1]
 
-        if cumulative:
-            density_q = density
-        else:
-            density_q = density.cumsum() / density.sum()
+        density_q = density if cumulative else density.cumsum() / density.sum()
 
         # This is just a hack placeholder for now
         xmin, xmax, ymin, ymax, gridsize = [None] * 5
@@ -293,27 +287,23 @@ def plot_kde(
             contour_level_list = [0] + list(contour_levels) + [density.max()]
 
             # Add keyword arguments to contour, contourf
-            if contour_kwargs is None:
-                contour_kwargs = {"levels": contour_level_list}
-            else:
-                if "levels" in contour_kwargs:
-                    warnings.warn(
-                        "Both 'levels' in contour_kwargs and 'hdi_probs' have been specified."
-                        "Using 'hdi_probs' in favor of 'levels'.",
-                        UserWarning,
-                    )
-                contour_kwargs["levels"] = contour_level_list
+            contour_kwargs = _init_kwargs_dict(contour_kwargs)
+            if "levels" in contour_kwargs:
+                warnings.warn(
+                    "Both 'levels' in contour_kwargs and 'hdi_probs' have been specified."
+                    "Using 'hdi_probs' in favor of 'levels'.",
+                    UserWarning,
+                )
+            contour_kwargs["levels"] = contour_level_list
 
-            if contourf_kwargs is None:
-                contourf_kwargs = {"levels": contour_level_list}
-            else:
-                if "levels" in contourf_kwargs:
-                    warnings.warn(
-                        "Both 'levels' in contourf_kwargs and 'hdi_probs' have been specified."
-                        "Using 'hdi_probs' in favor of 'levels'.",
-                        UserWarning,
-                    )
-                contourf_kwargs["levels"] = contour_level_list
+            contourf_kwargs = _init_kwargs_dict(contourf_kwargs)
+            if "levels" in contourf_kwargs:
+                warnings.warn(
+                    "Both 'levels' in contourf_kwargs and 'hdi_probs' have been specified."
+                    "Using 'hdi_probs' in favor of 'levels'.",
+                    UserWarning,
+                )
+            contourf_kwargs["levels"] = contour_level_list
 
         lower, upper, density_q = [None] * 3
 

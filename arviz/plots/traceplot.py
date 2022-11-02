@@ -174,7 +174,9 @@ def plot_trace(
         divergences = "top" if rug else "bottom"
     if divergences:
         try:
-            divergence_data = convert_to_dataset(data, group="sample_stats").diverging
+            divergence_data = convert_to_dataset(data, group="sample_stats").diverging.transpose(
+                "chain", "draw"
+            )
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
             divergences = None
 
@@ -198,13 +200,16 @@ def plot_trace(
 
     var_names = _var_names(var_names, coords_data, filter_vars)
 
-    if compact:
-        skip_dims = set(coords_data.dims) - {"chain", "draw"}
-    else:
-        skip_dims = set()
+    skip_dims = set(coords_data.dims) - {"chain", "draw"} if compact else set()
 
     plotters = list(
-        xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)
+        xarray_var_iter(
+            coords_data,
+            var_names=var_names,
+            combined=True,
+            skip_dims=skip_dims,
+            dim_order=["chain", "draw"],
+        )
     )
     max_plots = rcParams["plot.max_subplots"]
     max_plots = len(plotters) if max_plots is None else max(max_plots // 2, 1)

@@ -174,10 +174,7 @@ class SamplingWrapper:
             )
         posterior = idata__i.posterior
         arys = (*excluded_obs, *[posterior[var_name] for var_name in self.posterior_vars])
-        if self.is_ufunc:
-            ufunc_applier = apply_ufunc
-        else:
-            ufunc_applier = _wrap_xarray_ufunc
+        ufunc_applier = apply_ufunc if self.is_ufunc else _wrap_xarray_ufunc
         log_lik_idx = ufunc_applier(
             self.log_lik_fun,
             *arys,
@@ -222,8 +219,8 @@ class SamplingWrapper:
         bad_methods = [method for method in methods if method not in supported_methods]
         if bad_methods:
             raise ValueError(
-                "Not all method(s) in {} supported. Supported methods in SamplingWrapper "
-                "subclasses are:{}".format(bad_methods, supported_methods)
+                f"Not all method(s) in {bad_methods} supported. "
+                f"Supported methods in SamplingWrapper subclasses are:{supported_methods}"
             )
 
         not_implemented = []

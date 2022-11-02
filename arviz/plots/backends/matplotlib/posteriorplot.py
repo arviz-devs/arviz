@@ -276,21 +276,21 @@ def _plot_posterior_op(
             ax.text(
                 hdi_i[0],
                 plot_height * 0.07,
-                round_num(hdi_i[0], round_to) + " ",
+                f"{round_num(hdi_i[0], round_to)} ",
                 size=ax_labelsize,
                 horizontalalignment="right",
             )
             ax.text(
                 hdi_i[1],
                 plot_height * 0.07,
-                " " + round_num(hdi_i[1], round_to),
+                f" {round_num(hdi_i[1], round_to)}",
                 size=ax_labelsize,
                 horizontalalignment="left",
             )
             ax.text(
                 (hdi_i[0] + hdi_i[1]) / 2,
                 plot_height * 0.3,
-                format_as_percent(hdi_prob) + " HDI",
+                f"{format_as_percent(hdi_prob)} HDI",
                 size=ax_labelsize,
                 horizontalalignment="center",
             )

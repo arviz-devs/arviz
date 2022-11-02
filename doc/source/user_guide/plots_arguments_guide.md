@@ -20,8 +20,7 @@ which use one specific function to illustrate the usage but
 the behaviour described here will be the same for the
 other functions with the same argument.
 
-This page can be downloaded as a {jupyter-download:script}`Python script <plots_arguments_guide>`
-or as a {jupyter-download:nb}`Jupyter notebook <plots_arguments_guide>`.
+This page can be downloaded as a {nb-download}`Jupyter notebook <plots_arguments_guide.ipynb>`.
 
 ```{code-cell} ipython3
 import arviz as az
@@ -35,7 +34,7 @@ y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
 ```
 
 ```{code-cell} ipython3
-az.style.use("arviz-darkgrid")
+az.style.use("arviz-doc")
 ```
 
 ```{code-cell} ipython3
@@ -312,7 +311,7 @@ Show a legend with the color encoded model information. Defaults to True, if the
 
 
 (common_model_names)=
-List with names for the models in the list of data. Useful when plotting more that one dataset.
+List with names for the models in the list of data. Useful when plotting more than one dataset.
 
 
 (common_ax)=

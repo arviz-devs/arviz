@@ -1,0 +1,88 @@
+## ***************************************************************************
+## * FIGURE                                                                  *
+## ***************************************************************************
+
+figure.facecolor:   white   # broken white outside box
+figure.edgecolor:   None    # broken white outside box
+figure.titleweight: bold    # weight of the figure title
+figure.titlesize:   18
+
+figure.figsize:     11.5, 5
+figure.dpi:         300.0
+figure.constrained_layout.use: True
+
+## ***************************************************************************
+## * FONT                                                                    *
+## ***************************************************************************
+
+font.style:     normal
+font.variant:   normal
+font.weight:    normal
+font.stretch:   normal
+
+text.color:     .15
+
+## ***************************************************************************
+## * AXES                                                                    *
+## ***************************************************************************
+
+axes.facecolor:         white
+axes.edgecolor:         .33         # axes edge color
+axes.linewidth:         0.8         # edge line width
+
+axes.grid:              True        # show grid
+# axes.grid.axis:         y        # which axis the grid should apply to
+axes.grid.which:        major       # grid lines at {major, minor, both} ticks
+axes.axisbelow:         True        # keep grid layer in the back
+
+grid.color:             .8          # grid color
+grid.linestyle:         -           # solid
+grid.linewidth:         0.8         # in points
+grid.alpha:             1.0         # transparency, between 0.0 and 1.0
+
+lines.solid_capstyle:   round
+
+axes.spines.right:      False       # do not show right spine
+axes.spines.top:        False       # do not show top spine
+
+axes.titlesize:         16
+axes.titleweight:       bold        # font weight of title
+
+axes.labelsize:         14
+axes.labelcolor:        .15
+axes.labelweight:       normal      # weight of the x and y labels
+
+# color-blind friendly cycle designed using https://colorcyclepicker.mpetroff.net/
+# see preview and check for colorblindness here https://coolors.co/107591-00c0bf-f69a48-fdcd49-8da798-a19368-525252-a6761d-7035b7-cf166e
+axes.prop_cycle: cycler(color=['107591','00c0bf','f69a48','fdcd49','8da798','a19368','525252','a6761d','7035b7','cf166e'])
+
+image.cmap: viridis
+
+## ***************************************************************************
+## * TICKS                                                                   *
+## ***************************************************************************
+
+xtick.labelsize:    14
+xtick.color:        .15
+xtick.top:          False
+xtick.bottom:       True
+xtick.direction:    out
+
+ytick.labelsize:    14
+ytick.color:        .15
+ytick.left:         True
+ytick.right:        False
+ytick.direction:    out
+
+## ***************************************************************************
+## * LEGEND                                                                  *
+## ***************************************************************************
+
+legend.framealpha:  0.5
+legend.frameon:     False   # do not draw on background patch
+legend.fancybox:    False   # do not round corners
+
+legend.numpoints: 1
+legend.scatterpoints: 1
+
+legend.fontsize: 14
