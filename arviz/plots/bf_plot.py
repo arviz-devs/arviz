@@ -21,17 +21,16 @@ def plot_bf(
    
     Parameters
     -----------
-    :idata: obj
+    idata : obj
         a :class:`arviz.InferenceData` object
-    :var_name: str 
+    var_name : str 
         Name of variable we want to test.
-    :prior: numpy.array, optional
-        In case we want to use diffent prior (for sensitivity analysis of BF), 
-        we can define one and sent it to the function.
-    :ref_val: int, default is 0
-        Reference value for BF testing
-    :xlim: numpy.array, optional
-        limit the x axis (might be used for visualization porpuses sometimes)
+    prior : numpy.array, optional
+        In case we want to use different prior, for example for sensitivity analysis.
+    ref_val : int
+        Point-null for Bayes factor estimation. Defaults to 0.
+    xlim:  numpy.array, optional
+        Set the x limits, which might be used for visualization purposes.
 
     Returns
     -------
