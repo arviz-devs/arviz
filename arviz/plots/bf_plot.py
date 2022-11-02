@@ -5,7 +5,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-from arviz import extract
+from ..data.utils import extract
 from ..utils import _var_names
 
 _log = logging.getLogger(__name__)
@@ -71,9 +71,8 @@ def plot_bf(
     prior = prior_pdf(ref_val)
     bf_10 = posterior / prior
     bf_01 = prior / posterior
-    _log.info(f"the Bayes Factor 10 is {bf_10}"
-              f"the Bayes Factor 01 is {bf_01}"
-            )
+    _log.info("the Bayes Factor 10 is %.3f" %(bf_10)) 
+    _log.info("the Bayes Factor 01 is %.3f" %(bf_01))
     ax.plot(ref_val, posterior, "ko", lw=1.5)
     ax.plot(ref_val, prior, "ko", lw=1.5)
     ax.set_xlabel(var_name)
@@ -81,4 +80,3 @@ def plot_bf(
     plt.legend()
     
     return {'BF10': bf_10, 'BF01':bf_01}, ax
-# end
