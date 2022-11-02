@@ -5,6 +5,8 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
+from ..utils import _var_names
+
 _log = logging.getLogger(__name__)
 
 def plot_bf(
@@ -14,7 +16,6 @@ def plot_bf(
     ref_val=0,
     xlim=None,
     ax=None):
-   
     """Bayes Factor approximated as the Savage-Dickey density ratio.
     The Bayes factor is estimated by comparing a model 
     against a model in which the parameter of interest has been restricted to a point-null.
@@ -42,7 +43,7 @@ def plot_bf(
     TBN
     
     """
-    var_name = _var_names(var_name, idata)
+    var_name = _var_names_(var_name, idata)
     post = extract(idata, var_names=var_name)
     if prior is None:
         # grab prior from the data in case it wasn't defined by the user
@@ -67,10 +68,10 @@ def plot_bf(
     else:
         posterior = my_pdf(ref_val) # this gives the pdf at ref_val
     prior = prior_pdf(ref_val)
-    BF10 = posterior / prior
-    BF01 = prior / posterior
-    _log.info(f"the Bayes Factor 10 is {BF10}"
-                f"the Bayes Factor 01 is {BF01}"
+    bf_10 = posterior / prior
+    bf_01 = prior / posterior
+    _log.info(f"the Bayes Factor 10 is {bf_10}"
+                f"the Bayes Factor 01 is {bf_01}"
     )
     ax.plot(ref_val, posterior, "ko", lw=1.5)
     ax.plot(ref_val, prior, "ko", lw=1.5)
@@ -78,5 +79,5 @@ def plot_bf(
     ax.set_ylabel("Density")
     plt.legend()
     
-    return {'BF10': BF10, 'BF01':BF01}, ax
+    return {'BF10': bf_10, 'BF01':bf_01}, ax
 # end
