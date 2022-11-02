@@ -59,7 +59,7 @@ def plot_bf(
         ax.plot(x, posterior_pdf(x), color=colors[1], label="Posterior", **plot_kwargs)
     elif posterior.dtype.kind == "i":
         plot_dist(prior, color=colors[0], label="Prior", ax=ax, hist_kwargs=hist_kwargs)
-        plot_dist(posterior, color=colors[0], label="Prior", ax=ax, hist_kwargs=hist_kwargs)
+        plot_dist(posterior, color=colors[1], label="Posterior", ax=ax, hist_kwargs=hist_kwargs)
 
     ax.plot(ref_val, posterior_at_ref_val, "ko", lw=1.5)
     ax.plot(ref_val, prior_at_ref_val, "ko", lw=1.5)
