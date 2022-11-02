@@ -5,7 +5,6 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-# 
 _log = logging.getLogger(__name__)
 
 def plot_bf(
