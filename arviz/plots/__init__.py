@@ -1,6 +1,7 @@
 """Plotting functions."""
 from .autocorrplot import plot_autocorr
 from .bpvplot import plot_bpv
+from .bfplot import plot_bf
 from .compareplot import plot_compare
 from .densityplot import plot_density
 from .distcomparisonplot import plot_dist_comparison
@@ -30,6 +31,7 @@ from .violinplot import plot_violin
 __all__ = [
     "plot_autocorr",
     "plot_bpv",
+    "plot_bf",
     "plot_compare",
     "plot_density",
     "plot_dist",
