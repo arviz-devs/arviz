@@ -63,9 +63,10 @@ def plot_bf(
 
     ax.plot(ref_val, posterior_at_ref_val, "ko", lw=1.5)
     ax.plot(ref_val, prior_at_ref_val, "ko", lw=1.5)
+    ax.axvline(ref_val, color="k", ls="--")
     ax.set_xlabel(var_name)
     ax.set_ylabel("Density")
-    ax.set_title(f"The Bayes Factor 10 is {bf_10:.2f}\nThe Bayes Factor 01 is {bf_01:.2f}")
+    ax.set_title(f"The BF_10 is {bf_10:.2f}\nThe BF_01 is {bf_01:.2f}")
     plt.legend()
 
     if backend_show(show):

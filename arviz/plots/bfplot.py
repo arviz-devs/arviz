@@ -27,8 +27,12 @@ def plot_bf(
 ):
     """
     Bayes Factor approximated as the Savage-Dickey density ratio.
-    The Bayes factor is estimated by comparing a model
-    against a model in which the parameter of interest has been restricted to a point-null.
+
+    The Bayes factor is estimated by comparing a model (H1) against a model in which the
+    parameter of interest has been restricted to be a point-null (H0). This computation
+    assumes the models are nested and thus H0 is a special case of H1.
+
+
 
     Parameters
     -----------
@@ -70,18 +74,30 @@ def plot_bf(
     dict : A dictionary with BF10 (Bayes Factor 10 (H1/H0 ratio), and BF01 (H0/H1 ratio).
     axes : matplotlib axes or bokeh figures
 
+
     Examples
     --------
-    TBN
+    Moderate evidence indicating that the parameter "a" is different from zero
 
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import arviz as az
+        >>> idata = az.from_dict(posterior={"a":np.random.normal(1, 0.5, 5000)},
+        ...     prior={"a":np.random.normal(0, 1, 5000)})
+        >>> az.plot_bf(idata, var_name="a", ref_val=0)
     """
     posterior = extract(idata, var_names=var_name)
 
     if ref_val > posterior.max() or ref_val < posterior.min():
-        raise ValueError("Reference value is out of bounds of posterior")
+        _log.warning(
+            "The reference value is outside of the posterior. "
+            "This translate into infinite support for H1, which is most likely an overstatement."
+        )
 
     if posterior.ndim > 1:
-        _log.info("Posterior distribution has {posterior.ndim} dimensions")
+        _log.warning("Posterior distribution has {posterior.ndim} dimensions")
 
     if prior is None:
         prior = extract(idata, var_names=var_name, group="prior")
@@ -102,7 +118,7 @@ def plot_bf(
         posterior_at_ref_val = (posterior == ref_val).mean()
         prior_at_ref_val = (prior == ref_val).mean()
 
-    bf_10 = posterior_at_ref_val / prior_at_ref_val
+    bf_10 = prior_at_ref_val / posterior_at_ref_val
     bf_01 = 1 / bf_10
 
     bfplot_kwargs = dict(
