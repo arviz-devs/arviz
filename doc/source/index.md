@@ -112,14 +112,16 @@ Posterior Predictive Check Plot using `plot_ppc`
 :::{image} ./_images/mpl_plot_ppc.png
 :::
 :::::
-::::::  <!-- End grid -->
+::::::
+
+<!-- grid ended above, do not put anything on the right of markdown closings -->
 
 </div>  <!-- End Hero Right -->
 </div>  <!-- End Hero -->
 
 # Key Features
 
-::::{grid} 2 2 3 4
+::::{grid} 1 2 2 3
 :gutter: 3
 
 :::{grid-item-card} Interoperable
@@ -176,7 +178,7 @@ Distributed under the [Apache license](https://github.com/arviz-devs/arviz/blob/
 <h3>Contributions</h3>
 
 Contributions and issue reports are very welcome at
-[the GitHub repository](https://github.com/arviz-devs/arviz.
+[the GitHub repository](https://github.com/arviz-devs/arviz).
 We have a {ref}`contributing guide <contributing_guide>` to help you through the process.
 If you have any doubts, please do not hesitate to contact us on [gitter](https://gitter.im/arviz-devs/community)
 :::::
@@ -213,17 +215,14 @@ ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ fina
 # Sponsors
 
 ::::{grid} 1 2 3 4
-:::{grid-item-card}
-:img-background: _static/sponsor_university_helsinki.png
-:link: https://www.helsinki.fi/en
+:::{grid-item}
+[![helsinki_uni_logo](_static/sponsor_university_helsinki.png)](https://www.helsinki.fi/en)
 :::
-:::{grid-item-card}
-:img-background: _static/sponsor_fcai.png
-:link: https://fcai.fi/
+:::{grid-item}
+[![fcai_logo](_static/sponsor_fcai.png)](https://fcai.fi/)
 :::
-:::{grid-item-card}
-:img-background: _static/sponsor_czi.png
-:link: https://chanzuckerberg.com/
+:::{grid-item}
+[![czi_logo](_static/sponsor_czi.png)](https://chanzuckerberg.com/)
 :::
 ::::
 
