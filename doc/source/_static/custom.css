@@ -41,69 +41,63 @@ html[data-theme="dark"] {
 
 /* -------------------- HOMEPAGE -------------------- */
 #key-features,
+#sponsors,
 #support-arviz,
 #citation {
-  padding: 3rem 0;
+  padding: 3rem 0 7rem;
 }
 
 #key-features h1,
+#sponsors h1,
 #support-arviz h1,
 #citation h1 {
   font-weight: bold;
   text-align: center;
+  margin-bottom: 2rem;
 }
 
-#overview .headerlink,
+#hero .headerlink,
 #key-features .headerlink,
+#sponsors .headerlink,
 #support-arviz .headerlink {
   visibility: hidden;
   position: absolute;
 }
 
-/* Section Overview */
-#overview {
+/* Section hero */
+#hero {
   display: flex;
   flex-direction: row;
   padding: 3rem 0 7rem;
+  height: calc(80vh); /* Make hero fill up most of the page on load */
+  max-height: 1100px;
 }
-#overview #arviz {
+#hero-left {
   max-width: 476px;
   width: 40%;
+  margin: auto 0;
 }
-#overview #example-gallery {
+#hero-right {
   min-width: 476px;
   width: 60%;
+  margin: auto 0;
 }
 
-#overview h1,
-#overview #example-gallery h2 {  /* Hide it, it's just used for section dividers in rst file */
-  width: 0px;
-  height: 0px;
-  font-size: 0.1px;
-  visibility: hidden;
-}
-
-#arviz {
-  margin: auto 3rem auto 0;
-}
-#arviz h2 { /* Title */
-  font-size: 60px;
-  font-weight: bold;
-  margin: 2rem auto 0;
-}
-#arviz h3 { /* Subtitle */
-  font-weight: bold;
-  margin-top: 0;
-}
 .homepage-button-container {
   margin-bottom: 1rem;
   display: flex;
+  flex-direction: column;
+}
+.homepage-button-container-row {
+  display: flex;
   flex-wrap: wrap;
 }
+
 .homepage-button-container a {
   transition: 0.1s;
 }
 .homepage-button {
+  min-width: 142px;
   padding: 0.5em 2em;
   border: 1px solid var(--pst-color-primary);
   border-radius: 4px;
@@ -124,13 +118,26 @@ html[data-theme="dark"] {
   border: 1px solid var(--pst-color-secondary);
 }
 .homepage-button-link {
-  width: 100%;
   text-decoration: underline;
+}
+
+/* Sponsors */
+.sponsor-container {
+  display: flex;
+  justify-content: space-around;
+}
+.sponsor {
+  padding: 8px 10px;
+  margin: auto;
+  flex-grow: 1;
+  min-width: 120px;
+  max-width: 264px;
 }
 
 /* Section Support ArviZ */
 #support-arviz h3 {
   font-weight: bold;
+  text-align: center;
 }
 
 #support-arviz .two-col {
@@ -141,26 +148,12 @@ html[data-theme="dark"] {
   width: 50%;
   text-align: center;
   padding: 0 50px;
-}
-
-#support-arviz .sponsor-container {
-  display: flex;
-}
-#support-arviz .sponsor {
-  padding: 8px 10px;
-  margin: auto;
-}
-#sponsors .sponsor {
-  width: 33.3%;
-}
-#support-arviz #donate .sponsor.homepage-button {
-  margin-left: 20px;
+  margin: auto 20px;
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  #support-arviz .two-col,
-  #support-arviz #donate .sponsor-container {
+  #support-arviz .two-col {
     display: block;
   }
   #support-arviz .two-col .col {
@@ -172,21 +165,15 @@ html[data-theme="dark"] {
     width: 60%;
     min-width: 300px;
   }
-  #support-arviz #donate .sponsor.homepage-button {
-    margin: 20px;
-  }
 }
 @media (max-width: 768px) {
-  #overview {
+  #hero {
     display: block;
   }
-  #overview #arviz,
-  #overview #example-gallery {
+  #hero-left,
+  #hero-right {
     width: 100%;
     min-width: 0px;
-  }
-  #support-arviz #sponsors .sponsor {
-    padding: 4px 4px;
   }
 }
 @media (max-width: 480px) {
