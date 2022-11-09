@@ -13,9 +13,8 @@ likelihood to the user who is expected to write it with xarray/NumPy.
 ```{toctree}
 pystan2_refitting
 pystan_refitting
-pymc3_refitting
+pymc_refitting
 numpyro_refitting
 pystan2_refitting_xr_lik
-pymc3_refitting_xr_lik
 numpyro_refitting_xr_lik
 ```
