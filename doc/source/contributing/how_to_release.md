@@ -28,7 +28,7 @@ ArviZ uses the following process to cut a new release of the library.
 
 7. Add a follow-up PR changing the version string to include the dev flag. Make sure the version string is [PEP 440](https://peps.python.org/pep-0440/#appendix-b-parsing-version-strings-with-regular-expressions) compliant.
 
-8. Use the following template to add empty subheadings to the `CHANGELOG.md` file.
+8. Use the following template to add empty subheadings to the `CHANGELOG.md` file in the follow-up PR.
 
    ```markdown
    ## v0.x.x Unreleased
@@ -41,3 +41,5 @@ ArviZ uses the following process to cut a new release of the library.
 
    ### Documentation
    ```
+   
+9. If the versions were updated in step 3, update also the [conda forge recipe](https://github.com/conda-forge/arviz-feedstock).
