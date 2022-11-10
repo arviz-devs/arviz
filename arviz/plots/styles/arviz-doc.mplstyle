@@ -31,7 +31,14 @@ axes.edgecolor:         .33         # axes edge color
 axes.linewidth:         0.8         # edge line width
 
 axes.grid:              False        # do not show grid
+# axes.grid.axis:         y        # which axis the grid should apply to
+axes.grid.which:        major       # grid lines at {major, minor, both} ticks
 axes.axisbelow:         True        # keep grid layer in the back
+
+grid.color:             .8          # grid color
+grid.linestyle:         -           # solid
+grid.linewidth:         0.8         # in points
+grid.alpha:             1.0         # transparency, between 0.0 and 1.0
 
 lines.solid_capstyle:   round
 

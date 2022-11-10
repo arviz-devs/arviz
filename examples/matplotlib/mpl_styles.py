@@ -31,6 +31,7 @@ style_list = [
     ["arviz-white", "arviz-viridish"],
     ["arviz-white", "arviz-plasmish"],
     "arviz-doc",
+    "arviz-docgrid",
 ]
 
 fig = plt.figure(figsize=(20, 10))
