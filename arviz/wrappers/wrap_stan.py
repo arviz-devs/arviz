@@ -1,5 +1,5 @@
 # pylint: disable=arguments-differ
-"""Base class for PyStan wrappers."""
+"""Base class for Stan interface wrappers."""
 from typing import Union
 
 from ..data import from_cmdstanpy, from_pystan
@@ -110,5 +110,23 @@ class PyStanSamplingWrapper(StanSamplingWrapper):
         else:
             program_code = self.model.program_code
         self.model = stan.build(program_code, data=modified_observed_data)
+        fit = self.model.sample(**self.sample_kwargs)
+        return fit
+
+class CmdStanPySamplingWrapper(StanSamplingWrapper):
+    """CmdStanPy sampling wrapper base class.
+
+    See the documentation on  :class:`~arviz.SamplingWrapper` for a more detailed
+    description. An example of ``CmdStanPySamplingWrapper`` usage can be found
+    in the :ref:`cmdstanpy_refitting` notebook.
+
+    Warnings
+    --------
+    Sampling wrappers are an experimental feature in a very early stage. Please use them
+    with caution.
+    """
+
+    def sample(self, modified_observed_data):
+        """Resample cmdstanpy model on modified_observed_data."""
         fit = self.model.sample(**self.sample_kwargs)
         return fit
