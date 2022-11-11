@@ -121,52 +121,89 @@ Posterior Predictive Check Plot using `plot_ppc`
 
 # Key Features
 
-::::{grid} 1 2 2 3
-:gutter: 3
+Distributed under the [Apache license](https://github.com/arviz-devs/arviz/blob/main/LICENSE), ArviZ is developed and maintained [publicly on GitHub](https://github.com/arviz-devs/arviz) by a vibrant, responsive, and diverse {ref}`community <community>`.
 
-:::{grid-item-card} Interoperable
-:text-align: center
+:::::{grid} 1 1 2 2
+:gutter: 5
 
+::::{grid-item-card} 
+:shadow: none
+:class-card: sd-border-0
+
+:::{image} _static/key_feature_interoperability.svg
+:::
+
+:::{div} key-features-text
+<strong>Interoperability</strong><br/>
 Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, PyStan, Pyro, NumPyro, emcee...
 :::
+::::
 
-:::{grid-item-card} Large suite of visualizations
-:text-align: center
+::::{grid-item-card}
+:shadow: none
+:class-card: sd-border-0
 
+:::{image} _static/key_feature_visualizations.svg
+:::
+
+:::{div} key-features-text
+<strong>Large Suite of Visualizations</strong><br/>
 Provides over 25 plotting functions for all parts of Bayesian workflow: visualizing distributions, diagnostics, model checking...See the gallery for examples.
 :::
+::::
 
-:::{grid-item-card} State of the art diagnostics
-:text-align: center
+::::{grid-item-card}
+:shadow: none
+:class-card: sd-border-0
 
+:::{image} _static/key_feature_diagnostics.svg
+:::
+
+:::{div} key-features-text
+<strong>State of the Art Diagnostics</strong><br/>
 Latest published diagnostics and statistics are implemented, tested and distributed with ArviZ.
 :::
+::::
 
-:::{grid-item-card} Flexible model comparison
-:text-align: center
+::::{grid-item-card}
+:shadow: none
+:class-card: sd-border-0
 
+:::{image} _static/key_feature_comparison.svg
+:::
+
+:::{div} key-features-text
+<strong>Flexible Model Comparison</strong><br/>
 Includes functions for comparing models with information criteria, and cross validation (both approximate and brute force).
 :::
+::::
 
-:::{grid-item-card} Built for collaboration
-:text-align: center
+::::{grid-item-card}
+:shadow: none
+:class-card: sd-border-0 
 
+:::{image} _static/key_feature_collaboration.svg
+:::
+
+:::{div} key-features-text
+<strong>Built for Collaboration</strong><br/>
 Designed for flexible cross-language serialization using netCDF or Zarr formats. ArviZ also has a [Julia version](https://julia.arviz.org/) that uses the same {ref}`data schema <schema>`.
 :::
-
-:::{grid-item-card} Labeled data
-:text-align: center
-
-Builds on top of xarray to work with labeled dimensions and coordinates
-:::
-
-:::{grid-item-card} Open source
-:text-align: center
-
-Distributed under the [Apache license](https://github.com/arviz-devs/arviz/blob/main/LICENSE), ArviZ is developed and maintained [publicly on GitHub](https://github.com/arviz-devs/arviz) by a vibrant, responsive, and diverse {ref}`community <community>`
-:::
-
 ::::
+
+::::{grid-item-card}
+:shadow: none
+:class-card: sd-border-0
+
+:::{image} _static/key_feature_labeled_data.svg
+:::
+
+:::{div} key-features-text
+<strong>Labeled Data</strong><br/>
+Builds on top of xarray to work with labeled dimensions and coordinates.
+:::
+::::
+:::::
 
 
 # Support ArviZ
@@ -201,7 +238,7 @@ ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ fina
 [![numfocus_logo](_static/donate_numfocus.png)](href="https://numfocus.org/)
 :::
 :::{grid-item}
-<a href="https://numfocus.org/donate-to-arviz" class="sponsor homepage-button primary-button">Donate</a>
+<a href="https://numfocus.org/donate-to-arviz" class="homepage-button primary-button">Donate</a>
 :::
 ::::
 :::::

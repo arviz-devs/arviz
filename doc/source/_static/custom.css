@@ -42,18 +42,16 @@ html[data-theme="dark"] {
 /* -------------------- HOMEPAGE -------------------- */
 #key-features,
 #sponsors,
-#support-arviz,
-#citation {
+#support-arviz {
   padding: 3rem 0 7rem;
 }
 
 #key-features h1,
 #sponsors h1,
-#support-arviz h1,
-#citation h1 {
+#support-arviz h1 {
   font-weight: bold;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 4rem;
 }
 
 #hero .headerlink,
@@ -69,8 +67,7 @@ html[data-theme="dark"] {
   display: flex;
   flex-direction: row;
   padding: 3rem 0 7rem;
-  height: calc(80vh); /* Make hero fill up most of the page on load */
-  max-height: 1100px;
+  min-height: min(calc(80vh), 1100px); /* Make hero fill up most of the page on load */
 }
 #hero-left {
   max-width: 476px;
@@ -121,17 +118,17 @@ html[data-theme="dark"] {
   text-decoration: underline;
 }
 
-/* Sponsors */
-.sponsor-container {
+/* Key Features */
+#key-features .sd-card-body {
   display: flex;
-  justify-content: space-around;
 }
-.sponsor {
-  padding: 8px 10px;
-  margin: auto;
-  flex-grow: 1;
-  min-width: 120px;
-  max-width: 264px;
+#key-features .sd-card img {
+  width: 140px;
+  height: 140px;
+}
+#key-features .sd-card-body .key-features-text {
+  min-width: 70%;
+  padding-top: 20px;
 }
 
 /* Section Support ArviZ */
@@ -140,27 +137,13 @@ html[data-theme="dark"] {
   text-align: center;
 }
 
-#support-arviz .two-col {
-  display: flex;
-  margin-bottom: 30px;
-}
-#support-arviz .two-col .col {
-  width: 50%;
-  text-align: center;
-  padding: 0 50px;
-  margin: auto 20px;
+/* Sponsors */
+img {
+  max-width: 200px;
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  #support-arviz .two-col {
-    display: block;
-  }
-  #support-arviz .two-col .col {
-    width: 100%;
-    min-width: 300px;
-    padding: 0px;
-  }
   #support-arviz #donate img {
     width: 60%;
     min-width: 300px;
