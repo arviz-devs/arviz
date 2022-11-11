@@ -4,7 +4,7 @@
 
 ### New features
 - Adds Savage-Dickey density ratio plot for Bayes factor approximation. ([2037](https://github.com/arviz-devs/arviz/pull/2037), [2152](https://github.com/arviz-devs/arviz/pull/2152))
-
+- Adds rug plot for observed variables to `plot_ppc`. ([2161](https://github.com/arviz-devs/arviz/pull/2161))
 
 ### Maintenance and fixes
 - Fix dimension ordering for `plot_trace` with divergences ([2151](https://github.com/arviz-devs/arviz/pull/2151))
