@@ -31,6 +31,7 @@ def plot_ppc(
     textsize,
     mean,
     observed,
+    observed_rug,
     jitter,
     total_pp_samples,
     legend,
@@ -135,6 +136,7 @@ def plot_ppc(
                 if dtype == "f":
                     plot_kde(
                         obs_vals,
+                        rug=observed_rug,
                         label="Observed",
                         plot_kwargs={"color": colors[1], "linewidth": linewidth, "zorder": 3},
                         fill_kwargs={"alpha": 0},
@@ -232,6 +234,14 @@ def plot_ppc(
                     drawstyle=drawstyle,
                     zorder=3,
                 )
+                if observed_rug:
+                    ax_i.plot(
+                        obs_vals,
+                        np.zeros_like(obs_vals) - 0.1,
+                        ls="",
+                        marker="|",
+                        color=colors[1],
+                    )
             if animated:
                 animate, init = _set_animation(
                     pp_sampled_vals,
