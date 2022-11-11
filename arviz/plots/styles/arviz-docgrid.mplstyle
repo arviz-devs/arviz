@@ -30,7 +30,7 @@ axes.facecolor:         white
 axes.edgecolor:         .33         # axes edge color
 axes.linewidth:         0.8         # edge line width
 
-axes.grid:              False        # do not show grid
+axes.grid:              True        # show grid
 # axes.grid.axis:         y        # which axis the grid should apply to
 axes.grid.which:        major       # grid lines at {major, minor, both} ticks
 axes.axisbelow:         True        # keep grid layer in the back
