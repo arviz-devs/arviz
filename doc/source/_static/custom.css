@@ -50,6 +50,7 @@ html[data-theme="dark"] {
 #sponsors h1,
 #support-arviz h1 {
   font-weight: bold;
+  font-size: 48px;
   text-align: center;
   margin-bottom: 4rem;
 }
