@@ -20,6 +20,7 @@ __all__ = [
     "r2_score",
     "summary",
     "waic",
+    "weight_predictions",
     "ELPDData",
     "ess",
     "rhat",
