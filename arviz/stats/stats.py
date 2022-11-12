@@ -2098,7 +2098,7 @@ def weight_predictions(idatas, weights=None):
     ]
 
     if not all(len_idatas):
-        raise ValueError("at least one of your idatas has 0 samples")
+        raise ValueError("At least one of your idatas has 0 samples")
 
     new_samples = (np.min(len_idatas) * weights).astype(int)
 
