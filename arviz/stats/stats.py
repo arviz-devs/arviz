@@ -2053,7 +2053,7 @@ def weight_predictions(idatas, weights=None):
 
     Parameters
     ---------
-    idatas : list[InfereneData]
+    idatas : list[InferenceData]
         List of :class:`arviz.InferenceData` objects containing the groups `posterior_predictive`
         and `observed_data`. Observations should be the same for all InferenceData objects.
     weights : array-like, optional
@@ -2089,13 +2089,16 @@ def weight_predictions(idatas, weights=None):
             "The number of weights should be the same as the number of InferenceData objects"
         )
 
-    weights = np.asarray(weights, dtype=float)
+    weights = np.array(weights, dtype=float)
     weights /= weights.sum()
 
     len_idatas = [
-        len(idata.posterior_predictive.chain) * len(idata.posterior_predictive.draw)
+        idata.posterior_predictive.dims["chain"] * idata.posterior_predictive.dims["draw"]
         for idata in idatas
     ]
+
+    if not all(len_idatas):
+        raise ValueError("at least one of your idatas has 0 samples")
 
     new_samples = (np.min(len_idatas) * weights).astype(int)
 
