@@ -208,9 +208,9 @@ Builds on top of xarray to work with labeled dimensions and coordinates.
 
 # Support ArviZ
 
-::::::{grid} 1 1 2 2
+::::{grid} 1 1 2 2
 
-:::::{grid-item}
+:::{grid-item}
 
 <h3>Contributions</h3>
 
@@ -218,40 +218,60 @@ Contributions and issue reports are very welcome at
 [the GitHub repository](https://github.com/arviz-devs/arviz).
 We have a {ref}`contributing guide <contributing_guide>` to help you through the process.
 If you have any doubts, please do not hesitate to contact us on [gitter](https://gitter.im/arviz-devs/community)
-:::::
-:::::{grid-item}
+:::
+:::{grid-item}
 
 <h3>Citation</h3>
 
 If you use ArviZ, please it using <a class="reference external" href="https://doi.org/10.21105/joss.01143"><img alt="JOSS" src="https://joss.theoj.org/papers/10.21105/joss.01143/status.svg"></a>.
 
 See our {ref}`support page <arviz_org:cite>` for information on how to cite in BibTeX format.
-:::::
-:::::{grid-item}
+:::
+::::
 
+
+
+::::{grid} 1 1 3 3
+
+:::{grid-item}
+:child-align: justify
 <h3>Donate</h3>
+
+[![numfocus_logo](_static/donate_numfocus.png)](href="https://numfocus.org/)
 
 ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ financially, click the donate button below or visit the NumFOCUS website.
 
-::::{grid} 2
-:::{grid-item}
-[![numfocus_logo](_static/donate_numfocus.png)](href="https://numfocus.org/)
-:::
-:::{grid-item}
 <a href="https://numfocus.org/donate-to-arviz" class="homepage-button primary-button">Donate</a>
 :::
+
+:::{grid-item}
+:child-align: justify
+<h3>Shop ArviZ Merchandise</h3>
+
+[![logo_merch](_static/donate_merch.svg)](href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241)
+
+TBD Description Here
+
+<div style="display: flex; flex-wrap: wrap; justify-content:center;">
+<a href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241" class="homepage-button primary-button">Shop the Logo</a>
+<a href="https://numfocus.myspreadshop.com/arviz+favicon+design?idea=62a74f17ebe60a221692c6f2" class="homepage-button primary-button">Shop the Favicon</a>
+</div>
+:::
+
+:::{grid-item}
+:child-align: justify
+<h3>Become a Sponsor</h3>
+
+TBD Description Here
+
+<a href="#" class="homepage-button primary-button">TBD</a>
+:::
 ::::
-:::::
-:::::{grid-item}
 
-<h3>Become a sponsor</h3>
-
-:::::
-::::::
 
 # Sponsors
 
-::::{grid} 1 2 3 4
+::::{grid} 1 3 3 3
 :::{grid-item}
 [![helsinki_uni_logo](_static/sponsor_university_helsinki.png)](https://www.helsinki.fi/en)
 :::
@@ -262,6 +282,9 @@ ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ fina
 [![czi_logo](_static/sponsor_czi.png)](https://chanzuckerberg.com/)
 :::
 ::::
+
+
+
 
 :::{toctree}
 :maxdepth: 1

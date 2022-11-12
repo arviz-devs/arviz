@@ -137,6 +137,9 @@ html[data-theme="dark"] {
   font-weight: bold;
   text-align: center;
 }
+#support-arviz .sd-col p {
+  text-align: center;
+}
 
 /* Sponsors */
 img {

@@ -7,9 +7,10 @@
       }
 
       .cls-2 {
-        stroke-dasharray: 0 4;
+        stroke-dasharray: 0 6;
         stroke-linecap: round;
         stroke-linejoin: round;
+        stroke-width: 2px;
       }
 
       .cls-2, .cls-3, .cls-4 {
