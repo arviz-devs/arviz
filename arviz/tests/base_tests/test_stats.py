@@ -3,7 +3,12 @@ from copy import deepcopy
 
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
+from numpy.testing import (
+    assert_allclose,
+    assert_array_almost_equal,
+    assert_almost_equal,
+    assert_array_equal,
+)
 from scipy.special import logsumexp
 from scipy.stats import linregress
 from xarray import DataArray, Dataset
@@ -21,6 +26,7 @@ from ...stats import (
     r2_score,
     summary,
     waic,
+    weight_predictions,
     _calculate_ics,
 )
 from ...stats.stats import _gpinv
@@ -800,3 +806,26 @@ def test_apply_test_function_should_overwrite_error(centered_eight):
     """Test error when overwrite=False but out_name is already a present variable."""
     with pytest.raises(ValueError, match="Should overwrite"):
         apply_test_function(centered_eight, lambda y, theta: y, out_name_data="obs")
+
+
+def test_weight_predictions():
+    idata0 = from_dict(
+        posterior_predictive={"a": np.random.normal(-1, 1, 1000)}, observed_data={"a": [1]}
+    )
+    idata1 = from_dict(
+        posterior_predictive={"a": np.random.normal(1, 1, 1000)}, observed_data={"a": [1]}
+    )
+
+    new = weight_predictions([idata0, idata1])
+    assert (
+        idata1.posterior_predictive.mean()
+        > new.posterior_predictive.mean()
+        > idata0.posterior_predictive.mean()
+    )
+    assert "posterior_predictive" in new
+    assert "observed_data" in new
+
+    new = weight_predictions([idata0, idata1], weights=[0.5, 0.5])
+    assert_almost_equal(new.posterior_predictive["a"].mean(), 0, decimal=1)
+    new = weight_predictions([idata0, idata1], weights=[0.9, 0.1])
+    assert_almost_equal(new.posterior_predictive["a"].mean(), -0.8, decimal=1)
