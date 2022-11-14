@@ -711,7 +711,8 @@ def test_plot_pair_shared(sharex, sharey, marginals):
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
 @pytest.mark.parametrize("observed", [True, False])
-def test_plot_ppc(models, kind, alpha, animated, observed):
+@pytest.mark.parametrize("observed_rug", [False, True])
+def test_plot_ppc(models, kind, alpha, animated, observed, observed_rug):
     if animation and not animation.writers.is_available("ffmpeg"):
         pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     animation_kwargs = {"blit": False}
@@ -720,6 +721,7 @@ def test_plot_ppc(models, kind, alpha, animated, observed):
         kind=kind,
         alpha=alpha,
         observed=observed,
+        observed_rug=observed_rug,
         animated=animated,
         animation_kwargs=animation_kwargs,
         random_seed=3,

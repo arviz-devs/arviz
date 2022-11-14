@@ -1,10 +1,14 @@
 """Bokeh Posterior predictive plot."""
 import numpy as np
 from bokeh.models.annotations import Legend
+from bokeh.models.glyphs import Scatter
+from bokeh.models import ColumnDataSource
+
 
 from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size, vectorized_to_hex
+
 
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
@@ -27,6 +31,7 @@ def plot_ppc(
     textsize,
     mean,
     observed,
+    observed_rug,
     jitter,
     total_pp_samples,
     legend,  # pylint: disable=unused-argument
@@ -97,6 +102,7 @@ def plot_ppc(
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
         pp_sampled_vals = pp_vals[pp_sample_ix]
+        cds_rug = ColumnDataSource({"_": np.array(obs_vals)})
 
         if kind == "kde":
             plot_kwargs = {
@@ -144,6 +150,16 @@ def plot_ppc(
                         return_glyph=True,
                     )
                     legend_it.append((label, glyph))
+                    if observed_rug:
+                        glyph = Scatter(
+                            x="_",
+                            y=0.0,
+                            marker="dash",
+                            angle=np.pi / 2,
+                            line_color=colors[1],
+                            line_width=linewidth,
+                        )
+                        ax_i.add_glyph(cds_rug, glyph)
                 else:
                     bins = get_bins(obs_vals)
                     _, hist, bin_edges = histogram(obs_vals, bins=bins)
@@ -215,6 +231,18 @@ def plot_ppc(
                         mode="center",
                     )
                     legend_it.append((label, [step]))
+
+                if observed_rug:
+                    glyph = Scatter(
+                        x="_",
+                        y=0.0,
+                        marker="dash",
+                        angle=np.pi / 2,
+                        line_color=colors[1],
+                        line_width=linewidth,
+                    )
+                    ax_i.add_glyph(cds_rug, glyph)
+
             pp_densities = np.empty((2 * len(pp_sampled_vals), pp_sampled_vals[0].size))
             for idx, vals in enumerate(pp_sampled_vals):
                 vals = np.array([vals]).flatten()
