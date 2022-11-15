@@ -1,7 +1,6 @@
 # Change Log
 
-
-## v0.x.x Unreleased
+## v0.14.0 (2022 Nov 15)
 
 ### New features
 - Add `weight_predictions` function to allow generation of weighted predictions from two or more InfereceData with `posterior_predictive` groups and a set of weights ([2147](https://github.com/arviz-devs/arviz/pull/2147))
