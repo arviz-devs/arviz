@@ -273,6 +273,8 @@ def plot_ppc(
 
     if coords is None:
         coords = {}
+    else:
+        coords = coords.copy()
 
     if labeller is None:
         labeller = BaseLabeller()

@@ -36,6 +36,7 @@
 * Fix issue in dim generation when default dims are present in user inputed dims ([2138](https://github.com/arviz-devs/arviz/pull/2138))
 * Save InferenceData level attrs to netcdf and zarr ([2131](https://github.com/arviz-devs/arviz/pull/2131))
 * Update tests and docs for updated example data ([2137](https://github.com/arviz-devs/arviz/pull/2137))
+* Copy coords before modifying in ppcplot ([2160](https://github.com/arviz-devs/arviz/pull/2160))
 
 ### Deprecation
 * Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))
