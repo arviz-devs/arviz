@@ -7,10 +7,12 @@
 - Add `CmdStanPySamplingWrapper` and `PyMCSamplingWrapper` classes ([2158](https://github.com/arviz-devs/arviz/pull/2158))
 
 ### Maintenance and fixes
+- Fix `reloo` outdated usage of `ELPDData` ([2158](https://github.com/arviz-devs/arviz/pull/2158))
 
 ### Deprecation
 
 ### Documentation
+- Add PyMC and CmdStanPy sampling wrapper examples ([2158](https://github.com/arviz-devs/arviz/pull/2158))
 
 ## v0.14.0 (2022 Nov 15)
 
@@ -21,12 +23,6 @@
 
 ### Maintenance and fixes
 - Fix dimension ordering for `plot_trace` with divergences ([2151](https://github.com/arviz-devs/arviz/pull/2151))
-- Fix `reloo` outdated usage of `ELPDData` ([2158](https://github.com/arviz-devs/arviz/pull/2158))
-
-### Deprecation
-
-### Documentation
-- Add PyMC and CmdStanPy sampling wrapper examples ([2158](https://github.com/arviz-devs/arviz/pull/2158))
 
 ## v0.13.0 (2022 Oct 22)
 
