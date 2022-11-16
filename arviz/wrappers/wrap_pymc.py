@@ -18,7 +18,7 @@ class PyMCSamplingWrapper(SamplingWrapper):
 
     def sample(self, modified_observed_data):
         """Update data and sample model on modified_observed_data."""
-        import pymc
+        import pymc  # pylint: disable=import-error
 
         with self.model:
 
