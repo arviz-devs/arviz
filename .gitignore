@@ -75,6 +75,10 @@ saved_animations/
 
 # Stan file
 doc/getting_started/*.stan
+doc/source/user_guide/wrappers/*
+!doc/source/user_guide/wrappers/*.stan
+!doc/source/user_guide/wrappers/*.ipynb
+!doc/source/user_guide/wrappers/*.md
 
 # eight-schools files
 doc/source/getting_started/eight_school*
