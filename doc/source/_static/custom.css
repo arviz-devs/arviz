@@ -42,13 +42,15 @@ html[data-theme="dark"] {
 /* -------------------- HOMEPAGE -------------------- */
 #key-features,
 #sponsors,
-#support-arviz {
+#using-arviz,
+#supporting-arviz {
   padding: 3rem 0 7rem;
 }
 
 #key-features h1,
 #sponsors h1,
-#support-arviz h1 {
+#using-arviz h1,
+#supporting-arviz h1 {
   font-weight: bold;
   font-size: 48px;
   text-align: center;
@@ -58,7 +60,8 @@ html[data-theme="dark"] {
 #hero .headerlink,
 #key-features .headerlink,
 #sponsors .headerlink,
-#support-arviz .headerlink {
+#using-arviz .headerlink,
+#supporting-arviz .headerlink {
   visibility: hidden;
   position: absolute;
 }
@@ -133,11 +136,13 @@ html[data-theme="dark"] {
 }
 
 /* Section Support ArviZ */
-#support-arviz h3 {
+#using-arviz h3,
+#supporting-arviz h3 {
   font-weight: bold;
   text-align: center;
 }
-#support-arviz .sd-col p {
+#using-arviz .sd-col p,
+#supporting-arviz .sd-col p {
   text-align: center;
 }
 
@@ -148,7 +153,7 @@ img {
 
 /* Responsive */
 @media (max-width: 1024px) {
-  #support-arviz #donate img {
+  #supporting-arviz #donate img {
     width: 60%;
     min-width: 300px;
   }
@@ -164,7 +169,7 @@ img {
   }
 }
 @media (max-width: 480px) {
-  #support-arviz #donate img {
+  #supporting-arviz #donate img {
     width: 80%;
     min-width: 0px;
     padding: 20px;

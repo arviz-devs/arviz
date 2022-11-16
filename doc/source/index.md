@@ -121,8 +121,6 @@ Posterior Predictive Check Plot using `plot_ppc`
 
 # Key Features
 
-Distributed under the [Apache license](https://github.com/arviz-devs/arviz/blob/main/LICENSE), ArviZ is developed and maintained [publicly on GitHub](https://github.com/arviz-devs/arviz) by a vibrant, responsive, and diverse {ref}`community <community>`.
-
 :::::{grid} 1 1 2 2
 :gutter: 5
 
@@ -135,7 +133,7 @@ Distributed under the [Apache license](https://github.com/arviz-devs/arviz/blob/
 
 :::{div} key-features-text
 <strong>Interoperability</strong><br/>
-Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, PyStan, Pyro, NumPyro, emcee...
+Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, PyStan, Pyro, NumPyro, and emcee.
 :::
 ::::
 
@@ -148,7 +146,7 @@ Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, 
 
 :::{div} key-features-text
 <strong>Large Suite of Visualizations</strong><br/>
-Provides over 25 plotting functions for all parts of Bayesian workflow: visualizing distributions, diagnostics, model checking...See the gallery for examples.
+Provides over 25 plotting functions for all parts of Bayesian workflow: visualizing distributions, diagnostics, and model checking. See the gallery for examples.
 :::
 ::::
 
@@ -206,7 +204,7 @@ Builds on top of xarray to work with labeled dimensions and coordinates.
 :::::
 
 
-# Support ArviZ
+# Using ArviZ
 
 ::::{grid} 1 1 2 2
 
@@ -217,7 +215,7 @@ Builds on top of xarray to work with labeled dimensions and coordinates.
 Contributions and issue reports are very welcome at
 [the GitHub repository](https://github.com/arviz-devs/arviz).
 We have a {ref}`contributing guide <contributing_guide>` to help you through the process.
-If you have any doubts, please do not hesitate to contact us on [gitter](https://gitter.im/arviz-devs/community)
+If you have any doubts, please do not hesitate to contact us on [gitter](https://gitter.im/arviz-devs/community).
 :::
 :::{grid-item}
 
@@ -226,45 +224,6 @@ If you have any doubts, please do not hesitate to contact us on [gitter](https:/
 If you use ArviZ, please it using <a class="reference external" href="https://doi.org/10.21105/joss.01143"><img alt="JOSS" src="https://joss.theoj.org/papers/10.21105/joss.01143/status.svg"></a>.
 
 See our {ref}`support page <arviz_org:cite>` for information on how to cite in BibTeX format.
-:::
-::::
-
-
-
-::::{grid} 1 1 3 3
-
-:::{grid-item}
-:child-align: justify
-<h3>Donate</h3>
-
-[![numfocus_logo](_static/donate_numfocus.png)](href="https://numfocus.org/)
-
-ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ financially, click the donate button below or visit the NumFOCUS website.
-
-<a href="https://numfocus.org/donate-to-arviz" class="homepage-button primary-button">Donate</a>
-:::
-
-:::{grid-item}
-:child-align: justify
-<h3>Shop ArviZ Merchandise</h3>
-
-[![logo_merch](_static/donate_merch.svg)](href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241)
-
-TBD Description Here
-
-<div style="display: flex; flex-wrap: wrap; justify-content:center;">
-<a href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241" class="homepage-button primary-button">Shop the Logo</a>
-<a href="https://numfocus.myspreadshop.com/arviz+favicon+design?idea=62a74f17ebe60a221692c6f2" class="homepage-button primary-button">Shop the Favicon</a>
-</div>
-:::
-
-:::{grid-item}
-:child-align: justify
-<h3>Become a Sponsor</h3>
-
-TBD Description Here
-
-<a href="#" class="homepage-button primary-button">TBD</a>
 :::
 ::::
 
@@ -284,6 +243,44 @@ TBD Description Here
 ::::
 
 
+# Supporting ArviZ
+
+::::{grid} 1 1 3 3
+
+:::{grid-item}
+:child-align: justify
+<h3>Become a Sponsor</h3>
+
+See the Sponsors page for more details.
+
+<a href="https://www.arviz.org/en/latest/sponsors_partners.html" class="homepage-button primary-button">See Details</a>
+:::
+
+:::{grid-item}
+:child-align: justify
+<h3>Shop ArviZ Merchandise</h3>
+
+![logo_merch](_static/donate_merch.svg)
+
+Merchandise is available for the ArviZ logo and favicon.
+
+<div style="display: flex; flex-wrap: wrap; justify-content:center;">
+<a href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241" class="homepage-button primary-button">Shop Logo</a>
+<a href="https://numfocus.myspreadshop.com/arviz+favicon+design?idea=62a74f17ebe60a221692c6f2" class="homepage-button primary-button">Shop Favicon</a>
+</div>
+:::
+
+:::{grid-item}
+:child-align: justify
+<h3>Donate</h3>
+
+![numfocus_logo](_static/donate_numfocus.png)
+
+ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ financially, consider donating through the NumFOCUS website.
+
+<a href="https://numfocus.org/donate-to-arviz" class="homepage-button primary-button">Donate</a>
+:::
+::::
 
 
 :::{toctree}
