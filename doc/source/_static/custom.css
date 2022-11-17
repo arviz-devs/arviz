@@ -40,28 +40,18 @@ html[data-theme="dark"] {
 }
 
 /* -------------------- HOMEPAGE -------------------- */
-#key-features,
-#sponsors,
-#using-arviz,
-#supporting-arviz {
+article.bd-article section {
   padding: 3rem 0 7rem;
 }
 
-#key-features h1,
-#sponsors h1,
-#using-arviz h1,
-#supporting-arviz h1 {
+h1.homepage-title {
   font-weight: bold;
   font-size: 48px;
   text-align: center;
   margin-bottom: 4rem;
 }
 
-#hero .headerlink,
-#key-features .headerlink,
-#sponsors .headerlink,
-#using-arviz .headerlink,
-#supporting-arviz .headerlink {
+h1.homepage-title .headerlink {
   visibility: hidden;
   position: absolute;
 }

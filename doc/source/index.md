@@ -119,7 +119,7 @@ Posterior Predictive Check Plot using `plot_ppc`
 </div>  <!-- End Hero Right -->
 </div>  <!-- End Hero -->
 
-# Key Features
+<h1 class="homepage-title">Key Features</h1>
 
 :::::{grid} 1 1 2 2
 :gutter: 5
@@ -203,7 +203,7 @@ Builds on top of xarray to work with labeled dimensions and coordinates.
 ::::
 :::::
 
-# Sponsors and Institutional Partners
+<h1 class="homepage-title">Sponsors and Institutional Partners</h1>
 We thank these institutions for generously supporting the development and maintenance of ArviZ.
 
 ::::{grid} 1 3 3 3
@@ -218,7 +218,7 @@ We thank these institutions for generously supporting the development and mainte
 :::
 ::::
 
-# Support ArviZ
+<h1 class="homepage-title">Support ArviZ</h1>
 
 ::::{grid} 1 1 2 2
 
