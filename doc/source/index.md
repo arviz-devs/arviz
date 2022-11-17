@@ -124,7 +124,7 @@ Posterior Predictive Check Plot using `plot_ppc`
 :::::{grid} 1 1 2 2
 :gutter: 5
 
-::::{grid-item-card} 
+::::{grid-item-card}
 :shadow: none
 :class-card: sd-border-0
 
@@ -178,7 +178,7 @@ Includes functions for comparing models with information criteria, and cross val
 
 ::::{grid-item-card}
 :shadow: none
-:class-card: sd-border-0 
+:class-card: sd-border-0
 
 :::{image} _static/key_feature_collaboration.svg
 :::
@@ -203,8 +203,22 @@ Builds on top of xarray to work with labeled dimensions and coordinates.
 ::::
 :::::
 
+# Sponsors and Institutional Partners
+We thank these institutions for generously supporting the development and maintenance of ArviZ.
 
-# Using ArviZ
+::::{grid} 1 3 3 3
+:::{grid-item}
+[![helsinki_uni_logo](_static/sponsor_university_helsinki.png)](https://www.helsinki.fi/en)
+:::
+:::{grid-item}
+[![fcai_logo](_static/sponsor_fcai.png)](https://fcai.fi/)
+:::
+:::{grid-item}
+[![czi_logo](_static/sponsor_czi.png)](https://chanzuckerberg.com/)
+:::
+::::
+
+# Support ArviZ
 
 ::::{grid} 1 1 2 2
 
@@ -225,44 +239,25 @@ If you use ArviZ, please it using <a class="reference external" href="https://do
 
 See our {ref}`support page <arviz_org:cite>` for information on how to cite in BibTeX format.
 :::
-::::
-
-
-# Sponsors
-
-::::{grid} 1 3 3 3
-:::{grid-item}
-[![helsinki_uni_logo](_static/sponsor_university_helsinki.png)](https://www.helsinki.fi/en)
-:::
-:::{grid-item}
-[![fcai_logo](_static/sponsor_fcai.png)](https://fcai.fi/)
-:::
-:::{grid-item}
-[![czi_logo](_static/sponsor_czi.png)](https://chanzuckerberg.com/)
-:::
-::::
-
-
-# Supporting ArviZ
-
-::::{grid} 1 1 3 3
 
 :::{grid-item}
 :child-align: justify
+
 <h3>Become a Sponsor</h3>
 
-See the Sponsors page for more details.
+If your company or institution uses ArviZ,
+we encourage you to make a donation to ArviZ or
+to allow employees to dedicate some of their time to ArviZ.
 
-<a href="https://www.arviz.org/en/latest/sponsors_partners.html" class="homepage-button primary-button">See Details</a>
+<a href="https://www.arviz.org/en/latest/governance/sponsors_partners.html" class="homepage-button primary-button">See Details</a>
 :::
 
 :::{grid-item}
 :child-align: justify
+
 <h3>Shop ArviZ Merchandise</h3>
 
 ![logo_merch](_static/donate_merch.svg)
-
-Merchandise is available for the ArviZ logo and favicon.
 
 <div style="display: flex; flex-wrap: wrap; justify-content:center;">
 <a href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241" class="homepage-button primary-button">Shop Logo</a>
@@ -272,13 +267,17 @@ Merchandise is available for the ArviZ logo and favicon.
 
 :::{grid-item}
 :child-align: justify
-<h3>Donate</h3>
 
-![numfocus_logo](_static/donate_numfocus.png)
+<h3>Donate</h3>
 
 ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ financially, consider donating through the NumFOCUS website.
 
 <a href="https://numfocus.org/donate-to-arviz" class="homepage-button primary-button">Donate</a>
+:::
+:::{grid-item}
+:child-align: justify
+
+![numfocus_logo](_static/donate_numfocus.png)
 :::
 ::::
 
