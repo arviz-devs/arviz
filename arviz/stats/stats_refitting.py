@@ -84,7 +84,7 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
     loo_refitted = loo_orig.copy()
     khats = loo_refitted.pareto_k
     loo_i = loo_refitted.loo_i
-    scale = loo_orig.loo_scale
+    scale = loo_orig.scale
 
     if scale.lower() == "deviance":
         scale_value = -2
@@ -92,7 +92,7 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
         scale_value = 1
     elif scale.lower() == "negative_log":
         scale_value = -1
-    lppd_orig = loo_orig.p_loo + loo_orig.loo / scale_value
+    lppd_orig = loo_orig.p_loo + loo_orig.elpd_loo / scale_value
     n_data_points = loo_orig.n_data_points
 
     if verbose:
@@ -109,9 +109,9 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
             loo_lppd_idx = scale_value * _logsumexp(log_like_idx, b_inv=len(log_like_idx))
             khats[idx] = 0
             loo_i[idx] = loo_lppd_idx
-        loo_refitted.loo = loo_i.values.sum()
-        loo_refitted.loo_se = (n_data_points * np.var(loo_i.values)) ** 0.5
-        loo_refitted.p_loo = lppd_orig - loo_refitted.loo / scale_value
+        loo_refitted.elpd_loo = loo_i.values.sum()
+        loo_refitted.se = (n_data_points * np.var(loo_i.values)) ** 0.5
+        loo_refitted.p_loo = lppd_orig - loo_refitted.elpd_loo / scale_value
         return loo_refitted
     else:
         _log.info("No problematic observations")

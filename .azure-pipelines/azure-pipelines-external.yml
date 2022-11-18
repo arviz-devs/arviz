@@ -21,7 +21,7 @@ jobs:
       Python_39_Special_versions:
         python.version: "3.9"
         pystan.version: 2.19.1.1
-        cmdstanpy.version: 0.9.67
+        cmdstanpy.version: "github"
         pymc3.version: "github"
         emcee.version: 2
         name: "External special"
@@ -61,7 +61,11 @@ jobs:
       if [ "$(cmdstanpy.version)" = "latest" ]; then
           python -m pip --no-cache-dir install cmdstanpy
       else
+        if [ "$(cmdstanpy.version)" = "github" ]; then
+          python -m pip --no-cache-dir install git+https://github.com/stan-dev/cmdstanpy@develop#egg=cmdstanpy
+        else
           python -m pip --no-cache-dir install cmdstanpy=="$(cmdstanpy.version)"
+        fi
       fi
 
       if [ "$(emcee.version)" = "latest" ]; then

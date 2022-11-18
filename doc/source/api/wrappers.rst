@@ -10,5 +10,7 @@ Experimental feature
     :toctree: generated/
 
     SamplingWrapper
+    CmdStanPySamplingWrapper
+    PyMCSamplingWrapper
     PyStanSamplingWrapper
     PyStan2SamplingWrapper
