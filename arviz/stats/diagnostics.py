@@ -744,8 +744,8 @@ def _ess_sd(ary, relative=False):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    ary = _split_chains(ary)
-    return min(_ess(ary, relative=relative), _ess(ary**2, relative=relative))
+    ary = abs(ary-ary.mean())
+    return _ess(_split_chains(ary), relative=relative)
 
 
 def _ess_quantile(ary, prob, relative=False):
@@ -838,13 +838,16 @@ def _mcse_sd(ary):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    ess = _ess_sd(ary)
+    # need sims later
+    ary = ary - ary.mean()
+    ess = _ess_mean(abs(ary))
+    evar = (ary**2).mean()
+    varvar = ((ary**4) - evar**2) / ess
+    varsd = varvar / evar / 4
     if _numba_flag:
-        sd = float(_sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1)).item())
+        mcse_sd_value = float(_sqrt(np.ravel(varsd), ddof=1), np.zeros(1)))
     else:
-        sd = np.std(ary, ddof=1)
-    fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess) ** (ess - 1) - 1)
-    mcse_sd_value = sd * fac_mcse_sd
+        mcse_sd_value = np.std(varsd, ddof=1)
     return mcse_sd_value
 
 
