@@ -838,11 +838,10 @@ def _mcse_sd(ary):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    # need sims later
     ary = ary - ary.mean()
     ess = _ess_mean(abs(ary))
     evar = (ary**2).mean()
-    varvar = ((ary**4) - evar**2) / ess
+    varvar = ((ary**4).mean() - evar**2) / ess
     varsd = varvar / evar / 4
     if _numba_flag:
         mcse_sd_value = float(_sqrt(np.ravel(varsd), ddof=1), np.zeros(1)))
