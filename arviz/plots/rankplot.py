@@ -174,6 +174,7 @@ def plot_rank(
                 posterior_data,
                 var_names=var_names,
                 combined=True,
+                dim_order=["chain", "draw"],
             )
         ),
         "plot_rank",

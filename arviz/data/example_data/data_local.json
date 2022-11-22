@@ -1,0 +1,12 @@
+[
+    {
+        "name": "centered_eight",
+        "filename": "centered_eight.nc",
+        "description": "A centered parameterization of the eight schools model. Provided as an example of a model that NUTS has trouble fitting. Compare to `non_centered_eight`.\n\nThe eight schools model is a hierarchical model used for an analysis of the effectiveness of classes that were designed to improve students' performance on the Scholastic Aptitude Test.\n\nSee Bayesian Data Analysis (Gelman et. al.) for more details."
+    },
+    {
+        "name": "non_centered_eight",
+        "filename": "non_centered_eight.nc",
+        "description": "A non-centered parameterization of the eight schools model. This is a hierarchical model where sampling problems may be fixed by a non-centered parametrization. Compare to `centered_eight`.\n\nThe eight schools model is a hierarchical model used for an analysis of the effectiveness of classes that were designed to improve students' performance on the Scholastic Aptitude Test.\n\nSee Bayesian Data Analysis (Gelman et. al.) for more details."
+    }
+]

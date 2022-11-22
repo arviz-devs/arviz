@@ -1,5 +1,6 @@
 # pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
+import re
 import sys
 import uuid
 import warnings
@@ -9,7 +10,6 @@ from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
-import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -78,6 +78,13 @@ SUPPORTED_GROUPS_WARMUP = [
 SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 
 InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
+
+
+def _compressible_dtype(dtype):
+    """Check basic dtypes for automatic compression."""
+    if dtype.kind == "V":
+        return all(_compressible_dtype(item) for item, _ in dtype.fields.values())
+    return dtype.kind in {"b", "i", "u", "f", "c", "S"}
 
 
 class InferenceData(Mapping[str, xr.Dataset]):
@@ -356,13 +363,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
         InferenceData object
         """
         groups = {}
+        attrs = {}
 
         try:
             with nc.Dataset(filename, mode="r") as data:
                 data_groups = list(data.groups)
 
             for group in data_groups:
-
                 group_kws = {}
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
@@ -375,12 +382,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         groups[group] = data.load()
                     else:
                         groups[group] = data
-            res = InferenceData(**groups)
-            return res
-        except OSError as e:  # pylint: disable=invalid-name
-            if e.errno == -101:
-                raise type(e)(
-                    str(e)
+
+            with xr.open_dataset(filename, mode="r") as data:
+                attrs.update(data.load().attrs)
+
+            return InferenceData(attrs=attrs, **groups)
+        except OSError as err:
+            if err.errno == -101:
+                raise type(err)(
+                    str(err)
                     + (
                         " while reading a NetCDF file. This is probably an error in HDF5, "
                         "which happens because your OS does not support HDF5 file locking.  See "
@@ -388,8 +398,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         "errno-101-netcdf-hdf-error-when-opening-netcdf-file#49317928"
                         " for a possible solution."
                     )
-                )
-            raise e
+                ) from err
+            raise err
 
     def to_netcdf(
         self, filename: str, compress: bool = True, groups: Optional[List[str]] = None
@@ -412,6 +422,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
             Location of netcdf file
         """
         mode = "w"  # overwrite first, then append
+        if self._attrs:
+            xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode)
+            mode = "a"
+
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
                 groups = self._groups_all
@@ -422,11 +436,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data = getattr(self, group)
                 kwargs = {}
                 if compress:
-                    kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
+                    kwargs["encoding"] = {
+                        var_name: {"zlib": True}
+                        for var_name, values in data.variables.items()
+                        if _compressible_dtype(values.dtype)
+                    }
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
-        else:  # creates a netcdf file for an empty InferenceData object.
+        elif not self._attrs:  # creates a netcdf file for an empty InferenceData object.
             empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
             empty_netcdf_file.close()
         return filename
@@ -677,6 +695,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if not groups:
             raise TypeError("No valid groups found!")
 
+        # order matters here, saving attrs after the groups will erase the groups.
+        if self.attrs:
+            xr.Dataset(attrs=self.attrs).to_zarr(store=store, mode="w")
+
         for group in groups:
             # Create zarr group in store with same group name
             getattr(self, group).to_zarr(store=store, group=group, mode="w")
@@ -727,7 +749,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         for key_group, _ in zarr_handle.groups():
             with xr.open_zarr(store=store, group=key_group) as data:
                 groups[key_group] = data.load() if rcParams["data.load"] == "eager" else data
-        return InferenceData(**groups)
+
+        with xr.open_zarr(store=store) as root:
+            attrs = root.attrs
+
+        return InferenceData(attrs=attrs, **groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
         """Concatenate two InferenceData objects."""
@@ -784,14 +810,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             import arviz as az
             idata = az.load_arviz_data("centered_eight")
-            del idata.prior  # prior group only has 1 chain currently
             idata
 
         In order to remove the third chain:
 
         .. jupyter-execute::
 
-            idata_subset = idata.sel(chain=[0, 1, 3])
+            idata_subset = idata.sel(chain=[0, 1, 3], groups="posterior_groups")
             idata_subset
 
         See Also
@@ -871,14 +896,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             import arviz as az
             idata = az.load_arviz_data("centered_eight")
-            del idata.prior  # prior group only has 1 chain currently
             idata
 
         In order to remove the third chain:
 
         .. jupyter-execute::
 
-            idata_subset = idata.isel(chain=[0, 1, 3])
+            idata_subset = idata.isel(chain=[0, 1, 3], groups="posterior_groups")
             idata_subset
 
         You can expand the groups and coords in each group to see how now only the chains 0, 1 and

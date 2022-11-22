@@ -20,6 +20,7 @@ def plot_ppc(
     alpha=None,
     mean=True,
     observed=True,
+    observed_rug=False,
     color=None,
     colors=None,
     grid=None,
@@ -62,6 +63,9 @@ def plot_ppc(
         Defaults to ``True``.
     observed: bool, default True
         Whether or not to plot the observed data.
+    observed: bool, default False
+        Whether or not to plot a rug plot for the observed data. Only valid if `observed` is
+        `True` and for kind `kde` or `cumulative`.
     color: str
         Valid matplotlib ``color``. Defaults to ``C0``.
     color: list
@@ -269,6 +273,8 @@ def plot_ppc(
 
     if coords is None:
         coords = {}
+    else:
+        coords = coords.copy()
 
     if labeller is None:
         labeller = BaseLabeller()
@@ -339,6 +345,7 @@ def plot_ppc(
         textsize=textsize,
         mean=mean,
         observed=observed,
+        observed_rug=observed_rug,
         total_pp_samples=total_pp_samples,
         legend=legend,
         labeller=labeller,

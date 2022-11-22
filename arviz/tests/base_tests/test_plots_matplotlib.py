@@ -14,6 +14,7 @@ from ...data import from_dict, load_arviz_data
 from ...plots import (
     plot_autocorr,
     plot_bpv,
+    plot_bf,
     plot_compare,
     plot_density,
     plot_dist,
@@ -294,6 +295,12 @@ def test_plot_trace_invalid_varname_warning(models, kwargs):
     assert axes.shape
 
 
+def test_plot_trace_diverging_correctly_transposed():
+    idata = load_arviz_data("centered_eight")
+    idata.sample_stats["diverging"] = idata.sample_stats.diverging.T
+    plot_trace(idata, divergences="bottom")
+
+
 @pytest.mark.parametrize(
     "bad_kwargs", [{"var_names": ["mu", "tau"], "lines": [("mu", {}, ["hey"])]}]
 )
@@ -382,6 +389,14 @@ def test_plot_energy(models, kind):
 def test_plot_energy_bad(models):
     with pytest.raises(ValueError):
         plot_energy(models.model_1, kind="bad_kind")
+
+
+def test_plot_energy_correctly_transposed():
+    idata = load_arviz_data("centered_eight")
+    idata.sample_stats["energy"] = idata.sample_stats.energy.T
+    ax = plot_energy(idata)
+    # legend has one entry for each KDE and 1 BFMI for each chain
+    assert len(ax.legend_.texts) == 2 + len(idata.sample_stats.chain)
 
 
 def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
@@ -696,7 +711,8 @@ def test_plot_pair_shared(sharex, sharey, marginals):
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
 @pytest.mark.parametrize("observed", [True, False])
-def test_plot_ppc(models, kind, alpha, animated, observed):
+@pytest.mark.parametrize("observed_rug", [False, True])
+def test_plot_ppc(models, kind, alpha, animated, observed, observed_rug):
     if animation and not animation.writers.is_available("ffmpeg"):
         pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     animation_kwargs = {"blit": False}
@@ -705,6 +721,7 @@ def test_plot_ppc(models, kind, alpha, animated, observed):
         kind=kind,
         alpha=alpha,
         observed=observed,
+        observed_rug=observed_rug,
         animated=animated,
         animation_kwargs=animation_kwargs,
         random_seed=3,
@@ -1942,3 +1959,13 @@ def test_plot_ts_valueerror(multidim_models, val_err_kwargs):
     idata2 = multidim_models.model_1
     with pytest.raises(ValueError):
         plot_ts(idata=idata2, y="y", **val_err_kwargs)
+
+
+def test_plot_bf():
+    idata = from_dict(
+        posterior={"a": np.random.normal(1, 0.5, 5000)}, prior={"a": np.random.normal(0, 1, 5000)}
+    )
+    bf_dict0, _ = plot_bf(idata, var_name="a", ref_val=0)
+    bf_dict1, _ = plot_bf(idata, prior=np.random.normal(0, 10, 5000), var_name="a", ref_val=0)
+    assert bf_dict0["BF10"] > bf_dict0["BF01"]
+    assert bf_dict1["BF10"] < bf_dict1["BF01"]

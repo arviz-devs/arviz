@@ -147,7 +147,8 @@ def generate_dims_coords(
                 dims = dims[:i]
                 break
 
-    for idx, dim_len in enumerate(shape):
+    for i, dim_len in enumerate(shape):
+        idx = i + len([dim for dim in default_dims if dim in dims])
         if len(dims) < idx + 1:
             dim_name = f"{var_name}_dim_{idx}"
             dims.append(dim_name)

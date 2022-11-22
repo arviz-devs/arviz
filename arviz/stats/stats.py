@@ -21,7 +21,7 @@ except ImportError:
     NO_GET_ARGS = True
 
 from .. import _log
-from ..data import InferenceData, convert_to_dataset, convert_to_inference_data
+from ..data import InferenceData, convert_to_dataset, convert_to_inference_data, extract
 from ..rcparams import rcParams, ScaleKeyword, ICKeyword
 from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
@@ -49,6 +49,7 @@ __all__ = [
     "r2_score",
     "summary",
     "waic",
+    "weight_predictions",
     "_calculate_ics",
 ]
 
@@ -303,7 +304,7 @@ def compare(
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]
             weight = weights[idx]
-            df_comp.at[val] = (
+            df_comp.loc[val] = (
                 idx,
                 res[f"elpd_{ic}"],
                 res[p_ic],
@@ -904,9 +905,9 @@ def psislw(log_weights, reff=1.0):
     .. ipython::
 
         In [1]: import arviz as az
-           ...: data = az.load_arviz_data("centered_eight")
-           ...: log_likelihood = data.sample_stats.log_likelihood.stack(
-           ...:     __sample__=("chain", "draw")
+           ...: data = az.load_arviz_data("non_centered_eight")
+           ...: log_likelihood = data.log_likelihood["obs"].stack(
+           ...:     __sample__=["chain", "draw"]
            ...: )
            ...: az.psislw(-log_likelihood, reff=0.8)
 
@@ -1941,7 +1942,7 @@ def apply_test_function(
         >>> import arviz as az
         >>> idata = az.load_arviz_data("centered_eight")
         >>> az.apply_test_function(idata, lambda y, theta: np.min(y))
-        >>> T = np.asscalar(idata.observed_data.T)
+        >>> T = idata.observed_data.T.item()
         >>> az.plot_posterior(idata, var_names=["T"], group="posterior_predictive", ref_val=T)
 
     """
@@ -2043,3 +2044,72 @@ def apply_test_function(
         setattr(out, grp, out_group)
 
     return out
+
+
+def weight_predictions(idatas, weights=None):
+    """
+    Generate weighted posterior predictive samples from a list of InferenceData
+    and a set of weights.
+
+    Parameters
+    ---------
+    idatas : list[InferenceData]
+        List of :class:`arviz.InferenceData` objects containing the groups `posterior_predictive`
+        and `observed_data`. Observations should be the same for all InferenceData objects.
+    weights : array-like, optional
+        Individual weights for each model. Weights should be positive. If they do not sum up to 1,
+        they will be normalized. Default, same weight for each model.
+        Weights can be computed using many different methods including those in
+        :func:`arviz.compare`.
+
+    Returns
+    -------
+    idata: InferenceData
+        Output InferenceData object with the groups `posterior_predictive` and `observed_data`.
+
+    See Also
+    --------
+    compare :  Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation
+    """
+    if len(idatas) < 2:
+        raise ValueError("You should provide a list with at least two InferenceData objects")
+
+    if not all("posterior_predictive" in idata.groups() for idata in idatas):
+        raise ValueError(
+            "All the InferenceData objects must contain the `posterior_predictive` group"
+        )
+
+    if not all(idatas[0].observed_data.equals(idata.observed_data) for idata in idatas[1:]):
+        raise ValueError("The observed data should be the same for all InferenceData objects")
+
+    if weights is None:
+        weights = np.ones(len(idatas)) / len(idatas)
+    elif len(idatas) != len(weights):
+        raise ValueError(
+            "The number of weights should be the same as the number of InferenceData objects"
+        )
+
+    weights = np.array(weights, dtype=float)
+    weights /= weights.sum()
+
+    len_idatas = [
+        idata.posterior_predictive.dims["chain"] * idata.posterior_predictive.dims["draw"]
+        for idata in idatas
+    ]
+
+    if not all(len_idatas):
+        raise ValueError("At least one of your idatas has 0 samples")
+
+    new_samples = (np.min(len_idatas) * weights).astype(int)
+
+    new_idatas = [
+        extract(idata, group="posterior_predictive", num_samples=samples).reset_coords()
+        for samples, idata in zip(new_samples, idatas)
+    ]
+
+    weighted_samples = InferenceData(
+        posterior_predictive=xr.concat(new_idatas, dim="sample"),
+        observed_data=idatas[0].observed_data,
+    )
+
+    return weighted_samples

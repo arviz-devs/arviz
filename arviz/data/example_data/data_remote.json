@@ -1,0 +1,51 @@
+[
+    {
+        "name": "radon",
+        "filename": "radon_hierarchical.nc",
+        "url": "http://ndownloader.figshare.com/files/24067472",
+        "checksum": "a9b2b4adf1bf9c5728e5bdc97107e69c4fc8d8b7d213e9147233b57be8b4587b",
+        "description": "Radon is a radioactive gas that enters homes through contact points with the ground. It is a carcinogen that is the primary cause of lung cancer in non-smokers. Radon levels vary greatly from household to household.\n\nThis example uses an EPA study of radon levels in houses in Minnesota to construct a model with a hierarchy over households within a county. The model includes estimates (gamma) for contextual effects of the uranium per household.\n\nSee Gelman and Hill (2006) for details on the example, or https://docs.pymc.io/notebooks/multilevel_modeling.html by Chris Fonnesbeck for details on this implementation."
+    },
+    {
+        "name": "rugby",
+        "filename": "rugby.nc",
+        "url": "http://ndownloader.figshare.com/files/16254359",
+        "checksum": "9eecd2c6317e45b0388dd97ae6326adecf94128b5a7d15a52c9fcfac0937e2a6",
+        "description": "The Six Nations Championship is a yearly rugby competition between Italy, Ireland, Scotland, England, France and Wales. Fifteen games are played each year, representing all combinations of the six teams.\n\nThis example uses and includes results from 2014 - 2017, comprising 60 total games. It models latent parameters for each team's attack and defense, as well as a parameter for home team advantage.\n\nSee https://docs.pymc.io/notebooks/rugby_analytics.html by Peader Coyle for more details and references."
+    },
+    {
+        "name": "regression1d",
+        "filename": "regression1d.nc",
+        "url": "http://ndownloader.figshare.com/files/16254899",
+        "checksum": "909e8ffe344e196dad2730b1542881ab5729cb0977dd20ba645a532ffa427278",
+        "description": "A synthetic one dimensional linear regression dataset with latent slope, intercept, and noise (\"eps\"). One hundred data points, fit with PyMC3.\n\nTrue slope and intercept are included as deterministic variables."
+    },
+    {
+        "name": "regression10d",
+        "filename": "regression10d.nc",
+        "url": "http://ndownloader.figshare.com/files/16255736",
+        "checksum": "c6716ec7e19926ad2a52d6ae4c1d1dd5ddb747e204c0d811757c8e93fcf9f970",
+        "description": "A synthetic multi-dimensional (10 dimensions) linear regression dataset with latent weights (\"w\"), intercept, and noise (\"eps\"). Five hundred data points, fit with PyMC3.\n\nTrue weights and intercept are included as deterministic variables."
+    },
+    {
+        "name": "classification1d",
+        "filename": "classification1d.nc",
+        "url": "http://ndownloader.figshare.com/files/16256678",
+        "checksum": "1cf3806e72c14001f6864bb69d89747dcc09dd55bcbca50aba04e9939daee5a0",
+        "description": "A synthetic one dimensional logistic regression dataset with latent slope and intercept, passed into a Bernoulli random variable. One hundred data points, fit with PyMC3.\n\nTrue slope and intercept are included as deterministic variables."
+    },
+    {
+        "name": "classification10d",
+        "filename": "classification10d.nc",
+        "url": "http://ndownloader.figshare.com/files/16256681",
+        "checksum": "16c9a45e1e6e0519d573cafc4d266d761ba347e62b6f6a79030aaa8e2fde1367",
+        "description": "A synthetic multi dimensional (10 dimensions) logistic regression dataset with latent weights (\"w\") and intercept, passed into a Bernoulli random variable. Five hundred data points, fit with PyMC3.\n\nTrue weights and intercept are included as deterministic variables."
+    },
+    {
+        "name": "glycan_torsion_angles",
+        "filename": "glycan_torsion_angles.nc",
+        "url": "http://ndownloader.figshare.com/files/22882652",
+        "checksum": "4622621fe7a1d3075c18c4c34af8cc57c59eabbb3501b20c6e2d9c6c4737034c",
+        "description": "Torsion angles phi and psi are critical for determining the three dimensional structure of bio-molecules. Combinations of phi and psi torsion angles that produce clashes between atoms in the bio-molecule result in high energy, unlikely structures.\n\nThis model uses a Von Mises distribution to propose torsion angles for the structure of a glycan molecule (pdb id: 2LIQ), and a Potential to estimate the proposed structure's energy. Said Potential is bound by Boltzman's law."
+    }
+]

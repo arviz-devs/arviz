@@ -1,6 +1,8 @@
 """
 Matplotlib styles
 =================
+_gallery_category: Styles
+_alt_text: Use Matplotlib Styles with `arviz.style.use()`.
 """
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,17 +30,21 @@ style_list = [
     ["arviz-white", "arviz-royish"],
     ["arviz-white", "arviz-viridish"],
     ["arviz-white", "arviz-plasmish"],
+    "arviz-doc",
+    "arviz-docgrid",
 ]
 
-fig = plt.figure(figsize=(12, 25))
+fig = plt.figure(figsize=(20, 10))
 for idx, style in enumerate(style_list):
     with az.style.context(style, after_reset=True):
-        ax = fig.add_subplot(9, 2, idx + 1, label=idx)
-        for i in range(10):
+        ax = fig.add_subplot(5, 4, idx + 1, label=idx)
+        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        for i in range(len(colors)):
             ax.plot(x, dist - i, f"C{i}", label=f"C{i}")
         ax.set_title(style)
-        ax.set_xlabel("x")
         ax.set_ylabel("f(x)", rotation=0, labelpad=15)
+        ax.set_xticklabels([])
+
 plt.tight_layout()
 
 plt.show()
