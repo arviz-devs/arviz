@@ -3,6 +3,26 @@ html_theme.sidebar_secondary.remove:
 sd_hide_title: true
 ---
 
+<!-- CSS overrides on the homepage only -->
+<style>
+/* Extra top/bottom padding to the sections */
+article.bd-article section {
+  padding: 3rem 0 7rem;
+}
+/* Override all h1 headers except for the hidden ones */
+h1:not(.sd-d-none) {
+  font-weight: bold;
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+/* Override all h3 headers that are not in hero */
+h3:not(#hero h3) {
+  font-weight: bold;
+  text-align: center;
+}
+</style>
+
 (homepage)=
 # ArviZ: Exploratory analysis of Bayesian models
 
@@ -119,7 +139,9 @@ Posterior Predictive Check Plot using `plot_ppc`
 </div>  <!-- End Hero Right -->
 </div>  <!-- End Hero -->
 
-<h1 class="homepage-title">Key Features</h1>
+
+<!-- Keep in markdown to generate headerlink -->
+# Key Features
 
 :::::{grid} 1 1 2 2
 :gutter: 5
@@ -203,7 +225,9 @@ Builds on top of xarray to work with labeled dimensions and coordinates.
 ::::
 :::::
 
-<h1 class="homepage-title">Sponsors and Institutional Partners</h1>
+<!-- Keep in markdown to generate headerlink -->
+# Sponsors and Institutional Partners
+
 We thank these institutions for generously supporting the development and maintenance of ArviZ.
 
 ::::{grid} 1 3 3 3
@@ -218,7 +242,8 @@ We thank these institutions for generously supporting the development and mainte
 :::
 ::::
 
-<h1 class="homepage-title">Support ArviZ</h1>
+<!-- Keep in markdown to generate headerlink -->
+# Support ArviZ
 
 ::::{grid} 1 1 2 2
 
@@ -254,12 +279,13 @@ to allow employees to dedicate some of their time to ArviZ.
 
 :::{grid-item}
 :child-align: justify
+:class: support-arviz-img-merch
 
 <h3>Shop ArviZ Merchandise</h3>
 
 ![logo_merch](_static/donate_merch.svg)
 
-<div style="display: flex; flex-wrap: wrap; justify-content:center;">
+<div style="text-align: center;">
 <a href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241" class="homepage-button primary-button">Shop Logo</a>
 <a href="https://numfocus.myspreadshop.com/arviz+favicon+design?idea=62a74f17ebe60a221692c6f2" class="homepage-button primary-button">Shop Favicon</a>
 </div>
@@ -270,12 +296,19 @@ to allow employees to dedicate some of their time to ArviZ.
 
 <h3>Donate</h3>
 
+<div class="support-arviz-img-donate-responsive">
+
+![numfocus_logo](_static/donate_numfocus.png)
+
+</div>
+
 ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ financially, consider donating through the NumFOCUS website.
 
 <a href="https://numfocus.org/donate-to-arviz" class="homepage-button primary-button">Donate</a>
 :::
 :::{grid-item}
 :child-align: justify
+:class: support-arviz-img-donate
 
 ![numfocus_logo](_static/donate_numfocus.png)
 :::

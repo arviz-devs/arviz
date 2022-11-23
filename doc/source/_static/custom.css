@@ -40,27 +40,11 @@ html[data-theme="dark"] {
 }
 
 /* -------------------- HOMEPAGE -------------------- */
-article.bd-article section {
-  padding: 3rem 0 7rem;
-}
 
-h1.homepage-title {
-  font-weight: bold;
-  font-size: 48px;
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
-h1.homepage-title .headerlink {
-  visibility: hidden;
-  position: absolute;
-}
-
-/* Section hero */
+/* Hero */
 #hero {
   display: flex;
   flex-direction: row;
-  padding: 3rem 0 7rem;
   min-height: min(calc(80vh), 1100px); /* Make hero fill up most of the page on load */
 }
 #hero-left {
@@ -122,32 +106,41 @@ h1.homepage-title .headerlink {
 }
 #key-features .sd-card-body .key-features-text {
   min-width: 70%;
-  padding-top: 20px;
-}
-
-/* Section Support ArviZ */
-#using-arviz h3,
-#supporting-arviz h3 {
-  font-weight: bold;
-  text-align: center;
-}
-#using-arviz .sd-col p,
-#supporting-arviz .sd-col p {
-  text-align: center;
+  padding: 20px 10px;
 }
 
 /* Sponsors */
-img {
+#sponsors-and-institutional-partners p {
+  text-align: center;
+}
+#sponsors-and-institutional-partners img {
   max-width: 200px;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  #supporting-arviz #donate img {
-    width: 60%;
-    min-width: 300px;
-  }
+/* Support ArviZ */
+#support-arviz .sd-col {
+  margin-bottom: 3rem;
 }
+#support-arviz p {
+  text-align: center;
+}
+.support-arviz-img-merch img {
+  height: 160px;
+}
+.support-arviz-img-donate img {
+  display: block;
+  width: 100%;
+  padding: 60px 40px 20px;
+}
+.support-arviz-img-donate-responsive img {
+  display: none;
+  margin: auto;
+  width: 80%;
+  min-width: 0px;
+  padding: 20px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   #hero {
     display: block;
@@ -157,13 +150,12 @@ img {
     width: 100%;
     min-width: 0px;
   }
-}
-@media (max-width: 480px) {
-  #supporting-arviz #donate img {
-    width: 80%;
-    min-width: 0px;
-    padding: 20px;
+  .support-arviz-img-donate img {
+    display: none;
   }
+  .support-arviz-img-donate-responsive img {
+    display: block;
+  } 
 }
 
 /* -------------------- HOMEPAGE + EXAMPLE GALLERY -------------------- */
