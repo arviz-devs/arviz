@@ -39,6 +39,125 @@ html[data-theme="dark"] {
   border: none;
 }
 
+/* -------------------- HOMEPAGE -------------------- */
+
+/* Hero */
+#hero {
+  display: flex;
+  flex-direction: row;
+  min-height: min(calc(80vh), 1100px); /* Make hero fill up most of the page on load */
+}
+#hero-left {
+  max-width: 476px;
+  width: 40%;
+  margin: auto 0;
+}
+#hero-right {
+  min-width: 476px;
+  width: 60%;
+  margin: auto 0;
+}
+
+.homepage-button-container {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.homepage-button-container-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.homepage-button-container a {
+  transition: 0.1s;
+}
+.homepage-button {
+  min-width: 142px;
+  padding: 0.5em 2em;
+  border: 1px solid var(--pst-color-primary);
+  border-radius: 4px;
+  margin: 1em 0.5em 0.5em 0;
+}
+.primary-button {
+  background-color: var(--pst-color-primary);
+  color: var(--pst-color-background);
+}
+.secondary-button {
+  background-color: var(--pst-color-background);
+  color: var(--pst-color-primary);
+}
+.homepage-button:hover {
+  text-decoration: none;
+  background-color: var(--pst-color-secondary);
+  color: var(--pst-color-background);
+  border: 1px solid var(--pst-color-secondary);
+}
+.homepage-button-link {
+  text-decoration: underline;
+}
+
+/* Key Features */
+#key-features .sd-card-body {
+  display: flex;
+}
+#key-features .sd-card img {
+  width: 140px;
+  height: 140px;
+}
+#key-features .sd-card-body .key-features-text {
+  min-width: 70%;
+  padding: 20px 10px;
+}
+
+/* Sponsors */
+#sponsors-and-institutional-partners p {
+  text-align: center;
+}
+#sponsors-and-institutional-partners img {
+  max-width: 200px;
+}
+
+/* Support ArviZ */
+#support-arviz .sd-col {
+  margin-bottom: 3rem;
+}
+#support-arviz p {
+  text-align: center;
+}
+.support-arviz-img-merch img {
+  height: 160px;
+}
+.support-arviz-img-donate img {
+  display: block;
+  width: 100%;
+  padding: 60px 40px 20px;
+}
+.support-arviz-img-donate-responsive img {
+  display: none;
+  margin: auto;
+  width: 80%;
+  min-width: 0px;
+  padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #hero {
+    display: block;
+  }
+  #hero-left,
+  #hero-right {
+    width: 100%;
+    min-width: 0px;
+  }
+  .support-arviz-img-donate img {
+    display: none;
+  }
+  .support-arviz-img-donate-responsive img {
+    display: block;
+  } 
+}
+
 /* -------------------- HOMEPAGE + EXAMPLE GALLERY -------------------- */
 
 /* Homepage - grid layout */

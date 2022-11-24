@@ -157,17 +157,23 @@ html_theme_options = {
         "image_light": "logo.png",
         "image_dark": "logo_dark.png",
     },
+    # https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/header-links.html#fontawesome-icons
     "icon_links": [
         {
             "name": "GitHub",
             "url": "https://github.com/arviz-devs/arviz",
-            "icon": "fab fa-github-square",
+            "icon": "fa-brands fa-github",
         },
         {
             "name": "Twitter",
             "url": "https://twitter.com/arviz_devs",
-            "icon": "fab fa-twitter-square",
+            "icon": "fa-brands fa-twitter",
         },
+        {
+            "name": "Mastodon",
+            "url": "https://bayes.club/@ArviZ",
+            "icon": "fa-brands fa-mastodon",
+        }
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
     "header_links_before_dropdown": 7,
