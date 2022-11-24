@@ -158,23 +158,21 @@ html_theme_options = {
         "image_dark": "logo_dark.png",
     },
     # https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/header-links.html#fontawesome-icons
-    "github_url": "https://github.com/arviz-devs/arviz",
-    "twitter_url": "https://twitter.com/arviz_devs",
     "icon_links": [
-        # {
-        #     "name": "GitHub",
-        #     "url": "https://github.com/arviz-devs/arviz",
-        #     "icon": "fab fa-square-github",
-        # },
-        # {
-        #     "name": "Twitter",
-        #     "url": "https://twitter.com/arviz_devs",
-        #     "icon": "fab fa-square-twitter",
-        # },
+        {
+            "name": "GitHub",
+            "url": "https://github.com/arviz-devs/arviz",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "Twitter",
+            "url": "https://twitter.com/arviz_devs",
+            "icon": "fa-brands fa-twitter",
+        },
         {
             "name": "Mastodon",
-            "url": "https://fosstodon.org/@ArviZ@bayes.club",
-            "icon": "fab fa-mastodon",
+            "url": "https://bayes.club/@ArviZ",
+            "icon": "fa-brands fa-mastodon",
         }
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],

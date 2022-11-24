@@ -5,6 +5,9 @@ sd_hide_title: true
 
 <!-- CSS overrides on the homepage only -->
 <style>
+.bd-main .bd-content .bd-article-container {
+  max-width: 70rem; /* Make homepage a little wider instead of 60em */
+}
 /* Extra top/bottom padding to the sections */
 article.bd-article section {
   padding: 3rem 0 7rem;
