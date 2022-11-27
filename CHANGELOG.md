@@ -8,6 +8,8 @@
 
 ### Maintenance and fixes
 - Fix `reloo` outdated usage of `ELPDData` ([2158](https://github.com/arviz-devs/arviz/pull/2158))
+- Replaced `pymc3 @ git+https://github.com/pymc-devs/pymc3` with pymc3, since https://github.com/pymc-devs/pymc3 no longer exists (pymc3 is now pymc) ([2169](https://github.com/arviz-devs/arviz/pull/2169))
+- Added `requirements-test.txt` ([2169](https://github.com/arviz-devs/arviz/pull/2169))
 
 ### Deprecation
 
