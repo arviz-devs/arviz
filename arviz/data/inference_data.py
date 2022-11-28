@@ -1029,11 +1029,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
-            kwarg_dict = {
-                key: value
-                for key, value in dimensions.items()
-                if not set(value).difference(dataset.dims)
-            }
+            kwarg_dict = {}
+            for key, value in dimensions.items():
+                try:
+                    if not set(value).difference(dataset.dims):
+                        kwarg_dict[key] = value
+                except TypeError:
+                    kwarg_dict[key] = value
             dataset = dataset.stack(**kwarg_dict)
             setattr(out, group, dataset)
         if inplace:
