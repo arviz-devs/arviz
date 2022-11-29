@@ -1,7 +1,6 @@
 beanmachine
 emcee
 pyjags
-pymc3
 pystan
 cmdstanpy
 pyro-ppl>=1.0.0
