@@ -69,7 +69,7 @@ def plot_loo_pit(
         If None, size is (8 + numvars, 8 + numvars)
     textsize : int, optional
         Text size for labels. If None it will be autoscaled based on ``figsize``.
-    labeller : Labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     color : str or array_like, optional

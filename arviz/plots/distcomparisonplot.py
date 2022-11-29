@@ -34,7 +34,7 @@ def plot_dist_comparison(
 
     Parameters
     ----------
-    data : InferenceData 
+    data : InferenceData
         :class:`arviz.InferenceData` object containing the posterior/prior data.
     kind : str
         kind of plot to display {"latent", "observed"}, defaults to 'latent'.
@@ -60,10 +60,10 @@ def plot_dist_comparison(
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
-    Labeller : Labeller instance, optional
+    Labeller : Labeller, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax : axes, optional
+    ax : (nvars, 3) array-like of matplotlib_axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
         last column is for the combined before/after plots and columns 0 and 1 are
         for the before and after plots, respectively.
@@ -85,8 +85,9 @@ def plot_dist_comparison(
 
     Returns
     -------
-    axes : a numpy 2D array of matplotlib axes. Returned object will have shape (nvars, 3),
-    where the last column is the combined plot and the first columns are the single plots.
+    axes : 2D ndarray of matplotlib_axes
+        Returned object will have shape (nvars, 3),
+        where the last column is the combined plot and the first columns are the single plots.
 
     See Also
     --------

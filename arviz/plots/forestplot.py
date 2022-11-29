@@ -45,21 +45,21 @@ def plot_forest(
 
     Parameters
     ----------
-    data : object or list[obj]
+    data : object or iterable of obj
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     kind : str
         Choose kind of plot for main axis. Supports "forestplot" or "ridgeplot".
-    model_names : list[str], optional
+    model_names : list of str, optional
         List with names for the models in the list of data. Useful when plotting more that one
         dataset.
-    var_names : list[str], optional
+    var_names : list of str, optional
         List of variables to plot (defaults to None, which results in all variables plotted)
         Prefix the variables by ``~`` when you want to exclude them from the plot.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
         See the :ref:`this section <common_combine_dims>` for usage examples.
-    filter_vars : {None, "like", "regex"}, optional, default=None
+    filter_vars : {None, "like", "regex"}, default=None
         If None(default), interpret var_names as the real variables names. If "like", interpret
         var_names as substrings of the real variables names. If "regex", interpret var_names as
         regular expressions on the real variables names. A la ``pandas.filter``.
@@ -99,7 +99,7 @@ def plot_forest(
     legend : bool, optional
         Show a legend with the color encoded model information.
         Defaults to True, if there are multiple models.
-    labeller : Labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method ``make_model_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
     ridgeplot_alpha: float
@@ -132,7 +132,7 @@ def plot_forest(
 
     Returns
     -------
-    gridspec : matplotlib GridSpec or bokeh figures
+    1D ndarray of matplotlib_axes or bokeh_figures
 
     See Also
     --------

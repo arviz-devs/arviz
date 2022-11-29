@@ -71,7 +71,7 @@ def plot_mcse(
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    labeller : Labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method `make_label_vert` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : 2D array-like of matplotlib_axes or bokeh_figures, optional

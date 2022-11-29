@@ -53,14 +53,14 @@ def plot_density(
         Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
         :class:`arviz.InferenceData`.
-    data_labels : str, optional
+    data_labels : list of str, optional
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
-    var_names : str, optional
+    var_names : list of str, optional
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
-    filter_vars : {None, "like", "regex"}, optional, default=None
+    filter_vars : {None, "like", "regex"}, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -76,7 +76,7 @@ def plot_density(
     point_estimate : str, optional
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in ``rcParams``.
-    colors : str, optional
+    colors : str or list of str, optional
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
         cycle. If a single color is passed, e.g. 'k', 'C2' or 'red' this color will be used for all
@@ -102,20 +102,20 @@ def plot_density(
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize : int, optional
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    labeller : Labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax : 2D array-like of matplotlib _axes or bokeh _figure, optional
+    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs : bool, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
@@ -124,7 +124,7 @@ def plot_density(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : 2D ndarray of matplotlib_axes or bokeh_figure
 
     See Also
     --------
