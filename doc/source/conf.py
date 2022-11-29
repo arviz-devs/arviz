@@ -95,6 +95,7 @@ myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
 copybutton_prompt_is_regexp = True
 # numpydoc configuration
+autodoc_typehints = "none"
 numpydoc_xref_param_type = True
 numpydoc_xref_ignore = {
     "of", "or", "optional", "default", "1D", "2D", "3D", "n-dimensional", "M", "N", "K",
