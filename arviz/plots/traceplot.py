@@ -93,7 +93,7 @@ def plot_trace(
         Defines the property name and the property values to distinguish different chains.
         If compact=True it defaults to linestyle,
         otherwise it uses the color to distinguish
-        different chaing.
+        different chains.
     legend: bool, optional
         Add a legend to the figure with the chain color code.
     plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs: dict, optional
