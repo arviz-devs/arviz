@@ -485,6 +485,7 @@ def pystan_noncentered_schools(data, draws, chains):
         )
     return stan_model, fit
 
+
 def library_handle(library):
     """Import a library and return the handle."""
     if library == "pystan":
