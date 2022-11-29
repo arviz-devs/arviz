@@ -17,8 +17,6 @@ Inference library converters
    from_emcee
    from_numpyro
    from_pyjags
-   from_pymc3
-   from_pymc3_predictions
    from_pyro
    from_pystan
 
