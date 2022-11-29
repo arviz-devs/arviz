@@ -65,11 +65,11 @@ def plot_loo_pit(
         Compute expected hdi values instead of overlaying the sampled uniform distributions.
     hdi_prob : float, optional
         Probability for the highest density interval. Works with ``use_hdi=True`` or ``ecdf=True``.
-    figsize : figure size tuple, optional
+    figsize : (float, float), optional
         If None, size is (8 + numvars, 8 + numvars)
-    textsize: int, optional
+    textsize : int, optional
         Text size for labels. If None it will be autoscaled based on ``figsize``.
-    labeller : labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     color : str or array_like, optional
@@ -78,7 +78,7 @@ def plot_loo_pit(
         This will ensure that LOO-PIT kde and uniform kde have different default colors.
     legend : bool, optional
         Show the legend of the figure.
-    ax: axes, optional
+    ax : axes, optional
         Matplotlib axes or bokeh figures.
     plot_kwargs : dict, optional
         Additional keywords passed to :meth:`matplotlib.axes.Axes.plot`
@@ -91,9 +91,9 @@ def plot_loo_pit(
         Additional keywords passed to :meth:`matplotlib.axes.Axes.axhspan`
     fill_kwargs : dict, optional
         Additional kwargs passed to :meth:`matplotlib.axes.Axes.fill_between`
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`. For additional documentation
@@ -103,7 +103,7 @@ def plot_loo_pit(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figures
 
     See Also
     --------

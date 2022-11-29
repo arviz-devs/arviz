@@ -41,71 +41,71 @@ def plot_ess(
 
     Parameters
     ----------
-    idata: obj
+    idata : obj
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details
-    var_names: list of variable names, optional
+    var_names : list of variable names, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
-    filter_vars: {None, "like", "regex"}, optional, default=None
+    filter_vars : {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
-    kind: str, optional
+    kind : str, optional
         Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
-    relative: bool
+    relative : bool
         Show relative ess in plot ``ress = ess / N``.
-    coords: dict, optional
+    coords : dict, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize: tuple, optional
+    figsize : tuple, optional
         Figure size. If None it will be defined automatically.
-    textsize: float, optional
+    textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    rug: bool
+    rug : bool
         Plot rug plot of values diverging or that reached the max tree depth.
-    rug_kind: bool
+    rug_kind : bool
         Variable in sample stats to use as rug mask. Must be a boolean variable.
-    n_points: int
+    n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    extra_methods: bool, optional
+    extra_methods : bool, optional
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
-    min_ess: int
+    min_ess : int
         Minimum number of ESS desired. If ``relative=True`` the line is plotted at
         ``min_ess / n_samples`` for local and quantile kinds and as a curve following
         the ``min_ess / n`` dependency in evolution kind.
-    labeller : labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    extra_kwargs: dict, optional
+    extra_kwargs : dict, optional
         If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
         from ess bulk. Otherwise, passed to extra methods lines.
-    text_kwargs: dict, optional
+    text_kwargs : dict, optional
         Only taken into account when ``extra_methods=True``. kwargs passed to ax.annotate
         for extra methods lines labels. It accepts the additional
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
-    hline_kwargs: dict, optional
+    hline_kwargs : dict, optional
         kwargs passed to :func:`~matplotlib.axes.Axes.axhline` or to :class:`~bokeh.models.Span`
         depending on the backend for the horizontal minimum ESS line.
         For relative ess evolution plots the kwargs are passed to
         :func:`~matplotlib.axes.Axes.plot` or to :class:`~bokeh.plotting.figure.line`
-    rug_kwargs: dict
+    rug_kwargs : dict
         kwargs passed to rug plot.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
-    show: bool, optional
+    show : bool, optional
         Call backend show function.
     **kwargs
         Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or

@@ -34,15 +34,15 @@ def plot_dist_comparison(
 
     Parameters
     ----------
-    data : InferenceData object
+    data : InferenceData
         :class:`arviz.InferenceData` object containing the posterior/prior data.
     kind : str
         kind of plot to display {"latent", "observed"}, defaults to 'latent'.
         "latent" includes {"prior", "posterior"} and "observed" includes
         {"observed_data", "prior_predictive", "posterior_predictive"}
-    figsize : tuple
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on ``figsize``.
     var_names : str, list, list of lists
@@ -60,10 +60,10 @@ def plot_dist_comparison(
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
-    labeller : labeller instance, optional
+    Labeller : Labeller, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax: axes, optional
+    ax : (nvars, 3) array-like of matplotlib_axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
         last column is for the combined before/after plots and columns 0 and 1 are
         for the before and after plots, respectively.
@@ -73,9 +73,9 @@ def plot_dist_comparison(
         Additional keywords passed to :func:`arviz.plot_dist` for posterior/predictive groups.
     observed_kwargs : dicts, optional
         Additional keywords passed to :func:`arviz.plot_dist` for observed_data group.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`. For additional documentation
@@ -85,8 +85,9 @@ def plot_dist_comparison(
 
     Returns
     -------
-    axes : a numpy 2D array of matplotlib axes. Returned object will have shape (nvars, 3),
-    where the last column is the combined plot and the first columns are the single plots.
+    axes : 2D ndarray of matplotlib_axes
+        Returned object will have shape (nvars, 3),
+        where the last column is the combined plot and the first columns are the single plots.
 
     See Also
     --------

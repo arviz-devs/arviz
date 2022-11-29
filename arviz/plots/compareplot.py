@@ -38,7 +38,7 @@ def plot_compare(
 
     Parameters
     ----------
-    comp_df : pd.DataFrame
+    comp_df : pandas.DataFrame
         Result of the :func:`arviz.compare` method
     insample_dev : bool, optional
         Plot in-sample ELPD, that is the value of the information criteria without the
@@ -51,16 +51,16 @@ def plot_compare(
         and the top-ranked model. Defaults to True
     order_by_rank : bool
         If True (default) ensure the best model is used as reference.
-    legend : bool
-        Add legend to figure. By default True.
-    figsize : tuple, optional
+    legend : bool, default True
+        Add legend to figure.
+    figsize : (float, float), optional
         If None, size is (6, num of models) inches
-    title : bool:
+    title : bool
         Show a tittle with a description of how to interpret the plot. Defaults to True.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``.
-    labeller : labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method ``model_name_to_str`` to generate the labels in
         the plot.
         Read the :ref:`label_guide` for more details and usage examples.
@@ -68,11 +68,11 @@ def plot_compare(
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
         'marker_dse', 'ls_min_ic' 'color_ls_min_ic',  'fontsize'
-    ax: axes, optional
-        Matplotlib axes or bokeh figures.
-    backend: str, optional
+    ax : matplotlib_axes or bokeh_figure, optional
+        Matplotlib axes or bokeh figure.
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`.
@@ -81,7 +81,7 @@ def plot_compare(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figure
 
     See Also
     --------

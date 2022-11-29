@@ -55,14 +55,14 @@ def plot_kde(
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE
     label : string
         Text to include as part of the legend
-    bw: float or str, optional
+    bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when ``is_circular`` is False
         and "taylor" (for now) when ``is_circular`` is True.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
-    adaptive: bool, optional.
+    adaptive : bool, optional.
         If True, an adaptative bandwidth is used. Only valid for 1D KDE.
         Defaults to False.
     quantiles : list
@@ -78,9 +78,9 @@ def plot_kde(
         Defaults to matplotlib chosen levels with no fixed probability associated.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to False.
-    figsize : tuple
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on ``figsize``. Not implemented for bokeh backend.
     plot_kwargs : dict
@@ -110,7 +110,7 @@ def plot_kde(
         default input type is "radians". When this argument is present, it interprets ``values``
         is a circular variable measured in radians and a circular KDE is used. Inputs in
         "degrees" will undergo an internal conversion to radians.
-    ax: axes, optional
+    ax : axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
         Add legend to the figure. By default True.

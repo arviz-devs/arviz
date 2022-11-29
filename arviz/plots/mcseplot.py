@@ -38,58 +38,58 @@ def plot_mcse(
 
     Parameters
     ----------
-    idata: obj
+    idata : obj
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details
-    var_names: list of variable names, optional
+    var_names : list of variable names, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot.
-    filter_vars: {None, "like", "regex"}, optional, default=None
+    filter_vars : {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
-    coords: dict, optional
+    coords : dict, optional
         Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`
-    errorbar: bool, optional
+    errorbar : bool, optional
         Plot quantile value +/- mcse instead of plotting mcse.
     grid : tuple
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize: tuple, optional
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
-    textsize: float, optional
+    textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    extra_methods: bool, optional
+    extra_methods : bool, optional
         Plot mean and sd MCSE as horizontal lines. Only taken into account when
         ``errorbar=False``.
-    rug: bool
+    rug : bool
         Plot rug plot of values diverging or that reached the max tree depth.
-    rug_kind: bool
+    rug_kind : bool
         Variable in sample stats to use as rug mask. Must be a boolean variable.
-    n_points: int
+    n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    labeller : labeller instance, optional
+    labeller : Labeller, optional
         Class providing the method `make_label_vert` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib_axes or bokeh_figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    rug_kwargs: dict
+    rug_kwargs : dict
         kwargs passed to rug plot in
         :meth:`mpl:matplotlib.axes.Axes.plot` or :class:`bokeh:bokeh.models.glyphs.Scatter`.
-    extra_kwargs: dict, optional
+    extra_kwargs : dict, optional
         kwargs passed as extra method lines in
         :meth:`mpl:matplotlib.axes.Axes.axhline` or :class:`bokeh:bokeh.models.Span`
-    text_kwargs: dict, optional
+    text_kwargs : dict, optional
         kwargs passed to :meth:`mpl:matplotlib.axes.Axes.annotate` for extra methods lines labels.
         It accepts the additional key ``x`` to set ``xy=(text_kwargs["x"], mcse)``.
         text_kwargs are ignored for the bokeh plotting backend.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
     show: bool, optional
@@ -100,7 +100,7 @@ def plot_mcse(
 
     Returns
     -------
-    axes: matplotlib axes or bokeh figures
+    axes : matplotlib axes or bokeh figures
 
     See Also
     --------

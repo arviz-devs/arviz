@@ -94,6 +94,20 @@ myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 # copybutton config: strip console characters
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
 copybutton_prompt_is_regexp = True
+# numpydoc configuration
+autodoc_typehints = "none"
+numpydoc_xref_param_type = True
+numpydoc_xref_ignore = {
+    "of", "or", "optional", "default", "1D", "2D", "3D", "n-dimensional", "M", "N", "K",
+}
+numpydoc_xref_aliases = {
+    "Labeller": ":ref:`Labeller <labeller_api>`",
+    "ndarray": ":class:`~numpy.ndarray`",
+    "InferenceData": ":class:`~arviz.InferenceData`",
+    "matplotlib_axes": ":class:`matplotlib Axes <matplotlib.axes.Axes>`",
+    "bokeh_figure": ":class:`Bokeh Figure <bokeh.plotting.figure>`",
+
+}
 
 # The base toctree document.
 master_doc = "index"
@@ -309,6 +323,7 @@ intersphinx_mapping = {
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
     "diataxis": ("https://diataxis.fr/", None),
     "arviz_org": ("https://www.arviz.org/en/latest/", None),
+    "python": ("https://docs.python.org/3/", None),
 }
 
 
