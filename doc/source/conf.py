@@ -105,7 +105,7 @@ numpydoc_xref_aliases = {
     "ndarray": ":class:`~numpy.ndarray`",
     "InferenceData": ":class:`~arviz.InferenceData`",
     "matplotlib_axes": ":class:`matplotlib Axes <matplotlib.axes.Axes>`",
-    "bokeh_figure": ":class:`Bokeh Figure <bokeh.plotting.Figure>`",
+    "bokeh_figure": ":class:`Bokeh Figure <bokeh.plotting.figure>`",
 
 }
 
