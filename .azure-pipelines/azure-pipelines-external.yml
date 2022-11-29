@@ -97,6 +97,10 @@ jobs:
     displayName: 'Install ArviZ package'
 
   - script: |
+      python -m pip install "setuptools>=48.0,<60" -U
+    displayName: 'Temporary httpstan setuptools fix 2022-11-29'
+
+  - script: |
       python -m pip freeze
     displayName: 'Print packages'
 
