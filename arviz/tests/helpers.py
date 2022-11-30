@@ -486,20 +486,6 @@ def pystan_noncentered_schools(data, draws, chains):
     return stan_model, fit
 
 
-def pymc3_noncentered_schools(data, draws, chains):
-    """Non-centered eight schools implementation for pymc3."""
-    import pymc3 as pm
-
-    with pm.Model() as model:
-        mu = pm.Normal("mu", mu=0, sd=5)
-        tau = pm.HalfCauchy("tau", beta=5)
-        eta = pm.Normal("eta", mu=0, sd=1, shape=data["J"])
-        theta = pm.Deterministic("theta", mu + tau * eta)
-        pm.Normal("obs", mu=theta, sd=data["sigma"], observed=data["y"])
-        trace = pm.sample(draws, chains=chains)
-    return model, trace
-
-
 def library_handle(library):
     """Import a library and return the handle."""
     if library == "pystan":
@@ -513,11 +499,10 @@ def library_handle(library):
 
 
 def load_cached_models(eight_schools_data, draws, chains, libs=None):
-    """Load pymc3, pystan, emcee, and pyro models from pickle."""
+    """Load pystan, emcee, and pyro models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
     supported = (
         ("pystan", pystan_noncentered_schools),
-        ("pymc3", pymc3_noncentered_schools),
         ("emcee", emcee_schools_model),
         ("pyro", pyro_noncentered_schools),
         ("numpyro", numpyro_schools_model),

@@ -14,7 +14,6 @@ jobs:
         python.version: "3.9"
         pystan.version: "latest"
         cmdstanpy.version: "latest"
-        pymc3.version: "latest"
         emcee.version: "latest"
         name: "External latest"
 
@@ -22,7 +21,6 @@ jobs:
         python.version: "3.9"
         pystan.version: 2.19.1.1
         cmdstanpy.version: "github"
-        pymc3.version: "github"
         emcee.version: 2
         name: "External special"
 
@@ -74,14 +72,7 @@ jobs:
           python -m pip --no-cache-dir install "emcee<3"
       fi
 
-      if [ "$(pymc3.version)" = "github" ]; then
-           python -m pip --no-cache-dir --log log.txt install git+https://github.com/pymc-devs/pymc3@v3
-           cat log.txt
-      else
-          python -m pip --no-cache-dir install pymc3
-      fi
-
-      grep -Ev '^pystan|^cmdstanpy|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
+      grep -Ev '^pystan|^cmdstanpy|^emcee' requirements-external.txt | xargs python -m pip install
 
     displayName: 'Install packages'
 
