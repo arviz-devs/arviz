@@ -671,8 +671,9 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         }
         dims = {"c": ["c1", "c99"], "b": ["b1"]}
         dataset = from_dict(posterior=datadict, coords=coords, dims=dims)
-        assert(
-            dataset.stack(z=["c1", "c99"], create_index=False).posterior, dataset.posterior.stack(z=["c1", "c99"], create_index=False)
+        assert_identical(
+            dataset.stack(z=["c1", "c99"], create_index=False).posterior,
+            dataset.posterior.stack(z=["c1", "c99"], create_index=False)
         )
 
     def test_to_dict(self, models):
