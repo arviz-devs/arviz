@@ -657,6 +657,24 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior, dataset.posterior
         )
 
+    def test_stack_bool(self):
+        datadict = {
+            "a": np.random.randn(100),
+            "b": np.random.randn(1, 100, 10),
+            "c": np.random.randn(1, 100, 3, 4),
+        }
+        coords = {
+            "c1": np.arange(3),
+            "c99": np.arange(4),
+            "b1": np.arange(10),
+        }
+        dims = {"c": ["c1", "c99"], "b": ["b1"]}
+        dataset = from_dict(posterior=datadict, coords=coords, dims=dims)
+        assert_identical(
+            dataset.stack(z=["c1", "c99"], create_index=False).posterior,
+            dataset.posterior.stack(z=["c1", "c99"], create_index=False),
+        )
+
     def test_to_dict(self, models):
         idata = models.model_1
         test_data = from_dict(**idata.to_dict())
