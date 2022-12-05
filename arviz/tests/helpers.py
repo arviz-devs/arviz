@@ -513,6 +513,15 @@ def bm_schools_model(data, draws, chains):
             return dist.Normal(self.theta(), torch.from_numpy(data["sigma"]).float())
 
     model = EightSchools()
+
+    prior = bm.GlobalNoUTurnSampler().infer(
+        queries=[model.mu(), model.tau(), model.eta()],
+        observations={},
+        num_samples=draws,
+        num_adaptive_samples=500,
+        num_chains=chains,
+    )
+
     posterior = bm.GlobalNoUTurnSampler().infer(
         queries=[model.mu(), model.tau(), model.eta()],
         observations={model.obs(): torch.from_numpy(data["y"]).float()},
@@ -520,7 +529,7 @@ def bm_schools_model(data, draws, chains):
         num_adaptive_samples=500,
         num_chains=chains,
     )
-    return model, posterior
+    return model, prior, posterior
 
 
 def library_handle(library):

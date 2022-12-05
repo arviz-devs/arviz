@@ -22,7 +22,7 @@ class TestDataBeanMachine:
     @pytest.fixture(scope="class")
     def data(self, eight_schools_params, draws, chains):
         class Data:
-            model, obj = load_cached_models(
+            model, prior, obj = load_cached_models(
                 eight_schools_params,
                 draws,
                 chains,
@@ -71,14 +71,7 @@ class TestDataBeanMachine:
 
     def test_inference_data_no_posterior(self, data):
         model = data.model
-        prior = bm.GlobalNoUTurnSampler().infer(
-            queries=[model.mu(), model.tau(), model.eta()],
-            observations={},
-            num_samples=100,
-            num_adaptive_samples=100,
-            num_chains=2,
-        )
         # only prior
-        inference_data = from_beanmachine(prior)
+        inference_data = from_beanmachine(data.prior)
         assert not model.obs() in inference_data.posterior
         assert "observed_data" not in inference_data
