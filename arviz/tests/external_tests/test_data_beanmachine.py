@@ -1,6 +1,5 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import numpy as np
-import packaging
 import pytest
 
 from ...data.io_beanmachine import from_beanmachine  # pylint: disable=wrong-import-position
@@ -23,29 +22,24 @@ class TestDataBeanMachine:
     @pytest.fixture(scope="class")
     def data(self, eight_schools_params, draws, chains):
         class Data:
-            model, obj = load_cached_models(eight_schools_params, draws, chains, "beanmachine")["beanmachine"]
+            model, obj = load_cached_models(
+                eight_schools_params,
+                draws,
+                chains,
+                "beanmachine",
+            )["beanmachine"]
 
         return Data
 
     @pytest.fixture(scope="class")
-    def predictions_params(self):
-        """Predictions data for eight schools."""
-        return {
-            "J": 8,
-            "sigma": torch.tensor([5.0, 7.0, 12.0, 4.0, 6.0, 10.0, 3.0, 9.0]),
-        }
-
-    @pytest.fixture(scope="class")
-    def predictions_data(self, data, predictions_params):
+    def predictions_data(self, data):
         """Generate predictions for predictions_params"""
         posterior_samples = data.obj
         model = data.model
         predictions = bm.inference.predictive.simulate([model.obs()], posterior_samples)
         return predictions
 
-    def get_inference_data(self, data, eight_schools_params, predictions_data):
-        posterior_samples = data.obj
-        model = data.model
+    def get_inference_data(self, eight_schools_params, predictions_data):
         predictions = predictions_data
         return from_beanmachine(
             sampler=predictions,
@@ -56,11 +50,12 @@ class TestDataBeanMachine:
         )
 
     def test_inference_data(self, data, eight_schools_params, predictions_data):
-        inference_data = self.get_inference_data(data, eight_schools_params, predictions_data)
-        mu = data.model.mu()
-        tau = data.model.tau()
-        eta = data.model.eta()
-        obs = data.model.obs()
+        inference_data = self.get_inference_data(eight_schools_params, predictions_data)
+        model = data.model
+        mu = model.mu()
+        tau = model.tau()
+        eta = model.eta()
+        obs = model.obs()
 
         assert mu in inference_data.posterior
         assert tau in inference_data.posterior
@@ -74,10 +69,7 @@ class TestDataBeanMachine:
         assert obs in idata.log_likelihood
         assert obs in idata.observed_data
 
-    def test_inference_data_no_posterior(
-        self, data, eight_schools_params, predictions_data, predictions_params
-    ):
-        posterior_samples = data.obj
+    def test_inference_data_no_posterior(self, data):
         model = data.model
         prior = bm.GlobalNoUTurnSampler().infer(
             queries=[model.mu(), model.tau(), model.eta()],
