@@ -5,7 +5,6 @@ import pytest
 from ...data.io_beanmachine import from_beanmachine  # pylint: disable=wrong-import-position
 from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
-    check_multiple_attrs,
     draws,
     eight_schools_params,
     importorskip,
