@@ -8,6 +8,7 @@
 
 ### Maintenance and fixes
 - Fix `reloo` outdated usage of `ELPDData` ([2158](https://github.com/arviz-devs/arviz/pull/2158))
+- Fix bug when beanmachine objects lack some fields ([2154](https://github.com/arviz-devs/arviz/pull/2154))
 
 ### Deprecation
 
