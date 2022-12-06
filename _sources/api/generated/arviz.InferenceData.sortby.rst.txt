@@ -1,0 +1,6 @@
+arviz.InferenceData.sortby
+==========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.sortby

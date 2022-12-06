@@ -1,0 +1,6 @@
+﻿arviz.to\_cds
+=============
+
+.. currentmodule:: arviz
+
+.. autofunction:: to_cds

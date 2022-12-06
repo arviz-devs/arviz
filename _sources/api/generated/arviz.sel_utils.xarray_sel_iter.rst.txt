@@ -1,0 +1,6 @@
+﻿arviz.sel\_utils.xarray\_sel\_iter
+==================================
+
+.. currentmodule:: arviz.sel_utils
+
+.. autofunction:: xarray_sel_iter

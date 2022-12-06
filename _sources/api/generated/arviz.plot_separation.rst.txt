@@ -1,0 +1,6 @@
+﻿arviz.plot\_separation
+======================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_separation

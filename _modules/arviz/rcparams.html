@@ -1,0 +1,1090 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.rcparams &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/rcparams';</script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.rcparams</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;ArviZ rcparams. Based on matplotlib&#39;s implementation.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableMapping</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="n">NO_GET_ARGS</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">NO_GET_ARGS</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">ScaleKeyword</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="s2">&quot;negative_log&quot;</span><span class="p">,</span> <span class="s2">&quot;deviance&quot;</span><span class="p">]</span>
+<span class="n">ICKeyword</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;loo&quot;</span><span class="p">,</span> <span class="s2">&quot;waic&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_make_validate_choice</span><span class="p">(</span><span class="n">accepted_values</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">typeof</span><span class="o">=</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate value is in accepted_values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accepted_values : iterable</span>
+<span class="sd">        Iterable containing all accepted_values.</span>
+<span class="sd">    allow_none: boolean, optional</span>
+<span class="sd">        Whether to accept ``None`` in addition to the values in ``accepted_values``.</span>
+<span class="sd">    typeof: type, optional</span>
+<span class="sd">        Type the values should be converted to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># no blank lines allowed after function docstring by pydocstyle,</span>
+    <span class="c1"># but black requires white line before function</span>
+
+    <span class="k">def</span> <span class="nf">validate_choice</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">allow_none</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">typeof</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not convert to </span><span class="si">{</span><span class="n">typeof</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">accepted_values</span><span class="p">:</span>
+            <span class="c1"># Convert value to python boolean if string matches</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;true&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> is not one of </span><span class="si">{</span><span class="n">accepted_values</span><span class="si">}{</span><span class="s2">&quot; nor None&quot;</span> <span class="k">if</span> <span class="n">allow_none</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">validate_choice</span>
+
+
+<span class="k">def</span> <span class="nf">_make_validate_choice_regex</span><span class="p">(</span><span class="n">accepted_values</span><span class="p">,</span> <span class="n">accepted_values_regex</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate value is in accepted_values with regex.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    accepted_values : iterable</span>
+<span class="sd">        Iterable containing all accepted_values.</span>
+<span class="sd">    accepted_values_regex : iterable</span>
+<span class="sd">        Iterable containing all accepted_values with regex string.</span>
+<span class="sd">    allow_none: boolean, optional</span>
+<span class="sd">        Whether to accept ``None`` in addition to the values in ``accepted_values``.</span>
+<span class="sd">    typeof: type, optional</span>
+<span class="sd">        Type the values should be converted to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># no blank lines allowed after function docstring by pydocstyle,</span>
+    <span class="c1"># but black requires white line before function</span>
+
+    <span class="k">def</span> <span class="nf">validate_choice_regex</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">allow_none</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">accepted_values</span><span class="p">:</span>
+            <span class="c1"># Convert value to python boolean if string matches</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;true&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">accepted_values_regex</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> is not one of </span><span class="si">{</span><span class="n">accepted_values</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s1">&#39;or in regex </span><span class="si">{</span><span class="n">accepted_values_regex</span><span class="si">}{</span><span class="s2">&quot; nor None&quot;</span> <span class="k">if</span> <span class="n">allow_none</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">validate_choice_regex</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_positive_int</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate value is a natural number.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not convert to int&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only positive values are valid&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_float</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate value is a float.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not convert to float&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_probability</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate a probability: a float between 0 and 1.&quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">_validate_float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only values between 0 and 1 are valid.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate value is a float.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only boolean values are valid.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_add_none_to_validator</span><span class="p">(</span><span class="n">base_validator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a validator function that catches none and then calls base_fun.&quot;&quot;&quot;</span>
+    <span class="c1"># no blank lines allowed after function docstring by pydocstyle,</span>
+    <span class="c1"># but black requires white line before function</span>
+
+    <span class="k">def</span> <span class="nf">validate_with_none</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">base_validator</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">validate_with_none</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_bokeh_marker</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate the markers.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">bokeh.core.enums</span> <span class="kn">import</span> <span class="n">MarkerType</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">MarkerType</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;asterisk&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;circle_cross&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;circle_dot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;circle_x&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;circle_y&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cross&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dash&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;diamond&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;diamond_cross&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;diamond_dot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hex&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hex_dot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;inverted_triangle&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;plus&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;square&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;square_cross&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;square_dot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;square_pin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;square_x&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;star&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;star_dot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;triangle&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;triangle_dot&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;triangle_pin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="n">all_markers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">MarkerType</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_markers</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> is not one of </span><span class="si">{</span><span class="n">all_markers</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_dict_of_lists</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">validated_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="n">tup</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not interpret &#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; as key: list or str&quot;</span><span class="p">)</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">vals</span> <span class="o">=</span> <span class="n">tup</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &quot;&#39;</span><span class="p">)</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &quot;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot; [],&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">validated_dict</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Repeated key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> when validating dict of lists&quot;</span><span class="p">)</span>
+        <span class="n">validated_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">validated_dict</span>
+
+
+<span class="k">def</span> <span class="nf">make_iterable_validator</span><span class="p">(</span><span class="n">scalar_validator</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_auto</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate value is an iterable datatype.&quot;&quot;&quot;</span>
+    <span class="c1"># based on matplotlib&#39;s _listify_validator function</span>
+
+    <span class="k">def</span> <span class="nf">validate_iterable</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">allow_none</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">allow_auto</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;auto&quot;</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;([ ])&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">iterable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">scalar_validator</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">!=</span> <span class="n">length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iterable must be of length: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">val</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only ordered iterable values are valid&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">validate_iterable</span>
+
+
+<span class="n">_validate_float_or_none</span> <span class="o">=</span> <span class="n">_add_none_to_validator</span><span class="p">(</span><span class="n">_validate_float</span><span class="p">)</span>
+<span class="n">_validate_positive_int_or_none</span> <span class="o">=</span> <span class="n">_add_none_to_validator</span><span class="p">(</span><span class="n">_validate_positive_int</span><span class="p">)</span>
+<span class="n">_validate_bokeh_bounds</span> <span class="o">=</span> <span class="n">make_iterable_validator</span><span class="p">(</span>  <span class="c1"># pylint: disable=invalid-name</span>
+    <span class="n">_validate_float_or_none</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_auto</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">METAGROUPS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;posterior_groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;posterior&quot;</span><span class="p">,</span> <span class="s2">&quot;posterior_predictive&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_stats&quot;</span><span class="p">,</span> <span class="s2">&quot;log_likelihood&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;prior_groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;prior&quot;</span><span class="p">,</span> <span class="s2">&quot;prior_predictive&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_stats_prior&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;posterior_groups_warmup&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;_warmup_posterior&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_warmup_posterior_predictive&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_warmup_sample_stats&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;latent_vars&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;posterior&quot;</span><span class="p">,</span> <span class="s2">&quot;prior&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;observed_vars&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;posterior_predictive&quot;</span><span class="p">,</span> <span class="s2">&quot;observed_data&quot;</span><span class="p">,</span> <span class="s2">&quot;prior_predictive&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="n">defaultParams</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># pylint: disable=invalid-name</span>
+    <span class="s2">&quot;data.http_protocol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;https&quot;</span><span class="p">,</span> <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;https&quot;</span><span class="p">,</span> <span class="s2">&quot;http&quot;</span><span class="p">})),</span>
+    <span class="s2">&quot;data.load&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;lazy&quot;</span><span class="p">,</span> <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;lazy&quot;</span><span class="p">,</span> <span class="s2">&quot;eager&quot;</span><span class="p">})),</span>
+    <span class="s2">&quot;data.metagroups&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">METAGROUPS</span><span class="p">,</span> <span class="n">_validate_dict_of_lists</span><span class="p">),</span>
+    <span class="s2">&quot;data.index_origin&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">_make_validate_choice</span><span class="p">({</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">},</span> <span class="n">typeof</span><span class="o">=</span><span class="nb">int</span><span class="p">)),</span>
+    <span class="s2">&quot;data.log_likelihood&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">_validate_boolean</span><span class="p">),</span>
+    <span class="s2">&quot;data.save_warmup&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">_validate_boolean</span><span class="p">),</span>
+    <span class="s2">&quot;plot.backend&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;matplotlib&quot;</span><span class="p">,</span> <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;matplotlib&quot;</span><span class="p">,</span> <span class="s2">&quot;bokeh&quot;</span><span class="p">})),</span>
+    <span class="s2">&quot;plot.density_kind&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;kde&quot;</span><span class="p">,</span> <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;kde&quot;</span><span class="p">,</span> <span class="s2">&quot;hist&quot;</span><span class="p">})),</span>
+    <span class="s2">&quot;plot.max_subplots&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="n">_validate_positive_int_or_none</span><span class="p">),</span>
+    <span class="s2">&quot;plot.point_estimate&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;mode&quot;</span><span class="p">},</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.bounds_x_range&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">_validate_bokeh_bounds</span><span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.bounds_y_range&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">_validate_bokeh_bounds</span><span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.figure.dpi&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">_validate_positive_int</span><span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.figure.height&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">_validate_positive_int</span><span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.figure.width&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">_validate_positive_int</span><span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.layout.order&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">_make_validate_choice_regex</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;column&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;row&quot;</span><span class="p">,</span> <span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;square_trimmed&quot;</span><span class="p">},</span> <span class="p">{</span><span class="sa">r</span><span class="s2">&quot;\d*column&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\d*row&quot;</span><span class="p">}</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.layout.sizing_mode&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+        <span class="n">_make_validate_choice</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stretch_width&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stretch_height&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stretch_both&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;scale_width&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;scale_height&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;scale_both&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.layout.toolbar_location&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;above&quot;</span><span class="p">,</span>
+        <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;above&quot;</span><span class="p">,</span> <span class="s2">&quot;below&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">},</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.marker&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;cross&quot;</span><span class="p">,</span> <span class="n">_validate_bokeh_marker</span><span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.output_backend&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;webgl&quot;</span><span class="p">,</span> <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;canvas&quot;</span><span class="p">,</span> <span class="s2">&quot;svg&quot;</span><span class="p">,</span> <span class="s2">&quot;webgl&quot;</span><span class="p">})),</span>
+    <span class="s2">&quot;plot.bokeh.show&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">_validate_boolean</span><span class="p">),</span>
+    <span class="s2">&quot;plot.bokeh.tools&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;reset,pan,box_zoom,wheel_zoom,lasso_select,undo,save,hover&quot;</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;plot.matplotlib.show&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">_validate_boolean</span><span class="p">),</span>
+    <span class="s2">&quot;stats.hdi_prob&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.94</span><span class="p">,</span> <span class="n">_validate_probability</span><span class="p">),</span>
+    <span class="s2">&quot;stats.information_criterion&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;loo&quot;</span><span class="p">,</span>
+        <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;loo&quot;</span><span class="p">,</span> <span class="s2">&quot;waic&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">NO_GET_ARGS</span> <span class="k">else</span> <span class="nb">set</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">ICKeyword</span><span class="p">))),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;stats.ic_pointwise&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">_validate_boolean</span><span class="p">),</span>
+    <span class="s2">&quot;stats.ic_scale&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;log&quot;</span><span class="p">,</span>
+        <span class="n">_make_validate_choice</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="s2">&quot;negative_log&quot;</span><span class="p">,</span> <span class="s2">&quot;deviance&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">NO_GET_ARGS</span> <span class="k">else</span> <span class="nb">set</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">ScaleKeyword</span><span class="p">))</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;stats.ic_compare_method&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;stacking&quot;</span><span class="p">,</span>
+        <span class="n">_make_validate_choice</span><span class="p">({</span><span class="s2">&quot;stacking&quot;</span><span class="p">,</span> <span class="s2">&quot;bb-pseudo-bma&quot;</span><span class="p">,</span> <span class="s2">&quot;pseudo-bma&quot;</span><span class="p">}),</span>
+    <span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">RcParams</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to contain ArviZ default parameters.</span>
+
+<span class="sd">    It is implemented as a dict with validation when setting items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">validate</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">validate_fun</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">validate_fun</span><span class="p">)</span> <span class="ow">in</span> <span class="n">defaultParams</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># validate values on the way in</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add validation to __setitem__ function.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">[</span><span class="n">key</span><span class="p">](</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">verr</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">verr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">verr</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cval</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is not a valid rc parameter &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(see rcParams.keys() for a list of valid parameters)&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use underlying dict&#39;s getitem method.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raise TypeError if someone ever tries to delete a key from RcParams.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;RcParams keys cannot be deleted&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raise TypeError if someone ever tries to delete all keys from RcParams.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;RcParams keys cannot be deleted&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raise TypeError if someone ever tries to delete a key from RcParams.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;RcParams keys cannot be deleted. Use .get(key) of RcParams[key] to check values&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raise TypeError if someone ever tries to delete a key from RcParams.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;RcParams keys cannot be deleted. Use .get(key) of RcParams[key] to check values&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Raise error when using setdefault, defaults are handled on initialization.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;Defaults in RcParams are handled on object initialization during library&quot;</span>
+            <span class="s2">&quot;import. Use arvizrc file instead.&quot;</span>
+            <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Customize repr of RcParams objects.&quot;&quot;&quot;</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">repr_split</span> <span class="o">=</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="p">,</span>
+            <span class="n">indent</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="mi">80</span> <span class="o">-</span> <span class="n">indent</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">repr_indented</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">indent</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">repr_split</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">repr_indented</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Customize str/print of RcParams objects.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0[0]:&lt;22}</span><span class="s2">: </span><span class="si">{0[1]}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield sorted list of keys.&quot;&quot;&quot;</span>
+        <span class="k">yield from</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use underlying dict&#39;s len method.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">find_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find keys that match a regex pattern.</span>
+
+<span class="sd">        Return the subset of this RcParams dictionary whose keys match,</span>
+<span class="sd">        using :func:`re.search`, the given ``pattern``.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">            Changes to the returned dictionary are *not* propagated to</span>
+<span class="sd">            the parent RcParams dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pattern_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">RcParams</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">pattern_re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a copy of the RcParams object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_underlying_storage</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_arviz_rcfile</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Get arvizrc file.</span>
+
+<span class="sd">    The file location is determined in the following order:</span>
+
+<span class="sd">    - ``$PWD/arvizrc``</span>
+<span class="sd">    - ``$ARVIZ_DATA/arvizrc``</span>
+<span class="sd">    - On Linux,</span>
+<span class="sd">        - ``$XDG_CONFIG_HOME/arviz/arvizrc`` (if ``$XDG_CONFIG_HOME``</span>
+<span class="sd">          is defined)</span>
+<span class="sd">        - or ``$HOME/.config/arviz/arvizrc`` (if ``$XDG_CONFIG_HOME``</span>
+<span class="sd">          is not defined)</span>
+<span class="sd">    - On other platforms,</span>
+<span class="sd">        - ``$HOME/.arviz/arvizrc`` if ``$HOME`` is defined</span>
+
+<span class="sd">    Otherwise, the default defined in ``rcparams.py`` file will be used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># no blank lines allowed after function docstring by pydocstyle,</span>
+    <span class="c1"># but black requires white line before function</span>
+
+    <span class="k">def</span> <span class="nf">gen_candidates</span><span class="p">():</span>
+        <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s2">&quot;arvizrc&quot;</span><span class="p">)</span>
+        <span class="n">arviz_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ARVIZ_DATA&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">arviz_data_dir</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arviz_data_dir</span><span class="p">,</span> <span class="s2">&quot;arvizrc&quot;</span><span class="p">)</span>
+        <span class="n">xdg_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;XDG_CONFIG_HOME&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;linux&quot;</span><span class="p">,</span> <span class="s2">&quot;freebsd&quot;</span><span class="p">)):</span>
+            <span class="n">configdir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">xdg_base</span><span class="p">,</span> <span class="s2">&quot;arviz&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">configdir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.arviz&quot;</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">configdir</span><span class="p">,</span> <span class="s2">&quot;arvizrc&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">gen_candidates</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">fname</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">read_rcfile</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return :class:`arviz.RcParams` from the contents of the given file.</span>
+
+<span class="sd">    Unlike `rc_params_from_file`, the configuration class only contains the</span>
+<span class="sd">    parameters specified in the file (i.e. default values are not filled in).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_error_details_fmt</span> <span class="o">=</span> <span class="s1">&#39;line #</span><span class="si">%d</span><span class="se">\n\t</span><span class="s1">&quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n\t</span><span class="s1">in file &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span>
+
+    <span class="n">config</span> <span class="o">=</span> <span class="n">RcParams</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rcfile</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">multiline</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">line_no</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rcfile</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">strippedline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">strippedline</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">multiline</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">strippedline</span> <span class="o">==</span> <span class="s2">&quot;}&quot;</span><span class="p">:</span>
+                        <span class="n">multiline</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">val</span> <span class="o">=</span> <span class="n">aux_val</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">aux_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">strippedline</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tup</span> <span class="o">=</span> <span class="n">strippedline</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">error_details</span> <span class="o">=</span> <span class="n">_error_details_fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">line_no</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                        <span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Illegal </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">error_details</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">tup</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                        <span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Duplicate key in file </span><span class="si">%r</span><span class="s2"> line #</span><span class="si">%d</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">line_no</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;data.metagroups&quot;</span><span class="p">}:</span>
+                        <span class="n">aux_val</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">multiline</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">continue</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">verr</span><span class="p">:</span>
+                    <span class="n">error_details</span> <span class="o">=</span> <span class="n">_error_details_fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">line_no</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad val </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">error_details</span><span class="si">}</span><span class="se">\n\t</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">verr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">verr</span>
+
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+            <span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot decode configuration file </span><span class="si">%s</span><span class="s2"> with encoding &quot;</span>
+                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">, check LANG and LC_* variables.&quot;</span><span class="p">,</span>
+                <span class="n">fname</span><span class="p">,</span>
+                <span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">(</span><span class="n">do_setlocale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;utf-8 (default)&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="k">return</span> <span class="n">config</span>
+
+
+<span class="k">def</span> <span class="nf">rc_params</span><span class="p">(</span><span class="n">ignore_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read and validate arvizrc file.&quot;&quot;&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ignore_files</span> <span class="k">else</span> <span class="n">get_arviz_rcfile</span><span class="p">()</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">RcParams</span><span class="p">([(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">defaultParams</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+    <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_defaults</span> <span class="o">=</span> <span class="n">read_rcfile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_defaults</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">defaults</span>
+
+
+<span class="n">rcParams</span> <span class="o">=</span> <span class="n">rc_params</span><span class="p">()</span>  <span class="c1"># pylint: disable=invalid-name</span>
+
+
+<div class="viewcode-block" id="rc_context"><a class="viewcode-back" href="../../api/generated/arviz.rc_context.html#arviz.rc_context">[docs]</a><span class="k">class</span> <span class="nc">rc_context</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-name</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a context manager for managing rc settings.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rc : dict, optional</span>
+<span class="sd">        Mapping containing the rcParams to modify temporally.</span>
+<span class="sd">    fname : str, optional</span>
+<span class="sd">        Filename of the file containing the rcParams to use inside the rc_context.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    This allows one to do::</span>
+
+<span class="sd">        with az.rc_context(fname=&#39;pystan.rc&#39;):</span>
+<span class="sd">            idata = az.load_arviz_data(&quot;radon&quot;)</span>
+<span class="sd">            az.plot_posterior(idata, var_names=[&quot;gamma&quot;])</span>
+
+<span class="sd">    The plot would have settings from &#39;screen.rc&#39;</span>
+
+<span class="sd">    A dictionary can also be passed to the context manager::</span>
+
+<span class="sd">        with az.rc_context(rc={&#39;plot.max_subplots&#39;: None}, fname=&#39;pystan.rc&#39;):</span>
+<span class="sd">            idata = az.load_arviz_data(&quot;radon&quot;)</span>
+<span class="sd">            az.plot_posterior(idata, var_names=[&quot;gamma&quot;])</span>
+
+<span class="sd">    The &#39;rc&#39; dictionary takes precedence over the settings loaded from</span>
+<span class="sd">    &#39;fname&#39;. Passing a dictionary only is also valid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Based on mpl.rc_context</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orig</span> <span class="o">=</span> <span class="n">rcParams</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="n">file_rcparams</span> <span class="o">=</span> <span class="n">read_rcfile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">file_rcparams</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rc</span><span class="p">:</span>
+            <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Define enter method of context manager.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Define exit method of context manager.&quot;&quot;&quot;</span>
+        <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orig</span><span class="p">)</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

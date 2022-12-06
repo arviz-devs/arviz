@@ -1,0 +1,28 @@
+﻿arviz.PyStan2SamplingWrapper
+============================
+
+.. currentmodule:: arviz
+
+.. autoclass:: PyStan2SamplingWrapper
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      PyStan2SamplingWrapper.__init__
+      PyStan2SamplingWrapper.check_implemented_methods
+      PyStan2SamplingWrapper.get_inference_data
+      PyStan2SamplingWrapper.log_likelihood__i
+      PyStan2SamplingWrapper.sample
+      PyStan2SamplingWrapper.sel_observations
+   
+   
+
+   
+   
+   

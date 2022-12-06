@@ -1,0 +1,6 @@
+arviz.InferenceData.chunk
+=========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.chunk

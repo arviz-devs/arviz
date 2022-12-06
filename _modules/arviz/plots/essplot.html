@@ -1,0 +1,823 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.plots.essplot &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/plots/essplot';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.plots.essplot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Plot quantile or local effective sample sizes.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">convert_to_dataset</span>
+<span class="kn">from</span> <span class="nn">..labels</span> <span class="kn">import</span> <span class="n">BaseLabeller</span>
+<span class="kn">from</span> <span class="nn">..rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">..sel_utils</span> <span class="kn">import</span> <span class="n">xarray_var_iter</span>
+<span class="kn">from</span> <span class="nn">..stats</span> <span class="kn">import</span> <span class="n">ess</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">_var_names</span><span class="p">,</span> <span class="n">get_coords</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">default_grid</span><span class="p">,</span> <span class="n">filter_plotters_list</span><span class="p">,</span> <span class="n">get_plotting_function</span>
+
+
+<div class="viewcode-block" id="plot_ess"><a class="viewcode-back" href="../../../api/generated/arviz.plot_ess.html#arviz.plot_ess">[docs]</a><span class="k">def</span> <span class="nf">plot_ess</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span>
+    <span class="n">relative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">textsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">rug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">rug_kind</span><span class="o">=</span><span class="s2">&quot;diverging&quot;</span><span class="p">,</span>
+    <span class="n">n_points</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">extra_methods</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">min_ess</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+    <span class="n">labeller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">extra_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">text_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hline_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">rug_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot quantile, local or evolution of effective sample sizes (ESS).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    idata : obj</span>
+<span class="sd">        Any object that can be converted to an :class:`arviz.InferenceData` object</span>
+<span class="sd">        Refer to documentation of :func:`arviz.convert_to_dataset` for details</span>
+<span class="sd">    var_names : list of variable names, optional</span>
+<span class="sd">        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude</span>
+<span class="sd">        them from the plot.</span>
+<span class="sd">    filter_vars : {None, &quot;like&quot;, &quot;regex&quot;}, optional, default=None</span>
+<span class="sd">        If `None` (default), interpret var_names as the real variables names. If &quot;like&quot;,</span>
+<span class="sd">        interpret var_names as substrings of the real variables names. If &quot;regex&quot;,</span>
+<span class="sd">        interpret var_names as regular expressions on the real variables names. A la</span>
+<span class="sd">        ``pandas.filter``.</span>
+<span class="sd">    kind : str, optional</span>
+<span class="sd">        Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.</span>
+<span class="sd">    relative : bool</span>
+<span class="sd">        Show relative ess in plot ``ress = ess / N``.</span>
+<span class="sd">    coords : dict, optional</span>
+<span class="sd">        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.</span>
+<span class="sd">    grid : tuple</span>
+<span class="sd">        Number of rows and columns. Defaults to None, the rows and columns are</span>
+<span class="sd">        automatically inferred.</span>
+<span class="sd">    figsize : tuple, optional</span>
+<span class="sd">        Figure size. If None it will be defined automatically.</span>
+<span class="sd">    textsize : float, optional</span>
+<span class="sd">        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based</span>
+<span class="sd">        on figsize.</span>
+<span class="sd">    rug : bool</span>
+<span class="sd">        Plot rug plot of values diverging or that reached the max tree depth.</span>
+<span class="sd">    rug_kind : bool</span>
+<span class="sd">        Variable in sample stats to use as rug mask. Must be a boolean variable.</span>
+<span class="sd">    n_points : int</span>
+<span class="sd">        Number of points for which to plot their quantile/local ess or number of subsets</span>
+<span class="sd">        in the evolution plot.</span>
+<span class="sd">    extra_methods : bool, optional</span>
+<span class="sd">        Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind</span>
+<span class="sd">    min_ess : int</span>
+<span class="sd">        Minimum number of ESS desired. If ``relative=True`` the line is plotted at</span>
+<span class="sd">        ``min_ess / n_samples`` for local and quantile kinds and as a curve following</span>
+<span class="sd">        the ``min_ess / n`` dependency in evolution kind.</span>
+<span class="sd">    labeller : Labeller, optional</span>
+<span class="sd">        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.</span>
+<span class="sd">        Read the :ref:`label_guide` for more details and usage examples.</span>
+<span class="sd">    ax : 2D array-like of matplotlib axes or bokeh figures, optional</span>
+<span class="sd">        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create</span>
+<span class="sd">        its own array of plot areas (and return it).</span>
+<span class="sd">    extra_kwargs : dict, optional</span>
+<span class="sd">        If evolution plot, extra_kwargs is used to plot ess tail and differentiate it</span>
+<span class="sd">        from ess bulk. Otherwise, passed to extra methods lines.</span>
+<span class="sd">    text_kwargs : dict, optional</span>
+<span class="sd">        Only taken into account when ``extra_methods=True``. kwargs passed to ax.annotate</span>
+<span class="sd">        for extra methods lines labels. It accepts the additional</span>
+<span class="sd">        key ``x`` to set ``xy=(text_kwargs[&quot;x&quot;], mcse)``</span>
+<span class="sd">    hline_kwargs : dict, optional</span>
+<span class="sd">        kwargs passed to :func:`~matplotlib.axes.Axes.axhline` or to :class:`~bokeh.models.Span`</span>
+<span class="sd">        depending on the backend for the horizontal minimum ESS line.</span>
+<span class="sd">        For relative ess evolution plots the kwargs are passed to</span>
+<span class="sd">        :func:`~matplotlib.axes.Axes.plot` or to :class:`~bokeh.plotting.figure.line`</span>
+<span class="sd">    rug_kwargs : dict</span>
+<span class="sd">        kwargs passed to rug plot.</span>
+<span class="sd">    backend : str, optional</span>
+<span class="sd">        Select plotting backend {&quot;matplotlib&quot;,&quot;bokeh&quot;}. Default &quot;matplotlib&quot;.</span>
+<span class="sd">    backend_kwargs : bool, optional</span>
+<span class="sd">        These are kwargs specific to the backend being used, passed to</span>
+<span class="sd">        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.</span>
+<span class="sd">        For additional documentation check the plotting method of the backend.</span>
+<span class="sd">    show : bool, optional</span>
+<span class="sd">        Call backend show function.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or</span>
+<span class="sd">        :meth:`mpl:matplotlib.axes.Axes.plot` function depending on the</span>
+<span class="sd">        value of ``kind``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    axes: matplotlib axes or bokeh figures</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    ess: Calculate estimate of the effective sample size.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check</span>
+<span class="sd">    that there are enough samples for all the explored regions of parameter space. Checking</span>
+<span class="sd">    local and quantile ESS is particularly relevant when working with HDI intervals as</span>
+<span class="sd">    opposed to ESS bulk, which is relevant for point estimates.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; import arviz as az</span>
+<span class="sd">        &gt;&gt;&gt; idata = az.load_arviz_data(&quot;centered_eight&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; coords = {&quot;school&quot;: [&quot;Choate&quot;, &quot;Lawrenceville&quot;]}</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_ess(</span>
+<span class="sd">        ...     idata, kind=&quot;local&quot;, var_names=[&quot;mu&quot;, &quot;theta&quot;], coords=coords</span>
+<span class="sd">        ... )</span>
+
+<span class="sd">    Plot quantile ESS and exclude variables with partial naming</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_ess(</span>
+<span class="sd">        ...     idata, kind=&quot;quantile&quot;, var_names=[&#39;~thet&#39;], filter_vars=&quot;like&quot;, coords=coords</span>
+<span class="sd">        ... )</span>
+
+<span class="sd">    Plot ESS evolution as the number of samples increase. When the model is converging properly,</span>
+<span class="sd">    both lines in this plot should be roughly linear.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_ess(</span>
+<span class="sd">        ...     idata, kind=&quot;evolution&quot;, var_names=[&quot;mu&quot;, &quot;theta&quot;], coords=coords</span>
+<span class="sd">        ... )</span>
+
+<span class="sd">    Customize local ESS plot to look like reference paper.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_ess(</span>
+<span class="sd">        ...     idata, kind=&quot;local&quot;, var_names=[&quot;mu&quot;], drawstyle=&quot;steps-mid&quot;, color=&quot;k&quot;,</span>
+<span class="sd">        ...     linestyle=&quot;-&quot;, marker=None, rug=True, rug_kwargs={&quot;color&quot;: &quot;r&quot;}</span>
+<span class="sd">        ... )</span>
+
+<span class="sd">    Customize ESS evolution plot to look like reference paper.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; extra_kwargs = {&quot;color&quot;: &quot;lightsteelblue&quot;}</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_ess(</span>
+<span class="sd">        ...     idata, kind=&quot;evolution&quot;, var_names=[&quot;mu&quot;],</span>
+<span class="sd">        ...     color=&quot;royalblue&quot;, extra_kwargs=extra_kwargs</span>
+<span class="sd">        ... )</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">valid_kinds</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="s2">&quot;evolution&quot;</span><span class="p">)</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_kinds</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid kind, kind must be one of </span><span class="si">{</span><span class="n">valid_kinds</span><span class="si">}</span><span class="s2"> not </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s2">&quot;chain&quot;</span> <span class="ow">in</span> <span class="n">coords</span> <span class="ow">or</span> <span class="s2">&quot;draw&quot;</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;chain and draw are invalid coordinates for this kind of plot&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">labeller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">labeller</span> <span class="o">=</span> <span class="n">BaseLabeller</span><span class="p">()</span>
+    <span class="n">extra_methods</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;evolution&quot;</span> <span class="k">else</span> <span class="n">extra_methods</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">get_coords</span><span class="p">(</span><span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;posterior&quot;</span><span class="p">),</span> <span class="n">coords</span><span class="p">)</span>
+    <span class="n">var_names</span> <span class="o">=</span> <span class="n">_var_names</span><span class="p">(</span><span class="n">var_names</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">filter_vars</span><span class="p">)</span>
+    <span class="n">n_draws</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;draw&quot;</span><span class="p">]</span>
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_draws</span> <span class="o">*</span> <span class="n">data</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;chain&quot;</span><span class="p">]</span>
+
+    <span class="n">ess_tail_dataset</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mean_ess</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sd_ess</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;quantile&quot;</span><span class="p">:</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">n_points</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">n_points</span><span class="p">)</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">probs</span>
+        <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> for quantiles&quot;</span>
+        <span class="n">ess_dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">ess</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span> <span class="n">relative</span><span class="o">=</span><span class="n">relative</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probs</span>
+            <span class="p">],</span>
+            <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;ess_dim&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">probs</span>
+        <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> for small intervals&quot;</span>
+        <span class="n">ess_dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">ess</span><span class="p">(</span>
+                    <span class="n">data</span><span class="p">,</span>
+                    <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span>
+                    <span class="n">relative</span><span class="o">=</span><span class="n">relative</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;local&quot;</span><span class="p">,</span>
+                    <span class="n">prob</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n_points</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probs</span>
+            <span class="p">],</span>
+            <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;ess_dim&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">first_draw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">n_samples</span> <span class="o">/</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">n_points</span><span class="p">)</span>
+        <span class="n">draw_divisions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">n_draws</span> <span class="o">//</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">n_draws</span><span class="p">,</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">ess_dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">ess</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">draw</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">first_draw</span> <span class="o">+</span> <span class="n">draw_div</span><span class="p">)),</span>
+                    <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span>
+                    <span class="n">relative</span><span class="o">=</span><span class="n">relative</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bulk&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">draw_div</span> <span class="ow">in</span> <span class="n">draw_divisions</span>
+            <span class="p">],</span>
+            <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;ess_dim&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ess_tail_dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">ess</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">draw</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">first_draw</span> <span class="o">+</span> <span class="n">draw_div</span><span class="p">)),</span>
+                    <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span>
+                    <span class="n">relative</span><span class="o">=</span><span class="n">relative</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;tail&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">draw_div</span> <span class="ow">in</span> <span class="n">draw_divisions</span>
+            <span class="p">],</span>
+            <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;ess_dim&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">plotters</span> <span class="o">=</span> <span class="n">filter_plotters_list</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">xarray_var_iter</span><span class="p">(</span><span class="n">ess_dataset</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span> <span class="n">skip_dims</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ess_dim&quot;</span><span class="p">})),</span> <span class="s2">&quot;plot_ess&quot;</span>
+    <span class="p">)</span>
+    <span class="n">length_plotters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">plotters</span><span class="p">)</span>
+    <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">default_grid</span><span class="p">(</span><span class="n">length_plotters</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">extra_methods</span><span class="p">:</span>
+        <span class="n">mean_ess</span> <span class="o">=</span> <span class="n">ess</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">relative</span><span class="o">=</span><span class="n">relative</span><span class="p">)</span>
+        <span class="n">sd_ess</span> <span class="o">=</span> <span class="n">ess</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;sd&quot;</span><span class="p">,</span> <span class="n">relative</span><span class="o">=</span><span class="n">relative</span><span class="p">)</span>
+
+    <span class="n">essplot_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">plotters</span><span class="o">=</span><span class="n">plotters</span><span class="p">,</span>
+        <span class="n">xdata</span><span class="o">=</span><span class="n">xdata</span><span class="p">,</span>
+        <span class="n">ess_tail_dataset</span><span class="o">=</span><span class="n">ess_tail_dataset</span><span class="p">,</span>
+        <span class="n">mean_ess</span><span class="o">=</span><span class="n">mean_ess</span><span class="p">,</span>
+        <span class="n">sd_ess</span><span class="o">=</span><span class="n">sd_ess</span><span class="p">,</span>
+        <span class="n">idata</span><span class="o">=</span><span class="n">idata</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+        <span class="n">extra_methods</span><span class="o">=</span><span class="n">extra_methods</span><span class="p">,</span>
+        <span class="n">textsize</span><span class="o">=</span><span class="n">textsize</span><span class="p">,</span>
+        <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span>
+        <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">extra_kwargs</span><span class="o">=</span><span class="n">extra_kwargs</span><span class="p">,</span>
+        <span class="n">text_kwargs</span><span class="o">=</span><span class="n">text_kwargs</span><span class="p">,</span>
+        <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span>
+        <span class="n">relative</span><span class="o">=</span><span class="n">relative</span><span class="p">,</span>
+        <span class="n">min_ess</span><span class="o">=</span><span class="n">min_ess</span><span class="p">,</span>
+        <span class="n">labeller</span><span class="o">=</span><span class="n">labeller</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="o">=</span><span class="n">ylabel</span><span class="p">,</span>
+        <span class="n">rug</span><span class="o">=</span><span class="n">rug</span><span class="p">,</span>
+        <span class="n">rug_kind</span><span class="o">=</span><span class="n">rug_kind</span><span class="p">,</span>
+        <span class="n">rug_kwargs</span><span class="o">=</span><span class="n">rug_kwargs</span><span class="p">,</span>
+        <span class="n">hline_kwargs</span><span class="o">=</span><span class="n">hline_kwargs</span><span class="p">,</span>
+        <span class="n">backend_kwargs</span><span class="o">=</span><span class="n">backend_kwargs</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.backend&quot;</span><span class="p">]</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># TODO: Add backend kwargs</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">get_plotting_function</span><span class="p">(</span><span class="s2">&quot;plot_ess&quot;</span><span class="p">,</span> <span class="s2">&quot;essplot&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">essplot_kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

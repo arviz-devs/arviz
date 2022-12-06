@@ -1,0 +1,6 @@
+﻿arviz.output\_file
+==================
+
+.. currentmodule:: arviz
+
+.. autofunction:: output_file

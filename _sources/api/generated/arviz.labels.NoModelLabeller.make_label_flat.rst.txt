@@ -1,0 +1,6 @@
+arviz.labels.NoModelLabeller.make\_label\_flat
+==============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: NoModelLabeller.make_label_flat

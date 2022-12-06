@@ -1,0 +1,6 @@
+arviz.SamplingWrapper.check\_implemented\_methods
+=================================================
+
+.. currentmodule:: arviz
+
+.. automethod:: SamplingWrapper.check_implemented_methods

@@ -1,0 +1,6 @@
+arviz.labels.BaseLabeller.\_\_init\_\_
+======================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: BaseLabeller.__init__

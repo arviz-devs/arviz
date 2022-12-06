@@ -1,0 +1,6 @@
+﻿arviz.from\_pystan
+==================
+
+.. currentmodule:: arviz
+
+.. autofunction:: from_pystan

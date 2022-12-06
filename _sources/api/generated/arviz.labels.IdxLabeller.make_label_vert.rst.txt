@@ -1,0 +1,6 @@
+arviz.labels.IdxLabeller.make\_label\_vert
+==========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: IdxLabeller.make_label_vert

@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.plots.loopitplot &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/plots/loopitplot';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.plots.loopitplot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Plot LOO-PIT predictive checks of inference data.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">from</span> <span class="nn">..labels</span> <span class="kn">import</span> <span class="n">BaseLabeller</span>
+<span class="kn">from</span> <span class="nn">..rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">..stats</span> <span class="kn">import</span> <span class="n">loo_pit</span> <span class="k">as</span> <span class="n">_loo_pit</span>
+<span class="kn">from</span> <span class="nn">..stats.density_utils</span> <span class="kn">import</span> <span class="n">kde</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">get_plotting_function</span>
+
+
+<div class="viewcode-block" id="plot_loo_pit"><a class="viewcode-back" href="../../../api/generated/arviz.plot_loo_pit.html#arviz.plot_loo_pit">[docs]</a><span class="k">def</span> <span class="nf">plot_loo_pit</span><span class="p">(</span>
+    <span class="n">idata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_hat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">log_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ecdf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ecdf_fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_unif</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">use_hdi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">hdi_prob</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">textsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">labeller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span>
+    <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_unif_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hdi_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot Leave-One-Out (LOO) probability integral transformation (PIT) predictive checks.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    idata : InferenceData</span>
+<span class="sd">        :class:`arviz.InferenceData` object.</span>
+<span class="sd">    y : array, DataArray or str</span>
+<span class="sd">        Observed data. If str, ``idata`` must be present and contain the observed data group</span>
+<span class="sd">    y_hat : array, DataArray or str</span>
+<span class="sd">        Posterior predictive samples for ``y``. It must have the same shape as y plus an</span>
+<span class="sd">        extra dimension at the end of size n_samples (chains and draws stacked). If str or</span>
+<span class="sd">        None, ``idata`` must contain the posterior predictive group. If None, ``y_hat`` is taken</span>
+<span class="sd">        equal to y, thus, y must be str too.</span>
+<span class="sd">    log_weights : array or DataArray</span>
+<span class="sd">        Smoothed log_weights. It must have the same shape as ``y_hat``</span>
+<span class="sd">    ecdf : bool, optional</span>
+<span class="sd">        Plot the difference between the LOO-PIT Empirical Cumulative Distribution Function</span>
+<span class="sd">        (ECDF) and the uniform CDF instead of LOO-PIT kde.</span>
+<span class="sd">        In this case, instead of overlaying uniform distributions, the beta ``hdi_prob``</span>
+<span class="sd">        around the theoretical uniform CDF is shown. This approximation only holds</span>
+<span class="sd">        for large S and ECDF values not very close to 0 nor 1. For more information, see</span>
+<span class="sd">        `Vehtari et al. (2019)`, `Appendix G &lt;https://avehtari.github.io/rhat_ess/rhat_ess.html&gt;`_.</span>
+<span class="sd">    ecdf_fill : bool, optional</span>
+<span class="sd">        Use :meth:`matplotlib.axes.Axes.fill_between` to mark the area</span>
+<span class="sd">        inside the credible interval. Otherwise, plot the</span>
+<span class="sd">        border lines.</span>
+<span class="sd">    n_unif : int, optional</span>
+<span class="sd">        Number of datasets to simulate and overlay from the uniform distribution.</span>
+<span class="sd">    use_hdi : bool, optional</span>
+<span class="sd">        Compute expected hdi values instead of overlaying the sampled uniform distributions.</span>
+<span class="sd">    hdi_prob : float, optional</span>
+<span class="sd">        Probability for the highest density interval. Works with ``use_hdi=True`` or ``ecdf=True``.</span>
+<span class="sd">    figsize : (float, float), optional</span>
+<span class="sd">        If None, size is (8 + numvars, 8 + numvars)</span>
+<span class="sd">    textsize : int, optional</span>
+<span class="sd">        Text size for labels. If None it will be autoscaled based on ``figsize``.</span>
+<span class="sd">    labeller : Labeller, optional</span>
+<span class="sd">        Class providing the method ``make_pp_label`` to generate the labels in the plot titles.</span>
+<span class="sd">        Read the :ref:`label_guide` for more details and usage examples.</span>
+<span class="sd">    color : str or array_like, optional</span>
+<span class="sd">        Color of the LOO-PIT estimated pdf plot. If ``plot_unif_kwargs`` has no &quot;color&quot; key,</span>
+<span class="sd">        a slightly lighter color than this argument will be used for the uniform kde lines.</span>
+<span class="sd">        This will ensure that LOO-PIT kde and uniform kde have different default colors.</span>
+<span class="sd">    legend : bool, optional</span>
+<span class="sd">        Show the legend of the figure.</span>
+<span class="sd">    ax : axes, optional</span>
+<span class="sd">        Matplotlib axes or bokeh figures.</span>
+<span class="sd">    plot_kwargs : dict, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot`</span>
+<span class="sd">        for LOO-PIT line (kde or ECDF)</span>
+<span class="sd">    plot_unif_kwargs : dict, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot` for</span>
+<span class="sd">        overlaid uniform distributions or for beta credible interval</span>
+<span class="sd">        lines if ``ecdf=True``</span>
+<span class="sd">    hdi_kwargs : dict, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.axhspan`</span>
+<span class="sd">    fill_kwargs : dict, optional</span>
+<span class="sd">        Additional kwargs passed to :meth:`matplotlib.axes.Axes.fill_between`</span>
+<span class="sd">    backend : str, optional</span>
+<span class="sd">        Select plotting backend {&quot;matplotlib&quot;,&quot;bokeh&quot;}. Default &quot;matplotlib&quot;.</span>
+<span class="sd">    backend_kwargs : bool, optional</span>
+<span class="sd">        These are kwargs specific to the backend being used, passed to</span>
+<span class="sd">        :func:`matplotlib.pyplot.subplots` or</span>
+<span class="sd">        :func:`bokeh.plotting.figure`. For additional documentation</span>
+<span class="sd">        check the plotting method of the backend.</span>
+<span class="sd">    show : bool, optional</span>
+<span class="sd">        Call backend show function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    axes : matplotlib_axes or bokeh_figures</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    plot_bpv : Plot Bayesian p-value for observed data and Posterior/Prior predictive.</span>
+<span class="sd">    loo_pit : Compute leave one out (PSIS-LOO) probability integral transform (PIT) values.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    * Gabry et al. (2017) see https://arxiv.org/abs/1709.01449</span>
+<span class="sd">    * https://mc-stan.org/bayesplot/reference/PPC-loo.html</span>
+<span class="sd">    * Gelman et al. BDA (2014) Section 6.3</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Plot LOO-PIT predictive checks overlaying the KDE of the LOO-PIT values to several</span>
+<span class="sd">    realizations of uniform variable sampling with the same number of observations.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; import arviz as az</span>
+<span class="sd">        &gt;&gt;&gt; idata = az.load_arviz_data(&quot;radon&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_loo_pit(idata=idata, y=&quot;y&quot;)</span>
+
+<span class="sd">    Fill the area containing the 94% highest density interval of the difference between uniform</span>
+<span class="sd">    variables empirical CDF and the real uniform CDF. A LOO-PIT ECDF clearly outside of these</span>
+<span class="sd">    theoretical boundaries indicates that the observations and the posterior predictive</span>
+<span class="sd">    samples do not follow the same distribution.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_loo_pit(idata=idata, y=&quot;y&quot;, ecdf=True)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ecdf</span> <span class="ow">and</span> <span class="n">use_hdi</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;use_hdi is incompatible with ecdf plot&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">labeller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">labeller</span> <span class="o">=</span> <span class="n">BaseLabeller</span><span class="p">()</span>
+
+    <span class="n">loo_pit</span> <span class="o">=</span> <span class="n">_loo_pit</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="n">idata</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_hat</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span> <span class="n">log_weights</span><span class="o">=</span><span class="n">log_weights</span><span class="p">)</span>
+    <span class="n">loo_pit</span> <span class="o">=</span> <span class="n">loo_pit</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loo_pit</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">loo_pit</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="n">loo_pit_ecdf</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">unif_ecdf</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">p975</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">p025</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">loo_pit_kde</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hdi_odds</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">unif</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">x_vals</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">hdi_prob</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hdi_prob</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;stats.hdi_prob&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="n">hdi_prob</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of hdi_prob should be in the interval (0, 1]&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ecdf</span><span class="p">:</span>
+        <span class="n">loo_pit</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">n_data_points</span> <span class="o">=</span> <span class="n">loo_pit</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">loo_pit_ecdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_data_points</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_data_points</span>
+        <span class="c1"># ideal unnormalized ECDF of uniform distribution with n_data_points points</span>
+        <span class="c1"># it is used indistinctively as x or p(u&lt;x) because for u~U(0,1) they are equal</span>
+        <span class="n">unif_ecdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_data_points</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">p975</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">+</span> <span class="n">hdi_prob</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">unif_ecdf</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_data_points</span> <span class="o">-</span> <span class="n">unif_ecdf</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">p025</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">hdi_prob</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">unif_ecdf</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_data_points</span> <span class="o">-</span> <span class="n">unif_ecdf</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">unif_ecdf</span> <span class="o">=</span> <span class="n">unif_ecdf</span> <span class="o">/</span> <span class="n">n_data_points</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_vals</span><span class="p">,</span> <span class="n">loo_pit_kde</span> <span class="o">=</span> <span class="n">kde</span><span class="p">(</span><span class="n">loo_pit</span><span class="p">)</span>
+
+        <span class="n">unif</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_unif</span><span class="p">,</span> <span class="n">loo_pit</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">use_hdi</span><span class="p">:</span>
+            <span class="n">n_obs</span> <span class="o">=</span> <span class="n">loo_pit</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">hdi_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="n">n_obs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n_obs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">hdi_prob</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">hdi_odds</span> <span class="o">=</span> <span class="p">(</span><span class="n">hdi_</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">hdi_</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">hdi_</span><span class="p">)</span> <span class="o">/</span> <span class="n">hdi_</span><span class="p">)</span>
+
+    <span class="n">loo_pit_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">ecdf</span><span class="o">=</span><span class="n">ecdf</span><span class="p">,</span>
+        <span class="n">loo_pit</span><span class="o">=</span><span class="n">loo_pit</span><span class="p">,</span>
+        <span class="n">loo_pit_ecdf</span><span class="o">=</span><span class="n">loo_pit_ecdf</span><span class="p">,</span>
+        <span class="n">unif_ecdf</span><span class="o">=</span><span class="n">unif_ecdf</span><span class="p">,</span>
+        <span class="n">p975</span><span class="o">=</span><span class="n">p975</span><span class="p">,</span>
+        <span class="n">p025</span><span class="o">=</span><span class="n">p025</span><span class="p">,</span>
+        <span class="n">fill_kwargs</span><span class="o">=</span><span class="n">fill_kwargs</span><span class="p">,</span>
+        <span class="n">ecdf_fill</span><span class="o">=</span><span class="n">ecdf_fill</span><span class="p">,</span>
+        <span class="n">use_hdi</span><span class="o">=</span><span class="n">use_hdi</span><span class="p">,</span>
+        <span class="n">x_vals</span><span class="o">=</span><span class="n">x_vals</span><span class="p">,</span>
+        <span class="n">hdi_kwargs</span><span class="o">=</span><span class="n">hdi_kwargs</span><span class="p">,</span>
+        <span class="n">hdi_odds</span><span class="o">=</span><span class="n">hdi_odds</span><span class="p">,</span>
+        <span class="n">n_unif</span><span class="o">=</span><span class="n">n_unif</span><span class="p">,</span>
+        <span class="n">unif</span><span class="o">=</span><span class="n">unif</span><span class="p">,</span>
+        <span class="n">plot_unif_kwargs</span><span class="o">=</span><span class="n">plot_unif_kwargs</span><span class="p">,</span>
+        <span class="n">loo_pit_kde</span><span class="o">=</span><span class="n">loo_pit_kde</span><span class="p">,</span>
+        <span class="n">textsize</span><span class="o">=</span><span class="n">textsize</span><span class="p">,</span>
+        <span class="n">labeller</span><span class="o">=</span><span class="n">labeller</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">legend</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span>
+        <span class="n">y_hat</span><span class="o">=</span><span class="n">y_hat</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">hdi_prob</span><span class="o">=</span><span class="n">hdi_prob</span><span class="p">,</span>
+        <span class="n">plot_kwargs</span><span class="o">=</span><span class="n">plot_kwargs</span><span class="p">,</span>
+        <span class="n">backend_kwargs</span><span class="o">=</span><span class="n">backend_kwargs</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.backend&quot;</span><span class="p">]</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># TODO: Add backend kwargs</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">get_plotting_function</span><span class="p">(</span><span class="s2">&quot;plot_loo_pit&quot;</span><span class="p">,</span> <span class="s2">&quot;loopitplot&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">loo_pit_kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">axes</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

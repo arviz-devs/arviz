@@ -1,0 +1,6 @@
+﻿arviz.plot\_autocorr
+====================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_autocorr

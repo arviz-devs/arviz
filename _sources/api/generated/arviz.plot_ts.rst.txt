@@ -1,0 +1,6 @@
+﻿arviz.plot\_ts
+==============
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_ts

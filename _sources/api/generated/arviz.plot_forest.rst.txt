@@ -1,0 +1,6 @@
+﻿arviz.plot\_forest
+==================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_forest

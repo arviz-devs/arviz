@@ -1,0 +1,885 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>arviz.InferenceData.reset_index &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/arviz.InferenceData.reset_index';</script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="arviz.InferenceData.sel" href="arviz.InferenceData.sel.html" />
+    <link rel="prev" title="arviz.InferenceData.reset_coords" href="arviz.InferenceData.reset_coords.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plots.html">Plots</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_autocorr.html">arviz.plot_autocorr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_bpv.html">arviz.plot_bpv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_compare.html">arviz.plot_compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_density.html">arviz.plot_density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_dist.html">arviz.plot_dist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_dist_comparison.html">arviz.plot_dist_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_dot.html">arviz.plot_dot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ecdf.html">arviz.plot_ecdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_elpd.html">arviz.plot_elpd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_energy.html">arviz.plot_energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ess.html">arviz.plot_ess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_forest.html">arviz.plot_forest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_hdi.html">arviz.plot_hdi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_kde.html">arviz.plot_kde</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_khat.html">arviz.plot_khat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_loo_pit.html">arviz.plot_loo_pit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_lm.html">arviz.plot_lm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_mcse.html">arviz.plot_mcse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_pair.html">arviz.plot_pair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_parallel.html">arviz.plot_parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_posterior.html">arviz.plot_posterior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ppc.html">arviz.plot_ppc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_rank.html">arviz.plot_rank</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_separation.html">arviz.plot_separation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_trace.html">arviz.plot_trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ts.html">arviz.plot_ts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_violin.html">arviz.plot_violin</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../stats.html">Stats</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.apply_test_function.html">arviz.apply_test_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.compare.html">arviz.compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.hdi.html">arviz.hdi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.kde.html">arviz.kde</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.loo.html">arviz.loo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.loo_pit.html">arviz.loo_pit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.psislw.html">arviz.psislw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.r2_score.html">arviz.r2_score</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.summary.html">arviz.summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.waic.html">arviz.waic</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../diagnostics.html">Diagnostics</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.bfmi.html">arviz.bfmi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.ess.html">arviz.ess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.rhat.html">arviz.rhat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.mcse.html">arviz.mcse</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../stats_utils.html">Stats utils</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.autocov.html">arviz.autocov</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.autocorr.html">arviz.autocorr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.make_ufunc.html">arviz.make_ufunc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.wrap_xarray_ufunc.html">arviz.wrap_xarray_ufunc</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../data.html">Data</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_beanmachine.html">arviz.from_beanmachine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_cmdstan.html">arviz.from_cmdstan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_cmdstanpy.html">arviz.from_cmdstanpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_emcee.html">arviz.from_emcee</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_numpyro.html">arviz.from_numpyro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_pyjags.html">arviz.from_pyjags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_pyro.html">arviz.from_pyro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_pystan.html">arviz.from_pystan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.convert_to_inference_data.html">arviz.convert_to_inference_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.convert_to_dataset.html">arviz.convert_to_dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.dict_to_dataset.html">arviz.dict_to_dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_dict.html">arviz.from_dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_json.html">arviz.from_json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_netcdf.html">arviz.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.to_netcdf.html">arviz.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.concat.html">arviz.concat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.extract.html">arviz.extract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.list_datasets.html">arviz.list_datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.load_arviz_data.html">arviz.load_arviz_data</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../inference_data.html">InferenceData</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="arviz.InferenceData.html">arviz.InferenceData</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.__init__.html">arviz.InferenceData.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.add_groups.html">arviz.InferenceData.add_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.assign.html">arviz.InferenceData.assign</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.assign_coords.html">arviz.InferenceData.assign_coords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.chunk.html">arviz.InferenceData.chunk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.compute.html">arviz.InferenceData.compute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.copy.html">arviz.InferenceData.copy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.cumsum.html">arviz.InferenceData.cumsum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.extend.html">arviz.InferenceData.extend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.from_netcdf.html">arviz.InferenceData.from_netcdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.from_zarr.html">arviz.InferenceData.from_zarr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.get.html">arviz.InferenceData.get</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.get_index.html">arviz.InferenceData.get_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.groups.html">arviz.InferenceData.groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.isel.html">arviz.InferenceData.isel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.items.html">arviz.InferenceData.items</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.keys.html">arviz.InferenceData.keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.load.html">arviz.InferenceData.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.map.html">arviz.InferenceData.map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.max.html">arviz.InferenceData.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.mean.html">arviz.InferenceData.mean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.median.html">arviz.InferenceData.median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.min.html">arviz.InferenceData.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.persist.html">arviz.InferenceData.persist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.quantile.html">arviz.InferenceData.quantile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.rename.html">arviz.InferenceData.rename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.rename_dims.html">arviz.InferenceData.rename_dims</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.rename_vars.html">arviz.InferenceData.rename_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.reset_coords.html">arviz.InferenceData.reset_coords</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">arviz.InferenceData.reset_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.sel.html">arviz.InferenceData.sel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.set_coords.html">arviz.InferenceData.set_coords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.set_index.html">arviz.InferenceData.set_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.sortby.html">arviz.InferenceData.sortby</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.stack.html">arviz.InferenceData.stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.sum.html">arviz.InferenceData.sum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_dataframe.html">arviz.InferenceData.to_dataframe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_dict.html">arviz.InferenceData.to_dict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_json.html">arviz.InferenceData.to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_netcdf.html">arviz.InferenceData.to_netcdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_zarr.html">arviz.InferenceData.to_zarr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.unify_chunks.html">arviz.InferenceData.unify_chunks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.unstack.html">arviz.InferenceData.unstack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.values.html">arviz.InferenceData.values</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.get_index.html">arviz.InferenceData.get_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_dataframe.html">arviz.InferenceData.to_dataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_json.html">arviz.InferenceData.to_json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.from_netcdf.html">arviz.InferenceData.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_netcdf.html">arviz.InferenceData.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.from_zarr.html">arviz.InferenceData.from_zarr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_zarr.html">arviz.InferenceData.to_zarr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.chunk.html">arviz.InferenceData.chunk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.compute.html">arviz.InferenceData.compute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.load.html">arviz.InferenceData.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.persist.html">arviz.InferenceData.persist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.unify_chunks.html">arviz.InferenceData.unify_chunks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.groups.html">arviz.InferenceData.groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.items.html">arviz.InferenceData.items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.values.html">arviz.InferenceData.values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.add_groups.html">arviz.InferenceData.add_groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.extend.html">arviz.InferenceData.extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.assign.html">arviz.InferenceData.assign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.assign_coords.html">arviz.InferenceData.assign_coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.rename.html">arviz.InferenceData.rename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.rename_dims.html">arviz.InferenceData.rename_dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.set_coords.html">arviz.InferenceData.set_coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.set_index.html">arviz.InferenceData.set_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.isel.html">arviz.InferenceData.isel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.sel.html">arviz.InferenceData.sel</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">arviz.InferenceData.reset_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.map.html">arviz.InferenceData.map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.cumsum.html">arviz.InferenceData.cumsum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.max.html">arviz.InferenceData.max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.mean.html">arviz.InferenceData.mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.median.html">arviz.InferenceData.median</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.min.html">arviz.InferenceData.min</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.quantile.html">arviz.InferenceData.quantile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.sum.html">arviz.InferenceData.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.stack.html">arviz.InferenceData.stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.unstack.html">arviz.InferenceData.unstack</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plot_utils.html">Plot utils</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.BaseLabeller.html">arviz.labels.BaseLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.__init__.html">arviz.labels.BaseLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.dim_coord_to_str.html">arviz.labels.BaseLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_label_flat.html">arviz.labels.BaseLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_label_vert.html">arviz.labels.BaseLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_model_label.html">arviz.labels.BaseLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_pp_label.html">arviz.labels.BaseLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.model_name_to_str.html">arviz.labels.BaseLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.sel_to_str.html">arviz.labels.BaseLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.var_name_to_str.html">arviz.labels.BaseLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.var_pp_to_str.html">arviz.labels.BaseLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.DimCoordLabeller.html">arviz.labels.DimCoordLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.__init__.html">arviz.labels.DimCoordLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.dim_coord_to_str.html">arviz.labels.DimCoordLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_label_flat.html">arviz.labels.DimCoordLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_label_vert.html">arviz.labels.DimCoordLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_model_label.html">arviz.labels.DimCoordLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_pp_label.html">arviz.labels.DimCoordLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.model_name_to_str.html">arviz.labels.DimCoordLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.sel_to_str.html">arviz.labels.DimCoordLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.var_name_to_str.html">arviz.labels.DimCoordLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.var_pp_to_str.html">arviz.labels.DimCoordLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.IdxLabeller.html">arviz.labels.IdxLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-11"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.__init__.html">arviz.labels.IdxLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.dim_coord_to_str.html">arviz.labels.IdxLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_label_flat.html">arviz.labels.IdxLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_label_vert.html">arviz.labels.IdxLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_model_label.html">arviz.labels.IdxLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_pp_label.html">arviz.labels.IdxLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.model_name_to_str.html">arviz.labels.IdxLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.sel_to_str.html">arviz.labels.IdxLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.var_name_to_str.html">arviz.labels.IdxLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.var_pp_to_str.html">arviz.labels.IdxLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.DimIdxLabeller.html">arviz.labels.DimIdxLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-12"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.__init__.html">arviz.labels.DimIdxLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.dim_coord_to_str.html">arviz.labels.DimIdxLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_label_flat.html">arviz.labels.DimIdxLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_label_vert.html">arviz.labels.DimIdxLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_model_label.html">arviz.labels.DimIdxLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_pp_label.html">arviz.labels.DimIdxLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.model_name_to_str.html">arviz.labels.DimIdxLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.sel_to_str.html">arviz.labels.DimIdxLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.var_name_to_str.html">arviz.labels.DimIdxLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.var_pp_to_str.html">arviz.labels.DimIdxLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.MapLabeller.html">arviz.labels.MapLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-13"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.__init__.html">arviz.labels.MapLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.dim_coord_to_str.html">arviz.labels.MapLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_label_flat.html">arviz.labels.MapLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_label_vert.html">arviz.labels.MapLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_model_label.html">arviz.labels.MapLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_pp_label.html">arviz.labels.MapLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.model_name_to_str.html">arviz.labels.MapLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.sel_to_str.html">arviz.labels.MapLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.var_name_to_str.html">arviz.labels.MapLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.var_pp_to_str.html">arviz.labels.MapLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.NoModelLabeller.html">arviz.labels.NoModelLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-14"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.__init__.html">arviz.labels.NoModelLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.dim_coord_to_str.html">arviz.labels.NoModelLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_label_flat.html">arviz.labels.NoModelLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_label_vert.html">arviz.labels.NoModelLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_model_label.html">arviz.labels.NoModelLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_pp_label.html">arviz.labels.NoModelLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.model_name_to_str.html">arviz.labels.NoModelLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.sel_to_str.html">arviz.labels.NoModelLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.var_name_to_str.html">arviz.labels.NoModelLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.var_pp_to_str.html">arviz.labels.NoModelLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.NoVarLabeller.html">arviz.labels.NoVarLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-15"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.__init__.html">arviz.labels.NoVarLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.dim_coord_to_str.html">arviz.labels.NoVarLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_label_flat.html">arviz.labels.NoVarLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_label_vert.html">arviz.labels.NoVarLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_model_label.html">arviz.labels.NoVarLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_pp_label.html">arviz.labels.NoVarLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.model_name_to_str.html">arviz.labels.NoVarLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.sel_to_str.html">arviz.labels.NoVarLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.var_name_to_str.html">arviz.labels.NoVarLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.var_pp_to_str.html">arviz.labels.NoVarLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.labels.mix_labellers.html">arviz.labels.mix_labellers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.sel_utils.xarray_sel_iter.html">arviz.sel_utils.xarray_sel_iter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.sel_utils.xarray_var_iter.html">arviz.sel_utils.xarray_var_iter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.sel_utils.xarray_to_ndarray.html">arviz.sel_utils.xarray_to_ndarray</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../utils.html">Utils</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-16"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.Numba.html">arviz.Numba</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.Dask.html">arviz.Dask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.ColumnDataSource.html">arviz.ColumnDataSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.create_layout.html">arviz.create_layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.output_notebook.html">arviz.output_notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.output_file.html">arviz.output_file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.show_layout.html">arviz.show_layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.to_cds.html">arviz.to_cds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.interactive_backend.html">arviz.interactive_backend</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rcparams.html">rcParams</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-17"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.rc_context.html">arviz.rc_context</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../wrappers.html">Wrappers</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-18"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.SamplingWrapper.html">arviz.SamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-19"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.__init__.html">arviz.SamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.check_implemented_methods.html">arviz.SamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.get_inference_data.html">arviz.SamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.log_likelihood__i.html">arviz.SamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.sample.html">arviz.SamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.sel_observations.html">arviz.SamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.html">arviz.CmdStanPySamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-20"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.__init__.html">arviz.CmdStanPySamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.check_implemented_methods.html">arviz.CmdStanPySamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.get_inference_data.html">arviz.CmdStanPySamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.log_likelihood__i.html">arviz.CmdStanPySamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.sample.html">arviz.CmdStanPySamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.sel_observations.html">arviz.CmdStanPySamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.PyMCSamplingWrapper.html">arviz.PyMCSamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-21"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.__init__.html">arviz.PyMCSamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.check_implemented_methods.html">arviz.PyMCSamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.get_inference_data.html">arviz.PyMCSamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.log_likelihood__i.html">arviz.PyMCSamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.sample.html">arviz.PyMCSamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.sel_observations.html">arviz.PyMCSamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.PyStanSamplingWrapper.html">arviz.PyStanSamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-22"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.__init__.html">arviz.PyStanSamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.check_implemented_methods.html">arviz.PyStanSamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.get_inference_data.html">arviz.PyStanSamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.log_likelihood__i.html">arviz.PyStanSamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.sample.html">arviz.PyStanSamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.sel_observations.html">arviz.PyStanSamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.html">arviz.PyStan2SamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-23"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.__init__.html">arviz.PyStan2SamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.check_implemented_methods.html">arviz.PyStan2SamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.get_inference_data.html">arviz.PyStan2SamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.log_likelihood__i.html">arviz.PyStan2SamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.sample.html">arviz.PyStan2SamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.sel_observations.html">arviz.PyStan2SamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../stats_refitting.html">Stats (requiring refitting)</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-24"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.reloo.html">arviz.reloo</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="arviz-inferencedata-reset-index">
+<h1>arviz.InferenceData.reset_index<a class="headerlink" href="#arviz-inferencedata-reset-index" title="Permalink to this headline">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="arviz.InferenceData.reset_index">
+<span class="sig-prename descclassname"><span class="pre">InferenceData.</span></span><span class="sig-name descname"><span class="pre">reset_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dims_or_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#arviz.InferenceData.reset_index" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="arviz.InferenceData.reset_coords.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">arviz.InferenceData.reset_coords</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="arviz.InferenceData.sel.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">arviz.InferenceData.sel</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../../_sources/api/generated/arviz.InferenceData.reset_index.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

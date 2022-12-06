@@ -1,0 +1,6 @@
+arviz.InferenceData.assign
+==========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.assign

@@ -1,0 +1,6 @@
+arviz.labels.IdxLabeller.model\_name\_to\_str
+=============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: IdxLabeller.model_name_to_str

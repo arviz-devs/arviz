@@ -1,0 +1,2335 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>arviz.extract &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/arviz.extract';</script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="arviz.list_datasets" href="arviz.list_datasets.html" />
+    <link rel="prev" title="arviz.concat" href="arviz.concat.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plots.html">Plots</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_autocorr.html">arviz.plot_autocorr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_bpv.html">arviz.plot_bpv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_compare.html">arviz.plot_compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_density.html">arviz.plot_density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_dist.html">arviz.plot_dist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_dist_comparison.html">arviz.plot_dist_comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_dot.html">arviz.plot_dot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ecdf.html">arviz.plot_ecdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_elpd.html">arviz.plot_elpd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_energy.html">arviz.plot_energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ess.html">arviz.plot_ess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_forest.html">arviz.plot_forest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_hdi.html">arviz.plot_hdi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_kde.html">arviz.plot_kde</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_khat.html">arviz.plot_khat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_loo_pit.html">arviz.plot_loo_pit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_lm.html">arviz.plot_lm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_mcse.html">arviz.plot_mcse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_pair.html">arviz.plot_pair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_parallel.html">arviz.plot_parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_posterior.html">arviz.plot_posterior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ppc.html">arviz.plot_ppc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_rank.html">arviz.plot_rank</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_separation.html">arviz.plot_separation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_trace.html">arviz.plot_trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_ts.html">arviz.plot_ts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.plot_violin.html">arviz.plot_violin</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../stats.html">Stats</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.apply_test_function.html">arviz.apply_test_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.compare.html">arviz.compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.hdi.html">arviz.hdi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.kde.html">arviz.kde</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.loo.html">arviz.loo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.loo_pit.html">arviz.loo_pit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.psislw.html">arviz.psislw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.r2_score.html">arviz.r2_score</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.summary.html">arviz.summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.waic.html">arviz.waic</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../diagnostics.html">Diagnostics</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.bfmi.html">arviz.bfmi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.ess.html">arviz.ess</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.rhat.html">arviz.rhat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.mcse.html">arviz.mcse</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../stats_utils.html">Stats utils</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.autocov.html">arviz.autocov</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.autocorr.html">arviz.autocorr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.make_ufunc.html">arviz.make_ufunc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.wrap_xarray_ufunc.html">arviz.wrap_xarray_ufunc</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../data.html">Data</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_beanmachine.html">arviz.from_beanmachine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_cmdstan.html">arviz.from_cmdstan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_cmdstanpy.html">arviz.from_cmdstanpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_emcee.html">arviz.from_emcee</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_numpyro.html">arviz.from_numpyro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_pyjags.html">arviz.from_pyjags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_pyro.html">arviz.from_pyro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_pystan.html">arviz.from_pystan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.convert_to_inference_data.html">arviz.convert_to_inference_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.convert_to_dataset.html">arviz.convert_to_dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.dict_to_dataset.html">arviz.dict_to_dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_dict.html">arviz.from_dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_json.html">arviz.from_json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.from_netcdf.html">arviz.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.to_netcdf.html">arviz.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.concat.html">arviz.concat</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">arviz.extract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.list_datasets.html">arviz.list_datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.load_arviz_data.html">arviz.load_arviz_data</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../inference_data.html">InferenceData</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.InferenceData.html">arviz.InferenceData</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.__init__.html">arviz.InferenceData.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.add_groups.html">arviz.InferenceData.add_groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.assign.html">arviz.InferenceData.assign</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.assign_coords.html">arviz.InferenceData.assign_coords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.chunk.html">arviz.InferenceData.chunk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.compute.html">arviz.InferenceData.compute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.copy.html">arviz.InferenceData.copy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.cumsum.html">arviz.InferenceData.cumsum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.extend.html">arviz.InferenceData.extend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.from_netcdf.html">arviz.InferenceData.from_netcdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.from_zarr.html">arviz.InferenceData.from_zarr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.get.html">arviz.InferenceData.get</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.get_index.html">arviz.InferenceData.get_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.groups.html">arviz.InferenceData.groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.isel.html">arviz.InferenceData.isel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.items.html">arviz.InferenceData.items</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.keys.html">arviz.InferenceData.keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.load.html">arviz.InferenceData.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.map.html">arviz.InferenceData.map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.max.html">arviz.InferenceData.max</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.mean.html">arviz.InferenceData.mean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.median.html">arviz.InferenceData.median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.min.html">arviz.InferenceData.min</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.persist.html">arviz.InferenceData.persist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.quantile.html">arviz.InferenceData.quantile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.rename.html">arviz.InferenceData.rename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.rename_dims.html">arviz.InferenceData.rename_dims</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.rename_vars.html">arviz.InferenceData.rename_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.reset_coords.html">arviz.InferenceData.reset_coords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.reset_index.html">arviz.InferenceData.reset_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.sel.html">arviz.InferenceData.sel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.set_coords.html">arviz.InferenceData.set_coords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.set_index.html">arviz.InferenceData.set_index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.sortby.html">arviz.InferenceData.sortby</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.stack.html">arviz.InferenceData.stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.sum.html">arviz.InferenceData.sum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_dataframe.html">arviz.InferenceData.to_dataframe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_dict.html">arviz.InferenceData.to_dict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_json.html">arviz.InferenceData.to_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_netcdf.html">arviz.InferenceData.to_netcdf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.to_zarr.html">arviz.InferenceData.to_zarr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.unify_chunks.html">arviz.InferenceData.unify_chunks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.unstack.html">arviz.InferenceData.unstack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.InferenceData.values.html">arviz.InferenceData.values</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.get_index.html">arviz.InferenceData.get_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_dataframe.html">arviz.InferenceData.to_dataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_json.html">arviz.InferenceData.to_json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.from_netcdf.html">arviz.InferenceData.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_netcdf.html">arviz.InferenceData.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.from_zarr.html">arviz.InferenceData.from_zarr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.to_zarr.html">arviz.InferenceData.to_zarr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.chunk.html">arviz.InferenceData.chunk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.compute.html">arviz.InferenceData.compute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.load.html">arviz.InferenceData.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.persist.html">arviz.InferenceData.persist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.unify_chunks.html">arviz.InferenceData.unify_chunks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.groups.html">arviz.InferenceData.groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.items.html">arviz.InferenceData.items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.values.html">arviz.InferenceData.values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.add_groups.html">arviz.InferenceData.add_groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.extend.html">arviz.InferenceData.extend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.assign.html">arviz.InferenceData.assign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.assign_coords.html">arviz.InferenceData.assign_coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.rename.html">arviz.InferenceData.rename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.rename_dims.html">arviz.InferenceData.rename_dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.set_coords.html">arviz.InferenceData.set_coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.set_index.html">arviz.InferenceData.set_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.isel.html">arviz.InferenceData.isel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.sel.html">arviz.InferenceData.sel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.reset_index.html">arviz.InferenceData.reset_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.map.html">arviz.InferenceData.map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.cumsum.html">arviz.InferenceData.cumsum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.max.html">arviz.InferenceData.max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.mean.html">arviz.InferenceData.mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.median.html">arviz.InferenceData.median</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.min.html">arviz.InferenceData.min</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.quantile.html">arviz.InferenceData.quantile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.sum.html">arviz.InferenceData.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.stack.html">arviz.InferenceData.stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.InferenceData.unstack.html">arviz.InferenceData.unstack</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plot_utils.html">Plot utils</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.BaseLabeller.html">arviz.labels.BaseLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.__init__.html">arviz.labels.BaseLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.dim_coord_to_str.html">arviz.labels.BaseLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_label_flat.html">arviz.labels.BaseLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_label_vert.html">arviz.labels.BaseLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_model_label.html">arviz.labels.BaseLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.make_pp_label.html">arviz.labels.BaseLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.model_name_to_str.html">arviz.labels.BaseLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.sel_to_str.html">arviz.labels.BaseLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.var_name_to_str.html">arviz.labels.BaseLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.BaseLabeller.var_pp_to_str.html">arviz.labels.BaseLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.DimCoordLabeller.html">arviz.labels.DimCoordLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.__init__.html">arviz.labels.DimCoordLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.dim_coord_to_str.html">arviz.labels.DimCoordLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_label_flat.html">arviz.labels.DimCoordLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_label_vert.html">arviz.labels.DimCoordLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_model_label.html">arviz.labels.DimCoordLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.make_pp_label.html">arviz.labels.DimCoordLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.model_name_to_str.html">arviz.labels.DimCoordLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.sel_to_str.html">arviz.labels.DimCoordLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.var_name_to_str.html">arviz.labels.DimCoordLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimCoordLabeller.var_pp_to_str.html">arviz.labels.DimCoordLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.IdxLabeller.html">arviz.labels.IdxLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-11"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.__init__.html">arviz.labels.IdxLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.dim_coord_to_str.html">arviz.labels.IdxLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_label_flat.html">arviz.labels.IdxLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_label_vert.html">arviz.labels.IdxLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_model_label.html">arviz.labels.IdxLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.make_pp_label.html">arviz.labels.IdxLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.model_name_to_str.html">arviz.labels.IdxLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.sel_to_str.html">arviz.labels.IdxLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.var_name_to_str.html">arviz.labels.IdxLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.IdxLabeller.var_pp_to_str.html">arviz.labels.IdxLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.DimIdxLabeller.html">arviz.labels.DimIdxLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-12"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.__init__.html">arviz.labels.DimIdxLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.dim_coord_to_str.html">arviz.labels.DimIdxLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_label_flat.html">arviz.labels.DimIdxLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_label_vert.html">arviz.labels.DimIdxLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_model_label.html">arviz.labels.DimIdxLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.make_pp_label.html">arviz.labels.DimIdxLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.model_name_to_str.html">arviz.labels.DimIdxLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.sel_to_str.html">arviz.labels.DimIdxLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.var_name_to_str.html">arviz.labels.DimIdxLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.DimIdxLabeller.var_pp_to_str.html">arviz.labels.DimIdxLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.MapLabeller.html">arviz.labels.MapLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-13"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.__init__.html">arviz.labels.MapLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.dim_coord_to_str.html">arviz.labels.MapLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_label_flat.html">arviz.labels.MapLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_label_vert.html">arviz.labels.MapLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_model_label.html">arviz.labels.MapLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.make_pp_label.html">arviz.labels.MapLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.model_name_to_str.html">arviz.labels.MapLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.sel_to_str.html">arviz.labels.MapLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.var_name_to_str.html">arviz.labels.MapLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.MapLabeller.var_pp_to_str.html">arviz.labels.MapLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.NoModelLabeller.html">arviz.labels.NoModelLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-14"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.__init__.html">arviz.labels.NoModelLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.dim_coord_to_str.html">arviz.labels.NoModelLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_label_flat.html">arviz.labels.NoModelLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_label_vert.html">arviz.labels.NoModelLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_model_label.html">arviz.labels.NoModelLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.make_pp_label.html">arviz.labels.NoModelLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.model_name_to_str.html">arviz.labels.NoModelLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.sel_to_str.html">arviz.labels.NoModelLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.var_name_to_str.html">arviz.labels.NoModelLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoModelLabeller.var_pp_to_str.html">arviz.labels.NoModelLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.labels.NoVarLabeller.html">arviz.labels.NoVarLabeller</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-15"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.__init__.html">arviz.labels.NoVarLabeller.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.dim_coord_to_str.html">arviz.labels.NoVarLabeller.dim_coord_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_label_flat.html">arviz.labels.NoVarLabeller.make_label_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_label_vert.html">arviz.labels.NoVarLabeller.make_label_vert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_model_label.html">arviz.labels.NoVarLabeller.make_model_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.make_pp_label.html">arviz.labels.NoVarLabeller.make_pp_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.model_name_to_str.html">arviz.labels.NoVarLabeller.model_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.sel_to_str.html">arviz.labels.NoVarLabeller.sel_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.var_name_to_str.html">arviz.labels.NoVarLabeller.var_name_to_str</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.labels.NoVarLabeller.var_pp_to_str.html">arviz.labels.NoVarLabeller.var_pp_to_str</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.labels.mix_labellers.html">arviz.labels.mix_labellers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.sel_utils.xarray_sel_iter.html">arviz.sel_utils.xarray_sel_iter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.sel_utils.xarray_var_iter.html">arviz.sel_utils.xarray_var_iter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.sel_utils.xarray_to_ndarray.html">arviz.sel_utils.xarray_to_ndarray</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../utils.html">Utils</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-16"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.Numba.html">arviz.Numba</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.Dask.html">arviz.Dask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.ColumnDataSource.html">arviz.ColumnDataSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.create_layout.html">arviz.create_layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.output_notebook.html">arviz.output_notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.output_file.html">arviz.output_file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.show_layout.html">arviz.show_layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.to_cds.html">arviz.to_cds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arviz.interactive_backend.html">arviz.interactive_backend</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../rcparams.html">rcParams</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-17"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.rc_context.html">arviz.rc_context</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../wrappers.html">Wrappers</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-18"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.SamplingWrapper.html">arviz.SamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-19"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.__init__.html">arviz.SamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.check_implemented_methods.html">arviz.SamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.get_inference_data.html">arviz.SamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.log_likelihood__i.html">arviz.SamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.sample.html">arviz.SamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.SamplingWrapper.sel_observations.html">arviz.SamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.html">arviz.CmdStanPySamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-20"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.__init__.html">arviz.CmdStanPySamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.check_implemented_methods.html">arviz.CmdStanPySamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.get_inference_data.html">arviz.CmdStanPySamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.log_likelihood__i.html">arviz.CmdStanPySamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.sample.html">arviz.CmdStanPySamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.CmdStanPySamplingWrapper.sel_observations.html">arviz.CmdStanPySamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.PyMCSamplingWrapper.html">arviz.PyMCSamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-21"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.__init__.html">arviz.PyMCSamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.check_implemented_methods.html">arviz.PyMCSamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.get_inference_data.html">arviz.PyMCSamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.log_likelihood__i.html">arviz.PyMCSamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.sample.html">arviz.PyMCSamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyMCSamplingWrapper.sel_observations.html">arviz.PyMCSamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.PyStanSamplingWrapper.html">arviz.PyStanSamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-22"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.__init__.html">arviz.PyStanSamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.check_implemented_methods.html">arviz.PyStanSamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.get_inference_data.html">arviz.PyStanSamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.log_likelihood__i.html">arviz.PyStanSamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.sample.html">arviz.PyStanSamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStanSamplingWrapper.sel_observations.html">arviz.PyStanSamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.html">arviz.PyStan2SamplingWrapper</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-23"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.__init__.html">arviz.PyStan2SamplingWrapper.__init__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.check_implemented_methods.html">arviz.PyStan2SamplingWrapper.check_implemented_methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.get_inference_data.html">arviz.PyStan2SamplingWrapper.get_inference_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.log_likelihood__i.html">arviz.PyStan2SamplingWrapper.log_likelihood__i</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.sample.html">arviz.PyStan2SamplingWrapper.sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arviz.PyStan2SamplingWrapper.sel_observations.html">arviz.PyStan2SamplingWrapper.sel_observations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../stats_refitting.html">Stats (requiring refitting)</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-24"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arviz.reloo.html">arviz.reloo</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="arviz-extract">
+<h1>arviz.extract<a class="headerlink" href="#arviz-extract" title="Permalink to this headline">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="arviz.extract">
+<span class="sig-prename descclassname"><span class="pre">arviz.</span></span><span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'posterior'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combined</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/arviz/data/utils.html#extract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#arviz.extract" title="Permalink to this definition">#</a></dt>
+<dd><p>Extract an InferenceData group or subset of it.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>idata</strong><span class="classifier"><a class="reference internal" href="arviz.InferenceData.html#arviz.InferenceData" title="arviz.InferenceData"><code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceData</span></code></a> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">InferenceData_like</span></code></span></dt><dd><p>InferenceData from which to extract the data.</p>
+</dd>
+<dt><strong>group</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Which InferenceData data group to extract data from.</p>
+</dd>
+<dt><strong>combined</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.11)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>Combine <code class="docutils literal notranslate"><span class="pre">chain</span></code> and <code class="docutils literal notranslate"><span class="pre">draw</span></code> dimensions into <code class="docutils literal notranslate"><span class="pre">sample</span></code>. Won’t work if
+a dimension named <code class="docutils literal notranslate"><span class="pre">sample</span></code> already exists.</p>
+</dd>
+<dt><strong>var_names</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Variables to be extracted. Prefix the variables by <code class="code docutils literal notranslate"><span class="pre">~</span></code> when you want to exclude them.</p>
+</dd>
+<dt><strong>filter_vars: {None, “like”, “regex”}, optional</strong></dt><dd><p>If <code class="code docutils literal notranslate"><span class="pre">None</span></code> (default), interpret var_names as the real variables names. If “like”,
+interpret var_names as substrings of the real variables names. If “regex”,
+interpret var_names as regular expressions on the real variables names. A la
+<code class="code docutils literal notranslate"><span class="pre">pandas.filter</span></code>.
+Like with plotting, sometimes it’s easier to subset saying what to exclude
+instead of what to include</p>
+</dd>
+<dt><strong>num_samples</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a>, optional</span></dt><dd><p>Extract only a subset of the samples. Only valid if <code class="docutils literal notranslate"><span class="pre">combined=True</span></code></p>
+</dd>
+<dt><strong>keep_dataset</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.11)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If true, always return a DataSet. If false (default) return a DataArray
+when there is a single variable.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.11)"><span class="xref std std-ref">bool</span></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.Generator</span></code>, optional</span></dt><dd><p>Shuffle the samples, only valid if <code class="docutils literal notranslate"><span class="pre">combined=True</span></code>. By default,
+samples are shuffled if <code class="docutils literal notranslate"><span class="pre">num_samples</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>, and are left
+in the same order otherwise. This ensures that subsetting the samples doesn’t return
+only samples from a single chain and consecutive draws.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2022.12.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a> or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2022.12.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The default behaviour is to return the posterior group after stacking the chain and
+draw dimensions.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="n">idata</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">load_arviz_data</span><span class="p">(</span><span class="s2">&quot;centered_eight&quot;</span><span class="p">)</span>
+<span class="n">az</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt;
+Dimensions:  (sample: 2000, school: 8)
+Coordinates:
+  * school   (school) object &#x27;Choate&#x27; &#x27;Deerfield&#x27; ... &quot;St. Paul&#x27;s&quot; &#x27;Mt. Hermon&#x27;
+  * sample   (sample) object MultiIndex
+  * chain    (sample) int64 0 0 0 0 0 0 0 0 0 0 0 0 ... 3 3 3 3 3 3 3 3 3 3 3 3
+  * draw     (sample) int64 0 1 2 3 4 5 6 7 ... 492 493 494 495 496 497 498 499
+Data variables:
+    mu       (sample) float64 7.872 3.385 9.1 7.304 ... 1.859 1.767 3.486 3.404
+    theta    (school, sample) float64 12.32 11.29 5.709 ... -2.623 8.452 1.295
+    tau      (sample) float64 4.726 3.909 4.844 1.857 ... 2.741 2.932 4.461
+Attributes:
+    created_at:                 2022-10-13T14:37:37.315398
+    arviz_version:              0.13.0.dev0
+    inference_library:          pymc
+    inference_library_version:  4.2.2
+    sampling_time:              7.480114936828613
+    tuning_steps:               1000</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-ddefd7d5-7a32-4839-9804-3de4afe2b730' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-ddefd7d5-7a32-4839-9804-3de4afe2b730' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>sample</span>: 2000</li><li><span class='xr-has-index'>school</span>: 8</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-cbc51f25-943c-4ce8-b398-0bd7bf05b6f7' class='xr-section-summary-in' type='checkbox'  checked><label for='section-cbc51f25-943c-4ce8-b398-0bd7bf05b6f7' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>school</span></div><div class='xr-var-dims'>(school)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>&#x27;Choate&#x27; ... &#x27;Mt. Hermon&#x27;</div><input id='attrs-6c7c19ff-b16e-47e9-8b8e-11ea5cd2c2cd' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-6c7c19ff-b16e-47e9-8b8e-11ea5cd2c2cd' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ac047fb7-1d45-466e-8a33-c731f583d7ad' class='xr-var-data-in' type='checkbox'><label for='data-ac047fb7-1d45-466e-8a33-c731f583d7ad' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;Choate&#x27;, &#x27;Deerfield&#x27;, &#x27;Phillips Andover&#x27;, &#x27;Phillips Exeter&#x27;,
+       &#x27;Hotchkiss&#x27;, &#x27;Lawrenceville&#x27;, &quot;St. Paul&#x27;s&quot;, &#x27;Mt. Hermon&#x27;], dtype=object)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>sample</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>MultiIndex</div><input id='attrs-ca894cee-9865-4032-9fcc-bc5e66359f9d' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-ca894cee-9865-4032-9fcc-bc5e66359f9d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-47b97a6b-a3f2-48d0-ae6d-b0493415a206' class='xr-var-data-in' type='checkbox'><label for='data-47b97a6b-a3f2-48d0-ae6d-b0493415a206' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([(0, 0), (0, 1), (0, 2), ..., (3, 497), (3, 498), (3, 499)], dtype=object)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>chain</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 0 0 0 0 0 0 0 ... 3 3 3 3 3 3 3 3</div><input id='attrs-cf25b0f6-cfc0-4f57-aae4-6eaa8d3a72fb' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-cf25b0f6-cfc0-4f57-aae4-6eaa8d3a72fb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4ffe24a6-0008-4b80-93a6-add44e14ccab' class='xr-var-data-in' type='checkbox'><label for='data-4ffe24a6-0008-4b80-93a6-add44e14ccab' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0, 0, 0, ..., 3, 3, 3])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>draw</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 ... 495 496 497 498 499</div><input id='attrs-6872bc1e-5525-4c4b-850e-4f547547a134' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-6872bc1e-5525-4c4b-850e-4f547547a134' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5e03e81f-a540-4c1d-92e7-dfed06bd8f34' class='xr-var-data-in' type='checkbox'><label for='data-5e03e81f-a540-4c1d-92e7-dfed06bd8f34' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([  0,   1,   2, ..., 497, 498, 499])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-f4d7dc6c-15e6-435c-b904-2c392f07fc1f' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f4d7dc6c-15e6-435c-b904-2c392f07fc1f' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mu</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>7.872 3.385 9.1 ... 3.486 3.404</div><input id='attrs-7a5cc658-f413-4607-a68a-7f88c4b01636' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-7a5cc658-f413-4607-a68a-7f88c4b01636' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-964a14b0-83b6-40b9-9545-a937d614b8a1' class='xr-var-data-in' type='checkbox'><label for='data-964a14b0-83b6-40b9-9545-a937d614b8a1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([7.87179637, 3.38455431, 9.10047569, ..., 1.76673325, 3.48611194,
+       3.40446391])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>theta</span></div><div class='xr-var-dims'>(school, sample)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>12.32 11.29 5.709 ... 8.452 1.295</div><input id='attrs-a6e0c0c2-93c1-4050-a798-5cb0566cc419' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a6e0c0c2-93c1-4050-a798-5cb0566cc419' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ed33586d-68fc-4501-b356-1366335ef1ef' class='xr-var-data-in' type='checkbox'><label for='data-ed33586d-68fc-4501-b356-1366335ef1ef' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([[12.32068558, 11.28562322,  5.70850575, ...,  3.53251469,
+         4.1827505 ,  0.19295578],
+       [ 9.90536689,  9.12932369,  5.7579324 , ...,  2.00890089,
+         7.55425055,  6.4984278 ],
+       [14.9516155 ,  3.13926327, 10.94458539, ...,  0.51080602,
+         4.45603444, -0.89442402],
+       ...,
+       [16.90179529,  2.39308809,  8.14332707, ...,  4.70724881,
+         1.5289581 ,  7.93646013],
+       [13.19805933, 10.05522282,  7.60475341, ...,  3.07331446,
+         1.09609826,  6.76245459],
+       [15.06136584,  6.17672421,  8.76764689, ..., -2.62306892,
+         8.45228161,  1.2950506 ]])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>tau</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>4.726 3.909 4.844 ... 2.932 4.461</div><input id='attrs-278a0019-9534-4ff5-bc51-eb8663d635f3' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-278a0019-9534-4ff5-bc51-eb8663d635f3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-663f724b-84ac-4886-8d96-877c20e26a62' class='xr-var-data-in' type='checkbox'><label for='data-663f724b-84ac-4886-8d96-877c20e26a62' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([4.72574006, 3.90899361, 4.8440252 , ..., 2.74060666, 2.93237926,
+       4.46124596])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-bdfdcf26-ab70-4f52-a552-c786a21dc278' class='xr-section-summary-in' type='checkbox'  ><label for='section-bdfdcf26-ab70-4f52-a552-c786a21dc278' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>school</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-8f8bc028-d0a9-414c-b2f2-0ddc2bf3bd55' class='xr-index-data-in' type='checkbox'/><label for='index-8f8bc028-d0a9-414c-b2f2-0ddc2bf3bd55' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([&#x27;Choate&#x27;, &#x27;Deerfield&#x27;, &#x27;Phillips Andover&#x27;, &#x27;Phillips Exeter&#x27;,
+       &#x27;Hotchkiss&#x27;, &#x27;Lawrenceville&#x27;, &#x27;St. Paul&#x27;s&#x27;, &#x27;Mt. Hermon&#x27;],
+      dtype=&#x27;object&#x27;, name=&#x27;school&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>sample<br>chain<br>draw</div></div><div class='xr-index-preview'>PandasMultiIndex</div><div></div><input id='index-21ac0964-c2ff-43ae-9167-3bd2de45c750' class='xr-index-data-in' type='checkbox'/><label for='index-21ac0964-c2ff-43ae-9167-3bd2de45c750' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(MultiIndex([(0,   0),
+            (0,   1),
+            (0,   2),
+            (0,   3),
+            (0,   4),
+            (0,   5),
+            (0,   6),
+            (0,   7),
+            (0,   8),
+            (0,   9),
+            ...
+            (3, 490),
+            (3, 491),
+            (3, 492),
+            (3, 493),
+            (3, 494),
+            (3, 495),
+            (3, 496),
+            (3, 497),
+            (3, 498),
+            (3, 499)],
+           name=&#x27;sample&#x27;, length=2000))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-5d76d997-b7b6-42c7-b474-9aefef6a9043' class='xr-section-summary-in' type='checkbox'  checked><label for='section-5d76d997-b7b6-42c7-b474-9aefef6a9043' class='xr-section-summary' >Attributes: <span>(6)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>created_at :</span></dt><dd>2022-10-13T14:37:37.315398</dd><dt><span>arviz_version :</span></dt><dd>0.13.0.dev0</dd><dt><span>inference_library :</span></dt><dd>pymc</dd><dt><span>inference_library_version :</span></dt><dd>4.2.2</dd><dt><span>sampling_time :</span></dt><dd>7.480114936828613</dd><dt><span>tuning_steps :</span></dt><dd>1000</dd></dl></div></li></ul></div></div></div></div>
+</div>
+<p>You can also indicate a subset to be returned, but in variables and in samples:</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">&quot;theta&quot;</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;theta&#x27; (school: 8, sample: 100)&gt;
+array([[ 2.31176997e-01,  2.46155173e+00,  4.34307692e+00,
+        -2.16088609e+00,  1.95554018e+00,  7.03102581e+00,
+         1.57839245e+01,  6.40483142e+00,  2.28772366e+00,
+         1.20882179e+01, -2.47114345e+00,  6.31107231e+00,
+        -3.17824163e+00,  1.07360572e+01,  1.59326273e+00,
+         7.32099057e+00, -3.51079417e+00,  1.11110725e+01,
+         9.83765504e+00,  1.01866546e+01, -1.56217939e+00,
+         8.61451443e+00,  2.31176997e-01, -2.00466671e+00,
+        -2.56500961e+00,  3.72149650e+00,  4.64635723e+01,
+         3.25808233e+00,  8.59051413e+00,  3.25808233e+00,
+         7.18835611e+00,  1.12135189e+01,  7.61099342e+00,
+         2.32593164e+00,  6.32492457e+00,  1.20017602e+01,
+         9.50603892e+00,  1.62381904e+01,  8.64021463e+00,
+        -7.62142522e+00,  5.36521047e+00,  7.89962648e+00,
+         1.00630822e+01,  1.66144158e+01,  4.53988565e+00,
+         9.63421791e+00,  6.97611929e+00, -3.57120797e+00,
+         3.59774091e+00,  4.76967305e+00,  6.10026872e+00,
+         1.56471873e+01,  4.50599475e+00,  9.44361810e+00,
+         4.15384252e+00,  5.58777112e+00,  7.04585698e+00,
+         2.74842711e+00,  7.25006163e+00,  8.91456162e+00,
+...
+         1.48573677e+01,  1.46382853e+01,  2.69293481e+00,
+         5.89641290e+00, -5.86619237e-01,  1.07033154e+00,
+         1.55257653e+01, -6.48107401e+00,  8.57356980e+00,
+        -1.37876430e+01,  1.15331870e+01,  9.82982661e+00,
+         7.09633148e+00,  2.31904424e+00,  6.92280432e+00,
+         5.95217982e-01,  5.19428493e+00,  5.24910668e+00,
+        -1.82483963e+00,  8.52606566e+00, -1.16991233e+01,
+         3.56038714e+00,  7.07287973e+00, -1.08632173e+00,
+         3.32426120e+00,  5.65948482e+00,  8.94545600e+00,
+         1.33246268e+01,  8.79855496e+00,  1.82247922e+00,
+         3.45131075e+00,  1.22603714e+01,  1.55602979e+01,
+         3.28844249e+00,  2.14561164e+00,  1.36703091e+00,
+         2.03256638e+00,  5.59174676e+00,  6.84954111e+00,
+         5.17551659e+00, -2.05161879e+00,  8.77336892e+00,
+         3.94983056e+00,  6.49744763e+00,  3.41429536e+00,
+         4.28997121e+00, -1.75541104e+00,  4.70781258e+00,
+         5.54969423e+00,  6.33952795e+00,  6.99697482e+00,
+         4.95648908e+00,  9.46123394e+00,  5.29939272e+00,
+         3.47889525e+00,  1.60020244e+01, -3.24711098e+00,
+         6.43142446e+00]])
+Coordinates:
+  * school   (school) object &#x27;Choate&#x27; &#x27;Deerfield&#x27; ... &quot;St. Paul&#x27;s&quot; &#x27;Mt. Hermon&#x27;
+  * sample   (sample) object MultiIndex
+  * chain    (sample) int64 3 3 2 0 1 3 0 0 3 1 0 3 ... 2 0 2 0 3 1 2 2 1 1 3 1
+  * draw     (sample) int64 181 416 48 235 149 310 407 ... 382 6 159 404 356 165</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'theta'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>school</span>: 8</li><li><span class='xr-has-index'>sample</span>: 100</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-dd4256ad-7520-48c9-a345-fc818690542b' class='xr-array-in' type='checkbox' checked><label for='section-dd4256ad-7520-48c9-a345-fc818690542b' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>0.2312 2.462 4.343 -2.161 1.956 ... 5.299 3.479 16.0 -3.247 6.431</span></div><div class='xr-array-data'><pre>array([[ 2.31176997e-01,  2.46155173e+00,  4.34307692e+00,
+        -2.16088609e+00,  1.95554018e+00,  7.03102581e+00,
+         1.57839245e+01,  6.40483142e+00,  2.28772366e+00,
+         1.20882179e+01, -2.47114345e+00,  6.31107231e+00,
+        -3.17824163e+00,  1.07360572e+01,  1.59326273e+00,
+         7.32099057e+00, -3.51079417e+00,  1.11110725e+01,
+         9.83765504e+00,  1.01866546e+01, -1.56217939e+00,
+         8.61451443e+00,  2.31176997e-01, -2.00466671e+00,
+        -2.56500961e+00,  3.72149650e+00,  4.64635723e+01,
+         3.25808233e+00,  8.59051413e+00,  3.25808233e+00,
+         7.18835611e+00,  1.12135189e+01,  7.61099342e+00,
+         2.32593164e+00,  6.32492457e+00,  1.20017602e+01,
+         9.50603892e+00,  1.62381904e+01,  8.64021463e+00,
+        -7.62142522e+00,  5.36521047e+00,  7.89962648e+00,
+         1.00630822e+01,  1.66144158e+01,  4.53988565e+00,
+         9.63421791e+00,  6.97611929e+00, -3.57120797e+00,
+         3.59774091e+00,  4.76967305e+00,  6.10026872e+00,
+         1.56471873e+01,  4.50599475e+00,  9.44361810e+00,
+         4.15384252e+00,  5.58777112e+00,  7.04585698e+00,
+         2.74842711e+00,  7.25006163e+00,  8.91456162e+00,
+...
+         1.48573677e+01,  1.46382853e+01,  2.69293481e+00,
+         5.89641290e+00, -5.86619237e-01,  1.07033154e+00,
+         1.55257653e+01, -6.48107401e+00,  8.57356980e+00,
+        -1.37876430e+01,  1.15331870e+01,  9.82982661e+00,
+         7.09633148e+00,  2.31904424e+00,  6.92280432e+00,
+         5.95217982e-01,  5.19428493e+00,  5.24910668e+00,
+        -1.82483963e+00,  8.52606566e+00, -1.16991233e+01,
+         3.56038714e+00,  7.07287973e+00, -1.08632173e+00,
+         3.32426120e+00,  5.65948482e+00,  8.94545600e+00,
+         1.33246268e+01,  8.79855496e+00,  1.82247922e+00,
+         3.45131075e+00,  1.22603714e+01,  1.55602979e+01,
+         3.28844249e+00,  2.14561164e+00,  1.36703091e+00,
+         2.03256638e+00,  5.59174676e+00,  6.84954111e+00,
+         5.17551659e+00, -2.05161879e+00,  8.77336892e+00,
+         3.94983056e+00,  6.49744763e+00,  3.41429536e+00,
+         4.28997121e+00, -1.75541104e+00,  4.70781258e+00,
+         5.54969423e+00,  6.33952795e+00,  6.99697482e+00,
+         4.95648908e+00,  9.46123394e+00,  5.29939272e+00,
+         3.47889525e+00,  1.60020244e+01, -3.24711098e+00,
+         6.43142446e+00]])</pre></div></div></li><li class='xr-section-item'><input id='section-20621417-a4d8-439b-af8c-6dbc7463996e' class='xr-section-summary-in' type='checkbox'  checked><label for='section-20621417-a4d8-439b-af8c-6dbc7463996e' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>school</span></div><div class='xr-var-dims'>(school)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>&#x27;Choate&#x27; ... &#x27;Mt. Hermon&#x27;</div><input id='attrs-5da62f0d-ce47-4c30-9f0c-27d5560ae2c0' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-5da62f0d-ce47-4c30-9f0c-27d5560ae2c0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8b432b1e-e4c5-41df-8494-ebf34bc5d5a7' class='xr-var-data-in' type='checkbox'><label for='data-8b432b1e-e4c5-41df-8494-ebf34bc5d5a7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;Choate&#x27;, &#x27;Deerfield&#x27;, &#x27;Phillips Andover&#x27;, &#x27;Phillips Exeter&#x27;,
+       &#x27;Hotchkiss&#x27;, &#x27;Lawrenceville&#x27;, &quot;St. Paul&#x27;s&quot;, &#x27;Mt. Hermon&#x27;], dtype=object)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>sample</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>MultiIndex</div><input id='attrs-4c9d0efd-0e13-47be-8e65-581e9197e2c1' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-4c9d0efd-0e13-47be-8e65-581e9197e2c1' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4980a312-058f-4262-8ac8-d22a2f9b0059' class='xr-var-data-in' type='checkbox'><label for='data-4980a312-058f-4262-8ac8-d22a2f9b0059' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([(3, 181), (3, 416), (2, 48), (0, 235), (1, 149), (3, 310), (0, 407),
+       (0, 465), (3, 227), (1, 405), (0, 153), (3, 144), (2, 101), (0, 98),
+       (1, 433), (1, 403), (0, 390), (2, 195), (0, 405), (0, 11), (3, 324),
+       (1, 286), (3, 182), (0, 136), (3, 263), (2, 349), (3, 151), (1, 445),
+       (1, 118), (1, 464), (2, 429), (0, 314), (3, 242), (0, 62), (1, 407),
+       (1, 8), (0, 55), (2, 20), (2, 147), (1, 152), (3, 123), (3, 239),
+       (0, 96), (3, 421), (1, 416), (3, 236), (2, 231), (3, 9), (1, 318),
+       (1, 108), (0, 325), (1, 81), (2, 259), (3, 43), (1, 497), (0, 219),
+       (2, 8), (3, 489), (3, 199), (1, 72), (3, 394), (0, 296), (2, 249),
+       (3, 65), (1, 6), (0, 454), (1, 183), (2, 87), (3, 147), (3, 69),
+       (3, 143), (0, 210), (2, 362), (0, 248), (2, 25), (3, 221), (2, 308),
+       (1, 314), (1, 87), (0, 375), (1, 145), (3, 296), (2, 136), (0, 50),
+       (3, 126), (2, 77), (1, 157), (0, 246), (2, 158), (0, 264), (2, 174),
+       (0, 140), (3, 108), (1, 486), (2, 382), (2, 6), (1, 159), (1, 404),
+       (3, 356), (1, 165)], dtype=object)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>chain</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>3 3 2 0 1 3 0 0 ... 3 1 2 2 1 1 3 1</div><input id='attrs-8ab7f03f-1d50-4253-9be4-08029bb4898c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8ab7f03f-1d50-4253-9be4-08029bb4898c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a9f7778f-cf7a-4e9c-87f8-6c4ce33f69d9' class='xr-var-data-in' type='checkbox'><label for='data-a9f7778f-cf7a-4e9c-87f8-6c4ce33f69d9' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([3, 3, 2, 0, 1, 3, 0, 0, 3, 1, 0, 3, 2, 0, 1, 1, 0, 2, 0, 0, 3, 1, 3, 0,
+       3, 2, 3, 1, 1, 1, 2, 0, 3, 0, 1, 1, 0, 2, 2, 1, 3, 3, 0, 3, 1, 3, 2, 3,
+       1, 1, 0, 1, 2, 3, 1, 0, 2, 3, 3, 1, 3, 0, 2, 3, 1, 0, 1, 2, 3, 3, 3, 0,
+       2, 0, 2, 3, 2, 1, 1, 0, 1, 3, 2, 0, 3, 2, 1, 0, 2, 0, 2, 0, 3, 1, 2, 2,
+       1, 1, 3, 1])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>draw</span></div><div class='xr-var-dims'>(sample)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>181 416 48 235 ... 159 404 356 165</div><input id='attrs-eada9d00-b590-4c1e-8580-bc4190e713ab' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-eada9d00-b590-4c1e-8580-bc4190e713ab' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-542183ae-eb49-4611-aff8-33b5e7d4c312' class='xr-var-data-in' type='checkbox'><label for='data-542183ae-eb49-4611-aff8-33b5e7d4c312' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([181, 416,  48, 235, 149, 310, 407, 465, 227, 405, 153, 144, 101,  98,
+       433, 403, 390, 195, 405,  11, 324, 286, 182, 136, 263, 349, 151, 445,
+       118, 464, 429, 314, 242,  62, 407,   8,  55,  20, 147, 152, 123, 239,
+        96, 421, 416, 236, 231,   9, 318, 108, 325,  81, 259,  43, 497, 219,
+         8, 489, 199,  72, 394, 296, 249,  65,   6, 454, 183,  87, 147,  69,
+       143, 210, 362, 248,  25, 221, 308, 314,  87, 375, 145, 296, 136,  50,
+       126,  77, 157, 246, 158, 264, 174, 140, 108, 486, 382,   6, 159, 404,
+       356, 165])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-d69e30c0-091a-47e9-94d5-4fb4a802a5ab' class='xr-section-summary-in' type='checkbox'  ><label for='section-d69e30c0-091a-47e9-94d5-4fb4a802a5ab' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>school</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-b6e2cf70-4913-4bf4-b486-230eaeb65e0d' class='xr-index-data-in' type='checkbox'/><label for='index-b6e2cf70-4913-4bf4-b486-230eaeb65e0d' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([&#x27;Choate&#x27;, &#x27;Deerfield&#x27;, &#x27;Phillips Andover&#x27;, &#x27;Phillips Exeter&#x27;,
+       &#x27;Hotchkiss&#x27;, &#x27;Lawrenceville&#x27;, &#x27;St. Paul&#x27;s&#x27;, &#x27;Mt. Hermon&#x27;],
+      dtype=&#x27;object&#x27;, name=&#x27;school&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>sample<br>chain<br>draw</div></div><div class='xr-index-preview'>PandasMultiIndex</div><div></div><input id='index-9122cc54-e678-49d7-bdba-8026a7dcaf25' class='xr-index-data-in' type='checkbox'/><label for='index-9122cc54-e678-49d7-bdba-8026a7dcaf25' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(MultiIndex([(3, 181),
+            (3, 416),
+            (2,  48),
+            (0, 235),
+            (1, 149),
+            (3, 310),
+            (0, 407),
+            (0, 465),
+            (3, 227),
+            (1, 405),
+            (0, 153),
+            (3, 144),
+            (2, 101),
+            (0,  98),
+            (1, 433),
+            (1, 403),
+            (0, 390),
+            (2, 195),
+            (0, 405),
+            (0,  11),
+            (3, 324),
+            (1, 286),
+            (3, 182),
+            (0, 136),
+            (3, 263),
+            (2, 349),
+            (3, 151),
+            (1, 445),
+            (1, 118),
+            (1, 464),
+            (2, 429),
+            (0, 314),
+            (3, 242),
+            (0,  62),
+            (1, 407),
+            (1,   8),
+            (0,  55),
+            (2,  20),
+            (2, 147),
+            (1, 152),
+            (3, 123),
+            (3, 239),
+            (0,  96),
+            (3, 421),
+            (1, 416),
+            (3, 236),
+            (2, 231),
+            (3,   9),
+            (1, 318),
+            (1, 108),
+            (0, 325),
+            (1,  81),
+            (2, 259),
+            (3,  43),
+            (1, 497),
+            (0, 219),
+            (2,   8),
+            (3, 489),
+            (3, 199),
+            (1,  72),
+            (3, 394),
+            (0, 296),
+            (2, 249),
+            (3,  65),
+            (1,   6),
+            (0, 454),
+            (1, 183),
+            (2,  87),
+            (3, 147),
+            (3,  69),
+            (3, 143),
+            (0, 210),
+            (2, 362),
+            (0, 248),
+            (2,  25),
+            (3, 221),
+            (2, 308),
+            (1, 314),
+            (1,  87),
+            (0, 375),
+            (1, 145),
+            (3, 296),
+            (2, 136),
+            (0,  50),
+            (3, 126),
+            (2,  77),
+            (1, 157),
+            (0, 246),
+            (2, 158),
+            (0, 264),
+            (2, 174),
+            (0, 140),
+            (3, 108),
+            (1, 486),
+            (2, 382),
+            (2,   6),
+            (1, 159),
+            (1, 404),
+            (3, 356),
+            (1, 165)],
+           name=&#x27;sample&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-c2951c1c-fed0-4535-a832-56f651337f16' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-c2951c1c-fed0-4535-a832-56f651337f16' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div></div></div>
+</div>
+<p>To keep the chain and draw dimensions, use <code class="docutils literal notranslate"><span class="pre">combined=False</span></code>.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;prior&quot;</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt;
+Dimensions:  (chain: 1, draw: 500, school: 8)
+Coordinates:
+  * chain    (chain) int64 0
+  * draw     (draw) int64 0 1 2 3 4 5 6 7 8 ... 492 493 494 495 496 497 498 499
+  * school   (school) object &#x27;Choate&#x27; &#x27;Deerfield&#x27; ... &quot;St. Paul&#x27;s&quot; &#x27;Mt. Hermon&#x27;
+Data variables:
+    tau      (chain, draw) float64 ...
+    theta    (chain, draw, school) float64 ...
+    mu       (chain, draw) float64 ...
+Attributes:
+    created_at:                 2022-10-13T14:37:26.602116
+    arviz_version:              0.13.0.dev0
+    inference_library:          pymc
+    inference_library_version:  4.2.2</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-007eef36-7ecf-4a45-9388-26be6981612b' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-007eef36-7ecf-4a45-9388-26be6981612b' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>chain</span>: 1</li><li><span class='xr-has-index'>draw</span>: 500</li><li><span class='xr-has-index'>school</span>: 8</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-313e23fc-5343-4d36-a96c-eb663550353b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-313e23fc-5343-4d36-a96c-eb663550353b' class='xr-section-summary' >Coordinates: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>chain</span></div><div class='xr-var-dims'>(chain)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-32b1deda-1b10-4a64-b42e-9e732e37a0f8' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-32b1deda-1b10-4a64-b42e-9e732e37a0f8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f521d801-1cc0-4343-9aac-0b47cd5f0ee1' class='xr-var-data-in' type='checkbox'><label for='data-f521d801-1cc0-4343-9aac-0b47cd5f0ee1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>draw</span></div><div class='xr-var-dims'>(draw)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 ... 495 496 497 498 499</div><input id='attrs-ebc1f293-30bf-4529-92a0-b8d9f2da7014' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-ebc1f293-30bf-4529-92a0-b8d9f2da7014' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c7fc0a25-e78e-4324-9031-cc62f4d18087' class='xr-var-data-in' type='checkbox'><label for='data-c7fc0a25-e78e-4324-9031-cc62f4d18087' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([  0,   1,   2, ..., 497, 498, 499])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>school</span></div><div class='xr-var-dims'>(school)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>&#x27;Choate&#x27; ... &#x27;Mt. Hermon&#x27;</div><input id='attrs-92d88615-14c2-4a35-8e42-241f1551a7ca' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-92d88615-14c2-4a35-8e42-241f1551a7ca' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4e7eda9f-2823-49de-9432-bed75d393d8f' class='xr-var-data-in' type='checkbox'><label for='data-4e7eda9f-2823-49de-9432-bed75d393d8f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;Choate&#x27;, &#x27;Deerfield&#x27;, &#x27;Phillips Andover&#x27;, &#x27;Phillips Exeter&#x27;,
+       &#x27;Hotchkiss&#x27;, &#x27;Lawrenceville&#x27;, &quot;St. Paul&#x27;s&quot;, &#x27;Mt. Hermon&#x27;], dtype=object)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-7979a794-7a62-4896-9741-3804ae964f76' class='xr-section-summary-in' type='checkbox'  checked><label for='section-7979a794-7a62-4896-9741-3804ae964f76' class='xr-section-summary' >Data variables: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>tau</span></div><div class='xr-var-dims'>(chain, draw)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-8adbf905-5a0f-4aab-9853-780c90ae07db' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8adbf905-5a0f-4aab-9853-780c90ae07db' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b313255f-f8be-4545-abda-d89e34359e5a' class='xr-var-data-in' type='checkbox'><label for='data-b313255f-f8be-4545-abda-d89e34359e5a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[500 values with dtype=float64]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>theta</span></div><div class='xr-var-dims'>(chain, draw, school)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-8cbc2546-aa73-49c4-a826-9272577236df' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8cbc2546-aa73-49c4-a826-9272577236df' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ee20f849-4a6d-4737-8999-92742213b9c1' class='xr-var-data-in' type='checkbox'><label for='data-ee20f849-4a6d-4737-8999-92742213b9c1' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[4000 values with dtype=float64]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mu</span></div><div class='xr-var-dims'>(chain, draw)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-5ce9bbc4-bc81-4412-96b3-a34bc7df306e' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-5ce9bbc4-bc81-4412-96b3-a34bc7df306e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8aee82c0-8935-477b-b768-ccea78ccc5ee' class='xr-var-data-in' type='checkbox'><label for='data-8aee82c0-8935-477b-b768-ccea78ccc5ee' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[500 values with dtype=float64]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-4220ee05-0f71-4d43-b5b5-27bc5b18e7b6' class='xr-section-summary-in' type='checkbox'  ><label for='section-4220ee05-0f71-4d43-b5b5-27bc5b18e7b6' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>chain</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-161e296d-a671-4dea-822b-d3e3b8bd8a3a' class='xr-index-data-in' type='checkbox'/><label for='index-161e296d-a671-4dea-822b-d3e3b8bd8a3a' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([0], dtype=&#x27;int64&#x27;, name=&#x27;chain&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>draw</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-c8ff083a-e4d8-4e63-81e9-7e2e73dceaf6' class='xr-index-data-in' type='checkbox'/><label for='index-c8ff083a-e4d8-4e63-81e9-7e2e73dceaf6' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Int64Index([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
+            ...
+            490, 491, 492, 493, 494, 495, 496, 497, 498, 499],
+           dtype=&#x27;int64&#x27;, name=&#x27;draw&#x27;, length=500))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>school</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-65d1804f-78cc-4ea6-8046-b4d1106d07c4' class='xr-index-data-in' type='checkbox'/><label for='index-65d1804f-78cc-4ea6-8046-b4d1106d07c4' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([&#x27;Choate&#x27;, &#x27;Deerfield&#x27;, &#x27;Phillips Andover&#x27;, &#x27;Phillips Exeter&#x27;,
+       &#x27;Hotchkiss&#x27;, &#x27;Lawrenceville&#x27;, &#x27;St. Paul&#x27;s&#x27;, &#x27;Mt. Hermon&#x27;],
+      dtype=&#x27;object&#x27;, name=&#x27;school&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-e104fa0e-3147-41c8-840f-12b1641991f4' class='xr-section-summary-in' type='checkbox'  checked><label for='section-e104fa0e-3147-41c8-840f-12b1641991f4' class='xr-section-summary' >Attributes: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>created_at :</span></dt><dd>2022-10-13T14:37:26.602116</dd><dt><span>arviz_version :</span></dt><dd>0.13.0.dev0</dd><dt><span>inference_library :</span></dt><dd>pymc</dd><dt><span>inference_library_version :</span></dt><dd>4.2.2</dd></dl></div></li></ul></div></div></div></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="arviz.concat.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">arviz.concat</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="arviz.list_datasets.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">arviz.list_datasets</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../../_sources/api/generated/arviz.extract.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

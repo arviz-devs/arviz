@@ -1,0 +1,872 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.plots.ppcplot &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/plots/ppcplot';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.plots.ppcplot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Posterior/Prior predictive plot.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Integral</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..labels</span> <span class="kn">import</span> <span class="n">BaseLabeller</span>
+<span class="kn">from</span> <span class="nn">..sel_utils</span> <span class="kn">import</span> <span class="n">xarray_var_iter</span>
+<span class="kn">from</span> <span class="nn">..rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">_var_names</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">default_grid</span><span class="p">,</span> <span class="n">filter_plotters_list</span><span class="p">,</span> <span class="n">get_plotting_function</span>
+
+<span class="n">_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="plot_ppc"><a class="viewcode-back" href="../../../api/generated/arviz.plot_ppc.html#arviz.plot_ppc">[docs]</a><span class="k">def</span> <span class="nf">plot_ppc</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;kde&quot;</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">observed_rug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">textsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_pairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">flatten</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">flatten_pp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_pp_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">jitter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">animated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">animation_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">labeller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">group</span><span class="o">=</span><span class="s2">&quot;posterior&quot;</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot for posterior/prior predictive checks.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: az.InferenceData object</span>
+<span class="sd">        :class:`arviz.InferenceData` object containing the observed and posterior/prior</span>
+<span class="sd">        predictive data.</span>
+<span class="sd">    kind: str</span>
+<span class="sd">        Type of plot to display (&quot;kde&quot;, &quot;cumulative&quot;, or &quot;scatter&quot;). Defaults to `kde`.</span>
+<span class="sd">    alpha: float</span>
+<span class="sd">        Opacity of posterior/prior predictive density curves.</span>
+<span class="sd">        Defaults to 0.2 for ``kind = kde`` and cumulative, for scatter defaults to 0.7.</span>
+<span class="sd">    mean: bool</span>
+<span class="sd">        Whether or not to plot the mean posterior/prior predictive distribution.</span>
+<span class="sd">        Defaults to ``True``.</span>
+<span class="sd">    observed: bool, default True</span>
+<span class="sd">        Whether or not to plot the observed data.</span>
+<span class="sd">    observed: bool, default False</span>
+<span class="sd">        Whether or not to plot a rug plot for the observed data. Only valid if `observed` is</span>
+<span class="sd">        `True` and for kind `kde` or `cumulative`.</span>
+<span class="sd">    color: str</span>
+<span class="sd">        Valid matplotlib ``color``. Defaults to ``C0``.</span>
+<span class="sd">    color: list</span>
+<span class="sd">        List with valid matplotlib colors corresponding to the posterior/prior predictive</span>
+<span class="sd">        distribution, observed data and mean of the posterior/prior predictive distribution.</span>
+<span class="sd">        Defaults to [&quot;C0&quot;, &quot;k&quot;, &quot;C1&quot;].</span>
+<span class="sd">    grid : tuple</span>
+<span class="sd">        Number of rows and columns. Defaults to None, the rows and columns are</span>
+<span class="sd">        automatically inferred.</span>
+<span class="sd">    figsize: tuple</span>
+<span class="sd">        Figure size. If None, it will be defined automatically.</span>
+<span class="sd">    textsize: float</span>
+<span class="sd">        Text size scaling factor for labels, titles and lines. If None, it will be</span>
+<span class="sd">        autoscaled based on ``figsize``.</span>
+<span class="sd">    data_pairs: dict</span>
+<span class="sd">        Dictionary containing relations between observed data and posterior/prior predictive data.</span>
+<span class="sd">        Dictionary structure:</span>
+
+<span class="sd">        - key = data var_name</span>
+<span class="sd">        - value = posterior/prior predictive var_name</span>
+
+<span class="sd">        For example, ``data_pairs = {&#39;y&#39; : &#39;y_hat&#39;}``</span>
+<span class="sd">        If None, it will assume that the observed data and the posterior/prior</span>
+<span class="sd">        predictive data have the same variable name.</span>
+<span class="sd">    var_names: list of variable names</span>
+<span class="sd">        Variables to be plotted, if `None` all variable are plotted. Prefix the</span>
+<span class="sd">        variables by ``~`` when you want to exclude them from the plot.</span>
+<span class="sd">    filter_vars: {None, &quot;like&quot;, &quot;regex&quot;}, optional, default=None</span>
+<span class="sd">        If `None` (default), interpret var_names as the real variables names. If &quot;like&quot;,</span>
+<span class="sd">        interpret var_names as substrings of the real variables names. If &quot;regex&quot;,</span>
+<span class="sd">        interpret var_names as regular expressions on the real variables names. A la</span>
+<span class="sd">        ``pandas.filter``.</span>
+<span class="sd">    coords: dict</span>
+<span class="sd">        Dictionary mapping dimensions to selected coordinates to be plotted.</span>
+<span class="sd">        Dimensions without a mapping specified will include all coordinates for</span>
+<span class="sd">        that dimension. Defaults to including all coordinates for all</span>
+<span class="sd">        dimensions if None.</span>
+<span class="sd">    flatten: list</span>
+<span class="sd">        List of dimensions to flatten in ``observed_data``. Only flattens across the coordinates</span>
+<span class="sd">        specified in the ``coords`` argument. Defaults to flattening all of the dimensions.</span>
+<span class="sd">    flatten_pp: list</span>
+<span class="sd">        List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens</span>
+<span class="sd">        across the coordinates specified in the ``coords`` argument. Defaults to flattening all</span>
+<span class="sd">        of the dimensions. Dimensions should match flatten excluding dimensions for ``data_pairs``</span>
+<span class="sd">        parameters. If ``flatten`` is defined and ``flatten_pp`` is None, then</span>
+<span class="sd">        ``flatten_pp = flatten``.</span>
+<span class="sd">    num_pp_samples: int</span>
+<span class="sd">        The number of posterior/prior predictive samples to plot. For ``kind`` = &#39;scatter&#39; and</span>
+<span class="sd">        ``animation = False`` if defaults to a maximum of 5 samples and will set jitter to 0.7.</span>
+<span class="sd">        unless defined. Otherwise it defaults to all provided samples.</span>
+<span class="sd">    random_seed: int</span>
+<span class="sd">        Random number generator seed passed to ``numpy.random.seed`` to allow</span>
+<span class="sd">        reproducibility of the plot. By default, no seed will be provided</span>
+<span class="sd">        and the plot will change each call if a random sample is specified</span>
+<span class="sd">        by ``num_pp_samples``.</span>
+<span class="sd">    jitter: float</span>
+<span class="sd">        If ``kind`` is &quot;scatter&quot;, jitter will add random uniform noise to the height</span>
+<span class="sd">        of the ppc samples and observed data. By default 0.</span>
+<span class="sd">    animated: bool</span>
+<span class="sd">        Create an animation of one posterior/prior predictive sample per frame.</span>
+<span class="sd">        Defaults to ``False``. Only works with matploblib backend.</span>
+<span class="sd">        To run animations inside a notebook you have to use the `nbAgg` matplotlib&#39;s backend.</span>
+<span class="sd">        Try with `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch back to the</span>
+<span class="sd">        default matplotlib&#39;s backend with `%matplotlib  inline` or `%matplotlib  auto`.</span>
+<span class="sd">        If switching back and forth between matplotlib&#39;s backend, you may need to run twice the cell</span>
+<span class="sd">        with the animation.</span>
+<span class="sd">        If you experience problems rendering the animation try setting</span>
+<span class="sd">        `animation_kwargs({&#39;blit&#39;:False}`) or changing the matplotlib&#39;s backend (e.g. to TkAgg)</span>
+<span class="sd">        If you run the animation from a script write `ax, ani = az.plot_ppc(.)`</span>
+<span class="sd">    animation_kwargs : dict</span>
+<span class="sd">        Keywords passed to  :class:`matplotlib.animation.FuncAnimation`. Ignored with</span>
+<span class="sd">        matplotlib backend.</span>
+<span class="sd">    legend : bool</span>
+<span class="sd">        Add legend to figure. By default ``True``.</span>
+<span class="sd">    labeller : labeller instance, optional</span>
+<span class="sd">        Class providing the method ``make_pp_label`` to generate the labels in the plot titles.</span>
+<span class="sd">        Read the :ref:`label_guide` for more details and usage examples.</span>
+<span class="sd">    ax: numpy array-like of matplotlib axes or bokeh figures, optional</span>
+<span class="sd">        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create</span>
+<span class="sd">        its own array of plot areas (and return it).</span>
+<span class="sd">    backend: str, optional</span>
+<span class="sd">        Select plotting backend {&quot;matplotlib&quot;,&quot;bokeh&quot;}. Default to &quot;matplotlib&quot;.</span>
+<span class="sd">    backend_kwargs: bool, optional</span>
+<span class="sd">        These are kwargs specific to the backend being used, passed to</span>
+<span class="sd">        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.</span>
+<span class="sd">        For additional documentation check the plotting method of the backend.</span>
+<span class="sd">    group: {&quot;prior&quot;, &quot;posterior&quot;}, optional</span>
+<span class="sd">        Specifies which InferenceData group should be plotted. Defaults to &#39;posterior&#39;.</span>
+<span class="sd">        Other value can be &#39;prior&#39;.</span>
+<span class="sd">    show: bool, optional</span>
+<span class="sd">        Call backend show function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    axes: matplotlib axes or bokeh figures</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    plot_bpv: Plot Bayesian p-value for observed data and Posterior/Prior predictive.</span>
+<span class="sd">    plot_lm: Posterior predictive and mean plots for regression-like data.</span>
+<span class="sd">    plot_ppc: plot for posterior/prior predictive checks.</span>
+<span class="sd">    plot_ts: Plot timeseries data.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Plot the observed data KDE overlaid on posterior predictive KDEs.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; import arviz as az</span>
+<span class="sd">        &gt;&gt;&gt; data = az.load_arviz_data(&#39;radon&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_ppc(data, data_pairs={&quot;y&quot;:&quot;y&quot;})</span>
+
+<span class="sd">    Plot the overlay with empirical CDFs.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_ppc(data, kind=&#39;cumulative&#39;)</span>
+
+<span class="sd">    Use the ``coords`` and ``flatten`` parameters to plot selected variable dimensions</span>
+<span class="sd">    across multiple plots. We will now modify the dimension ``obs_id`` to contain</span>
+<span class="sd">    indicate the name of the county where the measure was taken. The change has to</span>
+<span class="sd">    be done on both ``posterior_predictive`` and ``observed_data`` groups, which is</span>
+<span class="sd">    why we will use :meth:`~arviz.InferenceData.map` to apply the same function to</span>
+<span class="sd">    both groups. Afterwards, we will select the counties to be plotted with the</span>
+<span class="sd">    ``coords`` arg.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; obs_county = data.posterior[&quot;County&quot;][data.constant_data[&quot;county_idx&quot;]]</span>
+<span class="sd">        &gt;&gt;&gt; data = data.assign_coords(obs_id=obs_county, groups=&quot;observed_vars&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_ppc(data, coords={&#39;obs_id&#39;: [&#39;ANOKA&#39;, &#39;BELTRAMI&#39;]}, flatten=[])</span>
+
+<span class="sd">    Plot the overlay using a stacked scatter plot that is particularly useful</span>
+<span class="sd">    when the sample sizes are small.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_ppc(data, kind=&#39;scatter&#39;, flatten=[],</span>
+<span class="sd">        &gt;&gt;&gt;             coords={&#39;obs_id&#39;: [&#39;AITKIN&#39;, &#39;BELTRAMI&#39;]})</span>
+
+<span class="sd">    Plot random posterior predictive sub-samples.</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_ppc(data, num_pp_samples=30, random_seed=7)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;posterior&quot;</span><span class="p">,</span> <span class="s2">&quot;prior&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`group` argument must be either `posterior` or `prior`&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">groups</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">_predictive&quot;</span><span class="p">,</span> <span class="s2">&quot;observed_data&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;`data` argument must have the group &quot;</span><span class="si">{</span><span class="n">groups</span><span class="si">}</span><span class="s1">&quot; for ppcplot&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">kind</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;kde&quot;</span><span class="p">,</span> <span class="s2">&quot;cumulative&quot;</span><span class="p">,</span> <span class="s2">&quot;scatter&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`kind` argument must be either `kde`, `cumulative`, or `scatter`&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;C1&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;colors should be a list with 3 items.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;colors should be a list with 3 items.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;color has been deprecated in favor of colors&quot;</span><span class="p">,</span> <span class="ne">FutureWarning</span><span class="p">)</span>
+        <span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+
+    <span class="k">if</span> <span class="n">data_pairs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_pairs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.backend&quot;</span><span class="p">]</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;bokeh&quot;</span> <span class="ow">and</span> <span class="n">animated</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Animation option is only supported with matplotlib backend.&quot;</span><span class="p">)</span>
+
+    <span class="n">observed_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">observed_data</span>
+
+    <span class="k">if</span> <span class="n">group</span> <span class="o">==</span> <span class="s2">&quot;posterior&quot;</span><span class="p">:</span>
+        <span class="n">predictive_dataset</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">posterior_predictive</span>
+    <span class="k">elif</span> <span class="n">group</span> <span class="o">==</span> <span class="s2">&quot;prior&quot;</span><span class="p">:</span>
+        <span class="n">predictive_dataset</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">prior_predictive</span>
+
+    <span class="k">if</span> <span class="n">var_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">var_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">observed_data</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span>
+    <span class="n">var_names</span> <span class="o">=</span> <span class="n">_var_names</span><span class="p">(</span><span class="n">var_names</span><span class="p">,</span> <span class="n">observed_data</span><span class="p">,</span> <span class="n">filter_vars</span><span class="p">)</span>
+    <span class="n">pp_var_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_pairs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">var_names</span><span class="p">]</span>
+    <span class="n">pp_var_names</span> <span class="o">=</span> <span class="n">_var_names</span><span class="p">(</span><span class="n">pp_var_names</span><span class="p">,</span> <span class="n">predictive_dataset</span><span class="p">,</span> <span class="n">filter_vars</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">flatten_pp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">flatten</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flatten_pp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">predictive_dataset</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">flatten_pp</span> <span class="o">=</span> <span class="n">flatten</span>
+    <span class="k">if</span> <span class="n">flatten</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">flatten</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">observed_data</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">labeller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">labeller</span> <span class="o">=</span> <span class="n">BaseLabeller</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">random_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+
+    <span class="n">total_pp_samples</span> <span class="o">=</span> <span class="n">predictive_dataset</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s2">&quot;chain&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">predictive_dataset</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s2">&quot;draw&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">num_pp_samples</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;scatter&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">animated</span><span class="p">:</span>
+            <span class="n">num_pp_samples</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">total_pp_samples</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">num_pp_samples</span> <span class="o">=</span> <span class="n">total_pp_samples</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">num_pp_samples</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="n">num_pp_samples</span> <span class="o">&lt;</span> <span class="mi">1</span>
+        <span class="ow">or</span> <span class="n">num_pp_samples</span> <span class="o">&gt;</span> <span class="n">total_pp_samples</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`num_pp_samples` must be an integer between 1 and </span><span class="si">{</span><span class="n">total_pp_samples</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">pp_sample_ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">total_pp_samples</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_pp_samples</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">coords</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">coords</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">observed_data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">key</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">obs_plotters</span> <span class="o">=</span> <span class="n">filter_plotters_list</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span>
+            <span class="n">xarray_var_iter</span><span class="p">(</span>
+                <span class="n">observed_data</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span>
+                <span class="n">skip_dims</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">flatten</span><span class="p">),</span>
+                <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span>
+                <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;plot_ppc&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">length_plotters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs_plotters</span><span class="p">)</span>
+    <span class="n">pp_plotters</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">tup</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">tup</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="n">length_plotters</span><span class="p">),</span>
+            <span class="n">xarray_var_iter</span><span class="p">(</span>
+                <span class="n">predictive_dataset</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span>
+                <span class="n">var_names</span><span class="o">=</span><span class="n">pp_var_names</span><span class="p">,</span>
+                <span class="n">skip_dims</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">flatten_pp</span><span class="p">),</span>
+                <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">default_grid</span><span class="p">(</span><span class="n">length_plotters</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
+
+    <span class="n">ppcplot_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">length_plotters</span><span class="o">=</span><span class="n">length_plotters</span><span class="p">,</span>
+        <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span>
+        <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">animated</span><span class="o">=</span><span class="n">animated</span><span class="p">,</span>
+        <span class="n">obs_plotters</span><span class="o">=</span><span class="n">obs_plotters</span><span class="p">,</span>
+        <span class="n">pp_plotters</span><span class="o">=</span><span class="n">pp_plotters</span><span class="p">,</span>
+        <span class="n">predictive_dataset</span><span class="o">=</span><span class="n">predictive_dataset</span><span class="p">,</span>
+        <span class="n">pp_sample_ix</span><span class="o">=</span><span class="n">pp_sample_ix</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+        <span class="n">jitter</span><span class="o">=</span><span class="n">jitter</span><span class="p">,</span>
+        <span class="n">textsize</span><span class="o">=</span><span class="n">textsize</span><span class="p">,</span>
+        <span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">observed</span><span class="p">,</span>
+        <span class="n">observed_rug</span><span class="o">=</span><span class="n">observed_rug</span><span class="p">,</span>
+        <span class="n">total_pp_samples</span><span class="o">=</span><span class="n">total_pp_samples</span><span class="p">,</span>
+        <span class="n">legend</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span>
+        <span class="n">labeller</span><span class="o">=</span><span class="n">labeller</span><span class="p">,</span>
+        <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>
+        <span class="n">animation_kwargs</span><span class="o">=</span><span class="n">animation_kwargs</span><span class="p">,</span>
+        <span class="n">num_pp_samples</span><span class="o">=</span><span class="n">num_pp_samples</span><span class="p">,</span>
+        <span class="n">backend_kwargs</span><span class="o">=</span><span class="n">backend_kwargs</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># TODO: Add backend kwargs</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">get_plotting_function</span><span class="p">(</span><span class="s2">&quot;plot_ppc&quot;</span><span class="p">,</span> <span class="s2">&quot;ppcplot&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">ppcplot_kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">axes</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

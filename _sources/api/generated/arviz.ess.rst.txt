@@ -1,0 +1,6 @@
+﻿arviz.ess
+=========
+
+.. currentmodule:: arviz
+
+.. autofunction:: ess

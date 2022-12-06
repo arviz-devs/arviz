@@ -1,0 +1,32 @@
+﻿arviz.labels.BaseLabeller
+=========================
+
+.. currentmodule:: arviz.labels
+
+.. autoclass:: BaseLabeller
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      BaseLabeller.__init__
+      BaseLabeller.dim_coord_to_str
+      BaseLabeller.make_label_flat
+      BaseLabeller.make_label_vert
+      BaseLabeller.make_model_label
+      BaseLabeller.make_pp_label
+      BaseLabeller.model_name_to_str
+      BaseLabeller.sel_to_str
+      BaseLabeller.var_name_to_str
+      BaseLabeller.var_pp_to_str
+   
+   
+
+   
+   
+   

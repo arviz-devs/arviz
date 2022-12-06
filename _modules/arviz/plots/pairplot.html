@@ -1,0 +1,783 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.plots.pairplot &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/plots/pairplot';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.plots.pairplot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Plot a scatter, kde and/or hexbin of sampled parameters.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">convert_to_dataset</span>
+<span class="kn">from</span> <span class="nn">..labels</span> <span class="kn">import</span> <span class="n">BaseLabeller</span>
+<span class="kn">from</span> <span class="nn">..sel_utils</span> <span class="kn">import</span> <span class="n">xarray_to_ndarray</span><span class="p">,</span> <span class="n">xarray_var_iter</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">get_plotting_function</span>
+<span class="kn">from</span> <span class="nn">..rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">_var_names</span><span class="p">,</span> <span class="n">get_coords</span>
+
+
+<div class="viewcode-block" id="plot_pair"><a class="viewcode-back" href="../../../api/generated/arviz.plot_pair.html#arviz.plot_pair">[docs]</a><span class="k">def</span> <span class="nf">plot_pair</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">group</span><span class="o">=</span><span class="s2">&quot;posterior&quot;</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_vars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">combine_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">marginals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">textsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;scatter&quot;</span><span class="p">,</span>
+    <span class="n">gridsize</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">divergences</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">labeller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">divergences_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">scatter_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kde_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hexbin_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">marginal_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">point_estimate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">point_estimate_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">point_estimate_marker_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reference_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reference_values_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data: obj</span>
+<span class="sd">        Any object that can be converted to an :class:`arviz.InferenceData` object.</span>
+<span class="sd">        Refer to documentation of :func:`arviz.convert_to_dataset` for details</span>
+<span class="sd">    group: str, optional</span>
+<span class="sd">        Specifies which InferenceData group should be plotted.  Defaults to &#39;posterior&#39;.</span>
+<span class="sd">    var_names: list of variable names, optional</span>
+<span class="sd">        Variables to be plotted, if None all variable are plotted. Prefix the</span>
+<span class="sd">        variables by ``~`` when you want to exclude them from the plot.</span>
+<span class="sd">    filter_vars: {None, &quot;like&quot;, &quot;regex&quot;}, optional, default=None</span>
+<span class="sd">        If `None` (default), interpret var_names as the real variables names. If &quot;like&quot;,</span>
+<span class="sd">        interpret var_names as substrings of the real variables names. If &quot;regex&quot;,</span>
+<span class="sd">        interpret var_names as regular expressions on the real variables names. A la</span>
+<span class="sd">        ``pandas.filter``.</span>
+<span class="sd">    combine_dims : set_like of str, optional</span>
+<span class="sd">        List of dimensions to reduce. Defaults to reducing only the &quot;chain&quot; and &quot;draw&quot; dimensions.</span>
+<span class="sd">        See the :ref:`this section &lt;common_combine_dims&gt;` for usage examples.</span>
+<span class="sd">    coords: mapping, optional</span>
+<span class="sd">        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.</span>
+<span class="sd">    marginals: bool, optional</span>
+<span class="sd">        If True pairplot will include marginal distributions for every variable</span>
+<span class="sd">    figsize: figure size tuple</span>
+<span class="sd">        If None, size is (8 + numvars, 8 + numvars)</span>
+<span class="sd">    textsize: int</span>
+<span class="sd">        Text size for labels. If None it will be autoscaled based on ``figsize``.</span>
+<span class="sd">    kind : str or List[str]</span>
+<span class="sd">        Type of plot to display (scatter, kde and/or hexbin)</span>
+<span class="sd">    gridsize: int or (int, int), optional</span>
+<span class="sd">        Only works for ``kind=hexbin``. The number of hexagons in the x-direction.</span>
+<span class="sd">        The corresponding number of hexagons in the y-direction is chosen</span>
+<span class="sd">        such that the hexagons are approximately regular. Alternatively, gridsize</span>
+<span class="sd">        can be a tuple with two elements specifying the number of hexagons</span>
+<span class="sd">        in the x-direction and the y-direction.</span>
+<span class="sd">    divergences: Boolean</span>
+<span class="sd">        If True divergences will be plotted in a different color, only if group is either &#39;prior&#39;</span>
+<span class="sd">        or &#39;posterior&#39;.</span>
+<span class="sd">    colorbar: bool</span>
+<span class="sd">        If True a colorbar will be included as part of the plot (Defaults to False).</span>
+<span class="sd">        Only works when ``kind=hexbin``</span>
+<span class="sd">    labeller : labeller instance, optional</span>
+<span class="sd">        Class providing the method ``make_label_vert`` to generate the labels in the plot.</span>
+<span class="sd">        Read the :ref:`label_guide` for more details and usage examples.</span>
+<span class="sd">    ax: axes, optional</span>
+<span class="sd">        Matplotlib axes or bokeh figures.</span>
+<span class="sd">    divergences_kwargs: dicts, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter` for divergences</span>
+<span class="sd">    scatter_kwargs:</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter` when using scatter kind</span>
+<span class="sd">    kde_kwargs: dict, optional</span>
+<span class="sd">        Additional keywords passed to :func:`arviz.plot_kde` when using kde kind</span>
+<span class="sd">    hexbin_kwargs: dict, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.hexbin` when</span>
+<span class="sd">        using hexbin kind</span>
+<span class="sd">    backend: str, optional</span>
+<span class="sd">        Select plotting backend {&quot;matplotlib&quot;,&quot;bokeh&quot;}. Default &quot;matplotlib&quot;.</span>
+<span class="sd">    backend_kwargs: bool, optional</span>
+<span class="sd">        These are kwargs specific to the backend being used, passed to</span>
+<span class="sd">        :func:`matplotlib.pyplot.subplots` or</span>
+<span class="sd">        :func:`bokeh.plotting.figure`.</span>
+<span class="sd">    marginal_kwargs: dict, optional</span>
+<span class="sd">        Additional keywords passed to :func:`arviz.plot_dist`, modifying the</span>
+<span class="sd">        marginal distributions plotted in the diagonal.</span>
+<span class="sd">    point_estimate: str, optional</span>
+<span class="sd">        Select point estimate from &#39;mean&#39;, &#39;mode&#39; or &#39;median&#39;. The point estimate will be</span>
+<span class="sd">        plotted using a scatter marker and vertical/horizontal lines.</span>
+<span class="sd">    point_estimate_kwargs: dict, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.axvline`,</span>
+<span class="sd">        :meth:`matplotlib.axes.Axes.axhline` (matplotlib) or</span>
+<span class="sd">        :class:`bokeh:bokeh.models.Span` (bokeh)</span>
+<span class="sd">    point_estimate_marker_kwargs: dict, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter`</span>
+<span class="sd">        or :meth:`bokeh:bokeh.plotting.Figure.square` in point</span>
+<span class="sd">        estimate plot. Not available in bokeh</span>
+<span class="sd">    reference_values: dict, optional</span>
+<span class="sd">        Reference values for the plotted variables. The Reference values will be plotted</span>
+<span class="sd">        using a scatter marker</span>
+<span class="sd">    reference_values_kwargs: dict, optional</span>
+<span class="sd">        Additional keywords passed to :meth:`matplotlib.axes.Axes.plot` or</span>
+<span class="sd">        :meth:`bokeh:bokeh.plotting.Figure.circle` in reference values plot</span>
+<span class="sd">    show: bool, optional</span>
+<span class="sd">        Call backend show function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    axes: matplotlib axes or bokeh figures</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    KDE Pair Plot</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; import arviz as az</span>
+<span class="sd">        &gt;&gt;&gt; centered = az.load_arviz_data(&#39;centered_eight&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; coords = {&#39;school&#39;: [&#39;Choate&#39;, &#39;Deerfield&#39;]}</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_pair(centered,</span>
+<span class="sd">        &gt;&gt;&gt;             var_names=[&#39;theta&#39;, &#39;mu&#39;, &#39;tau&#39;],</span>
+<span class="sd">        &gt;&gt;&gt;             kind=&#39;kde&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;             coords=coords,</span>
+<span class="sd">        &gt;&gt;&gt;             divergences=True,</span>
+<span class="sd">        &gt;&gt;&gt;             textsize=18)</span>
+
+<span class="sd">    Hexbin pair plot</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_pair(centered,</span>
+<span class="sd">        &gt;&gt;&gt;             var_names=[&#39;theta&#39;, &#39;mu&#39;],</span>
+<span class="sd">        &gt;&gt;&gt;             coords=coords,</span>
+<span class="sd">        &gt;&gt;&gt;             textsize=18,</span>
+<span class="sd">        &gt;&gt;&gt;             kind=&#39;hexbin&#39;)</span>
+
+<span class="sd">    Pair plot showing divergences and select variables with regular expressions</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_pair(centered,</span>
+<span class="sd">        ...             var_names=[&#39;^t&#39;, &#39;mu&#39;],</span>
+<span class="sd">        ...             filter_vars=&quot;regex&quot;,</span>
+<span class="sd">        ...             coords=coords,</span>
+<span class="sd">        ...             divergences=True,</span>
+<span class="sd">        ...             textsize=18)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">valid_kinds</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scatter&quot;</span><span class="p">,</span> <span class="s2">&quot;kde&quot;</span><span class="p">,</span> <span class="s2">&quot;hexbin&quot;</span><span class="p">]</span>
+    <span class="n">kind_boolean</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">kind_boolean</span> <span class="o">=</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">valid_kinds</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kind_boolean</span> <span class="o">=</span> <span class="p">[</span><span class="n">kind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">valid_kinds</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kind</span><span class="p">))]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">kind_boolean</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plot type </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> not recognized. Plot type must be in </span><span class="si">{</span><span class="n">valid_kinds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">labeller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">labeller</span> <span class="o">=</span> <span class="n">BaseLabeller</span><span class="p">()</span>
+
+    <span class="c1"># Get posterior draws and combine chains</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+    <span class="n">var_names</span> <span class="o">=</span> <span class="n">_var_names</span><span class="p">(</span><span class="n">var_names</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">filter_vars</span><span class="p">)</span>
+    <span class="n">plotters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">xarray_var_iter</span><span class="p">(</span>
+            <span class="n">get_coords</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">coords</span><span class="p">),</span> <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span> <span class="n">skip_dims</span><span class="o">=</span><span class="n">combine_dims</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">flat_var_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">labeller</span><span class="o">.</span><span class="n">make_label_vert</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">sel</span><span class="p">,</span> <span class="n">isel</span><span class="p">)</span> <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">sel</span><span class="p">,</span> <span class="n">isel</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">plotters</span>
+    <span class="p">]</span>
+
+    <span class="n">divergent_data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">diverging_mask</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Assigning divergence group based on group param</span>
+    <span class="k">if</span> <span class="n">group</span> <span class="o">==</span> <span class="s2">&quot;posterior&quot;</span><span class="p">:</span>
+        <span class="n">divergent_group</span> <span class="o">=</span> <span class="s2">&quot;sample_stats&quot;</span>
+    <span class="k">elif</span> <span class="n">group</span> <span class="o">==</span> <span class="s2">&quot;prior&quot;</span><span class="p">:</span>
+        <span class="n">divergent_group</span> <span class="o">=</span> <span class="s2">&quot;sample_stats_prior&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">divergences</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Get diverging draws and combine chains</span>
+    <span class="k">if</span> <span class="n">divergences</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">divergent_group</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">divergent_group</span><span class="p">),</span> <span class="s2">&quot;diverging&quot;</span><span class="p">):</span>
+            <span class="n">divergent_data</span> <span class="o">=</span> <span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">divergent_group</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">diverging_mask</span> <span class="o">=</span> <span class="n">xarray_to_ndarray</span><span class="p">(</span>
+                <span class="n">divergent_data</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;diverging&quot;</span><span class="p">,),</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">diverging_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">diverging_mask</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">divergences</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Divergences data not found, plotting without divergences. &quot;</span>
+                <span class="s2">&quot;Make sure the sample method provides divergences data and &quot;</span>
+                <span class="s2">&quot;that it is present in the `diverging` field of `sample_stats` &quot;</span>
+                <span class="s2">&quot;or `sample_stats_prior` or set divergences=False&quot;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">gridsize</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="n">gridsize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="s2">&quot;draw&quot;</span><span class="p">]</span> <span class="o">**</span> <span class="mf">0.35</span><span class="p">)</span>
+
+    <span class="n">numvars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_var_names</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">numvars</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of variables to be plotted must be 2 or greater.&quot;</span><span class="p">)</span>
+
+    <span class="n">pairplot_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">plotters</span><span class="o">=</span><span class="n">plotters</span><span class="p">,</span>
+        <span class="n">numvars</span><span class="o">=</span><span class="n">numvars</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">textsize</span><span class="o">=</span><span class="n">textsize</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+        <span class="n">scatter_kwargs</span><span class="o">=</span><span class="n">scatter_kwargs</span><span class="p">,</span>
+        <span class="n">kde_kwargs</span><span class="o">=</span><span class="n">kde_kwargs</span><span class="p">,</span>
+        <span class="n">hexbin_kwargs</span><span class="o">=</span><span class="n">hexbin_kwargs</span><span class="p">,</span>
+        <span class="n">gridsize</span><span class="o">=</span><span class="n">gridsize</span><span class="p">,</span>
+        <span class="n">colorbar</span><span class="o">=</span><span class="n">colorbar</span><span class="p">,</span>
+        <span class="n">divergences</span><span class="o">=</span><span class="n">divergences</span><span class="p">,</span>
+        <span class="n">diverging_mask</span><span class="o">=</span><span class="n">diverging_mask</span><span class="p">,</span>
+        <span class="n">divergences_kwargs</span><span class="o">=</span><span class="n">divergences_kwargs</span><span class="p">,</span>
+        <span class="n">flat_var_names</span><span class="o">=</span><span class="n">flat_var_names</span><span class="p">,</span>
+        <span class="n">backend_kwargs</span><span class="o">=</span><span class="n">backend_kwargs</span><span class="p">,</span>
+        <span class="n">marginal_kwargs</span><span class="o">=</span><span class="n">marginal_kwargs</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
+        <span class="n">marginals</span><span class="o">=</span><span class="n">marginals</span><span class="p">,</span>
+        <span class="n">point_estimate</span><span class="o">=</span><span class="n">point_estimate</span><span class="p">,</span>
+        <span class="n">point_estimate_kwargs</span><span class="o">=</span><span class="n">point_estimate_kwargs</span><span class="p">,</span>
+        <span class="n">point_estimate_marker_kwargs</span><span class="o">=</span><span class="n">point_estimate_marker_kwargs</span><span class="p">,</span>
+        <span class="n">reference_values</span><span class="o">=</span><span class="n">reference_values</span><span class="p">,</span>
+        <span class="n">reference_values_kwargs</span><span class="o">=</span><span class="n">reference_values_kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.backend&quot;</span><span class="p">]</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># TODO: Add backend kwargs</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">get_plotting_function</span><span class="p">(</span><span class="s2">&quot;plot_pair&quot;</span><span class="p">,</span> <span class="s2">&quot;pairplot&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">pairplot_kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+arviz.labels.DimIdxLabeller.var\_pp\_to\_str
+============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: DimIdxLabeller.var_pp_to_str

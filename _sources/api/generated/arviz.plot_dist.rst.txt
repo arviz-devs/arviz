@@ -1,0 +1,6 @@
+﻿arviz.plot\_dist
+================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_dist

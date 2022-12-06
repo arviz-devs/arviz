@@ -1,0 +1,72 @@
+﻿arviz.InferenceData
+===================
+
+.. currentmodule:: arviz
+
+.. autoclass:: InferenceData
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      InferenceData.__init__
+      InferenceData.add_groups
+      InferenceData.assign
+      InferenceData.assign_coords
+      InferenceData.chunk
+      InferenceData.compute
+      InferenceData.copy
+      InferenceData.cumsum
+      InferenceData.extend
+      InferenceData.from_netcdf
+      InferenceData.from_zarr
+      InferenceData.get
+      InferenceData.get_index
+      InferenceData.groups
+      InferenceData.isel
+      InferenceData.items
+      InferenceData.keys
+      InferenceData.load
+      InferenceData.map
+      InferenceData.max
+      InferenceData.mean
+      InferenceData.median
+      InferenceData.min
+      InferenceData.persist
+      InferenceData.quantile
+      InferenceData.rename
+      InferenceData.rename_dims
+      InferenceData.rename_vars
+      InferenceData.reset_coords
+      InferenceData.reset_index
+      InferenceData.sel
+      InferenceData.set_coords
+      InferenceData.set_index
+      InferenceData.sortby
+      InferenceData.stack
+      InferenceData.sum
+      InferenceData.to_dataframe
+      InferenceData.to_dict
+      InferenceData.to_json
+      InferenceData.to_netcdf
+      InferenceData.to_zarr
+      InferenceData.unify_chunks
+      InferenceData.unstack
+      InferenceData.values
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~InferenceData.attrs
+   
+   

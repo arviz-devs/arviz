@@ -1,0 +1,6 @@
+arviz.PyStan2SamplingWrapper.\_\_init\_\_
+=========================================
+
+.. currentmodule:: arviz
+
+.. automethod:: PyStan2SamplingWrapper.__init__

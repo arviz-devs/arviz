@@ -1,0 +1,33 @@
+﻿arviz.Numba
+===========
+
+.. currentmodule:: arviz
+
+.. autoclass:: Numba
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+      
+         disable_numba
+      
+      
+         enable_numba
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Numba.numba_flag
+   
+   

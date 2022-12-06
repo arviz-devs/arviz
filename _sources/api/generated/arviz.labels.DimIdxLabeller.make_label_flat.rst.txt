@@ -1,0 +1,6 @@
+arviz.labels.DimIdxLabeller.make\_label\_flat
+=============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: DimIdxLabeller.make_label_flat

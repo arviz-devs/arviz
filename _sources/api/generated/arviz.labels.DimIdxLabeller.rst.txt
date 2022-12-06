@@ -1,0 +1,32 @@
+﻿arviz.labels.DimIdxLabeller
+===========================
+
+.. currentmodule:: arviz.labels
+
+.. autoclass:: DimIdxLabeller
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      DimIdxLabeller.__init__
+      DimIdxLabeller.dim_coord_to_str
+      DimIdxLabeller.make_label_flat
+      DimIdxLabeller.make_label_vert
+      DimIdxLabeller.make_model_label
+      DimIdxLabeller.make_pp_label
+      DimIdxLabeller.model_name_to_str
+      DimIdxLabeller.sel_to_str
+      DimIdxLabeller.var_name_to_str
+      DimIdxLabeller.var_pp_to_str
+   
+   
+
+   
+   
+   

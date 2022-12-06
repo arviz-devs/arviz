@@ -1,0 +1,1001 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.data.base &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/data/base';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.data.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Low level converters usually used by other functions.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">ujson</span> <span class="k">as</span> <span class="nn">json</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># mypy struggles with conditional imports expressed as catching ImportError:</span>
+    <span class="c1"># https://github.com/python/mypy/issues/1153</span>
+    <span class="kn">import</span> <span class="nn">json</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">__version__</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">..rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+
+<span class="n">CoordSpec</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+<span class="n">DimSpec</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+<span class="n">RequiresArgTypeT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;RequiresArgTypeT&quot;</span><span class="p">)</span>
+<span class="n">RequiresReturnTypeT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;RequiresReturnTypeT&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">requires</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-name</span>
+    <span class="sd">&quot;&quot;&quot;Decorator to return None if an object does not have the required attribute.</span>
+
+<span class="sd">    If the decorator is called various times on the same function with different</span>
+<span class="sd">    attributes, it will return None if one of them is missing. If instead a list</span>
+<span class="sd">    of attributes is passed, it will return None if all attributes in the list are</span>
+<span class="sd">    missing. Both functionalities can be combined as desired.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">props</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">props</span>
+
+    <span class="c1"># Until typing.ParamSpec (https://www.python.org/dev/peps/pep-0612/) is available</span>
+    <span class="c1"># in all our supported Python versions, there is no way to simultaneously express</span>
+    <span class="c1"># the following two properties:</span>
+    <span class="c1"># - the input function may take arbitrary args/kwargs, and</span>
+    <span class="c1"># - the output function takes those same arbitrary args/kwargs, but has a different return type.</span>
+    <span class="c1"># We either have to limit the input function to e.g. only allowing a &quot;self&quot; argument,</span>
+    <span class="c1"># or we have to adopt the current approach of annotating the returned function as if</span>
+    <span class="c1"># it was defined as &quot;def f(*args: Any, **kwargs: Any) -&gt; Optional[RequiresReturnTypeT]&quot;.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Since all functions decorated with @requires currently only accept a single argument,</span>
+    <span class="c1"># we choose to limit application of @requires to only functions of one argument.</span>
+    <span class="c1"># When typing.ParamSpec is available, this definition can be updated to use it.</span>
+    <span class="c1"># See https://github.com/arviz-devs/arviz/pull/1504 for more discussion.</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">RequiresArgTypeT</span><span class="p">],</span> <span class="n">RequiresReturnTypeT</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">RequiresArgTypeT</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RequiresReturnTypeT</span><span class="p">]]:</span>  <span class="c1"># noqa: D202</span>
+        <span class="sd">&quot;&quot;&quot;Wrap the decorated function.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">RequiresArgTypeT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RequiresReturnTypeT</span><span class="p">]:</span>
+            <span class="sd">&quot;&quot;&quot;Return None if not all props are available.&quot;&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">((</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">prop_i</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">prop_i</span> <span class="ow">in</span> <span class="n">prop</span><span class="p">)):</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapped</span>
+
+
+<span class="k">def</span> <span class="nf">generate_dims_coords</span><span class="p">(</span>
+    <span class="n">shape</span><span class="p">,</span>
+    <span class="n">var_name</span><span class="p">,</span>
+    <span class="n">dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">index_origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_event_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate default dimensions and coordinates for a variable.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shape : tuple[int]</span>
+<span class="sd">        Shape of the variable</span>
+<span class="sd">    var_name : str</span>
+<span class="sd">        Name of the variable. If no dimension name(s) is provided, ArviZ</span>
+<span class="sd">        will generate a default dimension name using ``var_name``, e.g.,</span>
+<span class="sd">        ``&quot;foo_dim_0&quot;`` for the first dimension if ``var_name`` is ``&quot;foo&quot;``.</span>
+<span class="sd">    dims : list</span>
+<span class="sd">        List of dimensions for the variable</span>
+<span class="sd">    coords : dict[str] -&gt; list[str]</span>
+<span class="sd">        Map of dimensions to coordinates</span>
+<span class="sd">    default_dims : list[str]</span>
+<span class="sd">        Dimension names that are not part of the variable&#39;s shape. For example,</span>
+<span class="sd">        when manipulating Monte Carlo traces, the ``default_dims`` would be</span>
+<span class="sd">        ``[&quot;chain&quot; , &quot;draw&quot;]`` which ArviZ uses as its own names for dimensions</span>
+<span class="sd">        of MCMC traces.</span>
+<span class="sd">    index_origin : int, optional</span>
+<span class="sd">        Starting value of integer coordinate values. Defaults to the value in rcParam</span>
+<span class="sd">        ``data.index_origin``.</span>
+<span class="sd">    skip_event_dims : bool, default False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[str]</span>
+<span class="sd">        Default dims</span>
+<span class="sd">    dict[str] -&gt; list[str]</span>
+<span class="sd">        Default coords</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">index_origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">index_origin</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;data.index_origin&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">default_dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_dims</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">skip_event_dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">skip_event_dims</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span>
+
+    <span class="n">ndims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">dim</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span> <span class="k">if</span> <span class="n">dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">default_dims</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">ndims</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">skip_event_dims</span><span class="p">:</span>
+            <span class="n">dims</span> <span class="o">=</span> <span class="n">dims</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s2">&quot;In variable </span><span class="si">{var_name}</span><span class="s2">, there are &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;more dims (</span><span class="si">{dims_len}</span><span class="s2">) given than exist (</span><span class="si">{shape_len}</span><span class="s2">). &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Passed array should have shape (</span><span class="si">{defaults}</span><span class="s2">*shape)&quot;</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">var_name</span><span class="o">=</span><span class="n">var_name</span><span class="p">,</span>
+                    <span class="n">dims_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">),</span>
+                    <span class="n">shape_len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span>
+                    <span class="n">defaults</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">default_dims</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="k">if</span> <span class="n">default_dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="ne">UserWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="n">skip_event_dims</span><span class="p">:</span>
+        <span class="c1"># this is needed in case the reduction keeps the dimension with size 1</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim_size</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">shape</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">dim</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dim_size</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">dim</span><span class="p">])):</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="n">dims</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">break</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dim_len</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="nb">len</span><span class="p">([</span><span class="n">dim</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">default_dims</span> <span class="k">if</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dim_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">_dim_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dim_name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dims</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dim_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">_dim_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dims</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">dim_name</span>
+        <span class="n">dim_name</span> <span class="o">=</span> <span class="n">dims</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dim_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">dim_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">index_origin</span><span class="p">,</span> <span class="n">dim_len</span> <span class="o">+</span> <span class="n">index_origin</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">coord</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="n">dim</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dims</span> <span class="o">+</span> <span class="n">default_dims</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">dims</span><span class="p">,</span> <span class="n">coords</span>
+
+
+<span class="k">def</span> <span class="nf">numpy_to_data_array</span><span class="p">(</span>
+    <span class="n">ary</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">index_origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_event_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a numpy array to an xarray.DataArray.</span>
+
+<span class="sd">    By default, the first two dimensions will be (chain, draw), and any remaining</span>
+<span class="sd">    dimensions will be &quot;shape&quot;.</span>
+<span class="sd">    * If the numpy array is 1d, this dimension is interpreted as draw</span>
+<span class="sd">    * If the numpy array is 2d, it is interpreted as (chain, draw)</span>
+<span class="sd">    * If the numpy array is 3 or more dimensions, the last dimensions are kept as shapes.</span>
+
+<span class="sd">    To modify this behaviour, use ``default_dims``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ary : np.ndarray</span>
+<span class="sd">        A numpy array. If it has 2 or more dimensions, the first dimension should be</span>
+<span class="sd">        independent chains from a simulation. Use `np.expand_dims(ary, 0)` to add a</span>
+<span class="sd">        single dimension to the front if there is only 1 chain.</span>
+<span class="sd">    var_name : str</span>
+<span class="sd">        If there are no dims passed, this string is used to name dimensions</span>
+<span class="sd">    coords : dict[str, iterable]</span>
+<span class="sd">        A dictionary containing the values that are used as index. The key</span>
+<span class="sd">        is the name of the dimension, the values are the index values.</span>
+<span class="sd">    dims : List(str)</span>
+<span class="sd">        A list of coordinate names for the variable</span>
+<span class="sd">    default_dims : list of str, optional</span>
+<span class="sd">        Passed to :py:func:`generate_dims_coords`. Defaults to ``[&quot;chain&quot;, &quot;draw&quot;]``, and</span>
+<span class="sd">        an empty list is accepted</span>
+<span class="sd">    index_origin : int, optional</span>
+<span class="sd">        Passed to :py:func:`generate_dims_coords`</span>
+<span class="sd">    skip_event_dims : bool</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xr.DataArray</span>
+<span class="sd">        Will have the same data as passed, but with coordinates and dimensions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># manage and transform copies</span>
+    <span class="k">if</span> <span class="n">default_dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_dims</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;chain&quot;</span> <span class="ow">in</span> <span class="n">default_dims</span> <span class="ow">and</span> <span class="s2">&quot;draw&quot;</span> <span class="ow">in</span> <span class="n">default_dims</span><span class="p">:</span>
+        <span class="n">ary</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">two_de</span><span class="p">(</span><span class="n">ary</span><span class="p">)</span>
+        <span class="n">n_chains</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">ary</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">n_chains</span> <span class="o">&gt;</span> <span class="n">n_samples</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;More chains (</span><span class="si">{n_chains}</span><span class="s2">) than draws (</span><span class="si">{n_samples}</span><span class="s2">). &quot;</span>
+                <span class="s2">&quot;Passed array should have shape (chains, draws, *shape)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">n_chains</span><span class="o">=</span><span class="n">n_chains</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span>
+                <span class="p">),</span>
+                <span class="ne">UserWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ary</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">one_de</span><span class="p">(</span><span class="n">ary</span><span class="p">)</span>
+
+    <span class="n">dims</span><span class="p">,</span> <span class="n">coords</span> <span class="o">=</span> <span class="n">generate_dims_coords</span><span class="p">(</span>
+        <span class="n">ary</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">default_dims</span><span class="p">)</span> <span class="p">:],</span>
+        <span class="n">var_name</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
+        <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+        <span class="n">default_dims</span><span class="o">=</span><span class="n">default_dims</span><span class="p">,</span>
+        <span class="n">index_origin</span><span class="o">=</span><span class="n">index_origin</span><span class="p">,</span>
+        <span class="n">skip_event_dims</span><span class="o">=</span><span class="n">skip_event_dims</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># reversed order for default dims: &#39;chain&#39;, &#39;draw&#39;</span>
+    <span class="k">if</span> <span class="s2">&quot;draw&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;draw&quot;</span> <span class="ow">in</span> <span class="n">default_dims</span><span class="p">:</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;draw&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">dims</span>
+    <span class="k">if</span> <span class="s2">&quot;chain&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;chain&quot;</span> <span class="ow">in</span> <span class="n">default_dims</span><span class="p">:</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;chain&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">dims</span>
+
+    <span class="n">index_origin</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;data.index_origin&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;chain&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coords</span> <span class="ow">and</span> <span class="s2">&quot;chain&quot;</span> <span class="ow">in</span> <span class="n">default_dims</span><span class="p">:</span>
+        <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;chain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">index_origin</span><span class="p">,</span> <span class="n">n_chains</span> <span class="o">+</span> <span class="n">index_origin</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;draw&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coords</span> <span class="ow">and</span> <span class="s2">&quot;draw&quot;</span> <span class="ow">in</span> <span class="n">default_dims</span><span class="p">:</span>
+        <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;draw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">index_origin</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">+</span> <span class="n">index_origin</span><span class="p">)</span>
+
+    <span class="c1"># filter coords based on the dims</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">IndexVariable</span><span class="p">((</span><span class="n">key</span><span class="p">,),</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">ary</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="dict_to_dataset"><a class="viewcode-back" href="../../../api/generated/arviz.dict_to_dataset.html#arviz.dict_to_dataset">[docs]</a><span class="k">def</span> <span class="nf">dict_to_dataset</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">library</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">index_origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_event_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a dictionary of numpy arrays to an xarray.Dataset.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : dict[str] -&gt; ndarray</span>
+<span class="sd">        Data to convert. Keys are variable names.</span>
+<span class="sd">    attrs : dict</span>
+<span class="sd">        Json serializable metadata to attach to the dataset, in addition to defaults.</span>
+<span class="sd">    library : module</span>
+<span class="sd">        Library used for performing inference. Will be attached to the attrs metadata.</span>
+<span class="sd">    coords : dict[str] -&gt; ndarray</span>
+<span class="sd">        Coordinates for the dataset</span>
+<span class="sd">    dims : dict[str] -&gt; list[str]</span>
+<span class="sd">        Dimensions of each variable. The keys are variable names, values are lists of</span>
+<span class="sd">        coordinates.</span>
+<span class="sd">    default_dims : list of str, optional</span>
+<span class="sd">        Passed to :py:func:`numpy_to_data_array`</span>
+<span class="sd">    index_origin : int, optional</span>
+<span class="sd">        Passed to :py:func:`numpy_to_data_array`</span>
+<span class="sd">    skip_event_dims : bool</span>
+<span class="sd">        If True, cut extra dims whenever present to match the shape of the data.</span>
+<span class="sd">        Necessary for PPLs which have the same name in both observed data and log</span>
+<span class="sd">        likelihood groups, to account for their different shapes when observations are</span>
+<span class="sd">        multivariate.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xr.Dataset</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    dict_to_dataset({&#39;x&#39;: np.random.randn(4, 100), &#39;y&#39;: np.random.rand(4, 100)})</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">data_vars</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">numpy_to_data_array</span><span class="p">(</span>
+            <span class="n">values</span><span class="p">,</span>
+            <span class="n">var_name</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
+            <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">),</span>
+            <span class="n">default_dims</span><span class="o">=</span><span class="n">default_dims</span><span class="p">,</span>
+            <span class="n">index_origin</span><span class="o">=</span><span class="n">index_origin</span><span class="p">,</span>
+            <span class="n">skip_event_dims</span><span class="o">=</span><span class="n">skip_event_dims</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">make_attrs</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="n">library</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">make_attrs</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make standard attributes to attach to xarray datasets.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    attrs : dict (optional)</span>
+<span class="sd">        Additional attributes to add or overwrite</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        attrs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s2">&quot;arviz_version&quot;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">library</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">library_name</span> <span class="o">=</span> <span class="n">library</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">default_attrs</span><span class="p">[</span><span class="s2">&quot;inference_library&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">library_name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">get_distribution</span><span class="p">(</span><span class="n">library_name</span><span class="p">)</span><span class="o">.</span><span class="n">version</span>
+            <span class="n">default_attrs</span><span class="p">[</span><span class="s2">&quot;inference_library_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="k">except</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">DistributionNotFound</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">library</span><span class="p">,</span> <span class="s2">&quot;__version__&quot;</span><span class="p">):</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="n">library</span><span class="o">.</span><span class="n">__version__</span>
+                <span class="n">default_attrs</span><span class="p">[</span><span class="s2">&quot;inference_library_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span>
+
+    <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">default_attrs</span>
+
+
+<span class="k">def</span> <span class="nf">_extend_xr_method</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">see_also</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make wrapper to extend methods from xr.Dataset to InferenceData Class.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    func : callable</span>
+<span class="sd">        An xr.Dataset function</span>
+<span class="sd">    doc : str</span>
+<span class="sd">        docstring for the func</span>
+<span class="sd">    description : str</span>
+<span class="sd">        the description of the func to be added in docstring</span>
+<span class="sd">    examples : str</span>
+<span class="sd">        the examples of the func to be added in docstring</span>
+<span class="sd">    see_also : str, list</span>
+<span class="sd">        the similar methods of func to be included in See Also section of docstring</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pydocstyle requires a non empty line</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">_filter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;filter_groups&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">_groups</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">_inplace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inplace&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">_inplace</span> <span class="k">else</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_names</span><span class="p">(</span><span class="n">_groups</span><span class="p">,</span> <span class="n">_filter</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+            <span class="n">xr_data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+            <span class="n">xr_data</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">xr_data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">xr_data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">_inplace</span> <span class="k">else</span> <span class="n">out</span>
+
+    <span class="n">description_default</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="si">{method_name}</span><span class="s2"> method is extended from xarray.Dataset methods.</span>
+
+<span class="s2">    </span><span class="si">{description}</span><span class="s2">For more info see :meth:`xarray:xarray.Dataset.</span><span class="si">{method_name}</span><span class="s2">`</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># pylint: disable=no-member</span>
+    <span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Parameters</span>
+<span class="s2">    ----------</span>
+<span class="s2">    groups: str or list of str, optional</span>
+<span class="s2">        Groups where the selection is to be applied. Can either be group names</span>
+<span class="s2">        or metagroup names.</span>
+<span class="s2">    filter_groups: {None, &quot;like&quot;, &quot;regex&quot;}, optional, default=None</span>
+<span class="s2">        If `None` (default), interpret groups as the real group or metagroup names.</span>
+<span class="s2">        If &quot;like&quot;, interpret groups as substrings of the real group or metagroup names.</span>
+<span class="s2">        If &quot;regex&quot;, interpret groups as regular expressions on the real group or</span>
+<span class="s2">        metagroup names. A la `pandas.filter`.</span>
+<span class="s2">    inplace: bool, optional</span>
+<span class="s2">        If ``True``, modify the InferenceData object inplace,</span>
+<span class="s2">        otherwise, return the modified copy.</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">see_also</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">see_also</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">see_also</span><span class="p">)</span>
+    <span class="n">see_also_basic</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    See Also</span>
+<span class="s2">    --------</span>
+<span class="s2">    xarray.Dataset.</span><span class="si">{method_name}</span><span class="s2"></span>
+<span class="s2">    </span><span class="si">{custom_see_also}</span><span class="s2"></span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">method_name</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">custom_see_also</span><span class="o">=</span><span class="n">see_also</span>  <span class="c1"># pylint: disable=no-member</span>
+    <span class="p">)</span>
+    <span class="n">wrapped</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">description_default</span> <span class="o">+</span> <span class="n">params</span> <span class="o">+</span> <span class="n">examples</span> <span class="o">+</span> <span class="n">see_also_basic</span> <span class="k">if</span> <span class="n">doc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">doc</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wrapped</span>
+
+
+<span class="k">def</span> <span class="nf">_make_json_serializable</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert `data` with numpy.ndarray-like values to JSON-serializable form.&quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_make_json_serializable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Value associated with variable `</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">` is not JSON serializable.&quot;</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="k">def</span> <span class="nf">infer_stan_dtypes</span><span class="p">(</span><span class="n">stan_code</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Infer Stan integer variables from generated quantities block.&quot;&quot;&quot;</span>
+    <span class="c1"># Remove old deprecated comments</span>
+    <span class="n">stan_code</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">line</span> <span class="k">if</span> <span class="s2">&quot;#&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="k">else</span> <span class="n">line</span><span class="p">[:</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stan_code</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">pattern_remove_comments</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;//.*?$|/\*.*?\*/|</span><span class="se">\&#39;</span><span class="s1">(?:</span><span class="se">\\</span><span class="s1">.|[^</span><span class="se">\\\&#39;</span><span class="s1">])*</span><span class="se">\&#39;</span><span class="s1">|&quot;(?:</span><span class="se">\\</span><span class="s1">.|[^</span><span class="se">\\</span><span class="s1">&quot;])*&quot;&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span>
+    <span class="p">)</span>
+    <span class="n">stan_code</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pattern_remove_comments</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">stan_code</span><span class="p">)</span>
+
+    <span class="c1"># Check generated quantities</span>
+    <span class="k">if</span> <span class="s2">&quot;generated quantities&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stan_code</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="c1"># Extract generated quantities block</span>
+    <span class="n">gen_quantities_location</span> <span class="o">=</span> <span class="n">stan_code</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;generated quantities&quot;</span><span class="p">)</span>
+    <span class="n">block_start</span> <span class="o">=</span> <span class="n">gen_quantities_location</span> <span class="o">+</span> <span class="n">stan_code</span><span class="p">[</span><span class="n">gen_quantities_location</span><span class="p">:]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span>
+
+    <span class="n">curly_bracket_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">block_end</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">block_end</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stan_code</span><span class="p">[</span><span class="n">block_start</span><span class="p">:],</span> <span class="n">block_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;{&quot;</span><span class="p">:</span>
+            <span class="n">curly_bracket_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;}&quot;</span><span class="p">:</span>
+            <span class="n">curly_bracket_count</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">curly_bracket_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+
+    <span class="n">stan_code</span> <span class="o">=</span> <span class="n">stan_code</span><span class="p">[</span><span class="n">block_start</span><span class="p">:</span><span class="n">block_end</span><span class="p">]</span>
+
+    <span class="n">stan_integer</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;int&quot;</span>
+    <span class="n">stan_limits</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(?:\&lt;[^\&gt;]+\&gt;)*&quot;</span>  <span class="c1"># ignore group: 0 or more &lt;....&gt;</span>
+    <span class="n">stan_param</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([^;=\s\[]+)&quot;</span>  <span class="c1"># capture group: ends= &quot;;&quot;, &quot;=&quot;, &quot;[&quot; or whitespace</span>
+    <span class="n">stan_ws</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\s*&quot;</span>  <span class="c1"># 0 or more whitespace</span>
+    <span class="n">stan_ws_one</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\s+&quot;</span>  <span class="c1"># 1 or more whitespace</span>
+    <span class="n">pattern_int</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">stan_integer</span><span class="p">,</span> <span class="n">stan_ws_one</span><span class="p">,</span> <span class="n">stan_limits</span><span class="p">,</span> <span class="n">stan_ws</span><span class="p">,</span> <span class="n">stan_param</span><span class="p">)),</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
+    <span class="p">)</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span> <span class="s2">&quot;int&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pattern_int</span><span class="p">,</span> <span class="n">stan_code</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="n">dtypes</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

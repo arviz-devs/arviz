@@ -1,0 +1,6 @@
+arviz.labels.MapLabeller.make\_label\_flat
+==========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: MapLabeller.make_label_flat

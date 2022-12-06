@@ -1,0 +1,32 @@
+﻿arviz.labels.IdxLabeller
+========================
+
+.. currentmodule:: arviz.labels
+
+.. autoclass:: IdxLabeller
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      IdxLabeller.__init__
+      IdxLabeller.dim_coord_to_str
+      IdxLabeller.make_label_flat
+      IdxLabeller.make_label_vert
+      IdxLabeller.make_model_label
+      IdxLabeller.make_pp_label
+      IdxLabeller.model_name_to_str
+      IdxLabeller.sel_to_str
+      IdxLabeller.var_name_to_str
+      IdxLabeller.var_pp_to_str
+   
+   
+
+   
+   
+   

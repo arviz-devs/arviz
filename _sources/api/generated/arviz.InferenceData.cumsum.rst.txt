@@ -1,0 +1,6 @@
+arviz.InferenceData.cumsum
+==========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.cumsum

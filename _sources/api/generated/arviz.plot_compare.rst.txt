@@ -1,0 +1,6 @@
+﻿arviz.plot\_compare
+===================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_compare

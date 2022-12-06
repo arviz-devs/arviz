@@ -1,0 +1,982 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17.1: http://docutils.sourceforge.net/" name="generator"/>
+<title>Plots’ arguments guide — ArviZ dev documentation</title>
+<script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+<!-- Loaded before other Sphinx assets -->
+<link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link as="font" crossorigin="" href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" rel="preload" type="font/woff2"/>
+<link href="../_static/pygments.css" rel="stylesheet" type="text/css">
+<link href="../_static/plot_directive.css" rel="stylesheet" type="text/css">
+<link href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" rel="stylesheet" type="text/css">
+<link href="../_static/copybutton.css" rel="stylesheet" type="text/css">
+<link href="../_static/sphinx-codeautolink.css" rel="stylesheet" type="text/css">
+<link href="../_static/jupyter-sphinx.css" rel="stylesheet" type="text/css">
+<link href="../_static/thebelab.css" rel="stylesheet" type="text/css">
+<link href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" rel="stylesheet" type="text/css"/>
+<link href="../_static/custom.css" rel="stylesheet" type="text/css"/>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94" rel="preload"/>
+<link as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94" rel="preload"/>
+<script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+<script src="../_static/jquery.js"></script>
+<script src="../_static/underscore.js"></script>
+<script src="../_static/doctools.js"></script>
+<script src="../_static/clipboard.min.js"></script>
+<script src="../_static/copybutton.js"></script>
+<script src="../_static/thebelab-helper.js"></script>
+<script src="../_static/design-tabs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/plots_arguments_guide';</script>
+<link href="../_static/favicon.ico" rel="shortcut icon">
+<link href="../genindex.html" rel="index" title="Index">
+<link href="../search.html" rel="search" title="Search"/>
+<link href="plotting_with_matplotlib.html" rel="next" title="Plotting with Matplotlib"/>
+<link href="plotting.html" rel="prev" title="Plotting"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="None" name="docsearch:language"/>
+</link></link></link></link></link></link></link></link></link></head>
+<body data-default-mode="light" data-offset="180" data-spy="scroll" data-target="#bd-toc-nav">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<input class="sidebar-toggle" id="__primary" name="__primary" type="checkbox"/>
+<label class="overlay overlay-primary" for="__primary"></label>
+<input class="sidebar-toggle" id="__secondary" name="__secondary" type="checkbox"/>
+<label class="overlay overlay-secondary" for="__secondary"></label>
+<div class="search-button__wrapper">
+<div class="search-button__overlay"></div>
+<div class="search-button__search-container">
+<form action="../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" id="search-input" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+</div>
+</div>
+<nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+<label class="sidebar-toggle primary-toggle" for="__primary">
+<span class="fa-solid fa-bars"></span>
+</label>
+<div id="navbar-start">
+<a class="navbar-brand logo" href="../index.html">
+<img alt="Logo image" class="logo__image only-light" src="../_static/logo.png"/>
+<img alt="Logo image" class="logo__image only-dark" src="../_static/logo_dark.png"/>
+</a>
+    
+    dev
+    
+  </div>
+<div class="col-lg-9 navbar-header-items">
+<div class="mr-auto" id="navbar-center">
+<div class="navbar-center-item">
+<nav class="navbar-nav">
+<p aria-label="Site Navigation" aria-level="1" class="sidebar-header-items__title" role="heading">
+        Site Navigation
+    </p>
+<ul class="navbar-nav" id="navbar-main-elements">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+                        Example Gallery
+                      </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<div id="navbar-end">
+<div class="navbar-end-item navbar-persistent--container">
+<button aria-label="Search" class="btn btn-sm navbar-btn search-button search-button__button" data-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+</div>
+<div class="navbar-end-item">
+<button aria-label="light/dark" class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" data-toggle="tooltip" title="light/dark">
+<span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+<span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+<span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+</div>
+<div class="navbar-end-item">
+<ul aria-label="Icon Links" class="navbar-nav" id="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://github.com/arviz-devs/arviz" rel="noopener" target="_blank" title="GitHub"><span><i class="fa-brands fa-github"></i></span>
+<label class="sr-only">GitHub</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://twitter.com/arviz_devs" rel="noopener" target="_blank" title="Twitter"><span><i class="fa-brands fa-twitter"></i></span>
+<label class="sr-only">Twitter</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://bayes.club/@ArviZ" rel="noopener" target="_blank" title="Mastodon"><span><i class="fa-brands fa-mastodon"></i></span>
+<label class="sr-only">Mastodon</label></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="navbar-persistent--mobile">
+<button aria-label="Search" class="btn btn-sm navbar-btn search-button search-button__button" data-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+</div>
+<label class="sidebar-toggle secondary-toggle" for="__secondary">
+<span class="fa-solid fa-outdent"></span>
+</label>
+</div>
+</nav>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<div class="bd-sidebar-primary bd-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-center-item">
+<nav class="navbar-nav">
+<p aria-label="Site Navigation" aria-level="1" class="sidebar-header-items__title" role="heading">
+        Site Navigation
+    </p>
+<ul class="navbar-nav" id="navbar-main-elements">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+                        Example Gallery
+                      </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<div class="sidebar-header-items__end">
+<div class="navbar-end-item">
+<button aria-label="light/dark" class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" data-toggle="tooltip" title="light/dark">
+<span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+<span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+<span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+</div>
+<div class="navbar-end-item">
+<ul aria-label="Icon Links" class="navbar-nav" id="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://github.com/arviz-devs/arviz" rel="noopener" target="_blank" title="GitHub"><span><i class="fa-brands fa-github"></i></span>
+<label class="sr-only">GitHub</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://twitter.com/arviz_devs" rel="noopener" target="_blank" title="Twitter"><span><i class="fa-brands fa-twitter"></i></span>
+<label class="sr-only">Twitter</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://bayes.club/@ArviZ" rel="noopener" target="_blank" title="Mastodon"><span><i class="fa-brands fa-mastodon"></i></span>
+<label class="sr-only">Mastodon</label></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sidebar-start-items sidebar-primary__section">
+<div class="sidebar-start-items__item"><nav aria-label="Section navigation" class="bd-links" id="bd-docs-nav">
+<p aria-level="1" class="bd-links__title" role="heading">
+    Section Navigation
+  </p>
+<div class="bd-toc-item navbar-nav">
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="plotting.html">Plotting</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Plots’ arguments guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_with_matplotlib.html">Plotting with Matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_with_bokeh.html">Plotting with Bokeh</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="data_structures.html">Data structures</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="label_guide.html">Label guide</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../schema/schema.html">InferenceData schema specification</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../schema/PyMC3_schema_example.html">PyMC3 example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../schema/PyStan_schema_example.html">PyStan example</a></li>
+</ul>
+</input></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="computation.html">Computation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="Numba.html">Numba -  an overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dask.html">Dask for ArviZ</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="sampling_wrappers.html">Sampling wrappers</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="wrappers/cmdstanpy_refitting.html">Refitting CmdStanPy models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pystan_refitting.html">Refitting PyStan (3.0+) models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymc_refitting.html">Refitting PyMC models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numpyro_refitting.html">Refitting NumPyro models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numpyro_refitting_xr_lik.html">Refitting NumPyro models with ArviZ (and xarray)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+</div>
+</div>
+<div class="sidebar-end-items sidebar-primary__section">
+<div class="sidebar-end-items__item">
+</div>
+</div>
+<div id="rtd-footer-container"></div>
+</div>
+<main class="bd-main" id="main-content">
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article">
+</div>
+<article class="bd-article" role="main">
+<section class="tex2jax_ignore mathjax_ignore" id="plots-arguments-guide">
+<span id="id1"></span><h1>Plots’ arguments guide<a class="headerlink" href="#plots-arguments-guide" title="Permalink to this headline">#</a></h1>
+<p>Arviz <a class="reference internal" href="../api/plots.html#plot-api"><span class="std std-ref">plot</span></a> module is used for plotting data.
+It consists many functions that each serve different purposes.
+Most of these plotting functions have common arguments.
+These common arguments are explained in the following examples,
+which use one specific function to illustrate the usage but
+the behaviour described here will be the same for the
+other functions with the same argument.</p>
+<p>This page can be downloaded as a <a class="reference download internal" download="" href="../_downloads/5af4e95dba275705b2c91a719dbc88b1/plots_arguments_guide.ipynb"><code class="xref download myst-nb docutils literal notranslate"><span class="pre">Jupyter</span> <span class="pre">notebook</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">centered_eight</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.load_arviz_data.html#arviz.load_arviz_data" title="arviz.load_arviz_data"><span class="n">az</span><span class="o">.</span><span class="n">load_arviz_data</span></a><span class="p">(</span><span class="s1">'centered_eight'</span><span class="p">)</span>
+<span class="n">non_centered_eight</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.load_arviz_data.html#arviz.load_arviz_data" title="arviz.load_arviz_data"><span class="n">az</span><span class="o">.</span><span class="n">load_arviz_data</span></a><span class="p">(</span><span class="s1">'non_centered_eight'</span><span class="p">)</span>
+
+<span class="n">x_data</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html#numpy.random.normal" title="numpy.random.normal"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">y_data</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html#numpy.random.normal" title="numpy.random.normal"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span></a><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x_data</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"arviz-doc"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Page in construction</p>
+</div>
+<section id="var-names">
+<span id="common-var-names"></span><h2><code class="docutils literal notranslate"><span class="pre">var_names</span></code><a class="headerlink" href="#var-names" title="Permalink to this headline">#</a></h2>
+<p>Variables to be plotted. If None all variables are plotted.
+Prefix the variables by <code class="docutils literal notranslate"><span class="pre">~</span></code> when you want to exclude them from the plot.
+Let’s see the examples.</p>
+<p>Plot all variables, which is the default behavior:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/eee0aeb8b95473ac7fbd28e53003c9ed16b8d0bde120f6f54530da6f701ee202.png" src="../_images/eee0aeb8b95473ac7fbd28e53003c9ed16b8d0bde120f6f54530da6f701ee202.png">
+</img></div>
+</div>
+<p>Plot one variable by setting <code class="docutils literal notranslate"><span class="pre">var_names="var1"</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s1">'mu'</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/738f0f3e6400a637915aa71f6011d5b5ccffca651ca5a786e403c85f0bc1c916.png" src="../_images/738f0f3e6400a637915aa71f6011d5b5ccffca651ca5a786e403c85f0bc1c916.png">
+</img></div>
+</div>
+<p>Plot subset variables by specifying variable name exactly:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'mu'</span><span class="p">,</span> <span class="s1">'tau'</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/6b31d69905bb6a5b73c670163d1e249f94b7a42eb760bd0c88cb4edfc0eeeb03.png" src="../_images/6b31d69905bb6a5b73c670163d1e249f94b7a42eb760bd0c88cb4edfc0eeeb03.png"/>
+</div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">var_names</span></code> to indicate which variables to exclude with the <code class="docutils literal notranslate"><span class="pre">~</span></code> prefix:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'~mu'</span><span class="p">,</span> <span class="s1">'~theta'</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/937cb48cc2e1fafad696e24b53de7408f4dba05258f93c125f0a885f4215c008.png" src="../_images/937cb48cc2e1fafad696e24b53de7408f4dba05258f93c125f0a885f4215c008.png"/>
+</div>
+</div>
+<p>Variables do not need to be strings to be used. Anything that is
+hashable will work.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mu</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"mu"</span><span class="p">,</span> <span class="s2">"var"</span><span class="p">)</span>
+<span class="n">samples</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html#numpy.random.normal" title="numpy.random.normal"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.dict_to_dataset.html#arviz.dict_to_dataset" title="arviz.dict_to_dataset"><span class="n">az</span><span class="o">.</span><span class="n">dict_to_dataset</span></a><span class="p">({</span><span class="n">mu</span><span class="p">:</span> <span class="n">samples</span><span class="p">})</span>
+<a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/1ff6c92ef5d3c80332d0d128ee4c23b95fb13f1a71d8f58ea646c652547d8e45.png" src="../_images/1ff6c92ef5d3c80332d0d128ee4c23b95fb13f1a71d8f58ea646c652547d8e45.png"/>
+</div>
+</div>
+</section>
+<section id="filter-vars">
+<span id="common-filter-vars"></span><h2><code class="docutils literal notranslate"><span class="pre">filter_vars</span></code><a class="headerlink" href="#filter-vars" title="Permalink to this headline">#</a></h2>
+<p>If None (default), interpret <code class="docutils literal notranslate"><span class="pre">var_names</span></code> as the real variables names,
+as shown in <a class="reference internal" href="#common-var-names"><span class="std std-ref">the previous section</span></a>.
+This argument is inspired in <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.filter.html#pandas.DataFrame.filter" title="(in pandas v1.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.filter()</span></code></a>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">“like”</span></code>, interpret <code class="docutils literal notranslate"><span class="pre">var_names</span></code> as substrings of the real variables names.
+Each substring is checked against all present variable names and the
+list of matching variables to be plotted is generated.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s1">'ta'</span><span class="p">,</span> <span class="n">filter_vars</span><span class="o">=</span><span class="s2">"like"</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/5827cb5a555fbe45258b565e86f911a670acba8ed18949c9aafdfc6cca09185e.png" src="../_images/5827cb5a555fbe45258b565e86f911a670acba8ed18949c9aafdfc6cca09185e.png"/>
+</div>
+</div>
+<p>Both <code class="docutils literal notranslate"><span class="pre">tau</span></code> and <code class="docutils literal notranslate"><span class="pre">theta</span></code> have <code class="docutils literal notranslate"><span class="pre">ta</span></code> inside them, so only <code class="docutils literal notranslate"><span class="pre">mu</span></code> is excluded in this case.
+You can also use lists and you can also use the <code class="docutils literal notranslate"><span class="pre">~</span></code> prefix to indicate
+that all variables containing that substring should be excluded.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s1">'~ta'</span><span class="p">,</span> <span class="n">filter_vars</span><span class="o">=</span><span class="s2">"like"</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/738f0f3e6400a637915aa71f6011d5b5ccffca651ca5a786e403c85f0bc1c916.png" src="../_images/738f0f3e6400a637915aa71f6011d5b5ccffca651ca5a786e403c85f0bc1c916.png"/>
+</div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">“regex”</span></code>, interpret <code class="docutils literal notranslate"><span class="pre">var_names</span></code> as regular expressions on the real variables names.
+The regular expression <code class="docutils literal notranslate"><span class="pre">u$</span></code> matches the letter “u” at the end of the line
+(end of the variable name in this case). So it will match <code class="docutils literal notranslate"><span class="pre">mu</span></code> and <code class="docutils literal notranslate"><span class="pre">tau</span></code>
+variables:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"u$"</span><span class="p">,</span> <span class="n">filter_vars</span><span class="o">=</span><span class="s2">"regex"</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/6b31d69905bb6a5b73c670163d1e249f94b7a42eb760bd0c88cb4edfc0eeeb03.png" src="../_images/6b31d69905bb6a5b73c670163d1e249f94b7a42eb760bd0c88cb4edfc0eeeb03.png"/>
+</div>
+</div>
+<p>Again, like with <code class="docutils literal notranslate"><span class="pre">filter_vars="like"</span></code>, a list of regular expressions can
+also be provided as well as negative conditions with <code class="docutils literal notranslate"><span class="pre">~</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When providing a list of regular expressions and substring matches,
+they are expanded independently.</p>
+</div>
+</section>
+<section id="coords">
+<span id="common-coords"></span><h2><code class="docutils literal notranslate"><span class="pre">coords</span></code><a class="headerlink" href="#coords" title="Permalink to this headline">#</a></h2>
+<p>Dictionary mapping dimensions to selected coordinates to be plotted.
+Dimensions without a mapping specified will include the data corresponding
+to all coordinate values for that dimension.
+It defaults to including all coordinates for all dimensions.</p>
+<p>Using coords argument to plot only a subset of data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"school"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Choate"</span><span class="p">,</span> <span class="s2">"Phillips Exeter"</span><span class="p">]};</span>
+<a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"mu"</span><span class="p">,</span> <span class="s2">"theta"</span><span class="p">],</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/506ffe887eaf66bb22749ab6ff4db64aa713775071b9a19dc4edc984c68f5e44.png" src="../_images/506ffe887eaf66bb22749ab6ff4db64aa713775071b9a19dc4edc984c68f5e44.png"/>
+</div>
+</div>
+</section>
+<section id="combined">
+<span id="common-combined"></span><h2><code class="docutils literal notranslate"><span class="pre">combined</span></code><a class="headerlink" href="#combined" title="Permalink to this headline">#</a></h2>
+<p>Flag for combining multiple chains into a single chain.
+When <code class="docutils literal notranslate"><span class="pre">True</span></code>, chains are combined into a single plot/line,
+when <code class="docutils literal notranslate"><span class="pre">False</span></code> each chain is plotted independently
+(either beside each other or each in their own subplot).
+While the behaviour of the parameter is the same in all plots,
+its default depends on the plotting function.</p>
+<p>Plot each chain separately:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_forest.html#arviz.plot_forest" title="arviz.plot_forest"><span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"mu"</span><span class="p">,</span> <span class="s2">"tau"</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/867b54b9942ca823c3c7874abcc4fe08a508bb372eb815a2a010069c9cf536d2.png" src="../_images/867b54b9942ca823c3c7874abcc4fe08a508bb372eb815a2a010069c9cf536d2.png"/>
+</div>
+</div>
+<p>Plot all chains collapsed into a single line:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_forest.html#arviz.plot_forest" title="arviz.plot_forest"><span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"mu"</span><span class="p">,</span> <span class="s2">"tau"</span><span class="p">],</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/efa02280709a1f3282b33ffed6ce4962661fb81db9927f874a591352c0ce3b9a.png" src="../_images/efa02280709a1f3282b33ffed6ce4962661fb81db9927f874a591352c0ce3b9a.png"/>
+</div>
+</div>
+</section>
+<section id="combine-dims">
+<span id="common-combine-dims"></span><h2><code class="docutils literal notranslate"><span class="pre">combine_dims</span></code><a class="headerlink" href="#combine-dims" title="Permalink to this headline">#</a></h2>
+<p>Set like argument containing dimensions to reduce for plots that represent probability
+distributions. When used, the dimensions on <code class="docutils literal notranslate"><span class="pre">combine_dims</span></code> are added to <code class="docutils literal notranslate"><span class="pre">chain</span></code> and
+<code class="docutils literal notranslate"><span class="pre">draw</span></code> dimensions and reduced to generate a single KDE/histogram/dot plot from &gt;2D
+arrays.</p>
+<p><code class="docutils literal notranslate"><span class="pre">combine_dims</span></code> dims can be used to generate the KDE of the distribution of <code class="docutils literal notranslate"><span class="pre">theta</span></code>
+when combining all schools together.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"mu"</span><span class="p">,</span> <span class="s2">"theta"</span><span class="p">],</span> <span class="n">combine_dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">});</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/09cecdab52f850da561733d43b335c0ffb7df06bca0274f5f1d87bd22322cd96.png" src="../_images/09cecdab52f850da561733d43b335c0ffb7df06bca0274f5f1d87bd22322cd96.png"/>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">plot_pair</span></code> also supports <code class="docutils literal notranslate"><span class="pre">combine_dims</span></code> argument, but it’s the users responsibility
+to ensure the variables to be plotted have compatible dimensions when reducing
+them pairwise.</p>
+</div>
+<p>Both <code class="docutils literal notranslate"><span class="pre">theta</span></code> and <code class="docutils literal notranslate"><span class="pre">theta_t</span></code> have the <code class="docutils literal notranslate"><span class="pre">school</span></code> dimension, so we can use <code class="docutils literal notranslate"><span class="pre">combine_dims</span></code>
+in <code class="docutils literal notranslate"><span class="pre">plot_pair</span></code> to generate their global 2d KDE.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_pair.html#arviz.plot_pair" title="arviz.plot_pair"><span class="n">az</span><span class="o">.</span><span class="n">plot_pair</span></a><span class="p">(</span>
+    <span class="n">non_centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"theta"</span><span class="p">,</span> <span class="s2">"theta_t"</span><span class="p">],</span> <span class="n">combine_dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">},</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"kde"</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/632a9aa3983e28e881fd85d39ee91e36c2b73bbd2452ec4e212f6fe71f77feed.png" src="../_images/632a9aa3983e28e881fd85d39ee91e36c2b73bbd2452ec4e212f6fe71f77feed.png"/>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">mu</span></code> however does not, so trying to plot their combined distribution errors out:</p>
+<div class="cell tag_raises-exception tag_hide-output docutils container">
+<div class="cell_input above-output-prompt docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_pair.html#arviz.plot_pair" title="arviz.plot_pair"><span class="n">az</span><span class="o">.</span><span class="n">plot_pair</span></a><span class="p">(</span><span class="n">non_centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"theta"</span><span class="p">,</span> <span class="s2">"mu"</span><span class="p">],</span> <span class="n">combine_dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">});</span>
+</pre></div>
+</div>
+</div>
+<details class="hide below-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell output</span>
+<span class="expanded">Hide code cell output</span>
+</summary>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">17</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">az</span><span class="o">.</span><span class="n">plot_pair</span><span class="p">(</span><span class="n">non_centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"theta"</span><span class="p">,</span> <span class="s2">"mu"</span><span class="p">],</span> <span class="n">combine_dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">});</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/arviz/plots/pairplot.py:272,</span> in <span class="ni">plot_pair</span><span class="nt">(data, group, var_names, filter_vars, combine_dims, coords, marginals, figsize, textsize, kind, gridsize, divergences, colorbar, labeller, ax, divergences_kwargs, scatter_kwargs, kde_kwargs, hexbin_kwargs, backend, backend_kwargs, marginal_kwargs, point_estimate, point_estimate_kwargs, point_estimate_marker_kwargs, reference_values, reference_values_kwargs, show)</span>
+<span class="g g-Whitespace">    </span><span class="mi">270</span> <span class="c1"># TODO: Add backend kwargs</span>
+<span class="g g-Whitespace">    </span><span class="mi">271</span> <span class="n">plot</span> <span class="o">=</span> <span class="n">get_plotting_function</span><span class="p">(</span><span class="s2">"plot_pair"</span><span class="p">,</span> <span class="s2">"pairplot"</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">272</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">pairplot_kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">273</span> <span class="k">return</span> <span class="n">ax</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/arviz/plots/backends/matplotlib/pairplot.py:176,</span> in <span class="ni">plot_pair</span><span class="nt">(ax, plotters, numvars, figsize, textsize, kind, scatter_kwargs, kde_kwargs, hexbin_kwargs, gridsize, colorbar, divergences, diverging_mask, divergences_kwargs, flat_var_names, backend_kwargs, marginal_kwargs, show, marginals, point_estimate, point_estimate_kwargs, point_estimate_marker_kwargs, reference_values, reference_values_kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">173</span>         <span class="n">ax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">ax</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">175</span> <span class="k">if</span> <span class="s2">"scatter"</span> <span class="ow">in</span> <span class="n">kind</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">176</span>     <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">177</span> <span class="k">if</span> <span class="s2">"kde"</span> <span class="ow">in</span> <span class="n">kind</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">178</span>     <span class="n">plot_kde</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kde_kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/matplotlib/__init__.py:1423,</span> in <span class="ni">_preprocess_data.&lt;locals&gt;.inner</span><span class="nt">(ax, data, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1420</span> <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1421</span> <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1422</span>     <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1423</span>         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">sanitize_sequence</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1425</span>     <span class="n">bound</span> <span class="o">=</span> <span class="n">new_sig</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1426</span>     <span class="n">auto_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">bound</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">label_namer</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1427</span>                   <span class="ow">or</span> <span class="n">bound</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">label_namer</span><span class="p">))</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/matplotlib/axes/_axes.py:4520,</span> in <span class="ni">Axes.scatter</span><span class="nt">(self, x, y, s, c, marker, cmap, norm, vmin, vmax, alpha, linewidths, edgecolors, plotnonfinite, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">4518</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">4519</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">4520</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"x and y must be the same size"</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">4522</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">4523</span>     <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="mi">20</span> <span class="k">if</span> <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'_internal.classic_mode'</span><span class="p">]</span> <span class="k">else</span>
+<span class="g g-Whitespace">   </span><span class="mi">4524</span>          <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'lines.markersize'</span><span class="p">]</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span>
+
+<span class="ne">ValueError</span>: x and y must be the same size
+</pre></div>
+</div>
+<img alt="../_images/a33b9a15b64748d2a1ae599d755567fc45dc4ef1e562384bd290e1a9e287fc5c.png" src="../_images/a33b9a15b64748d2a1ae599d755567fc45dc4ef1e562384bd290e1a9e287fc5c.png"/>
+</div>
+</details>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">combine_dims</span></code> can be used alongside <code class="docutils literal notranslate"><span class="pre">combined</span></code>, but it can’t be used to replace it.
+When <code class="docutils literal notranslate"><span class="pre">combined=True</span></code>, ArviZ does extra processing in addition to adding
+<code class="docutils literal notranslate"><span class="pre">"chain"</span></code> to <code class="docutils literal notranslate"><span class="pre">combine_dims</span></code> under the hood. Therefore:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_forest.html#arviz.plot_forest" title="arviz.plot_forest"><span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span></a><span class="p">(</span>
+    <span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"theta"</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">combine_dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">}</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/2edc10cac4d8e3288bb051b2642896e9ec6f181cc49fcae4858851f45744120e.png" src="../_images/2edc10cac4d8e3288bb051b2642896e9ec6f181cc49fcae4858851f45744120e.png"/>
+</div>
+</div>
+<p>is not equivalent to:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_forest.html#arviz.plot_forest" title="arviz.plot_forest"><span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span></a><span class="p">(</span>
+    <span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"theta"</span><span class="p">,</span> <span class="n">combine_dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"chain"</span><span class="p">,</span> <span class="s2">"school"</span><span class="p">}</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/2c3b86096828b330a0de86d2edf4cf7aa6a97536636ec8592c5e3385dc6929c3.png" src="../_images/2c3b86096828b330a0de86d2edf4cf7aa6a97536636ec8592c5e3385dc6929c3.png"/>
+</div>
+</div>
+</section>
+<section id="hdi-prob">
+<span id="common-hdi-prob"></span><h2><code class="docutils literal notranslate"><span class="pre">hdi_prob</span></code><a class="headerlink" href="#hdi-prob" title="Permalink to this headline">#</a></h2>
+<p>Probability for the highest density interval (HDI).
+Defaults to <code class="docutils literal notranslate"><span class="pre">stats.hdi_prob</span></code> rcParam.</p>
+<p>Plot the 80% HDI interval of simulated regression data using <code class="docutils literal notranslate"><span class="pre">y</span></code> argument:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"mu"</span><span class="p">,</span> <span class="n">hdi_prob</span><span class="o">=</span><span class="mf">0.8</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/5ff9c61450e2318022e966cb744ee0c970c44612dda671484d40ba8a40621806.png" src="../_images/5ff9c61450e2318022e966cb744ee0c970c44612dda671484d40ba8a40621806.png"/>
+</div>
+</div>
+</section>
+<section id="grid">
+<span id="common-grid"></span><h2><code class="docutils literal notranslate"><span class="pre">grid</span></code><a class="headerlink" href="#grid" title="Permalink to this headline">#</a></h2>
+<p>Number of rows and columns. Defaults to None, the rows and columns are automatically inferred.</p>
+<p>Plot variables in a 4x5 grid:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_density.html#arviz.plot_density" title="arviz.plot_density"><span class="n">az</span><span class="o">.</span><span class="n">plot_density</span></a><span class="p">([</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">non_centered_eight</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/cbe57f2aeef039f5ab0719974563bed428a59df038818b0bfa035a74e798da7b.png" src="../_images/cbe57f2aeef039f5ab0719974563bed428a59df038818b0bfa035a74e798da7b.png"/>
+</div>
+</div>
+</section>
+<section id="figsize">
+<span id="common-figsize"></span><h2><code class="docutils literal notranslate"><span class="pre">figsize</span></code><a class="headerlink" href="#figsize" title="Permalink to this headline">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">figsize</span></code> is short for figure size, expressed as a tuple.
+By default it is defined automatically.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"mu"</span><span class="p">,</span> <span class="s2">"tau"</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/cd1a55786d6ec48d6001b66fbdee5998124144b313f3bb5bfcbc1e413a82d5c3.png" src="../_images/cd1a55786d6ec48d6001b66fbdee5998124144b313f3bb5bfcbc1e413a82d5c3.png"/>
+</div>
+</div>
+</section>
+<section id="textsize">
+<span id="common-textsize"></span><h2><code class="docutils literal notranslate"><span class="pre">textsize</span></code><a class="headerlink" href="#textsize" title="Permalink to this headline">#</a></h2>
+<p>Text size for labels, titles and lines.
+By default it is autoscaled based on <code class="docutils literal notranslate"><span class="pre">figsize</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"theta"</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">textsize</span><span class="o">=</span><span class="mi">30</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/a5689fcab51ff45ab75971516e4fbcb45f6d734c0a1c88607f997e9f0d745344.png" src="../_images/a5689fcab51ff45ab75971516e4fbcb45f6d734c0a1c88607f997e9f0d745344.png"/>
+</div>
+</div>
+</section>
+<section id="color-or-colors">
+<span id="common-color"></span><h2><code class="docutils literal notranslate"><span class="pre">color</span></code> or <code class="docutils literal notranslate"><span class="pre">colors</span></code><a class="headerlink" href="#color-or-colors" title="Permalink to this headline">#</a></h2>
+<p>Color used for the main element or elements of the plot.
+It should be a valid matplotlib color, even if using the bokeh backend.</p>
+<p>While both libraries use CSS colors as their base named colors,
+matplotlib also supports theme based colors like <code class="docutils literal notranslate"><span class="pre">C0</span></code> as well
+as tableau and xkcd colors. ArviZ converts the provided colors
+to hex RGB format using matplotlib before passing it to either
+plotting backend.</p>
+<p>Plot the HDI interval of simulated regression data using <code class="docutils literal notranslate"><span class="pre">y</span></code> argument, in red:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_hdi.html#arviz.plot_hdi" title="arviz.plot_hdi"><span class="n">az</span><span class="o">.</span><span class="n">plot_hdi</span></a><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/0c09bbc55231316e59e6983008d3f450bcd33b7a74deebf7363bbb8ec32a38a8.png" src="../_images/0c09bbc55231316e59e6983008d3f450bcd33b7a74deebf7363bbb8ec32a38a8.png"/>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">colors</span></code> behaves like <code class="docutils literal notranslate"><span class="pre">color</span></code> but it takes an iterable of colors instead
+of a single color. The number of colors to be provided is defined by
+the models being compared (like in <code class="docutils literal notranslate"><span class="pre">plot_density</span></code>) of by the number
+of different quantities being plotted (like in <code class="docutils literal notranslate"><span class="pre">plot_ppc</span></code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In <a class="reference internal" href="../api/generated/arviz.plot_elpd.html#arviz.plot_elpd" title="arviz.plot_elpd"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_elpd()</span></code></a> and <a class="reference internal" href="../api/generated/arviz.plot_khat.html#arviz.plot_khat" title="arviz.plot_khat"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_khat()</span></code></a>, where scatter plots are generated with
+one dot per observation, <code class="docutils literal notranslate"><span class="pre">color</span></code> can also take an <a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v1.23)"><span>array_like</span></a> of colors, one per dot.</p>
+<p>There are examples in their respective docstrings.</p>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_density.html#arviz.plot_density" title="arviz.plot_density"><span class="n">az</span><span class="o">.</span><span class="n">plot_density</span></a><span class="p">([</span><span class="n">centered_eight</span><span class="p">,</span> <span class="n">non_centered_eight</span><span class="p">],</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s2">"salmon"</span><span class="p">,</span> <span class="s2">"indigo"</span><span class="p">]);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/a7d90bffd84fa81e632d1639b78327a148b5122635e9392b90ea02432ac9f885.png" src="../_images/a7d90bffd84fa81e632d1639b78327a148b5122635e9392b90ea02432ac9f885.png"/>
+</div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Matplotlib <a class="reference external" href="https://matplotlib.org/stable/tutorials/colors/colors.html" title="(in Matplotlib v3.6.2)"><span>Specifying Colors</span></a> tutorial.</p>
+<p>Module <a class="reference external" href="https://docs.bokeh.org/en/latest/docs/reference/colors.html#module-bokeh.colors" title="(in Bokeh v3.0.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bokeh.colors</span></code></a></p>
+</div>
+</section>
+<section id="legend">
+<span id="common-legend"></span><h2><code class="docutils literal notranslate"><span class="pre">legend</span></code><a class="headerlink" href="#legend" title="Permalink to this headline">#</a></h2>
+<p>Show a legend with the color encoded model information. Defaults to True, if there are multiple models.</p>
+<p id="common-model-names">List with names for the models in the list of data. Useful when plotting more than one dataset.</p>
+</section>
+<section id="ax">
+<span id="common-ax"></span><h2><code class="docutils literal notranslate"><span class="pre">ax</span></code><a class="headerlink" href="#ax" title="Permalink to this headline">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code> or <code class="docutils literal notranslate"><span class="pre">bokeh.plotting.Figure</span></code>.</p>
+</section>
+<section id="backend">
+<span id="common-backend"></span><h2><code class="docutils literal notranslate"><span class="pre">backend</span></code><a class="headerlink" href="#backend" title="Permalink to this headline">#</a></h2>
+<p>Select plotting backend {“matplotlib”,”bokeh”}. Defaults to “matplotlib”.</p>
+</section>
+<section id="backend-kwargs">
+<span id="common-backend-kwargs"></span><h2><code class="docutils literal notranslate"><span class="pre">backend_kwargs</span></code><a class="headerlink" href="#backend-kwargs" title="Permalink to this headline">#</a></h2>
+<p>These are kwargs specific to the backend being used, passed to <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.subplots</span></code> or <code class="docutils literal notranslate"><span class="pre">bokeh.plotting.figure</span></code>. For additional documentation check the plotting method of the backend.</p>
+</section>
+<section id="show">
+<span id="common-show"></span><h2><code class="docutils literal notranslate"><span class="pre">show</span></code><a class="headerlink" href="#show" title="Permalink to this headline">#</a></h2>
+<p>Call backend show function.</p>
+</section>
+</section>
+</article>
+<footer class="bd-footer-article">
+<!-- Previous / next buttons -->
+<div class="prev-next-area">
+<a class="left-prev" href="plotting.html" id="prev-link" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">Plotting</p>
+</div>
+</a>
+<a class="right-next" href="plotting_with_matplotlib.html" id="next-link" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">Plotting with Matplotlib</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<div class="bd-sidebar-secondary bd-toc">
+<div class="toc-item">
+<div class="tocsection onthispage">
+<i class="fa-solid fa-list"></i> On this page
+</div>
+<nav class="page-toc" id="bd-toc-nav">
+<ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#var-names">
+<code class="docutils literal notranslate">
+<span class="pre">
+     var_names
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#filter-vars">
+<code class="docutils literal notranslate">
+<span class="pre">
+     filter_vars
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#coords">
+<code class="docutils literal notranslate">
+<span class="pre">
+     coords
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#combined">
+<code class="docutils literal notranslate">
+<span class="pre">
+     combined
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#combine-dims">
+<code class="docutils literal notranslate">
+<span class="pre">
+     combine_dims
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#hdi-prob">
+<code class="docutils literal notranslate">
+<span class="pre">
+     hdi_prob
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#grid">
+<code class="docutils literal notranslate">
+<span class="pre">
+     grid
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#figsize">
+<code class="docutils literal notranslate">
+<span class="pre">
+     figsize
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#textsize">
+<code class="docutils literal notranslate">
+<span class="pre">
+     textsize
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#color-or-colors">
+<code class="docutils literal notranslate">
+<span class="pre">
+     color
+    </span>
+</code>
+   or
+   <code class="docutils literal notranslate">
+<span class="pre">
+     colors
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#legend">
+<code class="docutils literal notranslate">
+<span class="pre">
+     legend
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#ax">
+<code class="docutils literal notranslate">
+<span class="pre">
+     ax
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#backend">
+<code class="docutils literal notranslate">
+<span class="pre">
+     backend
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#backend-kwargs">
+<code class="docutils literal notranslate">
+<span class="pre">
+     backend_kwargs
+    </span>
+</code>
+</a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#show">
+<code class="docutils literal notranslate">
+<span class="pre">
+     show
+    </span>
+</code>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+<div class="toc-item">
+<div id="searchbox"></div>
+</div>
+<div class="toc-item">
+<div class="tocsection editthispage">
+<a href="https://github.com/arviz-devs/arviz/edit/main/doc/source/user_guide/plots_arguments_guide.md">
+<i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+</div>
+<div class="toc-item">
+<div class="tocsection sourcelink">
+<a href="../_sources/user_guide/plots_arguments_guide.md.txt">
+<i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+</div>
+</div>
+</div>
+<footer class="bd-footer-content">
+<div class="bd-footer-content__inner">
+</div>
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+<footer class="bd-footer"><div class="bd-footer__inner container">
+<div class="footer-item">
+<p class="copyright">
+
+    © Copyright 2018, ArviZ devs.<br/>
+</p>
+</div>
+<div class="footer-item">
+<p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+</div>
+<div class="footer-item">
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+</p>
+</div>
+</div>
+</footer>
+</body>
+</html>

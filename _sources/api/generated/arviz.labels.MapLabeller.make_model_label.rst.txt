@@ -1,0 +1,6 @@
+arviz.labels.MapLabeller.make\_model\_label
+===========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: MapLabeller.make_model_label

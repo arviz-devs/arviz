@@ -1,0 +1,794 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.plots.densityplot &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/plots/densityplot';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.plots.densityplot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;KDE and histogram plots for multiple variables.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">convert_to_dataset</span>
+<span class="kn">from</span> <span class="nn">..labels</span> <span class="kn">import</span> <span class="n">BaseLabeller</span>
+<span class="kn">from</span> <span class="nn">..sel_utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">xarray_var_iter</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">_var_names</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">default_grid</span><span class="p">,</span> <span class="n">get_plotting_function</span>
+
+
+<span class="c1"># pylint:disable-msg=too-many-function-args</span>
+<div class="viewcode-block" id="plot_density"><a class="viewcode-back" href="../../../api/generated/arviz.plot_density.html#arviz.plot_density">[docs]</a><span class="k">def</span> <span class="nf">plot_density</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">group</span><span class="o">=</span><span class="s2">&quot;posterior&quot;</span><span class="p">,</span>
+    <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_vars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">combine_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hdi_prob</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">point_estimate</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;cycle&quot;</span><span class="p">,</span>
+    <span class="n">outline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">hdi_markers</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">shade</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">bw</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">circular</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">textsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">labeller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate KDE plots for continuous variables and histograms for discrete ones.</span>
+
+<span class="sd">    Plots are truncated at their 100*(1-alpha)% highest density intervals. Plots are grouped per</span>
+<span class="sd">    variable and colors assigned to models.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : object or iterable of object</span>
+<span class="sd">        Any object that can be converted to an :class:`arviz.InferenceData` object, or an Iterator</span>
+<span class="sd">        returning a sequence of such objects.</span>
+<span class="sd">        Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.</span>
+<span class="sd">    group : str, optional</span>
+<span class="sd">        Specifies which :class:`arviz.InferenceData` group should be plotted.</span>
+<span class="sd">        Defaults to &#39;posterior&#39;.</span>
+<span class="sd">        Alternative values include &#39;prior&#39; and any other strings used as dataset keys in the</span>
+<span class="sd">        :class:`arviz.InferenceData`.</span>
+<span class="sd">    data_labels : list of str, optional</span>
+<span class="sd">        List with names for the datasets passed as &quot;data.&quot; Useful when plotting more than one</span>
+<span class="sd">        dataset.  Must be the same shape as the data parameter.  Defaults to None.</span>
+<span class="sd">    var_names : list of str, optional</span>
+<span class="sd">        List of variables to plot.  If multiple datasets are supplied and var_names is not None,</span>
+<span class="sd">        will print the same set of variables for each dataset.  Defaults to None, which results in</span>
+<span class="sd">        all the variables being plotted.</span>
+<span class="sd">    filter_vars : {None, &quot;like&quot;, &quot;regex&quot;}, default=None</span>
+<span class="sd">        If `None` (default), interpret var_names as the real variables names. If &quot;like&quot;,</span>
+<span class="sd">        interpret var_names as substrings of the real variables names. If &quot;regex&quot;,</span>
+<span class="sd">        interpret var_names as regular expressions on the real variables names. A la</span>
+<span class="sd">        ``pandas.filter``.</span>
+<span class="sd">    combine_dims : set_like of str, optional</span>
+<span class="sd">        List of dimensions to reduce. Defaults to reducing only the &quot;chain&quot; and &quot;draw&quot; dimensions.</span>
+<span class="sd">        See the :ref:`this section &lt;common_combine_dims&gt;` for usage examples.</span>
+<span class="sd">    transform : callable</span>
+<span class="sd">        Function to transform data (defaults to None i.e. the identity function)</span>
+<span class="sd">    hdi_prob : float</span>
+<span class="sd">        Probability for the highest density interval. Should be in the interval (0, 1].</span>
+<span class="sd">        Defaults to 0.94.</span>
+<span class="sd">    point_estimate : str, optional</span>
+<span class="sd">        Plot point estimate per variable. Values should be &#39;mean&#39;, &#39;median&#39;, &#39;mode&#39; or None.</span>
+<span class="sd">        Defaults to &#39;auto&#39; i.e. it falls back to default set in ``rcParams``.</span>
+<span class="sd">    colors : str or list of str, optional</span>
+<span class="sd">        List with valid matplotlib colors, one color per model. Alternative a string can be passed.</span>
+<span class="sd">        If the string is `cycle`, it will automatically choose a color per model from matplotlib&#39;s</span>
+<span class="sd">        cycle. If a single color is passed, e.g. &#39;k&#39;, &#39;C2&#39; or &#39;red&#39; this color will be used for all</span>
+<span class="sd">        models. Defaults to `cycle`.</span>
+<span class="sd">    outline : bool</span>
+<span class="sd">        Use a line to draw KDEs and histograms. Default to True</span>
+<span class="sd">    hdi_markers : str</span>
+<span class="sd">        A valid `matplotlib.markers` like &#39;v&#39;, used to indicate the limits of the highest density</span>
+<span class="sd">        interval. Defaults to empty string (no marker).</span>
+<span class="sd">    shade : float, optional</span>
+<span class="sd">        Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1</span>
+<span class="sd">        (opaque). Defaults to 0.</span>
+<span class="sd">    bw : float or str, optional</span>
+<span class="sd">        If numeric, indicates the bandwidth and must be positive.</span>
+<span class="sd">        If str, indicates the method to estimate the bandwidth and must be</span>
+<span class="sd">        one of &quot;scott&quot;, &quot;silverman&quot;, &quot;isj&quot; or &quot;experimental&quot; when `circular` is False</span>
+<span class="sd">        and &quot;taylor&quot; (for now) when `circular` is True.</span>
+<span class="sd">        Defaults to &quot;default&quot; which means &quot;experimental&quot; when variable is not circular</span>
+<span class="sd">        and &quot;taylor&quot; when it is.</span>
+<span class="sd">    circular : bool, optional</span>
+<span class="sd">        If True, it interprets the values passed are from a circular variable measured in radians</span>
+<span class="sd">        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.</span>
+<span class="sd">    grid : tuple</span>
+<span class="sd">        Number of rows and columns. Defaults to None, the rows and columns are</span>
+<span class="sd">        automatically inferred.</span>
+<span class="sd">    figsize : (float, float), optional</span>
+<span class="sd">        Figure size. If None it will be defined automatically.</span>
+<span class="sd">    textsize : float, optional</span>
+<span class="sd">        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based</span>
+<span class="sd">        on ``figsize``.</span>
+<span class="sd">    labeller : Labeller, optional</span>
+<span class="sd">        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.</span>
+<span class="sd">        Read the :ref:`label_guide` for more details and usage examples.</span>
+<span class="sd">    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional</span>
+<span class="sd">        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create</span>
+<span class="sd">        its own array of plot areas (and return it).</span>
+<span class="sd">    backend : str, optional</span>
+<span class="sd">        Select plotting backend {&quot;matplotlib&quot;,&quot;bokeh&quot;}. Default &quot;matplotlib&quot;.</span>
+<span class="sd">    backend_kwargs : dict, optional</span>
+<span class="sd">        These are kwargs specific to the backend being used, passed to</span>
+<span class="sd">        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.</span>
+<span class="sd">        For additional documentation check the plotting method of the backend.</span>
+<span class="sd">    show : bool, optional</span>
+<span class="sd">        Call backend show function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    axes : 2D ndarray of matplotlib_axes or bokeh_figure</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    plot_dist : Plot distribution as histogram or kernel density estimates.</span>
+<span class="sd">    plot_posterior : Plot Posterior densities in the style of John K. Kruschke&#39;s book.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Plot default density plot</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; import arviz as az</span>
+<span class="sd">        &gt;&gt;&gt; centered = az.load_arviz_data(&#39;centered_eight&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; non_centered = az.load_arviz_data(&#39;non_centered_eight&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_density([centered, non_centered])</span>
+
+<span class="sd">    Plot variables in a 4x5 grid</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_density([centered, non_centered], grid=(4, 5))</span>
+
+<span class="sd">    Plot subset variables by specifying variable name exactly</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_density([centered, non_centered], var_names=[&quot;mu&quot;])</span>
+
+<span class="sd">    Plot a specific `az.InferenceData` group</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_density([centered, non_centered], var_names=[&quot;mu&quot;], group=&quot;prior&quot;)</span>
+
+<span class="sd">    Specify highest density interval</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_density([centered, non_centered], var_names=[&quot;mu&quot;], hdi_prob=.5)</span>
+
+<span class="sd">    Shade plots and/or remove outlines</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_density([centered, non_centered], var_names=[&quot;mu&quot;], outline=False, shade=.8)</span>
+
+<span class="sd">    Specify binwidth for kernel density estimation</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_density([centered, non_centered], var_names=[&quot;mu&quot;], bw=.9)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">datum</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span> <span class="k">for</span> <span class="n">datum</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">transform</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">labeller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">labeller</span> <span class="o">=</span> <span class="n">BaseLabeller</span><span class="p">()</span>
+
+    <span class="n">var_names</span> <span class="o">=</span> <span class="n">_var_names</span><span class="p">(</span><span class="n">var_names</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">filter_vars</span><span class="p">)</span>
+
+    <span class="n">n_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data_labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_data</span><span class="p">)]</span> <span class="k">if</span> <span class="n">n_data</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_data</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The number of names for the models (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_labels</span><span class="p">)</span><span class="si">}</span><span class="s2">) &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;does not match the number of models (</span><span class="si">{</span><span class="n">n_data</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">hdi_prob</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hdi_prob</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;stats.hdi_prob&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="n">hdi_prob</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of hdi_prob should be in the interval (0, 1]&quot;</span><span class="p">)</span>
+
+    <span class="n">to_plot</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">xarray_var_iter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">var_names</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skip_dims</span><span class="o">=</span><span class="n">combine_dims</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datasets</span>
+    <span class="p">]</span>
+    <span class="n">all_labels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">length_plotters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">plotters</span> <span class="ow">in</span> <span class="n">to_plot</span><span class="p">:</span>
+        <span class="n">length_plotters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plotters</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="n">isel</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">plotters</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">labeller</span><span class="o">.</span><span class="n">make_label_vert</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="n">isel</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_labels</span><span class="p">:</span>
+                <span class="n">all_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">length_plotters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_labels</span><span class="p">)</span>
+    <span class="n">max_plots</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.max_subplots&quot;</span><span class="p">]</span>
+    <span class="n">max_plots</span> <span class="o">=</span> <span class="n">length_plotters</span> <span class="k">if</span> <span class="n">max_plots</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">max_plots</span>
+    <span class="k">if</span> <span class="n">length_plotters</span> <span class="o">&gt;</span> <span class="n">max_plots</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;rcParams[&#39;plot.max_subplots&#39;] (</span><span class="si">{max_plots}</span><span class="s2">) is smaller than the number &quot;</span>
+            <span class="s2">&quot;of variables to plot (</span><span class="si">{len_plotters}</span><span class="s2">) in plot_density, generating only &quot;</span>
+            <span class="s2">&quot;</span><span class="si">{max_plots}</span><span class="s2"> plots&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">max_plots</span><span class="o">=</span><span class="n">max_plots</span><span class="p">,</span> <span class="n">len_plotters</span><span class="o">=</span><span class="n">length_plotters</span><span class="p">),</span>
+            <span class="ne">UserWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">all_labels</span> <span class="o">=</span> <span class="n">all_labels</span><span class="p">[:</span><span class="n">max_plots</span><span class="p">]</span>
+        <span class="n">to_plot</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="n">isel</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">plotters</span>
+                <span class="k">if</span> <span class="n">labeller</span><span class="o">.</span><span class="n">make_label_vert</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="n">isel</span><span class="p">)</span> <span class="ow">in</span> <span class="n">all_labels</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">plotters</span> <span class="ow">in</span> <span class="n">to_plot</span>
+        <span class="p">]</span>
+        <span class="n">length_plotters</span> <span class="o">=</span> <span class="n">max_plots</span>
+    <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">default_grid</span><span class="p">(</span><span class="n">length_plotters</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">max_cols</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">bw</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+        <span class="n">bw</span> <span class="o">=</span> <span class="s2">&quot;taylor&quot;</span> <span class="k">if</span> <span class="n">circular</span> <span class="k">else</span> <span class="s2">&quot;experimental&quot;</span>
+
+    <span class="n">plot_density_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">all_labels</span><span class="o">=</span><span class="n">all_labels</span><span class="p">,</span>
+        <span class="n">to_plot</span><span class="o">=</span><span class="n">to_plot</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+        <span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span>
+        <span class="n">circular</span><span class="o">=</span><span class="n">circular</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">length_plotters</span><span class="o">=</span><span class="n">length_plotters</span><span class="p">,</span>
+        <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span>
+        <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+        <span class="n">textsize</span><span class="o">=</span><span class="n">textsize</span><span class="p">,</span>
+        <span class="n">labeller</span><span class="o">=</span><span class="n">labeller</span><span class="p">,</span>
+        <span class="n">hdi_prob</span><span class="o">=</span><span class="n">hdi_prob</span><span class="p">,</span>
+        <span class="n">point_estimate</span><span class="o">=</span><span class="n">point_estimate</span><span class="p">,</span>
+        <span class="n">hdi_markers</span><span class="o">=</span><span class="n">hdi_markers</span><span class="p">,</span>
+        <span class="n">outline</span><span class="o">=</span><span class="n">outline</span><span class="p">,</span>
+        <span class="n">shade</span><span class="o">=</span><span class="n">shade</span><span class="p">,</span>
+        <span class="n">n_data</span><span class="o">=</span><span class="n">n_data</span><span class="p">,</span>
+        <span class="n">data_labels</span><span class="o">=</span><span class="n">data_labels</span><span class="p">,</span>
+        <span class="n">backend_kwargs</span><span class="o">=</span><span class="n">backend_kwargs</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.backend&quot;</span><span class="p">]</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># TODO: Add backend kwargs</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">get_plotting_function</span><span class="p">(</span><span class="s2">&quot;plot_density&quot;</span><span class="p">,</span> <span class="s2">&quot;densityplot&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">plot_density_kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

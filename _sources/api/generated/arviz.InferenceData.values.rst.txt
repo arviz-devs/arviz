@@ -1,0 +1,6 @@
+arviz.InferenceData.values
+==========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.values

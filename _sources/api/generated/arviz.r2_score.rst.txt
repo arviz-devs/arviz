@@ -1,0 +1,6 @@
+﻿arviz.r2\_score
+===============
+
+.. currentmodule:: arviz
+
+.. autofunction:: r2_score

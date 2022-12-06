@@ -1,0 +1,6 @@
+﻿arviz.hdi
+=========
+
+.. currentmodule:: arviz
+
+.. autofunction:: hdi

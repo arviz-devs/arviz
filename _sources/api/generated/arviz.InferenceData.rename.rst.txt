@@ -1,0 +1,6 @@
+arviz.InferenceData.rename
+==========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.rename

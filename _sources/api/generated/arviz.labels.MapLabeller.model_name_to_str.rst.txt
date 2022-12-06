@@ -1,0 +1,6 @@
+arviz.labels.MapLabeller.model\_name\_to\_str
+=============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: MapLabeller.model_name_to_str

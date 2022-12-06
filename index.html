@@ -1,0 +1,739 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ArviZ: Exploratory analysis of Bayesian models &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/thebelab-helper.js"></script>
+    <script src="_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started" href="getting_started/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="#">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <!-- CSS overrides on the homepage only -->
+<style>
+.bd-main .bd-content .bd-article-container {
+  max-width: 70rem; /* Make homepage a little wider instead of 60em */
+}
+/* Extra top/bottom padding to the sections */
+article.bd-article section {
+  padding: 3rem 0 7rem;
+}
+/* Override all h1 headers except for the hidden ones */
+h1:not(.sd-d-none) {
+  font-weight: bold;
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+/* Override all h3 headers that are not in hero */
+h3:not(#hero h3) {
+  font-weight: bold;
+  text-align: center;
+}
+</style>
+<section class="tex2jax_ignore mathjax_ignore" id="arviz-exploratory-analysis-of-bayesian-models">
+<span id="homepage"></span><h1 class="sd-d-none">ArviZ: Exploratory analysis of Bayesian models<a class="headerlink" href="#arviz-exploratory-analysis-of-bayesian-models" title="Permalink to this headline">#</a></h1>
+<div id="hero">
+<div id="hero-left">  <!-- Start Hero Left -->
+  <h2 style="font-size: 60px; font-weight: bold; margin: 2rem auto 0;">ArviZ</h2>
+  <h3 style="font-weight: bold; margin-top: 0;">Exploratory analysis of Bayesian models</h3>
+  <p>ArviZ is a Python package for exploratory analysis of Bayesian models. It serves as a backend-agnostic tool for diagnosing and visualizing Bayesian inference.</p>
+<div class="homepage-button-container">
+  <div class="homepage-button-container-row">
+      <a href="./getting_started/index.html" class="homepage-button primary-button">Get Started</a>
+      <a href="./examples/index.html" class="homepage-button secondary-button">See Gallery</a>
+  </div>
+  <div class="homepage-button-container-row">
+      <a href="./api/index.html" class="homepage-button-link">See API Reference →</a>
+  </div>
+</div>
+</div>  <!-- End Hero Left -->
+<div id="hero-right">  <!-- Start Hero Right -->
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Rank Bars Diagnostic with KDE using <code class="docutils literal notranslate"><span class="pre">plot_trace</span></code></p>
+</div>
+<img alt="_images/mpl_plot_trace_bars.png" src="_images/mpl_plot_trace_bars.png" />
+</div>
+<a class="sd-stretched-link reference internal" href="examples/plot_trace_bars.html#example-plot-trace-bars"><span class="std std-ref"></span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Forest Plot with ESS using <code class="docutils literal notranslate"><span class="pre">plot_forest</span></code></p>
+</div>
+<img alt="_images/mpl_plot_forest_mixed.png" src="_images/mpl_plot_forest_mixed.png" />
+</div>
+<a class="sd-stretched-link reference internal" href="examples/plot_forest_mixed.html#example-plot-forest-mixed"><span class="std std-ref"></span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Dist Plot using <code class="docutils literal notranslate"><span class="pre">plot_dist</span></code></p>
+</div>
+<img alt="_images/mpl_plot_dist.png" src="_images/mpl_plot_dist.png" />
+</div>
+<a class="sd-stretched-link reference internal" href="examples/plot_dist.html#example-plot-dist"><span class="std std-ref"></span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Density Plot (Comparison) using <code class="docutils literal notranslate"><span class="pre">plot_density</span></code></p>
+</div>
+<img alt="_images/mpl_plot_density.png" src="_images/mpl_plot_density.png" />
+</div>
+<a class="sd-stretched-link reference internal" href="examples/plot_density.html#example-plot-density"><span class="std std-ref"></span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Pair Plot using <code class="docutils literal notranslate"><span class="pre">plot_pair</span></code></p>
+</div>
+<img alt="_images/mpl_plot_pair.png" src="_images/mpl_plot_pair.png" />
+</div>
+<a class="sd-stretched-link reference internal" href="examples/plot_pair.html#example-plot-pair"><span class="std std-ref"></span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Posterior Predictive Check Plot using <code class="docutils literal notranslate"><span class="pre">plot_ppc</span></code></p>
+</div>
+<img alt="_images/mpl_plot_ppc.png" src="_images/mpl_plot_ppc.png" />
+</div>
+<a class="sd-stretched-link reference internal" href="examples/plot_ppc.html#example-plot-ppc"><span class="std std-ref"></span></a></div>
+</div>
+</div>
+</div>
+<!-- grid ended above, do not put anything on the right of markdown closings -->
+</div>  <!-- End Hero Right -->
+</div>  <!-- End Hero -->
+<!-- Keep in markdown to generate headerlink -->
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="key-features">
+<h1>Key Features<a class="headerlink" href="#key-features" title="Permalink to this headline">#</a></h1>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-5 sd-g-xs-5 sd-g-sm-5 sd-g-md-5 sd-g-lg-5 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-border-0 docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/key_feature_interoperability.svg" src="_images/key_feature_interoperability.svg" /><div class="key-features-text docutils">
+<p class="sd-card-text"><strong>Interoperability</strong><br/>
+Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, PyStan, Pyro, NumPyro, and emcee.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-border-0 docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/key_feature_visualizations.svg" src="_images/key_feature_visualizations.svg" /><div class="key-features-text docutils">
+<p class="sd-card-text"><strong>Large Suite of Visualizations</strong><br/>
+Provides over 25 plotting functions for all parts of Bayesian workflow: visualizing distributions, diagnostics, and model checking. See the gallery for examples.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-border-0 docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/key_feature_diagnostics.svg" src="_images/key_feature_diagnostics.svg" /><div class="key-features-text docutils">
+<p class="sd-card-text"><strong>State of the Art Diagnostics</strong><br/>
+Latest published diagnostics and statistics are implemented, tested and distributed with ArviZ.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-border-0 docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/key_feature_comparison.svg" src="_images/key_feature_comparison.svg" /><div class="key-features-text docutils">
+<p class="sd-card-text"><strong>Flexible Model Comparison</strong><br/>
+Includes functions for comparing models with information criteria, and cross validation (both approximate and brute force).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-border-0 docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/key_feature_collaboration.svg" src="_images/key_feature_collaboration.svg" /><div class="key-features-text docutils">
+<p class="sd-card-text"><strong>Built for Collaboration</strong><br/>
+Designed for flexible cross-language serialization using netCDF or Zarr formats. ArviZ also has a <a class="reference external" href="https://julia.arviz.org/">Julia version</a> that uses the same <a class="reference internal" href="schema/schema.html#schema"><span class="std std-ref">data schema</span></a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-border-0 docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/key_feature_labeled_data.svg" src="_images/key_feature_labeled_data.svg" /><div class="key-features-text docutils">
+<p class="sd-card-text"><strong>Labeled Data</strong><br/>
+Builds on top of xarray to work with labeled dimensions and coordinates.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Keep in markdown to generate headerlink -->
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="sponsors-and-institutional-partners">
+<h1>Sponsors and Institutional Partners<a class="headerlink" href="#sponsors-and-institutional-partners" title="Permalink to this headline">#</a></h1>
+<p>We thank these institutions for generously supporting the development and maintenance of ArviZ.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-3 sd-row-cols-md-3 sd-row-cols-lg-3 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<p><a class="reference external" href="https://www.helsinki.fi/en"><img alt="helsinki_uni_logo" src="_images/sponsor_university_helsinki.png" /></a></p>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p><a class="reference external" href="https://fcai.fi/"><img alt="fcai_logo" src="_images/sponsor_fcai.png" /></a></p>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p><a class="reference external" href="https://chanzuckerberg.com/"><img alt="czi_logo" src="_images/sponsor_czi.png" /></a></p>
+</div>
+</div>
+</div>
+<!-- Keep in markdown to generate headerlink -->
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="support-arviz">
+<h1>Support ArviZ<a class="headerlink" href="#support-arviz" title="Permalink to this headline">#</a></h1>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<h3>Contributions</h3>
+<p>Contributions and issue reports are very welcome at
+<a class="reference external" href="https://github.com/arviz-devs/arviz">the GitHub repository</a>.
+We have a <a class="reference internal" href="contributing/index.html#contributing-guide"><span class="std std-ref">contributing guide</span></a> to help you through the process.
+If you have any doubts, please do not hesitate to contact us on <a class="reference external" href="https://gitter.im/arviz-devs/community">gitter</a>.</p>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<h3>Citation</h3>
+<p>If you use ArviZ, please it using <a class="reference external" href="https://doi.org/10.21105/joss.01143"><img alt="JOSS" src="https://joss.theoj.org/papers/10.21105/joss.01143/status.svg"></a>.</p>
+<p>See our <a class="reference external" href="https://www.arviz.org/en/latest/support.html#cite" title="(in ArviZ project)"><span class="xref std std-ref">support page</span></a> for information on how to cite in BibTeX format.</p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-justify docutils">
+<h3>Become a Sponsor</h3>
+<p>If your company or institution uses ArviZ,
+we encourage you to make a donation to ArviZ or
+to allow employees to dedicate some of their time to ArviZ.</p>
+<p><a href="https://www.arviz.org/en/latest/governance/sponsors_partners.html" class="homepage-button primary-button">See Details</a></p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-justify support-arviz-img-merch docutils">
+<h3>Shop ArviZ Merchandise</h3>
+<p><img alt="logo_merch" src="_images/donate_merch.svg" /></p>
+<div style="text-align: center;">
+<a href="https://numfocus.myspreadshop.com/arviz+logo?idea=629e289fc8ee26344a684241" class="homepage-button primary-button">Shop Logo</a>
+<a href="https://numfocus.myspreadshop.com/arviz+favicon+design?idea=62a74f17ebe60a221692c6f2" class="homepage-button primary-button">Shop Favicon</a>
+</div>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-justify docutils">
+<h3>Donate</h3>
+<div class="support-arviz-img-donate-responsive">
+<p><img alt="numfocus_logo" src="_images/donate_numfocus.png" /></p>
+</div>
+<p>ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ financially, consider donating through the NumFOCUS website.</p>
+<p><a href="https://numfocus.org/donate-to-arviz" class="homepage-button primary-button">Donate</a></p>
+</div>
+<div class="sd-col sd-d-flex-column sd-align-major-justify support-arviz-img-donate docutils">
+<p><img alt="numfocus_logo" src="_images/donate_numfocus.png" /></p>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='right-next' id="next-link" href="getting_started/index.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Getting Started</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

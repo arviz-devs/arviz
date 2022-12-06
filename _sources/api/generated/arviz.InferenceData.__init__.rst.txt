@@ -1,0 +1,6 @@
+arviz.InferenceData.\_\_init\_\_
+================================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.__init__

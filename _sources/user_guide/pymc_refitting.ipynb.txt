@@ -1,0 +1,619 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Refitting PyMC models with ArviZ\n",
+    "\n",
+    "ArviZ is backend agnostic and therefore does not sample directly. In order to take advantage of algorithms that require refitting models several times, ArviZ uses {class}`~arviz.SamplingWrapper` to convert the API of the sampling backend to a common set of functions. Hence, functions like Leave Future Out Cross Validation can be used in ArviZ independently of the sampling backend used."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Below there is an example of `SamplingWrapper` usage for [PyMC](https://www.pymc.io/projects/docs/en/stable/learn.html)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import arviz as az\n",
+    "import pymc as pm\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For the example we will use a linear regression model."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "rng = np.random.default_rng(4)\n",
+    "\n",
+    "xdata = np.linspace(0, 50, 100)\n",
+    "b0, b1, sigma = -2, 1, 3\n",
+    "ydata = rng.normal(loc=b1 * xdata + b0, scale=sigma)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plt.plot(xdata, ydata);"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we will write the PyMC3 model, keeping in mind that the data must be modifiable (both `x` and `y`)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "with pm.Model() as linreg_model:\n",
+    "    # optional: add coords to \"time\" dimension\n",
+    "    linreg_model.add_coord(\"time\", np.arange(len(xdata)), mutable=True)\n",
+    "\n",
+    "    x = pm.MutableData(\"x\", xdata, dims=\"time\")\n",
+    "    y_obs = pm.MutableData(\"y_obs\", ydata, dims=\"time\")\n",
+    "\n",
+    "    b0 = pm.Normal(\"b0\", 0, 10)\n",
+    "    b1 = pm.Normal(\"b1\", 0, 10)\n",
+    "    sigma_e = pm.HalfNormal(\"sigma_e\", 10)\n",
+    "\n",
+    "    pm.Normal(\"y\", b0 + b1 * x, sigma_e, observed=y_obs, dims=\"time\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Auto-assigning NUTS sampler...\n",
+      "Initializing NUTS using jitter+adapt_diag...\n",
+      "Multiprocess sampling (4 chains in 4 jobs)\n",
+      "NUTS: [b0, b1, sigma_e]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "<style>\n",
+       "    /* Turns off some styling */\n",
+       "    progress {\n",
+       "        /* gets rid of default border in Firefox and Opera. */\n",
+       "        border: none;\n",
+       "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+       "        background-size: auto;\n",
+       "    }\n",
+       "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+       "        background: #F44336;\n",
+       "    }\n",
+       "</style>\n"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "    <div>\n",
+       "      <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>\n",
+       "      100.00% [6000/6000 00:04<00:00 Sampling 4 chains, 0 divergences]\n",
+       "    </div>\n",
+       "    "
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Sampling 4 chains for 1_000 tune and 500 draw iterations (4_000 + 2_000 draws total) took 5 seconds.\n"
+     ]
+    }
+   ],
+   "source": [
+    "sample_kwargs = {\"chains\": 4, \"draws\": 500}\n",
+    "with linreg_model:\n",
+    "    idata = pm.sample(**sample_kwargs)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We have defined a dictionary `sample_kwargs` that will be passed to the `SamplingWrapper` in order to make sure that all refits use the same sampler parameters. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We will create a subclass of `az.SamplingWrapper`. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from scipy import stats\n",
+    "from xarray_einstats.stats import XrContinuousRV\n",
+    "\n",
+    "\n",
+    "class PyMCLinRegWrapper(az.PyMCSamplingWrapper):\n",
+    "    def sample(self, modified_observed_data):\n",
+    "        with self.model:\n",
+    "            # if the model had coords the dim needs to be updated before\n",
+    "            # modifying the data in the model with set_data\n",
+    "            # otherwise, we don't need to overwrite the sample method\n",
+    "            n__i = len(modified_observed_data[\"x\"])\n",
+    "            self.model.set_dim(\"time\", n__i, coord_values=np.arange(n__i))\n",
+    "\n",
+    "            pm.set_data(modified_observed_data)\n",
+    "            idata = pm.sample(\n",
+    "                **self.sample_kwargs,\n",
+    "            )\n",
+    "        return idata\n",
+    "\n",
+    "    def log_likelihood__i(self, excluded_observed_data, idata__i):\n",
+    "        post = idata__i.posterior\n",
+    "        dist = XrContinuousRV(\n",
+    "            stats.norm,\n",
+    "            post[\"b0\"] + post[\"b1\"] * excluded_observed_data[\"x\"],\n",
+    "            post[\"sigma_e\"],\n",
+    "        )\n",
+    "        return dist.logpdf(excluded_observed_data[\"y_obs\"])\n",
+    "\n",
+    "    def sel_observations(self, idx):\n",
+    "        xdata = self.idata_orig[\"constant_data\"][\"x\"]\n",
+    "        ydata = self.idata_orig[\"observed_data\"][\"y\"]\n",
+    "        mask = np.isin(np.arange(len(xdata)), idx)\n",
+    "        data_dict = {\"x\": xdata, \"y_obs\": ydata}\n",
+    "        data__i = {key: value.values[~mask] for key, value in data_dict.items()}\n",
+    "        data_ex = {key: value.isel(time=idx) for key, value in data_dict.items()}\n",
+    "        return data__i, data_ex"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Computed from 2000 posterior samples and 100 observations log-likelihood matrix.\n",
+       "\n",
+       "         Estimate       SE\n",
+       "elpd_loo  -255.84     6.31\n",
+       "p_loo        2.70        -\n",
+       "------\n",
+       "\n",
+       "Pareto k diagnostic values:\n",
+       "                         Count   Pct.\n",
+       "(-Inf, 0.5]   (good)      100  100.0%\n",
+       " (0.5, 0.7]   (ok)          0    0.0%\n",
+       "   (0.7, 1]   (bad)         0    0.0%\n",
+       "   (1, Inf)   (very bad)    0    0.0%"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "loo_orig = az.loo(idata, pointwise=True)\n",
+    "loo_orig"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In this case, the Leave-One-Out Cross Validation (LOO-CV) approximation using [Pareto Smoothed Importance Sampling](https://arxiv.org/abs/1507.02646) (PSIS) works for all observations, so we will use modify `loo_orig` in order to make `az.reloo` believe that PSIS failed for some observations. This will also serve as a validation of our wrapper, as the PSIS LOO-CV already returned the correct value."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "loo_orig.pareto_k[[13, 42, 56, 73]] = np.array([0.8, 1.2, 2.6, 0.9])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We initialize our sampling wrapper"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pymc_wrapper = PyMCLinRegWrapper(model=linreg_model, idata_orig=idata, sample_kwargs=sample_kwargs)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "And eventually, we can use this wrapper to call `az.reloo`, and compare the results with the PSIS LOO-CV results."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/home/oriol/Public/arviz/arviz/stats/stats_refitting.py:99: UserWarning: reloo is an experimental and untested feature\n",
+      "  warnings.warn(\"reloo is an experimental and untested feature\", UserWarning)\n",
+      "Auto-assigning NUTS sampler...\n",
+      "Initializing NUTS using jitter+adapt_diag...\n",
+      "Multiprocess sampling (4 chains in 4 jobs)\n",
+      "NUTS: [b0, b1, sigma_e]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "<style>\n",
+       "    /* Turns off some styling */\n",
+       "    progress {\n",
+       "        /* gets rid of default border in Firefox and Opera. */\n",
+       "        border: none;\n",
+       "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+       "        background-size: auto;\n",
+       "    }\n",
+       "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+       "        background: #F44336;\n",
+       "    }\n",
+       "</style>\n"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "    <div>\n",
+       "      <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>\n",
+       "      100.00% [6000/6000 00:04<00:00 Sampling 4 chains, 0 divergences]\n",
+       "    </div>\n",
+       "    "
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Sampling 4 chains for 1_000 tune and 500 draw iterations (4_000 + 2_000 draws total) took 5 seconds.\n",
+      "Auto-assigning NUTS sampler...\n",
+      "Initializing NUTS using jitter+adapt_diag...\n",
+      "Multiprocess sampling (4 chains in 4 jobs)\n",
+      "NUTS: [b0, b1, sigma_e]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "<style>\n",
+       "    /* Turns off some styling */\n",
+       "    progress {\n",
+       "        /* gets rid of default border in Firefox and Opera. */\n",
+       "        border: none;\n",
+       "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+       "        background-size: auto;\n",
+       "    }\n",
+       "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+       "        background: #F44336;\n",
+       "    }\n",
+       "</style>\n"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "    <div>\n",
+       "      <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>\n",
+       "      100.00% [6000/6000 00:04<00:00 Sampling 4 chains, 0 divergences]\n",
+       "    </div>\n",
+       "    "
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Sampling 4 chains for 1_000 tune and 500 draw iterations (4_000 + 2_000 draws total) took 4 seconds.\n",
+      "Auto-assigning NUTS sampler...\n",
+      "Initializing NUTS using jitter+adapt_diag...\n",
+      "Multiprocess sampling (4 chains in 4 jobs)\n",
+      "NUTS: [b0, b1, sigma_e]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "<style>\n",
+       "    /* Turns off some styling */\n",
+       "    progress {\n",
+       "        /* gets rid of default border in Firefox and Opera. */\n",
+       "        border: none;\n",
+       "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+       "        background-size: auto;\n",
+       "    }\n",
+       "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+       "        background: #F44336;\n",
+       "    }\n",
+       "</style>\n"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "    <div>\n",
+       "      <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>\n",
+       "      100.00% [6000/6000 00:03<00:00 Sampling 4 chains, 0 divergences]\n",
+       "    </div>\n",
+       "    "
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Sampling 4 chains for 1_000 tune and 500 draw iterations (4_000 + 2_000 draws total) took 4 seconds.\n",
+      "Auto-assigning NUTS sampler...\n",
+      "Initializing NUTS using jitter+adapt_diag...\n",
+      "Multiprocess sampling (4 chains in 4 jobs)\n",
+      "NUTS: [b0, b1, sigma_e]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "<style>\n",
+       "    /* Turns off some styling */\n",
+       "    progress {\n",
+       "        /* gets rid of default border in Firefox and Opera. */\n",
+       "        border: none;\n",
+       "        /* Needs to be in here for Safari polyfill so background images work as expected. */\n",
+       "        background-size: auto;\n",
+       "    }\n",
+       "    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {\n",
+       "        background: #F44336;\n",
+       "    }\n",
+       "</style>\n"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "    <div>\n",
+       "      <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>\n",
+       "      100.00% [6000/6000 00:04<00:00 Sampling 4 chains, 0 divergences]\n",
+       "    </div>\n",
+       "    "
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Sampling 4 chains for 1_000 tune and 500 draw iterations (4_000 + 2_000 draws total) took 4 seconds.\n"
+     ]
+    }
+   ],
+   "source": [
+    "loo_relooed = az.reloo(pymc_wrapper, loo_orig=loo_orig)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Computed from 2000 posterior samples and 100 observations log-likelihood matrix.\n",
+       "\n",
+       "         Estimate       SE\n",
+       "elpd_loo  -255.82     6.30\n",
+       "p_loo        2.69        -\n",
+       "------\n",
+       "\n",
+       "Pareto k diagnostic values:\n",
+       "                         Count   Pct.\n",
+       "(-Inf, 0.5]   (good)      100  100.0%\n",
+       " (0.5, 0.7]   (ok)          0    0.0%\n",
+       "   (0.7, 1]   (bad)         0    0.0%\n",
+       "   (1, Inf)   (very bad)    0    0.0%"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "loo_relooed"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Computed from 2000 posterior samples and 100 observations log-likelihood matrix.\n",
+       "\n",
+       "         Estimate       SE\n",
+       "elpd_loo  -255.84     6.31\n",
+       "p_loo        2.70        -\n",
+       "------\n",
+       "\n",
+       "Pareto k diagnostic values:\n",
+       "                         Count   Pct.\n",
+       "(-Inf, 0.5]   (good)       96   96.0%\n",
+       " (0.5, 0.7]   (ok)          0    0.0%\n",
+       "   (0.7, 1]   (bad)         2    2.0%\n",
+       "   (1, Inf)   (very bad)    2    2.0%"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "loo_orig"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

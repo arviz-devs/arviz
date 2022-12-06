@@ -1,0 +1,744 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.plots.distplot &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/plots/distplot';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.plots.distplot</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=unexpected-keyword-arg</span>
+<span class="sd">&quot;&quot;&quot;Plot distribution as histogram or kernel density estimates.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">InferenceData</span>
+<span class="kn">from</span> <span class="nn">..rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">get_plotting_function</span>
+
+
+<div class="viewcode-block" id="plot_dist"><a class="viewcode-back" href="../../../api/generated/arviz.plot_dist.html#arviz.plot_dist">[docs]</a><span class="k">def</span> <span class="nf">plot_dist</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">,</span>
+    <span class="n">values2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">cumulative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">rotated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">rug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">bw</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">quantiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">contour</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">fill_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">textsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fill_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">rug_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">contour_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">contourf_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pcolormesh_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hist_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_circular</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot distribution as histogram or kernel density estimates.</span>
+
+<span class="sd">    By default continuous variables are plotted using KDEs and discrete ones using histograms</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    values : array-like</span>
+<span class="sd">        Values to plot.</span>
+<span class="sd">    values2 : array-like, optional</span>
+<span class="sd">        Values to plot. If present, a 2D KDE or a hexbin will be estimated.</span>
+<span class="sd">    color : string</span>
+<span class="sd">        valid matplotlib color.</span>
+<span class="sd">    kind : string</span>
+<span class="sd">        By default (&quot;auto&quot;) continuous variables will use the kind defined by rcParam</span>
+<span class="sd">        ``plot.density_kind`` and discrete ones will use histograms.</span>
+<span class="sd">        To override this use &quot;hist&quot; to plot histograms and &quot;kde&quot; for KDEs.</span>
+<span class="sd">    cumulative : bool</span>
+<span class="sd">        If true plot the estimated cumulative distribution function. Defaults to False.</span>
+<span class="sd">        Ignored for 2D KDE.</span>
+<span class="sd">    label : string</span>
+<span class="sd">        Text to include as part of the legend.</span>
+<span class="sd">    rotated : bool</span>
+<span class="sd">        Whether to rotate the 1D KDE plot 90 degrees.</span>
+<span class="sd">    rug : bool</span>
+<span class="sd">        If True adds a rugplot. Defaults to False. Ignored for 2D KDE.</span>
+<span class="sd">    bw : float or str, optional</span>
+<span class="sd">        If numeric, indicates the bandwidth and must be positive.</span>
+<span class="sd">        If str, indicates the method to estimate the bandwidth and must be</span>
+<span class="sd">        one of &quot;scott&quot;, &quot;silverman&quot;, &quot;isj&quot; or &quot;experimental&quot; when ``is_circular`` is False</span>
+<span class="sd">        and &quot;taylor&quot; (for now) when ``is_circular`` is True.</span>
+<span class="sd">        Defaults to &quot;default&quot; which means &quot;experimental&quot; when variable is not circular</span>
+<span class="sd">        and &quot;taylor&quot; when it is.</span>
+<span class="sd">    quantiles : list</span>
+<span class="sd">        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.</span>
+<span class="sd">        Defaults to None.</span>
+<span class="sd">    contour : bool</span>
+<span class="sd">        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.</span>
+<span class="sd">    fill_last : bool</span>
+<span class="sd">        If True fill the last contour of the 2D KDE plot. Defaults to True.</span>
+<span class="sd">    figsize : tuple</span>
+<span class="sd">        Figure size. If None it will be defined automatically.</span>
+<span class="sd">    textsize : float</span>
+<span class="sd">        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based</span>
+<span class="sd">        on ``figsize``. Not implemented for bokeh backend.</span>
+<span class="sd">    plot_kwargs : dict</span>
+<span class="sd">        Keywords passed to the pdf line of a 1D KDE.</span>
+<span class="sd">        Passed to :func:`arviz.plot_kde` as ``plot_kwargs``.</span>
+<span class="sd">    fill_kwargs : dict</span>
+<span class="sd">        Keywords passed to the fill under the line (use fill_kwargs={&#39;alpha&#39;: 0} to disable fill).</span>
+<span class="sd">        Ignored for 2D KDE. Passed to :func:`arviz.plot_kde` as ``fill_kwargs``.</span>
+<span class="sd">    rug_kwargs : dict</span>
+<span class="sd">        Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE</span>
+<span class="sd">        Use ``space`` keyword (float) to control the position of the rugplot.</span>
+<span class="sd">        The larger this number the lower the rugplot. Passed to</span>
+<span class="sd">        :func:`arviz.plot_kde` as ``rug_kwargs``.</span>
+<span class="sd">    contour_kwargs : dict</span>
+<span class="sd">        Keywords passed to the contourplot. Ignored for 1D KDE.</span>
+<span class="sd">    contourf_kwargs : dict</span>
+<span class="sd">        Keywords passed to :meth:`matplotlib.axes.Axes.contourf`. Ignored for 1D KDE.</span>
+<span class="sd">    pcolormesh_kwargs : dict</span>
+<span class="sd">        Keywords passed to :meth:`matplotlib.axes.Axes.pcolormesh`. Ignored for 1D KDE.</span>
+<span class="sd">    hist_kwargs : dict</span>
+<span class="sd">        Keyword arguments used to customize the histogram. Ignored when plotting a KDE.</span>
+<span class="sd">        They are passed to :meth:`matplotlib.axes.Axes.hist` if using matplotlib,</span>
+<span class="sd">        or to :meth:`bokeh.plotting.Figure.quad` if using bokeh. In bokeh case,</span>
+<span class="sd">        the following extra keywords are also supported:</span>
+
+<span class="sd">        * ``color``: replaces the ``fill_color`` and ``line_color`` of the ``quad`` method</span>
+<span class="sd">        * ``bins``: taken from ``hist_kwargs`` and passed to :func:`numpy.histogram` instead</span>
+<span class="sd">        * ``density``: normalize histogram to represent a probability density function,</span>
+<span class="sd">          Defaults to ``True``</span>
+
+<span class="sd">        * ``cumulative``: plot the cumulative counts. Defaults to ``False``</span>
+
+<span class="sd">    is_circular : {False, True, &quot;radians&quot;, &quot;degrees&quot;}. Default False.</span>
+<span class="sd">        Select input type {&quot;radians&quot;, &quot;degrees&quot;} for circular histogram or KDE plot. If True,</span>
+<span class="sd">        default input type is &quot;radians&quot;. When this argument is present, it interprets the</span>
+<span class="sd">        values passed are from a circular variable measured in radians and a circular KDE is</span>
+<span class="sd">        used. Inputs in &quot;degrees&quot; will undergo an internal conversion to radians. Only valid</span>
+<span class="sd">        for 1D KDE. Defaults to False.</span>
+<span class="sd">    ax : axes, optional</span>
+<span class="sd">        Matplotlib axes or bokeh figures.</span>
+<span class="sd">    backend : str, optional</span>
+<span class="sd">        Select plotting backend {&quot;matplotlib&quot;,&quot;bokeh&quot;}. Default &quot;matplotlib&quot;.</span>
+<span class="sd">    backend_kwargs : bool, optional</span>
+<span class="sd">        These are kwargs specific to the backend being used, passed to</span>
+<span class="sd">        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.</span>
+<span class="sd">        For additional documentation</span>
+<span class="sd">        check the plotting method of the backend.</span>
+<span class="sd">    show : bool, optional</span>
+<span class="sd">        Call backend show function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    axes : matplotlib axes or bokeh figures</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    plot_posterior : Plot Posterior densities in the style of John K. Kruschke&#39;s book.</span>
+<span class="sd">    plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.</span>
+<span class="sd">    plot_kde : 1D or 2D KDE plot taking into account boundary conditions.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Plot an integer distribution</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import arviz as az</span>
+<span class="sd">        &gt;&gt;&gt; a = np.random.poisson(4, 1000)</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_dist(a)</span>
+
+<span class="sd">    Plot a continuous distribution</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; b = np.random.normal(0, 1, 1000)</span>
+<span class="sd">        &gt;&gt;&gt; az.plot_dist(b)</span>
+
+<span class="sd">    Add a rug under the Gaussian distribution</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_dist(b, rug=True)</span>
+
+<span class="sd">    Segment into quantiles</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_dist(b, rug=True, quantiles=[.25, .5, .75])</span>
+
+<span class="sd">    Plot as the cumulative distribution</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; az.plot_dist(b, rug=True, quantiles=[.25, .5, .75], cumulative=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="n">InferenceData</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;InferenceData or xarray.Dataset object detected,&quot;</span>
+            <span class="s2">&quot; use plot_posterior, plot_density or plot_pair&quot;</span>
+            <span class="s2">&quot; instead of plot_dist&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;kde&quot;</span><span class="p">,</span> <span class="s2">&quot;hist&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid &quot;kind&quot;:</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">. Select from </span><span class="se">{{</span><span class="s1">&quot;auto&quot;,&quot;kde&quot;,&quot;hist&quot;</span><span class="se">}}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;hist&quot;</span> <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;i&quot;</span> <span class="k">else</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.density_kind&quot;</span><span class="p">]</span>
+
+    <span class="n">dist_plot_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="c1"># User Facing API that can be simplified</span>
+        <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span>
+        <span class="n">values2</span><span class="o">=</span><span class="n">values2</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+        <span class="n">cumulative</span><span class="o">=</span><span class="n">cumulative</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">rotated</span><span class="o">=</span><span class="n">rotated</span><span class="p">,</span>
+        <span class="n">rug</span><span class="o">=</span><span class="n">rug</span><span class="p">,</span>
+        <span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span>
+        <span class="n">quantiles</span><span class="o">=</span><span class="n">quantiles</span><span class="p">,</span>
+        <span class="n">contour</span><span class="o">=</span><span class="n">contour</span><span class="p">,</span>
+        <span class="n">fill_last</span><span class="o">=</span><span class="n">fill_last</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">textsize</span><span class="o">=</span><span class="n">textsize</span><span class="p">,</span>
+        <span class="n">plot_kwargs</span><span class="o">=</span><span class="n">plot_kwargs</span><span class="p">,</span>
+        <span class="n">fill_kwargs</span><span class="o">=</span><span class="n">fill_kwargs</span><span class="p">,</span>
+        <span class="n">rug_kwargs</span><span class="o">=</span><span class="n">rug_kwargs</span><span class="p">,</span>
+        <span class="n">contour_kwargs</span><span class="o">=</span><span class="n">contour_kwargs</span><span class="p">,</span>
+        <span class="n">contourf_kwargs</span><span class="o">=</span><span class="n">contourf_kwargs</span><span class="p">,</span>
+        <span class="n">pcolormesh_kwargs</span><span class="o">=</span><span class="n">pcolormesh_kwargs</span><span class="p">,</span>
+        <span class="n">hist_kwargs</span><span class="o">=</span><span class="n">hist_kwargs</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">backend_kwargs</span><span class="o">=</span><span class="n">backend_kwargs</span><span class="p">,</span>
+        <span class="n">is_circular</span><span class="o">=</span><span class="n">is_circular</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.backend&quot;</span><span class="p">]</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">get_plotting_function</span><span class="p">(</span><span class="s2">&quot;plot_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;distplot&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">dist_plot_args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

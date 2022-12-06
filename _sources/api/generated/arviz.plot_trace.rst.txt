@@ -1,0 +1,6 @@
+﻿arviz.plot\_trace
+=================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_trace

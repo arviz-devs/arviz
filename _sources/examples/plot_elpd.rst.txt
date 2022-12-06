@@ -1,0 +1,36 @@
+
+.. _example_plot_elpd:
+
+
+ELPD Plot
+=========
+
+
+.. seealso::
+
+    API Documentation: :func:`~arviz.plot_elpd`
+
+.. tab-set::
+    .. tab-item:: Matplotlib
+
+        .. image:: matplotlib/_images/mpl_plot_elpd.png
+
+        .. literalinclude:: matplotlib/mpl_plot_elpd.py
+            :lines: 6-
+
+        .. div:: example-plot-download
+
+           :download:`Download Python Source Code: matplotlib/mpl_plot_elpd.py<matplotlib/mpl_plot_elpd.py>`
+
+
+    .. tab-item:: Bokeh
+
+        .. bokeh-plot:: /home/vsts/work/1/s/doc/source/examples/bokeh/bokeh_plot_elpd.py
+            :source-position: none
+
+        .. literalinclude:: bokeh/bokeh_plot_elpd.py
+            :lines: 5-
+
+        .. div:: example-plot-download
+
+           :download:`Download Python Source Code: bokeh/bokeh_plot_elpd.py<bokeh/bokeh_plot_elpd.py>`

@@ -1,0 +1,6 @@
+arviz.labels.DimCoordLabeller.var\_name\_to\_str
+================================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: DimCoordLabeller.var_name_to_str

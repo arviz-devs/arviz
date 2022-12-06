@@ -1,0 +1,6 @@
+arviz.labels.IdxLabeller.make\_model\_label
+===========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: IdxLabeller.make_model_label

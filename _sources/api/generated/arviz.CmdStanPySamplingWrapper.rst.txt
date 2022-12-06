@@ -1,0 +1,28 @@
+﻿arviz.CmdStanPySamplingWrapper
+==============================
+
+.. currentmodule:: arviz
+
+.. autoclass:: CmdStanPySamplingWrapper
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      CmdStanPySamplingWrapper.__init__
+      CmdStanPySamplingWrapper.check_implemented_methods
+      CmdStanPySamplingWrapper.get_inference_data
+      CmdStanPySamplingWrapper.log_likelihood__i
+      CmdStanPySamplingWrapper.sample
+      CmdStanPySamplingWrapper.sel_observations
+   
+   
+
+   
+   
+   

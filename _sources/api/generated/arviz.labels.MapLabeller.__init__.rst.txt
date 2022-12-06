@@ -1,0 +1,6 @@
+arviz.labels.MapLabeller.\_\_init\_\_
+=====================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: MapLabeller.__init__

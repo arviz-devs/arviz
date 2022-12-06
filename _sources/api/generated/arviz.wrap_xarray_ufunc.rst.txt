@@ -1,0 +1,6 @@
+﻿arviz.wrap\_xarray\_ufunc
+=========================
+
+.. currentmodule:: arviz
+
+.. autofunction:: wrap_xarray_ufunc

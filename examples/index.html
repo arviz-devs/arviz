@@ -1,0 +1,1302 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Example gallery &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/index';</script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Forest Plot with ESS" href="plot_forest_mixed.html" />
+    <link rel="prev" title="Working with InferenceData" href="../getting_started/WorkingWithInferenceData.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Mixed Plots</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_forest_mixed.html">Forest Plot with ESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace.html">Traceplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace_bars.html">Rank Bars Diagnostic with KDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace_circ.html">Traceplot with Circular Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace_vlines.html">Traceplot rank_vlines</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Distributions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_density_single.html">Density Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_dist.html">Dist Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_dot.html">Dot Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ecdf.html">ECDF Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_forest.html">Forest Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_forest_ridge.html">Ridgeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_joint.html">Joint Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde.html">KDE Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde_2d.html">2D KDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde_2d_hdi.html">2D KDE with HDI Contours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde_quantiles.html">KDE quantiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_hex.html">Hexbin PairPlot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_kde.html">KDE Pair Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_kde_hdi.html">KDE Pair Plot with HDI Contours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_point_estimate.html">Point Estimate Pairplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_posterior.html">Posterior Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_posterior_combinedims.html">Posterior Plot (reducing school dimension)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_violin.html">Violin plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Distribution Comparison</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_density.html">Density Plot (Comparison)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_forest_comparison.html">Forest Plot Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_violin_single_sided.html">Single-Sided Violin Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Inference Diagnostics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_autocorr.html">Autocorrelation Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_energy.html">Energy Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ess_evolution.html">ESS Evolution Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ess_local.html">ESS Local Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ess_quantile.html">ESS Quantile Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_mcse.html">Quantile Monte Carlo Standard Error Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_mcse_errorbar.html">Quantile MCSE Errobar Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair.html">Pair Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_parallel.html">Parallel Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_rank.html">Rank plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Regression or Time Series</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_hdi.html">Plot HDI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_lm.html">Regression Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Model Comparison</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_compare.html">Compare Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_elpd.html">ELPD Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_khat.html">Pareto Shape Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Model Checking</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_bpv.html">Bayesian u-value Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_bpv_tstat.html">Bayesian p-value with T statistic Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_loo_pit_ecdf.html">LOO-PIT ECDF Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_loo_pit_overlay.html">LOO-PIT Overlay Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ppc.html">Posterior Predictive Check Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ppc_cumulative.html">Posterior Predictive Check Cumulative Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_separation.html">Separation Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Styles</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="styles.html">Matplotlib styles</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="example-gallery">
+<span id="id1"></span><h1>Example gallery<a class="headerlink" href="#example-gallery" title="Permalink to this headline">#</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<section id="mixed-plots">
+<h2>Mixed Plots<a class="headerlink" href="#mixed-plots" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Forest Plot with ESS using <code class="code docutils literal notranslate"><span class="pre">plot_forest</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_forest_mixed.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Forest Plot with ESS</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_forest_mixed.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Traceplot using <code class="code docutils literal notranslate"><span class="pre">plot_trace</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_trace.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Traceplot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_trace.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Rank Bars Diagnostic with KDE using <code class="code docutils literal notranslate"><span class="pre">plot_trace</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_trace_bars.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Rank Bars Diagnostic with KDE</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_trace_bars.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Traceplot with Circular Variables using <code class="code docutils literal notranslate"><span class="pre">plot_trace</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_trace_circ.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Traceplot with Circular Variables</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_trace_circ.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Traceplot rank_vlines using <code class="code docutils literal notranslate"><span class="pre">plot_trace</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_trace_vlines.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Traceplot rank_vlines</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_trace_vlines.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="distributions">
+<h2>Distributions<a class="headerlink" href="#distributions" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Density Plot using <code class="code docutils literal notranslate"><span class="pre">plot_density</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_density_single.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Density Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_density_single.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Dist Plot using <code class="code docutils literal notranslate"><span class="pre">plot_dist</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_dist.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Dist Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_dist.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Dot Plot using <code class="code docutils literal notranslate"><span class="pre">plot_dot</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_dot.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Dot Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_dot.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">ECDF Plot using <code class="code docutils literal notranslate"><span class="pre">plot_ecdf</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_ecdf.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">ECDF Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_ecdf.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Forest Plot using <code class="code docutils literal notranslate"><span class="pre">plot_forest</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_forest.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Forest Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_forest.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Ridgeplot using <code class="code docutils literal notranslate"><span class="pre">plot_forest</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_forest_ridge.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Ridgeplot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_forest_ridge.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Joint Plot using <code class="code docutils literal notranslate"><span class="pre">plot_pair</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_joint.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Joint Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_joint.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">KDE Plot using <code class="code docutils literal notranslate"><span class="pre">plot_kde</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_kde.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">KDE Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_kde.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">2D KDE using <code class="code docutils literal notranslate"><span class="pre">plot_kde</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_kde_2d.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">2D KDE</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_kde_2d.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">2D KDE with HDI Contours using <code class="code docutils literal notranslate"><span class="pre">plot_kde</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_kde_2d_hdi.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">2D KDE with HDI Contours</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_kde_2d_hdi.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">KDE quantiles using <code class="code docutils literal notranslate"><span class="pre">plot_kde</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_kde_quantiles.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">KDE quantiles</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_kde_quantiles.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Hexbin PairPlot using <code class="code docutils literal notranslate"><span class="pre">plot_pair</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_pair_hex.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Hexbin PairPlot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_pair_hex.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">KDE Pair Plot using <code class="code docutils literal notranslate"><span class="pre">plot_pair</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_pair_kde.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">KDE Pair Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_pair_kde.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">KDE Pair Plot with HDI Contours using <code class="code docutils literal notranslate"><span class="pre">plot_pair</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_pair_kde_hdi.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">KDE Pair Plot with HDI Contours</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_pair_kde_hdi.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Point Estimate Pairplot using <code class="code docutils literal notranslate"><span class="pre">plot_pair</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_pair_point_estimate.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Point Estimate Pairplot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_pair_point_estimate.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Posterior Plot using <code class="code docutils literal notranslate"><span class="pre">plot_posterior</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_posterior.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Posterior Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_posterior.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Posterior Plot (reducing school dimension) using <code class="code docutils literal notranslate"><span class="pre">plot_posterior</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_posterior_combinedims.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Posterior Plot (reducing school dimension)</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_posterior_combinedims.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Violin plot using <code class="code docutils literal notranslate"><span class="pre">plot_violin</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_violin.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Violin plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_violin.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="distribution-comparison">
+<h2>Distribution Comparison<a class="headerlink" href="#distribution-comparison" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Density Plot (Comparison) using <code class="code docutils literal notranslate"><span class="pre">plot_density</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_density.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Density Plot (Comparison)</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_density.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Forest Plot Comparison using <code class="code docutils literal notranslate"><span class="pre">plot_forest</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_forest_comparison.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Forest Plot Comparison</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_forest_comparison.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Single-Sided Violin Plot using <code class="code docutils literal notranslate"><span class="pre">plot_violin</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_violin_single_sided.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Single-Sided Violin Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_violin_single_sided.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="inference-diagnostics">
+<h2>Inference Diagnostics<a class="headerlink" href="#inference-diagnostics" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Autocorrelation Plot using <code class="code docutils literal notranslate"><span class="pre">plot_autocorr</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_autocorr.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Autocorrelation Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_autocorr.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Energy Plot using <code class="code docutils literal notranslate"><span class="pre">plot_energy</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_energy.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Energy Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_energy.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">ESS Evolution Plot using <code class="code docutils literal notranslate"><span class="pre">plot_ess</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_ess_evolution.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">ESS Evolution Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_ess_evolution.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">ESS Local Plot using <code class="code docutils literal notranslate"><span class="pre">plot_ess</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_ess_local.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">ESS Local Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_ess_local.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">ESS Quantile Plot using <code class="code docutils literal notranslate"><span class="pre">plot_ess</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_ess_quantile.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">ESS Quantile Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_ess_quantile.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Quantile Monte Carlo Standard Error Plot using <code class="code docutils literal notranslate"><span class="pre">plot_mcse</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_mcse.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Quantile Monte Carlo Standard Error Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_mcse.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Quantile MCSE Errobar Plot using <code class="code docutils literal notranslate"><span class="pre">plot_mcse</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_mcse_errorbar.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Quantile MCSE Errobar Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_mcse_errorbar.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Pair Plot using <code class="code docutils literal notranslate"><span class="pre">plot_pair</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_pair.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Pair Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_pair.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Parallel Plot using <code class="code docutils literal notranslate"><span class="pre">plot_parallel</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_parallel.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Parallel Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_parallel.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Rank plot using <code class="code docutils literal notranslate"><span class="pre">plot_rank</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_rank.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Rank plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_rank.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="regression-or-time-series">
+<h2>Regression or Time Series<a class="headerlink" href="#regression-or-time-series" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Plot HDI using <code class="code docutils literal notranslate"><span class="pre">plot_hdi</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_hdi.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Plot HDI</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_hdi.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Regression Plot using <code class="code docutils literal notranslate"><span class="pre">plot_lm</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_lm.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Regression Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_lm.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="model-comparison">
+<h2>Model Comparison<a class="headerlink" href="#model-comparison" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Compare Plot using <code class="code docutils literal notranslate"><span class="pre">plot_compare</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_compare.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Compare Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_compare.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">ELPD Plot using <code class="code docutils literal notranslate"><span class="pre">plot_elpd</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_elpd.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">ELPD Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_elpd.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Pareto Shape Plot using <code class="code docutils literal notranslate"><span class="pre">plot_khat</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_khat.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Pareto Shape Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_khat.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="model-checking">
+<h2>Model Checking<a class="headerlink" href="#model-checking" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Bayesian u-value Plot using <code class="code docutils literal notranslate"><span class="pre">plot_bpv</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_bpv.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Bayesian u-value Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_bpv.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Bayesian p-value with T statistic Plot using <code class="code docutils literal notranslate"><span class="pre">plot_bpv</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_bpv_tstat.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Bayesian p-value with T statistic Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_bpv_tstat.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">LOO-PIT ECDF Plot using <code class="code docutils literal notranslate"><span class="pre">plot_loo_pit</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_loo_pit_ecdf.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">LOO-PIT ECDF Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_loo_pit_ecdf.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">LOO-PIT Overlay Plot using <code class="code docutils literal notranslate"><span class="pre">plot_loo_pit</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_loo_pit_overlay.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">LOO-PIT Overlay Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_loo_pit_overlay.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Posterior Predictive Check Plot using <code class="code docutils literal notranslate"><span class="pre">plot_ppc</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_ppc.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Posterior Predictive Check Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_ppc.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Posterior Predictive Check Cumulative Plot using <code class="code docutils literal notranslate"><span class="pre">plot_ppc</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_ppc_cumulative.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Posterior Predictive Check Cumulative Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_ppc_cumulative.html"></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Separation Plot using <code class="code docutils literal notranslate"><span class="pre">plot_separation</span></code></p>
+</div>
+<img alt="" src="../_images/mpl_plot_separation.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Separation Plot</p>
+</div>
+<a class="sd-stretched-link reference external" href="./plot_separation.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="styles">
+<h2>Styles<a class="headerlink" href="#styles" title="Permalink to this headline">#</a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-2 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-none sd-card-hover sd-text-center example-gallery docutils">
+<div class="sd-card-body docutils">
+<div class="example-img-plot-overlay docutils">
+<p class="sd-card-text">Use Matplotlib Styles with <code class="code docutils literal notranslate"><span class="pre">arviz.style.use()</span></code>.</p>
+</div>
+<img alt="Use Matplotlib Styles with `arviz.style.use()`." src="../_images/mpl_styles.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Matplotlib styles</p>
+</div>
+<a class="sd-stretched-link reference external" href="./styles.html"></a></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="../getting_started/WorkingWithInferenceData.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Working with InferenceData</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="plot_forest_mixed.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Forest Plot with ESS</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+arviz.labels.NoModelLabeller.make\_model\_label
+===============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: NoModelLabeller.make_model_label

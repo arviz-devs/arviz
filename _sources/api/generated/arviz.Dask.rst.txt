@@ -1,0 +1,34 @@
+﻿arviz.Dask
+==========
+
+.. currentmodule:: arviz
+
+.. autoclass:: Dask
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+      
+         disable_dask
+      
+      
+         enable_dask
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Dask.dask_flag
+      ~Dask.dask_kwargs
+   
+   

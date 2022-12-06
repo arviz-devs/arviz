@@ -1,0 +1,6 @@
+﻿arviz.autocov
+=============
+
+.. currentmodule:: arviz
+
+.. autofunction:: autocov

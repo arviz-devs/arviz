@@ -1,0 +1,32 @@
+﻿arviz.labels.DimCoordLabeller
+=============================
+
+.. currentmodule:: arviz.labels
+
+.. autoclass:: DimCoordLabeller
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      DimCoordLabeller.__init__
+      DimCoordLabeller.dim_coord_to_str
+      DimCoordLabeller.make_label_flat
+      DimCoordLabeller.make_label_vert
+      DimCoordLabeller.make_model_label
+      DimCoordLabeller.make_pp_label
+      DimCoordLabeller.model_name_to_str
+      DimCoordLabeller.sel_to_str
+      DimCoordLabeller.var_name_to_str
+      DimCoordLabeller.var_pp_to_str
+   
+   
+
+   
+   
+   

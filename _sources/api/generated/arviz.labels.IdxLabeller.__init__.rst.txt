@@ -1,0 +1,6 @@
+arviz.labels.IdxLabeller.\_\_init\_\_
+=====================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: IdxLabeller.__init__

@@ -1,0 +1,6 @@
+arviz.labels.IdxLabeller.dim\_coord\_to\_str
+============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: IdxLabeller.dim_coord_to_str

@@ -1,0 +1,6 @@
+arviz.labels.MapLabeller.sel\_to\_str
+=====================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: MapLabeller.sel_to_str

@@ -1,0 +1,6 @@
+arviz.SamplingWrapper.sample
+============================
+
+.. currentmodule:: arviz
+
+.. automethod:: SamplingWrapper.sample

@@ -1,0 +1,6 @@
+arviz.PyMCSamplingWrapper.check\_implemented\_methods
+=====================================================
+
+.. currentmodule:: arviz
+
+.. automethod:: PyMCSamplingWrapper.check_implemented_methods

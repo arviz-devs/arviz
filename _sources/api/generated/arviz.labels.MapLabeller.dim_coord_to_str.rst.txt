@@ -1,0 +1,6 @@
+arviz.labels.MapLabeller.dim\_coord\_to\_str
+============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: MapLabeller.dim_coord_to_str

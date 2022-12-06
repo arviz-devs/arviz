@@ -1,0 +1,6 @@
+﻿arviz.plot\_rank
+================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_rank

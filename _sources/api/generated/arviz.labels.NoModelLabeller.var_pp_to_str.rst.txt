@@ -1,0 +1,6 @@
+arviz.labels.NoModelLabeller.var\_pp\_to\_str
+=============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: NoModelLabeller.var_pp_to_str

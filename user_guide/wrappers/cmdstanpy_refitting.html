@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17.1: http://docutils.sourceforge.net/" name="generator"/>
+<title>Refitting CmdStanPy models with ArviZ — ArviZ dev documentation</title>
+<script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+<!-- Loaded before other Sphinx assets -->
+<link href="../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link as="font" crossorigin="" href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" rel="preload" type="font/woff2"/>
+<link href="../../_static/pygments.css" rel="stylesheet" type="text/css">
+<link href="../../_static/plot_directive.css" rel="stylesheet" type="text/css">
+<link href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" rel="stylesheet" type="text/css">
+<link href="../../_static/copybutton.css" rel="stylesheet" type="text/css">
+<link href="../../_static/sphinx-codeautolink.css" rel="stylesheet" type="text/css">
+<link href="../../_static/jupyter-sphinx.css" rel="stylesheet" type="text/css">
+<link href="../../_static/thebelab.css" rel="stylesheet" type="text/css">
+<link href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" rel="stylesheet" type="text/css"/>
+<link href="../../_static/custom.css" rel="stylesheet" type="text/css"/>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94" rel="preload"/>
+<link as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94" rel="preload"/>
+<script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+<script src="../../_static/jquery.js"></script>
+<script src="../../_static/underscore.js"></script>
+<script src="../../_static/doctools.js"></script>
+<script src="../../_static/clipboard.min.js"></script>
+<script src="../../_static/copybutton.js"></script>
+<script src="../../_static/thebelab-helper.js"></script>
+<script src="../../_static/design-tabs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/wrappers/cmdstanpy_refitting';</script>
+<link href="../../_static/favicon.ico" rel="shortcut icon">
+<link href="../../genindex.html" rel="index" title="Index">
+<link href="../../search.html" rel="search" title="Search"/>
+<link href="../pystan_refitting.html" rel="next" title="Refitting PyStan (3.0+) models with ArviZ"/>
+<link href="../sampling_wrappers.html" rel="prev" title="Sampling wrappers"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="None" name="docsearch:language"/>
+</link></link></link></link></link></link></link></link></link></head>
+<body data-default-mode="light" data-offset="180" data-spy="scroll" data-target="#bd-toc-nav">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<input class="sidebar-toggle" id="__primary" name="__primary" type="checkbox"/>
+<label class="overlay overlay-primary" for="__primary"></label>
+<input class="sidebar-toggle" id="__secondary" name="__secondary" type="checkbox"/>
+<label class="overlay overlay-secondary" for="__secondary"></label>
+<div class="search-button__wrapper">
+<div class="search-button__overlay"></div>
+<div class="search-button__search-container">
+<form action="../../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" id="search-input" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+</div>
+</div>
+<nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+<label class="sidebar-toggle primary-toggle" for="__primary">
+<span class="fa-solid fa-bars"></span>
+</label>
+<div id="navbar-start">
+<a class="navbar-brand logo" href="../../index.html">
+<img alt="Logo image" class="logo__image only-light" src="../../_static/logo.png"/>
+<img alt="Logo image" class="logo__image only-dark" src="../../_static/logo_dark.png"/>
+</a>
+    
+    dev
+    
+  </div>
+<div class="col-lg-9 navbar-header-items">
+<div class="mr-auto" id="navbar-center">
+<div class="navbar-center-item">
+<nav class="navbar-nav">
+<p aria-label="Site Navigation" aria-level="1" class="sidebar-header-items__title" role="heading">
+        Site Navigation
+    </p>
+<ul class="navbar-nav" id="navbar-main-elements">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="../index.html">
+                        User Guide
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../api/index.html">
+                        API Reference
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<div id="navbar-end">
+<div class="navbar-end-item navbar-persistent--container">
+<button aria-label="Search" class="btn btn-sm navbar-btn search-button search-button__button" data-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+</div>
+<div class="navbar-end-item">
+<button aria-label="light/dark" class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" data-toggle="tooltip" title="light/dark">
+<span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+<span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+<span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+</div>
+<div class="navbar-end-item">
+<ul aria-label="Icon Links" class="navbar-nav" id="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://github.com/arviz-devs/arviz" rel="noopener" target="_blank" title="GitHub"><span><i class="fa-brands fa-github"></i></span>
+<label class="sr-only">GitHub</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://twitter.com/arviz_devs" rel="noopener" target="_blank" title="Twitter"><span><i class="fa-brands fa-twitter"></i></span>
+<label class="sr-only">Twitter</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://bayes.club/@ArviZ" rel="noopener" target="_blank" title="Mastodon"><span><i class="fa-brands fa-mastodon"></i></span>
+<label class="sr-only">Mastodon</label></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="navbar-persistent--mobile">
+<button aria-label="Search" class="btn btn-sm navbar-btn search-button search-button__button" data-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+</div>
+<label class="sidebar-toggle secondary-toggle" for="__secondary">
+<span class="fa-solid fa-outdent"></span>
+</label>
+</div>
+</nav>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<div class="bd-sidebar-primary bd-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-center-item">
+<nav class="navbar-nav">
+<p aria-label="Site Navigation" aria-level="1" class="sidebar-header-items__title" role="heading">
+        Site Navigation
+    </p>
+<ul class="navbar-nav" id="navbar-main-elements">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../getting_started/index.html">
+                        Getting Started
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../examples/index.html">
+                        Example Gallery
+                      </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="../index.html">
+                        User Guide
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../api/index.html">
+                        API Reference
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../community.html">
+                        Community
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../../contributing/index.html">
+                        Contributing
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<div class="sidebar-header-items__end">
+<div class="navbar-end-item">
+<button aria-label="light/dark" class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" data-toggle="tooltip" title="light/dark">
+<span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+<span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+<span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+</div>
+<div class="navbar-end-item">
+<ul aria-label="Icon Links" class="navbar-nav" id="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://github.com/arviz-devs/arviz" rel="noopener" target="_blank" title="GitHub"><span><i class="fa-brands fa-github"></i></span>
+<label class="sr-only">GitHub</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://twitter.com/arviz_devs" rel="noopener" target="_blank" title="Twitter"><span><i class="fa-brands fa-twitter"></i></span>
+<label class="sr-only">Twitter</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://bayes.club/@ArviZ" rel="noopener" target="_blank" title="Mastodon"><span><i class="fa-brands fa-mastodon"></i></span>
+<label class="sr-only">Mastodon</label></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sidebar-start-items sidebar-primary__section">
+<div class="sidebar-start-items__item"><nav aria-label="Section navigation" class="bd-links" id="bd-docs-nav">
+<p aria-level="1" class="bd-links__title" role="heading">
+    Section Navigation
+  </p>
+<div class="bd-toc-item navbar-nav">
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plotting.html">Plotting</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plots_arguments_guide.html">Plots’ arguments guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting_with_matplotlib.html">Plotting with Matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting_with_bokeh.html">Plotting with Bokeh</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../data_structures.html">Data structures</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../label_guide.html">Label guide</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../schema/schema.html">InferenceData schema specification</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../schema/PyMC3_schema_example.html">PyMC3 example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../schema/PyStan_schema_example.html">PyStan example</a></li>
+</ul>
+</input></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../computation.html">Computation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Numba.html">Numba -  an overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Dask.html">Dask for ArviZ</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../sampling_wrappers.html">Sampling wrappers</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Refitting CmdStanPy models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pystan_refitting.html">Refitting PyStan (3.0+) models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pymc_refitting.html">Refitting PyMC models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numpyro_refitting.html">Refitting NumPyro models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../numpyro_refitting_xr_lik.html">Refitting NumPyro models with ArviZ (and xarray)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+</div>
+</div>
+<div class="sidebar-end-items sidebar-primary__section">
+<div class="sidebar-end-items__item">
+</div>
+</div>
+<div id="rtd-footer-container"></div>
+</div>
+<main class="bd-main" id="main-content">
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article">
+</div>
+<article class="bd-article" role="main">
+<section class="tex2jax_ignore mathjax_ignore" id="refitting-cmdstanpy-models-with-arviz">
+<span id="cmdstanpy-refitting"></span><h1>Refitting CmdStanPy models with ArviZ<a class="headerlink" href="#refitting-cmdstanpy-models-with-arviz" title="Permalink to this headline">#</a></h1>
+<p>ArviZ is backend agnostic and therefore does not sample directly. In order to take advantage of algorithms that require refitting models several times, ArviZ uses <a class="reference internal" href="../../api/generated/arviz.SamplingWrapper.html#arviz.SamplingWrapper" title="arviz.SamplingWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplingWrapper</span></code></a> to convert the API of the sampling backend to a common set of functions. Hence, functions like Leave Future Out Cross Validation can be used in ArviZ independently of the sampling backend used.</p>
+<p>Below there is an example of <code class="docutils literal notranslate"><span class="pre">SamplingWrapper</span></code> usage for CmdStanPy extending <a class="reference internal" href="../../api/generated/arviz.CmdStanPySamplingWrapper.html#arviz.CmdStanPySamplingWrapper" title="arviz.CmdStanPySamplingWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">arviz.CmdStanPySamplingWrapper</span></code></a> that already implements some default methods targeted to CmdStanPy.</p>
+<p>Before starting, it is important to note that CmdStanPy cannot call the C++ functions it uses. Therefore, the <strong>code</strong> of the model must be slightly modified in order to be compatible with the cross validation refitting functions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="kn">from</span> <span class="nn">cmdstanpy</span> <span class="kn">import</span> <span class="n">CmdStanModel</span><span class="p">,</span> <span class="n">write_stan_json</span>
+<span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://matplotlib.org/stable/api/pyplot_summary.html#module-matplotlib.pyplot" title="matplotlib.pyplot"><span class="nn">matplotlib.pyplot</span></a> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>For the example, we will use a linear regression model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rng</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span></a><span class="p">(</span><span class="mi">251</span><span class="p">)</span>
+
+<span class="n">xdata</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">b0</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span>
+<span class="n">ydata</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">b1</span> <span class="o">*</span> <span class="n">xdata</span> <span class="o">+</span> <span class="n">b0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><a class="sphinx-codeautolink-a" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot" title="matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">xdata</span><span class="p">,</span> <span class="n">ydata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D at 0x7fd4790cd550&gt;]
+</pre></div>
+</div>
+<img alt="../../_images/a2ac77794a835e4b1dba538b329acbaf0a3d176305f96edbd353bd6944d5eeda.png" src="../../_images/a2ac77794a835e4b1dba538b329acbaf0a3d176305f96edbd353bd6944d5eeda.png">
+</img></div>
+</div>
+<p>Now we will write the Stan code, keeping in mind that it must be able to compute the pointwise log likelihood on excluded data, i.e., data that is not used to fit the model. Thus, the backbone of the code must look like the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="p">{</span>
+    <span class="n">data_for_fitting</span>
+    <span class="n">excluded_data</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+<span class="n">model</span> <span class="p">{</span>
+    <span class="o">//</span> <span class="n">fit</span> <span class="n">against</span> <span class="n">data_for_fitting</span>
+   <span class="o">...</span>
+<span class="p">}</span>
+<span class="n">generated</span> <span class="n">quantities</span> <span class="p">{</span>
+    <span class="o">....</span>
+    <span class="n">log_lik</span> <span class="k">for</span> <span class="n">data_for_fitting</span>
+    <span class="n">log_lik_excluded</span> <span class="k">for</span> <span class="n">excluded_data</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="cell tag_hide-cell docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell content</span>
+<span class="expanded">Hide code cell content</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#open" title="open"><span class="nb">open</span></a><span class="p">(</span><span class="s2">"linreg_ex_model.stan"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>data {
+  // Define data for fitting
+  int&lt;lower=0&gt; N;
+  array[N] real x;
+  array[N] real y;
+  // Define excluded data. It will not be used when fitting.
+  int&lt;lower=0&gt; N_ex;
+  array[N_ex] real x_ex;
+  array[N_ex] real y_ex;
+}
+
+parameters {
+  real b0;
+  real b1;
+  real&lt;lower=0&gt; sigma_e;
+}
+
+model {
+  b0 ~ normal(0, 10);
+  b1 ~ normal(0, 10);
+  sigma_e ~ normal(0, 10);
+  for (i in 1:N) {
+    y[i] ~ normal(b0 + b1 * x[i], sigma_e);  // use only data for fitting
+  }
+
+}
+
+generated quantities {
+    array[N] real log_lik;
+    array[N_ex] real log_lik_ex;
+    array[N] real y_hat;
+
+    for (i in 1:N) {
+        // calculate log likelihood and posterior predictive, there are
+        // no restrictions on adding more generated quantities
+        log_lik[i] = normal_lpdf(y[i] | b0 + b1 * x[i], sigma_e);
+        y_hat[i] = normal_rng(b0 + b1 * x[i], sigma_e);
+    }
+    for (j in 1:N_ex) {
+        // calculate the log likelihood of the excluded data given data_for_fitting
+        log_lik_ex[j] = normal_lpdf(y_ex[j] | b0 + b1 * x_ex[j], sigma_e);
+    }
+}
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CmdStanModel</span><span class="p">(</span><span class="n">stan_file</span><span class="o">=</span><span class="s2">"linreg_ex_model.stan"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"N"</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#len" title="len"><span class="nb">len</span></a><span class="p">(</span><span class="n">ydata</span><span class="p">),</span>
+    <span class="s2">"y"</span><span class="p">:</span> <span class="n">ydata</span><span class="p">,</span>
+    <span class="s2">"x"</span><span class="p">:</span> <span class="n">xdata</span><span class="p">,</span>
+    <span class="c1"># No excluded data in initial fit</span>
+    <span class="s2">"N_ex"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"x_ex"</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">"y_ex"</span><span class="p">:</span> <span class="p">[],</span>
+<span class="p">}</span>
+<span class="n">sample_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"iter_sampling"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="s2">"chains"</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+<span class="n">write_stan_json</span><span class="p">(</span><span class="s2">"linreg_ex_data.json"</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">)</span>
+<span class="n">fit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">"linreg_ex_data.json"</span><span class="p">,</span> <span class="o">**</span><span class="n">sample_kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:04 - cmdstanpy - INFO - CmdStan start processing
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "37b792d98b6f4ccaa4bbb68991e88c7f", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "67629d520b564f52b2ce68556bc1e1c9", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "0c54bc86f2a64df58c15138ff288da03", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "44971116bb5f490b979373e5601d240e", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                                                                                                                                                                                                                                                                                                
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:05 - cmdstanpy - INFO - CmdStan done processing.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We have defined a dictionary <code class="docutils literal notranslate"><span class="pre">sample_kwargs</span></code> that will be passed to the <code class="docutils literal notranslate"><span class="pre">SamplingWrapper</span></code> in order to make sure that all
+refits use the same sampler parameters. We will follow the same pattern with <code class="docutils literal notranslate"><span class="pre">az.from_cmdstanpy</span></code>. Here however, we are passing some arguments directly to <code class="docutils literal notranslate"><span class="pre">from_cmdstanpy</span></code>. We do this because we only want this data in <code class="docutils literal notranslate"><span class="pre">idata_orig</span></code>, not in every refit.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dims</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"y"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"time"</span><span class="p">],</span> <span class="s2">"x"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"time"</span><span class="p">],</span> <span class="s2">"log_likelihood"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"time"</span><span class="p">],</span> <span class="s2">"y_hat"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"time"</span><span class="p">]}</span>
+<span class="n">idata_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"posterior_predictive"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"y_hat"</span><span class="p">],</span>
+    <span class="s2">"log_likelihood"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"log_lik"</span><span class="p">],</span>
+    <span class="s2">"dims"</span><span class="p">:</span> <span class="n">dims</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">idata</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../../api/generated/arviz.from_cmdstanpy.html#arviz.from_cmdstanpy" title="arviz.from_cmdstanpy"><span class="n">az</span><span class="o">.</span><span class="n">from_cmdstanpy</span></a><span class="p">(</span>
+    <span class="n">posterior</span><span class="o">=</span><span class="n">fit</span><span class="p">,</span> <span class="n">observed_data</span><span class="o">=</span><span class="p">{</span><span class="s2">"y"</span><span class="p">:</span> <span class="n">ydata</span><span class="p">},</span> <span class="n">constant_data</span><span class="o">=</span><span class="p">{</span><span class="s2">"x"</span><span class="p">:</span> <span class="n">xdata</span><span class="p">},</span> <span class="o">**</span><span class="n">idata_kwargs</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We will create a subclass of <a class="reference internal" href="../../api/generated/arviz.CmdStanPySamplingWrapper.html#arviz.CmdStanPySamplingWrapper" title="arviz.CmdStanPySamplingWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">CmdStanPySamplingWrapper</span></code></a>. Therefore, instead of having to implement all functions required by <a class="reference internal" href="../../api/generated/arviz.reloo.html#arviz.reloo" title="arviz.reloo"><code class="xref py py-func docutils literal notranslate"><span class="pre">reloo()</span></code></a> we only have to implement <a class="reference internal" href="../../api/generated/arviz.CmdStanPySamplingWrapper.sel_observations.html#arviz.CmdStanPySamplingWrapper.sel_observations" title="arviz.CmdStanPySamplingWrapper.sel_observations"><code class="xref py py-func docutils literal notranslate"><span class="pre">sel_observations()</span></code></a>. As explained in its docs, it takes one argument which is the indices of the data to be excluded and returns <code class="docutils literal notranslate"><span class="pre">modified_observed_data</span></code> which is passed as <code class="docutils literal notranslate"><span class="pre">data</span></code> to <code class="docutils literal notranslate"><span class="pre">sampling</span></code> function of PyStan model and <code class="docutils literal notranslate"><span class="pre">excluded_observed_data</span></code> which is used to retrieve the log likelihood of the excluded data (as passing the excluded data would make no sense).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LinearRegressionWrapper</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="../../api/generated/arviz.CmdStanPySamplingWrapper.html#arviz.CmdStanPySamplingWrapper" title="arviz.wrappers.wrap_stan.CmdStanPySamplingWrapper"><span class="n">az</span><span class="o">.</span><span class="n">CmdStanPySamplingWrapper</span></a><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">sel_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idata_orig</span><span class="o">.</span><span class="n">constant_data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idata_orig</span><span class="o">.</span><span class="n">observed_data</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">mask</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.full_like.html#numpy.full_like" title="numpy.full_like"><span class="n">np</span><span class="o">.</span><span class="n">full_like</span></a><span class="p">(</span><span class="n">xdata</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#bool" title="bool"><span class="nb">bool</span></a><span class="p">)</span>
+        <span class="n">mask</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">N_obs</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#len" title="len"><span class="nb">len</span></a><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+        <span class="n">N_ex</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.sum.html#numpy.sum" title="numpy.sum"><span class="n">np</span><span class="o">.</span><span class="n">sum</span></a><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"N"</span><span class="p">:</span> <span class="n">N_obs</span> <span class="o">-</span> <span class="n">N_ex</span><span class="p">,</span>
+            <span class="s2">"x"</span><span class="p">:</span> <span class="n">xdata</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+            <span class="s2">"y"</span><span class="p">:</span> <span class="n">ydata</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+            <span class="s2">"N_ex"</span><span class="p">:</span> <span class="n">N_ex</span><span class="p">,</span>
+            <span class="s2">"x_ex"</span><span class="p">:</span> <span class="n">xdata</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">],</span>
+            <span class="s2">"y_ex"</span><span class="p">:</span> <span class="n">ydata</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">observations</span><span class="p">,</span> <span class="s2">"log_lik_ex"</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loo_orig</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../../api/generated/arviz.loo.html#arviz.loo" title="arviz.loo"><span class="n">az</span><span class="o">.</span><span class="n">loo</span></a><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">pointwise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"log_lik"</span><span class="p">)</span>
+<span class="n">loo_orig</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Computed from 4000 posterior samples and 100 observations log-likelihood matrix.
+
+         Estimate       SE
+elpd_loo  -258.72     8.23
+p_loo        3.17        -
+------
+
+Pareto k diagnostic values:
+                         Count   Pct.
+(-Inf, 0.5]   (good)      100  100.0%
+ (0.5, 0.7]   (ok)          0    0.0%
+   (0.7, 1]   (bad)         0    0.0%
+   (1, Inf)   (very bad)    0    0.0%
+</pre></div>
+</div>
+</div>
+</div>
+<p>In this case, the Leave-One-Out Cross Validation (LOO-CV) approximation using <a class="reference external" href="https://arxiv.org/abs/1507.02646">Pareto Smoothed Importance Sampling</a> (PSIS) works for all observations, so we will use modify <code class="docutils literal notranslate"><span class="pre">loo_orig</span></code> in order to make <a class="reference internal" href="../../api/generated/arviz.reloo.html#arviz.reloo" title="arviz.reloo"><code class="xref py py-func docutils literal notranslate"><span class="pre">reloo()</span></code></a> believe that PSIS failed for some observations. This will also serve as a validation of our wrapper, as the PSIS LOO-CV already returned the correct value.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loo_orig</span><span class="o">.</span><span class="n">pareto_k</span><span class="p">[[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">73</span><span class="p">]]</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.6</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We initialize our sampling wrapper</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">idata_kwargs</span><span class="p">[</span><span class="s2">"log_likelihood"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"log_lik"</span><span class="p">,</span> <span class="s2">"log_lik_ex"</span><span class="p">]</span>
+<span class="n">cmdstanpy_wrapper</span> <span class="o">=</span> <span class="n">LinearRegressionWrapper</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">idata_orig</span><span class="o">=</span><span class="n">idata</span><span class="p">,</span>
+    <span class="n">data_file</span><span class="o">=</span><span class="s2">"linreg_ex_data.json"</span><span class="p">,</span>
+    <span class="n">sample_kwargs</span><span class="o">=</span><span class="n">sample_kwargs</span><span class="p">,</span>
+    <span class="n">idata_kwargs</span><span class="o">=</span><span class="n">idata_kwargs</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>And eventually, we can use this wrapper to call <code class="docutils literal notranslate"><span class="pre">az.reloo</span></code>, and compare the results with the PSIS LOO-CV results.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loo_relooed</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../../api/generated/arviz.reloo.html#arviz.reloo" title="arviz.reloo"><span class="n">az</span><span class="o">.</span><span class="n">reloo</span></a><span class="p">(</span><span class="n">cmdstanpy_wrapper</span><span class="p">,</span> <span class="n">loo_orig</span><span class="o">=</span><span class="n">loo_orig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/oriol/Public/arviz/arviz/stats/stats_refitting.py:99: UserWarning: reloo is an experimental and untested feature
+  warnings.warn("reloo is an experimental and untested feature", UserWarning)
+19:13:06 - cmdstanpy - INFO - CmdStan start processing
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "bff9d1a7959e4b50b44af22bc31baa2f", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "96259a9ee14547e0867536550f3b78c8", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "9794d966365948909c1808ede776fa75", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "04dfc3494f874783a5c27340faeee118", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                                                                                                                                                                                                                                                                                                
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:06 - cmdstanpy - INFO - CmdStan done processing.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:06 - cmdstanpy - INFO - CmdStan start processing
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a9c72c7e5c624c6486b6b6246c909005", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "b26885338e484a69b6b5fbe79d5a2976", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "2f9efa574fc9495db5fa2bd7e1a01b59", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "87af8ff858394dcc8f49c5ab15e055e0", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                                                                                                                                                                                                                                                                                                
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:07 - cmdstanpy - INFO - CmdStan done processing.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:07 - cmdstanpy - INFO - CmdStan start processing
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "cb374c8242cf41a38cb8197384900874", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "61d2c14225be40ca8a94661b7d1872df", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "2267704b29ba41d08f866ce7d73e0739", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "2c288fca429e4b2b9057661068c94717", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                                                                                                                                                                                                                                                                                                
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:08 - cmdstanpy - INFO - CmdStan done processing.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:08 - cmdstanpy - INFO - CmdStan start processing
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d93a4e62e98145f2b78b6012c1924370", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "57e8aa99f7e84f78b1053d1968909bac", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "5bac255cc4ad416eab5f84c4c6315784", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "d4bfffd1e8754965b169c19144a45564", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                                                                                                                                                                                                                                                                                                
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19:13:08 - cmdstanpy - INFO - CmdStan done processing.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loo_relooed</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Computed from 4000 posterior samples and 100 observations log-likelihood matrix.
+
+         Estimate       SE
+elpd_loo  -258.73     8.23
+p_loo        3.18        -
+------
+
+Pareto k diagnostic values:
+                         Count   Pct.
+(-Inf, 0.5]   (good)      100  100.0%
+ (0.5, 0.7]   (ok)          0    0.0%
+   (0.7, 1]   (bad)         0    0.0%
+   (1, Inf)   (very bad)    0    0.0%
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loo_orig</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Computed from 4000 posterior samples and 100 observations log-likelihood matrix.
+
+         Estimate       SE
+elpd_loo  -258.72     8.23
+p_loo        3.17        -
+------
+
+Pareto k diagnostic values:
+                         Count   Pct.
+(-Inf, 0.5]   (good)       96   96.0%
+ (0.5, 0.7]   (ok)          0    0.0%
+   (0.7, 1]   (bad)         2    2.0%
+   (1, Inf)   (very bad)    2    2.0%
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</article>
+<footer class="bd-footer-article">
+<!-- Previous / next buttons -->
+<div class="prev-next-area">
+<a class="left-prev" href="../sampling_wrappers.html" id="prev-link" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">Sampling wrappers</p>
+</div>
+</a>
+<a class="right-next" href="../pystan_refitting.html" id="next-link" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">Refitting PyStan (3.0+) models with ArviZ</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<div class="bd-sidebar-secondary bd-toc">
+<div class="toc-item">
+<div id="searchbox"></div>
+</div>
+<div class="toc-item">
+<div class="tocsection editthispage">
+<a href="https://github.com/arviz-devs/arviz/edit/main/doc/source/user_guide/wrappers/cmdstanpy_refitting.ipynb">
+<i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+</div>
+<div class="toc-item">
+<div class="tocsection sourcelink">
+<a href="../../_sources/user_guide/wrappers/cmdstanpy_refitting.ipynb.txt">
+<i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+</div>
+</div>
+</div>
+<footer class="bd-footer-content">
+<div class="bd-footer-content__inner">
+</div>
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script src="../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+<footer class="bd-footer"><div class="bd-footer__inner container">
+<div class="footer-item">
+<p class="copyright">
+
+    © Copyright 2018, ArviZ devs.<br/>
+</p>
+</div>
+<div class="footer-item">
+<p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+</div>
+<div class="footer-item">
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+</p>
+</div>
+</div>
+</footer>
+</body>
+</html>

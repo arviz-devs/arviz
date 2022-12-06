@@ -1,0 +1,6 @@
+﻿arviz.waic
+==========
+
+.. currentmodule:: arviz
+
+.. autofunction:: waic

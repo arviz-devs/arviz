@@ -1,0 +1,1026 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17.1: http://docutils.sourceforge.net/" name="generator"/>
+<title>Label guide — ArviZ dev documentation</title>
+<script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+<!-- Loaded before other Sphinx assets -->
+<link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet"/>
+<link as="font" crossorigin="" href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" rel="preload" type="font/woff2"/>
+<link href="../_static/pygments.css" rel="stylesheet" type="text/css">
+<link href="../_static/plot_directive.css" rel="stylesheet" type="text/css">
+<link href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" rel="stylesheet" type="text/css">
+<link href="../_static/copybutton.css" rel="stylesheet" type="text/css">
+<link href="../_static/sphinx-codeautolink.css" rel="stylesheet" type="text/css">
+<link href="../_static/jupyter-sphinx.css" rel="stylesheet" type="text/css">
+<link href="../_static/thebelab.css" rel="stylesheet" type="text/css">
+<link href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" rel="stylesheet" type="text/css"/>
+<link href="../_static/custom.css" rel="stylesheet" type="text/css"/>
+<!-- Pre-loaded scripts that we'll load fully later -->
+<link as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94" rel="preload"/>
+<link as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94" rel="preload"/>
+<script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+<script src="../_static/jquery.js"></script>
+<script src="../_static/underscore.js"></script>
+<script src="../_static/doctools.js"></script>
+<script src="../_static/clipboard.min.js"></script>
+<script src="../_static/copybutton.js"></script>
+<script src="../_static/thebelab-helper.js"></script>
+<script src="../_static/design-tabs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+<script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+<script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/label_guide';</script>
+<link href="../_static/favicon.ico" rel="shortcut icon">
+<link href="../genindex.html" rel="index" title="Index">
+<link href="../search.html" rel="search" title="Search"/>
+<link href="../schema/schema.html" rel="next" title="InferenceData schema specification"/>
+<link href="data_structures.html" rel="prev" title="Data structures"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="None" name="docsearch:language"/>
+</link></link></link></link></link></link></link></link></link></head>
+<body data-default-mode="light" data-offset="180" data-spy="scroll" data-target="#bd-toc-nav">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<input class="sidebar-toggle" id="__primary" name="__primary" type="checkbox"/>
+<label class="overlay overlay-primary" for="__primary"></label>
+<input class="sidebar-toggle" id="__secondary" name="__secondary" type="checkbox"/>
+<label class="overlay overlay-secondary" for="__secondary"></label>
+<div class="search-button__wrapper">
+<div class="search-button__overlay"></div>
+<div class="search-button__search-container">
+<form action="../search.html" class="bd-search d-flex align-items-center" method="get">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input aria-label="Search the docs ..." autocapitalize="off" autocomplete="off" autocorrect="off" class="form-control" id="search-input" name="q" placeholder="Search the docs ..." spellcheck="false" type="search"/>
+<span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+</div>
+</div>
+<nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+<label class="sidebar-toggle primary-toggle" for="__primary">
+<span class="fa-solid fa-bars"></span>
+</label>
+<div id="navbar-start">
+<a class="navbar-brand logo" href="../index.html">
+<img alt="Logo image" class="logo__image only-light" src="../_static/logo.png"/>
+<img alt="Logo image" class="logo__image only-dark" src="../_static/logo_dark.png"/>
+</a>
+    
+    dev
+    
+  </div>
+<div class="col-lg-9 navbar-header-items">
+<div class="mr-auto" id="navbar-center">
+<div class="navbar-center-item">
+<nav class="navbar-nav">
+<p aria-label="Site Navigation" aria-level="1" class="sidebar-header-items__title" role="heading">
+        Site Navigation
+    </p>
+<ul class="navbar-nav" id="navbar-main-elements">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+                        Example Gallery
+                      </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<div id="navbar-end">
+<div class="navbar-end-item navbar-persistent--container">
+<button aria-label="Search" class="btn btn-sm navbar-btn search-button search-button__button" data-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+</div>
+<div class="navbar-end-item">
+<button aria-label="light/dark" class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" data-toggle="tooltip" title="light/dark">
+<span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+<span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+<span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+</div>
+<div class="navbar-end-item">
+<ul aria-label="Icon Links" class="navbar-nav" id="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://github.com/arviz-devs/arviz" rel="noopener" target="_blank" title="GitHub"><span><i class="fa-brands fa-github"></i></span>
+<label class="sr-only">GitHub</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://twitter.com/arviz_devs" rel="noopener" target="_blank" title="Twitter"><span><i class="fa-brands fa-twitter"></i></span>
+<label class="sr-only">Twitter</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://bayes.club/@ArviZ" rel="noopener" target="_blank" title="Mastodon"><span><i class="fa-brands fa-mastodon"></i></span>
+<label class="sr-only">Mastodon</label></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="navbar-persistent--mobile">
+<button aria-label="Search" class="btn btn-sm navbar-btn search-button search-button__button" data-toggle="tooltip" title="Search">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+</div>
+<label class="sidebar-toggle secondary-toggle" for="__secondary">
+<span class="fa-solid fa-outdent"></span>
+</label>
+</div>
+</nav>
+<div class="bd-container">
+<div class="bd-container__inner bd-page-width">
+<div class="bd-sidebar-primary bd-sidebar">
+<div class="sidebar-header-items sidebar-primary__section">
+<div class="sidebar-header-items__center">
+<div class="navbar-center-item">
+<nav class="navbar-nav">
+<p aria-label="Site Navigation" aria-level="1" class="sidebar-header-items__title" role="heading">
+        Site Navigation
+    </p>
+<ul class="navbar-nav" id="navbar-main-elements">
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../examples/index.html">
+                        Example Gallery
+                      </a>
+</li>
+<li class="nav-item current active">
+<a class="nav-link nav-internal" href="index.html">
+                        User Guide
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+</li>
+<li class="nav-item">
+<a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<div class="sidebar-header-items__end">
+<div class="navbar-end-item">
+<button aria-label="light/dark" class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" data-toggle="tooltip" title="light/dark">
+<span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+<span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+<span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+</div>
+<div class="navbar-end-item">
+<ul aria-label="Icon Links" class="navbar-nav" id="navbar-icon-links">
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://github.com/arviz-devs/arviz" rel="noopener" target="_blank" title="GitHub"><span><i class="fa-brands fa-github"></i></span>
+<label class="sr-only">GitHub</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://twitter.com/arviz_devs" rel="noopener" target="_blank" title="Twitter"><span><i class="fa-brands fa-twitter"></i></span>
+<label class="sr-only">Twitter</label></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" data-toggle="tooltip" href="https://bayes.club/@ArviZ" rel="noopener" target="_blank" title="Mastodon"><span><i class="fa-brands fa-mastodon"></i></span>
+<label class="sr-only">Mastodon</label></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sidebar-start-items sidebar-primary__section">
+<div class="sidebar-start-items__item"><nav aria-label="Section navigation" class="bd-links" id="bd-docs-nav">
+<p aria-level="1" class="bd-links__title" role="heading">
+    Section Navigation
+  </p>
+<div class="bd-toc-item navbar-nav">
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="plotting.html">Plotting</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="plots_arguments_guide.html">Plots’ arguments guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_with_matplotlib.html">Plotting with Matplotlib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting_with_bokeh.html">Plotting with Bokeh</a></li>
+</ul>
+</input></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="data_structures.html">Data structures</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Label guide</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../schema/schema.html">InferenceData schema specification</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../schema/PyMC3_schema_example.html">PyMC3 example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../schema/PyStan_schema_example.html">PyStan example</a></li>
+</ul>
+</input></li>
+</ul>
+</input></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="computation.html">Computation</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="Numba.html">Numba -  an overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dask.html">Dask for ArviZ</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="sampling_wrappers.html">Sampling wrappers</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="wrappers/cmdstanpy_refitting.html">Refitting CmdStanPy models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pystan_refitting.html">Refitting PyStan (3.0+) models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymc_refitting.html">Refitting PyMC models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numpyro_refitting.html">Refitting NumPyro models with ArviZ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numpyro_refitting_xr_lik.html">Refitting NumPyro models with ArviZ (and xarray)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+</div>
+</div>
+<div class="sidebar-end-items sidebar-primary__section">
+<div class="sidebar-end-items__item">
+</div>
+</div>
+<div id="rtd-footer-container"></div>
+</div>
+<main class="bd-main" id="main-content">
+<div class="bd-content">
+<div class="bd-article-container">
+<div class="bd-header-article">
+</div>
+<article class="bd-article" role="main">
+<section id="label-guide">
+<span id="id1"></span><h1>Label guide<a class="headerlink" href="#label-guide" title="Permalink to this headline">#</a></h1>
+<section id="basic-labelling">
+<h2>Basic labelling<a class="headerlink" href="#basic-labelling" title="Permalink to this headline">#</a></h2>
+<p>All ArviZ plotting functions and some stats functions can take an optional <code class="docutils literal notranslate"><span class="pre">labeller</span></code> argument.
+By default, labels show the variable name.
+Multidimensional variables also show the coordinate value.</p>
+<section id="example-default-labelling">
+<h3>Example: Default labelling<a class="headerlink" href="#example-default-labelling" title="Permalink to this headline">#</a></h3>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="gp">   ...: </span><span class="n">schools</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.load_arviz_data.html#arviz.load_arviz_data" title="arviz.load_arviz_data"><span class="n">az</span><span class="o">.</span><span class="n">load_arviz_data</span></a><span class="p">(</span><span class="s2">"centered_eight"</span><span class="p">)</span>
+<span class="gp">   ...: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">schools</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+<span class="gh">Out[1]: </span><span class="go"></span>
+<span class="go">                          mean     sd  hdi_3%  ...  ess_bulk  ess_tail  r_hat</span>
+<span class="go">mu                       4.486  3.487  -1.623  ...     241.0     659.0   1.02</span>
+<span class="go">theta[Choate]            6.460  5.868  -4.564  ...     365.0     710.0   1.01</span>
+<span class="go">theta[Deerfield]         5.028  4.883  -4.311  ...     427.0     851.0   1.01</span>
+<span class="go">theta[Phillips Andover]  3.938  5.688  -7.769  ...     515.0     730.0   1.01</span>
+<span class="go">theta[Phillips Exeter]   4.872  5.012  -4.490  ...     337.0     869.0   1.01</span>
+<span class="go">theta[Hotchkiss]         3.667  4.956  -6.470  ...     365.0    1034.0   1.01</span>
+<span class="go">theta[Lawrenceville]     3.975  5.187  -7.041  ...     521.0    1031.0   1.01</span>
+<span class="go">theta[St. Paul's]        6.581  5.105  -3.093  ...     276.0     586.0   1.01</span>
+<span class="go">theta[Mt. Hermon]        4.772  5.737  -5.858  ...     452.0     754.0   1.01</span>
+<span class="go">tau                      4.124  3.102   0.896  ...      67.0      38.0   1.06</span>
+
+<span class="go">[10 rows x 9 columns]</span>
+</pre></div>
+</div>
+<p>ArviZ supports label based indexing powered by <a class="reference external" href="http://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html">xarray</a>.
+Through label based indexing, you can use labels to plot a subset of selected variables.</p>
+</section>
+<section id="example-label-based-indexing">
+<h3>Example: Label based indexing<a class="headerlink" href="#example-label-based-indexing" title="Permalink to this headline">#</a></h3>
+<p>For a case where the coordinate values shown for the <code class="docutils literal notranslate"><span class="pre">theta</span></code> variable coordinate to the <code class="docutils literal notranslate"><span class="pre">school</span></code> dimension,
+you can indicate ArviZ to plot <code class="docutils literal notranslate"><span class="pre">tau</span></code> by including it in the <code class="docutils literal notranslate"><span class="pre">var_names</span></code> argument to inspect its 1.03 <a class="reference internal" href="../api/generated/arviz.rhat.html#arviz.rhat" title="arviz.rhat"><code class="xref py py-func docutils literal notranslate"><span class="pre">rhat()</span></code></a> value.
+To inspect the <code class="docutils literal notranslate"><span class="pre">theta</span></code> values for the <code class="docutils literal notranslate"><span class="pre">Choate</span></code> and <code class="docutils literal notranslate"><span class="pre">St.</span> <span class="pre">Paul's</span></code> coordinates, you can include <code class="docutils literal notranslate"><span class="pre">theta</span></code> in <code class="docutils literal notranslate"><span class="pre">var_names</span></code> and use the <code class="docutils literal notranslate"><span class="pre">coords</span></code> argument to select only these two coordinate values.
+You can generate this plot with the following command:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [2]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_trace.html#arviz.plot_trace" title="arviz.plot_trace"><span class="n">az</span><span class="o">.</span><span class="n">plot_trace</span></a><span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"tau"</span><span class="p">,</span> <span class="s2">"theta"</span><span class="p">],</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Choate"</span><span class="p">,</span> <span class="s2">"St. Paul's"</span><span class="p">]},</span> <span class="n">compact</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../_images/label_guide_plot_trace.png" src="../_images/label_guide_plot_trace.png">
+<p>Using the above command, you can now identify issues for low <code class="docutils literal notranslate"><span class="pre">tau</span></code> values.</p>
+</img></section>
+<section id="example-using-the-labeller-argument">
+<h3>Example: Using the labeller argument<a class="headerlink" href="#example-using-the-labeller-argument" title="Permalink to this headline">#</a></h3>
+<p>You can use the <code class="docutils literal notranslate"><span class="pre">labeller</span></code> argument to customize labels.
+Unlike the default labels that show <code class="docutils literal notranslate"><span class="pre">theta</span></code>, not <span class="math notranslate nohighlight">\(\theta\)</span> (generated from <code class="docutils literal notranslate"><span class="pre">$\theta$</span></code> using <span class="math notranslate nohighlight">\(\LaTeX\)</span>), the <code class="docutils literal notranslate"><span class="pre">labeller</span></code> argument presents the labels with proper math notation.</p>
+<p>You can use <a class="reference internal" href="../api/generated/arviz.labels.MapLabeller.html#arviz.labels.MapLabeller" title="arviz.labels.MapLabeller"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapLabeller</span></code></a> to rename the variable <code class="docutils literal notranslate"><span class="pre">theta</span></code> to <code class="docutils literal notranslate"><span class="pre">$\theta$</span></code>, as shown in the following example:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [3]: </span><span class="kn">import</span> <span class="nn">arviz.labels</span> <span class="k">as</span> <span class="nn">azl</span>
+<span class="gp">   ...: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.MapLabeller.html#arviz.labels.MapLabeller" title="arviz.labels.MapLabeller"><span class="n">labeller</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.MapLabeller.html#arviz.labels.MapLabeller" title="arviz.labels.MapLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">MapLabeller</span></a><span class="p">(</span><span class="n">var_name_map</span><span class="o">=</span><span class="p">{</span><span class="s2">"theta"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\theta$"</span><span class="p">})</span>
+<span class="gp">   ...: </span><span class="n">coords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"school"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Deerfield"</span><span class="p">,</span> <span class="s2">"Hotchkiss"</span><span class="p">,</span> <span class="s2">"Lawrenceville"</span><span class="p">]}</span>
+<span class="gp">   ...: </span>
+
+<span class="gp">In [4]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"theta"</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">labeller</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.MapLabeller.html#arviz.labels.MapLabeller" title="arviz.labels.MapLabeller"><span class="n">labeller</span></a><span class="p">,</span> <span class="n">ref_val</span><span class="o">=</span><span class="mi">5</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../_images/label_guide_plot_posterior.png" src="../_images/label_guide_plot_posterior.png">
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For a list of labellers available in ArviZ, see the <a class="reference internal" href="../api/plot_utils.html#labeller-api"><span class="std std-ref">the API reference page</span></a>.</p>
+</div>
+</img></section>
+</section>
+<section id="sorting-labels">
+<h2>Sorting labels<a class="headerlink" href="#sorting-labels" title="Permalink to this headline">#</a></h2>
+<p>ArviZ allows labels to be sorted in two ways:</p>
+<ol class="arabic simple">
+<li><p>Using the arguments passed to ArviZ plotting functions</p></li>
+<li><p>Sorting the underlying <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2022.12.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a></p></li>
+</ol>
+<p>The first option is more suitable for single time ordering whereas the second option is more suitable for sorting plots consistently.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both ways are limited.
+Multidimensional variables can not be separated.
+For example, it is possible to sort <code class="docutils literal notranslate"><span class="pre">theta,</span> <span class="pre">mu,</span></code> or <code class="docutils literal notranslate"><span class="pre">tau</span></code> in any order, and within <code class="docutils literal notranslate"><span class="pre">theta</span></code> to sort the schools in any order, but it is not possible to sort half of the schools, then <code class="docutils literal notranslate"><span class="pre">mu</span></code> and <code class="docutils literal notranslate"><span class="pre">tau</span></code> and then the rest of the schools.</p>
+</div>
+<section id="sorting-variable-names">
+<h3>Sorting variable names<a class="headerlink" href="#sorting-variable-names" title="Permalink to this headline">#</a></h3>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">var_order</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"theta"</span><span class="p">,</span> <span class="s2">"mu"</span><span class="p">,</span> <span class="s2">"tau"</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio"/>
+<label class="sd-tab-label" for="sd-tab-item-0">
+ArviZ args</label><div class="sd-tab-content docutils">
+<p>For variable names to appear sorted when calling ArviZ functions, pass a sorted list of the variable names.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="n">var_order</span><span class="p">)</span>
+<span class="gh">Out[6]: </span><span class="go"></span>
+<span class="go">                          mean     sd  hdi_3%  ...  ess_bulk  ess_tail  r_hat</span>
+<span class="go">theta[Choate]            6.460  5.868  -4.564  ...     365.0     710.0   1.01</span>
+<span class="go">theta[Deerfield]         5.028  4.883  -4.311  ...     427.0     851.0   1.01</span>
+<span class="go">theta[Phillips Andover]  3.938  5.688  -7.769  ...     515.0     730.0   1.01</span>
+<span class="go">theta[Phillips Exeter]   4.872  5.012  -4.490  ...     337.0     869.0   1.01</span>
+<span class="go">theta[Hotchkiss]         3.667  4.956  -6.470  ...     365.0    1034.0   1.01</span>
+<span class="go">theta[Lawrenceville]     3.975  5.187  -7.041  ...     521.0    1031.0   1.01</span>
+<span class="go">theta[St. Paul's]        6.581  5.105  -3.093  ...     276.0     586.0   1.01</span>
+<span class="go">theta[Mt. Hermon]        4.772  5.737  -5.858  ...     452.0     754.0   1.01</span>
+<span class="go">mu                       4.486  3.487  -1.623  ...     241.0     659.0   1.02</span>
+<span class="go">tau                      4.124  3.102   0.896  ...      67.0      38.0   1.06</span>
+
+<span class="go">[10 rows x 9 columns]</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio"/>
+<label class="sd-tab-label" for="sd-tab-item-1">
+xarray</label><div class="sd-tab-content docutils">
+<p>In xarray, subsetting the Dataset with a sorted list of variable names will order the Dataset.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="n">schools</span><span class="o">.</span><span class="n">posterior</span> <span class="o">=</span> <span class="n">schools</span><span class="o">.</span><span class="n">posterior</span><span class="p">[</span><span class="n">var_order</span><span class="p">]</span>
+<span class="gp">   ...: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">schools</span><span class="p">)</span>
+<span class="gp">   ...: </span>
+<span class="gh">Out[7]: </span><span class="go"></span>
+<span class="go">                          mean     sd  hdi_3%  ...  ess_bulk  ess_tail  r_hat</span>
+<span class="go">theta[Choate]            6.460  5.868  -4.564  ...     365.0     710.0   1.01</span>
+<span class="go">theta[Deerfield]         5.028  4.883  -4.311  ...     427.0     851.0   1.01</span>
+<span class="go">theta[Phillips Andover]  3.938  5.688  -7.769  ...     515.0     730.0   1.01</span>
+<span class="go">theta[Phillips Exeter]   4.872  5.012  -4.490  ...     337.0     869.0   1.01</span>
+<span class="go">theta[Hotchkiss]         3.667  4.956  -6.470  ...     365.0    1034.0   1.01</span>
+<span class="go">theta[Lawrenceville]     3.975  5.187  -7.041  ...     521.0    1031.0   1.01</span>
+<span class="go">theta[St. Paul's]        6.581  5.105  -3.093  ...     276.0     586.0   1.01</span>
+<span class="go">theta[Mt. Hermon]        4.772  5.737  -5.858  ...     452.0     754.0   1.01</span>
+<span class="go">mu                       4.486  3.487  -1.623  ...     241.0     659.0   1.02</span>
+<span class="go">tau                      4.124  3.102   0.896  ...      67.0      38.0   1.06</span>
+
+<span class="go">[10 rows x 9 columns]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="sorting-coordinate-values">
+<h3>Sorting coordinate values<a class="headerlink" href="#sorting-coordinate-values" title="Permalink to this headline">#</a></h3>
+<p>For sorting coordinate values, first, define the order, then store it, and use the result to sort the coordinate values.
+You can define the order by creating a list manually or by using xarray objects as illustrated in the below example “Sorting out the schools by mean”.</p>
+</section>
+<section id="example-sorting-the-schools-by-mean">
+<h3>Example: Sorting the schools by mean<a class="headerlink" href="#example-sorting-the-schools-by-mean" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>Locate the means of each school by using the following command:</p></li>
+</ul>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="n">school_means</span> <span class="o">=</span> <span class="n">schools</span><span class="o">.</span><span class="n">posterior</span><span class="p">[</span><span class="s2">"theta"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="s2">"chain"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">))</span>
+<span class="gp">   ...: </span><span class="n">school_means</span>
+<span class="gp">   ...: </span>
+<span class="gh">Out[8]: </span><span class="go"></span>
+<span class="go">&lt;xarray.DataArray 'theta' (school: 8)&gt;</span>
+<span class="go">array([6.46006423, 5.02755458, 3.93803067, 4.87161236, 3.66684116,</span>
+<span class="go">       3.97468712, 6.58092358, 4.77241104])</span>
+<span class="go">Coordinates:</span>
+<span class="go">  * school   (school) object 'Choate' 'Deerfield' ... "St. Paul's" 'Mt. Hermon'</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>You can use the <code class="docutils literal notranslate"><span class="pre">DataArray</span></code> result to sort the coordinate values for <code class="docutils literal notranslate"><span class="pre">theta</span></code>.</p></li>
+</ul>
+<p>There are two ways of sorting:</p>
+<ol class="arabic simple">
+<li><p>Arviz args</p></li>
+<li><p>xarray</p></li>
+</ol>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio"/>
+<label class="sd-tab-label" for="sd-tab-item-2">
+ArviZ args</label><div class="sd-tab-content docutils">
+<p>Sort the coordinate values to pass them as a <code class="docutils literal notranslate"><span class="pre">coords</span></code> argument and choose the order of the rows.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [9]: </span><span class="n">sorted_schools</span> <span class="o">=</span> <span class="n">schools</span><span class="o">.</span><span class="n">posterior</span><span class="p">[</span><span class="s2">"school"</span><span class="p">]</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">school_means</span><span class="p">)</span>
+<span class="gp">   ...: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"theta"</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">:</span> <span class="n">sorted_schools</span><span class="p">})</span>
+<span class="gp">   ...: </span>
+<span class="gh">Out[9]: </span><span class="go"></span>
+<span class="go">                          mean     sd  hdi_3%  ...  ess_bulk  ess_tail  r_hat</span>
+<span class="go">theta[Hotchkiss]         3.667  4.956  -6.470  ...     365.0    1034.0   1.01</span>
+<span class="go">theta[Phillips Andover]  3.938  5.688  -7.769  ...     515.0     730.0   1.01</span>
+<span class="go">theta[Lawrenceville]     3.975  5.187  -7.041  ...     521.0    1031.0   1.01</span>
+<span class="go">theta[Mt. Hermon]        4.772  5.737  -5.858  ...     452.0     754.0   1.01</span>
+<span class="go">theta[Phillips Exeter]   4.872  5.012  -4.490  ...     337.0     869.0   1.01</span>
+<span class="go">theta[Deerfield]         5.028  4.883  -4.311  ...     427.0     851.0   1.01</span>
+<span class="go">theta[Choate]            6.460  5.868  -4.564  ...     365.0     710.0   1.01</span>
+<span class="go">theta[St. Paul's]        6.581  5.105  -3.093  ...     276.0     586.0   1.01</span>
+
+<span class="go">[8 rows x 9 columns]</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio"/>
+<label class="sd-tab-label" for="sd-tab-item-3">
+xarray</label><div class="sd-tab-content docutils">
+<p>You can use the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sortby.html#xarray.Dataset.sortby" title="(in xarray v2022.12.1.dev0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sortby()</span></code></a> method to order our coordinate values directly at the source.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [10]: </span><span class="n">schools</span><span class="o">.</span><span class="n">posterior</span> <span class="o">=</span> <span class="n">schools</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">school_means</span><span class="p">)</span>
+<span class="gp">   ....: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s2">"theta"</span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="gh">Out[10]: </span><span class="go"></span>
+<span class="go">                          mean     sd  hdi_3%  ...  ess_bulk  ess_tail  r_hat</span>
+<span class="go">theta[Hotchkiss]         3.667  4.956  -6.470  ...     365.0    1034.0   1.01</span>
+<span class="go">theta[Phillips Andover]  3.938  5.688  -7.769  ...     515.0     730.0   1.01</span>
+<span class="go">theta[Lawrenceville]     3.975  5.187  -7.041  ...     521.0    1031.0   1.01</span>
+<span class="go">theta[Mt. Hermon]        4.772  5.737  -5.858  ...     452.0     754.0   1.01</span>
+<span class="go">theta[Phillips Exeter]   4.872  5.012  -4.490  ...     337.0     869.0   1.01</span>
+<span class="go">theta[Deerfield]         5.028  4.883  -4.311  ...     427.0     851.0   1.01</span>
+<span class="go">theta[Choate]            6.460  5.868  -4.564  ...     365.0     710.0   1.01</span>
+<span class="go">theta[St. Paul's]        6.581  5.105  -3.093  ...     276.0     586.0   1.01</span>
+
+<span class="go">[8 rows x 9 columns]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="sorting-dimensions">
+<h3>Sorting dimensions<a class="headerlink" href="#sorting-dimensions" title="Permalink to this headline">#</a></h3>
+<p>In some cases, our multidimensional variables may not have only one more dimension (a length <code class="docutils literal notranslate"><span class="pre">n</span></code> dimension
+in addition to the <code class="docutils literal notranslate"><span class="pre">chain</span></code> and <code class="docutils literal notranslate"><span class="pre">draw</span></code> ones)
+but could have multiple more dimensions.
+Let’s imagine we have performed a set of fixed experiments on several days to multiple subjects,
+three data dimensions overall.</p>
+<p>We will create fake inference data with data mimicking this situation to show how to sort dimensions.
+To keep things short and not clutter the guide too much with unnecessary output lines,
+we will stick to a posterior of a single variable and the dimension sizes will be <code class="docutils literal notranslate"><span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4</span></code>.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="kn">from</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/index.html#module-numpy.random" title="numpy.random"><span class="nn">numpy.random</span></a> <span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">default_rng</span></a>
+<span class="gp">   ....: </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://pandas.pydata.org/pandas-docs/stable/index.html#module-pandas" title="pandas"><span class="nn">pandas</span></a> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">   ....: </span><span class="n">rng</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">default_rng</span></a><span class="p">()</span>
+<span class="gp">   ....: </span><span class="n">samples</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">   ....: </span><span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">   ....: </span>    <span class="s2">"subject"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ecoli"</span><span class="p">,</span> <span class="s2">"pseudomonas"</span><span class="p">,</span> <span class="s2">"clostridium"</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="s2">"date"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"1-3-2020"</span><span class="p">,</span> <span class="s2">"2-4-2020"</span><span class="p">,</span> <span class="s2">"1-5-2020"</span><span class="p">,</span> <span class="s2">"1-6-2020"</span><span class="p">],</span>
+<span class="gp">   ....: </span>    <span class="s2">"experiment"</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">   ....: </span><span class="p">}</span>
+<span class="gp">   ....: </span><span class="n">experiments</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.from_dict.html#arviz.from_dict" title="arviz.from_dict"><span class="n">az</span><span class="o">.</span><span class="n">from_dict</span></a><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">posterior</span><span class="o">=</span><span class="p">{</span><span class="s2">"b"</span><span class="p">:</span> <span class="n">samples</span><span class="p">},</span> <span class="n">dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"b"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"experiment"</span><span class="p">,</span> <span class="s2">"subject"</span><span class="p">,</span> <span class="s2">"date"</span><span class="p">]},</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span><span class="n">experiments</span><span class="o">.</span><span class="n">posterior</span>
+<span class="gp">   ....: </span>
+<span class="gh">Out[11]: </span><span class="go"></span>
+<span class="go">&lt;xarray.Dataset&gt;</span>
+<span class="go">Dimensions:     (chain: 4, draw: 500, experiment: 2, subject: 3, date: 4)</span>
+<span class="go">Coordinates:</span>
+<span class="go">  * chain       (chain) int64 0 1 2 3</span>
+<span class="go">  * draw        (draw) int64 0 1 2 3 4 5 6 7 ... 492 493 494 495 496 497 498 499</span>
+<span class="go">  * experiment  (experiment) int64 1 2</span>
+<span class="go">  * subject     (subject) &lt;U11 'ecoli' 'pseudomonas' 'clostridium'</span>
+<span class="go">  * date        (date) &lt;U8 '1-3-2020' '2-4-2020' '1-5-2020' '1-6-2020'</span>
+<span class="go">Data variables:</span>
+<span class="go">    b           (chain, draw, experiment, subject, date) float64 1.451 ... 0....</span>
+<span class="go">Attributes:</span>
+<span class="go">    created_at:     2022-12-06T13:57:38.615215</span>
+<span class="go">    arviz_version:  0.15.0.dev0</span>
+</pre></div>
+</div>
+<p>Given how we have constructed our dataset, the default order is <code class="docutils literal notranslate"><span class="pre">experiment,</span> <span class="pre">subject,</span> <span class="pre">date</span></code>.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+Click to see the default summary<div class="sd-summary-down docutils">
+<svg aria-hidden="true" class="sd-octicon sd-octicon-chevron-down" height="1.5em" version="1.1" viewbox="0 0 24 24" width="1.5em"><path d="M5.22 8.72a.75.75 0 000 1.06l6.25 6.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06L12 14.44 6.28 8.72a.75.75 0 00-1.06 0z" fill-rule="evenodd"></path></svg></div>
+<div class="sd-summary-up docutils">
+<svg aria-hidden="true" class="sd-octicon sd-octicon-chevron-up" height="1.5em" version="1.1" viewbox="0 0 24 24" width="1.5em"><path d="M18.78 15.28a.75.75 0 000-1.06l-6.25-6.25a.75.75 0 00-1.06 0l-6.25 6.25a.75.75 0 101.06 1.06L12 9.56l5.72 5.72a.75.75 0 001.06 0z" fill-rule="evenodd"></path></svg></div>
+</summary><div class="sd-summary-content sd-card-body docutils">
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+<span class="gh">Out[12]: </span><span class="go"></span>
+<span class="go">                              mean     sd  hdi_3%  ...  ess_bulk  ess_tail  r_hat</span>
+<span class="go">b[1, ecoli, 1-3-2020]       -0.030  0.992  -1.855  ...    2045.0    1930.0    1.0</span>
+<span class="go">b[1, ecoli, 2-4-2020]       -0.021  1.027  -1.918  ...    2027.0    1933.0    1.0</span>
+<span class="go">b[1, ecoli, 1-5-2020]        0.012  0.989  -1.748  ...    2036.0    1920.0    1.0</span>
+<span class="go">b[1, ecoli, 1-6-2020]       -0.005  1.013  -1.744  ...    2044.0    1930.0    1.0</span>
+<span class="go">b[1, pseudomonas, 1-3-2020]  0.035  0.993  -1.820  ...    2038.0    2003.0    1.0</span>
+<span class="go">b[1, pseudomonas, 2-4-2020] -0.011  1.008  -1.893  ...    2122.0    1911.0    1.0</span>
+<span class="go">b[1, pseudomonas, 1-5-2020] -0.002  1.037  -1.930  ...    1799.0    1928.0    1.0</span>
+<span class="go">b[1, pseudomonas, 1-6-2020]  0.033  0.998  -1.887  ...    2071.0    1994.0    1.0</span>
+<span class="go">b[1, clostridium, 1-3-2020] -0.000  1.011  -1.976  ...    1729.0    1956.0    1.0</span>
+<span class="go">b[1, clostridium, 2-4-2020]  0.009  0.974  -1.845  ...    1774.0    1774.0    1.0</span>
+<span class="go">b[1, clostridium, 1-5-2020]  0.046  1.007  -1.900  ...    1852.0    1881.0    1.0</span>
+<span class="go">b[1, clostridium, 1-6-2020]  0.015  1.012  -1.826  ...    2109.0    1974.0    1.0</span>
+<span class="go">b[2, ecoli, 1-3-2020]        0.019  1.000  -1.790  ...    1876.0    1817.0    1.0</span>
+<span class="go">b[2, ecoli, 2-4-2020]        0.012  1.004  -1.823  ...    2041.0    1932.0    1.0</span>
+<span class="go">b[2, ecoli, 1-5-2020]        0.029  0.998  -1.835  ...    2002.0    2013.0    1.0</span>
+<span class="go">b[2, ecoli, 1-6-2020]       -0.032  1.000  -1.793  ...    1738.0    1950.0    1.0</span>
+<span class="go">b[2, pseudomonas, 1-3-2020]  0.015  1.025  -1.888  ...    1997.0    1775.0    1.0</span>
+<span class="go">b[2, pseudomonas, 2-4-2020]  0.011  0.995  -1.903  ...    1946.0    1743.0    1.0</span>
+<span class="go">b[2, pseudomonas, 1-5-2020] -0.046  1.003  -1.847  ...    1853.0    2012.0    1.0</span>
+<span class="go">b[2, pseudomonas, 1-6-2020] -0.019  0.995  -1.950  ...    1984.0    1930.0    1.0</span>
+<span class="go">b[2, clostridium, 1-3-2020]  0.003  1.009  -1.842  ...    2224.0    1919.0    1.0</span>
+<span class="go">b[2, clostridium, 2-4-2020] -0.019  0.978  -1.708  ...    2042.0    1930.0    1.0</span>
+<span class="go">b[2, clostridium, 1-5-2020] -0.006  0.995  -1.871  ...    1947.0    1899.0    1.0</span>
+<span class="go">b[2, clostridium, 1-6-2020] -0.023  1.008  -1.884  ...    1895.0    1777.0    1.0</span>
+
+<span class="go">[24 rows x 9 columns]</span>
+</pre></div>
+</div>
+</div>
+</details><p>However, the order we want is: <code class="docutils literal notranslate"><span class="pre">subject,</span> <span class="pre">date,</span> <span class="pre">experiment</span></code>.
+Now, to get the desired result, we need to modify the underlying xarray object.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [13]: </span><span class="n">dim_order</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"chain"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"subject"</span><span class="p">,</span> <span class="s2">"date"</span><span class="p">,</span> <span class="s2">"experiment"</span><span class="p">)</span>
+
+<span class="gp">In [14]: </span><span class="n">experiments</span> <span class="o">=</span> <span class="n">experiments</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="n">dim_order</span><span class="p">)</span>
+
+<span class="gp">In [15]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+<span class="gh">Out[15]: </span><span class="go"></span>
+<span class="go">                              mean     sd  hdi_3%  ...  ess_bulk  ess_tail  r_hat</span>
+<span class="go">b[ecoli, 1-3-2020, 1]       -0.030  0.992  -1.855  ...    2045.0    1930.0    1.0</span>
+<span class="go">b[ecoli, 1-3-2020, 2]        0.019  1.000  -1.790  ...    1876.0    1817.0    1.0</span>
+<span class="go">b[ecoli, 2-4-2020, 1]       -0.021  1.027  -1.918  ...    2027.0    1933.0    1.0</span>
+<span class="go">b[ecoli, 2-4-2020, 2]        0.012  1.004  -1.823  ...    2041.0    1932.0    1.0</span>
+<span class="go">b[ecoli, 1-5-2020, 1]        0.012  0.989  -1.748  ...    2036.0    1920.0    1.0</span>
+<span class="go">b[ecoli, 1-5-2020, 2]        0.029  0.998  -1.835  ...    2002.0    2013.0    1.0</span>
+<span class="go">b[ecoli, 1-6-2020, 1]       -0.005  1.013  -1.744  ...    2044.0    1930.0    1.0</span>
+<span class="go">b[ecoli, 1-6-2020, 2]       -0.032  1.000  -1.793  ...    1738.0    1950.0    1.0</span>
+<span class="go">b[pseudomonas, 1-3-2020, 1]  0.035  0.993  -1.820  ...    2038.0    2003.0    1.0</span>
+<span class="go">b[pseudomonas, 1-3-2020, 2]  0.015  1.025  -1.888  ...    1997.0    1775.0    1.0</span>
+<span class="go">b[pseudomonas, 2-4-2020, 1] -0.011  1.008  -1.893  ...    2122.0    1911.0    1.0</span>
+<span class="go">b[pseudomonas, 2-4-2020, 2]  0.011  0.995  -1.903  ...    1946.0    1743.0    1.0</span>
+<span class="go">b[pseudomonas, 1-5-2020, 1] -0.002  1.037  -1.930  ...    1799.0    1928.0    1.0</span>
+<span class="go">b[pseudomonas, 1-5-2020, 2] -0.046  1.003  -1.847  ...    1853.0    2012.0    1.0</span>
+<span class="go">b[pseudomonas, 1-6-2020, 1]  0.033  0.998  -1.887  ...    2071.0    1994.0    1.0</span>
+<span class="go">b[pseudomonas, 1-6-2020, 2] -0.019  0.995  -1.950  ...    1984.0    1930.0    1.0</span>
+<span class="go">b[clostridium, 1-3-2020, 1] -0.000  1.011  -1.976  ...    1729.0    1956.0    1.0</span>
+<span class="go">b[clostridium, 1-3-2020, 2]  0.003  1.009  -1.842  ...    2224.0    1919.0    1.0</span>
+<span class="go">b[clostridium, 2-4-2020, 1]  0.009  0.974  -1.845  ...    1774.0    1774.0    1.0</span>
+<span class="go">b[clostridium, 2-4-2020, 2] -0.019  0.978  -1.708  ...    2042.0    1930.0    1.0</span>
+<span class="go">b[clostridium, 1-5-2020, 1]  0.046  1.007  -1.900  ...    1852.0    1881.0    1.0</span>
+<span class="go">b[clostridium, 1-5-2020, 2] -0.006  0.995  -1.871  ...    1947.0    1899.0    1.0</span>
+<span class="go">b[clostridium, 1-6-2020, 1]  0.015  1.012  -1.826  ...    2109.0    1974.0    1.0</span>
+<span class="go">b[clostridium, 1-6-2020, 2] -0.023  1.008  -1.884  ...    1895.0    1777.0    1.0</span>
+
+<span class="go">[24 rows x 9 columns]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>However, we don’t need to overwrite or store the modified xarray object.
+Doing <code class="docutils literal notranslate"><span class="pre">az.summary(experiments.posterior.transpose(*dim_order))</span></code> would work just the same
+if we only want to use this order once.</p>
+</div>
+</section>
+</section>
+<section id="labeling-with-indexes">
+<h2>Labeling with indexes<a class="headerlink" href="#labeling-with-indexes" title="Permalink to this headline">#</a></h2>
+<p>As you may have seen, there are some labellers with <code class="docutils literal notranslate"><span class="pre">Idx</span></code> in their name:
+<a class="reference internal" href="../api/generated/arviz.labels.IdxLabeller.html#arviz.labels.IdxLabeller" title="arviz.labels.IdxLabeller"><code class="xref py py-class docutils literal notranslate"><span class="pre">IdxLabeller</span></code></a> and  <a class="reference internal" href="../api/generated/arviz.labels.DimIdxLabeller.html#arviz.labels.DimIdxLabeller" title="arviz.labels.DimIdxLabeller"><code class="xref py py-class docutils literal notranslate"><span class="pre">DimIdxLabeller</span></code></a>.
+They show the positional index of the values instead of their corresponding coordinate value.</p>
+<p>We have seen before that we can use the <code class="docutils literal notranslate"><span class="pre">coords</span></code> argument or
+the <a class="reference internal" href="../api/generated/arviz.InferenceData.sel.html#arviz.InferenceData.sel" title="arviz.InferenceData.sel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sel()</span></code></a> method to select data based on the coordinate values.
+Similarly, we can use the <a class="reference internal" href="../api/generated/arviz.InferenceData.isel.html#arviz.InferenceData.isel" title="arviz.InferenceData.isel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">isel()</span></code></a> method to select data based on positional indexes.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [16]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">labeller</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.IdxLabeller.html#arviz.labels.IdxLabeller" title="arviz.labels.IdxLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">IdxLabeller</span></a><span class="p">())</span>
+<span class="gh">Out[16]: </span><span class="go"></span>
+<span class="go">           mean     sd  hdi_3%  hdi_97%  ...  mcse_sd  ess_bulk  ess_tail  r_hat</span>
+<span class="go">theta[0]  3.667  4.956  -6.470   11.719  ...    0.185     365.0    1034.0   1.01</span>
+<span class="go">theta[1]  3.938  5.688  -7.769   13.676  ...    0.188     515.0     730.0   1.01</span>
+<span class="go">theta[2]  3.975  5.187  -7.041   12.209  ...    0.154     521.0    1031.0   1.01</span>
+<span class="go">theta[3]  4.772  5.737  -5.858   16.014  ...    0.182     452.0     754.0   1.01</span>
+<span class="go">theta[4]  4.872  5.012  -4.490   14.663  ...    0.187     337.0     869.0   1.01</span>
+<span class="go">theta[5]  5.028  4.883  -4.311   14.254  ...    0.164     427.0     851.0   1.01</span>
+<span class="go">theta[6]  6.460  5.868  -4.564   17.132  ...    0.213     365.0     710.0   1.01</span>
+<span class="go">theta[7]  6.581  5.105  -3.093   16.268  ...    0.210     276.0     586.0   1.01</span>
+<span class="go">mu        4.486  3.487  -1.623   10.693  ...    0.160     241.0     659.0   1.02</span>
+<span class="go">tau       4.124  3.102   0.896    9.668  ...    0.186      67.0      38.0   1.06</span>
+
+<span class="go">[10 rows x 9 columns]</span>
+</pre></div>
+</div>
+<p>After seeing the above summary, let’s use <code class="docutils literal notranslate"><span class="pre">isel</span></code> method to generate the summary of a subset only.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [17]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.summary.html#arviz.summary" title="arviz.summary"><span class="n">az</span><span class="o">.</span><span class="n">summary</span></a><span class="p">(</span><span class="n">schools</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">school</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">]),</span> <span class="n">labeller</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.IdxLabeller.html#arviz.labels.IdxLabeller" title="arviz.labels.IdxLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">IdxLabeller</span></a><span class="p">())</span>
+<span class="gh">Out[17]: </span><span class="go"></span>
+<span class="go">           mean     sd  hdi_3%  hdi_97%  ...  mcse_sd  ess_bulk  ess_tail  r_hat</span>
+<span class="go">theta[0]  3.975  5.187  -7.041   12.209  ...    0.154     521.0    1031.0   1.01</span>
+<span class="go">theta[1]  5.028  4.883  -4.311   14.254  ...    0.164     427.0     851.0   1.01</span>
+<span class="go">theta[2]  6.581  5.105  -3.093   16.268  ...    0.210     276.0     586.0   1.01</span>
+<span class="go">mu        4.486  3.487  -1.623   10.693  ...    0.160     241.0     659.0   1.02</span>
+<span class="go">tau       4.124  3.102   0.896    9.668  ...    0.186      67.0      38.0   1.06</span>
+
+<span class="go">[5 rows x 9 columns]</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Positional indexing is NOT label based indexing with numbers!</p>
+</div>
+<p>The positional indexes shown will correspond to the ordinal position in the <em>subsetted object</em>.
+If you are not subsetting the object, you can use these indexes with <code class="docutils literal notranslate"><span class="pre">isel</span></code> without problem.
+However, if you are subsetting the data (either directly or with the <code class="docutils literal notranslate"><span class="pre">coords</span></code> argument)
+and want to use the positional indexes shown, you need to use them on the corresponding subset.</p>
+<p><strong>Example</strong>: If you use a dict named <code class="docutils literal notranslate"><span class="pre">coords</span></code> when calling a plotting function,
+for <code class="docutils literal notranslate"><span class="pre">isel</span></code> to work it has to be called on
+<code class="docutils literal notranslate"><span class="pre">original_idata.sel(**coords).isel(&lt;desired</span> <span class="pre">positional</span> <span class="pre">idxs&gt;)</span></code> and
+not on <code class="docutils literal notranslate"><span class="pre">original_idata.isel(&lt;desired</span> <span class="pre">positional</span> <span class="pre">idxs&gt;)</span></code>.</p>
+</section>
+<section id="labeller-mixtures">
+<h2>Labeller mixtures<a class="headerlink" href="#labeller-mixtures" title="Permalink to this headline">#</a></h2>
+<p>In some cases, none of the available labellers do the right job.
+For example, one case where this is bound to happen is with <a class="reference internal" href="../api/generated/arviz.plot_forest.html#arviz.plot_forest" title="arviz.plot_forest"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_forest()</span></code></a>.
+When setting <code class="docutils literal notranslate"><span class="pre">legend=True</span></code> it does not really make sense to add the model name to the tick labels.
+<code class="docutils literal notranslate"><span class="pre">plot_forest</span></code> knows that, and if no <code class="docutils literal notranslate"><span class="pre">labeller</span></code> is passed, it uses either
+<a class="reference internal" href="../api/generated/arviz.labels.BaseLabeller.html#arviz.labels.BaseLabeller" title="arviz.labels.BaseLabeller"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLabeller</span></code></a> or <a class="reference internal" href="../api/generated/arviz.labels.NoModelLabeller.html#arviz.labels.NoModelLabeller" title="arviz.labels.NoModelLabeller"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoModelLabeller</span></code></a> depending on the value of <code class="docutils literal notranslate"><span class="pre">legend</span></code>.
+However, if we do want to use the <code class="docutils literal notranslate"><span class="pre">labeller</span></code> argument, we have to enforce this default ourselves:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [18]: </span><span class="n">schools2</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.load_arviz_data.html#arviz.load_arviz_data" title="arviz.load_arviz_data"><span class="n">az</span><span class="o">.</span><span class="n">load_arviz_data</span></a><span class="p">(</span><span class="s2">"non_centered_eight"</span><span class="p">)</span>
+
+<span class="gp">In [19]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_forest.html#arviz.plot_forest" title="arviz.plot_forest"><span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span></a><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">schools2</span><span class="p">),</span>
+<span class="gp">   ....: </span>    <span class="n">model_names</span><span class="o">=</span><span class="p">(</span><span class="s2">"centered"</span><span class="p">,</span> <span class="s2">"non_centered"</span><span class="p">),</span>
+<span class="gp">   ....: </span>    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Deerfield"</span><span class="p">,</span> <span class="s2">"Lawrenceville"</span><span class="p">,</span> <span class="s2">"Mt. Hermon"</span><span class="p">]},</span>
+<span class="gp">   ....: </span>    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">7</span><span class="p">),</span>
+<span class="gp">   ....: </span>    <span class="n">labeller</span><span class="o">=</span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.DimCoordLabeller.html#arviz.labels.DimCoordLabeller" title="arviz.labels.DimCoordLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">DimCoordLabeller</span></a><span class="p">(),</span>
+<span class="gp">   ....: </span>    <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">   ....: </span><span class="p">);</span>
+<span class="gp">   ....: </span>
+</pre></div>
+</div>
+<img alt="../_images/default_plot_forest.png" src="../_images/default_plot_forest.png"/>
+<p>There is a lot of repeated information now.
+The variable names, <code class="docutils literal notranslate"><span class="pre">dims</span></code> and <code class="docutils literal notranslate"><span class="pre">coords</span></code> are shown for both models.
+Moreover, the models are labeled both in the legend and in the labels of the y axis.
+For such cases, ArviZ provides a convenience function <a class="reference internal" href="../api/generated/arviz.labels.mix_labellers.html#arviz.labels.mix_labellers" title="arviz.labels.mix_labellers"><code class="xref py py-func docutils literal notranslate"><span class="pre">mix_labellers()</span></code></a>
+that combines labeller classes for some extra customization.</p>
+<p><strong>Labeller classes</strong> aim to split labeling into atomic tasks and have a method per task to maximize extensibility.
+Thus, many new labellers can be created with this mixer function alone without needing to write a new class from scratch.
+There are more usage examples of <a class="reference internal" href="../api/generated/arviz.labels.mix_labellers.html#arviz.labels.mix_labellers" title="arviz.labels.mix_labellers"><code class="xref py py-func docutils literal notranslate"><span class="pre">mix_labellers()</span></code></a> in its docstring page, click on
+it to go there.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [20]: </span><span class="n">MixtureLabeller</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.mix_labellers.html#arviz.labels.mix_labellers" title="arviz.labels.mix_labellers"><span class="n">azl</span><span class="o">.</span><span class="n">mix_labellers</span></a><span class="p">((</span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.DimCoordLabeller.html#arviz.labels.DimCoordLabeller" title="arviz.labels.DimCoordLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">DimCoordLabeller</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.NoModelLabeller.html#arviz.labels.NoModelLabeller" title="arviz.labels.NoModelLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">NoModelLabeller</span></a><span class="p">))</span>
+
+<span class="gp">In [21]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_forest.html#arviz.plot_forest" title="arviz.plot_forest"><span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span></a><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="p">(</span><span class="n">schools</span><span class="p">,</span> <span class="n">schools2</span><span class="p">),</span>
+<span class="gp">   ....: </span>    <span class="n">model_names</span><span class="o">=</span><span class="p">(</span><span class="s2">"centered"</span><span class="p">,</span> <span class="s2">"non_centered"</span><span class="p">),</span>
+<span class="gp">   ....: </span>    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">"school"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Deerfield"</span><span class="p">,</span> <span class="s2">"Lawrenceville"</span><span class="p">,</span> <span class="s2">"Mt. Hermon"</span><span class="p">]},</span>
+<span class="gp">   ....: </span>    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">7</span><span class="p">),</span>
+<span class="gp">   ....: </span>    <span class="n">labeller</span><span class="o">=</span><span class="n">MixtureLabeller</span><span class="p">(),</span>
+<span class="gp">   ....: </span>    <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">   ....: </span><span class="p">);</span>
+<span class="gp">   ....: </span>
+</pre></div>
+</div>
+<img alt="../_images/mixture_plot_forest.png" src="../_images/mixture_plot_forest.png"/>
+</section>
+<section id="custom-labellers">
+<h2>Custom labellers<a class="headerlink" href="#custom-labellers" title="Permalink to this headline">#</a></h2>
+<p>So far we have managed to customize the labels in the plots without writing a new class
+from scratch. However, there could be cases where we have to customize our labels
+further than what these sample labellers allow. In such cases, we have to subclass one of the
+labellers in <a class="reference internal" href="../api/plot_utils.html#labeller-api"><span class="std std-ref">arviz.labels</span></a> and override some of its methods.</p>
+<p>One case where we might need to do use this approach is when non indexing coordinates are present.
+This happens for example after doing pointwise selection on multiple dimensions,
+but we can also add extra dimensions to our models manually, as shown in TBD.
+For this example, let’s use pointwise selection.
+Let’s say one of the variables in the posterior represents a <a class="reference external" href="https://en.wikipedia.org/wiki/Covariance_matrix">covariance matrix</a>, and we want
+to keep it as is for other post-processing tasks instead of extracting the sub diagonal <a class="reference external" href="https://en.wikipedia.org/wiki/Triangular_matrix)">triangular
+matrix</a> with no repeated info as a flattened array. Or any other pointwise selection.</p>
+<p>Here is our data:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [22]: </span><span class="kn">from</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/index.html#module-numpy.random" title="numpy.random"><span class="nn">numpy.random</span></a> <span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">default_rng</span></a>
+
+<span class="gp">In [23]: </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="numpy"><span class="nn">numpy</span></a> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="gp">In [24]: </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://docs.xarray.dev/en/stable/index.html#module-xarray" title="xarray"><span class="nn">xarray</span></a> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="gp">In [25]: </span><span class="n">rng</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="numpy.random.default_rng"><span class="n">default_rng</span></a><span class="p">()</span>
+
+<span class="gp">In [26]: </span><span class="n">cov</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="gp">In [27]: </span><span class="n">cov</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://numpy.org/doc/stable/reference/generated/numpy.einsum.html#numpy.einsum" title="numpy.einsum"><span class="n">np</span><span class="o">.</span><span class="n">einsum</span></a><span class="p">(</span><span class="s2">"...ij,...kj"</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+
+<span class="gp">In [28]: </span><span class="n">cov</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="gp">In [29]: </span><span class="n">subjects</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ecoli"</span><span class="p">,</span> <span class="s2">"pseudomonas"</span><span class="p">,</span> <span class="s2">"clostridium"</span><span class="p">]</span>
+
+<span class="gp">In [30]: </span><span class="n">idata</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api/generated/arviz.from_dict.html#arviz.from_dict" title="arviz.from_dict"><span class="n">az</span><span class="o">.</span><span class="n">from_dict</span></a><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="p">{</span><span class="s2">"cov"</span><span class="p">:</span> <span class="n">cov</span><span class="p">},</span>
+<span class="gp">   ....: </span>    <span class="n">dims</span><span class="o">=</span><span class="p">{</span><span class="s2">"cov"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"subject"</span><span class="p">,</span> <span class="s2">"subject bis"</span><span class="p">]},</span>
+<span class="gp">   ....: </span>    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">"subject"</span><span class="p">:</span> <span class="n">subjects</span><span class="p">,</span> <span class="s2">"subject bis"</span><span class="p">:</span> <span class="n">subjects</span><span class="p">}</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [31]: </span><span class="n">idata</span><span class="o">.</span><span class="n">posterior</span>
+<span class="gh">Out[31]: </span><span class="go"></span>
+<span class="go">&lt;xarray.Dataset&gt;</span>
+<span class="go">Dimensions:      (chain: 4, draw: 500, subject: 3, subject bis: 3)</span>
+<span class="go">Coordinates:</span>
+<span class="go">  * chain        (chain) int64 0 1 2 3</span>
+<span class="go">  * draw         (draw) int64 0 1 2 3 4 5 6 7 ... 493 494 495 496 497 498 499</span>
+<span class="go">  * subject      (subject) &lt;U11 'ecoli' 'pseudomonas' 'clostridium'</span>
+<span class="go">  * subject bis  (subject bis) &lt;U11 'ecoli' 'pseudomonas' 'clostridium'</span>
+<span class="go">Data variables:</span>
+<span class="go">    cov          (chain, draw, subject, subject bis) float64 1.0 -0.3172 ... 1.0</span>
+<span class="go">Attributes:</span>
+<span class="go">    created_at:     2022-12-06T13:57:41.210594</span>
+<span class="go">    arviz_version:  0.15.0.dev0</span>
+</pre></div>
+</div>
+<p>To select a non rectangular slice with xarray and to get the result flattened and without NaNs, we can
+use <code class="docutils literal notranslate"><span class="pre">DataArray</span></code> s indexed with a dimension that is not present in our current dataset:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [32]: </span><span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">   ....: </span>    <span class="s1">'subject'</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span>
+<span class="gp">   ....: </span>        <span class="p">[</span><span class="s2">"ecoli"</span><span class="p">,</span> <span class="s2">"ecoli"</span><span class="p">,</span> <span class="s2">"pseudomonas"</span><span class="p">],</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">'pointwise_sel'</span><span class="p">]</span>
+<span class="gp">   ....: </span>    <span class="p">),</span>
+<span class="gp">   ....: </span>    <span class="s1">'subject bis'</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span>
+<span class="gp">   ....: </span>        <span class="p">[</span><span class="s2">"pseudomonas"</span><span class="p">,</span> <span class="s2">"clostridium"</span><span class="p">,</span> <span class="s2">"clostridium"</span><span class="p">],</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">'pointwise_sel'</span><span class="p">]</span>
+<span class="gp">   ....: </span>    <span class="p">)</span>
+<span class="gp">   ....: </span><span class="p">}</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [33]: </span><span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+<span class="gh">Out[33]: </span><span class="go"></span>
+<span class="go">&lt;xarray.Dataset&gt;</span>
+<span class="go">Dimensions:      (chain: 4, draw: 500, pointwise_sel: 3)</span>
+<span class="go">Coordinates:</span>
+<span class="go">  * chain        (chain) int64 0 1 2 3</span>
+<span class="go">  * draw         (draw) int64 0 1 2 3 4 5 6 7 ... 493 494 495 496 497 498 499</span>
+<span class="go">    subject      (pointwise_sel) &lt;U11 'ecoli' 'ecoli' 'pseudomonas'</span>
+<span class="go">    subject bis  (pointwise_sel) &lt;U11 'pseudomonas' 'clostridium' 'clostridium'</span>
+<span class="go">Dimensions without coordinates: pointwise_sel</span>
+<span class="go">Data variables:</span>
+<span class="go">    cov          (chain, draw, pointwise_sel) float64 -0.3172 -1.238 ... 6.289</span>
+<span class="go">Attributes:</span>
+<span class="go">    created_at:     2022-12-06T13:57:41.210594</span>
+<span class="go">    arviz_version:  0.15.0.dev0</span>
+</pre></div>
+</div>
+<p>We see now that <code class="docutils literal notranslate"><span class="pre">subject</span></code> and <code class="docutils literal notranslate"><span class="pre">subject</span> <span class="pre">bis</span></code> are no longer indexing coordinates, and
+therefore won’t be available to the <code class="docutils literal notranslate"><span class="pre">labeller</span></code>:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [34]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../_images/default_plot_posterior.png" src="../_images/default_plot_posterior.png"/>
+<p>To get around this limitation, we will store the <code class="docutils literal notranslate"><span class="pre">coords</span></code> used for pointwise selection
+as a Dataset. We will pass this Dataset to the <code class="docutils literal notranslate"><span class="pre">labeller</span></code> so it can use the info it has available
+(<code class="docutils literal notranslate"><span class="pre">pointwise_sel</span></code> and its position in this case) to subset this <code class="docutils literal notranslate"><span class="pre">coords</span></code> Dataset
+and use that instead to label.
+One option is to format these non-indexing coordinates as a dictionary whose
+keys are dimension names and values are coordinate labels and pass that to the parent’s
+<code class="docutils literal notranslate"><span class="pre">sel_to_str</span></code> method:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [35]: </span><a class="sphinx-codeautolink-a" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">coords_ds</span></a> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span></a><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+
+<span class="gp">In [36]: </span><span class="k">class</span> <span class="nc">NonIdxCoordLabeller</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.BaseLabeller.html#arviz.labels.BaseLabeller" title="arviz.labels.BaseLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">BaseLabeller</span></a><span class="p">):</span>
+<span class="gp">   ....: </span>    <span class="sd">"""Use non indexing coordinates as labels."""</span>
+<span class="gp">   ....: </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords_ds</span><span class="p">):</span>
+<span class="gp">   ....: </span>        <span class="bp">self</span><span class="o">.</span><span class="n">coords_ds</span> <span class="o">=</span> <span class="n">coords_ds</span>
+<span class="gp">   ....: </span>    <span class="k">def</span> <span class="nf">sel_to_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sel</span><span class="p">,</span> <span class="n">isel</span><span class="p">):</span>
+<span class="gp">   ....: </span>        <span class="n">new_sel</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">values</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords_ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="gp">   ....: </span>        <span class="k">return</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#super" title="super"><span class="nb">super</span></a><span class="p">()</span><span class="o">.</span><span class="n">sel_to_str</span><span class="p">(</span><span class="n">new_sel</span><span class="p">,</span> <span class="n">new_sel</span><span class="p">)</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [37]: </span><span class="n">labeller</span> <span class="o">=</span> <span class="n">NonIdxCoordLabeller</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">coords_ds</span></a><span class="p">)</span>
+
+<span class="gp">In [38]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">labeller</span><span class="o">=</span><span class="n">labeller</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../_images/custom_plot_posterior1.png" src="../_images/custom_plot_posterior1.png"/>
+<p>This has the following advantages:</p>
+<ul class="simple">
+<li><p>It requires very little extra code.</p></li>
+<li><p>It allows to combine our newly created <code class="docutils literal notranslate"><span class="pre">NonIdxCoordLabeller</span></code> with other labellers as we did in the previous section.</p></li>
+</ul>
+<p>Another option is to go for a much more customized look, and handle everything
+on <a class="reference internal" href="../api/generated/arviz.labels.BaseLabeller.make_label_vert.html#arviz.labels.BaseLabeller.make_label_vert" title="arviz.labels.BaseLabeller.make_label_vert"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_label_vert()</span></code></a> to get labels like “Correlation between subjects x and y”.</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [39]: </span><span class="k">class</span> <span class="nc">NonIdxCoordLabeller</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.labels.BaseLabeller.html#arviz.labels.BaseLabeller" title="arviz.labels.BaseLabeller"><span class="n">azl</span><span class="o">.</span><span class="n">BaseLabeller</span></a><span class="p">):</span>
+<span class="gp">   ....: </span>    <span class="sd">"""Use non indexing coordinates as labels."""</span>
+<span class="gp">   ....: </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords_ds</span><span class="p">):</span>
+<span class="gp">   ....: </span>        <span class="bp">self</span><span class="o">.</span><span class="n">coords_ds</span> <span class="o">=</span> <span class="n">coords_ds</span>
+<span class="gp">   ....: </span>    <span class="k">def</span> <span class="nf">make_label_vert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">sel</span><span class="p">,</span> <span class="n">isel</span><span class="p">):</span>
+<span class="gp">   ....: </span>        <span class="n">coords_ds_subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords_ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span>
+<span class="gp">   ....: </span>        <span class="n">subj</span> <span class="o">=</span> <span class="n">coords_ds_subset</span><span class="p">[</span><span class="s2">"subject"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="gp">   ....: </span>        <span class="n">subj_bis</span> <span class="o">=</span> <span class="n">coords_ds_subset</span><span class="p">[</span><span class="s2">"subject bis"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="gp">   ....: </span>        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Correlation between subjects</span><span class="se">\n</span><span class="si">{</span><span class="n">subj</span><span class="si">}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="n">subj_bis</span><span class="si">}</span><span class="s2">"</span>
+<span class="gp">   ....: </span>
+
+<span class="gp">In [40]: </span><span class="n">labeller</span> <span class="o">=</span> <span class="n">NonIdxCoordLabeller</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">coords_ds</span></a><span class="p">)</span>
+
+<span class="gp">In [41]: </span><a class="sphinx-codeautolink-a" href="../api/generated/arviz.plot_posterior.html#arviz.plot_posterior" title="arviz.plot_posterior"><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span></a><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">labeller</span><span class="o">=</span><span class="n">labeller</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../_images/custom_plot_posterior2.png" src="../_images/custom_plot_posterior2.png"/>
+<p>This won’t combine properly with other labellers, but it serves its function and
+achieves complete customization of the labels, so we probably won’t want to combine
+it with other labellers either. The main drawback is that we have only overridden
+<code class="docutils literal notranslate"><span class="pre">make_label_vert</span></code>, so functions like <code class="docutils literal notranslate"><span class="pre">plot_forest</span></code> or <code class="docutils literal notranslate"><span class="pre">summary</span></code> who
+use <a class="reference internal" href="../api/generated/arviz.labels.BaseLabeller.make_label_flat.html#arviz.labels.BaseLabeller.make_label_flat" title="arviz.labels.BaseLabeller.make_label_flat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_label_flat()</span></code></a> will still fall back to the methods defined by <code class="docutils literal notranslate"><span class="pre">BaseLabeller</span></code>.</p>
+</section>
+</section>
+</article>
+<footer class="bd-footer-article">
+<!-- Previous / next buttons -->
+<div class="prev-next-area">
+<a class="left-prev" href="data_structures.html" id="prev-link" title="previous page">
+<i class="fa-solid fa-angle-left"></i>
+<div class="prev-next-info">
+<p class="prev-next-subtitle">previous</p>
+<p class="prev-next-title">Data structures</p>
+</div>
+</a>
+<a class="right-next" href="../schema/schema.html" id="next-link" title="next page">
+<div class="prev-next-info">
+<p class="prev-next-subtitle">next</p>
+<p class="prev-next-title">InferenceData schema specification</p>
+</div>
+<i class="fa-solid fa-angle-right"></i>
+</a>
+</div>
+</footer>
+</div>
+<div class="bd-sidebar-secondary bd-toc">
+<div class="toc-item">
+<div class="tocsection onthispage">
+<i class="fa-solid fa-list"></i> On this page
+</div>
+<nav class="page-toc" id="bd-toc-nav">
+<ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#basic-labelling">
+   Basic labelling
+  </a>
+<ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry">
+<a class="reference internal nav-link" href="#example-default-labelling">
+     Example: Default labelling
+    </a>
+</li>
+<li class="toc-h3 nav-item toc-entry">
+<a class="reference internal nav-link" href="#example-label-based-indexing">
+     Example: Label based indexing
+    </a>
+</li>
+<li class="toc-h3 nav-item toc-entry">
+<a class="reference internal nav-link" href="#example-using-the-labeller-argument">
+     Example: Using the labeller argument
+    </a>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#sorting-labels">
+   Sorting labels
+  </a>
+<ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry">
+<a class="reference internal nav-link" href="#sorting-variable-names">
+     Sorting variable names
+    </a>
+</li>
+<li class="toc-h3 nav-item toc-entry">
+<a class="reference internal nav-link" href="#sorting-coordinate-values">
+     Sorting coordinate values
+    </a>
+</li>
+<li class="toc-h3 nav-item toc-entry">
+<a class="reference internal nav-link" href="#example-sorting-the-schools-by-mean">
+     Example: Sorting the schools by mean
+    </a>
+</li>
+<li class="toc-h3 nav-item toc-entry">
+<a class="reference internal nav-link" href="#sorting-dimensions">
+     Sorting dimensions
+    </a>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#labeling-with-indexes">
+   Labeling with indexes
+  </a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#labeller-mixtures">
+   Labeller mixtures
+  </a>
+</li>
+<li class="toc-h2 nav-item toc-entry">
+<a class="reference internal nav-link" href="#custom-labellers">
+   Custom labellers
+  </a>
+</li>
+</ul>
+</nav>
+</div>
+<div class="toc-item">
+<div id="searchbox"></div>
+</div>
+<div class="toc-item">
+<div class="tocsection editthispage">
+<a href="https://github.com/arviz-devs/arviz/edit/main/doc/source/user_guide/label_guide.rst">
+<i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+</div>
+<div class="toc-item">
+<div class="tocsection sourcelink">
+<a href="../_sources/user_guide/label_guide.rst.txt">
+<i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+</div>
+</div>
+</div>
+<footer class="bd-footer-content">
+<div class="bd-footer-content__inner">
+</div>
+</footer>
+</main>
+</div>
+</div>
+<!-- Scripts loaded after <body> so the DOM is not blocked -->
+<script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+<footer class="bd-footer"><div class="bd-footer__inner container">
+<div class="footer-item">
+<p class="copyright">
+
+    © Copyright 2018, ArviZ devs.<br/>
+</p>
+</div>
+<div class="footer-item">
+<p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+</div>
+<div class="footer-item">
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+</p>
+</div>
+</div>
+</footer>
+</body>
+</html>

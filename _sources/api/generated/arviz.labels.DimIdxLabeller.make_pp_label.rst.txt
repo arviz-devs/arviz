@@ -1,0 +1,6 @@
+arviz.labels.DimIdxLabeller.make\_pp\_label
+===========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: DimIdxLabeller.make_pp_label

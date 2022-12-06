@@ -1,0 +1,6 @@
+arviz.PyStanSamplingWrapper.get\_inference\_data
+================================================
+
+.. currentmodule:: arviz
+
+.. automethod:: PyStanSamplingWrapper.get_inference_data

@@ -1,0 +1,732 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arviz.plots.backends &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/arviz/plots/backends';</script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples/index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for arviz.plots.backends</h1><div class="highlight"><pre>
+<span></span><span class="c1"># pylint: disable=no-member,invalid-name,redefined-outer-name</span>
+<span class="sd">&quot;&quot;&quot;ArviZ plotting backends.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+
+<span class="kn">from</span> <span class="nn">...rcparams</span> <span class="kn">import</span> <span class="n">rcParams</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;to_cds&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;output_notebook&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;output_file&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ColumnDataSource&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_layout&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;show_layout&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="to_cds"><a class="viewcode-back" href="../../../api/generated/arviz.to_cds.html#arviz.to_cds">[docs]</a><span class="k">def</span> <span class="nf">to_cds</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">group_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">var_name_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">index_origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform data to ColumnDataSource (CDS) compatible with Bokeh.</span>
+
+<span class="sd">    Uses `_ARVIZ_GROUP_` and `_ARVIZ_CDS_SELECTION_` to separate var_name</span>
+<span class="sd">    from group and dimensions in CDS columns.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : obj</span>
+<span class="sd">        Any object that can be converted to an az.InferenceData object</span>
+<span class="sd">        Refer to documentation of az.convert_to_inference_data for details</span>
+<span class="sd">    var_names : str or list of str, optional</span>
+<span class="sd">        Variables to be processed, if None all variables are processed.</span>
+<span class="sd">    groups : str or list of str, optional</span>
+<span class="sd">        Select groups for CDS. Default groups are {&quot;posterior_groups&quot;, &quot;prior_groups&quot;,</span>
+<span class="sd">        &quot;posterior_groups_warmup&quot;}</span>
+
+<span class="sd">        - posterior_groups: posterior, posterior_predictive, sample_stats</span>
+<span class="sd">        - prior_groups: prior, prior_predictive, sample_stats_prior</span>
+<span class="sd">        - posterior_groups_warmup: warmup_posterior, warmup_posterior_predictive,</span>
+<span class="sd">          warmup_sample_stats</span>
+
+<span class="sd">    ignore_groups : str or list of str, optional</span>
+<span class="sd">        Ignore specific groups from CDS.</span>
+<span class="sd">    dimension : str, or list of str, optional</span>
+<span class="sd">        Select dimensions along to slice the data. By default uses (&quot;chain&quot;, &quot;draw&quot;).</span>
+<span class="sd">    group_info : bool</span>
+<span class="sd">        Add group info for `var_name_format`</span>
+<span class="sd">    var_name_format : str or tuple of tuple of string, optional</span>
+<span class="sd">        Select column name format for non-scalar input.</span>
+<span class="sd">        Predefined options are {&quot;brackets&quot;, &quot;underscore&quot;, &quot;cds&quot;}</span>
+
+<span class="sd">            &quot;brackets&quot;:</span>
+<span class="sd">                - add_group_info == False: ``theta[0,0]``</span>
+<span class="sd">                - add_group_info == True: ``theta_posterior[0,0]``</span>
+<span class="sd">            &quot;underscore&quot;:</span>
+<span class="sd">                - add_group_info == False: ``theta_0_0``</span>
+<span class="sd">                - add_group_info == True: ``theta_posterior_0_0_``</span>
+<span class="sd">            &quot;cds&quot;:</span>
+<span class="sd">                - add_group_info == False: ``theta_ARVIZ_CDS_SELECTION_0_0``</span>
+<span class="sd">                - add_group_info == True: ``theta_ARVIZ_GROUP_posterior__ARVIZ_CDS_SELECTION_0_0``</span>
+<span class="sd">            tuple:</span>
+<span class="sd">                Structure:</span>
+
+<span class="sd">                    - tuple: (dim_info, group_info)</span>
+
+<span class="sd">                        - dim_info: (str: `.join` separator,</span>
+<span class="sd">                          str: dim_separator_start,</span>
+<span class="sd">                          str: dim_separator_end)</span>
+<span class="sd">                        - group_info: (str: group separator start, str: group separator end)</span>
+
+<span class="sd">                Example: ((&quot;,&quot;, &quot;[&quot;, &quot;]&quot;), (&quot;_&quot;, &quot;&quot;))</span>
+
+<span class="sd">                    - add_group_info == False: ``theta[0,0]``</span>
+<span class="sd">                    - add_group_info == True: ``theta_posterior[0,0]``</span>
+
+<span class="sd">    index_origin : int, optional</span>
+<span class="sd">        Start parameter indices from `index_origin`. Either 0 or 1.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bokeh.models.ColumnDataSource object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">...utils</span> <span class="kn">import</span> <span class="n">flatten_inference_data_to_dict</span>
+
+    <span class="k">if</span> <span class="n">var_name_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">var_name_format</span> <span class="o">=</span> <span class="s2">&quot;cds&quot;</span>
+
+    <span class="n">cds_dict</span> <span class="o">=</span> <span class="n">flatten_inference_data_to_dict</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">var_names</span><span class="o">=</span><span class="n">var_names</span><span class="p">,</span>
+        <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
+        <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span>
+        <span class="n">group_info</span><span class="o">=</span><span class="n">group_info</span><span class="p">,</span>
+        <span class="n">index_origin</span><span class="o">=</span><span class="n">index_origin</span><span class="p">,</span>
+        <span class="n">var_name_format</span><span class="o">=</span><span class="n">var_name_format</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">cds_data</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">cds_dict</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">cds_data</span></div>
+
+
+<div class="viewcode-block" id="output_notebook"><a class="viewcode-back" href="../../../api/generated/arviz.output_notebook.html#arviz.output_notebook">[docs]</a><span class="k">def</span> <span class="nf">output_notebook</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrap func:`bokeh.plotting.output_notebook`.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">bokeh.plotting</span> <span class="k">as</span> <span class="nn">bkp</span>
+
+    <span class="k">return</span> <span class="n">bkp</span><span class="o">.</span><span class="n">output_notebook</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="output_file"><a class="viewcode-back" href="../../../api/generated/arviz.output_file.html#arviz.output_file">[docs]</a><span class="k">def</span> <span class="nf">output_file</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrap :func:`bokeh.plotting.output_file`.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">bokeh.plotting</span> <span class="k">as</span> <span class="nn">bkp</span>
+
+    <span class="k">return</span> <span class="n">bkp</span><span class="o">.</span><span class="n">output_file</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ColumnDataSource"><a class="viewcode-back" href="../../../api/generated/arviz.ColumnDataSource.html#arviz.ColumnDataSource">[docs]</a><span class="k">def</span> <span class="nf">ColumnDataSource</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrap bokeh.models.ColumnDataSource.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="n">ColumnDataSource</span>
+
+    <span class="k">return</span> <span class="n">ColumnDataSource</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_layout"><a class="viewcode-back" href="../../../api/generated/arviz.create_layout.html#arviz.create_layout">[docs]</a><span class="k">def</span> <span class="nf">create_layout</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">force_layout</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform bokeh array of figures to layout.&quot;&quot;&quot;</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">subplot_order</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.layout.order&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">force_layout</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">gridplot</span> <span class="k">as</span> <span class="n">layout</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">layout_args</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;sizing_mode&quot;</span><span class="p">:</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.layout.sizing_mode&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;toolbar_location&quot;</span><span class="p">:</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.layout.toolbar_location&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">subplot_order</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;row&quot;</span><span class="p">,</span> <span class="s2">&quot;column&quot;</span><span class="p">)):</span>
+        <span class="c1"># check number of rows</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\d*)(row|column)&quot;</span><span class="p">,</span> <span class="n">subplot_order</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">subplot_order</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># set up 1D list of axes</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">layout_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;sizing_mode&quot;</span><span class="p">:</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.layout.sizing_mode&quot;</span><span class="p">]}</span>
+        <span class="k">if</span> <span class="n">subplot_order</span> <span class="o">==</span> <span class="s2">&quot;row&quot;</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">row</span> <span class="k">as</span> <span class="n">layout</span>
+        <span class="k">elif</span> <span class="n">subplot_order</span> <span class="o">==</span> <span class="s2">&quot;column&quot;</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">column</span> <span class="k">as</span> <span class="n">layout</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">layout</span>
+
+        <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ax</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">))])</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">subplot_order</span> <span class="o">==</span> <span class="s2">&quot;row&quot;</span> <span class="k">else</span> <span class="n">ax</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">subplot_order</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;square_trimmed&quot;</span><span class="p">):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">))</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ax</span><span class="p">))]</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">subplot_order</span> <span class="o">==</span> <span class="s2">&quot;square_trimmed&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">ax</span>
+        <span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">layout</span>
+
+            <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">ax</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">row</span><span class="p">)]</span>
+            <span class="n">layout_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;sizing_mode&quot;</span><span class="p">:</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.layout.sizing_mode&quot;</span><span class="p">]}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">gridplot</span> <span class="k">as</span> <span class="n">layout</span>
+
+            <span class="n">layout_args</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;sizing_mode&quot;</span><span class="p">:</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.layout.sizing_mode&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;toolbar_location&quot;</span><span class="p">:</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.layout.toolbar_location&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+    <span class="c1"># ignore &quot;fixed&quot; sizing_mode without explicit width and height</span>
+    <span class="k">if</span> <span class="n">layout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sizing_mode&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;fixed&quot;</span><span class="p">:</span>
+        <span class="n">layout_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;sizing_mode&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">layout</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">layout_args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="show_layout"><a class="viewcode-back" href="../../../api/generated/arviz.show_layout.html#arviz.show_layout">[docs]</a><span class="k">def</span> <span class="nf">show_layout</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_layout</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a layout and call bokeh show.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">show</span> <span class="o">=</span> <span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;plot.bokeh.show&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">bokeh.plotting</span> <span class="k">as</span> <span class="nn">bkp</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">create_layout</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">force_layout</span><span class="o">=</span><span class="n">force_layout</span><span class="p">)</span>
+        <span class="n">bkp</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_copy_docstring</span><span class="p">(</span><span class="n">lib</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract docstring from function.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">importlib</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">function</span><span class="p">)</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Failed to import function </span><span class="si">{</span><span class="n">function</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">lib</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">doc</span>
+
+
+<span class="c1"># TODO: try copying substitutions too, or autoreplace them ourselves</span>
+<span class="n">output_notebook</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">_copy_docstring</span><span class="p">(</span><span class="s2">&quot;bokeh.plotting&quot;</span><span class="p">,</span> <span class="s2">&quot;output_notebook&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+    <span class="s2">&quot;|save|&quot;</span><span class="p">,</span> <span class="s2">&quot;save&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;|show|&quot;</span><span class="p">,</span> <span class="s2">&quot;show&quot;</span><span class="p">)</span>
+<span class="n">output_file</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">_copy_docstring</span><span class="p">(</span><span class="s2">&quot;bokeh.plotting&quot;</span><span class="p">,</span> <span class="s2">&quot;output_file&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+    <span class="s2">&quot;|save|&quot;</span><span class="p">,</span> <span class="s2">&quot;save&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;|show|&quot;</span><span class="p">,</span> <span class="s2">&quot;show&quot;</span><span class="p">)</span>
+<span class="n">ColumnDataSource</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">_copy_docstring</span><span class="p">(</span><span class="s2">&quot;bokeh.models&quot;</span><span class="p">,</span> <span class="s2">&quot;ColumnDataSource&quot;</span><span class="p">)</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

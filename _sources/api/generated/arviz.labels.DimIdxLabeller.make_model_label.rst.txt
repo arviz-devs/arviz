@@ -1,0 +1,6 @@
+arviz.labels.DimIdxLabeller.make\_model\_label
+==============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: DimIdxLabeller.make_model_label

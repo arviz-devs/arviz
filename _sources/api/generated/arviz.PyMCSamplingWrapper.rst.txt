@@ -1,0 +1,28 @@
+﻿arviz.PyMCSamplingWrapper
+=========================
+
+.. currentmodule:: arviz
+
+.. autoclass:: PyMCSamplingWrapper
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      PyMCSamplingWrapper.__init__
+      PyMCSamplingWrapper.check_implemented_methods
+      PyMCSamplingWrapper.get_inference_data
+      PyMCSamplingWrapper.log_likelihood__i
+      PyMCSamplingWrapper.sample
+      PyMCSamplingWrapper.sel_observations
+   
+   
+
+   
+   
+   

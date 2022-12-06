@@ -1,0 +1,6 @@
+arviz.InferenceData.isel
+========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.isel

@@ -1,0 +1,6 @@
+arviz.InferenceData.copy
+========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.copy

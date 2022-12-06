@@ -1,0 +1,6 @@
+﻿arviz.labels.mix\_labellers
+===========================
+
+.. currentmodule:: arviz.labels
+
+.. autofunction:: mix_labellers

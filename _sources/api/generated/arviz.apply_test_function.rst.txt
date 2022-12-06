@@ -1,0 +1,6 @@
+﻿arviz.apply\_test\_function
+===========================
+
+.. currentmodule:: arviz
+
+.. autofunction:: apply_test_function

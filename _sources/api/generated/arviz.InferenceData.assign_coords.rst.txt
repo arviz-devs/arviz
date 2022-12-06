@@ -1,0 +1,6 @@
+arviz.InferenceData.assign\_coords
+==================================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.assign_coords

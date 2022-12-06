@@ -1,0 +1,6 @@
+arviz.labels.BaseLabeller.make\_label\_vert
+===========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: BaseLabeller.make_label_vert

@@ -1,0 +1,6 @@
+arviz.labels.NoVarLabeller.model\_name\_to\_str
+===============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: NoVarLabeller.model_name_to_str

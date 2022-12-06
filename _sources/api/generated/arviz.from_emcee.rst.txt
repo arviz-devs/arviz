@@ -1,0 +1,6 @@
+﻿arviz.from\_emcee
+=================
+
+.. currentmodule:: arviz
+
+.. autofunction:: from_emcee

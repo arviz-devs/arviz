@@ -1,0 +1,6 @@
+arviz.labels.IdxLabeller.var\_pp\_to\_str
+=========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: IdxLabeller.var_pp_to_str

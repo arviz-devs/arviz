@@ -1,0 +1,6 @@
+arviz.PyStanSamplingWrapper.sel\_observations
+=============================================
+
+.. currentmodule:: arviz
+
+.. automethod:: PyStanSamplingWrapper.sel_observations

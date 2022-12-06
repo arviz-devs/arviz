@@ -1,0 +1,668 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>LOO-PIT Overlay Plot &#8212; ArviZ dev documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-codeautolink.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/plot_loo_pit_overlay';</script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Posterior Predictive Check Plot" href="plot_ppc.html" />
+    <link rel="prev" title="LOO-PIT ECDF Plot" href="plot_loo_pit_ecdf.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/logo_dark.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+    dev
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Example Gallery
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing/index.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://www.arviz.org">
+                    About
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/arviz-devs/arviz" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://twitter.com/arviz_devs" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-twitter"></i></span>
+            <label class="sr-only">Twitter</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://bayes.club/@ArviZ" title="Mastodon" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-mastodon"></i></span>
+            <label class="sr-only">Mastodon</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Mixed Plots</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_forest_mixed.html">Forest Plot with ESS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace.html">Traceplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace_bars.html">Rank Bars Diagnostic with KDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace_circ.html">Traceplot with Circular Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_trace_vlines.html">Traceplot rank_vlines</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Distributions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_density_single.html">Density Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_dist.html">Dist Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_dot.html">Dot Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ecdf.html">ECDF Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_forest.html">Forest Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_forest_ridge.html">Ridgeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_joint.html">Joint Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde.html">KDE Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde_2d.html">2D KDE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde_2d_hdi.html">2D KDE with HDI Contours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_kde_quantiles.html">KDE quantiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_hex.html">Hexbin PairPlot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_kde.html">KDE Pair Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_kde_hdi.html">KDE Pair Plot with HDI Contours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair_point_estimate.html">Point Estimate Pairplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_posterior.html">Posterior Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_posterior_combinedims.html">Posterior Plot (reducing school dimension)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_violin.html">Violin plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Distribution Comparison</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_density.html">Density Plot (Comparison)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_forest_comparison.html">Forest Plot Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_violin_single_sided.html">Single-Sided Violin Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Inference Diagnostics</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_autocorr.html">Autocorrelation Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_energy.html">Energy Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ess_evolution.html">ESS Evolution Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ess_local.html">ESS Local Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ess_quantile.html">ESS Quantile Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_mcse.html">Quantile Monte Carlo Standard Error Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_mcse_errorbar.html">Quantile MCSE Errobar Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_pair.html">Pair Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_parallel.html">Parallel Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_rank.html">Rank plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Regression or Time Series</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_hdi.html">Plot HDI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_lm.html">Regression Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Model Comparison</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_compare.html">Compare Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_elpd.html">ELPD Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_khat.html">Pareto Shape Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Model Checking</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_bpv.html">Bayesian u-value Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_bpv_tstat.html">Bayesian p-value with T statistic Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_loo_pit_ecdf.html">LOO-PIT ECDF Plot</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">LOO-PIT Overlay Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ppc.html">Posterior Predictive Check Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_ppc_cumulative.html">Posterior Predictive Check Cumulative Plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_separation.html">Separation Plot</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Styles</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="styles.html">Matplotlib styles</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="loo-pit-overlay-plot">
+<span id="example-plot-loo-pit-overlay"></span><h1>LOO-PIT Overlay Plot<a class="headerlink" href="#loo-pit-overlay-plot" title="Permalink to this headline">#</a></h1>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>API Documentation: <a class="reference internal" href="../api/generated/arviz.plot_loo_pit.html#arviz.plot_loo_pit" title="arviz.plot_loo_pit"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_loo_pit()</span></code></a></p>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-0">
+Matplotlib</label><div class="sd-tab-content docutils">
+<img alt="../_images/mpl_plot_loo_pit_overlay.png" src="../_images/mpl_plot_loo_pit_overlay.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+
+<span class="n">az</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;arviz-doc&quot;</span><span class="p">)</span>
+
+<span class="n">idata</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">load_arviz_data</span><span class="p">(</span><span class="s2">&quot;non_centered_eight&quot;</span><span class="p">)</span>
+
+<span class="n">az</span><span class="o">.</span><span class="n">plot_loo_pit</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="n">idata</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="example-plot-download docutils">
+<p><a class="reference download internal" download="" href="../_downloads/429fc98b0ab9036fc8f1c683a7fc19bb/mpl_plot_loo_pit_overlay.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">Source</span> <span class="pre">Code:</span> <span class="pre">matplotlib/mpl_plot_loo_pit_overlay.py</span></code></a></p>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+</input><label class="sd-tab-label" for="sd-tab-item-1">
+Bokeh</label><div class="sd-tab-content docutils">
+<script src="bokeh-content-5d60ffa68a004fb89ebd9e475ef658ab-examples-plot_loo_pit_overlay.js" id="72e90f71-ddcc-4717-b6c8-236c07b22264"></script><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+
+<span class="n">idata</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">load_arviz_data</span><span class="p">(</span><span class="s2">&quot;non_centered_eight&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">plot_loo_pit</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="n">idata</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;bokeh&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="example-plot-download docutils">
+<p><a class="reference download internal" download="" href="../_downloads/0ef8c799c35cc5e0709e109c97d6d799/bokeh_plot_loo_pit_overlay.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">Source</span> <span class="pre">Code:</span> <span class="pre">bokeh/bokeh_plot_loo_pit_overlay.py</span></code></a></p>
+</div>
+</div>
+</div>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="plot_loo_pit_ecdf.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">LOO-PIT ECDF Plot</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="plot_ppc.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Posterior Predictive Check Plot</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/arviz-devs/arviz/edit/main/doc/source/examples/plot_loo_pit_overlay.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/examples/plot_loo_pit_overlay.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+
+<script>
+  $(document).ready(function () {
+    const content = $('<div class="alert-danger">ArviZ docs will now be available at <a href="https://python.arviz.org">python.arviz.org</a>!</div>')
+    $('#banner').append(content);
+  })
+</script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2018, ArviZ devs.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

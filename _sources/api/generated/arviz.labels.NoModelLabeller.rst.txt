@@ -1,0 +1,32 @@
+﻿arviz.labels.NoModelLabeller
+============================
+
+.. currentmodule:: arviz.labels
+
+.. autoclass:: NoModelLabeller
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      NoModelLabeller.__init__
+      NoModelLabeller.dim_coord_to_str
+      NoModelLabeller.make_label_flat
+      NoModelLabeller.make_label_vert
+      NoModelLabeller.make_model_label
+      NoModelLabeller.make_pp_label
+      NoModelLabeller.model_name_to_str
+      NoModelLabeller.sel_to_str
+      NoModelLabeller.var_name_to_str
+      NoModelLabeller.var_pp_to_str
+   
+   
+
+   
+   
+   

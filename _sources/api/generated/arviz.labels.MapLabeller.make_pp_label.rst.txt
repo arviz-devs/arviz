@@ -1,0 +1,6 @@
+arviz.labels.MapLabeller.make\_pp\_label
+========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: MapLabeller.make_pp_label

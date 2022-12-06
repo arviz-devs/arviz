@@ -1,0 +1,6 @@
+arviz.InferenceData.compute
+===========================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.compute

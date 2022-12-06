@@ -1,0 +1,6 @@
+arviz.PyStanSamplingWrapper.log\_likelihood\_\_i
+================================================
+
+.. currentmodule:: arviz
+
+.. automethod:: PyStanSamplingWrapper.log_likelihood__i

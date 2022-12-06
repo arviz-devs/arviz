@@ -1,0 +1,6 @@
+arviz.InferenceData.to\_dict
+============================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.to_dict

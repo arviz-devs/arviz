@@ -1,0 +1,6 @@
+﻿arviz.plot\_loo\_pit
+====================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_loo_pit

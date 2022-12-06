@@ -1,0 +1,28 @@
+﻿arviz.SamplingWrapper
+=====================
+
+.. currentmodule:: arviz
+
+.. autoclass:: SamplingWrapper
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      SamplingWrapper.__init__
+      SamplingWrapper.check_implemented_methods
+      SamplingWrapper.get_inference_data
+      SamplingWrapper.log_likelihood__i
+      SamplingWrapper.sample
+      SamplingWrapper.sel_observations
+   
+   
+
+   
+   
+   

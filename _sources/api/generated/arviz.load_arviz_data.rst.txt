@@ -1,0 +1,6 @@
+﻿arviz.load\_arviz\_data
+=======================
+
+.. currentmodule:: arviz
+
+.. autofunction:: load_arviz_data

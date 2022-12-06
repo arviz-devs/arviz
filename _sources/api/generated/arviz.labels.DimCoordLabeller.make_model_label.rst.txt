@@ -1,0 +1,6 @@
+arviz.labels.DimCoordLabeller.make\_model\_label
+================================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: DimCoordLabeller.make_model_label

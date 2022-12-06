@@ -1,0 +1,6 @@
+﻿arviz.from\_dict
+================
+
+.. currentmodule:: arviz
+
+.. autofunction:: from_dict

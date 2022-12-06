@@ -1,0 +1,6 @@
+arviz.labels.BaseLabeller.make\_pp\_label
+=========================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: BaseLabeller.make_pp_label

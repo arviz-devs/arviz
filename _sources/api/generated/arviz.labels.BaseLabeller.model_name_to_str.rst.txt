@@ -1,0 +1,6 @@
+arviz.labels.BaseLabeller.model\_name\_to\_str
+==============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: BaseLabeller.model_name_to_str

@@ -1,0 +1,32 @@
+﻿arviz.labels.MapLabeller
+========================
+
+.. currentmodule:: arviz.labels
+
+.. autoclass:: MapLabeller
+
+   
+   
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      MapLabeller.__init__
+      MapLabeller.dim_coord_to_str
+      MapLabeller.make_label_flat
+      MapLabeller.make_label_vert
+      MapLabeller.make_model_label
+      MapLabeller.make_pp_label
+      MapLabeller.model_name_to_str
+      MapLabeller.sel_to_str
+      MapLabeller.var_name_to_str
+      MapLabeller.var_pp_to_str
+   
+   
+
+   
+   
+   

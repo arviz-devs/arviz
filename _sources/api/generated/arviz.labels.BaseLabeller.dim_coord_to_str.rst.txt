@@ -1,0 +1,6 @@
+arviz.labels.BaseLabeller.dim\_coord\_to\_str
+=============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: BaseLabeller.dim_coord_to_str

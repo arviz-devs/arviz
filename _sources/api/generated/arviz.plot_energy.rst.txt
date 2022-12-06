@@ -1,0 +1,6 @@
+﻿arviz.plot\_energy
+==================
+
+.. currentmodule:: arviz
+
+.. autofunction:: plot_energy

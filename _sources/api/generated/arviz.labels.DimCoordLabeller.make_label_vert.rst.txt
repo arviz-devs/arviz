@@ -1,0 +1,6 @@
+arviz.labels.DimCoordLabeller.make\_label\_vert
+===============================================
+
+.. currentmodule:: arviz.labels
+
+.. automethod:: DimCoordLabeller.make_label_vert

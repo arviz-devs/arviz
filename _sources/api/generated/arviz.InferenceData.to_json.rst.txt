@@ -1,0 +1,6 @@
+arviz.InferenceData.to\_json
+============================
+
+.. currentmodule:: arviz
+
+.. automethod:: InferenceData.to_json

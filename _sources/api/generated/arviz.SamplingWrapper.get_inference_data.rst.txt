@@ -1,0 +1,6 @@
+arviz.SamplingWrapper.get\_inference\_data
+==========================================
+
+.. currentmodule:: arviz
+
+.. automethod:: SamplingWrapper.get_inference_data

@@ -1,0 +1,6 @@
+﻿arviz.from\_json
+================
+
+.. currentmodule:: arviz
+
+.. autofunction:: from_json

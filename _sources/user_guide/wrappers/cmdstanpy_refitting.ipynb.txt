@@ -1,0 +1,867 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "(cmdstanpy_refitting)=\n",
+    "# Refitting CmdStanPy models with ArviZ\n",
+    "\n",
+    "ArviZ is backend agnostic and therefore does not sample directly. In order to take advantage of algorithms that require refitting models several times, ArviZ uses {class}`~arviz.SamplingWrapper` to convert the API of the sampling backend to a common set of functions. Hence, functions like Leave Future Out Cross Validation can be used in ArviZ independently of the sampling backend used."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Below there is an example of `SamplingWrapper` usage for CmdStanPy extending {class}`arviz.CmdStanPySamplingWrapper` that already implements some default methods targeted to CmdStanPy.\n",
+    "\n",
+    "Before starting, it is important to note that CmdStanPy cannot call the C++ functions it uses. Therefore, the **code** of the model must be slightly modified in order to be compatible with the cross validation refitting functions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import arviz as az\n",
+    "from cmdstanpy import CmdStanModel, write_stan_json\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For the example, we will use a linear regression model."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "rng = np.random.default_rng(251)\n",
+    "\n",
+    "xdata = np.linspace(0, 50, 100)\n",
+    "b0, b1, sigma = -2, 1, 3\n",
+    "ydata = rng.normal(loc=b1 * xdata + b0, scale=sigma)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[<matplotlib.lines.Line2D at 0x7fd4790cd550>]"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plt.plot(xdata, ydata)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we will write the Stan code, keeping in mind that it must be able to compute the pointwise log likelihood on excluded data, i.e., data that is not used to fit the model. Thus, the backbone of the code must look like the following:\n",
+    "\n",
+    "```\n",
+    "data {\n",
+    "    data_for_fitting\n",
+    "    excluded_data\n",
+    "    ...\n",
+    "}\n",
+    "model {\n",
+    "    // fit against data_for_fitting\n",
+    "   ...\n",
+    "}\n",
+    "generated quantities {\n",
+    "    ....\n",
+    "    log_lik for data_for_fitting\n",
+    "    log_lik_excluded for excluded_data\n",
+    "}\n",
+    "```"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "tags": [
+     "hide-cell"
+    ]
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "data {\n",
+      "  // Define data for fitting\n",
+      "  int<lower=0> N;\n",
+      "  array[N] real x;\n",
+      "  array[N] real y;\n",
+      "  // Define excluded data. It will not be used when fitting.\n",
+      "  int<lower=0> N_ex;\n",
+      "  array[N_ex] real x_ex;\n",
+      "  array[N_ex] real y_ex;\n",
+      "}\n",
+      "\n",
+      "parameters {\n",
+      "  real b0;\n",
+      "  real b1;\n",
+      "  real<lower=0> sigma_e;\n",
+      "}\n",
+      "\n",
+      "model {\n",
+      "  b0 ~ normal(0, 10);\n",
+      "  b1 ~ normal(0, 10);\n",
+      "  sigma_e ~ normal(0, 10);\n",
+      "  for (i in 1:N) {\n",
+      "    y[i] ~ normal(b0 + b1 * x[i], sigma_e);  // use only data for fitting\n",
+      "  }\n",
+      "\n",
+      "}\n",
+      "\n",
+      "generated quantities {\n",
+      "    array[N] real log_lik;\n",
+      "    array[N_ex] real log_lik_ex;\n",
+      "    array[N] real y_hat;\n",
+      "\n",
+      "    for (i in 1:N) {\n",
+      "        // calculate log likelihood and posterior predictive, there are\n",
+      "        // no restrictions on adding more generated quantities\n",
+      "        log_lik[i] = normal_lpdf(y[i] | b0 + b1 * x[i], sigma_e);\n",
+      "        y_hat[i] = normal_rng(b0 + b1 * x[i], sigma_e);\n",
+      "    }\n",
+      "    for (j in 1:N_ex) {\n",
+      "        // calculate the log likelihood of the excluded data given data_for_fitting\n",
+      "        log_lik_ex[j] = normal_lpdf(y_ex[j] | b0 + b1 * x_ex[j], sigma_e);\n",
+      "    }\n",
+      "}\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "with open(\"linreg_ex_model.stan\", mode=\"r\") as f:\n",
+    "    print(f.read())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = CmdStanModel(stan_file=\"linreg_ex_model.stan\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:04 - cmdstanpy - INFO - CmdStan start processing\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "37b792d98b6f4ccaa4bbb68991e88c7f",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 1 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "67629d520b564f52b2ce68556bc1e1c9",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 2 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "0c54bc86f2a64df58c15138ff288da03",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 3 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "44971116bb5f490b979373e5601d240e",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 4 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                                                                                                                                                                                                                                                                                                                                "
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:05 - cmdstanpy - INFO - CmdStan done processing.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "data_dict = {\n",
+    "    \"N\": len(ydata),\n",
+    "    \"y\": ydata,\n",
+    "    \"x\": xdata,\n",
+    "    # No excluded data in initial fit\n",
+    "    \"N_ex\": 0,\n",
+    "    \"x_ex\": [],\n",
+    "    \"y_ex\": [],\n",
+    "}\n",
+    "sample_kwargs = {\"iter_sampling\": 1000, \"chains\": 4}\n",
+    "write_stan_json(\"linreg_ex_data.json\", data_dict)\n",
+    "fit = model.sample(data=\"linreg_ex_data.json\", **sample_kwargs)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We have defined a dictionary `sample_kwargs` that will be passed to the `SamplingWrapper` in order to make sure that all\n",
+    "refits use the same sampler parameters. We will follow the same pattern with `az.from_cmdstanpy`. Here however, we are passing some arguments directly to `from_cmdstanpy`. We do this because we only want this data in `idata_orig`, not in every refit."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dims = {\"y\": [\"time\"], \"x\": [\"time\"], \"log_likelihood\": [\"time\"], \"y_hat\": [\"time\"]}\n",
+    "idata_kwargs = {\n",
+    "    \"posterior_predictive\": [\"y_hat\"],\n",
+    "    \"log_likelihood\": [\"log_lik\"],\n",
+    "    \"dims\": dims,\n",
+    "}\n",
+    "idata = az.from_cmdstanpy(\n",
+    "    posterior=fit, observed_data={\"y\": ydata}, constant_data={\"x\": xdata}, **idata_kwargs\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We will create a subclass of {class}`~arviz.CmdStanPySamplingWrapper`. Therefore, instead of having to implement all functions required by {func}`~arviz.reloo` we only have to implement {func}`~arviz.CmdStanPySamplingWrapper.sel_observations`. As explained in its docs, it takes one argument which is the indices of the data to be excluded and returns `modified_observed_data` which is passed as `data` to `sampling` function of PyStan model and `excluded_observed_data` which is used to retrieve the log likelihood of the excluded data (as passing the excluded data would make no sense)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "class LinearRegressionWrapper(az.CmdStanPySamplingWrapper):\n",
+    "    def sel_observations(self, idx):\n",
+    "        xdata = self.idata_orig.constant_data.x.values\n",
+    "        ydata = self.idata_orig.observed_data.y.values\n",
+    "        mask = np.full_like(xdata, True, dtype=bool)\n",
+    "        mask[idx] = False\n",
+    "        N_obs = len(mask)\n",
+    "        N_ex = np.sum(~mask)\n",
+    "        observations = {\n",
+    "            \"N\": N_obs - N_ex,\n",
+    "            \"x\": xdata[mask],\n",
+    "            \"y\": ydata[mask],\n",
+    "            \"N_ex\": N_ex,\n",
+    "            \"x_ex\": xdata[~mask],\n",
+    "            \"y_ex\": ydata[~mask],\n",
+    "        }\n",
+    "        return observations, \"log_lik_ex\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Computed from 4000 posterior samples and 100 observations log-likelihood matrix.\n",
+       "\n",
+       "         Estimate       SE\n",
+       "elpd_loo  -258.72     8.23\n",
+       "p_loo        3.17        -\n",
+       "------\n",
+       "\n",
+       "Pareto k diagnostic values:\n",
+       "                         Count   Pct.\n",
+       "(-Inf, 0.5]   (good)      100  100.0%\n",
+       " (0.5, 0.7]   (ok)          0    0.0%\n",
+       "   (0.7, 1]   (bad)         0    0.0%\n",
+       "   (1, Inf)   (very bad)    0    0.0%"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "loo_orig = az.loo(idata, pointwise=True, var_name=\"log_lik\")\n",
+    "loo_orig"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In this case, the Leave-One-Out Cross Validation (LOO-CV) approximation using [Pareto Smoothed Importance Sampling](https://arxiv.org/abs/1507.02646) (PSIS) works for all observations, so we will use modify `loo_orig` in order to make {func}`~arviz.reloo` believe that PSIS failed for some observations. This will also serve as a validation of our wrapper, as the PSIS LOO-CV already returned the correct value."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "loo_orig.pareto_k[[13, 42, 56, 73]] = np.array([0.8, 1.2, 2.6, 0.9])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We initialize our sampling wrapper"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "idata_kwargs[\"log_likelihood\"] = [\"log_lik\", \"log_lik_ex\"]\n",
+    "cmdstanpy_wrapper = LinearRegressionWrapper(\n",
+    "    model=model,\n",
+    "    idata_orig=idata,\n",
+    "    data_file=\"linreg_ex_data.json\",\n",
+    "    sample_kwargs=sample_kwargs,\n",
+    "    idata_kwargs=idata_kwargs,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "And eventually, we can use this wrapper to call `az.reloo`, and compare the results with the PSIS LOO-CV results."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/home/oriol/Public/arviz/arviz/stats/stats_refitting.py:99: UserWarning: reloo is an experimental and untested feature\n",
+      "  warnings.warn(\"reloo is an experimental and untested feature\", UserWarning)\n",
+      "19:13:06 - cmdstanpy - INFO - CmdStan start processing\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "bff9d1a7959e4b50b44af22bc31baa2f",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 1 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "96259a9ee14547e0867536550f3b78c8",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 2 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "9794d966365948909c1808ede776fa75",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 3 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "04dfc3494f874783a5c27340faeee118",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 4 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                                                                                                                                                                                                                                                                                                                                "
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:06 - cmdstanpy - INFO - CmdStan done processing.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:06 - cmdstanpy - INFO - CmdStan start processing\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "a9c72c7e5c624c6486b6b6246c909005",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 1 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "b26885338e484a69b6b5fbe79d5a2976",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 2 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "2f9efa574fc9495db5fa2bd7e1a01b59",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 3 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "87af8ff858394dcc8f49c5ab15e055e0",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 4 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                                                                                                                                                                                                                                                                                                                                "
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:07 - cmdstanpy - INFO - CmdStan done processing.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:07 - cmdstanpy - INFO - CmdStan start processing\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "cb374c8242cf41a38cb8197384900874",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 1 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "61d2c14225be40ca8a94661b7d1872df",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 2 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "2267704b29ba41d08f866ce7d73e0739",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 3 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "2c288fca429e4b2b9057661068c94717",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 4 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                                                                                                                                                                                                                                                                                                                                "
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:08 - cmdstanpy - INFO - CmdStan done processing.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:08 - cmdstanpy - INFO - CmdStan start processing\n"
+     ]
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "d93a4e62e98145f2b78b6012c1924370",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 1 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "57e8aa99f7e84f78b1053d1968909bac",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 2 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "5bac255cc4ad416eab5f84c4c6315784",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 3 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "d4bfffd1e8754965b169c19144a45564",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "chain 4 |          | 00:00 Status"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                                                                                                                                                                                                                                                                                                                                "
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "19:13:08 - cmdstanpy - INFO - CmdStan done processing.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "loo_relooed = az.reloo(cmdstanpy_wrapper, loo_orig=loo_orig)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Computed from 4000 posterior samples and 100 observations log-likelihood matrix.\n",
+       "\n",
+       "         Estimate       SE\n",
+       "elpd_loo  -258.73     8.23\n",
+       "p_loo        3.18        -\n",
+       "------\n",
+       "\n",
+       "Pareto k diagnostic values:\n",
+       "                         Count   Pct.\n",
+       "(-Inf, 0.5]   (good)      100  100.0%\n",
+       " (0.5, 0.7]   (ok)          0    0.0%\n",
+       "   (0.7, 1]   (bad)         0    0.0%\n",
+       "   (1, Inf)   (very bad)    0    0.0%"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "loo_relooed"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Computed from 4000 posterior samples and 100 observations log-likelihood matrix.\n",
+       "\n",
+       "         Estimate       SE\n",
+       "elpd_loo  -258.72     8.23\n",
+       "p_loo        3.17        -\n",
+       "------\n",
+       "\n",
+       "Pareto k diagnostic values:\n",
+       "                         Count   Pct.\n",
+       "(-Inf, 0.5]   (good)       96   96.0%\n",
+       " (0.5, 0.7]   (ok)          0    0.0%\n",
+       "   (0.7, 1]   (bad)         2    2.0%\n",
+       "   (1, Inf)   (very bad)    2    2.0%"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "loo_orig"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "celltoolbar": "Tags",
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

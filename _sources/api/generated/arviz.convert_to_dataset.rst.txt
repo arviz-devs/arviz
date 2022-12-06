@@ -1,0 +1,6 @@
+﻿arviz.convert\_to\_dataset
+==========================
+
+.. currentmodule:: arviz
+
+.. autofunction:: convert_to_dataset
