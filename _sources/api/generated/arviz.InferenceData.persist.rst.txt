@@ -1,6 +1,0 @@
-arviz.InferenceData.persist
-===========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.persist

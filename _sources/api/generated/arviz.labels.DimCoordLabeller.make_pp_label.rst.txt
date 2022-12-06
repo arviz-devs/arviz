@@ -1,6 +1,0 @@
-arviz.labels.DimCoordLabeller.make\_pp\_label
-=============================================
-
-.. currentmodule:: arviz.labels
-
-.. automethod:: DimCoordLabeller.make_pp_label

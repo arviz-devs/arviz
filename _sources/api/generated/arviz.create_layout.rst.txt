@@ -1,6 +1,0 @@
-﻿arviz.create\_layout
-====================
-
-.. currentmodule:: arviz
-
-.. autofunction:: create_layout

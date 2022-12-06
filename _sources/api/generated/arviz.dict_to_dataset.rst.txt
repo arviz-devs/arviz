@@ -1,6 +1,0 @@
-﻿arviz.dict\_to\_dataset
-=======================
-
-.. currentmodule:: arviz
-
-.. autofunction:: dict_to_dataset

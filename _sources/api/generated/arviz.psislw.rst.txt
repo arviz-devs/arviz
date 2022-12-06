@@ -1,6 +1,0 @@
-﻿arviz.psislw
-============
-
-.. currentmodule:: arviz
-
-.. autofunction:: psislw

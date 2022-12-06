@@ -1,6 +1,0 @@
-arviz.InferenceData.groups
-==========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.groups

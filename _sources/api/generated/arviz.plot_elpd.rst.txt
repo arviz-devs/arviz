@@ -1,6 +1,0 @@
-﻿arviz.plot\_elpd
-================
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_elpd

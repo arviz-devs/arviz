@@ -1,6 +1,0 @@
-arviz.InferenceData.rename\_dims
-================================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.rename_dims

@@ -1,6 +1,0 @@
-arviz.InferenceData.sum
-=======================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.sum

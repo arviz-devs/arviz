@@ -1,6 +1,0 @@
-arviz.InferenceData.load
-========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.load

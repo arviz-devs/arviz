@@ -1,6 +1,0 @@
-arviz.InferenceData.min
-=======================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.min

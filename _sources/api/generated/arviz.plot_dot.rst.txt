@@ -1,6 +1,0 @@
-﻿arviz.plot\_dot
-===============
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_dot

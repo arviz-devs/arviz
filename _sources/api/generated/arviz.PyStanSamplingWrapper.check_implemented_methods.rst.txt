@@ -1,6 +1,0 @@
-arviz.PyStanSamplingWrapper.check\_implemented\_methods
-=======================================================
-
-.. currentmodule:: arviz
-
-.. automethod:: PyStanSamplingWrapper.check_implemented_methods

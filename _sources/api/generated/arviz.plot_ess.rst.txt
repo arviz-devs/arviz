@@ -1,6 +1,0 @@
-﻿arviz.plot\_ess
-===============
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_ess

@@ -1,6 +1,0 @@
-arviz.InferenceData.set\_index
-==============================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.set_index

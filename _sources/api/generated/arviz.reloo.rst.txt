@@ -1,6 +1,0 @@
-﻿arviz.reloo
-===========
-
-.. currentmodule:: arviz
-
-.. autofunction:: reloo

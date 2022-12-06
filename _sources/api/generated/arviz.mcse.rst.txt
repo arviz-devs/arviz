@@ -1,6 +1,0 @@
-﻿arviz.mcse
-==========
-
-.. currentmodule:: arviz
-
-.. autofunction:: mcse

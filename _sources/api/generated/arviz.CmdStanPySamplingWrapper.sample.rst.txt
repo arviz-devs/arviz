@@ -1,6 +1,0 @@
-arviz.CmdStanPySamplingWrapper.sample
-=====================================
-
-.. currentmodule:: arviz
-
-.. automethod:: CmdStanPySamplingWrapper.sample

@@ -1,6 +1,0 @@
-﻿arviz.list\_datasets
-====================
-
-.. currentmodule:: arviz
-
-.. autofunction:: list_datasets

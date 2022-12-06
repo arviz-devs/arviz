@@ -1,6 +1,0 @@
-arviz.InferenceData.unstack
-===========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.unstack

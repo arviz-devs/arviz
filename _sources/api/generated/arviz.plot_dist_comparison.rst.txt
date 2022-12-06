@@ -1,6 +1,0 @@
-﻿arviz.plot\_dist\_comparison
-============================
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_dist_comparison

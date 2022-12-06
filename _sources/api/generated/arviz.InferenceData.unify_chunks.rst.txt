@@ -1,6 +1,0 @@
-arviz.InferenceData.unify\_chunks
-=================================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.unify_chunks

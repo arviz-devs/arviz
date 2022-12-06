@@ -1,6 +1,0 @@
-arviz.PyMCSamplingWrapper.sel\_observations
-===========================================
-
-.. currentmodule:: arviz
-
-.. automethod:: PyMCSamplingWrapper.sel_observations

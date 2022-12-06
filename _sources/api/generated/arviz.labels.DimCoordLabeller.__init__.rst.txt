@@ -1,6 +1,0 @@
-arviz.labels.DimCoordLabeller.\_\_init\_\_
-==========================================
-
-.. currentmodule:: arviz.labels
-
-.. automethod:: DimCoordLabeller.__init__

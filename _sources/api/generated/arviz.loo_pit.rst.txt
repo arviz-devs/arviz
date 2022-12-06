@@ -1,6 +1,0 @@
-﻿arviz.loo\_pit
-==============
-
-.. currentmodule:: arviz
-
-.. autofunction:: loo_pit

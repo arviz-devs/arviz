@@ -1,6 +1,0 @@
-﻿arviz.output\_notebook
-======================
-
-.. currentmodule:: arviz
-
-.. autofunction:: output_notebook

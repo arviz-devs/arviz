@@ -1,6 +1,0 @@
-﻿arviz.kde
-=========
-
-.. currentmodule:: arviz
-
-.. autofunction:: kde

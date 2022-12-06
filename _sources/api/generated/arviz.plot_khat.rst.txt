@@ -1,6 +1,0 @@
-﻿arviz.plot\_khat
-================
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_khat

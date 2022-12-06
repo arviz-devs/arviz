@@ -1,6 +1,0 @@
-arviz.labels.BaseLabeller.make\_model\_label
-============================================
-
-.. currentmodule:: arviz.labels
-
-.. automethod:: BaseLabeller.make_model_label

@@ -1,6 +1,0 @@
-arviz.InferenceData.to\_dataframe
-=================================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.to_dataframe

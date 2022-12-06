@@ -1,6 +1,0 @@
-﻿arviz.plot\_mcse
-================
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_mcse
