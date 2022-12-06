@@ -187,7 +187,7 @@ html_theme_options = {
             "name": "Mastodon",
             "url": "https://bayes.club/@ArviZ",
             "icon": "fa-brands fa-mastodon",
-        }
+        },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
     "header_links_before_dropdown": 7,
