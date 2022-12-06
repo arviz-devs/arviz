@@ -11,7 +11,7 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     load_cached_models,
 )
 
-# Skip all tests if pyro or pytorch not installed
+# Skip all tests if beanmachine or pytorch not installed
 torch = importorskip("torch")
 bm = importorskip("beanmachine.ppl")
 dist = torch.distributions
