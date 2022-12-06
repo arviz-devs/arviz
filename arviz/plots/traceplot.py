@@ -82,13 +82,18 @@ def plot_trace(
     compact: bool, optional
         Plot multidimensional variables in a single plot.
     compact_prop: str or dict {str: array_like}, optional
-        Tuple containing the property name and the property values to distinguish different
-        dimensions with compact=True
+         Defines the property name and the property values to distinguish different
+        dimensions with compact=True.
+        When compact=True it defaults to color, it is
+        ignored otherwise.
     combined: bool, optional
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
     chain_prop: str or dict {str: array_like}, optional
-        Tuple containing the property name and the property values to distinguish different chains
+        Defines the property name and the property values to distinguish different chains.
+        If compact=True it defaults to linestyle,
+        otherwise it uses the color to distinguish
+        different chains.
     legend: bool, optional
         Add a legend to the figure with the chain color code.
     plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs: dict, optional
