@@ -1091,7 +1091,7 @@ def _powerscale_lw(alpha, component_draws):
 
 def _cjs_dist(draws, weights):
     """
-    Calculate Cumulative Jensen-Shannon distance between original draws and weighted draws.
+    Calculate the cumulative Jensen-Shannon distance between original draws and weighted draws.
     """
 
     # sort draws and weights
