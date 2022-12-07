@@ -1,6 +1,0 @@
-arviz.InferenceData.from\_netcdf
-================================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.from_netcdf

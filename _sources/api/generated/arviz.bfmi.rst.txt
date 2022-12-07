@@ -1,6 +1,0 @@
-﻿arviz.bfmi
-==========
-
-.. currentmodule:: arviz
-
-.. autofunction:: bfmi

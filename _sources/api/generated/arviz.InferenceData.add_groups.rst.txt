@@ -1,6 +1,0 @@
-arviz.InferenceData.add\_groups
-===============================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.add_groups

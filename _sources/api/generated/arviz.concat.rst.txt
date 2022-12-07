@@ -1,6 +1,0 @@
-﻿arviz.concat
-============
-
-.. currentmodule:: arviz
-
-.. autofunction:: concat

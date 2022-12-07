@@ -1,6 +1,0 @@
-arviz.labels.DimIdxLabeller.\_\_init\_\_
-========================================
-
-.. currentmodule:: arviz.labels
-
-.. automethod:: DimIdxLabeller.__init__

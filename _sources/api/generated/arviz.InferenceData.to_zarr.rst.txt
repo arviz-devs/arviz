@@ -1,6 +1,0 @@
-arviz.InferenceData.to\_zarr
-============================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.to_zarr

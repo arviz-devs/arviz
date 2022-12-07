@@ -1,6 +1,0 @@
-arviz.InferenceData.stack
-=========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.stack

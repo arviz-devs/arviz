@@ -1,6 +1,0 @@
-arviz.CmdStanPySamplingWrapper.sel\_observations
-================================================
-
-.. currentmodule:: arviz
-
-.. automethod:: CmdStanPySamplingWrapper.sel_observations

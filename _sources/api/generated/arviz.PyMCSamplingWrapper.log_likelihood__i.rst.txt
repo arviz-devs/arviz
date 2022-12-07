@@ -1,6 +1,0 @@
-arviz.PyMCSamplingWrapper.log\_likelihood\_\_i
-==============================================
-
-.. currentmodule:: arviz
-
-.. automethod:: PyMCSamplingWrapper.log_likelihood__i

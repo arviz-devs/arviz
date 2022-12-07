@@ -1,6 +1,0 @@
-arviz.InferenceData.items
-=========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.items

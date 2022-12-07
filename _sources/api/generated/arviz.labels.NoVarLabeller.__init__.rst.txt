@@ -1,6 +1,0 @@
-arviz.labels.NoVarLabeller.\_\_init\_\_
-=======================================
-
-.. currentmodule:: arviz.labels
-
-.. automethod:: NoVarLabeller.__init__

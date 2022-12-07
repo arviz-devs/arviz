@@ -1,6 +1,0 @@
-arviz.InferenceData.map
-=======================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.map

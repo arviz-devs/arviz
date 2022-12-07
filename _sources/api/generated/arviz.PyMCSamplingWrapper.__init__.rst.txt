@@ -1,6 +1,0 @@
-arviz.PyMCSamplingWrapper.\_\_init\_\_
-======================================
-
-.. currentmodule:: arviz
-
-.. automethod:: PyMCSamplingWrapper.__init__

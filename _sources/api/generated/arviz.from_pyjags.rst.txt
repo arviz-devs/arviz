@@ -1,6 +1,0 @@
-﻿arviz.from\_pyjags
-==================
-
-.. currentmodule:: arviz
-
-.. autofunction:: from_pyjags

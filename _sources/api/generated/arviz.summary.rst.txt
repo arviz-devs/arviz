@@ -1,6 +1,0 @@
-﻿arviz.summary
-=============
-
-.. currentmodule:: arviz
-
-.. autofunction:: summary

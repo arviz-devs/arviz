@@ -1,6 +1,0 @@
-﻿arviz.plot\_pair
-================
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_pair

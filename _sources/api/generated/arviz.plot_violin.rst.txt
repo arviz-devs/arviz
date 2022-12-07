@@ -1,6 +1,0 @@
-﻿arviz.plot\_violin
-==================
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_violin

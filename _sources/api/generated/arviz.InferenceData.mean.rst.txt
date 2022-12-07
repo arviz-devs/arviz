@@ -1,6 +1,0 @@
-arviz.InferenceData.mean
-========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.mean

@@ -1,6 +1,0 @@
-arviz.CmdStanPySamplingWrapper.log\_likelihood\_\_i
-===================================================
-
-.. currentmodule:: arviz
-
-.. automethod:: CmdStanPySamplingWrapper.log_likelihood__i

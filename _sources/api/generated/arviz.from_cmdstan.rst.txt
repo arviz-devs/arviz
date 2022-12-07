@@ -1,6 +1,0 @@
-﻿arviz.from\_cmdstan
-===================
-
-.. currentmodule:: arviz
-
-.. autofunction:: from_cmdstan

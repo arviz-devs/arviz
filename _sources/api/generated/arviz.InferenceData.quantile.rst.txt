@@ -1,6 +1,0 @@
-arviz.InferenceData.quantile
-============================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.quantile

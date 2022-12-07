@@ -1,6 +1,0 @@
-﻿arviz.show\_layout
-==================
-
-.. currentmodule:: arviz
-
-.. autofunction:: show_layout

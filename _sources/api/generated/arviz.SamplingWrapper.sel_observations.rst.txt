@@ -1,6 +1,0 @@
-arviz.SamplingWrapper.sel\_observations
-=======================================
-
-.. currentmodule:: arviz
-
-.. automethod:: SamplingWrapper.sel_observations

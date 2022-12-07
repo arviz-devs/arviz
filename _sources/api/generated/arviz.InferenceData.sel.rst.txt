@@ -1,6 +1,0 @@
-arviz.InferenceData.sel
-=======================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.sel

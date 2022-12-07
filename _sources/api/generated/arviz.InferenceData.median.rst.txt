@@ -1,6 +1,0 @@
-arviz.InferenceData.median
-==========================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.median

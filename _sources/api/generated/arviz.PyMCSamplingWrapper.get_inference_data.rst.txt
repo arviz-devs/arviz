@@ -1,6 +1,0 @@
-arviz.PyMCSamplingWrapper.get\_inference\_data
-==============================================
-
-.. currentmodule:: arviz
-
-.. automethod:: PyMCSamplingWrapper.get_inference_data

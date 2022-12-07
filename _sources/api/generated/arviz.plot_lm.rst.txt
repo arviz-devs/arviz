@@ -1,6 +1,0 @@
-﻿arviz.plot\_lm
-==============
-
-.. currentmodule:: arviz
-
-.. autofunction:: plot_lm

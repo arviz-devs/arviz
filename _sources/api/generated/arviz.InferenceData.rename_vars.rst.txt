@@ -1,6 +1,0 @@
-arviz.InferenceData.rename\_vars
-================================
-
-.. currentmodule:: arviz
-
-.. automethod:: InferenceData.rename_vars
