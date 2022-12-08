@@ -71,7 +71,7 @@ def plot_rank(
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
         for idx, row in enumerate(ranks):
             _, all_counts[idx], _ = histogram(row, bins=bin_ary)
-        gap = all_counts.max() * 1.05
+        gap = 2 / ranks.size
         width = bin_ary[1] - bin_ary[0]
 
         bar_kwargs.setdefault("width", width)
