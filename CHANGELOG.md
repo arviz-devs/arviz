@@ -8,6 +8,7 @@
 
 ### Maintenance and fixes
 - Fix `reloo` outdated usage of `ELPDData` ([2158](https://github.com/arviz-devs/arviz/pull/2158))
+- Fix gap for `plot_trace` with option `kind="rank_bars"` ([2180](https://github.com/arviz-devs/arviz/pull/2180))
 
 ### Deprecation
 
@@ -23,7 +24,6 @@
 
 ### Maintenance and fixes
 - Fix dimension ordering for `plot_trace` with divergences ([2151](https://github.com/arviz-devs/arviz/pull/2151))
-- Fix gap for `plot_trace` with option `kind="rank_bars"` ([2180](https://github.com/arviz-devs/arviz/pull/2180))
 
 
 ## v0.13.0 (2022 Oct 22)
