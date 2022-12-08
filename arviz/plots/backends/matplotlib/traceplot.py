@@ -193,7 +193,8 @@ def plot_trace(
     rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "scatter")
     rank_kwargs = matplotlib_kwarg_dealiaser(rank_kwargs, "bar")
     if compact:
-        rank_kwargs.setdefault("bar_kwargs", {"alpha": 0.2})
+        rank_kwargs.setdefault("bar_kwargs", {})
+        rank_kwargs["bar_kwargs"].setdefault("alpha", 0.2)
 
     textsize = plot_kwargs.pop("textsize", 10)
 
