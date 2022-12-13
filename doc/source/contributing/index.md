@@ -30,13 +30,19 @@ if you want to contribute to the project but you are not sure where you can cont
 Historically, the most common way of contributing to the project is
 sending pull requests on the main [ArviZ Github repository](https://github.com/arviz-devs/arviz),
 but there are many other ways to help the project.
+
+Each subsection within this section gives an overview of common contribution types
+to ArviZ. If you prefer video instead of written form, jump to the next section:
+{ref}`contributing_webinar` for a recording of an ArviZ core contributor
+on both technical and social aspects of contributing to the library.
+
 You can contribute to ArviZ in the following ways:
 
 ### Create an issue
 [Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check  {ref}`issue_reports` for details on how to write an issue.
 
 ### Translate ArviZ website
-You can {ref}`translate <translate>` our website to languages other than english.
+You can {ref}`translate <translate>` our website to languages other than English.
 
 ### Review PRs
 {ref}`Review pull requests <review_prs>` to ensure that the contributions are well tested and documented.
@@ -68,6 +74,12 @@ To fix bugs or add new features, do the following:
 2. Understand the {ref}`development process <dev_summary>` and code conventions.
 3. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing <review_prs>` changes.
 4. Review and test your code.
+
+(contributing_webinar)=
+## Contributing to ArviZ webinar
+
+:::{youtube} 457ZTes4xOI
+:::
 
 ```{toctree}
 :hidden:
