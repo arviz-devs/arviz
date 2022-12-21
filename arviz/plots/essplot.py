@@ -37,56 +37,70 @@ def plot_ess(
     show=None,
     **kwargs,
 ):
-    """Plot quantile, local or evolution of effective sample sizes (ESS).
+    """Generate quantile, local, or evolution ESS plots.
+     
+    The local and the quantile ESS plots are recommended for checking
+    that there are enough samples for all the explored regions of the
+    parameter space. Checking local and quantile ESS is particularly
+    relevant when working with HDI intervals as opposed to ESS bulk,
+    which is suitable for point estimates.
 
     Parameters
     ----------
     idata : obj
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details
-    var_names : list of variable names, optional
+    var_names : list of str, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
-        them from the plot.
-    filter_vars : {None, "like", "regex"}, optional, default=None
-        If `None` (default), interpret var_names as the real variables names. If "like",
-        interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. A la
-        ``pandas.filter``.
-    kind : str, optional
-        Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
-    relative : bool
+        them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
+    filter_vars : {None, "like", "regex"}, default None
+        If `None` (default), interpret `var_names` as the real variables names. If "like",
+        interpret `var_names` as substrings of the real variables names. If "regex",
+        interpret `var_names` as regular expressions on the real variables names. See
+        the :ref:`this section <common_filter_vars>` for usage examples.
+    kind : {"local", "quantile", "evolution"}, default "local"
+        Specify the kind of plot:
+
+           * The ``kind="local"`` argument generates the ESS' local efficiency for
+             estimating quantiles of a desired posterior. 
+           * The ``kind="quantile"`` argument generates the ESS' local efficiency
+             for estimating small-interval probability of a desired posterior.
+           * The ``kind="evolution"`` argument generates the estimated ESS'
+             with incrised number of iterations of a desired posterior.
+             
+    relative : bool, default False
         Show relative ess in plot ``ress = ess / N``.
     coords : dict, optional
-        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
-    grid : tuple
-        Number of rows and columns. Defaults to None, the rows and columns are
+        Coordinates of `var_names` to be plotted. Passed to :meth:`xarray.Dataset.sel`.
+    grid : tuple, optional
+        Number of rows and columns. By default, the rows and columns are
         automatically inferred.
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    rug : bool
-        Plot rug plot of values diverging or that reached the max tree depth.
-    rug_kind : bool
+    rug : bool, default False
+        Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>` for a specific subset of values.
+    rug_kind : str, dafault "diverging"
         Variable in sample stats to use as rug mask. Must be a boolean variable.
-    n_points : int
+    n_points : int, default 20
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    extra_methods : bool, optional
-        Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
-    min_ess : int
+    extra_methods : bool, default False
+        Plot mean and sd ESS as horizontal lines. Not taken into account if ``kind = 'evolution'``.
+    min_ess : int, default 400
         Minimum number of ESS desired. If ``relative=True`` the line is plotted at
         ``min_ess / n_samples`` for local and quantile kinds and as a curve following
         the ``min_ess / n`` dependency in evolution kind.
     labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax : 2D array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     extra_kwargs : dict, optional
-        If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
+        If evolution plot, `extra_kwargs` is used to plot ess tail and differentiate it
         from ess bulk. Otherwise, passed to extra methods lines.
     text_kwargs : dict, optional
         Only taken into account when ``extra_methods=True``. kwargs passed to ax.annotate
@@ -101,7 +115,7 @@ def plot_ess(
         kwargs passed to rug plot.
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs : bool, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
@@ -114,11 +128,11 @@ def plot_ess(
 
     Returns
     -------
-    axes: matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figure
 
     See Also
     --------
-    ess: Calculate estimate of the effective sample size.
+    ess : Calculate estimate of the effective sample size.
 
     References
     ----------
@@ -126,10 +140,7 @@ def plot_ess(
 
     Examples
     --------
-    Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check
-    that there are enough samples for all the explored regions of parameter space. Checking
-    local and quantile ESS is particularly relevant when working with HDI intervals as
-    opposed to ESS bulk, which is relevant for point estimates.
+    Plot local ESS.
 
     .. plot::
         :context: close-figs
@@ -139,15 +150,6 @@ def plot_ess(
         >>> coords = {"school": ["Choate", "Lawrenceville"]}
         >>> az.plot_ess(
         ...     idata, kind="local", var_names=["mu", "theta"], coords=coords
-        ... )
-
-    Plot quantile ESS and exclude variables with partial naming
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_ess(
-        ...     idata, kind="quantile", var_names=['~thet'], filter_vars="like", coords=coords
         ... )
 
     Plot ESS evolution as the number of samples increase. When the model is converging properly,
