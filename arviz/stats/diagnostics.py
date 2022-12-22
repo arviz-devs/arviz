@@ -4,7 +4,9 @@ import warnings
 from collections.abc import Sequence
 
 import numpy as np
+import packaging
 import pandas as pd
+import scipy
 from scipy import stats
 
 from ..data import convert_to_dataset
@@ -538,7 +540,10 @@ def _z_scale(ary):
     np.ndarray
     """
     ary = np.asarray(ary)
-    rank = stats.rankdata(ary, method="average")
+    if packaging.version.parse(scipy.__version__) < packaging.version.parse("1.10.0"):
+        rank = stats.rankdata(ary, method="average")
+    else:
+        rank = stats.rankdata(ary, method="average", nan_policy="omit")  # pylint: disable=unexpected-keyword-arg
     rank = _backtransform_ranks(rank)
     z = stats.norm.ppf(rank)
     z = z.reshape(ary.shape)

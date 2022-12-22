@@ -3,8 +3,10 @@
 import os
 
 import numpy as np
+import packaging
 import pandas as pd
 import pytest
+import scipy
 from numpy.testing import assert_almost_equal
 
 from ...data import from_cmdstan, load_arviz_data
@@ -488,9 +490,11 @@ class TestDiagnostics:
         data[0, 0] = np.nan  #  pylint: disable=unsupported-assignment-operation
         if func == "_mcse_quantile":
             assert np.isnan(_mcse_quantile(data, 0.5)).all(None)
-        else:
+        elif packaging.version.parse(scipy.__version__) < packaging.version.parse("1.10.0"):
             assert not np.isnan(_z_scale(data)).all(None)
             assert not np.isnan(_z_scale(data)).any(None)
+        else:
+            assert np.isnan(_z_scale(data)).sum() == 1
 
     @pytest.mark.parametrize("chains", (None, 1, 2, 3))
     @pytest.mark.parametrize("draws", (2, 3, 100, 101))
