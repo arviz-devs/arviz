@@ -5,6 +5,7 @@
 ### New features
 - Adds Savage-Dickey density ratio plot for Bayes factor approximation. ([2037](https://github.com/arviz-devs/arviz/pull/2037), [2152](https://github.com/arviz-devs/arviz/pull/2152))
 - Add `CmdStanPySamplingWrapper` and `PyMCSamplingWrapper` classes ([2158](https://github.com/arviz-devs/arviz/pull/2158))
+- Changed dependency on netcdf4-python to h5netcdf  ([2122](https://github.com/arviz-devs/arviz/pull/2122))
 
 ### Maintenance and fixes
 - Fix `reloo` outdated usage of `ELPDData` ([2158](https://github.com/arviz-devs/arviz/pull/2158))
@@ -54,9 +55,6 @@
 * Save InferenceData level attrs to netcdf and zarr ([2131](https://github.com/arviz-devs/arviz/pull/2131))
 * Update tests and docs for updated example data ([2137](https://github.com/arviz-devs/arviz/pull/2137))
 * Copy coords before modifying in ppcplot ([2160](https://github.com/arviz-devs/arviz/pull/2160))
-
-* Changed dependency on netCDF4 to h5netcdf 
-* Changed dependency on netCDF4 to h5netcdf  ([2122](https://github.com/arviz-devs/arviz/pull/2122))
 
 ### Deprecation
 * Removed `fill_last`, `contour` and `plot_kwargs` arguments from `plot_pair` function ([2085](https://github.com/arviz-devs/arviz/pull/2085))

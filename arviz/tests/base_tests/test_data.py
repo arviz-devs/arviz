@@ -1296,11 +1296,22 @@ class TestDataNetCDF:
 
     @pytest.mark.parametrize("groups_arg", [False, True])
     @pytest.mark.parametrize("compress", [True, False])
-    def test_io_method(self, data, eight_schools_params, groups_arg, compress):
+    @pytest.mark.parametrize("engine", ["h5netcdf", "netcdf4"])
+    def test_io_method(self, data, eight_schools_params, groups_arg, compress, engine):
         # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
         )
+        if engine == "h5netcdf":
+            try:
+                import h5netcdf  # pylint: disable=unused-import
+            except ImportError:
+                pytest.skip("h5netcdf not installed")
+        elif engine == "netcdf4":
+            try:
+                import netCDF4  # pylint: disable=unused-import
+            except ImportError:
+                pytest.skip("netcdf4 not installed")
         test_dict = {
             "posterior": ["eta", "theta", "mu", "tau"],
             "posterior_predictive": ["eta", "theta", "mu", "tau"],
