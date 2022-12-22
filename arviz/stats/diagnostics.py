@@ -543,9 +543,10 @@ def _z_scale(ary):
     if packaging.version.parse(scipy.__version__) < packaging.version.parse("1.10.0.dev0"):
         rank = stats.rankdata(ary, method="average")
     else:
-        rank = stats.rankdata(
-            ary, method="average", nan_policy="omit"
-        )  # pylint: disable=unexpected-keyword-arg
+        # the .ravel part is only needed to overcom a bug in scipy 1.10.0.rc1
+        rank = stats.rankdata(  # pylint: disable=unexpected-keyword-arg
+            ary.ravel(), method="average", nan_policy="omit"
+        )
     rank = _backtransform_ranks(rank)
     z = stats.norm.ppf(rank)
     z = z.reshape(ary.shape)
