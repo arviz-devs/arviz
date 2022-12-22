@@ -19,6 +19,7 @@
 ### Documentation
 - Add PyMC and CmdStanPy sampling wrapper examples ([2158](https://github.com/arviz-devs/arviz/pull/2158))
 - Fix docstring for plot_trace chain_prop and compact_prop parameters ([2176](https://github.com/arviz-devs/arviz/pull/2176))
+- Add video of contributing to ArviZ webinar in contributing guide ([2184](https://github.com/arviz-devs/arviz/pull/2184))
 
 ## v0.14.0 (2022 Nov 15)
 
