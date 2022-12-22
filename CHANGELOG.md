@@ -11,6 +11,8 @@
 - plot_bpv smooth discrete data only when computing u_values ([2179](https://github.com/arviz-devs/arviz/pull/2179))
 - Fix bug when beanmachine objects lack some fields ([2154](https://github.com/arviz-devs/arviz/pull/2154))
 - Fix gap for `plot_trace` with option `kind="rank_bars"` ([2180](https://github.com/arviz-devs/arviz/pull/2180))
+- Fix `plot_lm` unsupported usage of `np.tile` ([2186](https://github.com/arviz-devs/arviz/pull/2186))
+- Update `_z_scale` to work with SciPy 1.10 ([2186](https://github.com/arviz-devs/arviz/pull/2186))
 
 ### Deprecation
 
