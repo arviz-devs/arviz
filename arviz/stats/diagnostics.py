@@ -540,10 +540,12 @@ def _z_scale(ary):
     np.ndarray
     """
     ary = np.asarray(ary)
-    if packaging.version.parse(scipy.__version__) < packaging.version.parse("1.10.0"):
+    if packaging.version.parse(scipy.__version__) < packaging.version.parse("1.10.0.dev0"):
         rank = stats.rankdata(ary, method="average")
     else:
-        rank = stats.rankdata(ary, method="average", nan_policy="omit")  # pylint: disable=unexpected-keyword-arg
+        rank = stats.rankdata(
+            ary, method="average", nan_policy="omit"
+        )  # pylint: disable=unexpected-keyword-arg
     rank = _backtransform_ranks(rank)
     z = stats.norm.ppf(rank)
     z = z.reshape(ary.shape)

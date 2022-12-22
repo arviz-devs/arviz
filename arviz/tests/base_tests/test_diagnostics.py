@@ -490,7 +490,7 @@ class TestDiagnostics:
         data[0, 0] = np.nan  #  pylint: disable=unsupported-assignment-operation
         if func == "_mcse_quantile":
             assert np.isnan(_mcse_quantile(data, 0.5)).all(None)
-        elif packaging.version.parse(scipy.__version__) < packaging.version.parse("1.10.0"):
+        elif packaging.version.parse(scipy.__version__) < packaging.version.parse("1.10.0.dev0"):
             assert not np.isnan(_z_scale(data)).all(None)
             assert not np.isnan(_z_scale(data)).any(None)
         else:
