@@ -545,7 +545,7 @@ def _z_scale(ary):
     else:
         # the .ravel part is only needed to overcom a bug in scipy 1.10.0.rc1
         rank = stats.rankdata(  # pylint: disable=unexpected-keyword-arg
-            ary.ravel(), method="average", nan_policy="omit"
+            ary, method="average", nan_policy="omit"
         )
     rank = _backtransform_ranks(rank)
     z = stats.norm.ppf(rank)
