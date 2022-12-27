@@ -43,6 +43,15 @@ Below are a few rules that should be followed:
 * Each group should have one entry per variable and each variable should be named.
 * Dimension names `chain`, `draw`, `sample` and `pred_id` are reserved for
   InferenceData use to indicate sample dimensions.
+  - `chain` indicates the MCMC chain
+  - `draw` indicates the iteration _within_ each MCMC chain.
+    ArviZ assumes all chains have the same length for better interoperability with
+    NumPy and xarray.
+  - `sample` indicates a unique id per value combining chain and draw. i.e. we often don't
+    care about `chain` and `draw` when plotting and only want all the samples of the distribution
+    as a whole.
+  - `pred_id` is interpreted as the dimension storing multiple independent and identically
+    distributed values per sample.
 * Dimensions in InferenceData (including sample dimensions) should be identified by name only. The
   dimension order does not matter, only their names.
 * For groups like `observed_data` or `constant_data`, all sample dimensions can be
