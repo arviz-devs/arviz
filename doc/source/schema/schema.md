@@ -14,7 +14,7 @@ Currently there are **two beta implementations** of this design:
     [CmdStan](https://mc-stan.org/docs/cmdstan-guide/index.html) and
     [CmdStanPy](https://mc-stan.org/cmdstanpy/)
   - [TensorFlow Probability](https://www.tensorflow.org/probability)
-* [ArviZ.jl](https://github.com/arviz-devs/ArviZ.jl) in **Julia** which integrates with:
+* [InferenceObjects.jl](https://github.com/arviz-devs/InferenceObjects.jl) in **Julia** used in [ArviZ.jl](https://github.com/arviz-devs/ArviZ.jl), which integrates with:
   - [CmdStan.jl](https://github.com/StanJulia/CmdStan.jl), [Soss.jl](https://cscherrer.github.io/Soss.jl/stable/), [StanSample.jl](https://github.com/StanJulia/StanSample.jl) and [Stan.jl](https://github.com/StanJulia/Stan.jl)
   - [Turing.jl](https://turing.ml/dev/) and indirectly any package using [MCMCChains.jl](https://github.com/TuringLang/MCMCChains.jl) to store results
 
@@ -170,7 +170,7 @@ by default. We recognize both the samplers and the models are continuously evolv
 Some models already require the use of sampling algorithms to get prior samples,
 in which case we basically need to treat the prior and posterior groups in the same way.
 
-We define the prefixes and to allow libraries that use InferenceData to be aware
+We define the prefixes to allow libraries that use InferenceData to be aware
 of the potential relations and hopefully support as many cases as possible.
 Back to the case above, it might be necessary to generate a pair plot
 for prior samples generated with NUTS _and_ its associated divergences,
