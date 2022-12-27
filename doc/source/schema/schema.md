@@ -8,16 +8,19 @@ The `InferenceData` schema approach defines a data structure compatible with [Ne
 Currently there are **two beta implementations** of this design:
 * {ref}`ArviZ <homepage>` in **Python** which integrates with:
   - [emcee](https://emcee.readthedocs.io/en/stable/)
-  - [PyMC3](https://docs.pymc.io)
+  - [PyMC](https://www.pymc.io)
   - [Pyro](https://pyro.ai/) and [NumPyro](https://pyro.ai/numpyro/)
-  - [PyStan](https://pystan.readthedocs.io/en/latest/index.html), [CmdStan](https://mc-stan.org/users/interfaces/cmdstan) and [CmdStanPy](https://cmdstanpy.readthedocs.io/en/latest/index.html)
+  - [PyStan](https://pystan.readthedocs.io/en/latest/index.html),
+    [CmdStan](https://mc-stan.org/docs/cmdstan-guide/index.html) and
+    [CmdStanPy](https://mc-stan.org/cmdstanpy/)
   - [TensorFlow Probability](https://www.tensorflow.org/probability)
-* [ArviZ.jl](https://github.com/arviz-devs/ArviZ.jl) in **Julia** which integrates with:
-  - [CmdStan.jl](https://github.com/StanJulia/CmdStan.jl), [StanSample.jl](https://github.com/StanJulia/StanSample.jl) and [Stan.jl](https://github.com/StanJulia/Stan.jl)
+* [InferenceObjects.jl](https://github.com/arviz-devs/InferenceObjects.jl) in **Julia** used in [ArviZ.jl](https://github.com/arviz-devs/ArviZ.jl), which integrates with:
+  - [CmdStan.jl](https://github.com/StanJulia/CmdStan.jl), [Soss.jl](https://cscherrer.github.io/Soss.jl/stable/), [StanSample.jl](https://github.com/StanJulia/StanSample.jl) and [Stan.jl](https://github.com/StanJulia/Stan.jl)
   - [Turing.jl](https://turing.ml/dev/) and indirectly any package using [MCMCChains.jl](https://github.com/TuringLang/MCMCChains.jl) to store results
 
 ## Terminology
-The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the {ref}`InferenceData <xarray_for_arviz>` case.
+The terminology used in this specification is based on {ref}`xarray's terminology <xarray:terminology>`, however, no xarray knowledge is assumed in this description, nor xarray is needed to use or interact with the schema.
+There are also some extensions particular to  the {ref}`InferenceData <xarray_for_arviz>` case.
 
 * **Variable**: NetCDF-like variables are multidimensional labeled arrays representing a single quantity. Variables and their dimensions must be named. They can also have attributes describing it. Relevant terms related to `InferenceData` variables are following:
   - *variable_name*
@@ -36,24 +39,75 @@ The terminology used in this specification is based on [xarray's terminology](ht
 `InferenceData` stores all quantities that are relevant to fulfilling its goals in different groups. Different groups generally distinguish conceptually different quantities in Bayesian inference, however, convenience in {ref}`creation <creating_InferenceData>` and {ref}`usage <working_with_InferenceData>` of `InferenceData` objects also plays a role. In general, each quantity (such as posterior distribution or observed data) will be represented by several multidimensional labeled variables.
 
 ### Rules
-Following are a few rules which should be followed:
+Below are a few rules that should be followed:
 * Each group should have one entry per variable and each variable should be named.
-* When relevant, the first two dimensions of each variable should be the sample identifier (`chain`, `draw`).
-* For groups like `observed_data` or `constant_data`, the two initial dimensions(`chain`, `draw`) are omitted.
+* Dimension names `chain`, `draw`, `sample` and `pred_id` are reserved for
+  InferenceData use to indicate sample dimensions.
+  - `chain` indicates the MCMC chain
+  - `draw` indicates the iteration _within_ each MCMC chain.
+    ArviZ assumes all chains have the same length for better interoperability with
+    NumPy and xarray.
+  - `sample` indicates a unique id per value combining chain and draw. i.e. we often don't
+    care about `chain` and `draw` when plotting and only want all the samples of the distribution
+    as a whole.
+  - `pred_id` is interpreted as the dimension storing multiple independent and identically
+    distributed values per sample.
+* Dimensions in InferenceData (including sample dimensions) should be identified by name only. The
+  dimension order does not matter, only their names.
+* For groups like `observed_data` or `constant_data`, all sample dimensions can be
+  omitted. For groups like `prior`, `posterior` or `posterior_predictive` either `sample` has to be
+  present or both `chain` and `draw` dimensions need to be present. Any combinations that follow
+  this are valid.
 * Dimensions must be named and share name with a coordinate specifying the index values, called coordinate values.
 * Coordinate values can be repeated and should not necessarily be numerical values.
 * Variables must not share names with dimensions.
-* Moreover, each group contains the following attributes:
-  - `created_at`: the date of creation of the group.
-  - `inference_library`: the library used to run the inference.
-  - `inference_library_version`: version of the inference library used.
+* Groups, variables or the InferenceData itself can have arbitrary metadata stored.
 
-### Relations
-`InferenceData` data objects contain any combination of the groups described below. There are also some relations (detailed below) between the variables and dimensions of different groups. Hence, whenever related groups are present they should comply with these relations.
+### Metadata
+No metadata is _required_ to be present in order to be compliant with the InferenceData schema.
+However, it is recommended to store the following fields when relevant:
+* `name`: InferenceData objects represent multiple quantities related to Bayesian modelling,
+  but they are all tied to a single model. The model identifier can be added as metadata
+  to simplify the calls to model comparison functions.
+* `created_at`: the date of creation of the group.
+* `creation_library`: the library used to create the InferenceData (might not necessarly be ArviZ)
+* `creation_library_version`: the version of `creation_library` that generated the InferenceData
+* `creation_library_language`: the programming language from which `creation_library` was used to create the InferenceData
+* `inference_library`: the library used to run the inference.
+* `inference_library_version`: version of the inference library used.
+
+Metadata can be stored at the whole `InferenceData` level but also at group level when needed.
+
+
+### Relations between groups
+`InferenceData` data objects contain any combination of the groups described below. There are also some relations (detailed below) between the variables and dimensions of different groups. Hence, whenever related groups are present they should comply with these relations. Neither the presence of groups not described below or the lack of some of the groups described below go against the schema.
 
 #### `posterior`
-Samples from the posterior distribution p(theta|y).
+Samples from the posterior distribution $p(\theta|y)$ in the parameter (also called constrained) space.
 
+(schema/unconstrained_posterior)=
+#### `unconstrained_posterior`
+Samples from the posterior distribution p(theta_transformed|y) in the unconstrained (also called transformed) space.
+
+Only variables that undergo a transformation for sampling should be present here.
+Therefore, to get the samples for _all_ the variables in the unconstrained space,
+variables should be taken from the `unconstrained_posterior` group if present,
+and if not, then the values from the variable in the `posterior` group should be used.
+
+Samples should match between the `posterior` and the `unconstrained_posterior` groups.
+All variables in `unconstrained_posterior` should have a counterpart in `posterior`
+with the same name. However, they don't need to have the same dimensions nor shape.
+
+:::{note}
+:class: dropdown
+
+Both InferenceData groups and variables can have metadata, which in the `unconstrained_posterior`
+case could be used to store the transformations each variable goes through to map between the
+constrained and unconstrained spaces. The schema leaves this completely up to the user
+and imposes no conventions or restrictions on such metadata.
+:::
+
+(schema/sample_stats)=
 #### `sample_stats`
 Information and diagnostics for each `posterior` sample, provided by the inference
 backend. It may vary depending on the algorithm used by the backend (i.e. an affine
@@ -61,8 +115,12 @@ invariant sampler has no energy associated). Therefore none of these parameters
 should be assumed to be present in the `sample_stats` group. The convention
 below serves to ensure that if a variable is present with one of these names
 it will correspond to the definition given in front of it.
+Moreover, some `sample_stats` may be constant throughout the sampling
+process; these variables don't need to have any sampling dimensions.
 
-The name convention used for `sample_stats` variables is the following:
+
+:::{dropdown} Naming convention used for `sample_stats` variables
+:icon: list-unordered
 
 * `lp`: The joint log posterior density for the model (up to an additive constant).
 * `acceptance_rate`: The average acceptance probabilities of all possible samples in the proposed tree.
@@ -79,6 +137,11 @@ additive constant).
 the accepted proposal.
 * `max_energy_error`: The maximum absolute difference in Hamiltonian energy between the initial point and all possible samples in the proposed tree.
 * `int_time`: The total integration time (static HMC sampler)
+* `inv_metric`: Inverse metric (also known as inverse _mass matrix_) used in HMC samplers for the computation of the Hamiltonian.
+  When it is constant, the resulting implementation is known as Euclidean HMC;
+  in that case, the variable wouldn't need to have any sampling dimensions
+  even if part of the `sample_stats` group.
+:::
 
 
 #### `log_likelihood`
@@ -99,9 +162,6 @@ Model constants, data included in the model which is not modeled as a random var
 #### `prior`
 Samples from the prior distribution p(theta). Samples do not need to match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. It should have matching variables with the `posterior` group.
 
-#### `sample_stats_prior`
-Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in `sample_stats`.
-
 #### `prior_predictive`
 Samples from the prior predictive distribution. Samples should match `prior` samples and each variable should have a counterpart in `posterior_predictive`/`observed_data`.
 
@@ -110,6 +170,45 @@ Out of sample posterior predictive samples p(y'|y). Samples should match `poster
 
 #### `predictions_constant_data`
 Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` can have different coordinate values.
+
+:::{admonition} Note on sample stats, warmup and unconstrained groups
+:class: note, dropdown
+
+The schema does not define which warmup or unconstrained groups exist or can exist
+by default. We recognize both the samplers and the models are continuously evolving.
+Some models already require the use of sampling algorithms to get prior samples,
+in which case we basically need to treat the prior and posterior groups in the same way.
+
+We define the prefixes to allow libraries that use InferenceData to be aware
+of the potential relations and hopefully support as many cases as possible.
+Back to the case above, it might be necessary to generate a pair plot
+for prior samples generated with NUTS _and_ its associated divergences,
+which would then come from `sample_stats_prior`.
+:::
+
+#### Sample stats groups
+Information and diagnostics for the samples in any InferenceData group
+other than the posterior should be stored in a separate group with the
+`sample_stats_` prefix. For example `sample_stats_prior`.
+
+The same rules and conventions defined in {ref}`schema/sample_stats` apply to
+any sample stats group.
+
+#### Warmup groups
+Samples generated during the adaptation/warmup phases of algorithms like HMC
+can also be stored in InferenceData. In such cases, the data/samples
+generated during the adaptation process should be stored in groups with
+the same name with the `warmup_` prefix, e.g. `warmup_posterior`, `warmup_sample_stats_prior`.
+The `warmup_` prefix goes before other prefixes.
+
+#### Unconstrained groups
+Samples on the unconstrained space in cases where the samples need to be generated with
+the help of a sampling algorithm and the sampling algorithm requires transformations
+to an unconstrained space.
+
+It is described in more detail in {ref}`schema/unconstrained_posterior` section, which
+is what we expect to be the most common section, but other groups could also have
+an unconstrained linked group, e.g. `prior` and `unconstrained_prior`.
 
 ## Planned features
 The `InferenceData` structure is still evolving, with some feature being currently developed. This section aims to describe the roadmap of the specification.
