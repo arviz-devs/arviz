@@ -4,13 +4,15 @@ from .converters import convert_to_inference_data
 from .inference_data import InferenceData
 
 
-def from_netcdf(filename, group_kwargs=None, regex=False):
+def from_netcdf(filename, *, engine="h5netcdf", group_kwargs=None, regex=False):
     """Load netcdf file back into an arviz.InferenceData.
 
     Parameters
     ----------
     filename : str
         name or path of the file to load trace
+    engine : {"h5netcdf", "netcdf4"}, default "h5netcdf"
+        Library used to read the netcdf file.
     group_kwargs : dict of {str: dict}
         Keyword arguments to be passed into each call of :func:`xarray.open_dataset`.
         The keys of the higher level should be group names or regex matching group
@@ -31,10 +33,12 @@ def from_netcdf(filename, group_kwargs=None, regex=False):
     """
     if group_kwargs is None:
         group_kwargs = {}
-    return InferenceData.from_netcdf(filename, group_kwargs, regex)
+    return InferenceData.from_netcdf(
+        filename, engine=engine, group_kwargs=group_kwargs, regex=regex
+    )
 
 
-def to_netcdf(data, filename, *, group="posterior", coords=None, dims=None):
+def to_netcdf(data, filename, *, group="posterior", engine="h5netcdf", coords=None, dims=None):
     """Save dataset as a netcdf file.
 
     WARNING: Only idempotent in case `data` is InferenceData
@@ -47,6 +51,8 @@ def to_netcdf(data, filename, *, group="posterior", coords=None, dims=None):
         name or path of the file to load trace
     group : str (optional)
         In case `data` is not InferenceData, this is the group it will be saved to
+    engine : {"h5netcdf", "netcdf4"}, default "h5netcdf"
+        Library used to read the netcdf file.
     coords : dict (optional)
         See `convert_to_inference_data`
     dims : dict (optional)
@@ -58,5 +64,5 @@ def to_netcdf(data, filename, *, group="posterior", coords=None, dims=None):
         filename saved to
     """
     inference_data = convert_to_inference_data(data, group=group, coords=coords, dims=dims)
-    file_name = inference_data.to_netcdf(filename)
+    file_name = inference_data.to_netcdf(filename, engine=engine)
     return file_name
