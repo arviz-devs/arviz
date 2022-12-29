@@ -44,7 +44,7 @@ def plot_bpv(
     data : InferenceData
         :class:`arviz.InferenceData` object containing the observed and
         posterior/prior predictive data.
-    kind : {"p_value", "u_value", "t_stat"}, default "u_value"
+    kind : {"u_value", "p_value", "t_stat"}, default "u_value"
         Specify the kind of plot:
 
            * The ``kind="p_value"`` computes :math:`p := p(y* \leq y | y)`. This is the probability of the 
