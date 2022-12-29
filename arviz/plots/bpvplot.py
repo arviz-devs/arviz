@@ -139,7 +139,7 @@ def plot_bpv(
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
-    group : {"prior", "posterior"}, optional default "posterior"
+    group : {"posterior", "prior"}, default "posterior"
         Specifies which InferenceData group should be plotted. 
     show : bool, optional
         Call backend show function.
