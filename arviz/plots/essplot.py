@@ -82,7 +82,7 @@ def plot_ess(
         on ``figsize``.
     rug : bool, default False
         Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>` for a specific subset of values.
-    rug_kind : str, dafault "diverging"
+    rug_kind : str, default "diverging"
         Variable in sample stats to use as rug mask. Must be a boolean variable.
     n_points : int, default 20
         Number of points for which to plot their quantile/local ess or number of subsets
