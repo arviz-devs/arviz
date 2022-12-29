@@ -26,8 +26,7 @@ def plot_autocorr(
     """Bar plot of the autocorrelation function (ACF) for a sequence of data.
 
     The ACF plots are helpful as a convergence diagnostic for posteriors from MCMC 
-    samples which may display correlation. The ACF is efficiently computed using a 
-    Fast Fourier Transform for every lag for the input array.
+    samples which display autocorrelation.
 
     Parameters
     ----------
