@@ -30,13 +30,13 @@ def plot_autocorr(
 
     Parameters
     ----------
-    data : obj
+    data : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
         refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names : list of str, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
-    filter_vars : {None, "like", "regex"},  default None
+    filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
@@ -50,12 +50,12 @@ def plot_autocorr(
     grid : tuple, optional
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize : tuple, optional
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
         Note this is not used if ``ax`` is supplied.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``.
+        on `figsize`.
     labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
