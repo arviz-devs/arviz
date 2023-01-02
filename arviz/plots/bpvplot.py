@@ -135,12 +135,14 @@ def plot_bpv(
         Passed to :meth:`matplotlib.axes.Axes.plot` or
         :meth:`matplotlib.axes.Axes.axhspan` (when ``kind=u_value``
         and ``reference=analytical``).
-    backend_kwargs : bool, optional 
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     group : {"posterior", "prior"}, default "posterior"
-        Specifies which InferenceData group should be plotted. 
+        Specifies which InferenceData group should be plotted.  If "posterior", then the values 
+        in `posterior_predictive` group are compared to the ones in `observed_data`, if "prior" then 
+        the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional
         Call backend show function.
 
