@@ -79,7 +79,7 @@ def plot_ess(
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``.
+        on `figsize`.
     rug : bool, default False
         Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>` for a specific subset of values.
     rug_kind : str, default "diverging"
