@@ -58,10 +58,10 @@ def plot_bpv(
            * The ``kind="t_stat"`` argument computes :math:`:= p(T(y)* \leq T(y) | y)` where T is any test statistic. 
              See ``t_stat`` argument below for details of available options.
              
-    t_stat : {"mean", "median", "std"},  default "median"
-        Test statistics to compute from the observations and predictive distributions. Alternative a quantile 
-        can be passed as a float (or str) in the interval (0, 1). Finally a user defined function is also
-        acepted, see examples section for details.
+    t_stat : str, float, or callable, default "median"
+        Test statistics to compute from the observations and predictive distributions. Allowed strings are 
+        “mean”, “median” or “std”. Alternative a quantile can be passed as a float (or str) in the interval 
+        (0, 1). Finally a user defined function is also acepted, see examples section for details.
     bpv : bool, default True
         If True add the Bayesian p_value to the legend when ``kind = t_stat``.
     plot_mean : bool, default True
@@ -83,11 +83,11 @@ def plot_bpv(
     grid : tuple, optional
         Number of rows and columns. By default, the rows and columns are
         automatically inferred.
-    figsize : tuple, optional
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``.
+        on `figsize`.
     data_pairs : dict, optional
         Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
@@ -105,7 +105,7 @@ def plot_bpv(
         Variables to be plotted. If `None` all variable are plotted. Prefix the variables by ``~`` 
         when you want to exclude them from the plot. See the :ref:`this section <common_var_names>` 
         for usage examples.
-    filter_vars : {None, "like", "regex"}, optional, default None
+    filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
