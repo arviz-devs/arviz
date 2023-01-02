@@ -37,8 +37,8 @@ def plot_ess(
     show=None,
     **kwargs,
 ):
-    """Generate quantile, local, or evolution ESS plots.
-     
+    r"""Generate quantile, local, or evolution ESS plots.
+
     The local and the quantile ESS plots are recommended for checking
     that there are enough samples for all the explored regions of the
     parameter space. Checking local and quantile ESS is particularly
@@ -47,7 +47,7 @@ def plot_ess(
 
     Parameters
     ----------
-    idata : obj
+    idata : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details
     var_names : list of str, optional
@@ -61,13 +61,13 @@ def plot_ess(
     kind : {"local", "quantile", "evolution"}, default "local"
         Specify the kind of plot:
 
-           * The ``kind="local"`` argument generates the ESS' local efficiency for
-             estimating quantiles of a desired posterior. 
-           * The ``kind="quantile"`` argument generates the ESS' local efficiency
-             for estimating small-interval probability of a desired posterior.
-           * The ``kind="evolution"`` argument generates the estimated ESS'
-             with incrised number of iterations of a desired posterior.
-             
+        * The ``kind="local"`` argument generates the ESS' local efficiency for
+          estimating quantiles of a desired posterior.
+        * The ``kind="quantile"`` argument generates the ESS' local efficiency
+          for estimating small-interval probability of a desired posterior.
+        * The ``kind="evolution"`` argument generates the estimated ESS'
+          with incrised number of iterations of a desired posterior.
+
     relative : bool, default False
         Show relative ess in plot ``ress = ess / N``.
     coords : dict, optional
@@ -81,7 +81,7 @@ def plot_ess(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on `figsize`.
     rug : bool, default False
-        Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>` for a specific subset of values.
+        Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>`_ for a specific subset of values.
     rug_kind : str, default "diverging"
         Variable in sample stats to use as rug mask. Must be a boolean variable.
     n_points : int, default 20
@@ -113,11 +113,11 @@ def plot_ess(
         :func:`~matplotlib.axes.Axes.plot` or to :class:`~bokeh.plotting.figure.line`
     rug_kwargs : dict
         kwargs passed to rug plot.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.

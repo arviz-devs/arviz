@@ -23,9 +23,9 @@ def plot_autocorr(
     backend_kwargs=None,
     show=None,
 ):
-    """Bar plot of the autocorrelation function (ACF) for a sequence of data.
+    r"""Bar plot of the autocorrelation function (ACF) for a sequence of data.
 
-    The ACF plots are helpful as a convergence diagnostic for posteriors from MCMC 
+    The ACF plots are helpful as a convergence diagnostic for posteriors from MCMC
     samples which display autocorrelation.
 
     Parameters
@@ -42,7 +42,7 @@ def plot_autocorr(
         interpret `var_names` as regular expressions on the real variables names. See
         the :ref:`this section <common_filter_vars>` for usage examples.
     max_lag : int, optional
-        Maximum lag to calculate autocorrelation. By Default, the plot displays the 
+        Maximum lag to calculate autocorrelation. By Default, the plot displays the
         first 100 lag or the total number of draws, whichever is smaller.
     combined : bool, default False
         Flag for combining multiple chains into a single chain. If False, chains will be
@@ -62,13 +62,13 @@ def plot_autocorr(
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
     backend_config : dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
