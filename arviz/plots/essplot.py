@@ -136,8 +136,8 @@ def plot_ess(
 
     References
     ----------
-    .. [1] Vehtari et al. (2019). Rank-normalization, folding, and 
-        localization: An improved Rhat for assessing convergence of 
+    .. [1] Vehtari et al. (2019). Rank-normalization, folding, and
+        localization: An improved Rhat for assessing convergence of
         MCMC https://arxiv.org/abs/1903.08008
 
     Examples
