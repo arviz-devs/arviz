@@ -42,7 +42,7 @@ def plot_elpd(
         Use coords as xticklabels. Defaults to False.
     figsize : figure size tuple, optional
         If None, size is (8 + numvars, 8 + numvars).
-    textsize: int, optional
+    textsize : int, optional
         Text size for labels. If None it will be autoscaled based on ``figsize``.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
@@ -66,11 +66,11 @@ def plot_elpd(
         :class:`arviz.InferenceData`.
     plot_kwargs : dicts, optional
         Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter`.
-    ax: axes, optional
+    ax : axes, optional
         :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib", "bokeh"}. Defaults to "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`.

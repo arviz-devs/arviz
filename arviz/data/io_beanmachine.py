@@ -24,15 +24,23 @@ class BMConverter:
 
         if "posterior" in self.sampler.namespaces:
             self.posterior = self.sampler.namespaces["posterior"].samples
+        else:
+            self.posterior = None
 
         if "posterior_predictive" in self.sampler.namespaces:
             self.posterior_predictive = self.sampler.namespaces["posterior_predictive"].samples
+        else:
+            self.posterior_predictive = None
 
         if self.sampler.log_likelihoods is not None:
             self.log_likelihoods = self.sampler.log_likelihoods
+        else:
+            self.log_likelihoods = None
 
         if self.sampler.observations is not None:
             self.observations = self.sampler.observations
+        else:
+            self.observations = None
 
     @requires("posterior")
     def posterior_to_xarray(self):

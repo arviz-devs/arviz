@@ -36,59 +36,61 @@ def plot_bpv(
     group="posterior",
     show=None,
 ):
-    """
-    Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+    r"""Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
     Parameters
     ----------
-    data : az.InferenceData object
+    data : InferenceData
         :class:`arviz.InferenceData` object containing the observed and
         posterior/prior predictive data.
-    kind : str
-        Type of plot to display ("p_value", "u_value", "t_stat"). Defaults to u_value.
-        For "p_value" we compute p := p(y* ≤ y | y). This is the probability of the data y being
-        larger or equal than the predicted data y*. The ideal value is 0.5 (half the predictions
-        below and half above the data).
-        For "u_value" we compute pi := p(yi* ≤ yi | y). i.e. like a p_value but per observation yi.
-        This is also known as marginal p_value. The ideal distribution is uniform. This is similar
-        to the LOO-pit calculation/plot, the difference is than in LOO-pit plot we compute
-        pi = p(yi* r ≤ yi | y-i ), where y-i, is all other data except yi.
-        For "t_stat" we compute := p(T(y)* ≤ T(y) | y) where T is any test statistic. See t_stat
-        argument below for details of available options.
-    t_stat : str, float, or callable
+    kind : {"u_value", "p_value", "t_stat"}, default "u_value"
+        Specify the kind of plot:
+
+        * The ``kind="p_value"`` computes :math:`p := p(y* \leq y | y)`.
+          This is the probability of the data y being larger or equal than the predicted data y*.
+          The ideal value is 0.5 (half the predictions below and half above the data).
+        * The ``kind="u_value"`` argument computes :math:`p_i := p(y_i* \leq y_i | y)`.
+          i.e. like a p_value but per observation :math:`y_i`. This is also known as marginal
+          p_value. The ideal distribution is uniform. This is similar to the LOO-PIT
+          calculation/plot, the difference is than in LOO-pit plot we compute
+          :math:`pi = p(y_i* r \leq y_i | y_{-i} )`, where :math:`y_{-i}`,
+          is all other data except :math:`y_i`.
+        * The ``kind="t_stat"`` argument computes :math:`:= p(T(y)* \leq T(y) | y)`
+          where T is any test statistic. See ``t_stat`` argument below for details
+          of available options.
+
+    t_stat : str, float, or callable, default "median"
         Test statistics to compute from the observations and predictive distributions.
-        Allowed strings are "mean", "median" or "std". Defaults to "median".
-        Alternative a quantile can be passed as a float (or str) in the
-        interval (0, 1). Finally a user defined function is also
+        Allowed strings are “mean”, “median” or “std”. Alternative a quantile can be passed
+        as a float (or str) in the interval (0, 1). Finally a user defined function is also
         acepted, see examples section for details.
-    bpv : bool
-        If True (default) add the Bayesian p_value to the legend when ``kind = t_stat``.
-    plot_mean : bool
-        Whether or not to plot the mean test statistic. Defaults to True.
-    reference : str
-        How to compute the distributions used as reference for u_values or p_values. Allowed values
-        are "analytical" (default) and "samples". Use `None` to do not plot any reference.
-        Defaults to "samples".
-    mse :bool
+    bpv : bool, default True
+        If True add the Bayesian p_value to the legend when ``kind = t_stat``.
+    plot_mean : bool, default True
+        Whether or not to plot the mean test statistic.
+    reference : {"analytical", "samples", None}, default "analytical"
+        How to compute the distributions used as reference for ``kind=u_values``
+        or ``kind=p_values``. Use `None` to not plot any reference.
+    mse : bool, default False
         Show scaled mean square error between uniform distribution and marginal p_value
-        distribution. Defaults to False.
-    n_ref : int, optional
-        Number of reference distributions to sample when ``reference=samples``. Defaults to 100.
-    hdi_prob: float, optional
+        distribution.
+    n_ref : int, default 100
+        Number of reference distributions to sample when ``reference=samples``.
+    hdi_prob : float, optional
         Probability for the highest density interval for the analytical reference distribution when
-        computing u_values. Should be in the interval (0, 1]. Defaults to
-        0.94.
-    color : str
+        ``kind=u_values``. Should be in the interval (0, 1]. Defaults to the
+        rcParam ``stats.hdi_prob``.
+    color : str, optional
         Matplotlib color
-    grid : tuple
-        Number of rows and columns. Defaults to None, the rows and columns are
+    grid : tuple, optional
+        Number of rows and columns. By default, the rows and columns are
         automatically inferred.
-    figsize : tuple
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
-    textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on ``figsize``.
-    data_pairs : dict
+    textsize : float, optional
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on `figsize`.
+    data_pairs : dict, optional
         Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
 
@@ -98,33 +100,34 @@ def plot_bpv(
         For example, ``data_pairs = {'y' : 'y_hat'}``
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
-    labeller : labeller instance, optional
+    Labeller : Labeller, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    var_names : list of variable names
-        Variables to be plotted, if `None` all variable are plotted. Prefix the variables by ``~``
-        when you want to exclude them from the plot.
-    filter_vars : {None, "like", "regex"}, optional, default=None
-        If `None` (default), interpret var_names as the real variables names. If "like",
-        interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. A la
-        ``pandas.filter``.
-    coords : dict
+    var_names : list of str, optional
+        Variables to be plotted. If `None` all variable are plotted. Prefix the variables by ``~``
+        when you want to exclude them from the plot. See the :ref:`this section <common_var_names>`
+        for usage examples.
+    filter_vars : {None, "like", "regex"}, default None
+        If `None` (default), interpret `var_names` as the real variables names. If "like",
+        interpret `var_names` as substrings of the real variables names. If "regex",
+        interpret `var_names` as regular expressions on the real variables names. See
+        the :ref:`this section <common_filter_vars>` for usage examples.
+    coords : dict, optional
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension. Defaults to including all coordinates for all
         dimensions if None.
-    flatten : list
+    flatten : list, optional
         List of dimensions to flatten in observed_data. Only flattens across the coordinates
         specified in the coords argument. Defaults to flattening all of the dimensions.
-    flatten_pp : list
+    flatten_pp : list, optional
         List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
         across the coordinates specified in the coords argument. Defaults to flattening all
         of the dimensions. Dimensions should match flatten excluding dimensions for data_pairs
         parameters. If flatten is defined and flatten_pp is None, then ``flatten_pp=flatten``.
-    legend : bool
-        Add legend to figure. By default True.
-    ax : numpy array-like of matplotlib axes or bokeh figures, optional
+    legend : bool, default True
+        Add legend to figure.
+    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend : str, optional
@@ -136,18 +139,18 @@ def plot_bpv(
         and ``reference=analytical``).
     backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`. For additional documentation
-        check the plotting method of the backend.
-    group : {"prior", "posterior"}, optional
-        Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
-        Other value can be 'prior'.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
+    group : {"posterior", "prior"}, default "posterior"
+        Specifies which InferenceData group should be plotted.  If "posterior", then the values
+        in `posterior_predictive` group are compared to the ones in `observed_data`, if "prior" then
+        the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes: matplotlib axes or bokeh figures
+    axes : 2D ndarray of matplotlib_axes or bokeh_figure
 
     See Also
     --------

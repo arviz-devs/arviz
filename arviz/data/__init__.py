@@ -12,7 +12,6 @@ from .io_json import from_json
 from .io_netcdf import from_netcdf, to_netcdf
 from .io_numpyro import from_numpyro
 from .io_pyjags import from_pyjags
-from .io_pymc3 import from_pymc3, from_pymc3_predictions
 from .io_pyro import from_pyro
 from .io_pystan import from_pystan
 from .utils import extract, extract_dataset
@@ -31,8 +30,6 @@ __all__ = [
     "convert_to_inference_data",
     "from_beanmachine",
     "from_pyjags",
-    "from_pymc3",
-    "from_pymc3_predictions",
     "from_pystan",
     "from_emcee",
     "from_cmdstan",

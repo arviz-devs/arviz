@@ -23,59 +23,59 @@ def plot_autocorr(
     backend_kwargs=None,
     show=None,
 ):
-    """Bar plot of the autocorrelation function for a sequence of data.
+    r"""Bar plot of the autocorrelation function (ACF) for a sequence of data.
 
-    Useful in particular for posteriors from MCMC samples which may display correlation.
+    The ACF plots are helpful as a convergence diagnostic for posteriors from MCMC
+    samples which display autocorrelation.
 
     Parameters
     ----------
-    data: obj
+    data : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
         refer to documentation of :func:`arviz.convert_to_dataset` for details
-    var_names: list of variable names, optional
-        Variables to be plotted, if None all variables are plotted. Prefix the
-        variables by ``~`` when you want to exclude them from the plot. Vector-value
-        stochastics are handled automatically.
-    filter_vars: {None, "like", "regex"}, optional, default=None
-        If `None` (default), interpret var_names as the real variables names. If "like",
-        interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. A la
-        ``pandas.filter``.
-    max_lag: int, optional
-        Maximum lag to calculate autocorrelation. Defaults to 100 or num draws,
-        whichever is smaller.
-    combined: bool, default=False
+    var_names : list of str, optional
+        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
+        them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
+    filter_vars : {None, "like", "regex"}, default None
+        If `None` (default), interpret `var_names` as the real variables names. If "like",
+        interpret `var_names` as substrings of the real variables names. If "regex",
+        interpret `var_names` as regular expressions on the real variables names. See
+        the :ref:`this section <common_filter_vars>` for usage examples.
+    max_lag : int, optional
+        Maximum lag to calculate autocorrelation. By Default, the plot displays the
+        first 100 lag or the total number of draws, whichever is smaller.
+    combined : bool, default False
         Flag for combining multiple chains into a single chain. If False, chains will be
         plotted separately.
-    grid : tuple
+    grid : tuple, optional
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize: tuple
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
         Note this is not used if ``ax`` is supplied.
-    textsize: float
+    textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``.
-    labeller : labeller instance, optional
+        on `figsize`.
+    labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_config: dict, optional
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_config : dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
-    backend_kwargs: dict, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`.
-    show: bool, optional
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
+    show : bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes: matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figures
 
     See Also
     --------

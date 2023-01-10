@@ -1,6 +1,7 @@
 """Plot regression figure."""
 import warnings
 from numbers import Integral
+from itertools import repeat
 
 import xarray as xr
 import numpy as np
@@ -9,6 +10,10 @@ from xarray.core.dataarray import DataArray
 from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
+
+
+def _repeat_flatten_list(lst, n):
+    return [item for sublist in repeat(lst, n) for item in sublist]
 
 
 def plot_lm(
@@ -86,15 +91,15 @@ def plot_lm(
         These are kwargs specific to the backend being used. Passed to
         :func:`matplotlib.pyplot.subplots` or
         :func:`bokeh.plotting.figure`.
-    figsize : tuple, optional
+    figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on ``figsize``.
-    axes : numpy array-like of matplotlib axes or bokeh figures, optional
+    axes : 2D numpy array-like of matplotlib_axes or bokeh_figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    show: bool, optional
+    show : bool, optional
         Call backend show function.
     legend : bool, optional
         Add legend to figure. By default True.
@@ -268,8 +273,8 @@ def plot_lm(
     len_y = len(y)
     len_x = len(x)
     length_plotters = len_x * len_y
-    y = np.tile(y, (len_x, 1))
-    x = np.tile(x, (len_y, 1))
+    y = _repeat_flatten_list(y, len_x)
+    x = _repeat_flatten_list(x, len_y)
 
     # Filter out the required values to generate plotters
     if y_hat is not None:
@@ -289,7 +294,7 @@ def plot_lm(
             )
         ]
 
-        y_hat = np.tile(y_hat, (len_x, 1))
+        y_hat = _repeat_flatten_list(y_hat, len_x)
 
     # Filter out the required values to generate plotters
     if y_model is not None:
@@ -307,7 +312,7 @@ def plot_lm(
                 ),
             )
         ]
-        y_model = np.tile(y_model, (len_x, 1))
+        y_model = _repeat_flatten_list(y_model, len_x)
 
     rows, cols = default_grid(length_plotters)
 

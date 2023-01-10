@@ -486,18 +486,50 @@ def pystan_noncentered_schools(data, draws, chains):
     return stan_model, fit
 
 
-def pymc3_noncentered_schools(data, draws, chains):
-    """Non-centered eight schools implementation for pymc3."""
-    import pymc3 as pm
+def bm_schools_model(data, draws, chains):
+    import beanmachine.ppl as bm
+    import torch
+    import torch.distributions as dist
 
-    with pm.Model() as model:
-        mu = pm.Normal("mu", mu=0, sd=5)
-        tau = pm.HalfCauchy("tau", beta=5)
-        eta = pm.Normal("eta", mu=0, sd=1, shape=data["J"])
-        theta = pm.Deterministic("theta", mu + tau * eta)
-        pm.Normal("obs", mu=theta, sd=data["sigma"], observed=data["y"])
-        trace = pm.sample(draws, chains=chains)
-    return model, trace
+    class EightSchools:
+        @bm.random_variable
+        def mu(self):
+            return dist.Normal(0, 5)
+
+        @bm.random_variable
+        def tau(self):
+            return dist.HalfCauchy(5)
+
+        @bm.random_variable
+        def eta(self):
+            return dist.Normal(0, 1).expand((data["J"],))
+
+        @bm.functional
+        def theta(self):
+            return self.mu() + self.tau() * self.eta()
+
+        @bm.random_variable
+        def obs(self):
+            return dist.Normal(self.theta(), torch.from_numpy(data["sigma"]).float())
+
+    model = EightSchools()
+
+    prior = bm.GlobalNoUTurnSampler().infer(
+        queries=[model.mu(), model.tau(), model.eta()],
+        observations={},
+        num_samples=draws,
+        num_adaptive_samples=500,
+        num_chains=chains,
+    )
+
+    posterior = bm.GlobalNoUTurnSampler().infer(
+        queries=[model.mu(), model.tau(), model.eta()],
+        observations={model.obs(): torch.from_numpy(data["y"]).float()},
+        num_samples=draws,
+        num_adaptive_samples=500,
+        num_chains=chains,
+    )
+    return model, prior, posterior
 
 
 def library_handle(library):
@@ -513,14 +545,14 @@ def library_handle(library):
 
 
 def load_cached_models(eight_schools_data, draws, chains, libs=None):
-    """Load pymc3, pystan, emcee, and pyro models from pickle."""
+    """Load pystan, emcee, and pyro models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
     supported = (
         ("pystan", pystan_noncentered_schools),
-        ("pymc3", pymc3_noncentered_schools),
         ("emcee", emcee_schools_model),
         ("pyro", pyro_noncentered_schools),
         ("numpyro", numpyro_schools_model),
+        ("beanmachine", bm_schools_model),
     )
     data_directory = os.path.join(here, "saved_models")
     models = {}

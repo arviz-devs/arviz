@@ -5,14 +5,22 @@
 ### New features
 - Adds Savage-Dickey density ratio plot for Bayes factor approximation. ([2037](https://github.com/arviz-devs/arviz/pull/2037), [2152](https://github.com/arviz-devs/arviz/pull/2152))
 - Add `CmdStanPySamplingWrapper` and `PyMCSamplingWrapper` classes ([2158](https://github.com/arviz-devs/arviz/pull/2158))
+- Changed dependency on netcdf4-python to h5netcdf  ([2122](https://github.com/arviz-devs/arviz/pull/2122))
 
 ### Maintenance and fixes
 - Fix `reloo` outdated usage of `ELPDData` ([2158](https://github.com/arviz-devs/arviz/pull/2158))
+- plot_bpv smooth discrete data only when computing u_values ([2179](https://github.com/arviz-devs/arviz/pull/2179))
+- Fix bug when beanmachine objects lack some fields ([2154](https://github.com/arviz-devs/arviz/pull/2154))
+- Fix gap for `plot_trace` with option `kind="rank_bars"` ([2180](https://github.com/arviz-devs/arviz/pull/2180))
+- Fix `plot_lm` unsupported usage of `np.tile` ([2186](https://github.com/arviz-devs/arviz/pull/2186))
+- Update `_z_scale` to work with SciPy 1.10 ([2186](https://github.com/arviz-devs/arviz/pull/2186))
 
 ### Deprecation
 
 ### Documentation
 - Add PyMC and CmdStanPy sampling wrapper examples ([2158](https://github.com/arviz-devs/arviz/pull/2158))
+- Fix docstring for plot_trace chain_prop and compact_prop parameters ([2176](https://github.com/arviz-devs/arviz/pull/2176))
+- Add video of contributing to ArviZ webinar in contributing guide ([2184](https://github.com/arviz-devs/arviz/pull/2184))
 
 ## v0.14.0 (2022 Nov 15)
 
@@ -23,6 +31,7 @@
 
 ### Maintenance and fixes
 - Fix dimension ordering for `plot_trace` with divergences ([2151](https://github.com/arviz-devs/arviz/pull/2151))
+
 
 ## v0.13.0 (2022 Oct 22)
 

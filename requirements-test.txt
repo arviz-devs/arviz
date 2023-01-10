@@ -1,0 +1,6 @@
+pytest
+pytest-cov
+cloudpickle
+
+-r requirements-optional.txt
+-r requirements-external.txt

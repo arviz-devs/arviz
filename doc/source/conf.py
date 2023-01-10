@@ -59,6 +59,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_codeautolink",
     "jupyter_sphinx",
+    "sphinxcontrib.youtube",
 ]
 
 # codeautolink
@@ -94,6 +95,20 @@ myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 # copybutton config: strip console characters
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
 copybutton_prompt_is_regexp = True
+# numpydoc configuration
+autodoc_typehints = "none"
+numpydoc_xref_param_type = True
+numpydoc_xref_ignore = {
+    "of", "or", "optional", "default", "1D", "2D", "3D", "n-dimensional", "M", "N", "K",
+}
+numpydoc_xref_aliases = {
+    "Labeller": ":ref:`Labeller <labeller_api>`",
+    "ndarray": ":class:`~numpy.ndarray`",
+    "InferenceData": ":class:`~arviz.InferenceData`",
+    "matplotlib_axes": ":class:`matplotlib Axes <matplotlib.axes.Axes>`",
+    "bokeh_figure": ":class:`Bokeh Figure <bokeh.plotting.figure>`",
+
+}
 
 # The base toctree document.
 master_doc = "index"
@@ -157,21 +172,27 @@ html_theme_options = {
         "image_light": "logo.png",
         "image_dark": "logo_dark.png",
     },
+    # https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/header-links.html#fontawesome-icons
     "icon_links": [
         {
             "name": "GitHub",
             "url": "https://github.com/arviz-devs/arviz",
-            "icon": "fab fa-github-square",
+            "icon": "fa-brands fa-github",
         },
         {
             "name": "Twitter",
             "url": "https://twitter.com/arviz_devs",
-            "icon": "fab fa-twitter-square",
+            "icon": "fa-brands fa-twitter",
+        },
+        {
+            "name": "Mastodon",
+            "url": "https://bayes.club/@ArviZ",
+            "icon": "fa-brands fa-mastodon",
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
     "header_links_before_dropdown": 7,
-    "page_sidebar_items": ["page-toc", "edit-this-page", "donate"],
+    "secondary_sidebar_items": ["page-toc", "searchbox", "edit-this-page", "sourcelink", "donate"],
     "use_edit_page_button": True,
     "google_analytics_id": "G-W1G68W77YV",
     "external_links": [
@@ -303,6 +324,7 @@ intersphinx_mapping = {
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
     "diataxis": ("https://diataxis.fr/", None),
     "arviz_org": ("https://www.arviz.org/en/latest/", None),
+    "python": ("https://docs.python.org/3/", None),
 }
 
 

@@ -24,7 +24,6 @@ from typing import (
     overload,
 )
 
-import netCDF4 as nc
 import numpy as np
 import xarray as xr
 from packaging import version
@@ -337,7 +336,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         return InferenceData.InferenceDataItemsView(self)
 
     @staticmethod
-    def from_netcdf(filename, group_kwargs=None, regex=False) -> "InferenceData":
+    def from_netcdf(
+        filename, *, engine="h5netcdf", group_kwargs=None, regex=False
+    ) -> "InferenceData":
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
@@ -349,6 +350,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         filename : str
             location of netcdf file
+        engine : {"h5netcdf", "netcdf4"}, default "h5netcdf"
+            Library used to read the netcdf file.
         group_kwargs : dict of {str: dict}, optional
             Keyword arguments to be passed into each call of :func:`xarray.open_dataset`.
             The keys of the higher level should be group names or regex matching group
@@ -360,16 +363,29 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Returns
         -------
-        InferenceData object
+        InferenceData
         """
         groups = {}
         attrs = {}
 
+        if engine == "h5netcdf":
+            import h5netcdf
+        elif engine == "netcdf4":
+            import netCDF4 as nc
+        else:
+            raise ValueError(
+                f"Invalid value for engine: {engine}. Valid options are: h5netcdf or netcdf4"
+            )
+
         try:
-            with nc.Dataset(filename, mode="r") as data:
+            with h5netcdf.File(filename, mode="r") if engine == "h5netcdf" else nc.Dataset(
+                filename, mode="r"
+            ) as data:
                 data_groups = list(data.groups)
 
             for group in data_groups:
+                group_kws = {}
+
                 group_kws = {}
                 if group_kwargs is not None and regex is False:
                     group_kws = group_kwargs.get(group, {})
@@ -377,13 +393,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     for key, kws in group_kwargs.items():
                         if re.search(key, group):
                             group_kws = kws
+                group_kws.setdefault("engine", engine)
                 with xr.open_dataset(filename, group=group, **group_kws) as data:
                     if rcParams["data.load"] == "eager":
                         groups[group] = data.load()
                     else:
                         groups[group] = data
 
-            with xr.open_dataset(filename, mode="r") as data:
+            with xr.open_dataset(filename, engine=engine) as data:
                 attrs.update(data.load().attrs)
 
             return InferenceData(attrs=attrs, **groups)
@@ -402,9 +419,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise err
 
     def to_netcdf(
-        self, filename: str, compress: bool = True, groups: Optional[List[str]] = None
+        self,
+        filename: str,
+        compress: bool = True,
+        groups: Optional[List[str]] = None,
+        engine: str = "h5netcdf",
     ) -> str:
-        """Write InferenceData to file using netcdf4.
+        """Write InferenceData to netcdf4 file.
 
         Parameters
         ----------
@@ -415,6 +436,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
             saving and loading somewhat slower (default: True).
         groups : list, optional
             Write only these groups to netcdf file.
+        engine : {"h5netcdf", "netcdf4"}, default "h5netcdf"
+            Library used to read the netcdf file.
 
         Returns
         -------
@@ -423,7 +446,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         mode = "w"  # overwrite first, then append
         if self._attrs:
-            xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode)
+            xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode, engine=engine)
             mode = "a"
 
         if self._groups_all:  # check's whether a group is present or not.
@@ -434,7 +457,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             for group in groups:
                 data = getattr(self, group)
-                kwargs = {}
+                kwargs = {"engine": engine}
                 if compress:
                     kwargs["encoding"] = {
                         var_name: {"zlib": True}
@@ -445,7 +468,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 data.close()
                 mode = "a"
         elif not self._attrs:  # creates a netcdf file for an empty InferenceData object.
-            empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
+            if engine == "h5netcdf":
+                import h5netcdf
+
+                empty_netcdf_file = h5netcdf.File(filename, mode="w")
+            elif engine == "netcdf4":
+                import netCDF4 as nc
+
+                empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
             empty_netcdf_file.close()
         return filename
 
@@ -1029,11 +1059,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
-            kwarg_dict = {
-                key: value
-                for key, value in dimensions.items()
-                if not set(value).difference(dataset.dims)
-            }
+            kwarg_dict = {}
+            for key, value in dimensions.items():
+                try:
+                    if not set(value).difference(dataset.dims):
+                        kwarg_dict[key] = value
+                except TypeError:
+                    kwarg_dict[key] = value
             dataset = dataset.stack(**kwarg_dict)
             setattr(out, group, dataset)
         if inplace:
