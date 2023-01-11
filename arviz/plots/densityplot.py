@@ -68,7 +68,7 @@ def plot_density(
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
         See the :ref:`this section <common_combine_dims>` for usage examples.
     transform : callable
-        Function to transform data (defaults to None i.e. the identity function)
+        Function to transform data (defaults to `None` i.e. the identity function).
     hdi_prob : float, default 0.94
         Probability for the highest density interval. Should be in the interval (0, 1].
     point_estimate : str, optional
@@ -98,12 +98,12 @@ def plot_density(
         If True, it interprets the values passed are from a circular variable measured in radians
         and a circular KDE is used. Only valid for 1D KDE.
     grid : tuple, optional
-        Number of rows and columns. Defaults to None, the rows and columns are
+        Number of rows and columns. Defaults to `None`, the rows and columns are
         automatically inferred.
     figsize : (float, float), optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If `None` it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
         on `figsize`.
     labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.

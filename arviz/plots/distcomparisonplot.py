@@ -44,13 +44,13 @@ def plot_dist_comparison(
         and the "observed" option includes
         {"observed_data", "prior_predictive", "posterior_predictive"}.
     figsize : (float, float), optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If `None` it will be defined automatically.
     textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be
+        Text size scaling factor for labels, titles and lines. If `None` it will be
         autoscaled based on `figsize`.
     var_names : list of str, optional
         List of variables to plot.  If multiple datasets are supplied and `var_names` is not None,
-        will print the same set of variables for each dataset.  Defaults to None, which results in
+        will print the same set of variables for each dataset.  Defaults to `None`, which results in
         all the variables being plotted.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
@@ -60,7 +60,7 @@ def plot_dist_comparison(
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
         See :ref:`this section <common_combine_dims>` for usage examples.
     transform : callable
-        Function to transform data (defaults to None i.e. the identity function)
+        Function to transform data (defaults to `None` i.e. the identity function).
     legend : bool
         Add legend to figure. By default True.
     labeller : Labeller, optional

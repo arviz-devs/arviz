@@ -51,11 +51,11 @@ def plot_compare(
     legend : bool, default True
         Add legend to figure.
     figsize : (float, float), optional
-        If None, size is (6, num of models) inches.
+        If `None`, size is (6, num of models) inches.
     title : bool, default True
         Show a tittle with a description of how to interpret the plot.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
         on `figsize`.
     labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
@@ -88,7 +88,7 @@ def plot_compare(
     
     References
     ----------
-    .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out 
+    .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
         cross-validation and WAIC https://arxiv.org/abs/1507.04544
 
     Examples
