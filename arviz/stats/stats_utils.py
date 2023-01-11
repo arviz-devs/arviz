@@ -572,3 +572,22 @@ def smooth_data(obs_vals, pp_vals):
     pp_vals = csi(np.linspace(0.01, 0.99, pp_vals.shape[1]))
 
     return obs_vals, pp_vals
+
+
+def get_log_prior(idata, var_name=None):
+    """Retrieve the log prior dataarray of a given variable."""
+    if not hasattr(idata, "log_prior"):
+        raise TypeError("log prior not found in inference data object")
+    if var_name is None:
+        var_names = list(idata.log_prior.data_vars)
+        if len(var_names) > 1:
+            raise TypeError(
+                f"Found several log prior arrays {var_names}, var_name cannot be None"
+            )
+        return idata.log_prior[var_names[0]]
+    else:
+        try:
+            log_prior = idata.log_prior[var_name]
+        except KeyError as err:
+            raise TypeError(f"No log prior data named {var_name} found") from err
+        return log_prior
