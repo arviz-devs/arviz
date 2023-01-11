@@ -37,42 +37,40 @@ def plot_density(
     backend_kwargs=None,
     show=None,
 ):
-    """Generate KDE plots for continuous variables and histograms for discrete ones.
+    r"""Generate KDE plots for continuous variables and histograms for discrete ones.
 
     Plots are truncated at their 100*(1-alpha)% highest density intervals. Plots are grouped per
     variable and colors assigned to models.
 
     Parameters
     ----------
-    data : object or iterable of object
+    data : InferenceData or iterable of object
         Any object that can be converted to an :class:`arviz.InferenceData` object, or an Iterator
         returning a sequence of such objects.
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details about such objects.
-    group : str, optional
-        Specifies which :class:`arviz.InferenceData` group should be plotted.
-        Defaults to 'posterior'.
-        Alternative values include 'prior' and any other strings used as dataset keys in the
-        :class:`arviz.InferenceData`.
-    data_labels : list of str, optional
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
+    group : {"posterior", "prior"}, default "posterior"
+        Specifies which InferenceData group should be plotted. If "posterior", then the values
+        in `posterior_predictive` group are compared to the ones in `observed_data`, if "prior" then
+        the same comparison happens, but with the values in `prior_predictive` group.
+    data_labels : list of str, default None
         List with names for the datasets passed as "data." Useful when plotting more than one
-        dataset.  Must be the same shape as the data parameter.  Defaults to None.
+        dataset.  Must be the same shape as the data parameter.
     var_names : list of str, optional
-        List of variables to plot.  If multiple datasets are supplied and var_names is not None,
+        List of variables to plot.  If multiple datasets are supplied and `var_names` is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
-    filter_vars : {None, "like", "regex"}, default=None
-        If `None` (default), interpret var_names as the real variables names. If "like",
-        interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. A la
-        ``pandas.filter``.
+    filter_vars : {None, "like", "regex"}, default None
+        If `None` (default), interpret `var_names` as the real variables names. If "like",
+        interpret `var_names` as substrings of the real variables names. If "regex",
+        interpret `var_names` as regular expressions on the real variables names. See
+        the :ref:`this section <common_filter_vars>` for usage examples.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
         See the :ref:`this section <common_combine_dims>` for usage examples.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
-    hdi_prob : float
+    hdi_prob : float, default 0.94
         Probability for the highest density interval. Should be in the interval (0, 1].
-        Defaults to 0.94.
     point_estimate : str, optional
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in ``rcParams``.
@@ -81,14 +79,14 @@ def plot_density(
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
         cycle. If a single color is passed, e.g. 'k', 'C2' or 'red' this color will be used for all
         models. Defaults to `cycle`.
-    outline : bool
-        Use a line to draw KDEs and histograms. Default to True
+    outline : bool, default True
+        Use a line to draw KDEs and histograms.
     hdi_markers : str
         A valid `matplotlib.markers` like 'v', used to indicate the limits of the highest density
         interval. Defaults to empty string (no marker).
-    shade : float, optional
+    shade : float, default 0
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
-        (opaque). Defaults to 0.
+        (opaque).
     bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
@@ -96,28 +94,28 @@ def plot_density(
         and "taylor" (for now) when `circular` is True.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
-    circular : bool, optional
+    circular : bool, default False
         If True, it interprets the values passed are from a circular variable measured in radians
-        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
-    grid : tuple
+        and a circular KDE is used. Only valid for 1D KDE.
+    grid : tuple, optional
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
     figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``.
+        on `figsize`.
     labeller : Labeller, optional
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        A 2D array of locations into which to plot the densities. If not supplied, ArviZ will create
         its own array of plot areas (and return it).
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
