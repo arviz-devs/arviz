@@ -37,7 +37,7 @@ def plot_compare(
     Parameters
     ----------
     comp_df : pandas.DataFrame
-        Result of the :func:`arviz.compare` method
+        Result of the :func:`arviz.compare` method.
     insample_dev : bool, default False
         Plot in-sample ELPD, that is the value of the information criteria without the
         penalization given by the effective number of parameters (p_loo or p_waic).
