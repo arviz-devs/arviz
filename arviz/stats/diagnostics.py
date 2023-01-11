@@ -9,7 +9,7 @@ import pandas as pd
 import scipy
 from scipy import stats
 
-from ..data import convert_to_dataset, extract
+from ..data import convert_to_dataset
 from ..utils import Numba, _numba_var, _stack, _var_names
 from .density_utils import histogram as _histogram
 from .stats_utils import _circular_standard_deviation, _sqrt
@@ -1004,5 +1004,3 @@ def _multichain_statistics(ary, focus="mean"):
         ess_tail_value,
         rhat_value,
     )
-
-

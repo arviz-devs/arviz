@@ -2143,8 +2143,10 @@ def psens(data, *, component, selection=None, component_var_name=None, var_names
 
     Notes
     -----
-    The diagnostic is computed by power-scaling the specified component (prior or likelihood)
-    and determining the degree to which the posterior changes as described in [1]_. It uses Pareto-smoothed
+    The diagnostic is computed by power-scaling the specified component
+    (prior or likelihood)
+    and determining the degree to which the posterior changes as described in [1]_.
+    It uses Pareto-smoothed
     importance sampling to avoid refitting the model.
 
     References
@@ -2253,7 +2255,7 @@ def _cjs_dist(draws, weights):
 
     cjs_qp = np.sum(
         binwidth * (
-        cdf_q * (np.log2(cdf_q) - denom))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
+        cdf_q * (qp_numer - denom))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
 
     cjs_pq = max(0, cjs_pq)
     cjs_qp = max(0, cjs_qp)
