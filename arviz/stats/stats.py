@@ -30,6 +30,7 @@ from .density_utils import kde as _kde
 from .diagnostics import _mc_error, _multichain_statistics, ess
 from .stats_utils import ELPDData, _circular_standard_deviation, smooth_data
 from .stats_utils import get_log_likelihood as _get_log_likelihood
+from .stats_utils import get_log_prior as _get_log_prior
 from .stats_utils import logsumexp as _logsumexp
 from .stats_utils import make_ufunc as _make_ufunc
 from .stats_utils import stats_variance_2d as svar
@@ -51,6 +52,7 @@ __all__ = [
     "waic",
     "weight_predictions",
     "_calculate_ics",
+    "psens"
 ]
 
 
@@ -2113,3 +2115,149 @@ def weight_predictions(idatas, weights=None):
     )
 
     return weighted_samples
+
+
+def psens(data, *, component, selection=None, component_var_name=None, var_names=None, filter_vars=None, delta=0.01, dask_kwargs=None):
+    """Compute power-scaling sensitivity diagnostic.
+
+    Power-scales the prior or likelihood and calculates how much the posterior is affected.
+
+    Parameters
+    ----------
+    data : obj
+        Any object that can be converted to an :class:`arviz.InferenceData` object.
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
+        For ndarray: shape = (chain, draw).
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+    var_names : list of str, optional
+        Names of variables to include in the power scaling sensitivity diagnostic
+    delta : float
+        Value for finite difference derivative calculation.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
+
+    Returns
+    -------
+    xarray.Dataset
+      Returns dataset of power-scaling sensitivity diagnostic values.
+
+    Notes
+    -----
+    The diagnostic is computed by power-scaling the specified component (prior or likelihood)
+    and determining the degree to which the posterior changes as described in [1]_. It uses Pareto-smoothed
+    importance sampling to avoid refitting the model.
+
+    References
+    ----------
+    .. [1] Kallioinen et al, *Detecting and diagnosing prior and likelihood sensitivity with
+       power-scaling*, 2022, https://arxiv.org/abs/2107.14054
+
+    """
+    dataset = extract(data, var_names=var_names, filter_vars=filter_vars, group="posterior")
+
+    if component == "likelihood":
+        component_draws = _get_log_likelihood(data, var_name=component_var_name)
+    elif component == "prior":
+        component_draws = _get_log_prior(data, var_name=component_var_name)
+
+    component_draws = np.array(component_draws.stack(__sample__=("chain", "draw")))
+
+    if len(component_draws.shape) > 1:
+        if selection is not None:
+            component_draws = np.sum(component_draws[selection, :], axis=0)
+        else:
+            component_draws = np.sum(component_draws, axis=0)
+
+    # calculate lower and upper alpha values
+    lower_alpha = 1 / (1 + delta)
+    upper_alpha = 1 + delta
+
+    # calculate importance sampling weights for lower and upper alpha power-scaling
+    lower_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=lower_alpha))
+    lower_w = lower_w / np.sum(lower_w)
+
+    upper_w = np.exp(_powerscale_lw(component_draws=component_draws, alpha=upper_alpha))
+    upper_w = upper_w / np.sum(upper_w)
+
+    ufunc_kwargs = {"n_dims": 1, "ravel": False}
+    func_kwargs = {
+        "lower_weights": lower_w,
+        "upper_weights": upper_w,
+        "delta": delta
+    }
+
+    # calculate the sensitivity diagnostic based on the importance weights and draws
+    return _wrap_xarray_ufunc(
+        _powerscale_sens,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
+        input_core_dims=[["sample"]],
+    )
+
+
+def _powerscale_sens(draws, *, lower_weights=None, upper_weights=None, delta=0.01):
+    """
+    Calculate power-scaling sensitivity by finite difference second derivative of CJS
+    """
+    lower_cjs = _cjs_dist(draws=draws, weights=lower_weights)
+    upper_cjs = _cjs_dist(draws=draws, weights=upper_weights)
+
+    logdiffsquare = 2 * np.log2(1 + delta)
+    grad = (lower_cjs + upper_cjs) / logdiffsquare
+
+    return grad
+
+
+def _powerscale_lw(alpha, component_draws):
+    """
+    Calculate log weights for power-scaling component by alpha.
+    """
+    log_weights = (alpha - 1) * component_draws
+    log_weights = psislw(log_weights)[0]
+
+    return log_weights
+
+
+def _cjs_dist(draws, weights):
+    """
+    Calculate the cumulative Jensen-Shannon distance between original draws and weighted draws.
+    """
+
+    # sort draws and weights
+    order = np.argsort(draws)
+    draws = draws[order]
+    weights = weights[order]
+
+    binwidth = np.diff(draws)
+
+    # ecdfs
+    cdf_p = np.linspace(1 / len(draws), 1 - 1 / len(draws), len(draws) - 1)
+    cdf_q = np.cumsum(weights/np.sum(weights))[:-1]
+
+    # integrals of ecdfs
+    cdf_p_int = np.dot(cdf_p, binwidth)
+    cdf_q_int = np.dot(cdf_q, binwidth)
+
+    # cjs calculation
+    pq_numer = np.log2(cdf_p, out=np.zeros_like(cdf_p), where=(cdf_p != 0))
+    qp_numer = np.log2(cdf_q, out=np.zeros_like(cdf_q), where=(cdf_q != 0))
+
+    denom = 0.5 * (cdf_p + cdf_q)
+    denom = np.log2(denom, out=np.zeros_like(denom), where=(denom != 0))
+
+    cjs_pq = np.sum(
+        binwidth * (
+        cdf_p * (pq_numer - denom))) + 0.5 / np.log(2) * (cdf_q_int - cdf_p_int)
+
+    cjs_qp = np.sum(
+        binwidth * (
+        cdf_q * (np.log2(cdf_q) - denom))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
+
+    cjs_pq = max(0, cjs_pq)
+    cjs_qp = max(0, cjs_qp)
+
+    bound = cdf_p_int + cdf_q_int
+
+    return np.sqrt((cjs_pq + cjs_qp) / bound)
