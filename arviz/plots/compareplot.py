@@ -84,7 +84,7 @@ def plot_compare(
     compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
     loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
     waic : Compute the widely applicable information criterion.
-    
+
     References
     ----------
     .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
