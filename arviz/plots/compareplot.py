@@ -33,7 +33,6 @@ def plot_compare(
     This plot is in the style of the one used in the book Statistical Rethinking by
     Richard McElreath.Chapter 6 in the first edition or 7 in the second.
 
-
     Parameters
     ----------
     comp_df : pandas.DataFrame
@@ -89,7 +88,7 @@ def plot_compare(
     References
     ----------
     .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
-        cross-validation and WAIC https://arxiv.org/abs/1507.04544
+    cross-validation and WAIC https://arxiv.org/abs/1507.04544
 
     Examples
     --------
