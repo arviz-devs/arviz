@@ -97,7 +97,7 @@ def plot_ess(
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        A 2D array of locations into which to plot the densities. If not supplied, ArviZ will create
         its own array of plot areas (and return it).
     extra_kwargs : dict, optional
         If evolution plot, `extra_kwargs` is used to plot ess tail and differentiate it
@@ -124,7 +124,7 @@ def plot_ess(
     **kwargs
         Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or
         :meth:`mpl:matplotlib.axes.Axes.plot` function depending on the
-        value of ``kind``.
+        value of `kind`.
 
     Returns
     -------
@@ -136,7 +136,9 @@ def plot_ess(
 
     References
     ----------
-    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    .. [1] Vehtari et al. (2019). Rank-normalization, folding, and
+        localization: An improved Rhat for assessing convergence of
+        MCMC https://arxiv.org/abs/1903.08008
 
     Examples
     --------

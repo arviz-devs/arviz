@@ -124,14 +124,14 @@ def plot_bpv(
         List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
         across the coordinates specified in the coords argument. Defaults to flattening all
         of the dimensions. Dimensions should match flatten excluding dimensions for data_pairs
-        parameters. If flatten is defined and flatten_pp is None, then ``flatten_pp=flatten``.
+        parameters. If `flatten` is defined and `flatten_pp` is None, then ``flatten_pp=flatten``.
     legend : bool, default True
         Add legend to figure.
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        A 2D array of locations into which to plot the densities. If not supplied, ArviZ will create
         its own array of plot areas (and return it).
     backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Select plotting backend {"matplotlib", "bokeh"}. Default "matplotlib".
     plot_ref_kwargs :  dict, optional
         Extra keyword arguments to control how reference is represented.
         Passed to :meth:`matplotlib.axes.Axes.plot` or
@@ -142,7 +142,7 @@ def plot_bpv(
         :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     group : {"posterior", "prior"}, default "posterior"
-        Specifies which InferenceData group should be plotted.  If "posterior", then the values
+        Specifies which InferenceData group should be plotted. If "posterior", then the values
         in `posterior_predictive` group are compared to the ones in `observed_data`, if "prior" then
         the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional
