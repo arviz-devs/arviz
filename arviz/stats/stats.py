@@ -2203,9 +2203,10 @@ def _powerscale_sens(draws, *, lower_weights=None, upper_weights=None, delta=0.0
     """
     Calculate power-scaling sensitivity by finite difference second derivative of CJS
     """
-    lower_cjs = _cjs_dist(draws=draws, weights=lower_weights)
-    upper_cjs = _cjs_dist(draws=draws, weights=upper_weights)
-
+    lower_cjs = max(_cjs_dist(draws=draws, weights=lower_weights),
+                       _cjs_dist(draws=-1 * draws, weights=lower_weights))
+    upper_cjs = max(_cjs_dist(draws=draws, weights=upper_weights),
+                       _cjs_dist(draws=-1 * draws, weights=upper_weights))
     logdiffsquare = 2 * np.log2(1 + delta)
     grad = (lower_cjs + upper_cjs) / logdiffsquare
 
