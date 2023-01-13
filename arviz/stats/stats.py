@@ -2117,7 +2117,9 @@ def weight_predictions(idatas, weights=None):
     return weighted_samples
 
 
-def psens(data, *, component, selection=None, component_var_name=None, var_names=None, filter_vars=None, delta=0.01, dask_kwargs=None):
+def psens(data,*, component, selection=None, component_var_name=None,
+          var_names=None, filter_vars=None, delta=0.01,
+          dask_kwargs=None):
     """Compute power-scaling sensitivity diagnostic.
 
     Power-scales the prior or likelihood and calculates how much the posterior is affected.
