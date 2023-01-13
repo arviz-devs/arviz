@@ -581,9 +581,7 @@ def get_log_prior(idata, var_name=None):
     if var_name is None:
         var_names = list(idata.log_prior.data_vars)
         if len(var_names) > 1:
-            raise TypeError(
-                f"Found several log prior arrays {var_names}, var_name cannot be None"
-            )
+            raise TypeError(f"Found several log prior arrays {var_names}, var_name cannot be None")
         return idata.log_prior[var_names[0]]
     else:
         try:
