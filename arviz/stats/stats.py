@@ -52,7 +52,7 @@ __all__ = [
     "waic",
     "weight_predictions",
     "_calculate_ics",
-    "psens"
+    "psens",
 ]
 
 
@@ -2117,9 +2117,17 @@ def weight_predictions(idatas, weights=None):
     return weighted_samples
 
 
-def psens(data,*, component, selection=None, component_var_name=None,
-          var_names=None, filter_vars=None, delta=0.01,
-          dask_kwargs=None):
+def psens(
+    data,
+    *,
+    component,
+    selection=None,
+    component_var_name=None,
+    var_names=None,
+    filter_vars=None,
+    delta=0.01,
+    dask_kwargs=None,
+):
     """Compute power-scaling sensitivity diagnostic.
 
     Power-scales the prior or likelihood and calculates how much the posterior is affected.
@@ -2185,11 +2193,7 @@ def psens(data,*, component, selection=None, component_var_name=None,
     upper_w = upper_w / np.sum(upper_w)
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    func_kwargs = {
-        "lower_weights": lower_w,
-        "upper_weights": upper_w,
-        "delta": delta
-    }
+    func_kwargs = {"lower_weights": lower_w, "upper_weights": upper_w, "delta": delta}
 
     # calculate the sensitivity diagnostic based on the importance weights and draws
     return _wrap_xarray_ufunc(
@@ -2207,10 +2211,14 @@ def _powerscale_sens(draws, *, lower_weights=None, upper_weights=None, delta=0.0
     Calculate power-scaling sensitivity by finite difference
     second derivative of CJS
     """
-    lower_cjs = max(_cjs_dist(draws=draws, weights=lower_weights),
-                       _cjs_dist(draws=-1 * draws, weights=lower_weights))
-    upper_cjs = max(_cjs_dist(draws=draws, weights=upper_weights),
-                       _cjs_dist(draws=-1 * draws, weights=upper_weights))
+    lower_cjs = max(
+        _cjs_dist(draws=draws, weights=lower_weights),
+        _cjs_dist(draws=-1 * draws, weights=lower_weights),
+    )
+    upper_cjs = max(
+        _cjs_dist(draws=draws, weights=upper_weights),
+        _cjs_dist(draws=-1 * draws, weights=upper_weights),
+    )
     logdiffsquare = 2 * np.log2(1 + delta)
     grad = (lower_cjs + upper_cjs) / logdiffsquare
 
@@ -2241,7 +2249,7 @@ def _cjs_dist(draws, weights):
 
     # ecdfs
     cdf_p = np.linspace(1 / len(draws), 1 - 1 / len(draws), len(draws) - 1)
-    cdf_q = np.cumsum(weights/np.sum(weights))[:-1]
+    cdf_q = np.cumsum(weights / np.sum(weights))[:-1]
 
     # integrals of ecdfs
     cdf_p_int = np.dot(cdf_p, binwidth)
@@ -2254,13 +2262,13 @@ def _cjs_dist(draws, weights):
     denom = 0.5 * (cdf_p + cdf_q)
     denom = np.log2(denom, out=np.zeros_like(denom), where=(denom != 0))
 
-    cjs_pq = np.sum(
-        binwidth * (
-        cdf_p * (pq_numer - denom))) + 0.5 / np.log(2) * (cdf_q_int - cdf_p_int)
+    cjs_pq = np.sum(binwidth * (cdf_p * (pq_numer - denom))) + 0.5 / np.log(2) * (
+        cdf_q_int - cdf_p_int
+    )
 
-    cjs_qp = np.sum(
-        binwidth * (
-        cdf_q * (qp_numer - denom))) + 0.5 / np.log(2) * (cdf_p_int - cdf_q_int)
+    cjs_qp = np.sum(binwidth * (cdf_q * (qp_numer - denom))) + 0.5 / np.log(2) * (
+        cdf_p_int - cdf_q_int
+    )
 
     cjs_pq = max(0, cjs_pq)
     cjs_qp = max(0, cjs_qp)
