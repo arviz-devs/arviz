@@ -2145,7 +2145,8 @@ def psens(data, *, component, selection=None, component_var_name=None, var_names
     -----
     The diagnostic is computed by power-scaling the specified component
     (prior or likelihood)
-    and determining the degree to which the posterior changes as described in [1]_.
+    and determining the degree to which the posterior changes as
+    described in [1]_.
     It uses Pareto-smoothed
     importance sampling to avoid refitting the model.
 
@@ -2201,7 +2202,8 @@ def psens(data, *, component, selection=None, component_var_name=None, var_names
 
 def _powerscale_sens(draws, *, lower_weights=None, upper_weights=None, delta=0.01):
     """
-    Calculate power-scaling sensitivity by finite difference second derivative of CJS
+    Calculate power-scaling sensitivity by finite difference
+    second derivative of CJS
     """
     lower_cjs = max(_cjs_dist(draws=draws, weights=lower_weights),
                        _cjs_dist(draws=-1 * draws, weights=lower_weights))
