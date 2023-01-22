@@ -12,7 +12,7 @@ def plot_ecdf(
     cdf=None,
     difference=False,
     pit=False,
-    confidence_bands=True,
+    confidence_bands=False,
     pointwise=False,
     npoints=100,
     num_trials=500,
@@ -52,7 +52,7 @@ def plot_ecdf(
         If True then plot ECDF-difference plot otherwise ECDF plot.
     pit : bool, default False
         If True plots the ECDF or ECDF-diff of PIT of sample.
-    confidence_bands : bool, default True
+    confidence_bands : bool, default False
         If True plots the simultaneous or pointwise confidence bands with `1 - fpr`
         confidence level.
     pointwise : bool, default False
