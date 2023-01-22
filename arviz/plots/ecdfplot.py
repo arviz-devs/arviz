@@ -39,7 +39,7 @@ def plot_ecdf(
     Notes
     -----
     This plot computes the confidence bands with the simulated based algorithm presented in [1]_.
-
+    
     Parameters
     ----------
     values : array-like
