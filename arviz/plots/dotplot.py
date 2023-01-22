@@ -38,7 +38,7 @@ def plot_dot(
     Parameters
     ----------
     values : array-like
-        Values to plot.
+        Values to plot from an unknown continuous or discrete distribution.
     binwidth : float, optional
         Width of the bin for drawing the dot plot.
     dotsize : float, default 1
