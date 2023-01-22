@@ -30,23 +30,23 @@ def plot_dot(
     backend_kwargs=None,
     **kwargs
 ):
-    """Plot distribution as dot plot or quantile dot plot.
+    r"""Plot distribution as dot plot or quantile dot plot.
 
     This function uses the Wilkinson's Algorithm [1]_ to allot dots to bins.
-    The quantile dot plots was inspired from the paper *When (ish) is My Bus?* [2]_.
+    The quantile dot plots was inspired from [2]_.
 
     Parameters
     ----------
     values : array-like
-        Values to plot
+        Values to plot.
     binwidth : float, optional
         Width of the bin for drawing the dot plot.
-    dotsize : float, optional
-        The size of the dots relative to the bin width. The default, 1, makes dots be
+    dotsize : float, default 1
+        The size of the dots relative to the bin width. The default makes dots be
         just about as wide as the bin width.
-    stackratio : float, optional
+    stackratio : float, default 1
         The distance between the center of the dots in the same stack relative to the bin height.
-        The default, 1, makes dots in the same stack just touch each other.
+        The default makes dots in the same stack just touch each other.
     point_interval : bool, optional
         Plots the point interval. Uses ``hdi_prob`` to plot the HDI interval
     point_estimate : str, optional
@@ -56,42 +56,39 @@ def plot_dot(
         The color of the dots. Should be a valid matplotlib color.
     intervalcolor : string, optional
         The color of the interval. Should be a valid matplotlib color.
-    linewidth : int, optional
-        Line width throughout. If None it will be autoscaled based on ``figsize``.
-    markersize : int, optional
-        Markersize throughout. If None it will be autoscaled based on ``figsize``.
+    linewidth : int, default None
+        Line width throughout. If None it will be autoscaled based on `figsize`.
+    markersize : int, default None
+        Markersize throughout. If None it will be autoscaled based on `figsize`.
     markercolor : string, optional
         The color of the marker when plot_interval is True. Should be a valid matplotlib color.
-    marker : string, optional
-        The shape of the marker. Valid for matplotlib backend
-        Defaults to "o".
+    marker : string, default "o"
+        The shape of the marker. Valid for matplotlib backend.
     hdi_prob : float, optional
         Valid only when point_interval is True. Plots HDI for chosen percentage of density.
         Defaults to ``stats.hdi_prob`` rcParam.
-    rotated : bool, optional
+    rotated : bool, default False
         Whether to rotate the dot plot by 90 degrees.
-    nquantiles : int, optional
-        Number of quantiles to plot, used for quantile dot plots
-        Defaults to 50.
-    quartiles : bool, optional
+    nquantiles : int, default 50
+        Number of quantiles to plot, used for quantile dot plots.
+    quartiles : bool, default True
         If True then the quartile interval will be plotted with the HDI.
-        Defaults to True.
     figsize : (float,float), optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If `None` it will be defined automatically.
     plot_kwargs : dict, optional
         Keywords passed for customizing the dots. Passed to :class:`mpl:matplotlib.patches.Circle`
-        in matplotlib and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    ax : axes, optional
-        Matplotlib_axes or bokeh_figures.
+        in matplotlib and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh.
+    backend :{"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
+        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        its own array of plot areas (and return it).
     show : bool, optional
         Call backend show function.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`. For additional documentation
-        check the plotting method of the backend.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
 
     Returns
     -------
