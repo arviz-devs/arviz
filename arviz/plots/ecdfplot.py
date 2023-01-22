@@ -35,11 +35,11 @@ def plot_ecdf(
     (in a darker shade) and confidence bands in a more transparent shade. Optionally, the difference
     between the two empirical CDFs can be computed, and the PIT for a single dataset or a comparison
     between two samples.
-    
+
     Notes
     -----
     This plot computes the confidence bands with the simulated based algorithm presented in [1]_.
-    
+
     Parameters
     ----------
     values : array-like
@@ -93,7 +93,7 @@ def plot_ecdf(
     Returns
     -------
     axes : matplotlib axes or bokeh figures.
-    
+
     References
     ----------
     .. [1] Säilynoja, T., Bürkner, P.C. and Vehtari, A., 2021. Graphical Test for
