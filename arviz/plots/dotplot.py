@@ -22,7 +22,7 @@ def plot_dot(
     point_estimate="auto",
     nquantiles=50,
     quartiles=True,
-    point_interval=None,
+    point_interval=False,
     ax=None,
     show=None,
     plot_kwargs=None,
@@ -47,7 +47,7 @@ def plot_dot(
     stackratio : float, default 1
         The distance between the center of the dots in the same stack relative to the bin height.
         The default makes dots in the same stack just touch each other.
-    point_interval : bool, optional
+    point_interval : bool, default False
         Plots the point interval. Uses ``hdi_prob`` to plot the HDI interval
     point_estimate : str, optional
         Plot point estimate per variable. Values should be ``mean``, ``median``, ``mode`` or None.
