@@ -35,6 +35,10 @@ def plot_ecdf(
     (in a darker shade) and confidence bands in a more transparent shade. Optionally, the difference
     between the two empirical CDFs can be computed, and the PIT for a single dataset or a comparison
     between two samples.
+    
+    Notes
+    -----
+    This plot computes the confidence bands with the simulated based algorithm presented in [1]_.
 
     Parameters
     ----------
@@ -49,7 +53,8 @@ def plot_ecdf(
     pit : bool, default False
         If True plots the ECDF or ECDF-diff of PIT of sample.
     confidence_bands : bool, default True
-        If True plots the simultaneous or pointwise confidence bands with `1 - fpr` confidence level.
+        If True plots the simultaneous or pointwise confidence bands with `1 - fpr`
+        confidence level.
     pointwise : bool, default False
         If True plots pointwise confidence bands otherwise simultaneous bands.
     npoints : int, default 100
@@ -74,8 +79,8 @@ def plot_ecdf(
         Additional kwargs passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
         :meth:`bokeh:bokeh.plotting.Figure.line`
     ax :2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
-        its own array of plot areas (and return it).
+        A 2D array of locations into which to plot the densities. If not supplied, Arviz will
+        create its own array of plot areas (and return it).
     show : bool, optional
         Call backend show function.
     backend : {"matplotlib", "bokeh"}, default "matplotlib"
@@ -89,10 +94,6 @@ def plot_ecdf(
     -------
     axes : matplotlib axes or bokeh figures.
     
-    Notes
-    -----
-    This plot computes the confidence bands with the simulated based algorithm presented in [1]_.
-
     References
     ----------
     .. [1] Säilynoja, T., Bürkner, P.C. and Vehtari, A., 2021. Graphical Test for
