@@ -109,7 +109,7 @@ def plot_dist(
 
         * ``cumulative``: plot the cumulative counts. Defaults to ``False``.
 
-    is_circular : {False, True, "radians", "degrees"}. Default False
+    is_circular : {False, True, "radians", "degrees"}, default False
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
         default input type is "radians". When this argument is present, it interprets the
         values passed are from a circular variable measured in radians and a circular KDE is
