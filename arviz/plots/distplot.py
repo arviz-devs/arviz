@@ -114,7 +114,7 @@ def plot_dist(
         default input type is "radians". When this argument is present, it interprets the
         values passed are from a circular variable measured in radians and a circular KDE is
         used. Inputs in "degrees" will undergo an internal conversion to radians. Only valid
-        for 1D KDE. Defaults to False.
+        for 1D KDE.
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
