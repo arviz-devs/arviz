@@ -64,7 +64,7 @@ def plot_dist_comparison(
     legend : bool
         Add legend to figure. By default True.
     labeller : Labeller, optional
-        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
+        Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : (nvars, 3) array-like of matplotlib_axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
