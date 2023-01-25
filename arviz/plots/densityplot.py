@@ -98,7 +98,7 @@ def plot_density(
         If True, it interprets the values passed are from a circular variable measured in radians
         and a circular KDE is used. Only valid for 1D KDE.
     grid : tuple, optional
-        Number of rows and columns. Defaults to `None`, the rows and columns are
+        Number of rows and columns. Defaults to ``None``, the rows and columns are
         automatically inferred.
     figsize : (float, float), optional
         Figure size. If `None` it will be defined automatically.
