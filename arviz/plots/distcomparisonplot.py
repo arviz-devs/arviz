@@ -44,7 +44,7 @@ def plot_dist_comparison(
         and the "observed" option includes
         {"observed_data", "prior_predictive", "posterior_predictive"}.
     figsize : (float, float), optional
-        Figure size. If `None` it will be defined automatically.
+        Figure size. If ``None`` it will be defined automatically.
     textsize : float
         Text size scaling factor for labels, titles and lines. If `None` it will be
         autoscaled based on `figsize`.
