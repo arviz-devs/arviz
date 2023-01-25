@@ -92,7 +92,7 @@ def plot_ecdf(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures.
+    axes : matplotlib_axes or bokeh_figure
 
     References
     ----------
