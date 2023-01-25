@@ -115,9 +115,9 @@ def plot_dist(
         values passed are from a circular variable measured in radians and a circular KDE is
         used. Inputs in "degrees" will undergo an internal conversion to radians. Only valid
         for 1D KDE.
-    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
-        its own array of plot areas (and return it).
+    ax : matplotlib_axes or bokeh_figure, optional
+        Matplotlib or bokeh targets on which to plot. If not supplied, Arviz will create
+        its own plot area (and return it).
     backend : {"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     backend_kwargs :dict, optional
