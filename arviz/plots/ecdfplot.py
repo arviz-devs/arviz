@@ -30,8 +30,8 @@ def plot_ecdf(
 ):
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
 
-    Plots of the empirical CDF estimates of an array. When `values2` option is different from
-    `None`, the two empirical CDFs are overlaid with the distribution of `values` on top
+    Plots of the empirical CDF estimates of an array. When `values2` argument is provided,
+    the two empirical CDFs are overlaid with the distribution of `values` on top
     (in a darker shade) and confidence bands in a more transparent shade. Optionally, the difference
     between the two empirical CDFs can be computed, and the PIT for a single dataset or a comparison
     between two samples.
