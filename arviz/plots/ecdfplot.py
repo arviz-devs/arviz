@@ -46,7 +46,7 @@ def plot_ecdf(
         Values to plot from an unknown continuous or discrete distribution.
     values2 : array-like, optional
         Values to compare to the original sample.
-    cdf : function, optional, default None
+    cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
     difference : bool, default False
         If True then plot ECDF-difference plot otherwise ECDF plot.
