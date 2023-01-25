@@ -44,7 +44,7 @@ def plot_density(
 
     Parameters
     ----------
-    data : InferenceData or iterable of object
+    data : InferenceData or iterable of InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object, or an Iterator
         returning a sequence of such objects.
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
