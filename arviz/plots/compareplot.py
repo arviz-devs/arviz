@@ -30,8 +30,8 @@ def plot_compare(
     cross-validation (LOO) or using the widely applicable information criterion (WAIC).
     We recommend LOO in line with the work presented by [1]_.
 
-    This plot is in the style of the one used in the book Statistical Rethinking by
-    Richard McElreath.Chapter 6 in the first edition or 7 in the second.
+    This plot is in the style of the one used in [2]_. Chapter 6 in the first edition
+    or 7 in the second.
 
     Parameters
     ----------
@@ -45,8 +45,8 @@ def plot_compare(
     plot_ic_diff : bool, default True
         Plot standard error of the difference in ELPD between each model
         and the top-ranked model.
-    order_by_rank : bool, optional
-        If True (default) ensure the best model is used as reference.
+    order_by_rank : bool, default True
+        If True ensure the best model is used as reference.
     legend : bool, default True
         Add legend to figure.
     figsize : (float, float), optional
@@ -89,6 +89,8 @@ def plot_compare(
     ----------
     .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
     cross-validation and WAIC https://arxiv.org/abs/1507.04544
+    .. [2] McElreath R. (2022). Statistical Rethinking A Bayesian Course with Examples in
+    R and Stan, Second edition, CRC Press.
 
     Examples
     --------

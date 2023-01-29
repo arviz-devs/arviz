@@ -48,10 +48,9 @@ def plot_dist_comparison(
     textsize : float
         Text size scaling factor for labels, titles and lines. If `None` it will be
         autoscaled based on `figsize`.
-    var_names : list of str, optional
-        List of variables to plot.  If multiple datasets are supplied and `var_names` is not None,
-        will print the same set of variables for each dataset.  Defaults to `None`, which results in
-        all the variables being plotted.
+    var_names : str, list, list of lists, optional
+        if str, plot the variable. if list, plot all the variables in list
+        of all groups. if list of lists, plot the vars of groups in respective lists.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
