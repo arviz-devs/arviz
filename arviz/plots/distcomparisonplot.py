@@ -46,7 +46,7 @@ def plot_dist_comparison(
     figsize : (float, float), optional
         Figure size. If ``None`` it will be defined automatically.
     textsize : float
-        Text size scaling factor for labels, titles and lines. If `None` it will be
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be
         autoscaled based on `figsize`.
     var_names : str, list, list of lists, optional
         if str, plot the variable. if list, plot all the variables in list
