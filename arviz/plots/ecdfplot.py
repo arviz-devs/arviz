@@ -12,7 +12,7 @@ def plot_ecdf(
     cdf=None,
     difference=False,
     pit=False,
-    confidence_bands=False,
+    confidence_bands=None,
     pointwise=False,
     npoints=100,
     num_trials=500,
@@ -52,7 +52,7 @@ def plot_ecdf(
         If True then plot ECDF-difference plot otherwise ECDF plot.
     pit : bool, default False
         If True plots the ECDF or ECDF-diff of PIT of sample.
-    confidence_bands : bool, default False
+    confidence_bands : bool, default None
         If True plots the simultaneous or pointwise confidence bands with `1 - fpr`
         confidence level.
     pointwise : bool, default False
@@ -78,9 +78,8 @@ def plot_ecdf(
     plot_outline_kwargs : dict, optional
         Additional kwargs passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
         :meth:`bokeh:bokeh.plotting.Figure.line`
-    ax :2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will
-        create its own array of plot areas (and return it).
+    ax :axes, optional
+        Matplotlib axes or bokeh figures.
     show : bool, optional
         Call backend show function.
     backend : {"matplotlib", "bokeh"}, default "matplotlib"
@@ -159,7 +158,7 @@ def plot_ecdf(
         >>> az.plot_ecdf(sample, sample2, confidence_bands = True, difference = True, pit = True)
 
     """
-    if confidence_bands is False:
+    if confidence_bands is None:
         confidence_bands = (values2 is not None) or (cdf is not None)
 
     if values2 is None and cdf is None and confidence_bands is True:

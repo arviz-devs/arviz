@@ -80,9 +80,8 @@ def plot_dot(
         in matplotlib and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh.
     backend :{"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
-    ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
-        its own array of plot areas (and return it).
+    ax : axes, optional
+        Matplotlib_axes or bokeh_figures.
     show : bool, optional
         Call backend show function.
     backend_kwargs : dict, optional

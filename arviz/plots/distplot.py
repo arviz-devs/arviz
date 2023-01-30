@@ -62,13 +62,13 @@ def plot_dist(
         Whether to rotate the 1D KDE plot 90 degrees.
     rug : bool, default False
         If True adds a rugplot. Ignored for 2D KDE.
-    bw : float or str, default "experimental"
+    bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when ``is_circular`` is False
         and "taylor" (for now) when ``is_circular`` is True.
         Defaults to "experimental" when variable is not circular and "taylor" when it is.
-    quantiles : list, default None
+    quantiles : list, optional
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
     contour : bool, default True
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
