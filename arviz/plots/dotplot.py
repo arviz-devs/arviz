@@ -81,7 +81,7 @@ def plot_dot(
     backend :{"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     ax : axes, optional
-        Matplotlib_axes or bokeh_figures.
+        Matplotlib_axes or bokeh_figure.
     show : bool, optional
         Call backend show function.
     backend_kwargs : dict, optional
@@ -91,7 +91,7 @@ def plot_dot(
 
     Returns
     -------
-    axes : matplotlib_axes or bokeh_figures
+    axes : matplotlib_axes or bokeh_figure
 
     See Also
     --------

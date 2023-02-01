@@ -99,7 +99,7 @@ def plot_dist(
     hist_kwargs : dict
         Keyword arguments used to customize the histogram. Ignored when plotting a KDE.
         They are passed to :meth:`matplotlib.axes.Axes.hist` if using matplotlib,
-        or to :meth:`bokeh.plotting.Figure.quad` if using bokeh. In bokeh case,
+        or to :meth:`bokeh.plotting.figure.quad` if using bokeh. In bokeh case,
         the following extra keywords are also supported:
 
         * ``color``: replaces the ``fill_color`` and ``line_color`` of the ``quad`` method
