@@ -71,7 +71,7 @@ def plot_ecdf(
         plot the border lines.
     plot_kwargs : dict, optional
         Additional kwargs passed to :func:`mpl:matplotlib.pyplot.step` or
-        :meth:`bokeh:bokeh.plotting.Figure.step`
+        :meth:`bokeh.plotting.figure.step`
     fill_kwargs : dict, optional
         Additional kwargs passed to :func:`mpl:matplotlib.pyplot.fill_between` or
         :meth:`bokeh:bokeh.plotting.Figure.varea`
