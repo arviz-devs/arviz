@@ -77,7 +77,7 @@ def plot_dot(
         Figure size. If ``None`` it will be defined automatically.
     plot_kwargs : dict, optional
         Keywords passed for customizing the dots. Passed to :class:`mpl:matplotlib.patches.Circle`
-        in matplotlib and :meth:`bokeh:bokeh.plotting.Figure.circle` in bokeh.
+        in matplotlib and :meth:`bokeh.plotting.figure.circle` in bokeh.
     backend :{"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     ax : axes, optional
