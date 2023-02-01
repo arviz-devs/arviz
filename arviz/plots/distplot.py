@@ -129,7 +129,7 @@ def plot_dist(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib axes or bokeh figure
 
     See Also
     --------
