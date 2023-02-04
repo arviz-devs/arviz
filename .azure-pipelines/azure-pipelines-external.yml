@@ -95,9 +95,9 @@ jobs:
       python -m pip freeze
     displayName: 'Print packages'
 
-  # - script: |
-  #     python -m pylint arviz
-  #   displayName: 'pylint'
+  - script: |
+      python -m pylint arviz
+    displayName: 'pylint'
 
   - script: |
       python -m pydocstyle arviz
