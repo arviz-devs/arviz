@@ -678,7 +678,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             for df in dfs_tail:
                 dfs = dfs.merge(df, how="outer", copy=False)
         else:
-            (dfs,) = dfs.values()
+            (dfs,) = dfs.values()  # pylint: disable=unbalanced-dict-unpacking
         return dfs
 
     def to_zarr(self, store=None):

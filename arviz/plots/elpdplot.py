@@ -133,7 +133,7 @@ def plot_elpd(
     coord_labels = format_coords_as_labels(pointwise_data[0]) if xlabels else None
 
     if numvars < 2:
-        raise Exception("Number of models to compare must be 2 or greater.")
+        raise ValueError("Number of models to compare must be 2 or greater.")
 
     elpd_plot_kwargs = dict(
         ax=ax,
