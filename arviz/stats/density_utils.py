@@ -303,7 +303,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
     if custom_lims[1] is None:
         custom_lims[1] = x_max
 
-    all_numeric = all(isinstance(i, (int, float, np.integer, np.float)) for i in custom_lims)
+    all_numeric = all(isinstance(i, (int, float, np.integer, np.number)) for i in custom_lims)
     if not all_numeric:
         raise TypeError(
             "Elements of `custom_lims` must be numeric or None.\nAt least one of them is not."
