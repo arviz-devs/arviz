@@ -9,6 +9,7 @@ Plots
     :toctree: generated/
 
     plot_autocorr
+    plot_bf
     plot_bpv
     plot_compare
     plot_density
