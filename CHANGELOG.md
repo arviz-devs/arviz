@@ -14,6 +14,7 @@
 - Fix gap for `plot_trace` with option `kind="rank_bars"` ([2180](https://github.com/arviz-devs/arviz/pull/2180))
 - Fix `plot_lm` unsupported usage of `np.tile` ([2186](https://github.com/arviz-devs/arviz/pull/2186))
 - Update `_z_scale` to work with SciPy 1.10 ([2186](https://github.com/arviz-devs/arviz/pull/2186))
+- Fix bug in BaseLabeller when combining with with NoVarLabeller ([2200](https://github.com/arviz-devs/arviz/pull/2200))
 
 ### Deprecation
 

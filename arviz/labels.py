@@ -111,7 +111,7 @@ class BaseLabeller:
         var_name_str = self.var_name_to_str(var_name)
         sel_str = self.sel_to_str(sel, isel)
         if not sel_str:
-            return var_name_str
+            return "" if var_name_str is None else var_name_str
         if var_name_str is None:
             return sel_str
         return f"{var_name_str}\n{sel_str}"
@@ -121,7 +121,7 @@ class BaseLabeller:
         var_name_str = self.var_name_to_str(var_name)
         sel_str = self.sel_to_str(sel, isel)
         if not sel_str:
-            return var_name_str
+            return "" if var_name_str is None else var_name_str
         if var_name_str is None:
             return sel_str
         return f"{var_name_str}[{sel_str}]"
@@ -136,7 +136,9 @@ class BaseLabeller:
         model_name_str = self.model_name_to_str(model_name)
         if model_name_str is None:
             return label
-        return f"{model_name}: {label}"
+        if label is None or label == "":
+            return model_name_str
+        return f"{model_name_str}: {label}"
 
 
 class DimCoordLabeller(BaseLabeller):
