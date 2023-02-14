@@ -146,6 +146,7 @@ def plot_forest(
     --------
     plot_posterior : Plot Posterior densities in the style of John K. Kruschke's book.
     plot_density : Generate KDE plots for continuous variables and histograms for discrete ones.
+    summary : Create a data frame with summary statistics.
 
     Examples
     --------
