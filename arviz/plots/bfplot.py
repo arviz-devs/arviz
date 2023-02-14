@@ -25,46 +25,48 @@ def plot_bf(
     backend_kwargs=None,
     show=None,
 ):
-    """
-    Bayes Factor approximated as the Savage-Dickey density ratio.
+    r"""Approximated Bayes Factor for comparing hypothesis of two nested models.
 
     The Bayes factor is estimated by comparing a model (H1) against a model in which the
     parameter of interest has been restricted to be a point-null (H0). This computation
-    assumes the models are nested and thus H0 is a special case of H1.
+    assumes the models are nested and thus H0 is a special case of H1. 
 
-
+    Notes
+    -----
+    The bayes Factor is approximated pproximated as the Savage-Dickey density ratio
+    algorithm presented in [1]_.
 
     Parameters
     -----------
-    idata : obj
-        a :class:`arviz.InferenceData` object
-    var_name : str
+    idata : InferenceData
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
+    var_name : str, optional
         Name of variable we want to test.
     prior : numpy.array, optional
         In case we want to use different prior, for example for sensitivity analysis.
-    ref_val : int
-        Point-null for Bayes factor estimation. Defaults to 0.
+    ref_val : int, default 0
+        Point-null for Bayes factor estimation.
     xlim :  tuple, optional
         Set the x limits, which might be used for visualization purposes.
-    colors : tuple
+    colors : tuple, default ('C0', 'C1')
         Tuple of valid Matplotlib colors. First element for the prior, second for the posterior.
-        Defaults to ('C0', 'C1').
-    figsize : tuple
-        Figure size. If None it will be defined automatically.
-    textsize: float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+    figsize : (float, float), optional
+        Figure size. If `None` it will be defined automatically.
+    textsize: float, optional
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
+        on `figsize`.
     plot_kwargs : dicts, optional
-        Additional keywords passed to :func:`matplotlib.pyplot.plot`
+        Additional keywords passed to :func:`matplotlib.pyplot.plot`.
     hist_kwargs : dicts, optional
-        Additional keywords passed to :func:`arviz.plot_dist`. Only works for discrete variables
+        Additional keywords passed to :func:`arviz.plot_dist`. Only works for discrete variables.
     ax : axes, optional
         :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs : bool, optional
+    backend :{"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
@@ -72,12 +74,16 @@ def plot_bf(
     Returns
     -------
     dict : A dictionary with BF10 (Bayes Factor 10 (H1/H0 ratio), and BF01 (H0/H1 ratio).
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib axes or bokeh figures.
 
+    References
+    ----------
+    .. [1] Heck, D., 2019. A caveat on the avage-Dickey density ratio:
+        The case of computing Bayes factors for regression parameters.
 
     Examples
     --------
-    Moderate evidence indicating that the parameter "a" is different from zero
+    Moderate evidence indicating that the parameter "a" is different from zero.
 
     .. plot::
         :context: close-figs

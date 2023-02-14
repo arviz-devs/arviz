@@ -39,93 +39,101 @@ def plot_forest(
     backend_kwargs=None,
     show=None,
 ):
-    """Forest plot to compare HDI intervals from a number of distributions.
+    r"""Forest plot to compare HDI intervals from a number of distributions.
 
-    Generates a forest plot of 100*(hdi_prob)% HDI intervals from a trace or list of traces.
+    Generate forest or ridge plots to compare distributions from a model or list of models.Additionally,
+    the function can display effective sample sizes (ess) and Rhats to visualize convergence diagnostics
+    alongside the distributions.
 
     Parameters
     ----------
-    data : object or iterable of obj
+    data : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
-    kind : str
-        Choose kind of plot for main axis. Supports "forestplot" or "ridgeplot".
+    kind : {"foresplot", "ridgeplot"}, default "forestplot"
+        Specify the kind of plot:
+
+        * The ``kind="forestplot"`` generates credible intervals, where the central points are the
+          estimated posterior means, the thick lines are the central quartiles, and the thin lines
+          represent the $100\times$(`hdi_prob`)% highest density intervals.
+        * The ``kind="ridgeplot"`` option generates density plots (kernel density estimate or histograms)
+          in the same graph. Ridge plots can be configured to have different overlap, truncation bounds
+          and quantile markers.
+
     model_names : list of str, optional
         List with names for the models in the list of data. Useful when plotting more that one
         dataset.
     var_names : list of str, optional
-        List of variables to plot (defaults to None, which results in all variables plotted)
-        Prefix the variables by ``~`` when you want to exclude them from the plot.
+        Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
+        them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
         See the :ref:`this section <common_combine_dims>` for usage examples.
-    filter_vars : {None, "like", "regex"}, default=None
-        If None(default), interpret var_names as the real variables names. If "like", interpret
-        var_names as substrings of the real variables names. If "regex", interpret var_names as
-        regular expressions on the real variables names. A la ``pandas.filter``.
-    transform : callable
-        Function to transform data (defaults to None i.e.the identity function)
+    filter_vars : {None, "like", "regex"}, default None
+        If `None` (default), interpret `var_names` as the real variables names. If "like",
+        interpret `var_names` as substrings of the real variables names. If "regex",
+        interpret `var_names` as regular expressions on the real variables names. See
+        the :ref:`this section <common_filter_vars>` for usage examples.
+    transform : callable, optional
+        Function to transform data (defaults to None i.e.the identity function).
     coords : dict, optional
-        Coordinates of var_names to be plotted. Passed to :meth:`xarray.Dataset.sel`.
-    combined : bool
-        Flag for combining multiple chains into a single chain. If False(default), chains will
+        Coordinates of ``var_names`` to be plotted. Passed to :meth:`xarray.Dataset.sel`.
+    combined : bool, default False
+        Flag for combining multiple chains into a single chain. If False, chains will
         be plotted separately.
-    hdi_prob : float, optional
+    hdi_prob : float, default 0.94
         Plots highest posterior density interval for chosen percentage of density.
-        Defaults to `0.94`.
     rope : tuple or dictionary of tuples
-        Lower and upper values of the Region Of Practical Equivalence. If a list with one interval
+        Lower and upper values of the Region of Practical Equivalence. If a list with one interval
         only is provided, the ROPE will be displayed across the y-axis. If more than one
         interval is provided the length of the list should match the number of variables.
-    quartiles : bool, optional
+    quartiles : bool, default True
         Flag for plotting the interquartile range, in addition to the ``hdi_prob`` intervals.
-        Defaults to True.
-    r_hat : bool, optional
-        Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
-    ess : bool, optional
-        Flag for plotting the effective sample size. Defaults to False.
+    r_hat : bool, default False
+        Flag for plotting Split R-hat statistics. Requires 2 or more chains.
+    ess : bool, default False
+        Flag for plotting the effective sample size.
     colors : list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically chose a color per model from the matplotlibs
         cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used for all
         models. Defaults to 'cycle'.
-    textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+    textsize : float, optional
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
         on ``figsize``.
-    linewidth : int
-        Line width throughout. If None it will be autoscaled based on ``figsize``.
-    markersize : int
-        Markersize throughout. If None it will be autoscaled based on ``figsize``.
+    linewidth : int, optional
+        Line width throughout. If `None` it will be autoscaled based on ``figsize``.
+    markersize : int, optional
+        Markersize throughout. If `None` it will be autoscaled based on ``figsize``.
     legend : bool, optional
         Show a legend with the color encoded model information.
         Defaults to True, if there are multiple models.
     labeller : Labeller, optional
-        Class providing the method ``make_model_label`` to generate the labels in the plot.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ridgeplot_alpha: float
-        Transparency for ridgeplot fill.  If **0**, border is colored by model, otherwise
+    ridgeplot_alpha: float, optional
+        Transparency for ridgeplot fill.  If ``ridgeplot_alpha=0``, border is colored by model, otherwise
         a `black` outline is used.
-    ridgeplot_overlap : float
+    ridgeplot_overlap : float, default 2
         Overlap height for ridgeplots.
-    ridgeplot_kind : string
+    ridgeplot_kind : string, optional
         By default ("auto") continuous variables are plotted using KDEs and discrete ones using
         histograms. To override this use "hist" to plot histograms and "density" for KDEs.
-    ridgeplot_truncate : bool
-        Whether to truncate densities according to the value of ``hdi_prob``. Defaults to True.
-    ridgeplot_quantiles : list
+    ridgeplot_truncate : bool, default True
+        Whether to truncate densities according to the value of ``hdi_prob``.
+    ridgeplot_quantiles : list, optional
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
-        Defaults to None.
     figsize : (float, float), optional
-        Figure size. If None, it will be defined automatically.
+        Figure size. If `None`, it will be defined automatically.
     ax : axes, optional
         :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Defaults to "matplotlib".
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
     backend_config : dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
-    backend_kwargs : bool, optional
+    backend_kwargs :dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.

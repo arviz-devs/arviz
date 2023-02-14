@@ -25,13 +25,15 @@ def plot_compare(
 ):
     r"""Summary plot for model comparison.
 
-    Models are compared based on their expected log pointwise predictive density (ELPD),
-    the ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
-    cross-validation (LOO) or using the widely applicable information criterion (WAIC).
-    We recommend LOO in line with the work presented by [1]_.
-
+    Models are compared based on their expected log pointwise predictive density (ELPD).
     This plot is in the style of the one used in [2]_. Chapter 6 in the first edition
     or 7 in the second.
+
+    Notes
+    -----
+    The ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
+    cross-validation (LOO) or using the widely applicable information criterion (WAIC).
+    We recommend LOO in line with the work presented by [1]_.
 
     Parameters
     ----------

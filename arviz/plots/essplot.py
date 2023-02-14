@@ -49,7 +49,7 @@ def plot_ess(
     ----------
     idata : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     var_names : list of str, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
         them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
@@ -76,9 +76,9 @@ def plot_ess(
         Number of rows and columns. By default, the rows and columns are
         automatically inferred.
     figsize : (float, float), optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If `None` it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
         on `figsize`.
     rug : bool, default False
         Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>`_ for a specific subset of values.
