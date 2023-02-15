@@ -57,8 +57,9 @@ def plot_density(
         dataset.  Must be the same shape as the data parameter.
     var_names : list of str, optional
         List of variables to plot.  If multiple datasets are supplied and `var_names` is not None,
-        will print the same set of variables for each dataset.  Defaults to None, which results in
-        all the variables being plotted. See :ref:`this section <common_var_names>` for usage examples.
+        will print the same set of variables for each dataset. Defaults to None, which results in
+        all the variables being plotted. See :ref:`this section <common_var_names>`
+        for usage examples.
     filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
