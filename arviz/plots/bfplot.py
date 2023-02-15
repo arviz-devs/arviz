@@ -29,7 +29,7 @@ def plot_bf(
 
     The Bayes factor is estimated by comparing a model (H1) against a model in which the
     parameter of interest has been restricted to be a point-null (H0). This computation
-    assumes the models are nested and thus H0 is a special case of H1. 
+    assumes the models are nested and thus H0 is a special case of H1.
 
     Notes
     -----

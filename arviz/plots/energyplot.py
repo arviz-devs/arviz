@@ -27,7 +27,7 @@ def plot_energy(
 
     This may help to diagnose poor exploration by gradient-based algorithms like HMC or NUTS.
     The energy function in HMC can identify posteriors with heavy tailed distributions, that
-    in practice are challenging for sampling. 
+    in practice are challenging for sampling.
 
     This plot is in the style of the one used in [1]_.
 
