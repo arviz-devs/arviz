@@ -79,7 +79,7 @@ def plot_bf(
     References
     ----------
     .. [1] Heck, D., 2019. A caveat on the avage-Dickey density ratio:
-        The case of computing Bayes factors for regression parameters.
+    The case of computing Bayes factors for regression parameters.
 
     Examples
     --------
