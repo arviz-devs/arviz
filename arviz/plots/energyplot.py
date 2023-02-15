@@ -23,7 +23,7 @@ def plot_energy(
     backend_kwargs=None,
     show=None,
 ):
-    """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
+    r"""Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
     This may help to diagnose poor exploration by gradient-based algorithms like HMC or NUTS. The
     energy function in HMC can identify posteriors with heavy tailed distributions, that in
