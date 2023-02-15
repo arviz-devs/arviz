@@ -41,9 +41,9 @@ def plot_forest(
 ):
     r"""Forest plot to compare HDI intervals from a number of distributions.
 
-    Generate forest or ridge plots to compare distributions from a model or list of models.Additionally,
-    the function can display effective sample sizes (ess) and Rhats to visualize convergence diagnostics
-    alongside the distributions.
+    Generate forest or ridge plots to compare distributions from a model or list of models.
+    Additionally, the function can display effective sample sizes (ess) and Rhats to visualize
+    convergence diagnostics alongside the distributions.
 
     Parameters
     ----------
@@ -56,9 +56,9 @@ def plot_forest(
         * The ``kind="forestplot"`` generates credible intervals, where the central points are the
           estimated posterior means, the thick lines are the central quartiles, and the thin lines
           represent the $100\times$(`hdi_prob`)% highest density intervals.
-        * The ``kind="ridgeplot"`` option generates density plots (kernel density estimate or histograms)
-          in the same graph. Ridge plots can be configured to have different overlap, truncation bounds
-          and quantile markers.
+        * The ``kind="ridgeplot"`` option generates density plots (kernel density estimate or
+          histograms) in the same graph. Ridge plots can be configured to have different overlap,
+          truncation bounds and quantile markers.
 
     model_names : list of str, optional
         List with names for the models in the list of data. Useful when plotting more that one
@@ -112,8 +112,8 @@ def plot_forest(
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ridgeplot_alpha: float, optional
-        Transparency for ridgeplot fill.  If ``ridgeplot_alpha=0``, border is colored by model, otherwise
-        a `black` outline is used.
+        Transparency for ridgeplot fill.  If ``ridgeplot_alpha=0``, border is colored by model,
+        otherwise a `black` outline is used.
     ridgeplot_overlap : float, default 2
         Overlap height for ridgeplots.
     ridgeplot_kind : string, optional
