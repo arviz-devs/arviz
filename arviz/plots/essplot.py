@@ -52,12 +52,12 @@ def plot_ess(
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     var_names : list of str, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
-        them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
+        them from the plot. See :ref:`this section <common_var_names>` for usage examples.
     filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
-        the :ref:`this section <common_filter_vars>` for usage examples.
+        :ref:`this section <common_filter_vars>` for usage examples.
     kind : {"local", "quantile", "evolution"}, default "local"
         Specify the kind of plot:
 
@@ -72,9 +72,10 @@ def plot_ess(
         Show relative ess in plot ``ress = ess / N``.
     coords : dict, optional
         Coordinates of `var_names` to be plotted. Passed to :meth:`xarray.Dataset.sel`.
+        See :ref:`this section <common_coords>` for usage examples.
     grid : tuple, optional
         Number of rows and columns. By default, the rows and columns are
-        automatically inferred.
+        automatically inferred. See :ref:`this section <common_grid>` for usage examples.
     figsize : (float, float), optional
         Figure size. If `None` it will be defined automatically.
     textsize : float, optional

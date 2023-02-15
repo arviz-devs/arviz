@@ -58,19 +58,20 @@ def plot_density(
     var_names : list of str, optional
         List of variables to plot.  If multiple datasets are supplied and `var_names` is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
-        all the variables being plotted.
+        all the variables being plotted. See :ref:`this section <common_var_names>` for usage examples.
     filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
-        the :ref:`this section <common_filter_vars>` for usage examples.
+        :ref:`this section <common_filter_vars>` for usage examples.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
-        See the :ref:`this section <common_combine_dims>` for usage examples.
+        See :ref:`this section <common_combine_dims>` for usage examples.
     transform : callable
         Function to transform data (defaults to `None` i.e. the identity function).
     hdi_prob : float, default 0.94
         Probability for the highest density interval. Should be in the interval (0, 1].
+        See :ref:`this section <common_hdi_prob>` for usage examples.
     point_estimate : str, optional
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in ``rcParams``.
@@ -99,7 +100,7 @@ def plot_density(
         and a circular KDE is used. Only valid for 1D KDE.
     grid : tuple, optional
         Number of rows and columns. Defaults to ``None``, the rows and columns are
-        automatically inferred.
+        automatically inferred. See :ref:`this section <common_grid>` for usage examples.
     figsize : (float, float), optional
         Figure size. If `None` it will be defined automatically.
     textsize : float, optional

@@ -53,7 +53,8 @@ def plot_elpd(
         Text size for labels. If `None` it will be autoscaled based on `figsize`.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
-        subset can be plotted for convenience.
+        subset can be plotted for convenience. See :ref:`this section <common_coords>`
+        for usage examples.
     legend : bool, default False
         Include a legend to the plot. Only taken into account when color argument is a dim name.
     threshold : float, optional

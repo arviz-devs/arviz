@@ -65,7 +65,7 @@ def plot_forest(
         dataset.
     var_names : list of str, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
-        them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
+        them from the plot. See :ref:`this section <common_var_names>` for usage examples.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
         See :ref:`this section <common_combine_dims>` for usage examples.
@@ -73,7 +73,7 @@ def plot_forest(
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
-        the :ref:`this section <common_filter_vars>` for usage examples.
+        :ref:`this section <common_filter_vars>` for usage examples.
     transform : callable, optional
         Function to transform data (defaults to None i.e.the identity function).
     coords : dict, optional
@@ -81,7 +81,7 @@ def plot_forest(
         See :ref:`this section <common_coords>` for usage examples.
     combined : bool, default False
         Flag for combining multiple chains into a single chain. If False, chains will
-        be plotted separately.
+        be plotted separately. See :ref:`this section <common_combine>` for usage examples.
     hdi_prob : float, default 0.94
         Plots highest posterior density interval for chosen percentage of density.
         See :ref:`this section <common_ hdi_prob>` for usage examples.
