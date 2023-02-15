@@ -68,7 +68,7 @@ def plot_forest(
         them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
-        See the :ref:`this section <common_combine_dims>` for usage examples.
+        See :ref:`this section <common_combine_dims>` for usage examples.
     filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
@@ -78,6 +78,7 @@ def plot_forest(
         Function to transform data (defaults to None i.e.the identity function).
     coords : dict, optional
         Coordinates of ``var_names`` to be plotted. Passed to :meth:`xarray.Dataset.sel`.
+        See :ref:`this section <common_coords>` for usage examples.
     combined : bool, default False
         Flag for combining multiple chains into a single chain. If False, chains will
         be plotted separately.
