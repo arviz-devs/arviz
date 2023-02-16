@@ -133,7 +133,7 @@ def plot_forest(
         Select plotting backend.
     backend_config : dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in ``rcParams``.
-    backend_kwargs :dict, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
