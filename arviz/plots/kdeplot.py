@@ -48,11 +48,11 @@ def plot_kde(
         Values to plot
     values2 : array-like, optional
         Values to plot. If present, a 2D KDE will be estimated
-    cumulative : bool
-        If true plot the estimated cumulative distribution function. Defaults to False.
-        Ignored for 2D KDE
-    rug : bool
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE
+    cumulative : bool, dafault False
+        If True plot the estimated cumulative distribution function. Ignored for 2D KDE.
+    rug : bool, default False
+        Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>`_ for a specific subset of
+        values. Ignored for 2D KDE.
     label : string
         Text to include as part of the legend
     bw : float or str, optional
