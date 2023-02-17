@@ -319,7 +319,7 @@ rope={'theta': [{'school': 'Choate',    'rope': (0, 3)},
                   {'school': "St. Paul's", 'rope': (3, 8)},
                  ]};
 
-az.plot_forest(non_centered_data,rope=rope,var_names='theta',combined=True);
+az.plot_forest(non_centered_eight,rope=rope,var_names='theta',combined=True);
 ```
 
 (common_legend)=
