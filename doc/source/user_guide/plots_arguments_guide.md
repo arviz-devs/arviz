@@ -304,6 +304,24 @@ Matplotlib {doc}`mpl:tutorials/colors/colors` tutorial.
 Module {mod}`bokeh.colors`
 :::
 
+(common_rope)=
+## `rope`
+
+A list with lower and upper values of the Region Of Practical Equivalence. If a list with one interval
+only is provided, the `ROPE` will be displayed across the `y-axis`. If more than one interval is
+provided the length of the list should match the number of variables.
+
+```{code-cell} ipython3
+# list of ropes for different schools
+rope={'theta': [{'school': 'Choate',    'rope': (0, 3)},
+                  {'school': 'Phillips Andover', 'rope': (10, 14)},
+                  {'school': 'Hotchkiss', 'rope': (3, 9)},
+                  {'school': "St. Paul's", 'rope': (3, 8)},
+                 ]};
+
+az.plot_forest(non_centered_data,rope=rope,var_names='theta',combined=True);
+```
+
 (common_legend)=
 ## `legend`
 
