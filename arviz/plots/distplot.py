@@ -61,7 +61,8 @@ def plot_dist(
     rotated : bool, default False
         Whether to rotate the 1D KDE plot 90 degrees.
     rug : bool, default False
-        If True adds a rugplot. Ignored for 2D KDE.
+        Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>`_ for a specific subset
+        of values. Ignored for 2D KDE.
     bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
