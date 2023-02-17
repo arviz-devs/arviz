@@ -42,7 +42,7 @@ def plot_khat(
     khats : ELPDData containing Pareto shapes information or array of Pareto tail indices.
     color : str or array_like, default "C0"
         Colors of the scatter plot, if color is a str all dots will have the same color,
-        if it is the size of the observations, each dot will have the specified color, 
+        if it is the size of the observations, each dot will have the specified color,
         otherwise, it will be interpreted as a list of the dims to be used for the color
         code. If Matplotlib c argument is passed, it will override the color argument.
     xlabels : bool, default False
