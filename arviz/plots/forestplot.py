@@ -86,9 +86,9 @@ def plot_forest(
         Plots highest posterior density interval for chosen percentage of density.
         See :ref:`this section <common_ hdi_prob>` for usage examples.
     rope : tuple or dictionary of tuples
-        Lower and upper values of the Region of Practical Equivalence. If a list with one interval
-        only is provided, the ROPE will be displayed across the y-axis. If more than one
-        interval is provided the length of the list should match the number of variables.
+        Lower and upper values of the Region Of Practical Equivalence. If a list is provided,
+        its length should match the number of variables. See :ref:`this section <common_rope>`
+        for usage examples.
     quartiles : bool, default True
         Flag for plotting the interquartile range, in addition to the ``hdi_prob`` intervals.
     r_hat : bool, default False
