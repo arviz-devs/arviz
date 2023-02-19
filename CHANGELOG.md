@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.x.x Unreleased
+## v0.15.0 (2023 Feb 19)
 
 ### New features
 - Adds Savage-Dickey density ratio plot for Bayes factor approximation. ([2037](https://github.com/arviz-devs/arviz/pull/2037), [2152](https://github.com/arviz-devs/arviz/pull/2152))
