@@ -3,7 +3,7 @@
 ## v0.x.x Unreleased
 
 ### Maintenance and fixes
-- Fix memory usage and improve efficiency for `io_emcee.posterior_to_xarray`.
+- Fix memory usage and improve efficiency in `from_emcee`.
 
 ## v0.15.0 (2023 Feb 19)
 
