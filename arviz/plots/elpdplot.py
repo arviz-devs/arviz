@@ -87,7 +87,7 @@ def plot_elpd(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures.
+    axes : matplotlib_axes or bokeh_figure
 
     See Also
     --------
