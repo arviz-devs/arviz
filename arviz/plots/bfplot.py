@@ -74,7 +74,7 @@ def plot_bf(
     Returns
     -------
     dict : A dictionary with BF10 (Bayes Factor 10 (H1/H0 ratio), and BF01 (H0/H1 ratio).
-    axes : matplotlib axes or bokeh figures.
+    axes : matplotlib_axes or bokeh_figure
 
     References
     ----------
