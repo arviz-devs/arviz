@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.x.x Unreleased
+
+### Maintenance and fixes
+- Fix memory usage and improve efficiency for `io_emcee.posterior_to_xarray`.
+
 ## v0.15.0 (2023 Feb 19)
 
 ### New features
