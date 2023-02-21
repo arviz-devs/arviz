@@ -116,12 +116,14 @@ class EmceeConverter:
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         # Use emcee3 syntax, else use emcee2
+        # A chain object is created outside of the dictionary to avoid a spike in memory usage
+        if hasattr(self.sampler, "get_chain"):
+            chain = self.sampler.get_chain().swapaxes(0, 1)
+        else:
+            chain = self.sampler.chain
+
         data = {
-            var_name: (
-                self.sampler.get_chain()[(..., idx)].swapaxes(0, 1)
-                if hasattr(self.sampler, "get_chain")
-                else self.sampler.chain[(..., idx)]
-            )
+            var_name: (chain[(..., idx)])
             for idx, var_name in zip(self.slices, self.var_names)
         }
         return dict_to_dataset(
