@@ -77,7 +77,7 @@ def plot_ess(
         Number of rows and columns. By default, the rows and columns are
         automatically inferred. See :ref:`this section <common_grid>` for usage examples.
     figsize : (float, float), optional
-        Figure size. If `None` it will be defined automatically.
+        Figure size. If ``None`` it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
         on `figsize`.
