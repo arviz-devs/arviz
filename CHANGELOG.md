@@ -5,6 +5,7 @@
 ### New features
 
 ### Maintenance and fixes
+- Fix memory usage and improve efficiency in `from_emcee` ([2215](https://github.com/arviz-devs/arviz/pull/2215))
 
 ### Deprecation
 
