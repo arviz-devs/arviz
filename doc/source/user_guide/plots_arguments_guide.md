@@ -307,9 +307,9 @@ Module {mod}`bokeh.colors`
 (common_rope)=
 ## `rope`
 
-A list with lower and upper values of the Region Of Practical Equivalence. If a list with one interval
-only is provided, the `ROPE` will be displayed across the `y-axis`. If more than one interval is
-provided the length of the list should match the number of variables.
+A dictionary of tuples with lower and upper values of the Region Of Practical Equivalence. If a list with
+one interval only is provided, the `ROPE` will be displayed across the `y-axis`. If more than one interval
+is provided the length of the list should match the number of variables.
 
 ```{code-cell} ipython3
 # list of ropes for different schools
