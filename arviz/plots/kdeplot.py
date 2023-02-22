@@ -78,8 +78,8 @@ def plot_kde(
     figsize : (float, float), optional
         Figure size. If ``None`` it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled based
-        on ``figsize``. Not implemented for bokeh backend.
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled
+        based on ``figsize``. Not implemented for bokeh backend.
     plot_kwargs : dict, optional
         Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`
         or :meth:`bokeh:bokeh.plotting.Figure.line` for a description of accepted values.
