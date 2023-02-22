@@ -54,7 +54,7 @@ def plot_khat(
     bin_format : str, optional
         The string is used as formatting guide calling ``bin_format.format(count, pct)``.
     threshold : float, optional
-        Show the labels of k values larger than ``threshold``. If `None` (default), no
+        Show the labels of k values larger than ``threshold``. If ``None`` (default), no
         observations will be highlighted.
     hover_label : bool, default False
         Show the datapoint label when hovering over it with the mouse. Requires an interactive
@@ -62,9 +62,9 @@ def plot_khat(
     hover_format : str, default "{1}"
         String used to format the hover label via ``hover_format.format(idx, coord_label)``
     figsize : (float, float), optional
-        Figure size. If `None` it will be defined automatically.
+        Figure size. If ``None`` it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled
         based on ``figsize``.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
@@ -73,7 +73,7 @@ def plot_khat(
     legend : bool, default False
         Include a legend to the plot. Only taken into account when color argument is a dim name.
     markersize : int, optional
-        markersize for scatter plot. Defaults to `None` in which case it will
+        markersize for scatter plot. Defaults to ``None`` in which case it will
         be chosen based on autoscaling for figsize.
     ax : axes, optional
         Matplotlib axes or bokeh figures.

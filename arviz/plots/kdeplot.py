@@ -76,9 +76,9 @@ def plot_kde(
     fill_last : bool, default False
         If True fill the last contour of the 2D KDE plot.
     figsize : (float, float), optional
-        Figure size. If `None` it will be defined automatically.
+        Figure size. If ``None`` it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled based
         on ``figsize``. Not implemented for bokeh backend.
     plot_kwargs : dict, optional
         Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`

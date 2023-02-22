@@ -55,7 +55,7 @@ def plot_hdi(
         Additional keywords modifying the Savitzky-Golay filter. See
         :func:`scipy:scipy.signal.savgol_filter` for details.
     figsize : (float, float), optional
-        Figure size. If `None`, it will be defined automatically.
+        Figure size. If ``None``, it will be defined automatically.
     fill_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.fill_between`
         (use ``fill_kwargs={'alpha': 0}`` to disable fill) or to
