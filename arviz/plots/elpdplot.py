@@ -25,8 +25,15 @@ def plot_elpd(
     backend_kwargs=None,
     show=None,
 ):
-    """
-    Plot pointwise elpd differences between two or more models.
+    r"""Plot pointwise elpd differences between two or more models.
+
+    Pointwise model comparison based on their expected log pointwise predictive density (ELPD).
+
+    Notes
+    -----
+    The ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
+    cross-validation (LOO) or using the widely applicable information criterion (WAIC).
+    We recommend LOO in line with the work presented by [1]_.
 
     Parameters
     ----------
@@ -34,22 +41,23 @@ def plot_elpd(
         A dictionary mapping the model name to the object containing inference data or the result
         of :func:`arviz.loo` or :func:`arviz.waic` functions.
         Refer to :func:`arviz.convert_to_inference_data` for details on possible dict items.
-    color : str or array_like, optional
+    color : str or array_like, default "C0"
         Colors of the scatter plot. If color is a str all dots will have the same color.
         If it is the size of the observations, each dot will have the specified color.
         Otherwise, it will be interpreted as a list of the dims to be used for the color code.
-    xlabels : bool, optional
-        Use coords as xticklabels. Defaults to False.
-    figsize : figure size tuple, optional
-        If None, size is (8 + numvars, 8 + numvars).
-    textsize : int, optional
-        Text size for labels. If None it will be autoscaled based on ``figsize``.
+    xlabels : bool, default False
+        Use coords as xticklabels.
+    figsize : (float, float), optional
+        If `None`, size is (8 + numvars, 8 + numvars).
+    textsize : float, optional
+        Text size for labels. If `None` it will be autoscaled based on `figsize`.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
-        subset can be plotted for convenience.
-    legend : bool, optional
+        subset can be plotted for convenience. See :ref:`this section <common_coords>`
+        for usage examples.
+    legend : bool, default False
         Include a legend to the plot. Only taken into account when color argument is a dim name.
-    threshold : float
+    threshold : float, optional
         If some elpd difference is larger than ``threshold * elpd.std()``, show its label. If
         `None`, no observations will be highlighted.
     ic : str, optional
@@ -68,22 +76,29 @@ def plot_elpd(
         Additional keywords passed to :meth:`matplotlib.axes.Axes.scatter`.
     ax : axes, optional
         :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
-    backend : str, optional
-        Select plotting backend {"matplotlib", "bokeh"}. Defaults to "matplotlib".
-    backend_kwargs : bool, optional
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figure
 
     See Also
     --------
     plot_compare : Summary plot for model comparison.
+    loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+    waic : Compute the widely applicable information criterion.
+
+    References
+    ----------
+    .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
+    cross-validation and WAIC https://arxiv.org/abs/1507.04544
 
     Examples
     --------

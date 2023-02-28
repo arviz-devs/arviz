@@ -23,37 +23,41 @@ def plot_energy(
     backend_kwargs=None,
     show=None,
 ):
-    """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
+    r"""Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
     This may help to diagnose poor exploration by gradient-based algorithms like HMC or NUTS.
+    The energy function in HMC can identify posteriors with heavy tailed distributions, that
+    in practice are challenging for sampling.
+
+    This plot is in the style of the one used in [1]_.
 
     Parameters
     ----------
     data : obj
         :class:`xarray.Dataset`, or any object that can be converted (must represent
         ``sample_stats`` and have an ``energy`` variable).
-    kind : str
+    kind : str, optional
         Type of plot to display ("kde", "hist").
-    bfmi : bool
-        If True add to the plot the value of the estimated Bayesian fraction of missing information
-    figsize : tuple
-        Figure size. If None it will be defined automatically.
-    legend : bool
-        Flag for plotting legend. Defaults to True.
-    fill_alpha : tuple of floats
+    bfmi : bool, default True
+        If True add to the plot the value of the estimated Bayesian fraction of missing
+        information.
+    figsize : (float, float), optional
+        Figure size. If `None` it will be defined automatically.
+    legend : bool, default True
+        Flag for plotting legend.
+    fill_alpha : tuple, default (1, 0.75)
         Alpha blending value for the shaded area under the curve, between 0
-        (no shade) and 1 (opaque). Defaults to (1, .75).
-    fill_color : tuple of valid matplotlib color
+        (no shade) and 1 (opaque).
+    fill_color : tuple of valid matplotlib color, default ('C0', 'C5')
         Color for Marginal energy distribution and Energy transition distribution.
-        Defaults to ('C0', 'C5').
     bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental". Defaults to "experimental".
         Only works if ``kind='kde'``.
-    textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+    textsize : float, optional
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled
+        based on `figsize`.
     fill_kwargs : dicts, optional
         Additional keywords passed to :func:`arviz.plot_kde` (to control the shade).
     plot_kwargs : dicts, optional
@@ -61,12 +65,12 @@ def plot_energy(
         (if ``type='hist'``).
     ax : axes, optional
         :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
-    backend : str, optional
-        Select plotting backend {"matplotlib", "bokeh"}. Defaults to "matplotlib".
-    backend_kwargs : bool, optional
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
@@ -77,6 +81,11 @@ def plot_energy(
     See Also
     --------
     bfmi : Calculate the estimated Bayesian fraction of missing information (BFMI).
+
+    References
+    ----------
+    .. [1] Betancourt (2016). Diagnosing Suboptimal Cotangent Disintegrations in
+    Hamiltonian Monte Carlo https://arxiv.org/abs/1604.00695
 
     Examples
     --------

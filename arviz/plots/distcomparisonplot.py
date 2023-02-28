@@ -51,10 +51,11 @@ def plot_dist_comparison(
     var_names : str, list, list of lists, optional
         if str, plot the variable. if list, plot all the variables in list
         of all groups. if list of lists, plot the vars of groups in respective lists.
+        See :ref:`this section <common_var_names>` for usage examples.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
-        that dimension.
+        that dimension. See :ref:`this section <common_coords>` for usage examples.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
         See :ref:`this section <common_combine_dims>` for usage examples.
