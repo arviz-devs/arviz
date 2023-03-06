@@ -1,15 +1,17 @@
 # Change Log
 
-## v0.x.x Unreleased
+## v0.15.1 (2023 Mar 06)
 
 ### New features
 
 ### Maintenance and fixes
 - Fix memory usage and improve efficiency in `from_emcee` ([2215](https://github.com/arviz-devs/arviz/pull/2215))
+- Lower pandas version needed ([2217](https://github.com/arviz-devs/arviz/pull/2217))
 
 ### Deprecation
 
 ### Documentation
+- Update documentation for various plots ([2208](https://github.com/arviz-devs/arviz/pull/2208))
 
 ## v0.15.0 (2023 Feb 19)
 
