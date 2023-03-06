@@ -1,5 +1,15 @@
 # Change Log
 
+## v0.19.1 (TBD)
+
+### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
 ## v0.15.1 (2023 Mar 06)
 
 ### New features
