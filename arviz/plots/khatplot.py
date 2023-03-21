@@ -57,7 +57,7 @@ def plot_khat(
     bin_format : str, optional
         The string is used as formatting guide calling ``bin_format.format(count, pct)``.
     threshold : float, optional
-        Show the labels of k values larger than ``threshold``. If ``None`` (default), no
+        Show the labels of k values larger than `threshold`. If ``None`` (default), no
         observations will be highlighted.
     hover_label : bool, default False
         Show the datapoint label when hovering over it with the mouse. Requires an interactive
