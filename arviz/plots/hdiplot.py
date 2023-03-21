@@ -94,13 +94,12 @@ def plot_hdi(
         >>> import numpy as np
         >>> import arviz as az
         >>> # time-steps random walk
-        >>> x_data = range(0, 100)
+        >>> x_data =np.arange(0,100)
         >>> # Mean random walk
         >>> mu = np.zeros(100)
-        >>> for i in x_data:
-        >>>    mu[i] = mu[i-1] + np.random.normal(0, 1, 1)
+        >>> for i in x_data: mu[i] = mu[i-1] + np.random.normal(0, 1, 1)
         >>> # Simulated pp samples form the random walk time series
-        >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, size=(2, 50, 100))
+        >>> y_data = np.random.normal(2 + mu * 0.5, 0.5, size = (2, 50, 100))
         >>> az.plot_hdi(x_data, y_data)
 
     ``plot_hdi`` can also be given precalculated values with the argument ``hdi_data``. This example
