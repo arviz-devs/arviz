@@ -35,7 +35,7 @@ def plot_khat(
     show=None,
     **kwargs
 ):
-    r"""Plot Pareto tail indices :math:`\hat{k}` for diagnosing convergence in PISIS-LOO.
+    r"""Plot Pareto tail indices :math:`\hat{k}` for diagnosing convergence in PSIS-LOO.
 
     Parameters
     ----------
