@@ -39,7 +39,10 @@ def plot_khat(
 
     Parameters
     ----------
-    khats : ELPDData containing Pareto shapes information or array of Pareto tail indices.
+    khats : ELPDData or array-like
+        The input Pareto tail indices to be plotted. It can be an ``ELPDData`` object containing
+        Pareto shapes or an array. In this second case, all the values in the array are interpreted
+        as Pareto tail indices.
     color : str or array_like, default "C0"
         Colors of the scatter plot, if color is a str all dots will have the same color,
         if it is the size of the observations, each dot will have the specified color,
