@@ -68,7 +68,7 @@ def plot_khat(
         Figure size. If ``None`` it will be defined automatically.
     textsize : float, optional
         Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled
-        based on ``figsize``.
+        based on `figsize`.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
         a subset can be plotted for convenience. See :ref:`this section <common_coords>` for
