@@ -62,23 +62,23 @@ python setup.py install
 <tr>
 
   <td>
-  <a href="https://python.arviz.org/en/latest/examples/plot_forest_ridge.html">
+  <a href= "https://python.arviz.org/en/latest/examples/plot_forest_ridge.html">
   <img alt="Ridge plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_forest_ridge.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_forest_ridge.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_forest.html">
   <img alt="Forest Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_forest.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_forest.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_violin.html">
   <img alt="Violin Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_violin.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_violin.png" width="300" height="auto" />
   </a>
   </td>
 
@@ -88,21 +88,21 @@ python setup.py install
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_ppc.html">
   <img alt="Posterior predictive plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_ppc.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_ppc.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_dot.html">
   <img alt="Joint plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_dot.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_dot.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_posterior.html">
   <img alt="Posterior plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_posterior.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_posterior.png" width="300" height="auto" />
   </a>
   </td>
 
@@ -112,21 +112,21 @@ python setup.py install
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_density.html">
   <img alt="Density plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_density.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_density.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_pair.html">
   <img alt="Pair plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_pair.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_pair.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_pair_hex.html">
   <img alt="Hexbin Pair plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_pair_hex.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_pair_hex.png" width="300" height="auto" />
   </a>
   </td>
 
@@ -135,27 +135,30 @@ python setup.py install
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_trace.html">
   <img alt="Trace plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_trace.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_trace.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_energy.html">
   <img alt="Energy Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_energy.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_energy.png" width="300" height="auto" />
   </a>
   </td>
 
   <td>
   <a href="https://python.arviz.org/en/latest/examples/plot_rank.html">
   <img alt="Rank Plot"
-  src="https://raw.githubusercontent.com/arviz-devs/arviz/gh-pages/_images/mpl_plot_rank.png" />
+  src="https://python.arviz.org/en/latest/_images/mpl_plot_rank.png" width="300" height="auto" />
   </a>
   </td>
 
 </tr>
 </table>
-
+<div>
+  
+  <a href="https://python.arviz.org/en/latest/examples/index.html">And more...</a>
+</div>
 ## Dependencies
 
 ArviZ is tested on Python 3.7, 3.8 and 3.9, and depends on NumPy, SciPy, xarray, and Matplotlib.
