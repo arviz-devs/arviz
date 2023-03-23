@@ -23,6 +23,7 @@ from typing import (
     Union,
     overload,
 )
+import os
 
 import numpy as np
 import xarray as xr
@@ -438,6 +439,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         groups: Optional[List[str]] = None,
         engine: str = "h5netcdf",
         base_group: Optional[str] = None,
+        overwrite_existing: bool = True,
     ) -> str:
         """Write InferenceData to netcdf4 file.
 
@@ -464,7 +466,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if base_group is None:
             base_group = '/'
 
-        mode = "w"  # overwrite first, then append
+        if os.path.exists(filename) and not overwrite_existing:
+            mode = "a"  # overwrite first, then append
+        else:
+            mode = "w"
+
         if self._attrs:
             xr.Dataset(attrs=self._attrs).to_netcdf(filename, mode=mode, engine=engine, group=base_group)
             mode = "a"
