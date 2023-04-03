@@ -35,60 +35,60 @@ def plot_khat(
     show=None,
     **kwargs
 ):
-    r"""
-    Plot Pareto tail indices for diagnosing convergence.
+    r"""Plot Pareto tail indices :math:`\hat{k}` for diagnosing convergence in PSIS-LOO.
 
     Parameters
     ----------
-    khats : ELPDData containing Pareto shapes information or array of
-        Pareto tail indices.
-    color : str or array_like, optional
-        Colors of the scatter plot, if color is a str all dots will
-        have the same color, if it is the size of the observations,
-        each dot will have the specified color, otherwise, it will be
-        interpreted as a list of the dims to be used for the color
-        code. If Matplotlib c argument is passed, it will override
-        the color argument
-    xlabels : bool, optional
-        Use coords as xticklabels
-    show_hlines : bool, optional
+    khats : ELPDData or array-like
+        The input Pareto tail indices to be plotted. It can be an ``ELPDData`` object containing
+        Pareto shapes or an array. In this second case, all the values in the array are interpreted
+        as Pareto tail indices.
+    color : str or array_like, default "C0"
+        Colors of the scatter plot, if color is a str all dots will have the same color,
+        if it is the size of the observations, each dot will have the specified color,
+        otherwise, it will be interpreted as a list of the dims to be used for the color
+        code. If Matplotlib c argument is passed, it will override the color argument.
+    xlabels : bool, default False
+        Use coords as xticklabels.
+    show_hlines : bool, default False
         Show the horizontal lines, by default at the values [0, 0.5, 0.7, 1].
-    show_bins : bool, optional
+    show_bins : bool, default False
         Show the percentage of khats falling in each bin, as delimited by hlines.
     bin_format : str, optional
         The string is used as formatting guide calling ``bin_format.format(count, pct)``.
     threshold : float, optional
-        Show the labels of k values larger than threshold. Defaults to `None`,
-        no observations will be highlighted.
-    hover_label : bool, optional
+        Show the labels of k values larger than `threshold`. If ``None`` (default), no
+        observations will be highlighted.
+    hover_label : bool, default False
         Show the datapoint label when hovering over it with the mouse. Requires an interactive
         backend.
-    hover_format : str, optional
+    hover_format : str, default "{1}"
         String used to format the hover label via ``hover_format.format(idx, coord_label)``
     figsize : (float, float), optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If ``None`` it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled
+        based on `figsize`.
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
-        a subset can be plotted for convenience.
-    legend : bool, optional
+        a subset can be plotted for convenience. See :ref:`this section <common_coords>` for
+        usage examples.
+    legend : bool, default False
         Include a legend to the plot. Only taken into account when color argument is a dim name.
     markersize : int, optional
-        markersize for scatter plot. Defaults to `None` in which case it will
+        markersize for scatter plot. Defaults to ``None`` in which case it will
         be chosen based on autoscaling for figsize.
     ax : axes, optional
         Matplotlib axes or bokeh figures.
-    hlines_kwargs : dictionary, optional
+    hlines_kwargs : dict, optional
         Additional keywords passed to
         :meth:`matplotlib.axes.Axes.hlines`.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs : bool, optional
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
     kwargs :
@@ -137,17 +137,14 @@ def plot_khat(
 
     Notes
     -----
-    The Generalized Pareto distribution (GPD) may be used to diagnose
-    convergence rates for importance sampling.  GPD has parameters
-    offset, scale, and shape. The shape parameter is usually denoted
-    with ``k``. ``k`` also tells how many finite moments the
-    distribution has. The pre-asymptotic convergence rate of
-    importance sampling can be estimated based on the fractional
-    number of finite moments of the importance ratio distribution. GPD
-    is fitted to the largest importance ratios and the estimated shape
-    parameter ``k``, i.e., ``\hat{k}`` can then be used as a diagnostic
-    (most importantly if ``\hat{k} > 0.7``, then the convergence rate
-    is impractically low). See [1]_.
+    The Generalized Pareto distribution (GPD) diagnoses convergence rates for importance
+    sampling. GPD has parameters offset, scale, and shape. The shape parameter (:math:`k`)
+    tells the distribution's number of finite moments. The pre-asymptotic convergence rate
+    of importance sampling can be estimated based on the fractional number of finite moments
+    of the importance ratio distribution. GPD is fitted to the largest importance ratios and
+    interprets the estimated shape parameter :math:`k`, i.e., :math:`\hat{k}` can then be
+    used as a diagnostic (most importantly if :math:`\hat{k} > 0.7`, then the convergence
+    rate is impractically low). See [1]_.
 
     References
     ----------
