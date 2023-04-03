@@ -1,5 +1,4 @@
 beanmachine
-torch<2.0 --index-url https://download.pytorch.org/whl/cpu
 emcee
 pyjags
 pystan

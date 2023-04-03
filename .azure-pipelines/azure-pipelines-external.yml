@@ -44,7 +44,7 @@ jobs:
       python -m pip install --upgrade pip
       python -m pip install wheel
 
-      python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
+      python -m pip --no-cache-dir install torch<2.0 --index-url https://download.pytorch.org/whl/cpu
 
       if [ "$(pystan.version)" = "latest" ]; then
           python -m pip --no-cache-dir install pystan
