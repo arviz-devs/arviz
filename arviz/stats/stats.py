@@ -805,14 +805,19 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
     loo_lppd = loo_lppd_i.sum().compute().item()
     loo_lppd_se = (n_data_points * loo_lppd_i.var().compute().item()) ** 0.5
 
-    lppd = _wrap_xarray_ufunc(
-        _logsumexp,
-        log_likelihood,
-        func_kwargs={"b_inv": n_samples},
-        ufunc_kwargs=ufunc_kwargs,
-        dask_kwargs=dask_kwargs,
-        **kwargs,
-    ).sum().compute().item()
+    lppd = (
+        _wrap_xarray_ufunc(
+            _logsumexp,
+            log_likelihood,
+            func_kwargs={"b_inv": n_samples},
+            ufunc_kwargs=ufunc_kwargs,
+            dask_kwargs=dask_kwargs,
+            **kwargs,
+        )
+        .sum()
+        .compute()
+        .item()
+    )
     p_loo = lppd - loo_lppd / scale_value
 
     if not pointwise:
