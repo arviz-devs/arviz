@@ -33,7 +33,7 @@ def plot_bf(
 
     Notes
     -----
-    The bayes Factor is approximated pproximated as the Savage-Dickey density ratio
+    The bayes Factor is approximated as the Savage-Dickey density ratio
     algorithm presented in [1]_.
 
     Parameters
@@ -54,8 +54,8 @@ def plot_bf(
     figsize : (float, float), optional
         Figure size. If `None` it will be defined automatically.
     textsize: float, optional
-        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
-        on `figsize`.
+        Text size scaling factor for labels, titles and lines. If `None` it will be auto
+        scaled based on `figsize`.
     plot_kwargs : dicts, optional
         Additional keywords passed to :func:`matplotlib.pyplot.plot`.
     hist_kwargs : dicts, optional
@@ -78,7 +78,7 @@ def plot_bf(
 
     References
     ----------
-    .. [1] Heck, D., 2019. A caveat on the avage-Dickey density ratio:
+    .. [1] Heck, D., 2019. A caveat on the Savage-Dickey density ratio:
     The case of computing Bayes factors for regression parameters.
 
     Examples
