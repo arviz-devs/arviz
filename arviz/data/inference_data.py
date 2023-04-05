@@ -366,7 +366,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         regex : bool, default False
             Specifies where regex search should be used to extend the keyword arguments.
             This feature is currently experimental.
-        base_group: str, default "/"
+        base_group : str, default "/"
             The group in the netCDF file where the InferenceData is stored. By default, assumes that the file
             only contains an InferenceData object.
 
@@ -454,10 +454,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
             Write only these groups to netcdf file.
         engine : {"h5netcdf", "netcdf4"}, default "h5netcdf"
             Library used to read the netcdf file.
-        base_group: str, default "/"
+        base_group : str, default "/"
             The group in the netCDF file where the InferenceData is will be stored.
             By default, will write to the root of the netCDF file
-        overwrite_existing: bool, default True
+        overwrite_existing : bool, default True
             Whether to overwrite the existing file or append to it.
 
         Returns
