@@ -307,19 +307,55 @@ Module {mod}`bokeh.colors`
 (common_rope)=
 ## `rope`
 
-A dictionary of tuples with lower and upper values of the Region Of Practical Equivalence. If a list with
-one interval only is provided, the `ROPE` will be displayed across the `y-axis`. If more than one interval
-is provided the length of the list should match the number of variables.
+The rope argument is used to indicate the lower and upper limits of the Region Of Practical
+Equivalence (ROPE). These limits can be expressed in two ways, depending on whether
+the ROPE is common between all variables or not:
+
+1. A single list. If a single list of two floats is given as `rope` argument,
+   these two provided values will be used as limits of the ROPE in all plotted variables.
+2. A dictionary of lists.
+
+Example of using a single list as `rope`
 
 ```{code-cell} ipython3
-# list of ropes for different schools
-rope={'theta': [{'school': 'Choate',    'rope': (0, 3)},
-                  {'school': 'Phillips Andover', 'rope': (10, 14)},
-                  {'school': 'Hotchkiss', 'rope': (3, 9)},
-                  {'school': "St. Paul's", 'rope': (3, 8)},
-                 ]};
+az.plot_forest(non_centered_eight, var_names="~theta_t", rope=[-1, 2]);
+```
 
-az.plot_forest(non_centered_eight,rope=rope,var_names='theta',combined=True);
+An example of using a dictionary as `rope` to highlight the ROPE for a single variable:
+
+```{code-cell} ipython3
+rope = {'mu': [{"rope": (4, 5)}]}
+
+az.plot_forest(non_centered_eight, rope=rope, var_names='~theta_t', combined=True);
+```
+
+An example of using a dictionary as `rope` to highlight different ROPEs for different variables:
+
+```{code-cell} ipython3
+rope = {
+    "mu": [{"rope": (4, 5)}],
+    "theta": [
+        {"school": "Choate",    "rope": (0, 3)},
+        {"school": "Phillips Andover", "rope": (10, 14)},
+        {"school": "Hotchkiss", "rope": (3, 9)},
+        {"school": "St. Paul's", "rope": (3, 8)},
+    ]
+}
+
+az.plot_forest(non_centered_eight, rope=rope, var_names="~theta_t", combined=True);
+```
+
+Moreover, for multidimensional variables, it is easy to share a common ROPE for all its components
+with a different one for other variables:
+
+```{code-cell} ipython3
+rope = {
+    "mu": [{"rope": (4, 5)}],
+    "theta": [{"rope": (0, 3)}],
+    "tau": [{"rope": (0, 1)}],
+}
+
+az.plot_forest(non_centered_eight, rope=rope, var_names="~theta_t", combined=True);
 ```
 
 (common_legend)=
