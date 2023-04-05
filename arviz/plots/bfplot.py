@@ -54,8 +54,8 @@ def plot_bf(
     figsize : (float, float), optional
         Figure size. If `None` it will be defined automatically.
     textsize: float, optional
-        Text size scaling factor for labels, titles and lines. If `None` it will be auto scaled based
-        on `figsize`.
+        Text size scaling factor for labels, titles and lines. If `None` it will be auto
+        scaled based on `figsize`.
     plot_kwargs : dicts, optional
         Additional keywords passed to :func:`matplotlib.pyplot.plot`.
     hist_kwargs : dicts, optional
