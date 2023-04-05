@@ -812,7 +812,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
         ufunc_kwargs=ufunc_kwargs,
         dask_kwargs=dask_kwargs,
         **kwargs,
-    ).sum().compute.item()
+    ).sum().compute().item()
     p_loo = lppd - loo_lppd / scale_value
 
     if not pointwise:
