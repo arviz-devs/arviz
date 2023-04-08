@@ -1294,10 +1294,11 @@ class TestDataNetCDF:
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
+    @pytest.mark.parametrize("base_group", ['/','/test_group'])
     @pytest.mark.parametrize("groups_arg", [False, True])
     @pytest.mark.parametrize("compress", [True, False])
     @pytest.mark.parametrize("engine", ["h5netcdf", "netcdf4"])
-    def test_io_method(self, data, eight_schools_params, groups_arg, compress, engine):
+    def test_io_method(self, data, eight_schools_params, groups_arg, base_group, compress, engine):
         # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
@@ -1334,12 +1335,13 @@ class TestDataNetCDF:
             filepath,
             groups=("posterior", "observed_data") if groups_arg else None,
             compress=compress,
+            base_group=base_group,
         )
 
         # assert file has been saved correctly
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
-        inference_data2 = InferenceData.from_netcdf(filepath)
+        inference_data2 = InferenceData.from_netcdf(filepath,base_group=base_group)
         if groups_arg:  # if groups arg, update test dict to contain only saved groups
             test_dict = {
                 "posterior": ["eta", "theta", "mu", "tau"],
