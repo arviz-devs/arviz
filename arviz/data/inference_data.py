@@ -367,8 +367,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
             Specifies where regex search should be used to extend the keyword arguments.
             This feature is currently experimental.
         base_group : str, default "/"
-            The group in the netCDF file where the InferenceData is stored. By default, assumes that the file
-            only contains an InferenceData object.
+            The group in the netCDF file where the InferenceData is stored. By default,
+            assumes that the file only contains an InferenceData object.
 
         Returns
         -------
