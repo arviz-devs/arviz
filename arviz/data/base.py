@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
-import pkg_resources
+import importlib.resources
 import xarray as xr
 
 try:
@@ -339,13 +339,12 @@ def make_attrs(attrs=None, library=None):
         library_name = library.__name__
         default_attrs["inference_library"] = library_name
         try:
-            version = pkg_resources.get_distribution(library_name).version
+            version = importlib.metadata.version(library_name)
             default_attrs["inference_library_version"] = version
-        except pkg_resources.DistributionNotFound:
+        except importlib.metadata.PackageNotFoundError:
             if hasattr(library, "__version__"):
                 version = library.__version__
                 default_attrs["inference_library_version"] = version
-
     if attrs is not None:
         default_attrs.update(attrs)
     return default_attrs
