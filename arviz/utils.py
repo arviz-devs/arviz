@@ -8,7 +8,7 @@ from functools import lru_cache
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pkg_resources
+import importlib.resources
 from numpy import newaxis
 
 from .rcparams import rcParams
@@ -658,7 +658,7 @@ def _load_static_files():
 
     Clone from xarray.core.formatted_html_template.
     """
-    return [pkg_resources.resource_string("arviz", fname).decode("utf8") for fname in STATIC_FILES]
+    return [importlib.resources.read_text("arviz", fname) for fname in STATIC_FILES]
 
 
 class HtmlTemplate:
