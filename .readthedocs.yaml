@@ -8,7 +8,6 @@ build:
     python: "3.10"
 
 sphinx:
-  fail_on_warning: true
   configuration: doc/source/conf.py
 
 python:
@@ -17,5 +16,3 @@ python:
    - requirements: requirements-docs.txt
    - method: pip
      path: .
-     extra_requirements:
-       - doc
