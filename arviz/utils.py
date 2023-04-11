@@ -658,7 +658,7 @@ def _load_static_files():
 
     Clone from xarray.core.formatted_html_template.
     """
-    return [importlib.resources.read_text("arviz", fname) for fname in STATIC_FILES]
+    return [importlib.resources.files("arviz").joinpath(fname).read_text() for fname in STATIC_FILES]
 
 
 class HtmlTemplate:
