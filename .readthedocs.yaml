@@ -17,5 +17,5 @@ python:
    - requirements: requirements-docs.txt
    - method: pip
      path: .
-     requirements:
+     extra_requirements:
        - doc
