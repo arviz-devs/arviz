@@ -80,7 +80,7 @@ jobs:
       python -m pip install  --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
-      python -m pip install pytest-azurepipelines codecov
+      python -m pip install pytest-azurepipelines
     displayName: 'Install requirements'
 
   - script: |
