@@ -37,6 +37,8 @@ IO / General conversion
   to_datatree
   to_json
   to_netcdf
+  from_zarr
+  to_zarr
 
 
 General functions

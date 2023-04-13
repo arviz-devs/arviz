@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from ... import InferenceData, from_dict
+from ... import to_zarr, from_zarr
 
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -76,24 +77,24 @@ class TestDataZarr:
             # InferenceData method
             if store == 0:
                 # Tempdir
-                store = inference_data.to_zarr(store=None)
+                store = to_zarr(inference_data, store=None)
                 assert isinstance(store, MutableMapping)
             elif store == 1:
-                inference_data.to_zarr(store=filepath)
+                to_zarr(inference_data, store=filepath)
                 # assert file has been saved correctly
                 assert os.path.exists(filepath)
                 assert os.path.getsize(filepath) > 0
             elif store == 2:
                 store = zarr.storage.DirectoryStore(filepath)
-                inference_data.to_zarr(store=store)
+                to_zarr(inference_data, store=store)
                 # assert file has been saved correctly
                 assert os.path.exists(filepath)
                 assert os.path.getsize(filepath) > 0
 
             if isinstance(store, MutableMapping):
-                inference_data2 = InferenceData.from_zarr(store)
+                inference_data2 = from_zarr(store)
             else:
-                inference_data2 = InferenceData.from_zarr(filepath)
+                inference_data2 = from_zarr(filepath)
 
             # Everything in dict still available in inference_data2 ?
             fails = check_multiple_attrs(test_dict, inference_data2)
