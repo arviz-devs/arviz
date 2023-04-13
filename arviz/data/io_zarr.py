@@ -6,6 +6,8 @@ from .inference_data import InferenceData
 
 def from_zarr(store):
     return InferenceData.from_zarr(store)
+
+
 from_zarr.__doc__ = InferenceData.from_zarr.__doc__
 
 
@@ -41,6 +43,3 @@ def to_zarr(data, store=None, **kwargs):
     inference_data = convert_to_inference_data(data, **kwargs)
     zarr_group = inference_data.to_zarr(store=store)
     return zarr_group
-
-
-
