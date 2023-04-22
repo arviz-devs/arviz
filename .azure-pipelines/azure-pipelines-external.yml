@@ -10,16 +10,14 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_39_Latest:
-        python.version: "3.9"
-        pystan.version: "latest"
+      Python_310_Latest:
+        python.version: "3.10"
         cmdstanpy.version: "latest"
         emcee.version: "latest"
         name: "External latest"
 
-      Python_39_Special_versions:
-        python.version: "3.9"
-        pystan.version: 2.19.1.1
+      Python_310_Special_versions:
+        python.version: "3.10"
         cmdstanpy.version: "github"
         emcee.version: 2
         name: "External special"
@@ -46,16 +44,6 @@ jobs:
 
       python -m pip --no-cache-dir install torch<2.0 --index-url https://download.pytorch.org/whl/cpu
 
-      if [ "$(pystan.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install pystan
-      else
-          if [ "$(pystan.version)" = "latest" ]; then
-              python -m pip --no-cache-dir install pystan
-          else
-              python -m pip --no-cache-dir install pystan=="$(pystan.version)"
-          fi
-      fi
-
       if [ "$(cmdstanpy.version)" = "latest" ]; then
           python -m pip --no-cache-dir install cmdstanpy
       else
@@ -72,7 +60,7 @@ jobs:
           python -m pip --no-cache-dir install "emcee<3"
       fi
 
-      grep -Ev '^pystan|^cmdstanpy|^emcee' requirements-external.txt | xargs python -m pip install
+      grep -Ev '^cmdstanpy|^emcee' requirements-external.txt | xargs python -m pip install
 
     displayName: 'Install packages'
 
@@ -86,10 +74,6 @@ jobs:
   - script: |
       python -m pip install .
     displayName: 'Install ArviZ package'
-
-  - script: |
-      python -m pip install "setuptools>=48.0,<60" -U
-    displayName: 'Temporary httpstan setuptools fix 2022-11-29'
 
   - script: |
       python -m pip freeze

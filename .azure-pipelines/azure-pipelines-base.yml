@@ -14,18 +14,14 @@ jobs:
         python.version: "3.10"
         PyPIGithub: false
         name: "Python 3.10"
+      Python_310_preview:
+        python.version: "3.10"
+        PyPIGithub: true
+        name: "Python 3.10"
       Python_39:
         python.version: "3.9"
         PyPIGithub: false
         name: "Python 3.9"
-      Python_39_preview:
-        python.version: "3.9"
-        PyPIGithub: true
-        name: "Python 3.9"
-      Python_38:
-        python.version: "3.8"
-        PyPIGithub: false
-        name: "Python 3.8"
 
 
   steps:
