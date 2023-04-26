@@ -1,4 +1,5 @@
 # Plotting and reporting Bayes Factor given idata, var name, prior distribution and reference value
+# pylint: disable=unbalanced-tuple-unpacking
 import logging
 
 from numpy import interp
