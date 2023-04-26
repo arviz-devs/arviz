@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 from ...distplot import plot_dist
@@ -10,11 +9,8 @@ def plot_bf(
     ax,
     bf_10,
     bf_01,
-    xlim,
     prior,
     posterior,
-    prior_pdf,
-    posterior_pdf,
     ref_val,
     prior_at_ref_val,
     posterior_at_ref_val,
@@ -52,14 +48,22 @@ def plot_bf(
     if ax is None:
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
-    x = np.linspace(*xlim, 5000)
-
-    if posterior.dtype.kind == "f":
-        ax.plot(x, prior_pdf(x), color=colors[0], label="Prior", **plot_kwargs)
-        ax.plot(x, posterior_pdf(x), color=colors[1], label="Posterior", **plot_kwargs)
-    elif posterior.dtype.kind == "i":
-        plot_dist(prior, color=colors[0], label="Prior", ax=ax, hist_kwargs=hist_kwargs)
-        plot_dist(posterior, color=colors[1], label="Posterior", ax=ax, hist_kwargs=hist_kwargs)
+    plot_dist(
+        prior,
+        color=colors[0],
+        label="Prior",
+        ax=ax,
+        plot_kwargs=plot_kwargs,
+        hist_kwargs=hist_kwargs,
+    )
+    plot_dist(
+        posterior,
+        color=colors[1],
+        label="Posterior",
+        ax=ax,
+        plot_kwargs=plot_kwargs,
+        hist_kwargs=hist_kwargs,
+    )
 
     ax.plot(ref_val, posterior_at_ref_val, "ko", lw=1.5)
     ax.plot(ref_val, prior_at_ref_val, "ko", lw=1.5)
