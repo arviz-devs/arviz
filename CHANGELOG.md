@@ -4,6 +4,8 @@
 
 ### New features
 
+- Bayes Factor plot: Use arviz's kde instead of the one from scipy ([2237](https://github.com/arviz-devs/arviz/pull/2237))
+
 ### Maintenance and fixes
 
 ### Deprecation
