@@ -191,9 +191,6 @@ class EmceeConverter:
             if int(self.emcee.__version__[0]) >= 3:
                 blobs = self.sampler.get_blobs()
             else:
-                # debug print
-                print(np.array(self.sampler.blobs, dtype=object), flush=True)
-                print(np.array(self.sampler.blobs), flush=True)
                 blobs = np.array(self.sampler.blobs, dtype=object)
             if (blobs is None or blobs.size == 0) and self.blob_names:
                 raise ValueError("No blobs in sampler, blob_names must be None")
