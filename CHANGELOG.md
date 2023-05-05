@@ -19,6 +19,7 @@
 ### Maintenance and fixes
 - Fix memory usage and improve efficiency in `from_emcee` ([2215](https://github.com/arviz-devs/arviz/pull/2215))
 - Lower pandas version needed ([2217](https://github.com/arviz-devs/arviz/pull/2217))
+- Fixes for creating numpy object array ([2233](https://github.com/arviz-devs/arviz/pull/2233) and [2239](https://github.com/arviz-devs/arviz/pull/2239))
 
 ### Deprecation
 
