@@ -96,10 +96,6 @@ jobs:
     displayName: 'Use relative imports'
 
   - script: |
-      python -m madforhooks.no_print_statements $(find arviz -name '*.py' -not -path 'arviz/tests/*')
-    displayName: 'Disallow debugging print statements (use `file=sys.stdout` if not debugging)'
-
-  - script: |
       pytest arviz/tests/helpers.py
     displayName: 'precompile models'
 
