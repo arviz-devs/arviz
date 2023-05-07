@@ -8,6 +8,8 @@
 
 ### Maintenance and fixes
 
+- Fixes for creating numpy object array ([2233](https://github.com/arviz-devs/arviz/pull/2233) and [2239](https://github.com/arviz-devs/arviz/pull/2239))
+
 ### Deprecation
 
 ### Documentation
