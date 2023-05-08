@@ -1,13 +1,13 @@
 """Low level converters usually used by other functions."""
 import datetime
 import functools
+import importlib.resources
 import re
 import warnings
 from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
-import importlib.resources
 import xarray as xr
 
 try:
