@@ -156,12 +156,12 @@ python setup.py install
 </tr>
 </table>
 <div>
-  
+
   <a href="https://python.arviz.org/en/latest/examples/index.html">And more...</a>
 </div>
 ## Dependencies
 
-ArviZ is tested on Python 3.7, 3.8 and 3.9, and depends on NumPy, SciPy, xarray, and Matplotlib.
+ArviZ is tested on Python 3.9, 3.10 and 3.11, and depends on NumPy, SciPy, xarray, and Matplotlib.
 
 
 ## Citation
