@@ -181,7 +181,7 @@ class maybe_numba_fn:  # pylint: disable=invalid-name
         """Memoized compiled function."""
         try:
             numba = importlib.import_module("numba")
-            numba_fn = numba.jit(**self.kwargs)(self.function)
+            numba_fn = numba.jit(nopython=False, **self.kwargs)(self.function)
         except ImportError:
             numba_fn = self.function
         return numba_fn
@@ -258,7 +258,7 @@ def conditional_jit(_func=None, **kwargs):
 
     Notes
     -----
-        If called without arguments  then return wrapped function.
+        If called without arguments then return wrapped function.
 
         @conditional_jit
         def my_func():
