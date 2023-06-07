@@ -152,12 +152,16 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     if values.dtype.kind == "i":
         hist_kwargs.setdefault("align", "left")
-        ticks = bins[:-1]
     else:
         hist_kwargs.setdefault("align", "mid")
-        ticks = (bins[1:] + bins[:-1]) / 2
 
     n, bins, _ = ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
+
+    if values.dtype.kind == "i":
+        ticks = bins[:-1]
+    else:
+        ticks = (bins[1:] + bins[:-1]) / 2
+
 
     if rotated:
         ax.set_yticks(ticks)
