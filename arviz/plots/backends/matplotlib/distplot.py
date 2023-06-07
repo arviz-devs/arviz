@@ -67,7 +67,6 @@ def plot_dist(
         hist_kwargs.setdefault("color", color)
         hist_kwargs.setdefault("label", label)
         hist_kwargs.setdefault("rwidth", 0.9)
-        hist_kwargs.setdefault("align", "left")
         hist_kwargs.setdefault("density", True)
 
         if rotated:
@@ -151,12 +150,20 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     if bins is None:
         bins = get_bins(values)
 
+
+    if values.dtype.kind == "i":
+        hist_kwargs.setdefault("align", "left")
+        ticks = bins[:-1]
+    else:
+        hist_kwargs.setdefault("align", "mid")
+        ticks = (bins[1:] + bins[:-1]) / 2
+
     n, bins, _ = ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
 
     if rotated:
-        ax.set_yticks(bins[:-1])
+        ax.set_yticks(ticks)
     elif not is_circular:
-        ax.set_xticks(bins[:-1])
+        ax.set_xticks(ticks)
 
     if is_circular:
         ax.set_ylim(0, 1.5 * n.max())
