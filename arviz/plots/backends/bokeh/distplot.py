@@ -176,7 +176,7 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
         ax = set_bokeh_circular_ticks_labels(ax, hist, labels)
 
     if values.dtype.kind == "i":
-        edges -= .5
+        edges -= 0.5
     elif rotated:
         ax.quad(top=edges[:-1], bottom=edges[1:], left=0, right=hist, **hist_kwargs)
     else:

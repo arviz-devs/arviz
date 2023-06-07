@@ -150,7 +150,6 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     if bins is None:
         bins = get_bins(values)
 
-
     if values.dtype.kind == "i":
         hist_kwargs.setdefault("align", "left")
         ticks = bins[:-1]
