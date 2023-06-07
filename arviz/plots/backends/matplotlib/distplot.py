@@ -162,7 +162,6 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     else:
         ticks = (bins[1:] + bins[:-1]) / 2
 
-
     if rotated:
         ax.set_yticks(ticks)
     elif not is_circular:
