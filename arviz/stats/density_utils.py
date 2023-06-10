@@ -240,7 +240,7 @@ def _fixed_point(t, N, k_sq, a_sq):
 
     for j in np.arange(l - 1, 2 - 1, -1):
         c1 = (1 + 0.5 ** (j + 0.5)) / 3
-        c2 = np.product(np.arange(1.0, 2 * j + 1, 2, dtype=np.float64))
+        c2 = np.prod(np.arange(1.0, 2 * j + 1, 2, dtype=np.float64))
         c2 /= (np.pi / 2) ** 0.5
         t_j = np.power((c1 * (c2 / (N * f))), (2.0 / (3.0 + 2.0 * j)))
         f = np.sum(k_sq**j * a_sq * np.exp(-k_sq * np.pi**2.0 * t_j))
