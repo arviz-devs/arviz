@@ -7,8 +7,9 @@
 - Bayes Factor plot: Use arviz's kde instead of the one from scipy ([2237](https://github.com/arviz-devs/arviz/pull/2237))
 
 ### Maintenance and fixes
-
+- Fix numba deprecation warning ([2246](https://github.com/arviz-devs/arviz/pull/2246))
 - Fixes for creating numpy object array ([2233](https://github.com/arviz-devs/arviz/pull/2233) and [2239](https://github.com/arviz-devs/arviz/pull/2239))
+
 
 ### Deprecation
 
