@@ -174,6 +174,7 @@ class maybe_numba_fn:  # pylint: disable=invalid-name
     def __init__(self, function, **kwargs):
         """Wrap a function and save compilation keywords."""
         self.function = function
+        kwargs.setdefault("nopython", False)
         self.kwargs = kwargs
 
     @lazy_property

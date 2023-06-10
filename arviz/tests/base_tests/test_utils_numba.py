@@ -48,7 +48,7 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
 
     # pylint: disable=unpacking-non-sequence
     function_results, wrapper_result = placeholder_func()
-    assert wrapper_result == {"keyword_argument": "A keyword argument"}
+    assert wrapper_result == {"keyword_argument": "A keyword argument", "nopython": False}
     assert function_results == "output"
 
 
