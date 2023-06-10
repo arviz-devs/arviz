@@ -5,7 +5,6 @@
 ### New features
 
 - Bayes Factor plot: Use arviz's kde instead of the one from scipy ([2237](https://github.com/arviz-devs/arviz/pull/2237))
-- InferenceData objects can now be appended to existing netCDF4 files
 - InferenceData objects can now be appended to existing netCDF4 files and to specific groups within them ([2227](https://github.com/arviz-devs/arviz/pull/2227))
 
 ### Maintenance and fixes
