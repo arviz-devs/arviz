@@ -149,7 +149,6 @@ def list_datasets():
     """Get a string representation of all available datasets with descriptions."""
     lines = []
     for name, resource in itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()):
-
         if isinstance(resource, LocalFileMetadata):
             location = f"local: {resource.filename}"
         elif isinstance(resource, RemoteFileMetadata):

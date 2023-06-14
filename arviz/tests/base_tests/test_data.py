@@ -1,6 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
 
+import importlib
 import os
 from collections import namedtuple
 from copy import deepcopy
@@ -21,6 +22,7 @@ from ... import (
     concat,
     convert_to_dataset,
     convert_to_inference_data,
+    from_datatree,
     from_dict,
     from_json,
     from_netcdf,
@@ -40,6 +42,7 @@ from ..helpers import (  # pylint: disable=unused-import
     draws,
     eight_schools_params,
     models,
+    running_on_ci,
 )
 
 
@@ -1381,6 +1384,19 @@ class TestJSON:
 
         os.remove(filepath)
         assert not os.path.exists(filepath)
+
+
+@pytest.mark.skipif(
+    not (importlib.util.find_spec("datatree") or running_on_ci()),
+    reason="test requires xarray-datatree library",
+)
+class TestDataTree:
+    def test_datatree(self):
+        idata = load_arviz_data("centered_eight")
+        dt = idata.to_datatree()
+        idata_back = from_datatree(dt)
+        assert all(assert_identical(ds, idata_back[group]) for group, ds in idata.items())
+        assert all(group in dt.children for group in idata.groups)
 
 
 class TestConversions:
