@@ -517,17 +517,17 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise ModuleNotFoundError(
                 "datatree must be installed in order to use InferenceData.to_datatree"
             ) from err
-        return DataTree({group: ds for group, ds in self.items()})
+        return DataTree.from_dict({group: ds for group, ds in self.items()})
 
     @staticmethod
-    def from_datatree(dt):
+    def from_datatree(datatree):
         """Create an InferenceData object from a :class:`~datatree.DataTree`.
 
         Parameters
         ----------
         dt : DataTree
         """
-        return InferenceData(**{group: sub_dt.to_dataset() for group, sub_dt in dt.items()})
+        return InferenceData(**{group: sub_dt.to_dataset() for group, sub_dt in datatree.items()})
 
     def to_dict(self, groups=None, filter_groups=None):
         """Convert InferenceData to a dictionary following xarray naming conventions.
