@@ -12,11 +12,11 @@ def to_datatree(data):
     return data.to_datatree()
 
 
-def from_datatree(dt):
+def from_datatree(datatree):
     """Create an InferenceData object from a :class:`~datatree.DataTree`.
 
     Parameters
     ----------
-    dt : DataTree
+    datatree : DataTree
     """
-    return InferenceData.from_datatree(dt)
+    return InferenceData.from_datatree(datatree)

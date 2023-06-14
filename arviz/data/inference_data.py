@@ -525,7 +525,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        dt : DataTree
+        datatree : DataTree
         """
         return InferenceData(**{group: sub_dt.to_dataset() for group, sub_dt in datatree.items()})
 
