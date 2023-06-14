@@ -1395,8 +1395,9 @@ class TestDataTree:
         idata = load_arviz_data("centered_eight")
         dt = idata.to_datatree()
         idata_back = from_datatree(dt)
-        assert all(assert_identical(ds, idata_back[group]) for group, ds in idata.items())
-        assert all(group in dt.children for group in idata.groups)
+        for group, ds in idata.items():
+            assert_identical(ds, idata_back[group])
+        assert all([group in dt.children for group in idata.groups()])
 
 
 class TestConversions:
