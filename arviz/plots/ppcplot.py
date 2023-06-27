@@ -63,7 +63,7 @@ def plot_ppc(
         Defaults to ``True``.
     observed: bool, default True
         Whether or not to plot the observed data.
-    observed: bool, default False
+    observed_rug: bool, default False
         Whether or not to plot a rug plot for the observed data. Only valid if `observed` is
         `True` and for kind `kde` or `cumulative`.
     color: str
