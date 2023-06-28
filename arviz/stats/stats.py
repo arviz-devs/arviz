@@ -771,7 +771,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
-    n_data_points = np.product(shape[:-1])
+    n_data_points = np.prod(shape[:-1])
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
     if scale == "deviance":
@@ -1628,7 +1628,7 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
-    n_data_points = np.product(shape[:-1])
+    n_data_points = np.prod(shape[:-1])
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
     kwargs = {"input_core_dims": [["__sample__"]]}

@@ -2,13 +2,13 @@
 """General utilities."""
 import functools
 import importlib
+import importlib.resources
 import re
 import warnings
 from functools import lru_cache
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pkg_resources
 from numpy import newaxis
 
 from .rcparams import rcParams
@@ -174,6 +174,7 @@ class maybe_numba_fn:  # pylint: disable=invalid-name
     def __init__(self, function, **kwargs):
         """Wrap a function and save compilation keywords."""
         self.function = function
+        kwargs.setdefault("nopython", False)
         self.kwargs = kwargs
 
     @lazy_property
@@ -658,7 +659,9 @@ def _load_static_files():
 
     Clone from xarray.core.formatted_html_template.
     """
-    return [pkg_resources.resource_string("arviz", fname).decode("utf8") for fname in STATIC_FILES]
+    return [
+        importlib.resources.files("arviz").joinpath(fname).read_text() for fname in STATIC_FILES
+    ]
 
 
 class HtmlTemplate:

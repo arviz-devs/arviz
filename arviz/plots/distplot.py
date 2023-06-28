@@ -37,58 +37,57 @@ def plot_dist(
     show=None,
     **kwargs,
 ):
-    """Plot distribution as histogram or kernel density estimates.
+    r"""Plot distribution as histogram or kernel density estimates.
 
     By default continuous variables are plotted using KDEs and discrete ones using histograms
 
     Parameters
     ----------
     values : array-like
-        Values to plot.
+        Values to plot from an unknown continuous or discrete distribution.
     values2 : array-like, optional
         Values to plot. If present, a 2D KDE or a hexbin will be estimated.
     color : string
         valid matplotlib color.
-    kind : string
+    kind : string, default "auto"
         By default ("auto") continuous variables will use the kind defined by rcParam
         ``plot.density_kind`` and discrete ones will use histograms.
         To override this use "hist" to plot histograms and "kde" for KDEs.
-    cumulative : bool
+    cumulative : bool, default False
         If true plot the estimated cumulative distribution function. Defaults to False.
         Ignored for 2D KDE.
     label : string
         Text to include as part of the legend.
-    rotated : bool
+    rotated : bool, default False
         Whether to rotate the 1D KDE plot 90 degrees.
-    rug : bool
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
+    rug : bool, default False
+        Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>`_ for a specific subset
+        of values. Ignored for 2D KDE.
     bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when ``is_circular`` is False
         and "taylor" (for now) when ``is_circular`` is True.
-        Defaults to "default" which means "experimental" when variable is not circular
-        and "taylor" when it is.
-    quantiles : list
+        Defaults to "experimental" when variable is not circular and "taylor" when it is.
+    quantiles : list, optional
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
-        Defaults to None.
-    contour : bool
-        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
-    fill_last : bool
-        If True fill the last contour of the 2D KDE plot. Defaults to True.
-    figsize : tuple
-        Figure size. If None it will be defined automatically.
-    textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``. Not implemented for bokeh backend.
+    contour : bool, default True
+        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
+    fill_last : bool, default True
+        If True fill the last contour of the 2D KDE plot.
+    figsize : (float, float), optional
+        Figure size. If `None` it will be defined automatically.
+    textsize : float, optional
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
+        on `figsize`. Not implemented for bokeh backend.
     plot_kwargs : dict
-        Keywords passed to the pdf line of a 1D KDE.
-        Passed to :func:`arviz.plot_kde` as ``plot_kwargs``.
+        Keywords passed to the pdf line of a 1D KDE. Passed to :func:`arviz.plot_kde` as
+        ``plot_kwargs``.
     fill_kwargs : dict
         Keywords passed to the fill under the line (use fill_kwargs={'alpha': 0} to disable fill).
         Ignored for 2D KDE. Passed to :func:`arviz.plot_kde` as ``fill_kwargs``.
     rug_kwargs : dict
-        Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE
+        Keywords passed to the rug plot. Ignored if ``rug=False`` or for 2D KDE
         Use ``space`` keyword (float) to control the position of the rugplot.
         The larger this number the lower the rugplot. Passed to
         :func:`arviz.plot_kde` as ``rug_kwargs``.
@@ -101,7 +100,7 @@ def plot_dist(
     hist_kwargs : dict
         Keyword arguments used to customize the histogram. Ignored when plotting a KDE.
         They are passed to :meth:`matplotlib.axes.Axes.hist` if using matplotlib,
-        or to :meth:`bokeh.plotting.Figure.quad` if using bokeh. In bokeh case,
+        or to :meth:`bokeh.plotting.figure.quad` if using bokeh. In bokeh case,
         the following extra keywords are also supported:
 
         * ``color``: replaces the ``fill_color`` and ``line_color`` of the ``quad`` method
@@ -109,29 +108,29 @@ def plot_dist(
         * ``density``: normalize histogram to represent a probability density function,
           Defaults to ``True``
 
-        * ``cumulative``: plot the cumulative counts. Defaults to ``False``
+        * ``cumulative``: plot the cumulative counts. Defaults to ``False``.
 
-    is_circular : {False, True, "radians", "degrees"}. Default False.
+    is_circular : {False, True, "radians", "degrees"}, default False
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
         default input type is "radians". When this argument is present, it interprets the
         values passed are from a circular variable measured in radians and a circular KDE is
         used. Inputs in "degrees" will undergo an internal conversion to radians. Only valid
-        for 1D KDE. Defaults to False.
-    ax : axes, optional
-        Matplotlib axes or bokeh figures.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs : bool, optional
+        for 1D KDE.
+    ax : matplotlib_axes or bokeh_figure, optional
+        Matplotlib or bokeh targets on which to plot. If not supplied, Arviz will create
+        its own plot area (and return it).
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_kwargs :dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
-        For additional documentation
-        check the plotting method of the backend.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib axes or bokeh figure
 
     See Also
     --------

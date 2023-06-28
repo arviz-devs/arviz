@@ -240,7 +240,7 @@ def _fixed_point(t, N, k_sq, a_sq):
 
     for j in np.arange(l - 1, 2 - 1, -1):
         c1 = (1 + 0.5 ** (j + 0.5)) / 3
-        c2 = np.product(np.arange(1.0, 2 * j + 1, 2, dtype=np.float64))
+        c2 = np.prod(np.arange(1.0, 2 * j + 1, 2, dtype=np.float64))
         c2 /= (np.pi / 2) ** 0.5
         t_j = np.power((c1 * (c2 / (N * f))), (2.0 / (3.0 + 2.0 * j)))
         f = np.sum(k_sq**j * a_sq * np.exp(-k_sq * np.pi**2.0 * t_j))
@@ -303,7 +303,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
     if custom_lims[1] is None:
         custom_lims[1] = x_max
 
-    all_numeric = all(isinstance(i, (int, float, np.integer, np.float)) for i in custom_lims)
+    all_numeric = all(isinstance(i, (int, float, np.integer, np.number)) for i in custom_lims)
     if not all_numeric:
         raise TypeError(
             "Elements of `custom_lims` must be numeric or None.\nAt least one of them is not."

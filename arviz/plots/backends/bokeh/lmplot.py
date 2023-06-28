@@ -80,7 +80,6 @@ def plot_lm(
     y_model_mean_kwargs.setdefault("line_width", 2)
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
-
         _, _, _, y_plotters = y[i]
         _, _, _, x_plotters = x[i]
         legend_it = []
@@ -124,9 +123,8 @@ def plot_lm(
         if y_model is not None:
             _, _, _, y_model_plotters = y_model[i]
             if kind_model == "lines":
-
                 model_legend = ax_i.multi_line(
-                    [np.tile(x_plotters, (num_samples, 1))],
+                    [np.tile(np.array(x_plotters, dtype=object), (num_samples, 1))],
                     [np.transpose(y_model_plotters)],
                     **y_model_plot_kwargs,
                 )

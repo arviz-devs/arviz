@@ -129,7 +129,7 @@ class PyroConverter:
     def sample_stats_to_xarray(self):
         """Extract sample_stats from Pyro posterior."""
         divergences = self.posterior.diagnostics()["divergences"]
-        diverging = np.zeros((self.nchains, self.ndraws), dtype=np.bool)
+        diverging = np.zeros((self.nchains, self.ndraws), dtype=bool)
         for i, k in enumerate(sorted(divergences)):
             diverging[i, divergences[k]] = True
         data = {"diverging": diverging}

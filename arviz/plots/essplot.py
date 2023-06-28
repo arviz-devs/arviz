@@ -49,15 +49,15 @@ def plot_ess(
     ----------
     idata : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
-        Refer to documentation of :func:`arviz.convert_to_dataset` for details
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     var_names : list of str, optional
         Variables to be plotted. Prefix the variables by ``~`` when you want to exclude
-        them from the plot. See the :ref:`this section <common_var_names>` for usage examples.
+        them from the plot. See :ref:`this section <common_var_names>` for usage examples.
     filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
-        the :ref:`this section <common_filter_vars>` for usage examples.
+        :ref:`this section <common_filter_vars>` for usage examples.
     kind : {"local", "quantile", "evolution"}, default "local"
         Specify the kind of plot:
 
@@ -72,14 +72,15 @@ def plot_ess(
         Show relative ess in plot ``ress = ess / N``.
     coords : dict, optional
         Coordinates of `var_names` to be plotted. Passed to :meth:`xarray.Dataset.sel`.
+        See :ref:`this section <common_coords>` for usage examples.
     grid : tuple, optional
         Number of rows and columns. By default, the rows and columns are
-        automatically inferred.
+        automatically inferred. See :ref:`this section <common_grid>` for usage examples.
     figsize : (float, float), optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If ``None`` it will be defined automatically.
     textsize : float, optional
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on `figsize`.
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled
+        based on `figsize`.
     rug : bool, default False
         Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>`_ for a specific subset of values.
     rug_kind : str, default "diverging"
@@ -97,7 +98,7 @@ def plot_ess(
         Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        A 2D array of locations into which to plot the densities. If not supplied, ArviZ will create
         its own array of plot areas (and return it).
     extra_kwargs : dict, optional
         If evolution plot, `extra_kwargs` is used to plot ess tail and differentiate it
@@ -124,7 +125,7 @@ def plot_ess(
     **kwargs
         Passed as-is to :meth:`mpl:matplotlib.axes.Axes.hist` or
         :meth:`mpl:matplotlib.axes.Axes.plot` function depending on the
-        value of ``kind``.
+        value of `kind`.
 
     Returns
     -------
@@ -136,7 +137,9 @@ def plot_ess(
 
     References
     ----------
-    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    .. [1] Vehtari et al. (2019). Rank-normalization, folding, and
+        localization: An improved Rhat for assessing convergence of
+        MCMC https://arxiv.org/abs/1903.08008
 
     Examples
     --------

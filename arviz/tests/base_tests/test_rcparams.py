@@ -288,18 +288,18 @@ def test_stats_information_criterion(models):
 
 def test_http_type_request(monkeypatch):
     def _urlretrive(url, _):
-        raise Exception(f"URL Retrieved: {url}")
+        raise ValueError(f"URL Retrieved: {url}")
 
     # Hijack url retrieve to inspect url passed
     monkeypatch.setattr(datasets, "urlretrieve", _urlretrive)
 
     # Test HTTPS default
-    with pytest.raises(Exception) as error:
+    with pytest.raises(ValueError) as error:
         datasets.load_arviz_data("radon")
         assert "https://" in str(error)
 
     # Test HTTP setting
-    with pytest.raises(Exception) as error:
+    with pytest.raises(ValueError) as error:
         rcParams["data.http_protocol"] = "http"
         datasets.load_arviz_data("radon")
         assert "http://" in str(error)

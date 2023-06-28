@@ -141,6 +141,8 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     if hist_kwargs.pop("cumulative", False):
         hist = np.cumsum(hist)
         hist /= hist[-1]
+    if values.dtype.kind == "i":
+        edges = edges.astype(float) - 0.5
 
     if is_circular:
 
@@ -174,7 +176,6 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
         )
 
         ax = set_bokeh_circular_ticks_labels(ax, hist, labels)
-
     elif rotated:
         ax.quad(top=edges[:-1], bottom=edges[1:], left=0, right=hist, **hist_kwargs)
     else:

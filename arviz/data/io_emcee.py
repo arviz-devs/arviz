@@ -116,12 +116,13 @@ class EmceeConverter:
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         # Use emcee3 syntax, else use emcee2
+        if hasattr(self.sampler, "get_chain"):
+            samples_ary = self.sampler.get_chain().swapaxes(0, 1)
+        else:
+            samples_ary = self.sampler.chain
+
         data = {
-            var_name: (
-                self.sampler.get_chain()[(..., idx)].swapaxes(0, 1)
-                if hasattr(self.sampler, "get_chain")
-                else self.sampler.chain[(..., idx)]
-            )
+            var_name: (samples_ary[(..., idx)])
             for idx, var_name in zip(self.slices, self.var_names)
         }
         return dict_to_dataset(
@@ -190,7 +191,7 @@ class EmceeConverter:
             if int(self.emcee.__version__[0]) >= 3:
                 blobs = self.sampler.get_blobs()
             else:
-                blobs = np.array(self.sampler.blobs)
+                blobs = np.array(self.sampler.blobs, dtype=object)
             if (blobs is None or blobs.size == 0) and self.blob_names:
                 raise ValueError("No blobs in sampler, blob_names must be None")
             if len(blobs.shape) == 2:

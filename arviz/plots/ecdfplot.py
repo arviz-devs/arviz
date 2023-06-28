@@ -28,63 +28,70 @@ def plot_ecdf(
     backend_kwargs=None,
     **kwargs
 ):
-    """Plot ECDF or ECDF-Difference Plot with Confidence bands.
+    r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
 
-    This plot uses the simulated based algorithm presented in the paper "Graphical Test for
-    Discrete Uniformity and its Applications in Goodness of Fit Evaluation and
-    Multiple Sample Comparison" [1]_.
+    Plots of the empirical CDF estimates of an array. When `values2` argument is provided,
+    the two empirical CDFs are overlaid with the distribution of `values` on top
+    (in a darker shade) and confidence bands in a more transparent shade. Optionally, the difference
+    between the two empirical CDFs can be computed, and the PIT for a single dataset or a comparison
+    between two samples.
+
+    Notes
+    -----
+    This plot computes the confidence bands with the simulated based algorithm presented in [1]_.
 
     Parameters
     ----------
     values : array-like
-        Values to plot from an unknown continuous or discrete distribution
+        Values to plot from an unknown continuous or discrete distribution.
     values2 : array-like, optional
-        Values to compare to the original sample
-    cdf : function, optional
-        Cumulative distribution function of the distribution to compare the original sample to
-    difference : bool, optional, Defaults False
-        If true then plot ECDF-difference plot otherwise ECDF plot
-    pit : bool, optional
-        If True plots the ECDF or ECDF-diff of PIT of sample
-    confidence_bands : bool, optional, Defaults True
-        If True plots the simultaneous or pointwise confidence bands with 1 - fpr confidence level
-    pointwise : bool, optional, Defaults False
-        If True plots pointwise confidence bands otherwise simultaneous bands
-    npoints : int, optional, Defaults 100
-        This denotes the granularity size of our plot
-        i.e the number of evaluation points for our ecdf or ecdf-difference plot
-    num_trials : int, optional, Defaults 500
-        The number of random ECDFs to generate to construct simultaneous confidence bands
-    fpr : float, optional, Defaults 0.05
-        The type I error rate s.t 1 - fpr denotes the confidence level of bands
-    figsize : tuple, optional
-        Figure size. If None it will be defined automatically.
-    fill_band : bool, optional
-        Use fill_between to mark the area inside the credible interval.
-        Otherwise, plot the border lines.
+        Values to compare to the original sample.
+    cdf : callable, optional
+        Cumulative distribution function of the distribution to compare the original sample.
+    difference : bool, default False
+        If True then plot ECDF-difference plot otherwise ECDF plot.
+    pit : bool, default False
+        If True plots the ECDF or ECDF-diff of PIT of sample.
+    confidence_bands : bool, default None
+        If True plots the simultaneous or pointwise confidence bands with `1 - fpr`
+        confidence level.
+    pointwise : bool, default False
+        If True plots pointwise confidence bands otherwise simultaneous bands.
+    npoints : int, default 100
+        This denotes the granularity size of our plot i.e the number of evaluation points
+        for the ecdf or ecdf-difference plots.
+    num_trials : int, default 500
+        The number of random ECDFs to generate for constructing simultaneous confidence bands.
+    fpr : float, default 0.05
+        The type I error rate s.t `1 - fpr` denotes the confidence level of bands.
+    figsize : (float,float), optional
+        Figure size. If `None` it will be defined automatically.
+    fill_band : bool, default True
+        If True it fills in between to mark the area inside the confidence interval. Otherwise,
+        plot the border lines.
     plot_kwargs : dict, optional
         Additional kwargs passed to :func:`mpl:matplotlib.pyplot.step` or
-        :meth:`bokeh:bokeh.plotting.Figure.step`
+        :meth:`bokeh.plotting.figure.step`
     fill_kwargs : dict, optional
         Additional kwargs passed to :func:`mpl:matplotlib.pyplot.fill_between` or
         :meth:`bokeh:bokeh.plotting.Figure.varea`
     plot_outline_kwargs : dict, optional
         Additional kwargs passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
         :meth:`bokeh:bokeh.plotting.Figure.line`
-    ax : axes, optional
+    ax :axes, optional
         Matplotlib axes or bokeh figures.
     show : bool, optional
         Call backend show function.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`mpl:matplotlib.pyplot.subplots` or
-        :meth:`bokeh:bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figure
 
     References
     ----------

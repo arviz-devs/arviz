@@ -26,42 +26,45 @@ def plot_dist_comparison(
     backend_kwargs=None,
     show=None,
 ):
-    """Plot to compare fitted and unfitted distributions.
+    r"""Plot to compare fitted and unfitted distributions.
 
     The resulting plots will show the compared distributions both on
     separate axes (particularly useful when one of them is substantially tighter
-    than another), and plotted together, so three plots per distribution
+    than another), and plotted together, displaying a grid of three plots per
+    distribution.
 
     Parameters
     ----------
     data : InferenceData
-        :class:`arviz.InferenceData` object containing the posterior/prior data.
-    kind : str
-        kind of plot to display {"latent", "observed"}, defaults to 'latent'.
-        "latent" includes {"prior", "posterior"} and "observed" includes
-        {"observed_data", "prior_predictive", "posterior_predictive"}
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        containing the posterior/prior data. Refer to documentation of
+        :func:`arviz.convert_to_dataset` for details.
+    kind : {"latent", "observed"}, default "latent"
+        kind of plot to display The "latent" option includes {"prior", "posterior"},
+        and the "observed" option includes
+        {"observed_data", "prior_predictive", "posterior_predictive"}.
     figsize : (float, float), optional
-        Figure size. If None it will be defined automatically.
+        Figure size. If ``None`` it will be defined automatically.
     textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be
-        autoscaled based on ``figsize``.
-    var_names : str, list, list of lists
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be
+        autoscaled based on `figsize`.
+    var_names : str, list, list of lists, optional
         if str, plot the variable. if list, plot all the variables in list
         of all groups. if list of lists, plot the vars of groups in respective lists.
+        See :ref:`this section <common_var_names>` for usage examples.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
-        that dimension.
+        that dimension. See :ref:`this section <common_coords>` for usage examples.
     combine_dims : set_like of str, optional
         List of dimensions to reduce. Defaults to reducing only the "chain" and "draw" dimensions.
-        See the :ref:`this section <common_combine_dims>` for usage examples.
-
+        See :ref:`this section <common_combine_dims>` for usage examples.
     transform : callable
-        Function to transform data (defaults to None i.e. the identity function)
+        Function to transform data (defaults to `None` i.e. the identity function).
     legend : bool
         Add legend to figure. By default True.
-    Labeller : Labeller, optional
-        Class providing the method ``make_pp_label`` to generate the labels in the plot.
+    labeller : Labeller, optional
+        Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     ax : (nvars, 3) array-like of matplotlib_axes, optional
         Matplotlib axes: The ax argument should have shape (nvars, 3), where the
@@ -73,13 +76,12 @@ def plot_dist_comparison(
         Additional keywords passed to :func:`arviz.plot_dist` for posterior/predictive groups.
     observed_kwargs : dicts, optional
         Additional keywords passed to :func:`arviz.plot_dist` for observed_data group.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs : bool, optional
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`. For additional documentation
-        check the plotting method of the backend.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 

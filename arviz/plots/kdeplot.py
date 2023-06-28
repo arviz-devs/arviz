@@ -48,13 +48,13 @@ def plot_kde(
         Values to plot
     values2 : array-like, optional
         Values to plot. If present, a 2D KDE will be estimated
-    cumulative : bool
-        If true plot the estimated cumulative distribution function. Defaults to False.
-        Ignored for 2D KDE
-    rug : bool
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE
-    label : string
-        Text to include as part of the legend
+    cumulative : bool, dafault False
+        If True plot the estimated cumulative distribution function. Ignored for 2D KDE.
+    rug : bool, default False
+        Add a `rug plot <https://en.wikipedia.org/wiki/Rug_plot>`_ for a specific subset of
+        values. Ignored for 2D KDE.
+    label : string, optional
+        Text to include as part of the legend.
     bw : float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
@@ -62,69 +62,65 @@ def plot_kde(
         and "taylor" (for now) when ``is_circular`` is True.
         Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
-    adaptive : bool, optional.
+    adaptive : bool, default False
         If True, an adaptative bandwidth is used. Only valid for 1D KDE.
-        Defaults to False.
-    quantiles : list
-        Quantiles in ascending order used to segment the KDE.
-        Use [.25, .5, .75] for quartiles. Defaults to None.
-    rotated : bool
+    quantiles : list, optional
+        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
+    rotated : bool, default False
         Whether to rotate the 1D KDE plot 90 degrees.
-    contour : bool
+    contour : bool, default True
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
-        Defaults to True.
-    hdi_probs : list
+    hdi_probs : list, optional
         Plots highest density credibility regions for the provided probabilities for a 2D KDE.
         Defaults to matplotlib chosen levels with no fixed probability associated.
-    fill_last : bool
-        If True fill the last contour of the 2D KDE plot. Defaults to False.
+    fill_last : bool, default False
+        If True fill the last contour of the 2D KDE plot.
     figsize : (float, float), optional
-        Figure size. If None it will be defined automatically.
-    textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``. Not implemented for bokeh backend.
-    plot_kwargs : dict
+        Figure size. If ``None`` it will be defined automatically.
+    textsize : float, optional
+        Text size scaling factor for labels, titles and lines. If ``None`` it will be autoscaled
+        based on ``figsize``. Not implemented for bokeh backend.
+    plot_kwargs : dict, optional
         Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`
         or :meth:`bokeh:bokeh.plotting.Figure.line` for a description of accepted values.
-    fill_kwargs : dict
+    fill_kwargs : dict, optional
         Keywords passed to the fill under the line (use ``fill_kwargs={'alpha': 0}``
         to disable fill). Ignored for 2D KDE. Passed to
         :meth:`bokeh.plotting.Figure.patch`.
-    rug_kwargs : dict
+    rug_kwargs : dict, optional
         Keywords passed to the rug plot. Ignored if ``rug=False`` or for 2D KDE
         Use ``space`` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot. Passed to :class:`bokeh:bokeh.models.glyphs.Scatter`.
-    contour_kwargs : dict
+    contour_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contour`
         to draw contour lines or :meth:`bokeh.plotting.Figure.patch`.
         Ignored for 1D KDE.
-    contourf_kwargs : dict
+    contourf_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.contourf`
         to draw filled contours. Ignored for 1D KDE.
-    pcolormesh_kwargs : dict
+    pcolormesh_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.pcolormesh` or
         :meth:`bokeh.plotting.Figure.image`.
         Ignored for 1D KDE.
-    is_circular : {False, True, "radians", "degrees"}. Default False.
+    is_circular : {False, True, "radians", "degrees"}. Default False
         Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
         default input type is "radians". When this argument is present, it interprets ``values``
-        is a circular variable measured in radians and a circular KDE is used. Inputs in
+        as a circular variable measured in radians and a circular KDE is used. Inputs in
         "degrees" will undergo an internal conversion to radians.
     ax : axes, optional
         Matplotlib axes or bokeh figures.
-    legend : bool
-        Add legend to the figure. By default True.
-    backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    legend : bool, default True
+        Add legend to the figure.
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`. For additional documentation
-        check the plotting method of the backend.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
     return_glyph : bool, optional
-        Internal argument to return glyphs for bokeh
+        Internal argument to return glyphs for bokeh.
 
     Returns
     -------

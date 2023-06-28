@@ -263,7 +263,7 @@ If you have any doubts, please do not hesitate to contact us on [gitter](https:/
 
 <h3>Citation</h3>
 
-If you use ArviZ, please it using <a class="reference external" href="https://doi.org/10.21105/joss.01143"><img alt="JOSS" src="https://joss.theoj.org/papers/10.21105/joss.01143/status.svg"></a>.
+If you use ArviZ, please cite it using <a class="reference external" href="https://doi.org/10.21105/joss.01143"><img alt="JOSS" src="https://joss.theoj.org/papers/10.21105/joss.01143/status.svg"></a>.
 
 See our {ref}`support page <arviz_org:cite>` for information on how to cite in BibTeX format.
 :::

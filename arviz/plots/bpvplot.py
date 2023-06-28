@@ -79,12 +79,12 @@ def plot_bpv(
     hdi_prob : float, optional
         Probability for the highest density interval for the analytical reference distribution when
         ``kind=u_values``. Should be in the interval (0, 1]. Defaults to the
-        rcParam ``stats.hdi_prob``.
+        rcParam ``stats.hdi_prob``. See :ref:`this section <common_hdi_prob>` for usage examples.
     color : str, optional
         Matplotlib color
     grid : tuple, optional
         Number of rows and columns. By default, the rows and columns are
-        automatically inferred.
+        automatically inferred. See :ref:`this section <common_grid>` for usage examples.
     figsize : (float, float), optional
         Figure size. If None it will be defined automatically.
     textsize : float, optional
@@ -106,17 +106,17 @@ def plot_bpv(
     var_names : list of str, optional
         Variables to be plotted. If `None` all variable are plotted. Prefix the variables by ``~``
         when you want to exclude them from the plot. See the :ref:`this section <common_var_names>`
-        for usage examples.
+        for usage examples. See :ref:`this section <common_var_names>` for usage examples.
     filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret `var_names` as the real variables names. If "like",
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
-        the :ref:`this section <common_filter_vars>` for usage examples.
+        :ref:`this section <common_filter_vars>` for usage examples.
     coords : dict, optional
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension. Defaults to including all coordinates for all
-        dimensions if None.
+        dimensions if None. See :ref:`this section <common_coords>` for usage examples.
     flatten : list, optional
         List of dimensions to flatten in observed_data. Only flattens across the coordinates
         specified in the coords argument. Defaults to flattening all of the dimensions.
@@ -124,14 +124,14 @@ def plot_bpv(
         List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
         across the coordinates specified in the coords argument. Defaults to flattening all
         of the dimensions. Dimensions should match flatten excluding dimensions for data_pairs
-        parameters. If flatten is defined and flatten_pp is None, then ``flatten_pp=flatten``.
+        parameters. If `flatten` is defined and `flatten_pp` is None, then ``flatten_pp=flatten``.
     legend : bool, default True
         Add legend to figure.
     ax : 2D array-like of matplotlib_axes or bokeh_figure, optional
-        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        A 2D array of locations into which to plot the densities. If not supplied, ArviZ will create
         its own array of plot areas (and return it).
     backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+        Select plotting backend {"matplotlib", "bokeh"}. Default "matplotlib".
     plot_ref_kwargs :  dict, optional
         Extra keyword arguments to control how reference is represented.
         Passed to :meth:`matplotlib.axes.Axes.plot` or
@@ -142,7 +142,7 @@ def plot_bpv(
         :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     group : {"posterior", "prior"}, default "posterior"
-        Specifies which InferenceData group should be plotted.  If "posterior", then the values
+        Specifies which InferenceData group should be plotted. If "posterior", then the values
         in `posterior_predictive` group are compared to the ones in `observed_data`, if "prior" then
         the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional

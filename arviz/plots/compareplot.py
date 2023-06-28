@@ -23,46 +23,43 @@ def plot_compare(
     backend_kwargs=None,
     show=None,
 ):
-    """
-    Summary plot for model comparison.
+    r"""Summary plot for model comparison.
 
-    Models are compared based on their expected log pointwise predictive density (ELPD),
-    the ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
+    Models are compared based on their expected log pointwise predictive density (ELPD).
+    This plot is in the style of the one used in [2]_. Chapter 6 in the first edition
+    or 7 in the second.
+
+    Notes
+    -----
+    The ELPD is estimated either by Pareto smoothed importance sampling leave-one-out
     cross-validation (LOO) or using the widely applicable information criterion (WAIC).
-    We recommend LOO in line with the work presented by Vehtari et al. (2016) available
-    here: https://arxiv.org/abs/1507.04544.
-
-    This plot is in the style of the one used in the book Statistical Rethinking by
-    Richard McElreath.Chapter 6 in the first edition or 7 in the second.
-
+    We recommend LOO in line with the work presented by [1]_.
 
     Parameters
     ----------
     comp_df : pandas.DataFrame
-        Result of the :func:`arviz.compare` method
-    insample_dev : bool, optional
+        Result of the :func:`arviz.compare` method.
+    insample_dev : bool, default False
         Plot in-sample ELPD, that is the value of the information criteria without the
         penalization given by the effective number of parameters (p_loo or p_waic).
-        Defaults to False
-    plot_standard_error : bool, optional
-        Plot the standard error of the ELPD. Defaults to True
-    plot_ic_diff : bool, optional
+    plot_standard_error : bool, default True
+        Plot the standard error of the ELPD.
+    plot_ic_diff : bool, default True
         Plot standard error of the difference in ELPD between each model
-        and the top-ranked model. Defaults to True
-    order_by_rank : bool
-        If True (default) ensure the best model is used as reference.
+        and the top-ranked model.
+    order_by_rank : bool, default True
+        If True ensure the best model is used as reference.
     legend : bool, default True
         Add legend to figure.
     figsize : (float, float), optional
-        If None, size is (6, num of models) inches
-    title : bool
-        Show a tittle with a description of how to interpret the plot. Defaults to True.
-    textsize : float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on ``figsize``.
+        If `None`, size is (6, num of models) inches.
+    title : bool, default True
+        Show a tittle with a description of how to interpret the plot.
+    textsize : float, optional
+        Text size scaling factor for labels, titles and lines. If `None` it will be autoscaled based
+        on `figsize`.
     labeller : Labeller, optional
-        Class providing the method ``model_name_to_str`` to generate the labels in
-        the plot.
+        Class providing the method ``make_label_vert`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
     plot_kwargs : dict, optional
         Optional arguments for plot elements. Currently accepts 'color_ic',
@@ -70,12 +67,12 @@ def plot_compare(
         'marker_dse', 'ls_min_ic' 'color_ls_min_ic',  'fontsize'
     ax : matplotlib_axes or bokeh_figure, optional
         Matplotlib axes or bokeh figure.
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
+        Select plotting backend.
     backend_kwargs : bool, optional
         These are kwargs specific to the backend being used, passed to
-        :func:`matplotlib.pyplot.subplots` or
-        :func:`bokeh.plotting.figure`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
@@ -89,6 +86,14 @@ def plot_compare(
     compare : Compare models based on PSIS-LOO loo or WAIC waic cross-validation.
     loo : Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
     waic : Compute the widely applicable information criterion.
+
+    References
+    ----------
+    .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
+    cross-validation and WAIC https://arxiv.org/abs/1507.04544
+
+    .. [2] McElreath R. (2022). Statistical Rethinking A Bayesian Course with Examples in
+    R and Stan, Second edition, CRC Press.
 
     Examples
     --------

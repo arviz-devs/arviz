@@ -29,8 +29,7 @@ def plot_hdi(
     backend_kwargs=None,
     show=None,
 ):
-    r"""
-    Plot HDI intervals for regression data.
+    r"""Plot HDI intervals for regression data.
 
     Parameters
     ----------
@@ -43,20 +42,20 @@ def plot_hdi(
         Precomputed HDI values to use. Assumed shape is ``(*x.shape, 2)``.
     hdi_prob : float, optional
         Probability for the highest density interval. Defaults to ``stats.hdi_prob`` rcParam.
-    color : str, optional
+        See :ref:`this section <common_ hdi_prob>` for usage examples.
+    color : str, default "C1"
         Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
-    circular : bool, optional
+    circular : bool, default False
         Whether to compute the HDI taking into account ``x`` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
-    smooth : boolean, optional
+    smooth : boolean, default True
         If True the result will be smoothed by first computing a linear interpolation of the data
         over a regular grid and then applying the Savitzky-Golay filter to the interpolated data.
-        Defaults to True.
     smooth_kwargs : dict, optional
         Additional keywords modifying the Savitzky-Golay filter. See
         :func:`scipy:scipy.signal.savgol_filter` for details.
-    figsize : tuple
-        Figure size. If None it will be defined automatically.
+    figsize : (float, float), optional
+        Figure size. If ``None``, it will be defined automatically.
     fill_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.fill_between`
         (use ``fill_kwargs={'alpha': 0}`` to disable fill) or to
@@ -68,12 +67,12 @@ def plot_hdi(
         Keyword arguments passed to :func:`~arviz.hdi`. Ignored if ``hdi_data`` is present.
     ax : axes, optional
         Matplotlib axes or bokeh figures.
-    backend : {"matplotlib","bokeh"}, optional
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
-    backend_kwargs : bool, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
-        :meth:`mpl:matplotlib.axes.Axes.plot` or
-        :meth:`bokeh.plotting.Figure.patch`.
+        :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
+        For additional documentation check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
 
@@ -87,15 +86,20 @@ def plot_hdi(
 
     Examples
     --------
-    Plot HDI interval of simulated regression data using `y` argument:
+    Plot HDI interval of simulated random-walk data using `y` argument:
 
     .. plot::
         :context: close-figs
 
         >>> import numpy as np
         >>> import arviz as az
-        >>> x_data = np.random.normal(0, 1, 100)
-        >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, size=(2, 50, 100))
+        >>> # time-steps random walk
+        >>> x_data =np.arange(0,100)
+        >>> # Mean random walk
+        >>> mu = np.zeros(100)
+        >>> for i in x_data: mu[i] = mu[i-1] + np.random.normal(0, 1, 1)
+        >>> # Simulated pp samples form the random walk time series
+        >>> y_data = np.random.normal(2 + mu * 0.5, 0.5, size = (2, 50, 100))
         >>> az.plot_hdi(x_data, y_data)
 
     ``plot_hdi`` can also be given precalculated values with the argument ``hdi_data``. This example

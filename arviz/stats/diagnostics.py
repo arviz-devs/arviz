@@ -836,7 +836,7 @@ def _mcse_sd(ary):
         return np.nan
     ess = _ess_sd(ary)
     if _numba_flag:
-        sd = np.float(_sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1)))
+        sd = float(_sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1)))
     else:
         sd = np.std(ary, ddof=1)
     fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess) ** (ess - 1) - 1)
@@ -905,7 +905,7 @@ def _mc_error(ary, batches=5, circular=False):
                 else:
                     std = stats.circstd(ary, high=np.pi, low=-np.pi)
             elif _numba_flag:
-                std = np.float(_sqrt(svar(ary), np.zeros(1)))
+                std = float(_sqrt(svar(ary), np.zeros(1)))
             else:
                 std = np.std(ary)
             return std / np.sqrt(len(ary))
