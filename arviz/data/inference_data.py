@@ -509,6 +509,26 @@ class InferenceData(Mapping[str, xr.Dataset]):
             empty_netcdf_file.close()
         return filename
 
+    def to_datatree(self):
+        """Convert InferenceData object to a :class:`~datatree.DataTree`."""
+        try:
+            from datatree import DataTree
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(
+                "datatree must be installed in order to use InferenceData.to_datatree"
+            ) from err
+        return DataTree.from_dict({group: ds for group, ds in self.items()})
+
+    @staticmethod
+    def from_datatree(datatree):
+        """Create an InferenceData object from a :class:`~datatree.DataTree`.
+
+        Parameters
+        ----------
+        datatree : DataTree
+        """
+        return InferenceData(**{group: sub_dt.to_dataset() for group, sub_dt in datatree.items()})
+
     def to_dict(self, groups=None, filter_groups=None):
         """Convert InferenceData to a dictionary following xarray naming conventions.
 

@@ -30,9 +30,12 @@ IO / General conversion
   convert_to_inference_data
   convert_to_dataset
   dict_to_dataset
+  from_datatree
   from_dict
   from_json
   from_netcdf
+  to_datatree
+  to_json
   to_netcdf
 
 
