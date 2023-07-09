@@ -350,7 +350,7 @@ def make_attrs(attrs=None, library=None):
     return default_attrs
 
 
-def _extend_xr_method(func, doc="", description="", examples="", see_also=""):
+def _extend_xr_method(func, doc=None, description="", examples="", see_also=""):
     """Make wrapper to extend methods from xr.Dataset to InferenceData Class.
 
     Parameters
