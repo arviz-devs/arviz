@@ -350,7 +350,7 @@ def make_attrs(attrs=None, library=None):
     return default_attrs
 
 
-def _extend_xr_method(func, doc="", description="", examples="", see_also=""):
+def _extend_xr_method(func, doc=None, description="", examples="", see_also=""):
     """Make wrapper to extend methods from xr.Dataset to InferenceData Class.
 
     Parameters
@@ -387,13 +387,17 @@ def _extend_xr_method(func, doc="", description="", examples="", see_also=""):
 
     description_default = """{method_name} method is extended from xarray.Dataset methods.
 
-    {description}For more info see :meth:`xarray:xarray.Dataset.{method_name}`
+    {description}
+
+    For more info see :meth:`xarray:xarray.Dataset.{method_name}`.
+    In addition to the arguments available in the original method, the following
+    ones are added by ArviZ to adapt the method to being called on an ``InferenceData`` object.
     """.format(
         description=description, method_name=func.__name__  # pylint: disable=no-member
     )
     params = """
-    Parameters
-    ----------
+    Other Parameters
+    ----------------
     groups: str or list of str, optional
         Groups where the selection is to be applied. Can either be group names
         or metagroup names.
