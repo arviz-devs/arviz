@@ -15,6 +15,7 @@ from .io_numpyro import from_numpyro
 from .io_pyjags import from_pyjags
 from .io_pyro import from_pyro
 from .io_pystan import from_pystan
+from .io_zarr import from_zarr, to_zarr
 from .utils import extract, extract_dataset
 
 __all__ = [
@@ -44,6 +45,8 @@ __all__ = [
     "to_datatree",
     "to_json",
     "to_netcdf",
+    "from_zarr",
+    "to_zarr",
     "CoordSpec",
     "DimSpec",
 ]

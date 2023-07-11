@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from ... import InferenceData, from_dict
+from ... import to_zarr, from_zarr
 
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -103,3 +104,41 @@ class TestDataZarr:
                 assert inference_data2.attrs["test"] == 1
             else:
                 assert "test" not in inference_data2.attrs
+
+    def test_io_function(self, data, eight_schools_params):
+        # create InferenceData and check it has been properly created
+        inference_data = self.get_inference_data(  # pylint: disable=W0612
+            data,
+            eight_schools_params,
+            fill_attrs=True,
+        )
+        test_dict = {
+            "posterior": ["eta", "theta", "mu", "tau"],
+            "posterior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats": ["eta", "theta", "mu", "tau"],
+            "prior": ["eta", "theta", "mu", "tau"],
+            "prior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats_prior": ["eta", "theta", "mu", "tau"],
+            "observed_data": ["J", "y", "sigma"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
+        assert inference_data.attrs["test"] == 1
+
+        # check filename does not exist and use to_zarr method
+        with TemporaryDirectory(prefix="arviz_tests_") as tmp_dir:
+            filepath = os.path.join(tmp_dir, "zarr")
+
+            to_zarr(inference_data, store=filepath)
+            # assert file has been saved correctly
+            assert os.path.exists(filepath)
+            assert os.path.getsize(filepath) > 0
+
+            inference_data2 = from_zarr(filepath)
+
+            # Everything in dict still available in inference_data2 ?
+            fails = check_multiple_attrs(test_dict, inference_data2)
+            assert not fails
+
+            assert inference_data2.attrs["test"] == 1
