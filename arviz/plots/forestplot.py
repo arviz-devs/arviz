@@ -85,10 +85,9 @@ def plot_forest(
     hdi_prob : float, default 0.94
         Plots highest posterior density interval for chosen percentage of density.
         See :ref:`this section <common_ hdi_prob>` for usage examples.
-    rope : tuple or dictionary of tuples
-        Lower and upper values of the Region of Practical Equivalence. If a list with one interval
-        only is provided, the ROPE will be displayed across the y-axis. If more than one
-        interval is provided the length of the list should match the number of variables.
+    rope : list, tuple or dictionary of {str : tuples or lists}, optional
+        A dictionary of tuples with the lower and upper values of the Region Of Practical
+        Equivalence. See :ref:`this section <common_rope>` for usage examples.
     quartiles : bool, default True
         Flag for plotting the interquartile range, in addition to the ``hdi_prob`` intervals.
     r_hat : bool, default False
@@ -181,20 +180,6 @@ def plot_forest(
         >>>                            combined=True,
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools models')
-
-    Forestplot with ropes
-
-    .. plot::
-        :context: close-figs
-
-        >>> rope = {'theta': [{'school': 'Choate', 'rope': (2, 4)}], 'mu': [{'rope': (-2, 2)}]}
-        >>> axes = az.plot_forest(non_centered_data,
-        >>>                            rope=rope,
-        >>>                            var_names='~tau',
-        >>>                            combined=True,
-        >>>                            figsize=(9, 7))
-        >>> axes[0].set_title('Estimated theta for 8 schools model')
-
 
     Ridgeplot
 
