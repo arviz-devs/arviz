@@ -28,10 +28,7 @@ class TestDataZarr:
         class Data:
             # fake 8-school output
             shapes: Mapping[str, list] = {"mu": [], "tau": [], "eta": [8], "theta": [8]}
-            obj = {
-                key: np.random.randn(chains, draws, *shape)
-                for key, shape in shapes.items()
-            }
+            obj = {key: np.random.randn(chains, draws, *shape) for key, shape in shapes.items()}
 
         return Data
 
@@ -111,7 +108,9 @@ class TestDataZarr:
     def test_io_function(self, data, eight_schools_params):
         # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
-            data, eight_schools_params, fill_attrs=True,
+            data,
+            eight_schools_params,
+            fill_attrs=True,
         )
         test_dict = {
             "posterior": ["eta", "theta", "mu", "tau"],
