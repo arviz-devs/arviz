@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.16.0 (2023 Jul 11)
+## v0.16.0 (2023 Jul 13)
 
 ### New features
 - Add InferenceData<->DataTree conversion functions ([2253](https://github.com/arviz-devs/arviz/pull/2253))
