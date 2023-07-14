@@ -174,7 +174,7 @@ class maybe_numba_fn:  # pylint: disable=invalid-name
     def __init__(self, function, **kwargs):
         """Wrap a function and save compilation keywords."""
         self.function = function
-        kwargs.setdefault("nopython", False)
+        kwargs.setdefault("nopython", True)
         self.kwargs = kwargs
 
     @lazy_property
@@ -407,7 +407,7 @@ def _dot(x, y):
 
 @conditional_jit(cache=True, nopython=True)
 def _cov_1d(x):
-    x = x - x.mean(axis=0)
+    x = x - x.mean()
     ddof = x.shape[0] - 1
     return np.dot(x.T, x.conj()) / ddof
 

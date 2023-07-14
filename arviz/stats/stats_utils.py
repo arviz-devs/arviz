@@ -506,7 +506,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         return ELPDData(copied_obj)
 
 
-@conditional_jit
+@conditional_jit(nopython=True)
 def stats_variance_1d(data, ddof=0):
     a_a, b_b = 0, 0
     for i in data:

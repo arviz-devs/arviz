@@ -277,7 +277,7 @@ class PlotHandler:
         """Collect labels and ticks from plotters."""
         val = self.plotters.values()
 
-        @conditional_jit(forceobj=True)
+        @conditional_jit(forceobj=True, nopython=False)
         def label_idxs():
             labels, idxs = [], []
             for plotter in val:
