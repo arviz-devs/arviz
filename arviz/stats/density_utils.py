@@ -954,7 +954,7 @@ def _normalize_angle(x, zero_centered=True):
         return x % (2 * np.pi)
 
 
-@conditional_jit(cache=True)
+@conditional_jit(cache=True, nopython=True)
 def histogram(data, bins, range_hist=None):
     """Conditionally jitted histogram.
 

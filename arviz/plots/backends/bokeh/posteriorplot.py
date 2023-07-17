@@ -287,13 +287,14 @@ def _plot_posterior_op(
             backend_kwargs={},
             show=False,
         )
-        _, hist, edges = histogram(values, bins="auto")
+        max_data = values.max()
     elif values.dtype.kind == "i" or (values.dtype.kind == "f" and kind == "hist"):
         if bins is None:
             bins = get_bins(values)
         kwargs.setdefault("align", "left")
         kwargs.setdefault("color", "blue")
         _, hist, edges = histogram(values, bins=bins)
+        max_data = hist.max()
         ax.quad(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
         )
@@ -303,6 +304,7 @@ def _plot_posterior_op(
         kwargs.setdefault("color", "blue")
 
         hist = np.array([(~values).sum(), values.sum()])
+        max_data = hist.max()
         edges = np.array([-0.5, 0.5, 1.5])
         ax.quad(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
@@ -314,7 +316,6 @@ def _plot_posterior_op(
         raise TypeError("Values must be float, integer or boolean")
 
     format_axes()
-    max_data = hist.max()
     if hdi_prob != "hide":
         display_hdi(max_data)
     display_point_estimate(max_data)
