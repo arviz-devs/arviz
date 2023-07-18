@@ -1,14 +1,12 @@
 # Change Log
 
-## v0.x.x Unreleased
-
-### New features
+## v0.16.1 (2023 Jul 18)
 
 ### Maintenance and fixes
-
-### Deprecation
+- Fix Numba deprecation errors and incorrect nopython usage ([2268](https://github.com/arviz-devs/arviz/pull/2268))
 
 ### Documentation
+- Rerun Numba notebook
 
 ## v0.16.0 (2023 Jul 13)
 
