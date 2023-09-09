@@ -688,9 +688,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         dfs = {}
         for group in group_names:
             dataset = self[group]
-            var_names = _var_names(var_names, dataset, filter_vars)
-            if var_names is not None:
-                dataset = dataset[var_names]
+            group_var_names = _var_names(var_names, dataset, filter_vars, "ignore")
+            if group_var_names is not None:
+                dataset = dataset[[var_name for var_name in group_var_names if var_name in dataset]]
             df = None
             coords_to_idx = {
                 name: dict(map(reversed, enumerate(dataset.coords[name].values, index_origin)))
