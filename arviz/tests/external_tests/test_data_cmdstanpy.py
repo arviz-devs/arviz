@@ -107,8 +107,8 @@ def _create_test_data():
     return fit_files
 
 
-# @pytest.mark.skipif(sys.version_info < (3, 6), reason="CmdStanPy is supported only Python 3.6+")
 @pytest.mark.skip("Temporary skip until converter is fixed.")
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="CmdStanPy is supported only Python 3.6+")
 class TestDataCmdStanPy:
     @pytest.fixture(scope="session")
     def data_directory(self):
