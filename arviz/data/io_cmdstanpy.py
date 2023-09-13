@@ -72,17 +72,7 @@ class CmdStanPyConverter:
 
         self.dtypes = dtypes
 
-        if hasattr(self.posterior, "metadata"):
-            if self.log_likelihood is True and "log_lik" in self.posterior.metadata.stan_vars_cols:
-                self.log_likelihood = ["log_lik"]
-        elif hasattr(self.posterior, "stan_vars_cols"):
-            if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
-                self.log_likelihood = ["log_lik"]
-        elif (
-            self.log_likelihood is True
-            and self.posterior is not None
-            and any(name.split("[")[0] == "log_lik" for name in self.posterior.column_names)
-        ):
+        if self.log_likelihood is True and "log_lik" in self.posterior.stan_variables():
             self.log_likelihood = ["log_lik"]
 
         if isinstance(self.log_likelihood, bool):
@@ -96,10 +86,7 @@ class CmdStanPyConverter:
         if not (hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols")):
             return self.posterior_to_xarray_pre_v_0_9_68()
 
-        if hasattr(self.posterior, "metadata"):
-            items = list(self.posterior.metadata.stan_vars_cols.keys())
-        else:
-            items = list(self.posterior.stan_vars_cols.keys())
+        items = list(self.posterior.stan_variables().keys())
         if self.posterior_predictive is not None:
             try:
                 items = _filter(items, self.posterior_predictive)
@@ -115,13 +102,6 @@ class CmdStanPyConverter:
                 items = _filter(items, self.log_likelihood)
             except ValueError:
                 pass
-
-        valid_cols = []
-        for item in items:
-            if hasattr(self.posterior, "metadata"):
-                valid_cols.extend(self.posterior.metadata.stan_vars_cols[item])
-            else:
-                valid_cols.extend(self.posterior.stan_vars_cols[item])
 
         data, data_warmup = _unpack_fit(
             self.posterior,
@@ -172,10 +152,7 @@ class CmdStanPyConverter:
             "treedepth__": np.int64,
             **self.dtypes,
         }
-        if hasattr(fit, "metadata"):
-            items = list(fit.metadata._method_vars_cols.keys())  # pylint: disable=protected-access
-        else:
-            items = list(fit.sampler_vars_cols.keys())
+        items = list(fit.method_variables().keys())
         rename_dict = {
             "divergent": "diverging",
             "n_leapfrog": "n_steps",
@@ -356,16 +333,15 @@ class CmdStanPyConverter:
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        if hasattr(self.posterior, "metadata") or hasattr(self.prior, "stan_vars_cols"):
-            if hasattr(self.posterior, "metadata"):
-                items = list(self.prior.metadata.stan_vars_cols.keys())
-            else:
-                items = list(self.prior.stan_vars_cols.keys())
-            if self.prior_predictive is not None:
-                try:
-                    items = _filter(items, self.prior_predictive)
-                except ValueError:
-                    pass
+        if self.posterior:
+            items = list(self.posterior.stan_variables().keys())
+        else:
+            items = list(self.prior.stan_variables().keys())
+        if self.prior_predictive is not None:
+            try:
+                items = _filter(items, self.prior_predictive)
+            except ValueError:
+                pass
             data, data_warmup = _unpack_fit(
                 self.prior,
                 items,
@@ -634,32 +610,30 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
             num_warmup = fit.num_draws_warmup
 
     nchains = fit.chains
-    draws = np.swapaxes(fit.draws(inc_warmup=save_warmup), 0, 1)
     sample = {}
     sample_warmup = {}
 
-    stan_vars_cols = fit.metadata.stan_vars_cols if hasattr(fit, "metadata") else fit.stan_vars_cols
-    sampler_vars_cols = (
-        fit.metadata._method_vars_cols  # pylint: disable=protected-access
-        if hasattr(fit, "metadata")
-        else fit.sampler_vars_cols
-    )
+    stan_variables = fit.stan_variables()
+    method_variables = fit.method_variables()
     for item in items:
-        if item in stan_vars_cols:
-            col_idxs = stan_vars_cols[item]
+        if item in stan_variables:
             raw_draws = fit.stan_variable(item, inc_warmup=save_warmup)
             raw_draws = np.swapaxes(
                 raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
             )
-        elif item in sampler_vars_cols:
-            col_idxs = sampler_vars_cols[item]
-            raw_draws = draws[..., col_idxs[0]]
+        elif item in method_variables:
+            raw_draws = np.swapaxes(
+                method_variables[item].reshape((-1, nchains), order="F"), 0, 1
+            )
         else:
             raise ValueError(f"fit data, unknown variable: {item}")
         raw_draws = raw_draws.astype(dtypes.get(item))
         if save_warmup:
-            sample_warmup[item] = raw_draws[:, :num_warmup, ...]
-            sample[item] = raw_draws[:, num_warmup:, ...]
+            if item in method_variables:
+                sample[item] = raw_draws
+            else:
+                sample_warmup[item] = raw_draws[:, :num_warmup, ...]
+                sample[item] = raw_draws[:, num_warmup:, ...]
         else:
             sample[item] = raw_draws
 

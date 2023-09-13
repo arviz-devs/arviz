@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 from glob import glob
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -20,14 +21,12 @@ from ..helpers import (  # pylint: disable=unused-import
 )
 
 
-def _create_test_data():
+def _create_test_data(data_directory):
     """Create test data to local folder.
 
     This function is needed when test data needs to be updated.
     """
     import platform
-    import shutil
-    from pathlib import Path
 
     import cmdstanpy
 
@@ -79,61 +78,29 @@ def _create_test_data():
         "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
         "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
     }
-    fit_no_warmup = model.sample(
-        data=stan_data, iter_sampling=100, iter_warmup=1000, save_warmup=False
+    model.sample(
+        data=stan_data, iter_sampling=100, iter_warmup=500, save_warmup=False, fixed_param=False, chains=4, output_dir=data_directory
     )
-    fit_no_warmup.save_csvfiles(dir=".")
-    fit_files = {
-        "cmdstanpy_eight_schools_nowarmup": [],
-        "cmdstanpy_eight_schools_warmup": [],
-    }
-    for path in fit_no_warmup.runset.csv_files:
-        path = Path(path)
-        _, num = path.stem.rsplit("-", 1)
-        new_path = path.parent / ("cmdstanpy_eight_schools_nowarmup-" + num + path.suffix)
-        shutil.move(path, new_path)
-        fit_files["cmdstanpy_eight_schools_nowarmup"].append(new_path)
-    fit_warmup = model.sample(data=stan_data, iter_sampling=100, iter_warmup=500, save_warmup=True)
-    fit_warmup.save_csvfiles(dir=".")
-    for path in fit_no_warmup.runset.csv_files:
-        path = Path(path)
-        _, num = path.stem.rsplit("-", 1)
-        new_path = path.parent / ("cmdstanpy_eight_schools_warmup-" + num + path.suffix)
-        shutil.move(path, new_path)
-        fit_files["cmdstanpy_eight_schools_warmup"].append(new_path)
+    model.sample(
+        data=stan_data, iter_sampling=100, iter_warmup=500, save_warmup=True, fixed_param=False, chains=4, output_dir=data_directory / "warmup"
+    )
     path = Path(stan_file)
     os.remove(str(path.parent / (path.stem + (".exe" if platform.system() == "Windows" else ""))))
     os.remove(str(path.parent / (path.stem + ".hpp")))
-    return fit_files
 
 
-@pytest.mark.skip("Temporary skip until converter is fixed.")
-@pytest.mark.skipif(sys.version_info < (3, 6), reason="CmdStanPy is supported only Python 3.6+")
 class TestDataCmdStanPy:
     @pytest.fixture(scope="session")
     def data_directory(self):
-        here = os.path.dirname(os.path.abspath(__file__))
-        data_directory = os.path.join(here, "..", "saved_models")
+        here = Path(__file__).parent.resolve()
+        data_directory = here.parent / "saved_models" / "cmdstanpy"
+        if not data_directory.is_dir():
+            os.makedirs(data_directory)
+            _create_test_data(data_directory)
         return data_directory
 
     @pytest.fixture(scope="class")
-    def filepaths(self, data_directory):
-        files = {
-            "nowarmup": glob(
-                os.path.join(
-                    data_directory, "cmdstanpy", "cmdstanpy_eight_schools_nowarmup-[1-4].csv"
-                )
-            ),
-            "warmup": glob(
-                os.path.join(
-                    data_directory, "cmdstanpy", "cmdstanpy_eight_schools_warmup-[1-4].csv"
-                )
-            ),
-        }
-        return files
-
-    @pytest.fixture(scope="class")
-    def data(self, filepaths):
+    def data(self, data_directory):
         # Skip tests if cmdstanpy not installed
         cmdstanpy = importorskip("cmdstanpy")
         CmdStanModel = cmdstanpy.CmdStanModel  # pylint: disable=invalid-name
@@ -149,8 +116,8 @@ class TestDataCmdStanPy:
                 list(range(1, 5)),
                 method_args=SamplerArgs(iter_sampling=100),
             )
-            runset_obj = RunSet(args)
-            runset_obj._csv_files = filepaths["nowarmup"]  # pylint: disable=protected-access
+            runset_obj = RunSet(args, chains=4)
+            runset_obj._csv_files = list(data_directory.glob("*.csv"))  # pylint: disable=protected-access
             obj = CmdStanMCMC(runset_obj)
             obj._assemble_draws()  # pylint: disable=protected-access
 
@@ -160,12 +127,12 @@ class TestDataCmdStanPy:
                 list(range(1, 5)),
                 method_args=SamplerArgs(iter_sampling=100, iter_warmup=500, save_warmup=True),
             )
-            runset_obj_warmup = RunSet(args_warmup)
-            runset_obj_warmup._csv_files = filepaths["warmup"]  # pylint: disable=protected-access
+            runset_obj_warmup = RunSet(args_warmup, chains=4)
+            runset_obj_warmup._csv_files = list((data_directory / "warmup").glob("*.csv")) # pylint: disable=protected-access
             obj_warmup = CmdStanMCMC(runset_obj_warmup)
             obj_warmup._assemble_draws()  # pylint: disable=protected-access
 
-            _model_code = """model { real y; } generated quantities { int eta; int theta[N]; }"""
+            _model_code = """model { real y; } generated quantities { int eta; int theta[8]; }"""
             _tmp_dir = tempfile.TemporaryDirectory(prefix="arviz_tests_")
             _stan_file = os.path.join(_tmp_dir.name, "stan_model_test.stan")
             with open(_stan_file, "w", encoding="utf8") as f:
