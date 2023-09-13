@@ -127,7 +127,9 @@ class TestDataCmdStanPy:
                 method_args=SamplerArgs(iter_sampling=100),
             )
             runset_obj = RunSet(args, chains=4)
-            runset_obj._csv_files = list(data_directory.glob("*.csv"))  # pylint: disable=protected-access
+            runset_obj._csv_files = list(  # pylint: disable=protected-access
+                data_directory.glob("*.csv")
+            )
             obj = CmdStanMCMC(runset_obj)
             obj._assemble_draws()  # pylint: disable=protected-access
 
@@ -138,7 +140,9 @@ class TestDataCmdStanPy:
                 method_args=SamplerArgs(iter_sampling=100, iter_warmup=500, save_warmup=True),
             )
             runset_obj_warmup = RunSet(args_warmup, chains=4)
-            runset_obj_warmup._csv_files = list((data_directory / "warmup").glob("*.csv")) # pylint: disable=protected-access
+            runset_obj_warmup._csv_files = list(  # pylint: disable=protected-access
+                (data_directory / "warmup").glob("*.csv")
+            )
             obj_warmup = CmdStanMCMC(runset_obj_warmup)
             obj_warmup._assemble_draws()  # pylint: disable=protected-access
 

@@ -622,9 +622,7 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
                 raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
             )
         elif item in method_variables:
-            raw_draws = np.swapaxes(
-                method_variables[item].reshape((-1, nchains), order="F"), 0, 1
-            )
+            raw_draws = np.swapaxes(method_variables[item].reshape((-1, nchains), order="F"), 0, 1)
         else:
             raise ValueError(f"fit data, unknown variable: {item}")
         raw_draws = raw_draws.astype(dtypes.get(item))
