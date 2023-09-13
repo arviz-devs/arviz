@@ -1,8 +1,6 @@
 # pylint: disable=redefined-outer-name
 import os
-import sys
 import tempfile
-from glob import glob
 from pathlib import Path
 
 import numpy as np
@@ -79,10 +77,22 @@ def _create_test_data(data_directory):
         "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
     }
     model.sample(
-        data=stan_data, iter_sampling=100, iter_warmup=500, save_warmup=False, fixed_param=False, chains=4, output_dir=data_directory
+        data=stan_data,
+        iter_sampling=100,
+        iter_warmup=500,
+        save_warmup=False,
+        fixed_param=False,
+        chains=4,
+        output_dir=data_directory,
     )
     model.sample(
-        data=stan_data, iter_sampling=100, iter_warmup=500, save_warmup=True, fixed_param=False, chains=4, output_dir=data_directory / "warmup"
+        data=stan_data,
+        iter_sampling=100,
+        iter_warmup=500,
+        save_warmup=True,
+        fixed_param=False,
+        chains=4,
+        output_dir=data_directory / "warmup",
     )
     path = Path(stan_file)
     os.remove(str(path.parent / (path.stem + (".exe" if platform.system() == "Windows" else ""))))
