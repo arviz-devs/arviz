@@ -4,6 +4,7 @@
 ### New features
 
 ### Maintenance and fixes
+Set matplotlib requirements >=3.5
 
 ### Deprecation
 
