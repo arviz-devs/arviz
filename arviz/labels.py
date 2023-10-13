@@ -100,6 +100,8 @@ class BaseLabeller:
         """WIP."""
         var_name_str = self.var_name_to_str(var_name)
         pp_var_name_str = self.var_name_to_str(pp_var_name)
+        if var_name_str == pp_var_name_str:
+            return f"{var_name_str}"
         return f"{var_name_str} / {pp_var_name_str}"
 
     def model_name_to_str(self, model_name):
