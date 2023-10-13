@@ -371,8 +371,6 @@ def plot_ppc(
         if legend:
             if i == 0:
                 ax_i.legend(fontsize=xt_labelsize * 0.75)
-            else:
-                ax_i.legend([])
 
     if backend_show(show):
         plt.show()

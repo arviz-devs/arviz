@@ -9,6 +9,7 @@ import pytest
 from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde, norm
+import xarray as xr
 
 from ...data import from_dict, load_arviz_data
 from ...plots import (
@@ -730,6 +731,28 @@ def test_plot_ppc(models, kind, alpha, animated, observed, observed_rug):
         assert axes[0]
         assert axes[1]
     assert axes
+
+
+def test_plot_ppc_transposed():
+    idata = load_arviz_data("rugby")
+    idata.map(
+        lambda ds: ds.assign(points=xr.concat((ds.home_points, ds.away_points), "field")),
+        groups="observed_vars",
+        inplace=True
+    )
+    assert idata.posterior_predictive.points.dims == ("field", "chain", "draw", "match")
+    ax = plot_ppc(
+        idata,
+        kind="scatter",
+        var_names="points",
+        flatten=["field"],
+        coords={"match": ["Wales Italy"]},
+        random_seed=3,
+        num_pp_samples=8
+    )
+    x, y = ax.get_lines()[2].get_data()
+    assert not np.isclose(y[0], 0)
+    assert np.all(np.array([40, 43, 10,  9]) == x)
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
