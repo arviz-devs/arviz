@@ -4,6 +4,7 @@
 ### New features
 
 ### Maintenance and fixes
+- Update requirements: matplotlib>=3.5, pandas>=1.4.0, numpy>=1.22.0
 
 ### Deprecation
 
