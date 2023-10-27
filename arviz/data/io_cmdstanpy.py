@@ -333,21 +333,22 @@ class CmdStanPyConverter:
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        if self.posterior:
-            items = list(self.posterior.stan_variables().keys())
-        else:
-            items = list(self.prior.stan_variables().keys())
-        if self.prior_predictive is not None:
-            try:
-                items = _filter(items, self.prior_predictive)
-            except ValueError:
-                pass
-            data, data_warmup = _unpack_fit(
-                self.prior,
-                items,
-                self.save_warmup,
-                self.dtypes,
-            )
+        if hasattr(self.prior, "metadata") or hasattr(self.prior, "stan_vars_cols"):
+            if self.posterior:
+                items = list(self.posterior.stan_variables().keys())
+            else:
+                items = list(self.prior.stan_variables().keys())
+            if self.prior_predictive is not None:
+                try:
+                    items = _filter(items, self.prior_predictive)
+                except ValueError:
+                    pass
+                data, data_warmup = _unpack_fit(
+                    self.prior,
+                    items,
+                    self.save_warmup,
+                    self.dtypes,
+                )
         else:  # pre_v_0_9_68
             columns = self.prior.column_names
             prior_predictive = _as_set(self.prior_predictive)
