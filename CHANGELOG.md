@@ -4,11 +4,14 @@
 ### New features
 
 ### Maintenance and fixes
-- Update requirements: matplotlib>=3.5, pandas>=1.4.0, numpy>=1.22.0
+- Update requirements: matplotlib>=3.5, pandas>=1.4.0, numpy>=1.22.0 ([2280](https://github.com/arviz-devs/arviz/pull/2280))
+- Fix behaviour of `plot_ppc` when dimension order isn't `chain, draw, ...` ([2283](https://github.com/arviz-devs/arviz/pull/2283))
+- Avoid repeating the variable name in `plot_ppc`, `plot_bpv`, `plot_loo_pit`... when repeated. ([2283](https://github.com/arviz-devs/arviz/pull/2283))
 
 ### Deprecation
 
 ### Documentation
+- Several fixes in `plot_ppc` docstring ([2283](https://github.com/arviz-devs/arviz/pull/2283))
 
 ## v0.16.1 (2023 Jul 18)
 

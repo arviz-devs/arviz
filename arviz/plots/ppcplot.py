@@ -50,37 +50,34 @@ def plot_ppc(
 
     Parameters
     ----------
-    data: az.InferenceData object
+    data : InferenceData
         :class:`arviz.InferenceData` object containing the observed and posterior/prior
         predictive data.
-    kind: str
-        Type of plot to display ("kde", "cumulative", or "scatter"). Defaults to `kde`.
-    alpha: float
+    kind : str, default "kde"
+        Type of plot to display ("kde", "cumulative", or "scatter").
+    alpha : float, optional
         Opacity of posterior/prior predictive density curves.
         Defaults to 0.2 for ``kind = kde`` and cumulative, for scatter defaults to 0.7.
-    mean: bool
+    mean : bool, default True
         Whether or not to plot the mean posterior/prior predictive distribution.
-        Defaults to ``True``.
-    observed: bool, default True
+    observed : bool, default True
         Whether or not to plot the observed data.
-    observed_rug: bool, default False
+    observed_rug : bool, default False
         Whether or not to plot a rug plot for the observed data. Only valid if `observed` is
         `True` and for kind `kde` or `cumulative`.
-    color: str
-        Valid matplotlib ``color``. Defaults to ``C0``.
-    color: list
+    color : list, optional
         List with valid matplotlib colors corresponding to the posterior/prior predictive
         distribution, observed data and mean of the posterior/prior predictive distribution.
         Defaults to ["C0", "k", "C1"].
-    grid : tuple
+    grid : tuple, optional
         Number of rows and columns. Defaults to None, the rows and columns are
         automatically inferred.
-    figsize: tuple
+    figsize : tuple, optional
         Figure size. If None, it will be defined automatically.
-    textsize: float
+    textsize : float, optional
         Text size scaling factor for labels, titles and lines. If None, it will be
         autoscaled based on ``figsize``.
-    data_pairs: dict
+    data_pairs : dict, optional
         Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
 
@@ -90,84 +87,86 @@ def plot_ppc(
         For example, ``data_pairs = {'y' : 'y_hat'}``
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
-    var_names: list of variable names
+    var_names : list of str, optional
         Variables to be plotted, if `None` all variable are plotted. Prefix the
         variables by ``~`` when you want to exclude them from the plot.
-    filter_vars: {None, "like", "regex"}, optional, default=None
+    filter_vars : {None, "like", "regex"}, default None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         ``pandas.filter``.
-    coords: dict
+    coords : dict, optional
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension. Defaults to including all coordinates for all
         dimensions if None.
-    flatten: list
+    flatten : list
         List of dimensions to flatten in ``observed_data``. Only flattens across the coordinates
         specified in the ``coords`` argument. Defaults to flattening all of the dimensions.
-    flatten_pp: list
+    flatten_pp : list
         List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
         across the coordinates specified in the ``coords`` argument. Defaults to flattening all
         of the dimensions. Dimensions should match flatten excluding dimensions for ``data_pairs``
         parameters. If ``flatten`` is defined and ``flatten_pp`` is None, then
         ``flatten_pp = flatten``.
-    num_pp_samples: int
+    num_pp_samples : int
         The number of posterior/prior predictive samples to plot. For ``kind`` = 'scatter' and
         ``animation = False`` if defaults to a maximum of 5 samples and will set jitter to 0.7.
         unless defined. Otherwise it defaults to all provided samples.
-    random_seed: int
+    random_seed : int
         Random number generator seed passed to ``numpy.random.seed`` to allow
         reproducibility of the plot. By default, no seed will be provided
         and the plot will change each call if a random sample is specified
         by ``num_pp_samples``.
-    jitter: float
+    jitter : float, default 0
         If ``kind`` is "scatter", jitter will add random uniform noise to the height
-        of the ppc samples and observed data. By default 0.
-    animated: bool
+        of the ppc samples and observed data.
+    animated : bool, default False
         Create an animation of one posterior/prior predictive sample per frame.
-        Defaults to ``False``. Only works with matploblib backend.
+        Only works with matploblib backend.
         To run animations inside a notebook you have to use the `nbAgg` matplotlib's backend.
         Try with `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch back to the
         default matplotlib's backend with `%matplotlib  inline` or `%matplotlib  auto`.
         If switching back and forth between matplotlib's backend, you may need to run twice the cell
         with the animation.
         If you experience problems rendering the animation try setting
-        `animation_kwargs({'blit':False}`) or changing the matplotlib's backend (e.g. to TkAgg)
-        If you run the animation from a script write `ax, ani = az.plot_ppc(.)`
+        ``animation_kwargs({'blit':False})`` or changing the matplotlib's backend (e.g. to TkAgg)
+        If you run the animation from a script write ``ax, ani = az.plot_ppc(.)``
     animation_kwargs : dict
         Keywords passed to  :class:`matplotlib.animation.FuncAnimation`. Ignored with
         matplotlib backend.
-    legend : bool
-        Add legend to figure. By default ``True``.
-    labeller : labeller instance, optional
+    legend : bool, default True
+        Add legend to figure.
+    labeller : labeller, optional
         Class providing the method ``make_pp_label`` to generate the labels in the plot titles.
         Read the :ref:`label_guide` for more details and usage examples.
-    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : numpy array-like of matplotlib_axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default to "matplotlib".
-    backend_kwargs: bool, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :func:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
-    group: {"prior", "posterior"}, optional
+    group : {"prior", "posterior"}, optional
         Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
         Other value can be 'prior'.
-    show: bool, optional
+    show : bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes: matplotlib axes or bokeh figures
+    axes : matplotlib_axes or bokeh_figures
+    ani : matplotlib.animation.FuncAnimation, optional
+        Only provided if `animated` is ``True``.
 
     See Also
     --------
-    plot_bpv: Plot Bayesian p-value for observed data and Posterior/Prior predictive.
-    plot_lm: Posterior predictive and mean plots for regression-like data.
-    plot_ppc: plot for posterior/prior predictive checks.
-    plot_ts: Plot timeseries data.
+    plot_bpv : Plot Bayesian p-value for observed data and Posterior/Prior predictive.
+    plot_loo_pit : Plot for posterior predictive checks using cross validation.
+    plot_lm : Posterior predictive and mean plots for regression-like data.
+    plot_ts : Plot timeseries data.
 
     Examples
     --------
@@ -308,6 +307,7 @@ def plot_ppc(
                 skip_dims=set(flatten),
                 var_names=var_names,
                 combined=True,
+                dim_order=["chain", "draw"],
             )
         ),
         "plot_ppc",
@@ -322,6 +322,7 @@ def plot_ppc(
                 var_names=pp_var_names,
                 skip_dims=set(flatten_pp),
                 combined=True,
+                dim_order=["chain", "draw"],
             ),
         )
     ]
