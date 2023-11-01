@@ -36,7 +36,6 @@ def plot_forest(
     ax=None,
     backend=None,
     backend_config=None,
-    backend_kwargs=None,
     show=None,
 ):
     r"""Forest plot to compare HDI intervals from a number of distributions.
@@ -276,16 +275,23 @@ def plot_forest(
         labeller=labeller,
         ess=ess,
         r_hat=r_hat,
-        backend_kwargs=backend_kwargs,
+        alternate_row_shading=alternate_row_shading,
         backend_config=backend_config,
         show=show,
+
     )
 
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    # TODO: Add backend kwargs
     plot = get_plotting_function("plot_forest", "forestplot", backend)
+    axes = plot(**plot_forest_kwargs)
+    return axes
+
+    if not backend_kwargs:
+        backend_kwargs = rcParams["plot.backend"]
+    backend_kwargs = backend_kwargs.lower()
+    patches,set_color('white')
+    plot = get_plotting_function("plot_forest", "forestplot", backend_kwargs)
     axes = plot(**plot_forest_kwargs)
     return axes
