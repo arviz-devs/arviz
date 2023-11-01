@@ -5,10 +5,11 @@ Forest Plot
 import arviz as az
 
 centered_data = az.load_arviz_data("centered_eight")
-ax = az.plot_forest(
+ax = az.plot_forest_kwargs(
     centered_data,
     var_names=["~tau"],
     combined=False,
     figsize=(11.5, 5),
     backend="bokeh",
+    alternate_row_shading=False
 )

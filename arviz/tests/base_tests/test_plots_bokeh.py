@@ -538,18 +538,18 @@ def test_plot_ess_no_divergences(models):
 def test_plot_forest(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
-    axes = plot_forest(obj, backend="bokeh", show=False, **args)
+    axes = plot_forest_kwargs(obj, backend="bokeh", show=False, **args, alternate_row_shading=False)
     assert axes.shape == (1, expected)
 
 
 def test_plot_forest_rope_exception():
     with pytest.raises(ValueError) as err:
-        plot_forest({"x": [1]}, rope="not_correct_format", backend="bokeh", show=False)
+        plot_forest_kwargs({"x": [1]}, rope="not_correct_format", backend="bokeh", show=False, alternate_row_shading=False)
     assert "Argument `rope` must be None, a dictionary like" in str(err.value)
 
 
 def test_plot_forest_single_value():
-    axes = plot_forest({"x": [1]}, backend="bokeh", show=False)
+    axes = plot_forest_kwargs({"x": [1]}, backend="bokeh", show=False, alternate_row_shading=False)
     assert axes.shape
 
 
@@ -557,14 +557,15 @@ def test_plot_forest_single_value():
 def test_plot_forest_bad(models, model_fits):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     with pytest.raises(TypeError):
-        plot_forest(obj, kind="bad_kind", backend="bokeh", show=False)
+        plot_forest_kwargs(obj, kind="bad_kind", backend="bokeh", show=False, alternate_row_shading=False)
 
     with pytest.raises(ValueError):
-        plot_forest(
+        plot_forest_kwargs(
             obj,
             model_names=[f"model_name_{i}" for i in range(len(obj) + 10)],
             backend="bokeh",
             show=False,
+            alternate_row_shading=False
         )
 
 

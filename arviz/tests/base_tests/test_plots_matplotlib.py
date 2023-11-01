@@ -379,7 +379,7 @@ def test_plot_forest_bad(models, model_fits):
         plot_forest(obj, kind="bad_kind")
 
     with pytest.raises(ValueError):
-        plot_forest(obj, model_names=[f"model_name_{i}" for i in range(len(obj) + 10)])
+        plot_forest_kwargs(obj, model_names=[f"model_name_{i}" for i in range(len(obj) + 10)], alternate_row_shading=False)
 
 
 @pytest.mark.parametrize("kind", ["kde", "hist"])
