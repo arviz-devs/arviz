@@ -78,6 +78,11 @@ class CmdStanPyConverter:
         ):
             if self.log_likelihood is True and "log_lik" in self.posterior.metadata.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
+        elif hasattr(self.posterior, "metadata") and hasattr(
+            self.posterior.metadata, "stan_vars_cols"
+        ):
+            if self.log_likelihood is True and "log_lik" in self.posterior.metadata.stan_vars_cols:
+                self.log_likelihood = ["log_lik"]
         elif hasattr(self.posterior, "stan_vars_cols"):
             if self.log_likelihood is True and "log_lik" in self.posterior.stan_vars_cols:
                 self.log_likelihood = ["log_lik"]
@@ -102,11 +107,15 @@ class CmdStanPyConverter:
         """Extract posterior samples from output csv."""
         if not (hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols")):
             return self.posterior_to_xarray_pre_v_0_9_68()
-        if not (
+        if (
             hasattr(self.posterior, "metadata")
-            and not hasattr(self.posterior.metadata, "stan_vars_cols")
+            and hasattr(self.posterior.metadata, "stan_vars_cols")
+        ) or hasattr(self.posterior, "stan_vars_cols"):
+            return self.posterior_to_xarray_pre_v_1_0_0()
+        if hasattr(self.posterior, "metadata") and hasattr(
+            self.posterior.metadata, "stan_vars_cols"
         ):
-            return self.posterior_to_xarray_pre_v_1_1_0()
+            return self.posterior_to_xarray_pre_v_1_2_0()
 
         items = list(self.posterior.metadata.stan_vars)
         if self.posterior_predictive is not None:
@@ -172,8 +181,12 @@ class CmdStanPyConverter:
         """Extract sample_stats from fit."""
         if not (hasattr(fit, "metadata") or hasattr(fit, "sampler_vars_cols")):
             return self.sample_stats_to_xarray_pre_v_0_9_68(fit)
-        if not (hasattr(fit, "metadata") and not hasattr(fit.metadata, "stan_vars_cols")):
-            return self.sample_stats_to_xarray_pre_v_1_1_0(fit)
+        if (hasattr(fit, "metadata") and hasattr(fit.metadata, "stan_vars_cols")) or hasattr(
+            fit, "stan_vars_cols"
+        ):
+            return self.sample_stats_to_xarray_pre_v_1_0_0(fit)
+        if hasattr(fit, "metadata") and hasattr(fit.metadata, "stan_vars_cols"):
+            return self.sample_stats_to_xarray_pre_v_1_2_0(fit)
 
         dtypes = {
             "divergent__": bool,
@@ -238,28 +251,35 @@ class CmdStanPyConverter:
         """Convert predictive samples to xarray."""
         predictive = _as_set(names)
 
-        if (hasattr(fit, "metadata") and hasattr(fit.metadata, "sample_vars_cols")) or hasattr(
-            fit, "stan_vars_cols"
-        ):  # pre_v_1_1_0
-            data, data_warmup = _unpack_fit_pre_v_1_1_0(
-                fit,
-                predictive,
-                self.save_warmup,
-                self.dtypes,
-            )
-        elif hasattr(fit, "metadata") and not hasattr(fit.metadata, "sample_vars_cols"):
-            data, data_warmup = _unpack_fit(
-                fit,
-                predictive,
-                self.save_warmup,
-                self.dtypes,
-            )
-        else:  # pre_v_0_9_68
+        if not (hasattr(fit, "metadata") or hasattr(fit, "stan_vars_cols")):  # pre_v_0_9_68
             valid_cols = _filter_columns(fit.column_names, predictive)
             data, data_warmup = _unpack_frame(
                 fit,
                 fit.column_names,
                 valid_cols,
+                self.save_warmup,
+                self.dtypes,
+            )
+        elif (hasattr(fit, "metadata") and hasattr(fit.metadata, "sample_vars_cols")) or hasattr(
+            fit, "stan_vars_cols"
+        ):  # pre_v_1_0_0
+            data, data_warmup = _unpack_fit_pre_v_1_0_0(
+                fit,
+                predictive,
+                self.save_warmup,
+                self.dtypes,
+            )
+        elif hasattr(fit, "metadata") and hasattr(fit.metadata, "stan_vars_cols"):  # pre_v_1_2_0
+            data, data_warmup = _unpack_fit_pre_v_1_2_0(
+                fit,
+                predictive,
+                self.save_warmup,
+                self.dtypes,
+            )
+        else:
+            data, data_warmup = _unpack_fit(
+                fit,
+                predictive,
                 self.save_warmup,
                 self.dtypes,
             )
@@ -287,34 +307,43 @@ class CmdStanPyConverter:
         """Convert out of sample predictions samples to xarray."""
         predictions = _as_set(self.predictions)
 
-        if (
-            hasattr(self.posterior, "metadata")
-            and hasattr(self.posterior.metadata, "sample_vars_cols")
-        ) or hasattr(
-            self.posterior, "stan_vars_cols"
-        ):  # pre_v_1_1_0
-            data, data_warmup = _unpack_fit_pre_v_1_1_0(
-                self.posterior,
-                predictions,
-                self.save_warmup,
-                self.dtypes,
-            )
-        elif hasattr(self.posterior, "metadata") and not hasattr(
-            self.posterior.metadata, "sample_vars_cols"
-        ):
-            data, data_warmup = _unpack_fit(
-                self.posterior,
-                predictions,
-                self.save_warmup,
-                self.dtypes,
-            )
-        else:  # pre_v_0_9_68
+        if not (
+            hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols")
+        ):  # pre_v_0_9_68
             columns = self.posterior.column_names
             valid_cols = _filter_columns(columns, predictions)
             data, data_warmup = _unpack_frame(
                 self.posterior,
                 columns,
                 valid_cols,
+                self.save_warmup,
+                self.dtypes,
+            )
+        elif (
+            hasattr(self.posterior, "metadata")
+            and hasattr(self.posterior.metadata, "sample_vars_cols")
+        ) or hasattr(
+            self.posterior, "stan_vars_cols"
+        ):  # pre_v_1_0_0
+            data, data_warmup = _unpack_fit_pre_v_1_0_0(
+                self.posterior,
+                predictions,
+                self.save_warmup,
+                self.dtypes,
+            )
+        elif hasattr(self.posterior, "metadata") and hasattr(
+            self.posterior.metadata, "stan_vars_cols"
+        ):  # pre_v_1_2_0
+            data, data_warmup = _unpack_fit_pre_v_1_2_0(
+                self.posterior,
+                predictions,
+                self.save_warmup,
+                self.dtypes,
+            )
+        else:
+            data, data_warmup = _unpack_fit(
+                self.posterior,
+                predictions,
                 self.save_warmup,
                 self.dtypes,
             )
@@ -342,28 +371,9 @@ class CmdStanPyConverter:
         """Convert elementwise log likelihood samples to xarray."""
         log_likelihood = _as_set(self.log_likelihood)
 
-        if (
-            hasattr(self.posterior, "metadata")
-            and hasattr(self.posterior.metadata, "sample_vars_cols")
-        ) or hasattr(
-            self.posterior, "stan_vars_cols"
-        ):  # pre_v_1_1_0
-            data, data_warmup = _unpack_fit_pre_v_1_1_0(
-                self.posterior,
-                log_likelihood,
-                self.save_warmup,
-                self.dtypes,
-            )
-        elif hasattr(self.posterior, "metadata") and not hasattr(
-            self.posterior.metadata, "sample_vars_cols"
-        ):
-            data, data_warmup = _unpack_fit(
-                self.posterior,
-                log_likelihood,
-                self.save_warmup,
-                self.dtypes,
-            )
-        else:  # pre_v_0_9_68
+        if not (
+            hasattr(self.posterior, "metadata") or hasattr(self.posterior, "stan_vars_cols")
+        ):  # pre_v_0_9_68
             columns = self.posterior.column_names
             valid_cols = _filter_columns(columns, log_likelihood)
             data, data_warmup = _unpack_frame(
@@ -373,6 +383,35 @@ class CmdStanPyConverter:
                 self.save_warmup,
                 self.dtypes,
             )
+        elif (
+            hasattr(self.posterior, "metadata")
+            and hasattr(self.posterior.metadata, "sample_vars_cols")
+        ) or hasattr(
+            self.posterior, "stan_vars_cols"
+        ):  # pre_v_1_0_0
+            data, data_warmup = _unpack_fit_pre_v_1_0_0(
+                self.posterior,
+                log_likelihood,
+                self.save_warmup,
+                self.dtypes,
+            )
+        elif hasattr(self.posterior, "metadata") and hasattr(
+            self.posterior.metadata, "stan_vars_cols"
+        ):  # pre_v_1_2_0
+            data, data_warmup = _unpack_fit_pre_v_1_2_0(
+                self.posterior,
+                log_likelihood,
+                self.save_warmup,
+                self.dtypes,
+            )
+        else:
+            data, data_warmup = _unpack_fit(
+                self.posterior,
+                log_likelihood,
+                self.save_warmup,
+                self.dtypes,
+            )
+
         if isinstance(self.log_likelihood, dict):
             data = {obs_name: data[lik_name] for obs_name, lik_name in self.log_likelihood.items()}
             if data_warmup:
@@ -402,45 +441,9 @@ class CmdStanPyConverter:
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        if (
-            hasattr(self.prior, "metadata") and hasattr(self.prior.metadata, "sample_vars_cols")
-        ) or hasattr(
-            self.prior, "stan_vars_cols"
-        ):  # pre_v_1_1_0
-            if hasattr(self.prior, "metadata"):
-                items = list(self.prior.metadata.stan_vars_cols.keys())
-            else:
-                items = list(self.prior.stan_vars_cols.keys())
-            if self.prior_predictive is not None:
-                try:
-                    items = _filter(items, self.prior_predictive)
-                except ValueError:
-                    pass
-            data, data_warmup = _unpack_fit_pre_v_1_1_0(
-                self.prior,
-                items,
-                self.save_warmup,
-                self.dtypes,
-            )
-        elif hasattr(self.prior, "metadata") and not hasattr(
-            self.prior.metadata, "sample_vars_cols"
-        ):
-            if hasattr(self.prior, "metadata"):
-                items = list(self.prior.metadata.stan_vars.keys())
-            else:
-                items = list(self.prior.stan_vars.keys())
-            if self.prior_predictive is not None:
-                try:
-                    items = _filter(items, self.prior_predictive)
-                except ValueError:
-                    pass
-            data, data_warmup = _unpack_fit(
-                self.prior,
-                items,
-                self.save_warmup,
-                self.dtypes,
-            )
-        else:  # pre_v_0_9_68
+        if not (
+            hasattr(self.prior, "metadata") or hasattr(self.prior, "stan_vars_cols")
+        ):  # pre_v_0_9_68
             columns = self.prior.column_names
             prior_predictive = _as_set(self.prior_predictive)
             prior_predictive = _filter_columns(columns, prior_predictive)
@@ -452,6 +455,54 @@ class CmdStanPyConverter:
                 self.prior,
                 columns,
                 valid_cols,
+                self.save_warmup,
+                self.dtypes,
+            )
+        elif (
+            hasattr(self.prior, "metadata") and hasattr(self.prior.metadata, "sample_vars_cols")
+        ) or hasattr(
+            self.prior, "stan_vars_cols"
+        ):  # pre_v_1_0_0
+            if hasattr(self.prior, "metadata"):
+                items = list(self.prior.metadata.stan_vars_cols.keys())
+            else:
+                items = list(self.prior.stan_vars_cols.keys())
+            if self.prior_predictive is not None:
+                try:
+                    items = _filter(items, self.prior_predictive)
+                except ValueError:
+                    pass
+            data, data_warmup = _unpack_fit_pre_v_1_0_0(
+                self.prior,
+                items,
+                self.save_warmup,
+                self.dtypes,
+            )
+        elif hasattr(self.prior, "metadata") and hasattr(
+            self.prior.metadata, "stan_vars_cols"
+        ):  # pre_v_1_2_0
+            items = list(self.prior.metadata.stan_vars_cols.keys())
+            if self.prior_predictive is not None:
+                try:
+                    items = _filter(items, self.prior_predictive)
+                except ValueError:
+                    pass
+            data, data_warmup = _unpack_fit_pre_v_1_2_0(
+                self.prior,
+                items,
+                self.save_warmup,
+                self.dtypes,
+            )
+        else:
+            items = list(self.prior.metadata.stan_vars.keys())
+            if self.prior_predictive is not None:
+                try:
+                    items = _filter(items, self.prior_predictive)
+                except ValueError:
+                    pass
+            data, data_warmup = _unpack_fit(
+                self.prior,
+                items,
                 self.save_warmup,
                 self.dtypes,
             )
@@ -534,8 +585,59 @@ class CmdStanPyConverter:
             },
         )
 
+    def posterior_to_xarray_pre_v_1_2_0(self):
+        items = list(self.posterior.metadata.stan_vars_cols)
+        if self.posterior_predictive is not None:
+            try:
+                items = _filter(items, self.posterior_predictive)
+            except ValueError:
+                pass
+        if self.predictions is not None:
+            try:
+                items = _filter(items, self.predictions)
+            except ValueError:
+                pass
+        if self.log_likelihood is not None:
+            try:
+                items = _filter(items, self.log_likelihood)
+            except ValueError:
+                pass
+
+        valid_cols = []
+        for item in items:
+            if hasattr(self.posterior, "metadata"):
+                if item in self.posterior.metadata.stan_vars_cols:
+                    valid_cols.append(item)
+
+        data, data_warmup = _unpack_fit_pre_v_1_2_0(
+            self.posterior,
+            items,
+            self.save_warmup,
+            self.dtypes,
+        )
+
+        dims = deepcopy(self.dims) if self.dims is not None else {}
+        coords = deepcopy(self.coords) if self.coords is not None else {}
+
+        return (
+            dict_to_dataset(
+                data,
+                library=self.cmdstanpy,
+                coords=coords,
+                dims=dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=coords,
+                dims=dims,
+                index_origin=self.index_origin,
+            ),
+        )
+
     @requires("posterior")
-    def posterior_to_xarray_pre_v_1_1_0(self):
+    def posterior_to_xarray_pre_v_1_0_0(self):
         if hasattr(self.posterior, "metadata"):
             items = list(self.posterior.metadata.stan_vars_cols.keys())
         else:
@@ -563,7 +665,7 @@ class CmdStanPyConverter:
             else:
                 valid_cols.extend(self.posterior.stan_vars_cols[item])
 
-        data, data_warmup = _unpack_fit_pre_v_1_1_0(
+        data, data_warmup = _unpack_fit_pre_v_1_0_0(
             self.posterior,
             items,
             self.save_warmup,
@@ -668,7 +770,55 @@ class CmdStanPyConverter:
             ),
         )
 
-    def sample_stats_to_xarray_pre_v_1_1_0(self, fit):
+    def sample_stats_to_xarray_pre_v_1_2_0(self, fit):
+        dtypes = {
+            "divergent__": bool,
+            "n_leapfrog__": np.int64,
+            "treedepth__": np.int64,
+            **self.dtypes,
+        }
+
+        items = list(fit.metadata.method_vars_cols.keys())  # pylint: disable=protected-access
+
+        rename_dict = {
+            "divergent": "diverging",
+            "n_leapfrog": "n_steps",
+            "treedepth": "tree_depth",
+            "stepsize": "step_size",
+            "accept_stat": "acceptance_rate",
+        }
+
+        data, data_warmup = _unpack_fit_pre_v_1_2_0(
+            fit,
+            items,
+            self.save_warmup,
+            self.dtypes,
+        )
+        for item in items:
+            name = re.sub("__$", "", item)
+            name = rename_dict.get(name, name)
+            data[name] = data.pop(item).astype(dtypes.get(item, float))
+            if data_warmup:
+                data_warmup[name] = data_warmup.pop(item).astype(dtypes.get(item, float))
+
+        return (
+            dict_to_dataset(
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
+            ),
+        )
+
+    def sample_stats_to_xarray_pre_v_1_0_0(self, fit):
         """Extract sample_stats from fit."""
         dtypes = {
             "divergent__": bool,
@@ -688,7 +838,7 @@ class CmdStanPyConverter:
             "accept_stat": "acceptance_rate",
         }
 
-        data, data_warmup = _unpack_fit_pre_v_1_1_0(
+        data, data_warmup = _unpack_fit_pre_v_1_0_0(
             fit,
             items,
             self.save_warmup,
@@ -817,7 +967,40 @@ def _unpack_fit(fit, items, save_warmup, dtypes):
     return sample, sample_warmup
 
 
-def _unpack_fit_pre_v_1_1_0(fit, items, save_warmup, dtypes):
+def _unpack_fit_pre_v_1_2_0(fit, items, save_warmup, dtypes):
+    num_warmup = 0
+    if save_warmup:
+        if not fit._save_warmup:  # pylint: disable=protected-access
+            save_warmup = False
+        else:
+            num_warmup = fit.num_draws_warmup
+
+    nchains = fit.chains
+    sample = {}
+    sample_warmup = {}
+    stan_vars_cols = list(fit.metadata.stan_vars_cols)
+    sampler_vars = fit.method_variables()
+    for item in items:
+        if item in stan_vars_cols:
+            raw_draws = fit.stan_variable(item, inc_warmup=save_warmup)
+            raw_draws = np.swapaxes(
+                raw_draws.reshape((-1, nchains, *raw_draws.shape[1:]), order="F"), 0, 1
+            )
+        elif item in sampler_vars:
+            raw_draws = np.swapaxes(sampler_vars[item], 0, 1)
+        else:
+            raise ValueError(f"fit data, unknown variable: {item}")
+        raw_draws = raw_draws.astype(dtypes.get(item))
+        if save_warmup:
+            sample_warmup[item] = raw_draws[:, :num_warmup, ...]
+            sample[item] = raw_draws[:, num_warmup:, ...]
+        else:
+            sample[item] = raw_draws
+
+    return sample, sample_warmup
+
+
+def _unpack_fit_pre_v_1_0_0(fit, items, save_warmup, dtypes):
     """Transform fit to dictionary containing ndarrays.
 
     Parameters
