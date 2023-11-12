@@ -796,6 +796,12 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
                 "groups": "posterior",
                 "var_results": ["parameter_2", "variable_2", "custom_name"],
             },
+            {
+                "var_names": ["lp"],
+                "filter_vars": "regex",
+                "groups": "sample_stats",
+                "var_results": ["lp"],
+            },
         ),
     )
     def test_to_dataframe_selection(self, kwargs):
@@ -811,6 +817,9 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             prior={
                 "parameter_1": np.random.randn(4, 100),
                 "parameter_2": np.random.randn(4, 100),
+            },
+            sample_stats={
+                "lp": np.random.randn(4, 100),
             },
         )
         test_data = idata.to_dataframe(**kwargs)
@@ -834,6 +843,9 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
 
         with pytest.raises(KeyError):
             idata.to_dataframe(groups=["invalid_group"])
+
+        with pytest.raises(ValueError):
+            idata.to_dataframe(var_names=["c"])
 
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):

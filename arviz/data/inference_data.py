@@ -637,6 +637,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         skipped implicitly.
 
         Raises TypeError if no valid groups are found.
+        Raises ValueError if no data are selected.
 
         Parameters
         ----------
@@ -731,6 +732,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
             if df is not None:
                 df = df.reset_index()
                 dfs[group] = df
+        if not dfs:
+            raise ValueError("No data selected for the dataframe.")
         if len(dfs) > 1:
             for group, df in dfs.items():
                 df.columns = [
