@@ -51,7 +51,7 @@ to ask quick questions about ArviZ and to chat with other users and contributors
 For longer questions, the Discourse forums listed below are probably a better platform.
 
 ### Affine forums
-Many ArviZ contributors are also active in one of [PyMC3 Discourse](https://discourse.pymc.io/)
+Many ArviZ contributors are also active in one of [PyMC Discourse](https://discourse.pymc.io/)
 or [Stan Discourse](https://discourse.mc-stan.org/) (and sometimes even in both!).
 
 ## Conferences
@@ -67,7 +67,7 @@ share the results of PPL libraries.
 
 The PPLs that integrate with ArviZ are:
 
-* [PyMC3](https://docs.pymc.io)
+* [PyMC](https://www.pymc.io/)
 * [Stan](https://mc-stan.org/users/documentation/)
 * [MCX](https://github.com/rlouf/mcx)
 * [Pyro](https://pyro.ai/) and [NumPyro](https://pyro.ai/numpyro/)
@@ -99,6 +99,9 @@ let us know!
 ## Podcasts
 * [Learning Bayesian Statistics](https://www.learnbayesstats.com/)
 * [dats'n'stats](https://www.pydata-podcast.com/)
+
+## Videos
+* [Contributing to ArviZ and Open Source: Social and Technical Sides](https://youtu.be/457ZTes4xOI) (Oriol Abril Pla)
 
 ## Blogs and example compilations
 If you have a blog that has 2 or more posts tagged as "ArviZ", you can submit
