@@ -689,6 +689,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         for group in group_names:
             dataset = self[group]
             group_var_names = _var_names(var_names, dataset, filter_vars, "ignore")
+            if (group_var_names is not None) and not group_var_names:
+                continue
             if group_var_names is not None:
                 dataset = dataset[[var_name for var_name in group_var_names if var_name in dataset]]
             df = None
@@ -726,8 +728,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     df = dataframe
                     continue
                 df = df.join(dataframe, how="outer")
-            df = df.reset_index()
-            dfs[group] = df
+            if df is not None:
+                df = df.reset_index()
+                dfs[group] = df
         if len(dfs) > 1:
             for group, df in dfs.items():
                 df.columns = [
