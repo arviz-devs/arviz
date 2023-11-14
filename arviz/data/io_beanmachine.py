@@ -99,6 +99,11 @@ def from_beanmachine(
         Map of dimensions to coordinates
     dims : dict of {str : list of str}
         Map variable names to their coordinates
+
+    Warnings
+    --------
+    `beanmachine` is no longer under active development, and therefore, it
+    is not possible to test this converter in ArviZ's CI.
     """
     return BMConverter(
         sampler=sampler,
