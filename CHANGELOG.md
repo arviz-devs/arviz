@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
+- Support for `pytree`s and robust to nested dictionaries. (2291)
 
 ### Maintenance and fixes
 - Fix deprecations introduced in latest pandas and xarray versions, and prepare for numpy 2.0 ones ([2315](https://github.com/arviz-devs/arviz/pull/2315)))

@@ -333,7 +333,7 @@ def plot_pair(
                     if reference_values:
                         x_name = flat_var_names[i]
                         y_name = flat_var_names[j + not_marginals]
-                        if x_name and y_name not in difference:
+                        if (x_name not in difference) and (y_name not in difference):
                             ax[j, i].plot(
                                 reference_values_copy[x_name],
                                 reference_values_copy[y_name],

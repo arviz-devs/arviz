@@ -1,5 +1,6 @@
 """High level conversion functions."""
 import numpy as np
+import tree
 import xarray as xr
 
 from .base import dict_to_dataset
@@ -105,6 +106,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         dataset = obj.to_dataset()
     elif isinstance(obj, dict):
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
+    elif tree.is_nested(obj) and not isinstance(obj, (list, tuple)):
+        dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
         dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
     elif isinstance(obj, (list, tuple)) and isinstance(obj[0], str) and obj[0].endswith(".csv"):
@@ -118,6 +121,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             "xarray dataarray",
             "xarray dataset",
             "dict",
+            "pytree",
             "netcdf filename",
             "numpy array",
             "pystan fit",

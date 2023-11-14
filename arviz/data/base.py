@@ -8,6 +8,7 @@ from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
+import tree
 import xarray as xr
 
 try:
@@ -65,6 +66,48 @@ class requires:  # pylint: disable=invalid-name
             return func(cls)
 
         return wrapped
+
+
+def _yield_flat_up_to(shallow_tree, input_tree, path=()):
+    """Yields (path, value) pairs of input_tree flattened up to shallow_tree.
+
+    Adapted from dm-tree (https://github.com/google-deepmind/tree) to allow
+    lists as leaves.
+
+    Args:
+        shallow_tree: Nested structure. Traverse no further than its leaf nodes.
+        input_tree: Nested structure. Return the paths and values from this tree.
+            Must have the same upper structure as shallow_tree.
+        path: Tuple. Optional argument, only used when recursing. The path from the
+            root of the original shallow_tree, down to the root of the shallow_tree
+            arg of this recursive call.
+
+    Yields:
+        Pairs of (path, value), where path the tuple path of a leaf node in
+        shallow_tree, and value is the value of the corresponding node in
+        input_tree.
+    """
+    # pylint: disable=protected-access
+    if isinstance(shallow_tree, tree._TEXT_OR_BYTES) or not (
+        isinstance(shallow_tree, tree.collections_abc.Mapping)
+        or tree._is_namedtuple(shallow_tree)
+        or tree._is_attrs(shallow_tree)
+    ):
+        yield (path, input_tree)
+    else:
+        input_tree = dict(tree._yield_sorted_items(input_tree))
+        for shallow_key, shallow_subtree in tree._yield_sorted_items(shallow_tree):
+            subpath = path + (shallow_key,)
+            input_subtree = input_tree[shallow_key]
+            for leaf_path, leaf_value in _yield_flat_up_to(
+                shallow_subtree, input_subtree, path=subpath
+            ):
+                yield (leaf_path, leaf_value)
+    # pylint: enable=protected-access
+
+
+def _flatten_with_path(structure):
+    return list(_yield_flat_up_to(structure, structure))
 
 
 def generate_dims_coords(
@@ -255,7 +298,7 @@ def numpy_to_data_array(
     return xr.DataArray(ary, coords=coords, dims=dims)
 
 
-def dict_to_dataset(
+def pytree_to_dataset(
     data,
     *,
     attrs=None,
@@ -266,11 +309,34 @@ def dict_to_dataset(
     index_origin=None,
     skip_event_dims=None,
 ):
-    """Convert a dictionary of numpy arrays to an xarray.Dataset.
+    """Convert a pytree of numpy arrays to an xarray.Dataset.
+
+    See https://jax.readthedocs.io/en/latest/pytrees.html for what a pytree is, but
+    this inclues at least dictionaries and tuple types.
+
+    In case of nested pytrees, the variable name will be a tuple of individual names.
+
+    For example,
+
+    pytree_to_dataset({'top': {'second': 1.}, 'top2': 1.})
+
+    will have `var_names` `('top', 'second')` and `top2`.
+
+    Dimensions and co-ordinates can be defined as usual:
+
+    datadict = {
+        "top": {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)},
+        "d": np.random.randn(100),
+    }
+    dataset = convert_to_dataset(datadict,
+                                 coords={"c": np.arange(10)},
+                                 dims={("top", "b"): ["c"]})
+
+    Then `dataset.data_vars` will be `('top', 'a'), ('top', 'b'), 'd'`.
 
     Parameters
     ----------
-    data : dict[str] -> ndarray
+    data : pytree
         Data to convert. Keys are variable names.
     attrs : dict
         Json serializable metadata to attach to the dataset, in addition to defaults.
@@ -302,6 +368,10 @@ def dict_to_dataset(
     """
     if dims is None:
         dims = {}
+    try:
+        data = {k[0] if len(k) == 1 else k: v for k, v in _flatten_with_path(data)}
+    except TypeError:  # probably unsortable keys -- the function will still work if
+        pass  # it is an honest dictionary.
 
     data_vars = {
         key: numpy_to_data_array(
@@ -316,6 +386,9 @@ def dict_to_dataset(
         for key, values in data.items()
     }
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
+
+
+dict_to_dataset = pytree_to_dataset
 
 
 def make_attrs(attrs=None, library=None):

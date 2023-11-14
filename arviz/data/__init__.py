@@ -7,7 +7,7 @@ from .io_beanmachine import from_beanmachine
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
 from .io_datatree import from_datatree, to_datatree
-from .io_dict import from_dict
+from .io_dict import from_dict, from_pytree
 from .io_emcee import from_emcee
 from .io_json import from_json, to_json
 from .io_netcdf import from_netcdf, to_netcdf
@@ -38,6 +38,7 @@ __all__ = [
     "from_cmdstanpy",
     "from_datatree",
     "from_dict",
+    "from_pytree",
     "from_json",
     "from_pyro",
     "from_numpyro",

@@ -1077,6 +1077,20 @@ def test_dict_to_dataset():
     assert set(dataset.b.coords) == {"chain", "draw", "c"}
 
 
+def test_nested_dict_to_dataset():
+    datadict = {
+        "top": {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)},
+        "d": np.random.randn(100),
+    }
+    dataset = convert_to_dataset(datadict, coords={"c": np.arange(10)}, dims={("top", "b"): ["c"]})
+    assert set(dataset.data_vars) == {("top", "a"), ("top", "b"), "d"}
+    assert set(dataset.coords) == {"chain", "draw", "c"}
+
+    assert set(dataset[("top", "a")].coords) == {"chain", "draw"}
+    assert set(dataset[("top", "b")].coords) == {"chain", "draw", "c"}
+    assert set(dataset.d.coords) == {"chain", "draw"}
+
+
 def test_dict_to_dataset_event_dims_error():
     datadict = {"a": np.random.randn(1, 100, 10)}
     coords = {"b": np.arange(10), "c": ["x", "y", "z"]}
