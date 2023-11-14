@@ -416,7 +416,10 @@ def _set_animation(
             _, y_vals, x_vals = histogram(vals, bins=bins)
             (line,) = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
 
-            max_max = max(max(histogram(pp_sampled_vals[i], bins=get_bins(pp_sampled_vals[i]))[1]) for i in range(length))
+            max_max = max(
+                max(histogram(pp_sampled_vals[i], bins=get_bins(pp_sampled_vals[i]))[1])
+                for i in range(length)
+            )
 
             ax.set_ylim(0, max_max)
 
