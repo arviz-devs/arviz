@@ -6,7 +6,7 @@ pydocstyle
 Sphinx>=5
 pydata-sphinx-theme>=0.13.0
 myst-parser
-myst-nb
+myst-nb<1.0
 sphinx-notfound-page
 sphinx-copybutton
 bokeh
