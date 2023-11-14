@@ -1,6 +1,6 @@
 torch
 emcee
-pyjags
+pyjags ; python_version < '3.12'
 pystan
 cmdstanpy
 pyro-ppl>=1.0.0

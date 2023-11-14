@@ -1,4 +1,5 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name, unused-import
+import sys
 import typing as tp
 
 import numpy as np
@@ -40,6 +41,10 @@ def verify_equality_of_numpy_values_dictionaries(
     return True
 
 
+@pytest.mark.skipif(
+    packaging.version.parse(sys.__version__) < packaging.version.parse("3.12"),
+    reason="No python 3.12 support",
+)
 class TestDataPyJAGSWithoutEstimation:
     def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(self):
         arviz_samples_dict_from_pyjags_samples_dict = _convert_pyjags_dict_to_arviz_dict(
