@@ -763,6 +763,69 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
                     )
             assert all(item in test_data.columns for item in ("chain", "draw"))
 
+    @pytest.mark.parametrize(
+        "kwargs",
+        (
+            {
+                "var_names": ["parameter_1", "parameter_2", "variable_1", "variable_2"],
+                "filter_vars": None,
+                "var_results": [
+                    ("posterior", "parameter_1"),
+                    ("posterior", "parameter_2"),
+                    ("prior", "parameter_1"),
+                    ("prior", "parameter_2"),
+                    ("posterior", "variable_1"),
+                    ("posterior", "variable_2"),
+                ],
+            },
+            {
+                "var_names": "parameter",
+                "filter_vars": "like",
+                "groups": "posterior",
+                "var_results": ["parameter_1", "parameter_2"],
+            },
+            {
+                "var_names": "~parameter",
+                "filter_vars": "like",
+                "groups": "posterior",
+                "var_results": ["variable_1", "variable_2", "custom_name"],
+            },
+            {
+                "var_names": [".+_2$", "custom_name"],
+                "filter_vars": "regex",
+                "groups": "posterior",
+                "var_results": ["parameter_2", "variable_2", "custom_name"],
+            },
+            {
+                "var_names": ["lp"],
+                "filter_vars": "regex",
+                "groups": "sample_stats",
+                "var_results": ["lp"],
+            },
+        ),
+    )
+    def test_to_dataframe_selection(self, kwargs):
+        results = kwargs.pop("var_results")
+        idata = from_dict(
+            posterior={
+                "parameter_1": np.random.randn(4, 100),
+                "parameter_2": np.random.randn(4, 100),
+                "variable_1": np.random.randn(4, 100),
+                "variable_2": np.random.randn(4, 100),
+                "custom_name": np.random.randn(4, 100),
+            },
+            prior={
+                "parameter_1": np.random.randn(4, 100),
+                "parameter_2": np.random.randn(4, 100),
+            },
+            sample_stats={
+                "lp": np.random.randn(4, 100),
+            },
+        )
+        test_data = idata.to_dataframe(**kwargs)
+        assert not test_data.empty
+        assert set(test_data.columns).symmetric_difference(results) == set(["chain", "draw"])
+
     def test_to_dataframe_bad(self):
         idata = from_dict(
             posterior={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
@@ -780,6 +843,9 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
 
         with pytest.raises(KeyError):
             idata.to_dataframe(groups=["invalid_group"])
+
+        with pytest.raises(ValueError):
+            idata.to_dataframe(var_names=["c"])
 
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):

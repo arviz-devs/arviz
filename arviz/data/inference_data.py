@@ -1,5 +1,6 @@
 # pylint: disable=too-many-lines,too-many-public-methods
 """Data structure for using netcdf groups with xarray."""
+import os
 import re
 import sys
 import uuid
@@ -23,14 +24,13 @@ from typing import (
     Union,
     overload,
 )
-import os
 
 import numpy as np
 import xarray as xr
 from packaging import version
 
 from ..rcparams import rcParams
-from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
+from ..utils import HtmlTemplate, _subset_list, _var_names, either_dict_or_kwargs
 from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 
 if sys.version_info[:2] >= (3, 9):
@@ -620,6 +620,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
         self,
         groups=None,
         filter_groups=None,
+        var_names=None,
+        filter_vars=None,
         include_coords=True,
         include_index=True,
         index_origin=None,
@@ -635,6 +637,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         skipped implicitly.
 
         Raises TypeError if no valid groups are found.
+        Raises ValueError if no data are selected.
 
         Parameters
         ----------
@@ -646,6 +649,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
             If "like", interpret groups as substrings of the real group or metagroup names.
             If "regex", interpret groups as regular expressions on the real group or
             metagroup names. A la `pandas.filter`.
+        var_names : str or list of str, optional
+            Variables to be extracted. Prefix the variables by `~` when you want to exclude them.
+        filter_vars: {None, "like", "regex"}, optional
+            If `None` (default), interpret var_names as the real variables names. If "like",
+            interpret var_names as substrings of the real variables names. If "regex",
+            interpret var_names as regular expressions on the real variables names. A la
+            `pandas.filter`.
+            Like with plotting, sometimes it's easier to subset saying what to exclude
+            instead of what to include
         include_coords: bool
             Add coordinate values to column name (tuple).
         include_index: bool
@@ -677,6 +689,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         dfs = {}
         for group in group_names:
             dataset = self[group]
+            group_var_names = _var_names(var_names, dataset, filter_vars, "ignore")
+            if (group_var_names is not None) and not group_var_names:
+                continue
+            if group_var_names is not None:
+                dataset = dataset[[var_name for var_name in group_var_names if var_name in dataset]]
             df = None
             coords_to_idx = {
                 name: dict(map(reversed, enumerate(dataset.coords[name].values, index_origin)))
@@ -712,8 +729,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     df = dataframe
                     continue
                 df = df.join(dataframe, how="outer")
-            df = df.reset_index()
-            dfs[group] = df
+            if df is not None:
+                df = df.reset_index()
+                dfs[group] = df
+        if not dfs:
+            raise ValueError("No data selected for the dataframe.")
         if len(dfs) > 1:
             for group, df in dfs.items():
                 df.columns = [

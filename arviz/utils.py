@@ -21,7 +21,7 @@ def _check_tilde_start(x):
     return bool(isinstance(x, str) and x.startswith("~"))
 
 
-def _var_names(var_names, data, filter_vars=None):
+def _var_names(var_names, data, filter_vars=None, errors="raise"):
     """Handle var_names input across arviz.
 
     Parameters
@@ -34,6 +34,8 @@ def _var_names(var_names, data, filter_vars=None):
          interpret var_names as substrings of the real variables names. If "regex",
          interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
+    errors: {"raise", "ignore"}, optional, default="raise"
+        Select either to raise or ignore the invalid names.
 
     Returns
     -------
@@ -43,6 +45,9 @@ def _var_names(var_names, data, filter_vars=None):
         raise ValueError(
             f"'filter_vars' can only be None, 'like', or 'regex', got: '{filter_vars}'"
         )
+
+    if errors not in {"raise", "ignore"}:
+        raise ValueError(f"'errors' can only be 'raise', or 'ignore', got: '{errors}'")
 
     if var_names is not None:
         if isinstance(data, (list, tuple)):
@@ -66,14 +71,16 @@ def _var_names(var_names, data, filter_vars=None):
             )
 
         try:
-            var_names = _subset_list(var_names, all_vars, filter_items=filter_vars, warn=False)
+            var_names = _subset_list(
+                var_names, all_vars, filter_items=filter_vars, warn=False, errors=errors
+            )
         except KeyError as err:
             msg = " ".join(("var names:", f"{err}", "in dataset"))
             raise KeyError(msg) from err
     return var_names
 
 
-def _subset_list(subset, whole_list, filter_items=None, warn=True):
+def _subset_list(subset, whole_list, filter_items=None, warn=True, errors="raise"):
     """Handle list subsetting (var_names, groups...) across arviz.
 
     Parameters
@@ -87,6 +94,8 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
         names. If "like", interpret `subset` as substrings of the elements in
         `whole_list`. If "regex", interpret `subset` as regular expressions to match
         elements in `whole_list`. A la `pandas.filter`.
+    errors: {"raise", "ignore"}, optional, default="raise"
+        Select either to raise or ignore the invalid names.
 
     Returns
     -------
@@ -142,7 +151,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
             subset = [item for item in whole_list for name in subset if re.search(name, item)]
 
         existing_items = np.isin(subset, whole_list)
-        if not np.all(existing_items):
+        if not np.all(existing_items) and (errors == "raise"):
             raise KeyError(f"{np.array(subset)[~existing_items]} are not present")
 
     return subset
