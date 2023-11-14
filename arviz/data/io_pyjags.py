@@ -52,7 +52,7 @@ class PyJAGSConverter:
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
         self.warmup_iterations = warmup_iterations
 
-        import pyjags
+        import pyjags  # pylint: disable=import-error
 
         self.pyjags = pyjags
 
