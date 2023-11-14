@@ -149,7 +149,10 @@ def get_draws(
     variables = tuple(variables)
 
     if warmup_iterations > 0:
-        (warmup_samples, actual_samples,) = _split_pyjags_dict_in_warmup_and_actual_samples(
+        (
+            warmup_samples,
+            actual_samples,
+        ) = _split_pyjags_dict_in_warmup_and_actual_samples(
             pyjags_samples=pyjags_samples,
             warmup_iterations=warmup_iterations,
             variable_names=variables,

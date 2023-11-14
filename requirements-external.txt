@@ -1,5 +1,4 @@
-beanmachine
-torch<2.0
+torch
 emcee
 pyjags
 pystan

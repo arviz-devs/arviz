@@ -129,7 +129,6 @@ def _d_helper(
     shade,
     ax,
 ):
-
     extra = {}
     plotted = []
 

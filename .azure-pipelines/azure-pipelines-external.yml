@@ -42,7 +42,7 @@ jobs:
       python -m pip install --upgrade pip
       python -m pip install wheel
 
-      python -m pip --no-cache-dir install torch<2.0 --index-url https://download.pytorch.org/whl/cpu
+      python -m pip --no-cache-dir install torch --index-url https://download.pytorch.org/whl/cpu
 
       if [ "$(cmdstanpy.version)" = "latest" ]; then
           python -m pip --no-cache-dir install cmdstanpy

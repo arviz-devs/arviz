@@ -552,7 +552,7 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
         ("emcee", emcee_schools_model),
         ("pyro", pyro_noncentered_schools),
         ("numpyro", numpyro_schools_model),
-        ("beanmachine", bm_schools_model),
+        # ("beanmachine", bm_schools_model),  # ignore beanmachine until it supports torch>=2
     )
     data_directory = os.path.join(here, "saved_models")
     models = {}

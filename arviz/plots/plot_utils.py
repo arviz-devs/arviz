@@ -364,7 +364,6 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
         else:
             point_value = int(mode(values).mode)
     elif point_estimate == "median":
-
         point_value = np.nanmedian(values) if skipna else np.median(values)
     return point_value
 

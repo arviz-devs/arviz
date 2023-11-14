@@ -889,7 +889,6 @@ def _mc_error(ary, batches=5, circular=False):
     """
     _numba_flag = Numba.numba_flag
     if ary.ndim > 1:
-
         dims = np.shape(ary)
         trace = np.transpose([t.ravel() for t in ary])
 
