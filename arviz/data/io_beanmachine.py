@@ -18,7 +18,7 @@ class BMConverter:
         self.coords = coords
         self.dims = dims
 
-        import beanmachine.ppl as bm
+        import beanmachine.ppl as bm  # pylint: disable=import-error
 
         self.beanm = bm
 

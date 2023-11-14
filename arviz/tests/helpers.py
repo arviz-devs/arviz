@@ -487,7 +487,7 @@ def pystan_noncentered_schools(data, draws, chains):
 
 
 def bm_schools_model(data, draws, chains):
-    import beanmachine.ppl as bm
+    import beanmachine.ppl as bm  # pylint: disable=import-error
     import torch
     import torch.distributions as dist
 
