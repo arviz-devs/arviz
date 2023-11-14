@@ -1,13 +1,12 @@
 docutils
-ghp-import
 ipython
+pickleshare
 numpydoc
 pydocstyle
-Sphinx>=1.8.3
+Sphinx>=5
 pydata-sphinx-theme>=0.13.0
 myst-parser
 myst-nb
-sphinx-panels
 sphinx-notfound-page
 sphinx-copybutton
 bokeh
