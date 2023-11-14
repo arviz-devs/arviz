@@ -412,15 +412,20 @@ def _set_animation(
 
         else:
             vals = pp_sampled_vals[0]
-            _, y_vals, x_vals = histogram(vals, bins="auto")
+            bins = get_bins(vals)
+            _, y_vals, x_vals = histogram(vals, bins=bins)
             (line,) = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
 
-            max_max = max(max(histogram(pp_sampled_vals[i], bins="auto")[1]) for i in range(length))
+            max_max = max(
+                max(histogram(pp_sampled_vals[i], bins=get_bins(pp_sampled_vals[i]))[1])
+                for i in range(length)
+            )
 
             ax.set_ylim(0, max_max)
 
             def animate(i):
-                _, y_vals, x_vals = histogram(pp_sampled_vals[i], bins="auto")
+                pp_vals = pp_sampled_vals[i]
+                _, y_vals, x_vals = histogram(pp_vals, bins=get_bins(pp_vals))
                 line.set_data(x_vals[:-1], y_vals)
                 return (line,)
 
