@@ -13,6 +13,8 @@ from ...data.io_pyjags import (
 )
 from ..helpers import check_multiple_attrs, eight_schools_params
 
+pytest.skip("Uses deprecated numpy C-api")
+
 PYJAGS_POSTERIOR_DICT = {
     "b": np.random.randn(3, 10, 3),
     "int": np.random.randn(1, 10, 3),
@@ -41,10 +43,6 @@ def verify_equality_of_numpy_values_dictionaries(
     return True
 
 
-@pytest.mark.skipif(
-    packaging.version.parse(sys.__version__) < packaging.version.parse("3.12"),
-    reason="No python 3.12 support",
-)
 class TestDataPyJAGSWithoutEstimation:
     def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(self):
         arviz_samples_dict_from_pyjags_samples_dict = _convert_pyjags_dict_to_arviz_dict(

@@ -10,10 +10,10 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_312:
-        python.version: "3.12"
+      Python_39:
+        python.version: "3.9"
         PyPIGithub: false
-        name: "Python 3.12"
+        name: "Python 3.9"
       Python_311:
         python.version: "3.11"
         PyPIGithub: false
