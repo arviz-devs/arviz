@@ -13,7 +13,7 @@ from ...data.io_pyjags import (
 )
 from ..helpers import check_multiple_attrs, eight_schools_params
 
-pytest.skip("Uses deprecated numpy C-api")
+pytest.skip("Uses deprecated numpy C-api", allow_module_level=True)
 
 PYJAGS_POSTERIOR_DICT = {
     "b": np.random.randn(3, 10, 3),
