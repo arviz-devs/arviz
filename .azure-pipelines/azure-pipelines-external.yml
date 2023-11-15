@@ -10,14 +10,14 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_310_Latest:
-        python.version: "3.10"
+      Python_311_Latest:
+        python.version: "3.11"
         cmdstanpy.version: "latest"
         emcee.version: "latest"
         name: "External latest"
 
-      Python_310_Special_versions:
-        python.version: "3.10"
+      Python_311_Special_versions:
+        python.version: "3.11"
         cmdstanpy.version: "github"
         emcee.version: 2
         name: "External special"
@@ -38,11 +38,10 @@ jobs:
 
   - script: |
       sudo apt-get update
-      sudo apt-get install jags
       python -m pip install --upgrade pip
       python -m pip install wheel
 
-      python -m pip --no-cache-dir install torch<2.0 --index-url https://download.pytorch.org/whl/cpu
+      python -m pip --no-cache-dir install torch --index-url https://download.pytorch.org/whl/cpu
 
       if [ "$(cmdstanpy.version)" = "latest" ]; then
           python -m pip --no-cache-dir install cmdstanpy

@@ -165,7 +165,6 @@ def plot_kde(
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
 
         if contour:
-
             scaled_density, *scaled_density_args = _scale_axis(density)
 
             contourpy_kwargs = _init_kwargs_dict(contour_kwargs.pop("contourpy_kwargs", {}))
@@ -224,7 +223,6 @@ def plot_kde(
             ax.ygrid.grid_line_color = None
 
         else:
-
             cmap = pcolormesh_kwargs.pop("cmap", "viridis")
             if isinstance(cmap, str):
                 cmap = get_cmap(cmap)

@@ -470,7 +470,6 @@ def _plot_chains_mpl(
     circ_var_units,
     circ_units_trace,
 ):
-
     if not circular:
         circ_var_units = False
 

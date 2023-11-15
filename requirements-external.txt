@@ -1,7 +1,5 @@
-beanmachine
-torch<2.0
+torch
 emcee
-pyjags
 pystan
 cmdstanpy
 pyro-ppl>=1.0.0

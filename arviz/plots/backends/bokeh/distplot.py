@@ -145,12 +145,10 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
         edges = edges.astype(float) - 0.5
 
     if is_circular:
-
         if is_circular == "degrees":
             edges = np.deg2rad(edges)
             labels = ["0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"]
         else:
-
             labels = [
                 r"0",
                 r"π/4",

@@ -50,7 +50,6 @@ def plot_lm(
         _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
-
         # All the kwargs are defined here beforehand
         y_kwargs = matplotlib_kwarg_dealiaser(y_kwargs, "plot")
         y_kwargs.setdefault("color", "C3")
@@ -68,22 +67,22 @@ def plot_lm(
         y_hat_plot_kwargs.setdefault("linewidth", 0)
 
         y_hat_fill_kwargs = matplotlib_kwarg_dealiaser(y_hat_fill_kwargs, "fill_between")
-        y_hat_fill_kwargs.setdefault("color", "C1")
+        y_hat_fill_kwargs.setdefault("color", "C3")
 
         y_model_plot_kwargs = matplotlib_kwarg_dealiaser(y_model_plot_kwargs, "plot")
-        y_model_plot_kwargs.setdefault("color", "k")
+        y_model_plot_kwargs.setdefault("color", "C6")
         y_model_plot_kwargs.setdefault("alpha", 0.5)
         y_model_plot_kwargs.setdefault("linewidth", 0.5)
         y_model_plot_kwargs.setdefault("zorder", 9)
 
         y_model_fill_kwargs = matplotlib_kwarg_dealiaser(y_model_fill_kwargs, "fill_between")
-        y_model_fill_kwargs.setdefault("color", "k")
+        y_model_fill_kwargs.setdefault("color", "C0")
         y_model_fill_kwargs.setdefault("linewidth", 0.5)
         y_model_fill_kwargs.setdefault("zorder", 9)
         y_model_fill_kwargs.setdefault("alpha", 0.5)
 
         y_model_mean_kwargs = matplotlib_kwarg_dealiaser(y_model_mean_kwargs, "plot")
-        y_model_mean_kwargs.setdefault("color", "y")
+        y_model_mean_kwargs.setdefault("color", "C6")
         y_model_mean_kwargs.setdefault("linewidth", 0.8)
         y_model_mean_kwargs.setdefault("zorder", 11)
 

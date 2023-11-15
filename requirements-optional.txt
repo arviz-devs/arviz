@@ -5,3 +5,4 @@ contourpy
 ujson
 dask[distributed]
 zarr>=2.5.0
+xarray-datatree

@@ -201,7 +201,6 @@ def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c, hover_format)
     offset = 10
 
     def update_annot(ind):
-
         idx = ind["ind"][0]
         pos = sc_plot.get_offsets()[idx]
         annot_text = hover_format.format(idx, coord_labels[idx])

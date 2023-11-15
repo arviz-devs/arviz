@@ -1,6 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
 
+import importlib
 import os
 from collections import namedtuple
 from copy import deepcopy
@@ -21,6 +22,7 @@ from ... import (
     concat,
     convert_to_dataset,
     convert_to_inference_data,
+    from_datatree,
     from_dict,
     from_json,
     from_netcdf,
@@ -40,6 +42,7 @@ from ..helpers import (  # pylint: disable=unused-import
     draws,
     eight_schools_params,
     models,
+    running_on_ci,
 )
 
 
@@ -760,6 +763,69 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
                     )
             assert all(item in test_data.columns for item in ("chain", "draw"))
 
+    @pytest.mark.parametrize(
+        "kwargs",
+        (
+            {
+                "var_names": ["parameter_1", "parameter_2", "variable_1", "variable_2"],
+                "filter_vars": None,
+                "var_results": [
+                    ("posterior", "parameter_1"),
+                    ("posterior", "parameter_2"),
+                    ("prior", "parameter_1"),
+                    ("prior", "parameter_2"),
+                    ("posterior", "variable_1"),
+                    ("posterior", "variable_2"),
+                ],
+            },
+            {
+                "var_names": "parameter",
+                "filter_vars": "like",
+                "groups": "posterior",
+                "var_results": ["parameter_1", "parameter_2"],
+            },
+            {
+                "var_names": "~parameter",
+                "filter_vars": "like",
+                "groups": "posterior",
+                "var_results": ["variable_1", "variable_2", "custom_name"],
+            },
+            {
+                "var_names": [".+_2$", "custom_name"],
+                "filter_vars": "regex",
+                "groups": "posterior",
+                "var_results": ["parameter_2", "variable_2", "custom_name"],
+            },
+            {
+                "var_names": ["lp"],
+                "filter_vars": "regex",
+                "groups": "sample_stats",
+                "var_results": ["lp"],
+            },
+        ),
+    )
+    def test_to_dataframe_selection(self, kwargs):
+        results = kwargs.pop("var_results")
+        idata = from_dict(
+            posterior={
+                "parameter_1": np.random.randn(4, 100),
+                "parameter_2": np.random.randn(4, 100),
+                "variable_1": np.random.randn(4, 100),
+                "variable_2": np.random.randn(4, 100),
+                "custom_name": np.random.randn(4, 100),
+            },
+            prior={
+                "parameter_1": np.random.randn(4, 100),
+                "parameter_2": np.random.randn(4, 100),
+            },
+            sample_stats={
+                "lp": np.random.randn(4, 100),
+            },
+        )
+        test_data = idata.to_dataframe(**kwargs)
+        assert not test_data.empty
+        assert set(test_data.columns).symmetric_difference(results) == set(["chain", "draw"])
+
     def test_to_dataframe_bad(self):
         idata = from_dict(
             posterior={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
@@ -777,6 +843,9 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
 
         with pytest.raises(KeyError):
             idata.to_dataframe(groups=["invalid_group"])
+
+        with pytest.raises(ValueError):
+            idata.to_dataframe(var_names=["c"])
 
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
@@ -1381,6 +1450,20 @@ class TestJSON:
 
         os.remove(filepath)
         assert not os.path.exists(filepath)
+
+
+@pytest.mark.skipif(
+    not (importlib.util.find_spec("datatree") or running_on_ci()),
+    reason="test requires xarray-datatree library",
+)
+class TestDataTree:
+    def test_datatree(self):
+        idata = load_arviz_data("centered_eight")
+        dt = idata.to_datatree()
+        idata_back = from_datatree(dt)
+        for group, ds in idata.items():
+            assert_identical(ds, idata_back[group])
+        assert all(group in dt.children for group in idata.groups())
 
 
 class TestConversions:

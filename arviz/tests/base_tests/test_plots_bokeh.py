@@ -327,7 +327,6 @@ def test_plot_autocorr_var_names(models, var_names):
     "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
 def test_plot_compare(models, kwargs):
-
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     axes = plot_compare(model_compare, backend="bokeh", show=False, **kwargs)

@@ -191,12 +191,13 @@ html_theme_options = {
         },
     ],
     "navbar_start": ["navbar-logo", "navbar-version"],
-    "header_links_before_dropdown": 7,
+    "navbar_align": "content",
+    "header_links_before_dropdown": 5,
     "secondary_sidebar_items": ["page-toc", "searchbox", "edit-this-page", "sourcelink", "donate"],
     "use_edit_page_button": True,
-    "google_analytics_id": "G-W1G68W77YV",
+    "analytics": {"google_analytics_id": "G-W1G68W77YV"},
     "external_links": [
-        {"name": "About", "url": "https://www.arviz.org"},
+        {"name": "The ArviZ project", "url": "https://www.arviz.org"},
     ],
 }
 html_context = {

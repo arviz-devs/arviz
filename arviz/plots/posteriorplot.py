@@ -38,7 +38,7 @@ def plot_posterior(
     show=None,
     **kwargs
 ):
-    """Plot Posterior densities in the style of John K. Kruschke's book.
+    r"""Plot Posterior densities in the style of John K. Kruschke's book.
 
     Parameters
     ----------
@@ -83,9 +83,9 @@ def plot_posterior(
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
     group: str, optional
         Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
-    rope: tuple or dictionary of tuples
-        Lower and upper values of the Region Of Practical Equivalence. If a list is provided, its
-        length should match the number of variables.
+    rope : list, tuple or dictionary of {str: tuples or lists}, optional
+        A dictionary of tuples with the lower and upper values of the Region Of Practical
+        Equivalence. See :ref:`this section <common_rope>` for usage examples.
     ref_val: float or dictionary of floats
         display the percentage below and above the values in ref_val. Must be None (default),
         a constant, a list or a dictionary like see an example below. If a list is provided, its

@@ -291,7 +291,6 @@ def plot_pair(
                         ax[j, i].scatter(var1, var2, **scatter_kwargs)
 
                     if "kde" in kind:
-
                         plot_kde(
                             var1,
                             var2,

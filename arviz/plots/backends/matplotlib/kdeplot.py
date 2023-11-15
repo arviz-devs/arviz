@@ -88,7 +88,6 @@ def plot_kde(
         rug_space = max(density) * rug_kwargs.pop("space")
 
         if is_circular:
-
             if is_circular == "radians":
                 labels = [
                     "0",
