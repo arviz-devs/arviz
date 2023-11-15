@@ -299,7 +299,7 @@ class PlotHandler:
     def legend(self, ax, plotted):
         """Add interactive legend with colorcoded model info."""
         legend_it = []
-        for (model_name, glyphs) in plotted.items():
+        for model_name, glyphs in plotted.items():
             legend_it.append((model_name, glyphs))
 
         legend = Legend(items=legend_it, orientation="vertical", location="top_left")

@@ -97,7 +97,7 @@ def plot_dot(
     stack_locs, stack_count = wilkinson_algorithm(values, binwidth)
     x, y = layout_stacks(stack_locs, stack_count, binwidth, stackratio, rotated)
 
-    for (x_i, y_i) in zip(x, y):
+    for x_i, y_i in zip(x, y):
         dot = plt.Circle((x_i, y_i), dotsize * binwidth / 2, **plot_kwargs)
         ax.add_patch(dot)
 

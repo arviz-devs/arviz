@@ -110,7 +110,6 @@ def plot_separation(
             )
 
     else:
-
         if y_hat is None and isinstance(y, str):
             label_y_hat = y
             y_hat = y

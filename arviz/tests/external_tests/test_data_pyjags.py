@@ -1,4 +1,5 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name, unused-import
+import sys
 import typing as tp
 
 import numpy as np
@@ -11,6 +12,8 @@ from ...data.io_pyjags import (
     _extract_arviz_dict_from_inference_data,
 )
 from ..helpers import check_multiple_attrs, eight_schools_params
+
+pytest.skip("Uses deprecated numpy C-api", allow_module_level=True)
 
 PYJAGS_POSTERIOR_DICT = {
     "b": np.random.randn(3, 10, 3),
@@ -40,7 +43,6 @@ def verify_equality_of_numpy_values_dictionaries(
     return True
 
 
-@pytest.mark.skip("Crashes Python")
 class TestDataPyJAGSWithoutEstimation:
     def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(self):
         arviz_samples_dict_from_pyjags_samples_dict = _convert_pyjags_dict_to_arviz_dict(

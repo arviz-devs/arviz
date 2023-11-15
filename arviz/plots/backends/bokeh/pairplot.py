@@ -241,11 +241,9 @@ def plot_pair(
 
     # pylint: disable=too-many-nested-blocks
     for i in range(0, numvars - marginals_offset):
-
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
 
         for j in range(0, numvars - marginals_offset):
-
             var2 = (
                 flat_var_names[j + marginals_offset]
                 if tmp_flat_var_names is None
@@ -268,7 +266,6 @@ def plot_pair(
                 ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
 
             elif j + marginals_offset > i:
-
                 if "scatter" in kind:
                     if divergences:
                         ax[j, i].circle(var1, var2, source=source, view=source_nondiv)
@@ -328,7 +325,6 @@ def plot_pair(
                     ax[j, i].add_layout(ax_vline)
 
                     if marginals:
-
                         ax[j - 1, i].add_layout(ax_vline)
 
                         pe_last = calculate_point_estimate(point_estimate, plotters[-1][-1])

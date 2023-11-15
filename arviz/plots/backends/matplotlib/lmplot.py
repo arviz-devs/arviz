@@ -50,7 +50,6 @@ def plot_lm(
         _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
 
     for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
-
         # All the kwargs are defined here beforehand
         y_kwargs = matplotlib_kwarg_dealiaser(y_kwargs, "plot")
         y_kwargs.setdefault("color", "C3")

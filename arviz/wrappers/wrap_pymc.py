@@ -2,6 +2,7 @@
 """Base class for PyMC interface wrappers."""
 from .base import SamplingWrapper
 
+
 # pylint: disable=abstract-method
 class PyMCSamplingWrapper(SamplingWrapper):
     """PyMC (4.0+) sampling wrapper base class.
@@ -21,7 +22,6 @@ class PyMCSamplingWrapper(SamplingWrapper):
         import pymc  # pylint: disable=import-error
 
         with self.model:
-
             pymc.set_data(modified_observed_data)
             idata = pymc.sample(
                 **self.sample_kwargs,

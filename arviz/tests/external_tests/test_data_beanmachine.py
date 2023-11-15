@@ -11,6 +11,8 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     load_cached_models,
 )
 
+pytest.skip("Ignore beanmachine tests until it supports pytorch 2", allow_module_level=True)
+
 # Skip all tests if beanmachine or pytorch not installed
 torch = importorskip("torch")
 bm = importorskip("beanmachine.ppl")

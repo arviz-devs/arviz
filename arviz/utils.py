@@ -104,7 +104,6 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True, errors="raise
         and ``filter_items``.
     """
     if subset is not None:
-
         if isinstance(subset, str):
             subset = [subset]
 
@@ -754,7 +753,6 @@ def conditional_dask(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-
         if not Dask.dask_flag:
             return func(*args, **kwargs)
         user_kwargs = kwargs.pop("dask_kwargs", None)

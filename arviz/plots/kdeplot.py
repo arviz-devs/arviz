@@ -256,7 +256,6 @@ def plot_kde(
         )
 
     if values2 is None:
-
         if bw == "default":
             bw = "taylor" if is_circular else "experimental"
 

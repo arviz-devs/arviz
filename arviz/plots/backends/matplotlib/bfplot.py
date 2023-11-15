@@ -23,7 +23,6 @@ def plot_bf(
     backend_kwargs,
     show,
 ):
-
     """Matplotlib Bayes Factor plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
