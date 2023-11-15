@@ -325,7 +325,7 @@ ArviZ is a non-profit project under the NumFOCUS umbrella. To support ArviZ fina
 Getting Started<getting_started/index>
 Example Gallery<examples/index>
 User Guide<user_guide/index>
-API Reference<api/index>
+API <api/index>
 Community<community>
 Contributing<contributing/index>
 :::
