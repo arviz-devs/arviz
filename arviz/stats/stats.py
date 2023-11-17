@@ -768,6 +768,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
     log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
     pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
 
+    if dask_kwargs is None:
+        dask_kwargs = {}
+
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
@@ -797,7 +800,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
                 np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
             )
 
-    log_weights, pareto_shape = psislw(-log_likelihood, reff, dask_kwargs=dask_kwargs)
+    psis_dask = dask_kwargs.copy()
+    psis_dask["output_dtypes"] = (float, float)
+    log_weights, pareto_shape = psislw(-log_likelihood, reff, dask_kwargs=psis_dask)
     log_weights += log_likelihood
 
     warn_mg = False
@@ -813,8 +818,10 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
     kwargs = {"input_core_dims": [["__sample__"]]}
+    logsumexp_dask = dask_kwargs.copy()
+    logsumexp_dask["output_dtypes"] = [float]
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
-        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, dask_kwargs=dask_kwargs, **kwargs
+        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, dask_kwargs=logsumexp_dask, **kwargs
     )
     loo_lppd = loo_lppd_i.sum().compute().item()
     loo_lppd_se = (n_data_points * loo_lppd_i.var().compute().item()) ** 0.5
@@ -825,7 +832,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
             log_likelihood,
             func_kwargs={"b_inv": n_samples},
             ufunc_kwargs=ufunc_kwargs,
-            dask_kwargs=dask_kwargs,
+            dask_kwargs=logsumexp_dask,
             **kwargs,
         )
         .sum()
@@ -920,6 +927,8 @@ def psislw(log_weights, reff=1.0, dask_kwargs=None):
            ...: az.psislw(-log_likelihood, reff=0.8)
 
     """
+    if dask_kwargs is None:
+        dask_kwargs = {}
     if hasattr(log_weights, "__sample__"):
         n_samples = len(log_weights.__sample__)
         shape = [
@@ -933,10 +942,13 @@ def psislw(log_weights, reff=1.0, dask_kwargs=None):
     cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member, assignment-from-no-return
 
     # create output array with proper dimensions
-    out = np.empty_like(log_weights), np.empty(shape)
+    if dask_kwargs.get("dask", "forbidden") in {"allowed", "parallelized"}:
+        out = xr.zeros_like(log_weights).data, np.empty(shape)
+    else:
+        out = np.empty_like(log_weights), np.empty(shape)
 
     # define kwargs
-    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "out": out}
+    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin}
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
     kwargs = {"input_core_dims": [["__sample__"]], "output_core_dims": [["__sample__"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
