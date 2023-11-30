@@ -2141,6 +2141,10 @@ def psens(
         For ndarray: shape = (chain, draw).
         For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
     component : {"prior", "likelihood"}, default "prior"
+        When `component` is "likelihood", the log likelihood values are retrieved
+        from the ``log_likelihood`` group as pointwise log likelihood and added
+        together. With "prior", the log prior values are retrieved from the
+        ``log_prior`` group.
     component_var_names : str, optional
         Name of the prior or log likelihood variables to use
     component_coords : dict, optional
@@ -2151,8 +2155,10 @@ def psens(
     coords : dict, optional
         Coordinates defining a subset over the posterior. Only these variables will
         be used when computing the prior sensitivity.
-    filter_vars :
-        TODO: copy from other docstring, but add note it affects the posterior group only
+    filter_vars: {None, "like", "regex"}, default None
+        If ``None`` (default), interpret var_names as the real variables names.
+        If "like", interpret var_names as substrings of the real variables names.
+        If "regex", interpret var_names as regular expressions on the real variables names.
     delta : float
         Value for finite difference derivative calculation.
     dask_kwargs : dict, optional
@@ -2187,13 +2193,13 @@ def psens(
 
         In [1]: from xarray_einstats.stats import XrContinuousRV
            ...: from scipy.stats import norm, halfcauchy
-           ...: post = non_centered_eight.posterior
+           ...: post = data.posterior
            ...: log_prior = {
            ...:     "mu": XrContinuousRV(norm, 0, 5).logpdf(post["mu"]),
            ...:     "tau": XrContinuousRV(halfcauchy, scale=5).logpdf(post["tau"]),
            ...:     "theta_t": XrContinuousRV(norm, 0, 1).logpdf(post["theta_t"]),
            ...: }
-           ...: non_centered_eight.add_groups({"log_prior": log_prior})
+           ...: data.add_groups({"log_prior": log_prior})
            ...: az.psens(data, component="prior")
 
     Notes
