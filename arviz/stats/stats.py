@@ -2242,7 +2242,7 @@ def psens(
     upper_w = upper_w / np.sum(upper_w)
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    func_kwargs = {"lower_weights": lower_w, "upper_weights": upper_w, "delta": delta}
+    func_kwargs = {"lower_weights": lower_w.values, "upper_weights": upper_w.values, "delta": delta}
 
     # calculate the sensitivity diagnostic based on the importance weights and draws
     return _wrap_xarray_ufunc(
