@@ -2151,7 +2151,7 @@ def psens(
     coords : dict, optional
         Coordinates defining a subset over the posterior. Only these variables will
         be used when computing the prior sensitivity.
-    filter_vars : 
+    filter_vars :
         TODO: copy from other docstring, but add note it affects the posterior group only
     delta : float
         Value for finite difference derivative calculation.
@@ -2165,6 +2165,7 @@ def psens(
         Higher sensitivity values indicate greater sensitivity.
         Prior sensitivity above 0.05 indicates informative prior.
         Likelihood sensitivity below 0.05 indicates weak or nonin-formative likelihood.
+
     Examples
     --------
     Compute the likelihood sensitivity for the non centered eight model:
@@ -2224,7 +2225,9 @@ def psens(
     if isinstance(component_draws, xr.DataArray):
         component_draws = component_draws.to_dataset()
     if len(component_draws.dims):
-        component_draws = component_draws.to_stacked_array("latent-obs_var", sample_dims=("__sample__",)).sum("latent-obs_var")
+        component_draws = component_draws.to_stacked_array(
+            "latent-obs_var", sample_dims=("__sample__",)
+        ).sum("latent-obs_var")
     # from here component_draws is a 1d object with dimensions (sample,)
 
     # calculate lower and upper alpha values

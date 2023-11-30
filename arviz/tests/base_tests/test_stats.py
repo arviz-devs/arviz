@@ -832,9 +832,10 @@ def test_weight_predictions():
     new = weight_predictions([idata0, idata1], weights=[0.9, 0.1])
     assert_almost_equal(new.posterior_predictive["a"].mean(), -0.8, decimal=1)
 
+
 @pytest.fixture(scope="module")
 def psens_data():
-    non_centered_eight = load_arviz_data("non_centered_eight")
+    non_centered_eight = load_arviz_data("non_centered_eight").load()
     post = non_centered_eight.posterior
     log_prior = {
         "mu": XrContinuousRV(norm, 0, 5).logpdf(post["mu"]),
@@ -844,6 +845,7 @@ def psens_data():
     non_centered_eight.add_groups({"log_prior": log_prior})
     return non_centered_eight
 
+
 @pytest.mark.parametrize("component", ("prior", "likelihood"))
 def test_priorsens_global(psens_data, component):
     result = psens(psens_data, component=component)
@@ -851,14 +853,18 @@ def test_priorsens_global(psens_data, component):
     assert "theta" in result
     assert "school" in result.theta_t.dims
 
+
 def test_priorsens_var_names(psens_data):
-    result1 = psens(psens_data, component="prior", component_var_names=["mu", "tau"], var_names=["mu", "tau"])
+    result1 = psens(
+        psens_data, component="prior", component_var_names=["mu", "tau"], var_names=["mu", "tau"]
+    )
     result2 = psens(psens_data, component="prior", var_names=["mu", "tau"])
     for result in (result1, result2):
         assert "theta" not in result
         assert "mu" in result
         assert "tau" in result
     assert not np.isclose(result1.mu, result2.mu)
+
 
 def test_priorsens_coords(psens_data):
     result = psens(psens_data, component="likelihood", component_coords={"school": "Choate"})
