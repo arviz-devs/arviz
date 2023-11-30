@@ -409,7 +409,7 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
     return nan_error | chain_error | draw_error
 
 
-def get_log_likelihood(idata, var_name=None):
+def get_log_likelihood(idata, var_name=None, single_var=True):
     """Retrieve the log likelihood dataarray of a given variable."""
     if (
         not hasattr(idata, "log_likelihood")
@@ -426,9 +426,11 @@ def get_log_likelihood(idata, var_name=None):
     if var_name is None:
         var_names = list(idata.log_likelihood.data_vars)
         if len(var_names) > 1:
-            raise TypeError(
-                f"Found several log likelihood arrays {var_names}, var_name cannot be None"
-            )
+            if single_var:
+                raise TypeError(
+                    f"Found several log likelihood arrays {var_names}, var_name cannot be None"
+                )
+            return idata.log_likelihood[var_names]
         return idata.log_likelihood[var_names[0]]
     else:
         try:
@@ -574,18 +576,10 @@ def smooth_data(obs_vals, pp_vals):
     return obs_vals, pp_vals
 
 
-def get_log_prior(idata, var_name=None):
+def get_log_prior(idata, var_names=None):
     """Retrieve the log prior dataarray of a given variable."""
     if not hasattr(idata, "log_prior"):
         raise TypeError("log prior not found in inference data object")
-    if var_name is None:
+    if var_names is None:
         var_names = list(idata.log_prior.data_vars)
-        if len(var_names) > 1:
-            raise TypeError(f"Found several log prior arrays {var_names}, var_name cannot be None")
-        return idata.log_prior[var_names[0]]
-    else:
-        try:
-            log_prior = idata.log_prior[var_name]
-        except KeyError as err:
-            raise TypeError(f"No log prior data named {var_name} found") from err
-        return log_prior
+    return idata.log_prior[var_names]

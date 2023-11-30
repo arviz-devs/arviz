@@ -2120,10 +2120,11 @@ def weight_predictions(idatas, weights=None):
 def psens(
     data,
     *,
-    component,
-    selection=None,
-    component_var_name=None,
+    component="prior",
+    component_var_names=None,
+    component_coords=None,
     var_names=None,
+    coords=None,
     filter_vars=None,
     delta=0.01,
     dask_kwargs=None,
@@ -2139,8 +2140,19 @@ def psens(
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
         For ndarray: shape = (chain, draw).
         For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+    component : {"prior", "likelihood"}, default "prior"
+    component_var_names : str, optional
+        Name of the prior or log likelihood variables to use
+    component_coords : dict, optional
+        Coordinates defining a subset over the component element for which to
+        compute the prior sensitivity diagnostic.
     var_names : list of str, optional
-        Names of variables to include in the power scaling sensitivity diagnostic
+        Names of posterior variables to include in the power scaling sensitivity diagnostic
+    coords : dict, optional
+        Coordinates defining a subset over the posterior. Only these variables will
+        be used when computing the prior sensitivity.
+    filter_vars : 
+        TODO: copy from other docstring, but add note it affects the posterior group only
     delta : float
         Value for finite difference derivative calculation.
     dask_kwargs : dict, optional
@@ -2149,16 +2161,45 @@ def psens(
     Returns
     -------
     xarray.Dataset
-      Returns dataset of power-scaling sensitivity diagnostic values.
+        Returns dataset of power-scaling sensitivity diagnostic values.
+        Higher sensitivity values indicate greater sensitivity.
+        Prior sensitivity above 0.05 indicates informative prior.
+        Likelihood sensitivity below 0.05 indicates weak or nonin-formative likelihood.
+    Examples
+    --------
+    Compute the likelihood sensitivity for the non centered eight model:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("non_centered_eight")
+           ...: az.psens(data, component="likelihood")
+
+    To compute the prior sensitivity, we need to first compute the log prior
+    at each posterior sample. In our case, we know mu has a normal prior :math:`N(0, 5)`,
+    tau is a half cauchy prior with scale/beta parameter 5,
+    and theta has a standard normal as prior.
+    We add this information to the ``log_prior`` group before computing powerscaling
+    check with ``psens``
+
+    .. ipython::
+
+        In [1]: from xarray_einstats.stats import XrContinuousRV
+           ...: from scipy.stats import norm, halfcauchy
+           ...: post = non_centered_eight.posterior
+           ...: log_prior = {
+           ...:     "mu": XrContinuousRV(norm, 0, 5).logpdf(post["mu"]),
+           ...:     "tau": XrContinuousRV(halfcauchy, scale=5).logpdf(post["tau"]),
+           ...:     "theta_t": XrContinuousRV(norm, 0, 1).logpdf(post["theta_t"]),
+           ...: }
+           ...: non_centered_eight.add_groups({"log_prior": log_prior})
+           ...: az.psens(data, component="prior")
 
     Notes
     -----
-    The diagnostic is computed by power-scaling the specified component
-    (prior or likelihood)
-    and determining the degree to which the posterior changes as
-    described in [1]_.
-    It uses Pareto-smoothed
-    importance sampling to avoid refitting the model.
+    The diagnostic is computed by power-scaling the specified component (prior or likelihood)
+    and determining the degree to which the posterior changes as described in [1]_.
+    It uses Pareto-smoothed importance sampling to avoid refitting the model.
 
     References
     ----------
@@ -2167,19 +2208,24 @@ def psens(
 
     """
     dataset = extract(data, var_names=var_names, filter_vars=filter_vars, group="posterior")
+    if coords is None:
+        dataset = dataset.sel(coords)
 
     if component == "likelihood":
-        component_draws = _get_log_likelihood(data, var_name=component_var_name)
+        component_draws = _get_log_likelihood(data, var_name=component_var_names, single_var=False)
     elif component == "prior":
-        component_draws = _get_log_prior(data, var_name=component_var_name)
+        component_draws = _get_log_prior(data, var_names=component_var_names)
+    else:
+        raise ValueError("Value for `component` argument not recognized")
 
-    component_draws = np.array(component_draws.stack(__sample__=("chain", "draw")))
-
-    if len(component_draws.shape) > 1:
-        if selection is not None:
-            component_draws = np.sum(component_draws[selection, :], axis=0)
-        else:
-            component_draws = np.sum(component_draws, axis=0)
+    component_draws = component_draws.stack(__sample__=("chain", "draw"))
+    if component_coords is None:
+        component_draws = component_draws.sel(component_coords)
+    if isinstance(component_draws, xr.DataArray):
+        component_draws = component_draws.to_dataset()
+    if len(component_draws.dims):
+        component_draws = component_draws.to_stacked_array("latent-obs_var", sample_dims=("__sample__",)).sum("latent-obs_var")
+    # from here component_draws is a 1d object with dimensions (sample,)
 
     # calculate lower and upper alpha values
     lower_alpha = 1 / (1 + delta)
