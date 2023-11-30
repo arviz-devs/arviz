@@ -835,7 +835,7 @@ def test_weight_predictions():
 
 @pytest.fixture(scope="module")
 def psens_data():
-    non_centered_eight = load_arviz_data("non_centered_eight").load()
+    non_centered_eight = load_arviz_data("non_centered_eight")
     post = non_centered_eight.posterior
     log_prior = {
         "mu": XrContinuousRV(norm, 0, 5).logpdf(post["mu"]),
