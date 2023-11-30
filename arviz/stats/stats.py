@@ -2305,11 +2305,11 @@ def _cjs_dist(draws, weights):
     cdf_q_int = np.dot(cdf_q, binwidth)
 
     # cjs calculation
-    pq_numer = np.log2(cdf_p, out=np.zeros_like(cdf_p), where=(cdf_p != 0))
-    qp_numer = np.log2(cdf_q, out=np.zeros_like(cdf_q), where=(cdf_q != 0))
+    pq_numer = np.log2(cdf_p, out=np.zeros_like(cdf_p), where=cdf_p != 0)
+    qp_numer = np.log2(cdf_q, out=np.zeros_like(cdf_q), where=cdf_q != 0)
 
     denom = 0.5 * (cdf_p + cdf_q)
-    denom = np.log2(denom, out=np.zeros_like(denom), where=(denom != 0))
+    denom = np.log2(denom, out=np.zeros_like(denom), where=denom != 0)
 
     cjs_pq = np.sum(binwidth * (cdf_p * (pq_numer - denom))) + 0.5 / np.log(2) * (
         cdf_q_int - cdf_p_int
