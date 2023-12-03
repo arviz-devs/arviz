@@ -236,6 +236,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
             self._groups_warmup.remove(group)
         object.__delattr__(self, group)
 
+    def __delitem__(self, key:str) -> None:
+        """Delete an item from the InferenceData object using del idata[key]."""
+        self.__delattr__(key)
+
     @property
     def _groups_all(self) -> List[str]:
         return self._groups + self._groups_warmup
