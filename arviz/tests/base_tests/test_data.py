@@ -496,7 +496,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         with pytest.raises(KeyError):
             idata.sel(inplace=False, chain_prior=True, chain=[0, 1, 3])
 
-    @pytest.mark.parametrize("use", ("del", "delattr"))
+    @pytest.mark.parametrize("use", ("del", "delattr", "delitem"))
     def test_del(self, use):
         # create inference data object
         data = np.random.normal(size=(4, 500, 8))
@@ -523,6 +523,8 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         # Use del method
         if use == "del":
             del idata.sample_stats
+        elif use == "delitem":
+            del idata["sample_stats"]
         else:
             delattr(idata, "sample_stats")
 
