@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
+- Add prior sensitivity diagnostic `psens` ([2093](https://github.com/arviz-devs/arviz/pull/2093))
 -   Add filter_vars functionality to `InfereceData.to_dataframe`method ([2277](https://github.com/arviz-devs/arviz/pull/2277))
 
 ### Maintenance and fixes

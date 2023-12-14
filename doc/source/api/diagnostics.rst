@@ -12,3 +12,4 @@ Diagnostics
     ess
     rhat
     mcse
+    psens

@@ -10,8 +10,9 @@ from numpy.testing import (
     assert_array_equal,
 )
 from scipy.special import logsumexp
-from scipy.stats import linregress
+from scipy.stats import linregress, norm, halfcauchy
 from xarray import DataArray, Dataset
+from xarray_einstats.stats import XrContinuousRV
 
 from ...data import concat, convert_to_inference_data, from_dict, load_arviz_data
 from ...rcparams import rcParams
@@ -22,6 +23,7 @@ from ...stats import (
     hdi,
     loo,
     loo_pit,
+    psens,
     psislw,
     r2_score,
     summary,
@@ -829,3 +831,43 @@ def test_weight_predictions():
     assert_almost_equal(new.posterior_predictive["a"].mean(), 0, decimal=1)
     new = weight_predictions([idata0, idata1], weights=[0.9, 0.1])
     assert_almost_equal(new.posterior_predictive["a"].mean(), -0.8, decimal=1)
+
+
+@pytest.fixture(scope="module")
+def psens_data():
+    non_centered_eight = load_arviz_data("non_centered_eight")
+    post = non_centered_eight.posterior
+    log_prior = {
+        "mu": XrContinuousRV(norm, 0, 5).logpdf(post["mu"]),
+        "tau": XrContinuousRV(halfcauchy, scale=5).logpdf(post["tau"]),
+        "theta_t": XrContinuousRV(norm, 0, 1).logpdf(post["theta_t"]),
+    }
+    non_centered_eight.add_groups({"log_prior": log_prior})
+    return non_centered_eight
+
+
+@pytest.mark.parametrize("component", ("prior", "likelihood"))
+def test_priorsens_global(psens_data, component):
+    result = psens(psens_data, component=component)
+    assert "mu" in result
+    assert "theta" in result
+    assert "school" in result.theta_t.dims
+
+
+def test_priorsens_var_names(psens_data):
+    result1 = psens(
+        psens_data, component="prior", component_var_names=["mu", "tau"], var_names=["mu", "tau"]
+    )
+    result2 = psens(psens_data, component="prior", var_names=["mu", "tau"])
+    for result in (result1, result2):
+        assert "theta" not in result
+        assert "mu" in result
+        assert "tau" in result
+    assert not np.isclose(result1.mu, result2.mu)
+
+
+def test_priorsens_coords(psens_data):
+    result = psens(psens_data, component="likelihood", component_coords={"school": "Choate"})
+    assert "mu" in result
+    assert "theta" in result
+    assert "school" in result.theta_t.dims
