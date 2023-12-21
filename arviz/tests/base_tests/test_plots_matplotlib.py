@@ -1921,7 +1921,7 @@ def test_plot_ts(kwargs):
         dims={"y": ["obs_dim"], "z": ["pred_dim"]},
     )
 
-    ax = plot_ts(idata=idata, y="y", show=True, **kwargs)
+    ax = plot_ts(idata=idata, y="y", **kwargs)
     assert np.all(ax)
 
 
