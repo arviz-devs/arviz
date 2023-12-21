@@ -82,6 +82,9 @@ doc/source/user_guide/wrappers/*
 !doc/source/user_guide/wrappers/*.md
 
 # eight-schools files
+doc/source/getting_started/schools*
+!doc/source/user_guide/wrappers/schools.stan
+!doc/source/user_guide/wrappers/schools.json
 doc/source/getting_started/eight_school*
 doc/source/getting_started/sample_data/
 
