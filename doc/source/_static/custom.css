@@ -80,7 +80,7 @@ html[data-theme="dark"] {
 }
 .primary-button {
   background-color: var(--pst-color-primary);
-  color: var(--pst-color-background);
+  color: var(--pst-color-background) !important;
 }
 .secondary-button {
   background-color: var(--pst-color-background);
