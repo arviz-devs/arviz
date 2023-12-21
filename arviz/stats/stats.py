@@ -880,17 +880,18 @@ def psislw(log_weights, reff=1.0):
 
     Parameters
     ----------
-    log_weights: array
+    log_weights : DataArray or (..., N) array-like
         Array of size (n_observations, n_samples)
-    reff: float
+    reff : float, default 1
         relative MCMC efficiency, ``ess / n``
 
     Returns
     -------
-    lw_out: array
-        Smoothed log weights
-    kss: array
-        Pareto tail indices
+    lw_out : DataArray or (..., N) ndarray
+        Smoothed, truncated and normalized log weights.
+    kss : DataArray or (...) ndarray
+        Estimates of the shape parameter *k* of the generalized Pareto
+        distribution.
 
     References
     ----------
