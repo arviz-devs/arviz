@@ -1,10 +1,10 @@
 # Change Log
 
-## v0.x.x Unreleased
+## v0.17.0 (2023 Dec 22)
 
 ### New features
 - Add prior sensitivity diagnostic `psens` ([2093](https://github.com/arviz-devs/arviz/pull/2093))
--   Add filter_vars functionality to `InfereceData.to_dataframe`method ([2277](https://github.com/arviz-devs/arviz/pull/2277))
+- Add filter_vars functionality to `InfereceData.to_dataframe`method ([2277](https://github.com/arviz-devs/arviz/pull/2277))
 
 ### Maintenance and fixes
 
@@ -12,10 +12,12 @@
 -   Fix behaviour of `plot_ppc` when dimension order isn't `chain, draw, ...` ([2283](https://github.com/arviz-devs/arviz/pull/2283))
 -   Avoid repeating the variable name in `plot_ppc`, `plot_bpv`, `plot_loo_pit`... when repeated. ([2283](https://github.com/arviz-devs/arviz/pull/2283))
 -   Add support for the latest CmdStanPy. ([2287](https://github.com/arviz-devs/arviz/pull/2287))
-
-### Deprecation
+-   Fix import error on windows due to missing encoding argument ([2300](https://github.com/arviz-devs/arviz/pull/2300))
+-   Add ``__delitem__`` method to InferenceData ([2292](https://github.com/arviz-devs/arviz/pull/2292))
 
 ### Documentation
+- Improve the docstring of `psislw` ([2300](https://github.com/arviz-devs/arviz/pull/2300))
+- Rerun the quickstart and working with InferenceData notebooks ([2300](https://github.com/arviz-devs/arviz/pull/2300))
 
 -   Several fixes in `plot_ppc` docstring ([2283](https://github.com/arviz-devs/arviz/pull/2283))
 
