@@ -44,6 +44,7 @@ __all__ = [
     "compare",
     "hdi",
     "loo",
+    "loo_expectation",
     "loo_pit",
     "psislw",
     "r2_samples",
@@ -864,6 +865,61 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
             "scale",
         ],
     )
+
+def loo_expectation(data, values, pointwise=None, reff=None, **kwargs):
+    """
+    Computes the expectation of values with respect to the leave-one-out posteriors using PSIS.
+
+    Parameters
+    ----------
+        data: obj
+            Any object that can be converted to an :class:`arviz.InferenceData` object.
+            Refer to documentation of :func:`arviz.convert_to_dataset` for details.
+        values: ndarray
+            A vector of quantities to compute expectations for.
+        pointwise: bool, optional
+            If True the pointwise predictive accuracy will be returned. Defaults to
+            ``stats.ic_pointwise`` rcParam.
+        reff: float, optional
+            Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples divided by the number
+            of actual samples. Computed from trace by default.
+        **kwargs:
+            Additional keyword arguments to pass to the `psislw` function.
+
+    Returns
+    -------
+        expectation: float
+            The computed expectation of `values` across LOO posteriors.
+    """
+    inference_data = convert_to_inference_data(data)
+    log_likelihood = _get_log_likelihood(inference_data)
+    pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
+    shape = log_likelihood.shape
+    n_samples = shape[-1]
+
+    if reff is None:
+        if not hasattr(inference_data, "posterior"):
+            raise TypeError("Must be able to extract a posterior group from data.")
+        posterior = inference_data.posterior
+        n_chains = len(posterior.chain)
+        if n_chains == 1:
+            reff = 1.0
+        else:
+            ess_p = ess(posterior, method="mean")
+            # this mean is over all data variables
+            reff = (
+                np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+            )
+
+    log_weights, _ = psislw(-log_likelihood, reff=reff, **kwargs)
+
+    # Numerically stable Weighted sum
+    # Do computations in the log-space for numerical stability
+    w_exp = log_weights + np.log(np.abs(values))
+    _expectation = (np.sign(values) * np.exp(w_exp)).sum()
+
+    return _expectation
 
 
 def psislw(log_weights, reff=1.0):
