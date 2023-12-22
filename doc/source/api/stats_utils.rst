@@ -11,4 +11,5 @@ Stats utils
     autocov
     autocorr
     make_ufunc
+    smooth_data
     wrap_xarray_ufunc
