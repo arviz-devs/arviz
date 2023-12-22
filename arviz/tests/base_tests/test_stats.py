@@ -30,6 +30,7 @@ from ...stats import (
     waic,
     weight_predictions,
     _calculate_ics,
+    loo_expectation,
 )
 from ...stats.stats import _gpinv
 from ...stats.stats_utils import get_log_likelihood
@@ -538,6 +539,15 @@ def test_loo_warning(centered_eight):
         assert loo(centered_eight, pointwise=True) is not None
     assert any("Estimated shape parameter" in str(record.message) for record in records)
 
+@pytest.mark.parametrize("reff", [None, 0.5, 1.0])
+def test_loo_expectation(centered_eight, reff):
+    log_likelihood = get_log_likelihood(centered_eight)
+    log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
+    values = np.arange(1, log_likelihood.shape[-1]+1)
+    expectation = loo_expectation(
+        centered_eight, values, pointwise=None, reff=reff
+    )
+    assert expectation is not None
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_loo_print(centered_eight, scale):
