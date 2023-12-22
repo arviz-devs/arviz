@@ -162,6 +162,11 @@ def plot_bpv(
     ----------
     * Gelman et al. (2013) see http://www.stat.columbia.edu/~gelman/book/ pages 151-153 for details
 
+    Notes
+    -----
+    Discrete data is smoothed before computing either p-values or u-values using the
+    function :func:`smooth_data`
+
     Examples
     --------
     Plot Bayesian p_values.
