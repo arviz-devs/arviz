@@ -881,8 +881,8 @@ def loo_expectation(data, values, pointwise=None, reff=None, **kwargs):
             If True the pointwise predictive accuracy will be returned. Defaults to
             ``stats.ic_pointwise`` rcParam.
         reff: float, optional
-            Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples divided by the number
-            of actual samples. Computed from trace by default.
+            Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples 
+            divided by the number of actual samples. Computed from trace by default.
         **kwargs:
             Additional keyword arguments to pass to the `psislw` function.
 
