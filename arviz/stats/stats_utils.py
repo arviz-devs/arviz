@@ -16,7 +16,7 @@ from ..utils import conditional_jit, conditional_vect, conditional_dask
 from .density_utils import histogram as _histogram
 
 
-__all__ = ["autocorr", "autocov", "ELPDData", "make_ufunc", "wrap_xarray_ufunc"]
+__all__ = ["autocorr", "autocov", "ELPDData", "make_ufunc", "smooth_data", "wrap_xarray_ufunc"]
 
 
 def autocov(ary, axis=-1):
@@ -564,7 +564,25 @@ def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, a
 
 
 def smooth_data(obs_vals, pp_vals):
-    """Smooth data, helper function for discrete data in plot_pbv, loo_pit and plot_loo_pit."""
+    """Smooth data using a cubic spline.
+
+    Helper function for discrete data in plot_pbv, loo_pit and plot_loo_pit.
+
+    Parameters
+    ----------
+    obs_vals : (N) array-like
+        Observed data
+    pp_vals : (S, N) array-like
+        Posterior predictive samples. ``N`` is the number of observations,
+        and ``S`` is the number of samples (generally n_chains*n_draws).
+
+    Returns
+    -------
+    obs_vals : (N) ndarray
+        Smoothed observed data
+    pp_vals : (S, N) ndarray
+        Smoothed posterior predictive samples
+    """
     x = np.linspace(0, 1, len(obs_vals))
     csi = CubicSpline(x, obs_vals)
     obs_vals = csi(np.linspace(0.01, 0.99, len(obs_vals)))

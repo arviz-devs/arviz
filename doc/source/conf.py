@@ -99,15 +99,16 @@ copybutton_prompt_is_regexp = True
 autodoc_typehints = "none"
 numpydoc_xref_param_type = True
 numpydoc_xref_ignore = {
-    "of", "or", "optional", "default", "1D", "2D", "3D", "n-dimensional", "M", "N", "K",
+    "of", "or", "optional", "default", "1D", "2D", "3D", "n-dimensional", "K", "M", "N", "S",
 }
 numpydoc_xref_aliases = {
+    "DataArray": ":class:`~xarray.DataArray`",
+    "Dataset": ":class:`~xarray.Dataset`",
     "Labeller": ":ref:`Labeller <labeller_api>`",
     "ndarray": ":class:`~numpy.ndarray`",
     "InferenceData": ":class:`~arviz.InferenceData`",
     "matplotlib_axes": ":class:`matplotlib Axes <matplotlib.axes.Axes>`",
     "bokeh_figure": ":class:`Bokeh Figure <bokeh.plotting.figure>`",
-
 }
 
 # The base toctree document.

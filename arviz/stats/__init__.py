@@ -28,6 +28,7 @@ __all__ = [
     "autocorr",
     "autocov",
     "make_ufunc",
+    "smooth_data",
     "wrap_xarray_ufunc",
     "reloo",
     "_calculate_ics",
