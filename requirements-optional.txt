@@ -1,4 +1,5 @@
-numba
+numba;python_version < '3.12'
+numba==0.59.0rc1;python_version == '3.12'
 netcdf4
 bokeh>=1.4.0,<3.0
 contourpy
