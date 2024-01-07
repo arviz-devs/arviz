@@ -543,10 +543,8 @@ def test_loo_warning(centered_eight):
 def test_loo_expectation(centered_eight, reff):
     log_likelihood = get_log_likelihood(centered_eight)
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
-    values = np.arange(1, log_likelihood.shape[-1]+1)
-    expectation = loo_expectation(
-        centered_eight, values, pointwise=None, reff=reff
-    )
+    values = np.arange(1, log_likelihood.shape[-1] + 1)
+    expectation = loo_expectation(centered_eight, values, pointwise=None, reff=reff)
     assert expectation is not None
 
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
