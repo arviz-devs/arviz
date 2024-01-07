@@ -869,7 +869,6 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 def loo_expectation(data, values, pointwise=None, reff=None, **kwargs):
     """
     Computes the expectation of values with respect to the leave-one-out posteriors using PSIS.
-
     Parameters
     ----------
         data: obj
@@ -881,11 +880,10 @@ def loo_expectation(data, values, pointwise=None, reff=None, **kwargs):
             If True the pointwise predictive accuracy will be returned. Defaults to
             ``stats.ic_pointwise`` rcParam.
         reff: float, optional
-            Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples 
+            Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples
             divided by the number of actual samples. Computed from trace by default.
         **kwargs:
             Additional keyword arguments to pass to the `psislw` function.
-
     Returns
     -------
         expectation: float
@@ -909,7 +907,8 @@ def loo_expectation(data, values, pointwise=None, reff=None, **kwargs):
             ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
             reff = (
-                np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+                np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean()
+                / n_samples
             )
 
     log_weights, _ = psislw(-log_likelihood, reff=reff, **kwargs)
