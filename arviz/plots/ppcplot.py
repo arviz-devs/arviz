@@ -19,7 +19,7 @@ def plot_ppc(
     kind="kde",
     alpha=None,
     mean=True,
-    observed=True,
+    observed=None,
     observed_rug=False,
     color=None,
     colors=None,
@@ -60,8 +60,9 @@ def plot_ppc(
         Defaults to 0.2 for ``kind = kde`` and cumulative, for scatter defaults to 0.7.
     mean : bool, default True
         Whether or not to plot the mean posterior/prior predictive distribution.
-    observed : bool, default True
-        Whether or not to plot the observed data.
+    observed : bool
+        Whether or not to plot the observed data. Defaults to True for ``group = posterior``
+        and False for ``group = prior``.
     observed_rug : bool, default False
         Whether or not to plot a rug plot for the observed data. Only valid if `observed` is
         `True` and for kind `kde` or `cumulative`.
@@ -253,8 +254,12 @@ def plot_ppc(
 
     if group == "posterior":
         predictive_dataset = data.posterior_predictive
+        if observed is None:
+            observed = True
     elif group == "prior":
         predictive_dataset = data.prior_predictive
+        if observed is None:
+            observed = False
 
     if var_names is None:
         var_names = list(observed_data.data_vars)
