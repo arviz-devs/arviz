@@ -304,7 +304,6 @@ def compute_gamma(n, z, npoints=None, num_trials=1000, fpr=0.05):
     for _ in range(num_trials):
         unif_samples = uniform.rvs(0, 1, n)
         unif_samples.sort()
-        gamma_m = 1000
         ## Can compute ecdf for all the z together or one at a time.
         f_z = compute_ecdf(unif_samples, z)
         gamma_m = 2 * min(
