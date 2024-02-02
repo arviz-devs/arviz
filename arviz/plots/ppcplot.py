@@ -60,7 +60,7 @@ def plot_ppc(
         Defaults to 0.2 for ``kind = kde`` and cumulative, for scatter defaults to 0.7.
     mean : bool, default True
         Whether or not to plot the mean posterior/prior predictive distribution.
-    observed : bool
+    observed : bool, optional
         Whether or not to plot the observed data. Defaults to True for ``group = posterior``
         and False for ``group = prior``.
     observed_rug : bool, default False
