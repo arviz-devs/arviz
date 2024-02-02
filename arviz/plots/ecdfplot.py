@@ -201,7 +201,7 @@ def plot_ecdf(
 
         n = len(values)  # number of samples
         ## Computing gamma
-        gamma = fpr if pointwise else compute_gamma(n, z, npoints, num_trials, fpr)
+        gamma = fpr if pointwise else compute_gamma(n, z, num_trials, fpr)
         ## Using gamma to get the confidence intervals
         lower, higher = get_lims(gamma, n, z)
 
@@ -292,14 +292,12 @@ def get_ecdf_points(x, probs, difference):
     return x, y
 
 
-def compute_gamma(n, z, npoints=None, num_trials=1000, fpr=0.05):
+def compute_gamma(n, z, num_trials=1000, fpr=0.05):
     """Compute gamma for confidence interval calculation.
 
     This function simulates an adjusted value of gamma to account for multiplicity
     when forming an 1-fpr level confidence envelope for the ECDF of a sample.
     """
-    if npoints is None:
-        npoints = n
     gamma = []
     for _ in range(num_trials):
         unif_samples = uniform.rvs(0, 1, n)
