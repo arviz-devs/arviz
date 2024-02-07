@@ -180,68 +180,37 @@ def plot_ecdf(
     values = np.ravel(values)
     values.sort()
 
+    if pit:
+        eval_points = np.linspace(1 / npoints, 1, npoints)
+        sample = cdf(values) if cdf else compute_ecdf(values2, values) / len(values2)
+        cdf_at_eval_points = eval_points
+    else:
+        eval_points = np.linspace(values[0], values[-1], npoints)
+        sample = values
+        if confidence_bands or difference:
+            cdf_at_eval_points = cdf(eval_points) if cdf else compute_ecdf(values2, eval_points)
+        else:
+            cdf_at_eval_points = np.zeros_like(eval_points)
+
+    x_coord, y_coord = get_ecdf_points(eval_points, sample, difference)
+
+    if difference:
+        y_coord -= cdf_at_eval_points
+
     ## This block computes gamma and uses it to get the upper and lower confidence bands
     ## Here we check if we want confidence bands or not
     if confidence_bands:
-        ## If plotting PIT then we find the PIT values of sample.
-        ## Basically here we generate the evaluation points(eval_points) and find the PIT values.
-        if pit:
-            eval_points = np.linspace(1 / npoints, 1, npoints)
-            cdf_at_eval_points = eval_points
-            ## Finding PIT for our sample
-            sample = cdf(values) if cdf else compute_ecdf(values2, values) / len(values2)
-        else:
-            ## If not PIT use sample for plots and for evaluation points(eval_points) use equally spaced
-            ## points between minimum and maximum of sample
-            eval_points = np.linspace(values[0], values[-1], npoints)
-            cdf_at_eval_points = cdf(eval_points) if cdf else compute_ecdf(values2, eval_points)
-            sample = values
-
         n = len(values)  # number of samples
         ## Computing gamma
         gamma = fpr if pointwise else compute_gamma(n, cdf_at_eval_points, num_trials, fpr)
         ## Using gamma to get the confidence intervals
         lower, higher = get_lims(gamma, n, cdf_at_eval_points)
 
-        ## This block is for whether to plot ECDF or ECDF-difference
-        if not difference:
-            ## We store the coordinates of our ecdf in x_coord, y_coord
-            x_coord, y_coord = get_ecdf_points(eval_points, sample, difference)
-        else:
-            ## Here we subtract the ecdf value as here we are plotting the ECDF-difference
-            x_coord, y_coord = get_ecdf_points(eval_points, sample, difference)
-            for i, x_i in enumerate(eval_points):
-                y_coord[i] = y_coord[i] - (
-                    x_i if pit else cdf(x_i) if cdf else compute_ecdf(values2, x_i)
-                )
-
-            ## Similarly we subtract from the upper and lower bounds
-            if pit:
-                lower = lower - eval_points
-                higher = higher - eval_points
-            else:
-                lower = lower - (cdf(eval_points) if cdf else compute_ecdf(values2, eval_points))
-                higher = higher - (cdf(eval_points) if cdf else compute_ecdf(values2, eval_points))
-
+        if difference:
+            lower -= cdf_at_eval_points
+            higher -= cdf_at_eval_points
     else:
-        if pit:
-            eval_points = np.linspace(1 / npoints, 1, npoints)
-            sample = cdf(values)
-        else:
-            eval_points = np.linspace(values[0], values[-1], npoints)
-            sample = values
-
         lower, higher = None, None
-        ## This block is for whether to plot ECDF or ECDF-difference
-        if not difference:
-            x_coord, y_coord = get_ecdf_points(eval_points, sample, difference)
-        else:
-            ## Here we subtract the ecdf value as here we are plotting the ECDF-difference
-            x_coord, y_coord = get_ecdf_points(eval_points, sample, difference)
-            for i, x_i in enumerate(eval_points):
-                y_coord[i] = y_coord[i] - (
-                    x_i if pit else cdf(x_i) if cdf else compute_ecdf(values2, x_i)
-                )
 
     ecdf_plot_args = dict(
         x_coord=x_coord,
