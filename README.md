@@ -9,8 +9,7 @@
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01143/status.svg)](https://doi.org/10.21105/joss.01143) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2540945.svg)](https://doi.org/10.5281/zenodo.2540945)
 [![Powered by NumFOCUS](https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org)
 
-ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
-Includes functions for posterior analysis, data storage, model checking, comparison and diagnostics.
+ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models. It includes functions for posterior analysis, data storage, model checking, comparison and diagnostics.
 
 ### ArviZ in other languages
 ArviZ also has a Julia wrapper available [ArviZ.jl](https://julia.arviz.org/).
@@ -159,6 +158,7 @@ python setup.py install
 
   <a href="https://python.arviz.org/en/latest/examples/index.html">And more...</a>
 </div>
+
 ## Dependencies
 
 ArviZ is tested on Python 3.10, 3.11 and 3.12, and depends on NumPy, SciPy, xarray, and Matplotlib.
