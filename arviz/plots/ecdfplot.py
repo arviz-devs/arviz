@@ -202,7 +202,11 @@ def plot_ecdf(
     if confidence_bands:
         ndraws = len(values)  # number of samples
         ## Computing gamma
-        gamma = fpr if pointwise else compute_gamma(ndraws, cdf_at_eval_points, num_trials, fpr)
+        gamma = (
+            fpr
+            if pointwise
+            else compute_gamma(ndraws, eval_points, cdf_at_eval_points, num_trials, fpr)
+        )
         ## Using gamma to get the confidence intervals
         lower, higher = get_lims(gamma, ndraws, cdf_at_eval_points)
 
@@ -260,7 +264,7 @@ def get_ecdf_points(sample, eval_points, difference):
     return x, y
 
 
-def compute_gamma(ndraws, eval_points, num_trials=1000, fpr=0.05):
+def compute_gamma(ndraws, eval_points, cdf_at_eval_points, num_trials=1000, fpr=0.05):
     """Compute gamma for confidence interval calculation.
 
     This function simulates an adjusted value of gamma to account for multiplicity
@@ -270,14 +274,26 @@ def compute_gamma(ndraws, eval_points, num_trials=1000, fpr=0.05):
     for _ in range(num_trials):
         unif_samples = uniform.rvs(0, 1, ndraws)
         unif_samples.sort()
-        ## Can compute ecdf for all the z together or one at a time.
-        ecdf_at_eval_points = compute_ecdf(unif_samples, eval_points)
-        gamma_m = 2 * min(
-            np.amin(binom.cdf(ndraws * ecdf_at_eval_points, ndraws, eval_points)),
-            np.amin(1 - binom.cdf(ndraws * ecdf_at_eval_points - 1, ndraws, eval_points)),
+        ecdf_at_eval_points = compute_ecdf(unif_samples, cdf_at_eval_points)
+        gamma_m = 1 - fit_pointwise_band_probability(
+            ndraws, ecdf_at_eval_points, cdf_at_eval_points
         )
         gamma.append(gamma_m)
     return np.quantile(gamma, fpr)
+
+
+def fit_pointwise_band_probability(
+    ndraws: int,
+    ecdf_at_eval_points: np.ndarray,
+    cdf_at_eval_points: np.ndarray,
+) -> float:
+    """Compute the smallest marginal probability of a pointwise confidence band that
+    contains the ECDF."""
+    ecdf_scaled = (ndraws * ecdf_at_eval_points).astype(int)
+    prob_lower_tail = np.amin(binom.cdf(ecdf_scaled, ndraws, cdf_at_eval_points))
+    prob_upper_tail = np.amin(binom.sf(ecdf_scaled - 1, ndraws, cdf_at_eval_points))
+    prob_pointwise = 1 - 2 * min(prob_lower_tail, prob_upper_tail)
+    return prob_pointwise
 
 
 def get_lims(gamma, ndraws, eval_points):
