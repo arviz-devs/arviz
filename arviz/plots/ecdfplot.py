@@ -1,5 +1,5 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
-from typing import Tuple
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from scipy.stats import uniform, binom
@@ -205,7 +205,12 @@ def plot_ecdf(
             prob_pointwise = 1 - fpr
         else:
             prob_pointwise = simulate_simultaneous_band_probability(
-                ndraws, eval_points, cdf_at_eval_points, num_trials=num_trials, prob_target=1 - fpr
+                ndraws,
+                cdf_at_eval_points,  # TODO: replace with eval_points when user can provide rvs
+                cdf_at_eval_points,
+                rvs=uniform(0, 1).rvs,
+                num_trials=num_trials,
+                prob_target=1 - fpr,
             )
         lower, higher = get_pointwise_confidence_band(prob_pointwise, ndraws, cdf_at_eval_points)
 
@@ -252,6 +257,18 @@ def compute_ecdf(sample, eval_points):
     return np.searchsorted(sample, eval_points, side="right") / len(sample)
 
 
+def simulate_ecdf(
+    ndraws: int,
+    eval_points: np.ndarray,
+    rvs: Callable[[int, Optional[np.random.RandomState]], np.ndarray],
+    random_state: Optional[np.random.RandomState] = None,
+) -> np.ndarray:
+    """Simulate ECDF at the `eval_points` using the given random variable sampler"""
+    sample = rvs(ndraws, random_state=random_state)
+    sample.sort()
+    return compute_ecdf(sample, eval_points)
+
+
 def get_ecdf_points(sample, eval_points, difference):
     """Compute the coordinates for the ecdf points using compute_ecdf."""
     x = eval_points
@@ -264,8 +281,14 @@ def get_ecdf_points(sample, eval_points, difference):
 
 
 def simulate_simultaneous_band_probability(
-    ndraws, eval_points, cdf_at_eval_points, num_trials=1000, prob_target=0.95
-):
+    ndraws: int,
+    eval_points: np.ndarray,
+    cdf_at_eval_points: np.ndarray,
+    rvs: Callable[[int, Optional[np.random.RandomState]], np.ndarray],
+    prob_target: float = 0.95,
+    num_trials: int = 1000,
+    random_state: Optional[np.random.RandomState] = None,
+) -> float:
     """Estimate probability for simultaneous confidence band using simulation.
 
     This function simulates the pointwise probability needed to construct pointwise
@@ -274,9 +297,7 @@ def simulate_simultaneous_band_probability(
     """
     probs = []
     for _ in range(num_trials):
-        unif_samples = uniform.rvs(0, 1, ndraws)
-        unif_samples.sort()
-        ecdf_at_eval_points = compute_ecdf(unif_samples, cdf_at_eval_points)
+        ecdf_at_eval_points = simulate_ecdf(ndraws, eval_points, rvs, random_state=random_state)
         prob = fit_pointwise_band_probability(ndraws, ecdf_at_eval_points, cdf_at_eval_points)
         probs.append(prob)
     return np.quantile(probs, prob_target)
