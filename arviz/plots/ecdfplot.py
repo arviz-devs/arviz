@@ -297,11 +297,11 @@ def fit_pointwise_band_probability(
 
 
 def get_pointwise_confidence_band(
-    prob: float, num_draws: int, cdf_at_eval_points: np.ndarray
+    prob: float, ndraws: int, cdf_at_eval_points: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Compute the `prob`-level pointwise confidence band."""
     prob_lower_tail = (1 - prob) / 2
     prob_upper_tail = 1 - prob_lower_tail
     prob_tails = np.array([[prob_lower_tail, prob_upper_tail]]).T
-    prob_lower, prob_upper = binom.ppf(prob_tails, num_draws, cdf_at_eval_points) / num_draws
+    prob_lower, prob_upper = binom.ppf(prob_tails, ndraws, cdf_at_eval_points) / ndraws
     return prob_lower, prob_upper
