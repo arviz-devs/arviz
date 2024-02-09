@@ -248,12 +248,8 @@ def plot_ecdf(
     return ax
 
 
-def compute_ecdf(sample, eval_points):
-    """Compute ECDF.
-
-    This function computes the ecdf value at the evaluation point
-        or a sorted set of evaluation points.
-    """
+def compute_ecdf(sample: np.ndarray, eval_points: np.ndarray) -> np.ndarray:
+    """Compute ECDF of the sorted `sample` at the evaluation points."""
     return np.searchsorted(sample, eval_points, side="right") / len(sample)
 
 
@@ -269,7 +265,9 @@ def simulate_ecdf(
     return compute_ecdf(sample, eval_points)
 
 
-def get_ecdf_points(sample, eval_points, difference):
+def get_ecdf_points(
+    sample: np.ndarray, eval_points: np.ndarray, difference: bool
+) -> Tuple[np.ndarray, np.ndarray]:
     """Compute the coordinates for the ecdf points using compute_ecdf."""
     x = eval_points
     y = compute_ecdf(sample, eval_points)
