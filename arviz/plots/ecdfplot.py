@@ -192,7 +192,7 @@ def plot_ecdf(
         else:
             cdf_at_eval_points = np.zeros_like(eval_points)
 
-    x_coord, y_coord = get_ecdf_points(eval_points, sample, difference)
+    x_coord, y_coord = get_ecdf_points(sample, eval_points, difference)
 
     if difference:
         y_coord -= cdf_at_eval_points
@@ -249,7 +249,7 @@ def compute_ecdf(sample, eval_points):
     return np.searchsorted(sample, eval_points, side="right") / len(sample)
 
 
-def get_ecdf_points(eval_points, sample, difference):
+def get_ecdf_points(sample, eval_points, difference):
     """Compute the coordinates for the ecdf points using compute_ecdf."""
     x = eval_points
     y = compute_ecdf(sample, eval_points)
