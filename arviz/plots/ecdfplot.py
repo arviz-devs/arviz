@@ -202,16 +202,17 @@ def plot_ecdf(
 
     if confidence_bands:
         ndraws = len(values)  # number of samples
+        prob = 1 - fpr
         if pointwise:
-            prob_pointwise = 1 - fpr
+            prob_pointwise = prob
         else:
             prob_pointwise = simulate_simultaneous_band_probability(
                 ndraws,
                 cdf_at_eval_points,  # TODO: replace with eval_points when user can provide rvs
                 cdf_at_eval_points,
-                rvs=uniform(0, 1).rvs,
+                rvs=uniform(0, 1).rvs,  # TODO: replace with user provided rvs
                 num_trials=num_trials,
-                prob_target=1 - fpr,
+                prob_target=prob,
             )
         lower, higher = get_pointwise_confidence_band(prob_pointwise, ndraws, cdf_at_eval_points)
 
