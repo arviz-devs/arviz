@@ -202,11 +202,12 @@ def plot_ecdf(
     if confidence_bands:
         ndraws = len(values)  # number of samples
         ## Computing gamma
-        gamma = (
-            fpr
-            if pointwise
-            else compute_gamma(ndraws, eval_points, cdf_at_eval_points, num_trials, fpr)
-        )
+        if pointwise:
+            gamma = fpr
+        else:
+            gamma = 1 - simulate_simultaneous_band_probability(
+                ndraws, eval_points, cdf_at_eval_points, num_trials=num_trials, prob_target=1 - fpr
+            )
         ## Using gamma to get the confidence intervals
         lower, higher = get_lims(gamma, ndraws, cdf_at_eval_points)
 
@@ -264,22 +265,23 @@ def get_ecdf_points(sample, eval_points, difference):
     return x, y
 
 
-def compute_gamma(ndraws, eval_points, cdf_at_eval_points, num_trials=1000, fpr=0.05):
-    """Compute gamma for confidence interval calculation.
+def simulate_simultaneous_band_probability(
+    ndraws, eval_points, cdf_at_eval_points, num_trials=1000, prob_target=0.95
+):
+    """Estimate probability for simultaneous confidence band using simulation.
 
-    This function simulates an adjusted value of gamma to account for multiplicity
-    when forming an 1-fpr level confidence envelope for the ECDF of a sample.
+    This function simulates the pointwise probability needed to construct pointwise
+    confidence bands that form a `prob_target`-level confidence envelope for the ECDF
+    of a sample.
     """
-    gamma = []
+    probs = []
     for _ in range(num_trials):
         unif_samples = uniform.rvs(0, 1, ndraws)
         unif_samples.sort()
         ecdf_at_eval_points = compute_ecdf(unif_samples, cdf_at_eval_points)
-        gamma_m = 1 - fit_pointwise_band_probability(
-            ndraws, ecdf_at_eval_points, cdf_at_eval_points
-        )
-        gamma.append(gamma_m)
-    return np.quantile(gamma, fpr)
+        prob = fit_pointwise_band_probability(ndraws, ecdf_at_eval_points, cdf_at_eval_points)
+        probs.append(prob)
+    return np.quantile(probs, prob_target)
 
 
 def fit_pointwise_band_probability(
