@@ -1,4 +1,6 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
+from typing import Tuple
+
 import numpy as np
 from scipy.stats import uniform, binom
 
@@ -197,19 +199,15 @@ def plot_ecdf(
     if difference:
         y_coord -= cdf_at_eval_points
 
-    ## This block computes gamma and uses it to get the upper and lower confidence bands
-    ## Here we check if we want confidence bands or not
     if confidence_bands:
         ndraws = len(values)  # number of samples
-        ## Computing gamma
         if pointwise:
-            gamma = fpr
+            prob_pointwise = 1 - fpr
         else:
-            gamma = 1 - simulate_simultaneous_band_probability(
+            prob_pointwise = simulate_simultaneous_band_probability(
                 ndraws, eval_points, cdf_at_eval_points, num_trials=num_trials, prob_target=1 - fpr
             )
-        ## Using gamma to get the confidence intervals
-        lower, higher = get_lims(gamma, ndraws, cdf_at_eval_points)
+        lower, higher = get_pointwise_confidence_band(prob_pointwise, ndraws, cdf_at_eval_points)
 
         if difference:
             lower -= cdf_at_eval_points
@@ -298,8 +296,12 @@ def fit_pointwise_band_probability(
     return prob_pointwise
 
 
-def get_lims(gamma, ndraws, eval_points):
-    """Compute the simultaneous 1 - fpr level confidence bands."""
-    lower = binom.ppf(gamma / 2, ndraws, eval_points)
-    upper = binom.ppf(1 - gamma / 2, ndraws, eval_points)
-    return lower / ndraws, upper / ndraws
+def get_pointwise_confidence_band(
+    prob: float, num_draws: int, cdf_at_eval_points: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute the `prob`-level pointwise confidence band."""
+    prob_lower_tail = (1 - prob) / 2
+    prob_upper_tail = 1 - prob_lower_tail
+    prob_tails = np.array([[prob_lower_tail, prob_upper_tail]]).T
+    prob_lower, prob_upper = binom.ppf(prob_tails, num_draws, cdf_at_eval_points) / num_draws
+    return prob_lower, prob_upper
