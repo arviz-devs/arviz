@@ -200,11 +200,11 @@ def plot_ecdf(
     ## This block computes gamma and uses it to get the upper and lower confidence bands
     ## Here we check if we want confidence bands or not
     if confidence_bands:
-        n = len(values)  # number of samples
+        ndraws = len(values)  # number of samples
         ## Computing gamma
-        gamma = fpr if pointwise else compute_gamma(n, cdf_at_eval_points, num_trials, fpr)
+        gamma = fpr if pointwise else compute_gamma(ndraws, cdf_at_eval_points, num_trials, fpr)
         ## Using gamma to get the confidence intervals
-        lower, higher = get_lims(gamma, n, cdf_at_eval_points)
+        lower, higher = get_lims(gamma, ndraws, cdf_at_eval_points)
 
         if difference:
             lower -= cdf_at_eval_points
@@ -260,7 +260,7 @@ def get_ecdf_points(sample, eval_points, difference):
     return x, y
 
 
-def compute_gamma(n, z, num_trials=1000, fpr=0.05):
+def compute_gamma(ndraws, eval_points, num_trials=1000, fpr=0.05):
     """Compute gamma for confidence interval calculation.
 
     This function simulates an adjusted value of gamma to account for multiplicity
@@ -268,19 +268,20 @@ def compute_gamma(n, z, num_trials=1000, fpr=0.05):
     """
     gamma = []
     for _ in range(num_trials):
-        unif_samples = uniform.rvs(0, 1, n)
+        unif_samples = uniform.rvs(0, 1, ndraws)
         unif_samples.sort()
         ## Can compute ecdf for all the z together or one at a time.
-        f_z = compute_ecdf(unif_samples, z)
+        ecdf_at_eval_points = compute_ecdf(unif_samples, eval_points)
         gamma_m = 2 * min(
-            np.amin(binom.cdf(n * f_z, n, z)), np.amin(1 - binom.cdf(n * f_z - 1, n, z))
+            np.amin(binom.cdf(ndraws * ecdf_at_eval_points, ndraws, eval_points)),
+            np.amin(1 - binom.cdf(ndraws * ecdf_at_eval_points - 1, ndraws, eval_points)),
         )
         gamma.append(gamma_m)
     return np.quantile(gamma, fpr)
 
 
-def get_lims(gamma, n, z):
+def get_lims(gamma, ndraws, eval_points):
     """Compute the simultaneous 1 - fpr level confidence bands."""
-    lower = binom.ppf(gamma / 2, n, z)
-    upper = binom.ppf(1 - gamma / 2, n, z)
-    return lower / n, upper / n
+    lower = binom.ppf(gamma / 2, ndraws, eval_points)
+    upper = binom.ppf(1 - gamma / 2, ndraws, eval_points)
+    return lower / ndraws, upper / ndraws
