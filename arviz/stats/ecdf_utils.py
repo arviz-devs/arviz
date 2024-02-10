@@ -110,7 +110,7 @@ def ecdf_confidence_band(
         prob_pointwise = prob
     elif method == "simulated":
         prob_pointwise = _simulate_simultaneous_ecdf_band_probability(
-            ndraws, eval_points, cdf_at_eval_points, **kwargs
+            ndraws, eval_points, cdf_at_eval_points, prob=prob, **kwargs
         )
     else:
         raise ValueError(f"Unknown method {method}. Valid options are 'pointwise' or 'simulated'.")
@@ -126,7 +126,7 @@ def _simulate_simultaneous_ecdf_band_probability(
     ndraws: int,
     eval_points: np.ndarray,
     cdf_at_eval_points: np.ndarray,
-    prob_target: float = 0.95,
+    prob: float = 0.95,
     rvs: Optional[Callable[[int, Optional[np.random.RandomState]], np.ndarray]] = None,
     num_trials: int = 1000,
     random_state: Optional[np.random.RandomState] = None,
@@ -134,7 +134,7 @@ def _simulate_simultaneous_ecdf_band_probability(
     """Estimate probability for simultaneous confidence band using simulation.
 
     This function simulates the pointwise probability needed to construct pointwise
-    confidence bands that form a `prob_target`-level confidence envelope for the ECDF
+    confidence bands that form a `prob`-level confidence envelope for the ECDF
     of a sample.
     """
     if rvs is None:
@@ -150,11 +150,13 @@ def _simulate_simultaneous_ecdf_band_probability(
     else:
         eval_points_sim = eval_points
 
-    probs = []
+    probs_pointwise = []
     for _ in range(num_trials):
         ecdf_at_eval_points = _simulate_ecdf(
             ndraws, eval_points_sim, rvs, random_state=random_state
         )
-        prob = _fit_pointwise_band_probability(ndraws, ecdf_at_eval_points, cdf_at_eval_points)
-        probs.append(prob)
-    return np.quantile(probs, prob_target)
+        prob_pointwise = _fit_pointwise_band_probability(
+            ndraws, ecdf_at_eval_points, cdf_at_eval_points
+        )
+        probs_pointwise.append(prob_pointwise)
+    return np.quantile(probs_pointwise, prob)
