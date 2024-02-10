@@ -13,7 +13,6 @@ def plot_ecdf(
     values,
     values2=None,
     cdf: Optional[Callable[[np.ndarray], np.ndarray]] = None,
-    rvs: Optional[Callable[[int, Optional[np.random.RandomState]], np.ndarray]] = None,
     difference=False,
     pit=False,
     confidence_bands=None,
