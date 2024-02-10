@@ -1,6 +1,4 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
-from typing import Callable, Optional
-
 import numpy as np
 from scipy.stats import uniform
 

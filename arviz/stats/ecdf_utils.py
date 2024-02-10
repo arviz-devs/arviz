@@ -87,7 +87,8 @@ def ecdf_confidence_band(
         - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence band.
           `rvs` must be provided.
     rvs: callable, optional
-        A function with signature `rvs(n: int, random_state: Optional[np.random.RandomState]) -> np.ndarray`
+        A function with signature
+        `rvs(n: int, random_state: Optional[np.random.RandomState]) -> np.ndarray`
         that returns `n` samples from the distribution of the original dataset.
         Required if `method` is "simulated" and variable is discrete.
     num_trials : int, default 1000
@@ -103,7 +104,7 @@ def ecdf_confidence_band(
     prob_upper : np.ndarray
         Upper confidence band for the ECDF at the evaluation points.
     """
-    if not (0 < prob < 1):
+    if not 0 < prob < 1:
         raise ValueError(f"Invalid value for `prob`. Expected 0 < prob < 1, but got {prob}.")
 
     if method == "pointwise":
