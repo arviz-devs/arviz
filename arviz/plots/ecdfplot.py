@@ -185,14 +185,20 @@ def plot_ecdf(
 
     if pit:
         eval_points = np.linspace(1 / npoints, 1, npoints)
-        sample = cdf(values) if cdf else compute_ecdf(values2, values) / len(values2)
+        if cdf:
+            sample = np.apply_along_axis(cdf, 0, values)
+        else:
+            sample = compute_ecdf(values2, values) / len(values2)
         cdf_at_eval_points = eval_points
         rvs = uniform(0, 1).rvs
     else:
         eval_points = np.linspace(values[0], values[-1], npoints)
         sample = values
         if confidence_bands or difference:
-            cdf_at_eval_points = cdf(eval_points) if cdf else compute_ecdf(values2, eval_points)
+            if cdf:
+                cdf_at_eval_points = np.apply_along_axis(cdf, 0, eval_points)
+            else:
+                cdf_at_eval_points = compute_ecdf(values2, eval_points)
         else:
             cdf_at_eval_points = np.zeros_like(eval_points)
         rvs = None
