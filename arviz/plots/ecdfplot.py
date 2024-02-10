@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import uniform
 
 from ..rcparams import rcParams
-from ..stats.ecdf_utils import compute_ecdf, ecdf_confidence_band, get_ecdf_points
+from ..stats.ecdf_utils import compute_ecdf, ecdf_confidence_band, _get_ecdf_points
 from .plot_utils import get_plotting_function
 
 
@@ -198,7 +198,7 @@ def plot_ecdf(
             cdf_at_eval_points = np.zeros_like(eval_points)
         rvs = None
 
-    x_coord, y_coord = get_ecdf_points(sample, eval_points, difference)
+    x_coord, y_coord = _get_ecdf_points(sample, eval_points, difference)
 
     if difference:
         y_coord -= cdf_at_eval_points

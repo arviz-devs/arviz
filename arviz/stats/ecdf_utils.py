@@ -11,14 +11,14 @@ def compute_ecdf(sample: np.ndarray, eval_points: np.ndarray) -> np.ndarray:
     return np.searchsorted(sample, eval_points, side="right") / len(sample)
 
 
-def get_ecdf_points(
+def _get_ecdf_points(
     sample: np.ndarray, eval_points: np.ndarray, difference: bool
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Compute the coordinates for the ecdf points using compute_ecdf."""
     x = eval_points
     y = compute_ecdf(sample, eval_points)
 
-    if not difference:
+    if not difference and y[0] > 0:
         x = np.insert(x, 0, x[0])
         y = np.insert(y, 0, 0)
     return x, y
