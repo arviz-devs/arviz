@@ -1,5 +1,6 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
 from typing import Callable, Optional, Tuple
+import warnings
 
 import numpy as np
 from scipy.stats import uniform, binom
@@ -12,6 +13,7 @@ def plot_ecdf(
     values,
     values2=None,
     cdf: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    rvs: Optional[Callable[[int, Optional[np.random.RandomState]], np.ndarray]] = None,
     difference=False,
     pit=False,
     confidence_bands=None,
@@ -28,7 +30,7 @@ def plot_ecdf(
     show=None,
     backend=None,
     backend_kwargs=None,
-    **kwargs
+    **kwargs,
 ):
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
 
@@ -187,6 +189,7 @@ def plot_ecdf(
         eval_points = np.linspace(1 / npoints, 1, npoints)
         sample = cdf(values) if cdf else compute_ecdf(values2, values) / len(values2)
         cdf_at_eval_points = eval_points
+        rvs = uniform(0, 1).rvs
     else:
         eval_points = np.linspace(values[0], values[-1], npoints)
         sample = values
@@ -194,6 +197,7 @@ def plot_ecdf(
             cdf_at_eval_points = cdf(eval_points) if cdf else compute_ecdf(values2, eval_points)
         else:
             cdf_at_eval_points = np.zeros_like(eval_points)
+        rvs = None
 
     x_coord, y_coord = get_ecdf_points(sample, eval_points, difference)
 
@@ -201,20 +205,10 @@ def plot_ecdf(
         y_coord -= cdf_at_eval_points
 
     if confidence_bands:
-        ndraws = len(values)  # number of samples
-        prob = 1 - fpr
-        if pointwise:
-            prob_pointwise = prob
-        else:
-            prob_pointwise = simulate_simultaneous_band_probability(
-                ndraws,
-                cdf_at_eval_points,  # TODO: replace with eval_points when user can provide rvs
-                cdf_at_eval_points,
-                rvs=uniform(0, 1).rvs,  # TODO: replace with user provided rvs
-                num_trials=num_trials,
-                prob_target=prob,
-            )
-        lower, higher = get_pointwise_confidence_band(prob_pointwise, ndraws, cdf_at_eval_points)
+        ndraws = len(values)
+        band_kwargs = {"prob": 1 - fpr, "num_trials": num_trials, "rvs": rvs, "random_state": None}
+        band_kwargs["method"] = "pointwise" if pointwise else "simulated"
+        lower, higher = ecdf_confidence_band(ndraws, eval_points, cdf_at_eval_points, **band_kwargs)
 
         if difference:
             lower -= cdf_at_eval_points
@@ -237,7 +231,7 @@ def plot_ecdf(
         ax=ax,
         show=show,
         backend_kwargs=backend_kwargs,
-        **kwargs
+        **kwargs,
     )
 
     if backend is None:
@@ -305,12 +299,74 @@ def get_pointwise_confidence_band(
     return prob_lower, prob_upper
 
 
-def simulate_simultaneous_band_probability(
+def ecdf_confidence_band(
     ndraws: int,
     eval_points: np.ndarray,
     cdf_at_eval_points: np.ndarray,
-    rvs: Callable[[int, Optional[np.random.RandomState]], np.ndarray],
+    prob: float = 0.95,
+    method="simulated",
+    **kwargs,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute the `prob`-level confidence band for the ECDF.
+
+    Arguments
+    ---------
+    ndraws : int
+        Number of samples in the original dataset.
+    eval_points : np.ndarray
+        Points at which the ECDF is evaluated. If these are dependent on the sample
+        values, simultaneous confidence bands may not be correctly calibrated.
+    cdf_at_eval_points : np.ndarray
+        CDF values at the evaluation points.
+    prob : float, default 0.95
+        The target probability that a true ECDF lies within the confidence band.
+    method : string, default "simulated"
+        The method used to compute the confidence band. Valid options are:
+        - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
+        - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence band.
+          `rvs` must be provided.
+    rvs: callable, optional
+        A function with signature `rvs(n: int, random_state: Optional[np.random.RandomState]) -> np.ndarray`
+        that returns `n` samples from the distribution of the original dataset.
+        Required if `method` is "simulated" and variable is discrete.
+    num_trials : int, default 1000
+        The number of random ECDFs to generate for constructing simultaneous confidence bands
+        (if `method` is "simulated").
+    random_state : np.random.RandomState, optional
+        Random state to be used if `method` is "simulated".
+
+    Returns
+    -------
+    prob_lower : np.ndarray
+        Lower confidence band for the ECDF at the evaluation points.
+    prob_upper : np.ndarray
+        Upper confidence band for the ECDF at the evaluation points.
+    """
+    if not (0 < prob < 1):
+        raise ValueError(f"Invalid value for `prob`. Expected 0 < prob < 1, but got {prob}.")
+
+    if method == "pointwise":
+        prob_pointwise = prob
+    elif method == "simulated":
+        prob_pointwise = simulate_simultaneous_ecdf_band_probability(
+            ndraws, eval_points, cdf_at_eval_points, **kwargs
+        )
+    else:
+        raise ValueError(f"Unknown method {method}. Valid options are 'pointwise' or 'simulated'.")
+
+    prob_lower, prob_upper = get_pointwise_confidence_band(
+        prob_pointwise, ndraws, cdf_at_eval_points
+    )
+
+    return prob_lower, prob_upper
+
+
+def simulate_simultaneous_ecdf_band_probability(
+    ndraws: int,
+    eval_points: np.ndarray,
+    cdf_at_eval_points: np.ndarray,
     prob_target: float = 0.95,
+    rvs: Optional[Callable[[int, Optional[np.random.RandomState]], np.ndarray]] = None,
     num_trials: int = 1000,
     random_state: Optional[np.random.RandomState] = None,
 ) -> float:
@@ -320,9 +376,22 @@ def simulate_simultaneous_band_probability(
     confidence bands that form a `prob_target`-level confidence envelope for the ECDF
     of a sample.
     """
+    if rvs is None:
+        warnings.warn(
+            "Assuming variable is continuous for calibration of pointwise bands. "
+            "If the variable is discrete, specify random variable sampler `rvs`.",
+            UserWarning,
+        )
+        # if variable continuous, we can calibrate the confidence band using a uniform
+        # distribution
+        rvs = uniform(0, 1).rvs
+        eval_points_sim = cdf_at_eval_points
+    else:
+        eval_points_sim = eval_points
+
     probs = []
     for _ in range(num_trials):
-        ecdf_at_eval_points = simulate_ecdf(ndraws, eval_points, rvs, random_state=random_state)
+        ecdf_at_eval_points = simulate_ecdf(ndraws, eval_points_sim, rvs, random_state=random_state)
         prob = fit_pointwise_band_probability(ndraws, ecdf_at_eval_points, cdf_at_eval_points)
         probs.append(prob)
     return np.quantile(probs, prob_target)
