@@ -24,7 +24,7 @@ def get_ecdf_points(
     return x, y
 
 
-def simulate_ecdf(
+def _simulate_ecdf(
     ndraws: int,
     eval_points: np.ndarray,
     rvs: Callable[[int, Optional[np.random.RandomState]], np.ndarray],
@@ -36,7 +36,7 @@ def simulate_ecdf(
     return compute_ecdf(sample, eval_points)
 
 
-def fit_pointwise_band_probability(
+def _fit_pointwise_band_probability(
     ndraws: int,
     ecdf_at_eval_points: np.ndarray,
     cdf_at_eval_points: np.ndarray,
@@ -50,7 +50,7 @@ def fit_pointwise_band_probability(
     return prob_pointwise
 
 
-def get_pointwise_confidence_band(
+def _get_pointwise_confidence_band(
     prob: float, ndraws: int, cdf_at_eval_points: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Compute the `prob`-level pointwise confidence band."""
@@ -110,20 +110,20 @@ def ecdf_confidence_band(
     if method == "pointwise":
         prob_pointwise = prob
     elif method == "simulated":
-        prob_pointwise = simulate_simultaneous_ecdf_band_probability(
+        prob_pointwise = _simulate_simultaneous_ecdf_band_probability(
             ndraws, eval_points, cdf_at_eval_points, **kwargs
         )
     else:
         raise ValueError(f"Unknown method {method}. Valid options are 'pointwise' or 'simulated'.")
 
-    prob_lower, prob_upper = get_pointwise_confidence_band(
+    prob_lower, prob_upper = _get_pointwise_confidence_band(
         prob_pointwise, ndraws, cdf_at_eval_points
     )
 
     return prob_lower, prob_upper
 
 
-def simulate_simultaneous_ecdf_band_probability(
+def _simulate_simultaneous_ecdf_band_probability(
     ndraws: int,
     eval_points: np.ndarray,
     cdf_at_eval_points: np.ndarray,
@@ -153,7 +153,9 @@ def simulate_simultaneous_ecdf_band_probability(
 
     probs = []
     for _ in range(num_trials):
-        ecdf_at_eval_points = simulate_ecdf(ndraws, eval_points_sim, rvs, random_state=random_state)
-        prob = fit_pointwise_band_probability(ndraws, ecdf_at_eval_points, cdf_at_eval_points)
+        ecdf_at_eval_points = _simulate_ecdf(
+            ndraws, eval_points_sim, rvs, random_state=random_state
+        )
+        prob = _fit_pointwise_band_probability(ndraws, ecdf_at_eval_points, cdf_at_eval_points)
         probs.append(prob)
     return np.quantile(probs, prob_target)
