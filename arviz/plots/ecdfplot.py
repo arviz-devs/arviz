@@ -12,7 +12,7 @@ from .plot_utils import get_plotting_function
 def plot_ecdf(
     values,
     values2=None,
-    cdf: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    cdf=None,
     difference=False,
     pit=False,
     confidence_bands=None,
@@ -51,7 +51,6 @@ def plot_ecdf(
         Values to compare to the original sample.
     cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
-        It should accept a vector of evaluation points and return a vector of probabilities.
     difference : bool, default False
         If True then plot ECDF-difference plot otherwise ECDF plot.
     pit : bool, default False
