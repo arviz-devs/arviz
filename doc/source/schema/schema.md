@@ -150,6 +150,10 @@ should match `observed_data` variables. The `observed_data` counterpart variable
 may have a different name. Moreover, some cases such as a multivariate normal
 may require some dimensions or coordinates to be different.
 
+#### `log_prior`
+Pointwise log prior data. Samples should match with `posterior` ones and its variables
+should match `posterior` variables, os be a subset of it.
+
 #### `posterior_predictive`
 Posterior predictive samples p(y|y) corresponding to the posterior predictive distribution evaluated at the `observed_data`. Samples should match with `posterior` ones and its variables should match `observed_data` variables. The `observed_data` counterpart variable may have a different name.
 

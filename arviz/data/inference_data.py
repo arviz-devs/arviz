@@ -56,6 +56,7 @@ SUPPORTED_GROUPS = [
     "posterior_predictive",
     "predictions",
     "log_likelihood",
+    "log_prior",
     "sample_stats",
     "prior",
     "prior_predictive",
@@ -73,6 +74,7 @@ SUPPORTED_GROUPS_WARMUP = [
     f"{WARMUP_TAG}predictions",
     f"{WARMUP_TAG}sample_stats",
     f"{WARMUP_TAG}log_likelihood",
+    f"{WARMUP_TAG}log_prior",
 ]
 
 SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
