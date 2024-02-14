@@ -87,15 +87,17 @@ def ecdf_confidence_band(
         - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence band.
           `rvs` must be provided.
     rvs: callable, optional
-        A function with signature
-        `rvs(n: int, random_state: Optional[np.random.RandomState]) -> np.ndarray`
-        that returns `n` samples from the distribution of the original dataset.
-        Required if `method` is "simulated" and variable is discrete.
+        A function that takes an integer `ndraws` and optionally the object passed to
+        `random_state` and returns an array of `ndraws` samples from the same distribution
+        as the original dataset. Required if `method` is "simulated" and variable is discrete.
     num_trials : int, default 1000
         The number of random ECDFs to generate for constructing simultaneous confidence bands
         (if `method` is "simulated").
-    random_state : np.random.RandomState, optional
-        Random state to be used if `method` is "simulated".
+    random_state : {None, int, `numpy.random.Generator`,
+                    `numpy.random.RandomState`}, optional
+        If `None`, the `numpy.random.RandomState` singleton is used. If an `int`, a new
+        ``numpy.random.RandomState`` instance is used, seeded with seed. If a `RandomState` or
+        `Generator` instance, the instance is used.
 
     Returns
     -------
