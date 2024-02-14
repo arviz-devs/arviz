@@ -1,5 +1,5 @@
 """Functions for evaluating ECDFs and their confidence bands."""
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 import warnings
 
 import numpy as np
@@ -27,8 +27,8 @@ def _get_ecdf_points(
 def _simulate_ecdf(
     ndraws: int,
     eval_points: np.ndarray,
-    rvs: Callable[[int, Optional[np.random.RandomState]], np.ndarray],
-    random_state: Optional[np.random.RandomState] = None,
+    rvs: Callable[[int, Optional[Any]], np.ndarray],
+    random_state: Optional[Any] = None,
 ) -> np.ndarray:
     """Simulate ECDF at the `eval_points` using the given random variable sampler"""
     sample = rvs(ndraws, random_state=random_state)
@@ -128,9 +128,9 @@ def _simulate_simultaneous_ecdf_band_probability(
     eval_points: np.ndarray,
     cdf_at_eval_points: np.ndarray,
     prob: float = 0.95,
-    rvs: Optional[Callable[[int, Optional[np.random.RandomState]], np.ndarray]] = None,
+    rvs: Optional[Callable[[int, Optional[Any]], np.ndarray]] = None,
     num_trials: int = 1000,
-    random_state: Optional[np.random.RandomState] = None,
+    random_state: Optional[Any] = None,
 ) -> float:
     """Estimate probability for simultaneous confidence band using simulation.
 
