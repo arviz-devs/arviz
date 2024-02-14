@@ -151,13 +151,13 @@ def _simulate_simultaneous_ecdf_band_probability(
     else:
         eval_points_sim = eval_points
 
-    probs_pointwise = []
-    for _ in range(num_trials):
+    probs_pointwise = np.empty(num_trials)
+    for i in range(num_trials):
         ecdf_at_eval_points = _simulate_ecdf(
             ndraws, eval_points_sim, rvs, random_state=random_state
         )
         prob_pointwise = _fit_pointwise_band_probability(
             ndraws, ecdf_at_eval_points, cdf_at_eval_points
         )
-        probs_pointwise.append(prob_pointwise)
+        probs_pointwise[i] = prob_pointwise
     return np.quantile(probs_pointwise, prob)
