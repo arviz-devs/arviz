@@ -49,7 +49,7 @@ def test_get_ecdf_points(difference):
 @pytest.mark.parametrize(
     "dist", [scipy.stats.norm(3, 10), scipy.stats.binom(10, 0.5)], ids=["continuous", "discrete"]
 )
-@pytest.mark.parametrize("seed", [32, None])
+@pytest.mark.parametrize("seed", [32, 87])
 def test_simulate_ecdf(dist, seed):
     """Test _simulate_ecdf."""
     ndraws = 1000
@@ -57,16 +57,10 @@ def test_simulate_ecdf(dist, seed):
 
     rvs = dist.rvs
 
-    if seed is not None:
-        random_state = np.random.RandomState(seed)
-        ecdf = _simulate_ecdf(ndraws, eval_points, rvs, random_state=random_state)
-        random_state = np.random.RandomState(seed)
-        ecdf_expected = compute_ecdf(np.sort(rvs(ndraws, random_state=random_state)), eval_points)
-    else:
-        np.random.seed(87)
-        ecdf = _simulate_ecdf(ndraws, eval_points, rvs)
-        np.random.seed(87)
-        ecdf_expected = compute_ecdf(np.sort(rvs(ndraws)), eval_points)
+    random_state = np.random.default_rng(seed)
+    ecdf = _simulate_ecdf(ndraws, eval_points, rvs, random_state=random_state)
+    random_state = np.random.default_rng(seed)
+    ecdf_expected = compute_ecdf(np.sort(rvs(ndraws, random_state=random_state)), eval_points)
 
     assert np.allclose(ecdf, ecdf_expected)
 
@@ -90,7 +84,7 @@ def test_get_pointwise_confidence_band(dist, prob, ndraws, num_trials=1_000, see
 
     # use simulation to estimate lower and upper bounds on pointwise probability
     in_interval = []
-    random_state = np.random.RandomState(seed)
+    random_state = np.random.default_rng(seed)
     for _ in range(num_trials):
         ecdf = _simulate_ecdf(ndraws, eval_points, dist.rvs, random_state=random_state)
         in_interval.append((ecdf_lower <= ecdf) & (ecdf < ecdf_upper))
@@ -120,7 +114,7 @@ def test_ecdf_confidence_band(dist, rvs, prob, ndraws, method, num_trials=1_000,
     """Test test_ecdf_confidence_band."""
     eval_points = np.linspace(*dist.interval(0.99), 10)
     cdf_at_eval_points = dist.cdf(eval_points)
-    random_state = np.random.RandomState(seed)
+    random_state = np.random.default_rng(seed)
 
     ecdf_lower, ecdf_upper = ecdf_confidence_band(
         ndraws,
@@ -148,7 +142,7 @@ def test_ecdf_confidence_band(dist, rvs, prob, ndraws, method, num_trials=1_000,
 
     # use simulation to estimate lower and upper bounds on simultaneous probability
     in_envelope = []
-    random_state = np.random.RandomState(seed)
+    random_state = np.random.default_rng(seed)
     for _ in range(num_trials):
         ecdf = _simulate_ecdf(ndraws, eval_points, dist.rvs, random_state=random_state)
         in_envelope.append(np.all(ecdf_lower <= ecdf) & np.all(ecdf < ecdf_upper))
