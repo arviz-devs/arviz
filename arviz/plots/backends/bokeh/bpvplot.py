@@ -172,7 +172,12 @@ def plot_bpv(
 
             if plot_mean:
                 ax_i.scatter(
-                    obs_vals.mean(), 0, fill_color=color, line_color="black", size=markersize, marker="circle"
+                    obs_vals.mean(),
+                    0,
+                    fill_color=color,
+                    line_color="black",
+                    size=markersize,
+                    marker="circle",
                 )
 
         _title = Title()

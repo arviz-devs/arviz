@@ -93,7 +93,7 @@ def plot_compare(
         fill_color=None,
         line_width=2,
         size=6,
-        marker="circle"
+        marker="circle",
     )
     elpd_label = [elpd_circ]
 
@@ -129,7 +129,7 @@ def plot_compare(
             fill_color=plot_kwargs.get("color_insample_dev", "black"),
             line_width=2,
             size=6,
-            marker="circle"
+            marker="circle",
         )
         labels.append(("In-sample ELPD", [insample_circ]))
 

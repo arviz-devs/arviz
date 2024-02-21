@@ -5,6 +5,7 @@
 ### New features
 
 ### Maintenance and fixes
+- Fix deprecations introduced in latest pandas and xarray versions, and prepare for numpy 2.0 ones ([2315](https://github.com/arviz-devs/arviz/pull/2315)))
 
 ### Deprecation
 
