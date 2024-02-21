@@ -49,6 +49,7 @@ def plot_ecdf(
         Values to compare to the original sample.
     cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
+        The function must take as input a numpy array of draws from the distribution.
     difference : bool, default False
         If True then plot ECDF-difference plot otherwise ECDF plot.
     pit : bool, default False
