@@ -185,7 +185,7 @@ def plot_ecdf(
     if pit:
         eval_points = np.linspace(1 / npoints, 1, npoints)
         if cdf:
-            sample = np.apply_along_axis(cdf, 0, values)
+            sample = cdf(values)
         else:
             sample = compute_ecdf(values2, values) / len(values2)
         cdf_at_eval_points = eval_points
@@ -195,7 +195,7 @@ def plot_ecdf(
         sample = values
         if confidence_bands or difference:
             if cdf:
-                cdf_at_eval_points = np.apply_along_axis(cdf, 0, eval_points)
+                cdf_at_eval_points = cdf(eval_points)
             else:
                 cdf_at_eval_points = compute_ecdf(values2, eval_points)
         else:
