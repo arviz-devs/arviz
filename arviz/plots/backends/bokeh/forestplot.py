@@ -648,7 +648,7 @@ class VarHandler:
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(
-                    sub_data,
+                    sub_data.squeeze(),
                     var_names=[self.var_name],
                     skip_dims=skip_dims,
                     reverse_selections=True,
