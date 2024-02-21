@@ -38,7 +38,7 @@ def plot_bf(
     algorithm presented in [1]_.
 
     Parameters
-    -----------
+    ----------
     idata : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
@@ -52,16 +52,16 @@ def plot_bf(
         Tuple of valid Matplotlib colors. First element for the prior, second for the posterior.
     figsize : (float, float), optional
         Figure size. If `None` it will be defined automatically.
-    textsize: float, optional
+    textsize : float, optional
         Text size scaling factor for labels, titles and lines. If `None` it will be auto
         scaled based on `figsize`.
-    plot_kwargs : dicts, optional
+    plot_kwargs : dict, optional
         Additional keywords passed to :func:`matplotlib.pyplot.plot`.
-    hist_kwargs : dicts, optional
+    hist_kwargs : dict, optional
         Additional keywords passed to :func:`arviz.plot_dist`. Only works for discrete variables.
     ax : axes, optional
         :class:`matplotlib.axes.Axes` or :class:`bokeh.plotting.Figure`.
-    backend :{"matplotlib", "bokeh"}, default "matplotlib"
+    backend : {"matplotlib", "bokeh"}, default "matplotlib"
         Select plotting backend.
     backend_kwargs : dict, optional
         These are kwargs specific to the backend being used, passed to
@@ -78,7 +78,7 @@ def plot_bf(
     References
     ----------
     .. [1] Heck, D., 2019. A caveat on the Savage-Dickey density ratio:
-    The case of computing Bayes factors for regression parameters.
+       The case of computing Bayes factors for regression parameters.
 
     Examples
     --------
@@ -92,6 +92,7 @@ def plot_bf(
         >>> idata = az.from_dict(posterior={"a":np.random.normal(1, 0.5, 5000)},
         ...     prior={"a":np.random.normal(0, 1, 5000)})
         >>> az.plot_bf(idata, var_name="a", ref_val=0)
+
     """
     posterior = extract(idata, var_names=var_name).values
 

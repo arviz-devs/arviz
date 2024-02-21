@@ -98,7 +98,7 @@ def plot_elpd(
     References
     ----------
     .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
-    cross-validation and WAIC https://arxiv.org/abs/1507.04544
+       cross-validation and WAIC https://arxiv.org/abs/1507.04544
 
     Examples
     --------

@@ -484,7 +484,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
             base += "\n\nThere has been a warning during the calculation. Please check the results."
 
         if kind == "loo" and "pareto_k" in self:
-            bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
+            bins = np.asarray([-np.inf, 0.5, 0.7, 1, np.inf])
             counts, *_ = _histogram(self.pareto_k.values, bins)
             extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
             extended = extended.format(

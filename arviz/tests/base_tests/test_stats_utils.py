@@ -344,9 +344,9 @@ def test_variance_bad_data():
 
 def test_histogram():
     school = load_arviz_data("non_centered_eight").posterior["mu"].values
-    k_count_az, k_dens_az, _ = histogram(school, bins=np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf]))
-    k_dens_np, *_ = np.histogram(school, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf], density=True)
-    k_count_np, *_ = np.histogram(school, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf], density=False)
+    k_count_az, k_dens_az, _ = histogram(school, bins=np.asarray([-np.inf, 0.5, 0.7, 1, np.inf]))
+    k_dens_np, *_ = np.histogram(school, bins=[-np.inf, 0.5, 0.7, 1, np.inf], density=True)
+    k_count_np, *_ = np.histogram(school, bins=[-np.inf, 0.5, 0.7, 1, np.inf], density=False)
     assert np.allclose(k_count_az, k_count_np)
     assert np.allclose(k_dens_az, k_dens_np)
 

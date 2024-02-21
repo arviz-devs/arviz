@@ -90,10 +90,10 @@ def plot_compare(
     References
     ----------
     .. [1] Vehtari et al. (2016). Practical Bayesian model evaluation using leave-one-out
-    cross-validation and WAIC https://arxiv.org/abs/1507.04544
+       cross-validation and WAIC https://arxiv.org/abs/1507.04544
 
     .. [2] McElreath R. (2022). Statistical Rethinking A Bayesian Course with Examples in
-    R and Stan, Second edition, CRC Press.
+       R and Stan, Second edition, CRC Press.
 
     Examples
     --------

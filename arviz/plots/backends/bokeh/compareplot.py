@@ -69,13 +69,14 @@ def plot_compare(
             err_ys.append((y, y))
 
         # plot them
-        dif_tri = ax.triangle(
+        dif_tri = ax.scatter(
             comp_df[information_criterion].iloc[1:],
             yticks_pos[1::2],
             line_color=plot_kwargs.get("color_dse", "grey"),
             fill_color=plot_kwargs.get("color_dse", "grey"),
             line_width=2,
             size=6,
+            marker="triangle",
         )
         dif_line = ax.multi_line(err_xs, err_ys, line_color=plot_kwargs.get("color_dse", "grey"))
 
@@ -85,13 +86,14 @@ def plot_compare(
         ax.yaxis.ticker = yticks_pos[::2]
         ax.yaxis.major_label_overrides = dict(zip(yticks_pos[::2], yticks_labels))
 
-    elpd_circ = ax.circle(
+    elpd_circ = ax.scatter(
         comp_df[information_criterion],
         yticks_pos[::2],
         line_color=plot_kwargs.get("color_ic", "black"),
         fill_color=None,
         line_width=2,
         size=6,
+        marker="circle"
     )
     elpd_label = [elpd_circ]
 
@@ -110,7 +112,7 @@ def plot_compare(
 
     labels.append(("ELPD", elpd_label))
 
-    scale = comp_df["scale"][0]
+    scale = comp_df["scale"].iloc[0]
 
     if insample_dev:
         p_ic = comp_df[f"p_{information_criterion.split('_')[1]}"]
@@ -120,13 +122,14 @@ def plot_compare(
             correction = -p_ic
         elif scale == "deviance":
             correction = -(2 * p_ic)
-        insample_circ = ax.circle(
+        insample_circ = ax.scatter(
             comp_df[information_criterion] + correction,
             yticks_pos[::2],
             line_color=plot_kwargs.get("color_insample_dev", "black"),
             fill_color=plot_kwargs.get("color_insample_dev", "black"),
             line_width=2,
             size=6,
+            marker="circle"
         )
         labels.append(("In-sample ELPD", [insample_circ]))
 

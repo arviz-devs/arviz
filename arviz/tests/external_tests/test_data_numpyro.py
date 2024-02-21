@@ -101,8 +101,8 @@ class TestDataNumPyro:
         assert not fails
 
         # test dims
-        dims = inference_data.posterior_predictive.dims["school"]
-        pred_dims = inference_data.predictions.dims["school_pred"]
+        dims = inference_data.posterior_predictive.sizes["school"]
+        pred_dims = inference_data.predictions.sizes["school_pred"]
         assert dims == 8
         assert pred_dims == 8
 
@@ -240,7 +240,7 @@ class TestDataNumPyro:
     def test_inference_data_num_chains(self, predictions_data, chains):
         predictions = predictions_data
         inference_data = from_numpyro(predictions=predictions, num_chains=chains)
-        nchains = inference_data.predictions.dims["chain"]
+        nchains = inference_data.predictions.sizes["chain"]
         assert nchains == chains
 
     @pytest.mark.parametrize("nchains", [1, 2])

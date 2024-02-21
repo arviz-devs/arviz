@@ -1490,7 +1490,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             import numpy as np
             rng = np.random.default_rng(73)
-            ary = rng.normal(size=(post.dims["chain"], post.dims["draw"], obs.dims["match"]))
+            ary = rng.normal(size=(post.sizes["chain"], post.sizes["draw"], obs.sizes["match"]))
             idata.add_groups(
                 log_likelihood={"home_points": ary},
                 dims={"home_points": ["match"]},
