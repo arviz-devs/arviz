@@ -1,8 +1,9 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
 import numpy as np
-from scipy.stats import uniform, binom
+from scipy.stats import uniform
 
 from ..rcparams import rcParams
+from ..stats.ecdf_utils import compute_ecdf, ecdf_confidence_band, _get_ecdf_points
 from .plot_utils import get_plotting_function
 
 
@@ -26,7 +27,7 @@ def plot_ecdf(
     show=None,
     backend=None,
     backend_kwargs=None,
-    **kwargs
+    **kwargs,
 ):
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
 
@@ -48,6 +49,7 @@ def plot_ecdf(
         Values to compare to the original sample.
     cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
+        The function must take as input a numpy array of draws from the distribution.
     difference : bool, default False
         If True then plot ECDF-difference plot otherwise ECDF plot.
     pit : bool, default False
@@ -180,75 +182,47 @@ def plot_ecdf(
     values = np.ravel(values)
     values.sort()
 
-    ## This block computes gamma and uses it to get the upper and lower confidence bands
-    ## Here we check if we want confidence bands or not
-    if confidence_bands:
-        ## If plotting PIT then we find the PIT values of sample.
-        ## Basically here we generate the evaluation points(x) and find the PIT values.
-        ## z is the evaluation point for our uniform distribution in compute_gamma()
-        if pit:
-            x = np.linspace(1 / npoints, 1, npoints)
-            z = x
-            ## Finding PIT for our sample
-            probs = cdf(values) if cdf else compute_ecdf(values2, values) / len(values2)
+    if pit:
+        eval_points = np.linspace(1 / npoints, 1, npoints)
+        if cdf:
+            sample = cdf(values)
         else:
-            ## If not PIT use sample for plots and for evaluation points(x) use equally spaced
-            ## points between minimum and maximum of sample
-            ## For z we have used cdf(x)
-            x = np.linspace(values[0], values[-1], npoints)
-            z = cdf(x) if cdf else compute_ecdf(values2, x)
-            probs = values
-
-        n = len(values)  # number of samples
-        ## Computing gamma
-        gamma = fpr if pointwise else compute_gamma(n, z, npoints, num_trials, fpr)
-        ## Using gamma to get the confidence intervals
-        lower, higher = get_lims(gamma, n, z)
-
-        ## This block is for whether to plot ECDF or ECDF-difference
-        if not difference:
-            ## We store the coordinates of our ecdf in x_coord, y_coord
-            x_coord, y_coord = get_ecdf_points(x, probs, difference)
-        else:
-            ## Here we subtract the ecdf value as here we are plotting the ECDF-difference
-            x_coord, y_coord = get_ecdf_points(x, probs, difference)
-            for i, x_i in enumerate(x):
-                y_coord[i] = y_coord[i] - (
-                    x_i if pit else cdf(x_i) if cdf else compute_ecdf(values2, x_i)
-                )
-
-            ## Similarly we subtract from the upper and lower bounds
-            if pit:
-                lower = lower - x
-                higher = higher - x
-            else:
-                lower = lower - (cdf(x) if cdf else compute_ecdf(values2, x))
-                higher = higher - (cdf(x) if cdf else compute_ecdf(values2, x))
-
+            sample = compute_ecdf(values2, values) / len(values2)
+        cdf_at_eval_points = eval_points
+        rvs = uniform(0, 1).rvs
     else:
-        if pit:
-            x = np.linspace(1 / npoints, 1, npoints)
-            probs = cdf(values)
+        eval_points = np.linspace(values[0], values[-1], npoints)
+        sample = values
+        if confidence_bands or difference:
+            if cdf:
+                cdf_at_eval_points = cdf(eval_points)
+            else:
+                cdf_at_eval_points = compute_ecdf(values2, eval_points)
         else:
-            x = np.linspace(values[0], values[-1], npoints)
-            probs = values
+            cdf_at_eval_points = np.zeros_like(eval_points)
+        rvs = None
 
+    x_coord, y_coord = _get_ecdf_points(sample, eval_points, difference)
+
+    if difference:
+        y_coord -= cdf_at_eval_points
+
+    if confidence_bands:
+        ndraws = len(values)
+        band_kwargs = {"prob": 1 - fpr, "num_trials": num_trials, "rvs": rvs, "random_state": None}
+        band_kwargs["method"] = "pointwise" if pointwise else "simulated"
+        lower, higher = ecdf_confidence_band(ndraws, eval_points, cdf_at_eval_points, **band_kwargs)
+
+        if difference:
+            lower -= cdf_at_eval_points
+            higher -= cdf_at_eval_points
+    else:
         lower, higher = None, None
-        ## This block is for whether to plot ECDF or ECDF-difference
-        if not difference:
-            x_coord, y_coord = get_ecdf_points(x, probs, difference)
-        else:
-            ## Here we subtract the ecdf value as here we are plotting the ECDF-difference
-            x_coord, y_coord = get_ecdf_points(x, probs, difference)
-            for i, x_i in enumerate(x):
-                y_coord[i] = y_coord[i] - (
-                    x_i if pit else cdf(x_i) if cdf else compute_ecdf(values2, x_i)
-                )
 
     ecdf_plot_args = dict(
         x_coord=x_coord,
         y_coord=y_coord,
-        x_bands=x,
+        x_bands=eval_points,
         lower=lower,
         higher=higher,
         confidence_bands=confidence_bands,
@@ -260,7 +234,7 @@ def plot_ecdf(
         ax=ax,
         show=show,
         backend_kwargs=backend_kwargs,
-        **kwargs
+        **kwargs,
     )
 
     if backend is None:
@@ -271,52 +245,3 @@ def plot_ecdf(
     ax = plot(**ecdf_plot_args)
 
     return ax
-
-
-def compute_ecdf(sample, z):
-    """Compute ECDF.
-
-    This function computes the ecdf value at the evaluation point
-        or a sorted set of evaluation points.
-    """
-    return np.searchsorted(sample, z, side="right") / len(sample)
-
-
-def get_ecdf_points(x, probs, difference):
-    """Compute the coordinates for the ecdf points using compute_ecdf."""
-    y = compute_ecdf(probs, x)
-
-    if not difference:
-        x = np.insert(x, 0, x[0])
-        y = np.insert(y, 0, 0)
-    return x, y
-
-
-def compute_gamma(n, z, npoints=None, num_trials=1000, fpr=0.05):
-    """Compute gamma for confidence interval calculation.
-
-    This function simulates an adjusted value of gamma to account for multiplicity
-    when forming an 1-fpr level confidence envelope for the ECDF of a sample.
-    """
-    if npoints is None:
-        npoints = n
-    gamma = []
-    for _ in range(num_trials):
-        unif_samples = uniform.rvs(0, 1, n)
-        unif_samples = np.sort(unif_samples)
-        gamma_m = 1000
-        ## Can compute ecdf for all the z together or one at a time.
-        f_z = compute_ecdf(unif_samples, z)
-        f_z = compute_ecdf(unif_samples, z)
-        gamma_m = 2 * min(
-            np.amin(binom.cdf(n * f_z, n, z)), np.amin(1 - binom.cdf(n * f_z - 1, n, z))
-        )
-        gamma.append(gamma_m)
-    return np.quantile(gamma, fpr)
-
-
-def get_lims(gamma, n, z):
-    """Compute the simultaneous 1 - fpr level confidence bands."""
-    lower = binom.ppf(gamma / 2, n, z)
-    upper = binom.ppf(1 - gamma / 2, n, z)
-    return lower / n, upper / n

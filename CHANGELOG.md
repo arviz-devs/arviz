@@ -6,6 +6,8 @@
 
 ### Maintenance and fixes
 
+-   Refactor ECDF code ([2311](https://github.com/arviz-devs/arviz/pull/2311))
+
 ### Deprecation
 
 ### Documentation
