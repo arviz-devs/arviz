@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 import scipy.stats
-from arviz.stats.ecdf_utils import (
+from ...stats.ecdf_utils import (
     compute_ecdf,
     ecdf_confidence_band,
     _get_ecdf_points,
