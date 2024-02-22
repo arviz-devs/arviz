@@ -16,9 +16,11 @@ def plot_ecdf(
     difference=False,
     pit=False,
     npoints=100,
-    num_trials=500,
     band_kind=None,
     band_prob=None,
+    num_trials=500,
+    rvs=None,
+    random_state=None,
     figsize=None,
     fill_band=True,
     plot_kwargs=None,
@@ -68,8 +70,18 @@ def plot_ecdf(
     npoints : int, default 100
         This denotes the granularity size of our plot i.e the number of evaluation points
         for the ecdf or ecdf-difference plots.
+    rvs: callable, optional
+        A function that takes an integer `ndraws` and optionally the object passed to
+        `random_state` and returns an array of `ndraws` samples from the same distribution
+        as the original dataset. Required if `method` is "simulated" and variable is discrete.
     num_trials : int, default 500
-        The number of random ECDFs to generate for constructing simultaneous confidence bands.
+        The number of random ECDFs to generate for constructing simultaneous confidence bands
+        (if `band_kind` is "simulated").
+    random_state : {None, int, `numpy.random.Generator`,
+                    `numpy.random.RandomState`}, optional
+        If `None`, the `numpy.random.RandomState` singleton is used. If an `int`, a new
+        ``numpy.random.RandomState`` instance is used, seeded with seed. If a `RandomState` or
+        `Generator` instance, the instance is used.
     figsize : (float,float), optional
         Figure size. If `None` it will be defined automatically.
     fill_band : bool, default True
@@ -238,7 +250,6 @@ def plot_ecdf(
                 cdf_at_eval_points = compute_ecdf(values2, eval_points)
         else:
             cdf_at_eval_points = np.zeros_like(eval_points)
-        rvs = None
 
     x_coord, y_coord = _get_ecdf_points(sample, eval_points, difference)
 
@@ -256,7 +267,7 @@ def plot_ecdf(
             prob=band_prob,
             num_trials=num_trials,
             rvs=rvs,
-            random_state=None,
+            random_state=random_state,
         )
 
         if difference:
