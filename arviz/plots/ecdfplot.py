@@ -1,4 +1,5 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
+import warnings
 
 import numpy as np
 from scipy.stats import uniform
@@ -14,11 +15,10 @@ def plot_ecdf(
     cdf=None,
     difference=False,
     pit=False,
-    confidence_bands=None,
-    pointwise=False,
     npoints=100,
     num_trials=500,
-    fpr=0.05,
+    band_kind=None,
+    band_prob=None,
     figsize=None,
     fill_band=True,
     plot_kwargs=None,
@@ -28,6 +28,9 @@ def plot_ecdf(
     show=None,
     backend=None,
     backend_kwargs=None,
+    confidence_bands=None,
+    pointwise=False,
+    fpr=None,
     **kwargs,
 ):
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
@@ -55,18 +58,18 @@ def plot_ecdf(
         If True then plot ECDF-difference plot otherwise ECDF plot.
     pit : bool, default False
         If True plots the ECDF or ECDF-diff of PIT of sample.
-    confidence_bands : bool, default None
-        If True plots the simultaneous or pointwise confidence bands with `1 - fpr`
-        confidence level.
-    pointwise : bool, default False
-        If True plots pointwise confidence bands otherwise simultaneous bands.
+    band_kind : str, optional
+        - None: No confidence bands are plotted.
+        - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
+        - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence band.
+    band_prob : float, default 0.94
+        The probability that the true ECDF lies within the confidence band. If `band_kind` is
+        "pointwise", this is the marginal probability instead of the joint probability.
     npoints : int, default 100
         This denotes the granularity size of our plot i.e the number of evaluation points
         for the ecdf or ecdf-difference plots.
     num_trials : int, default 500
         The number of random ECDFs to generate for constructing simultaneous confidence bands.
-    fpr : float, default 0.05
-        The type I error rate s.t `1 - fpr` denotes the confidence level of bands.
     figsize : (float,float), optional
         Figure size. If `None` it will be defined automatically.
     fill_band : bool, default True
@@ -91,6 +94,12 @@ def plot_ecdf(
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
+    confidence_bands : bool, default None
+        deprecated: please see `band_kind`.
+    pointwise : bool, default False
+        deprecated: please see `band_kind`.
+    fpr : float, optional
+        deprecated: please see `band_prob`.
 
     Returns
     -------
@@ -161,10 +170,38 @@ def plot_ecdf(
         >>> az.plot_ecdf(sample, sample2, confidence_bands = True, difference = True, pit = True)
 
     """
-    if confidence_bands is None:
-        confidence_bands = (values2 is not None) or (cdf is not None)
+    if confidence_bands:
+        warnings.warn(
+            "confidence_bands keyword will be deprecated in a future release. Use `band_kind`.",
+            FutureWarning,
+        )
 
-    if values2 is None and cdf is None and confidence_bands is True:
+        if band_kind is not None:
+            raise ValueError("Cannot specify both `confidence_bands` and `band_kind`")
+
+        if pointwise:
+            warnings.warn(
+                "pointwise keyword will be deprecated in a future release. Use `band_kind='pointwise'`",
+                FutureWarning,
+            )
+            band_kind = "pointwise"
+        else:
+            band_kind = "simulated"
+
+    if fpr is not None:
+        warnings.warn(
+            "fpr keyword will be deprecated in a future release. Use `band_prob=1-fpr` "
+            "or set rcParam `plot.band_prob` to `1-fpr`",
+            FutureWarning,
+        )
+        if band_prob is not None:
+            raise ValueError("Cannot specify both `fpr` and `band_prob`")
+        band_prob = 1 - fpr
+
+    if band_prob is None:
+        band_prob = rcParams["plot.band_prob"]
+
+    if values2 is None and cdf is None and band_kind is not None:
         raise ValueError("For confidence bands you need to specify values2 or the cdf")
 
     if cdf is not None and values2 is not None:
@@ -194,7 +231,7 @@ def plot_ecdf(
     else:
         eval_points = np.linspace(values[0], values[-1], npoints)
         sample = values
-        if confidence_bands or difference:
+        if difference or band_kind is not None:
             if cdf:
                 cdf_at_eval_points = cdf(eval_points)
             else:
@@ -208,25 +245,32 @@ def plot_ecdf(
     if difference:
         y_coord -= cdf_at_eval_points
 
-    if confidence_bands:
+    if band_kind is not None:
         ndraws = len(values)
-        band_kwargs = {"prob": 1 - fpr, "num_trials": num_trials, "rvs": rvs, "random_state": None}
-        band_kwargs["method"] = "pointwise" if pointwise else "simulated"
-        lower, higher = ecdf_confidence_band(ndraws, eval_points, cdf_at_eval_points, **band_kwargs)
+        x_bands = eval_points
+        lower, higher = ecdf_confidence_band(
+            ndraws,
+            eval_points,
+            cdf_at_eval_points,
+            method=band_kind,
+            prob=band_prob,
+            num_trials=num_trials,
+            rvs=rvs,
+            random_state=None,
+        )
 
         if difference:
             lower -= cdf_at_eval_points
             higher -= cdf_at_eval_points
     else:
-        lower, higher = None, None
+        x_bands, lower, higher = None, None, None
 
     ecdf_plot_args = dict(
         x_coord=x_coord,
         y_coord=y_coord,
-        x_bands=eval_points,
+        x_bands=x_bands,
         lower=lower,
         higher=higher,
-        confidence_bands=confidence_bands,
         figsize=figsize,
         fill_band=fill_band,
         plot_kwargs=plot_kwargs,
