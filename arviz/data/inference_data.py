@@ -63,6 +63,8 @@ SUPPORTED_GROUPS = [
     "observed_data",
     "constant_data",
     "predictions_constant_data",
+    "unconstrained_posterior",
+    "unconstrained_prior",
 ]
 
 WARMUP_TAG = "warmup_"
