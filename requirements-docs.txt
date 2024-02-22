@@ -9,7 +9,7 @@ myst-parser
 myst-nb
 sphinx-notfound-page
 sphinx-copybutton
-bokeh
+bokeh<3
 contourpy
 sphinx_design
 sphinx-codeautolink>=0.9.0

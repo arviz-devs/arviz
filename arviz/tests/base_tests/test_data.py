@@ -1241,7 +1241,7 @@ class TestDataDict:
         self.check_var_names_coords_dims(inference_data.prior_predictive)
         self.check_var_names_coords_dims(inference_data.sample_stats_prior)
 
-        pred_dims = inference_data.predictions.dims["school_pred"]
+        pred_dims = inference_data.predictions.sizes["school_pred"]
         assert pred_dims == 8
 
     def test_inference_data_warmup(self, data, eight_schools_params):
@@ -1586,8 +1586,8 @@ class TestExtractDataset:
         idata = load_arviz_data("centered_eight")
         post = extract(idata, combined=False)
         assert "sample" not in post.dims
-        assert post.dims["chain"] == 4
-        assert post.dims["draw"] == 500
+        assert post.sizes["chain"] == 4
+        assert post.sizes["draw"] == 500
 
     def test_var_name_group(self):
         idata = load_arviz_data("centered_eight")
@@ -1607,5 +1607,5 @@ class TestExtractDataset:
     def test_subset_samples(self):
         idata = load_arviz_data("centered_eight")
         post = extract(idata, num_samples=10)
-        assert post.dims["sample"] == 10
+        assert post.sizes["sample"] == 10
         assert post.attrs == idata.posterior.attrs

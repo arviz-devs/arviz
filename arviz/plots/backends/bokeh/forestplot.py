@@ -640,7 +640,7 @@ class VarHandler:
             grouped_data = [[(0, datum)] for datum in self.data]
             skip_dims = self.combine_dims.union({"chain"})
         else:
-            grouped_data = [datum.groupby("chain") for datum in self.data]
+            grouped_data = [datum.groupby("chain", squeeze=False) for datum in self.data]
             skip_dims = self.combine_dims
 
         label_dict = OrderedDict()
@@ -648,7 +648,7 @@ class VarHandler:
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(
-                    sub_data,
+                    sub_data.squeeze(),
                     var_names=[self.var_name],
                     skip_dims=skip_dims,
                     reverse_selections=True,

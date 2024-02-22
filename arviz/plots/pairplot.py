@@ -229,7 +229,7 @@ def plot_pair(
             )
 
     if gridsize == "auto":
-        gridsize = int(dataset.dims["draw"] ** 0.35)
+        gridsize = int(dataset.sizes["draw"] ** 0.35)
 
     numvars = len(flat_var_names)
 

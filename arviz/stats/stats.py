@@ -146,6 +146,7 @@ def compare(
     Compare the centered and non centered models of the eight school problem:
 
     .. ipython::
+       :okwarning:
 
         In [1]: import arviz as az
            ...: data1 = az.load_arviz_data("non_centered_eight")
@@ -157,6 +158,7 @@ def compare(
     weights using the stacking method.
 
     .. ipython::
+       :okwarning:
 
         In [1]: az.compare(compare_dict, ic="loo", method="stacking", scale="log")
 
@@ -180,37 +182,19 @@ def compare(
     except Exception as e:
         raise e.__class__("Encountered error in ELPD computation of compare.") from e
     names = list(ics_dict.keys())
-    if ic == "loo":
+    if ic in {"loo", "waic"}:
         df_comp = pd.DataFrame(
-            index=names,
-            columns=[
-                "rank",
-                "elpd_loo",
-                "p_loo",
-                "elpd_diff",
-                "weight",
-                "se",
-                "dse",
-                "warning",
-                "scale",
-            ],
-            dtype=np.float_,
-        )
-    elif ic == "waic":
-        df_comp = pd.DataFrame(
-            index=names,
-            columns=[
-                "rank",
-                "elpd_waic",
-                "p_waic",
-                "elpd_diff",
-                "weight",
-                "se",
-                "dse",
-                "warning",
-                "scale",
-            ],
-            dtype=np.float_,
+            {
+                "rank": pd.Series(index=names, dtype="int"),
+                f"elpd_{ic}": pd.Series(index=names, dtype="float"),
+                f"p_{ic}": pd.Series(index=names, dtype="float"),
+                "elpd_diff": pd.Series(index=names, dtype="float"),
+                "weight": pd.Series(index=names, dtype="float"),
+                "se": pd.Series(index=names, dtype="float"),
+                "dse": pd.Series(index=names, dtype="float"),
+                "warning": pd.Series(index=names, dtype="boolean"),
+                "scale": pd.Series(index=names, dtype="str"),
+            }
         )
     else:
         raise NotImplementedError(f"The information criterion {ic} is not supported.")
@@ -632,7 +616,7 @@ def _hdi(ary, hdi_prob, circular, skipna):
     ary = np.sort(ary)
     interval_idx_inc = int(np.floor(hdi_prob * n))
     n_intervals = n - interval_idx_inc
-    interval_width = np.subtract(ary[interval_idx_inc:], ary[:n_intervals], dtype=np.float_)
+    interval_width = np.subtract(ary[interval_idx_inc:], ary[:n_intervals], dtype=np.float64)
 
     if len(interval_width) == 0:
         raise ValueError("Too few elements for interval calculation. ")
@@ -2096,7 +2080,7 @@ def weight_predictions(idatas, weights=None):
     weights /= weights.sum()
 
     len_idatas = [
-        idata.posterior_predictive.dims["chain"] * idata.posterior_predictive.dims["draw"]
+        idata.posterior_predictive.sizes["chain"] * idata.posterior_predictive.sizes["draw"]
         for idata in idatas
     ]
 
