@@ -37,11 +37,11 @@ def plot_ecdf(
 ):
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
 
-    Plots of the empirical CDF estimates of an array. When `values2` argument is provided,
-    the two empirical CDFs are overlaid with the distribution of `values` on top
-    (in a darker shade) and confidence bands in a more transparent shade. Optionally, the difference
-    between the two empirical CDFs can be computed, and the PIT for a single dataset or a comparison
-    between two samples.
+    Plots of the empirical cumulative distribution function (ECDF) of an array. Optionally, A `cdf`
+    argument representing a reference CDF may be provided for comparison using a difference ECDF plot
+    and/or confidence bands.
+
+    Alternatively, the PIT for a single dataset may be visualized.
 
     Notes
     -----
@@ -52,7 +52,8 @@ def plot_ecdf(
     values : array-like
         Values to plot from an unknown continuous or discrete distribution.
     values2 : array-like, optional
-        Values to compare to the original sample.
+        deprecated: values to compare to the original sample. Instead use
+        `cdf=scipy.stats.ecdf(values2).cdf`.
     cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
         The function must take as input a numpy array of draws from the distribution.
@@ -213,41 +214,44 @@ def plot_ecdf(
     if band_prob is None:
         band_prob = rcParams["plot.band_prob"]
 
-    if values2 is None and cdf is None and band_kind is not None:
-        raise ValueError("For confidence bands you need to specify values2 or the cdf")
-
-    if cdf is not None and values2 is not None:
-        raise ValueError("To compare sample you need either cdf or values2 and not both")
-
-    if values2 is None and cdf is None and pit is True:
-        raise ValueError("For PIT specify either cdf or values2")
-
-    if values2 is None and cdf is None and difference is True:
-        raise ValueError("For ECDF difference plot need either cdf or values2")
-
     if values2 is not None:
-        values2 = np.ravel(values2)
-        values2.sort()
+        warnings.warn(
+            "The `values2` argument will be deprecated in a future release. "
+            "Use `cdf=scipy.stats.ecdf(values2).cdf` instead.",
+            FutureWarning,
+        )
+        if cdf is not None:
+            raise ValueError("You cannot specify both `values2` and `cdf`")
+        # use scipy.stats.ecdf if available
+        try:
+            from scipy.stats import ecdf as scipy_ecdf
+
+            cdf = scipy_ecdf(values2).cdf
+        except ImportError:
+            raise ValueError(
+                "The `values2` argument is deprecated and `scipy.stats.ecdf` is not available. "
+                "Please use `cdf` instead."
+            )
+
+    if cdf is None:
+        if band_kind is not None:
+            raise ValueError("For confidence bands you must specify cdf")
+        if difference is True:
+            raise ValueError("For ECDF difference plot you must specify cdf")
 
     values = np.ravel(values)
     values.sort()
 
     if pit:
         eval_points = np.linspace(1 / npoints, 1, npoints)
-        if cdf:
-            sample = cdf(values)
-        else:
-            sample = compute_ecdf(values2, values) / len(values2)
+        sample = cdf(values)
         cdf_at_eval_points = eval_points
         rvs = uniform(0, 1).rvs
     else:
         eval_points = np.linspace(values[0], values[-1], npoints)
         sample = values
         if difference or band_kind is not None:
-            if cdf:
-                cdf_at_eval_points = cdf(eval_points)
-            else:
-                cdf_at_eval_points = compute_ecdf(values2, eval_points)
+            cdf_at_eval_points = cdf(eval_points)
         else:
             cdf_at_eval_points = np.zeros_like(eval_points)
 
