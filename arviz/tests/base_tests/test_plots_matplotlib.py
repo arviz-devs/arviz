@@ -1285,6 +1285,14 @@ def test_plot_ecdf_eval_points():
     assert axes is not None
 
 
+@pytest.mark.parametrize("confidence_bands", [True, "pointwise", "simulated"])
+def test_plot_ecdf_confidence_bands(confidence_bands):
+    """Check that all confidence_bands values correctly accepted"""
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, confidence_bands=confidence_bands, cdf=norm(0, 1).cdf)
+    assert axes is not None
+
+
 def test_plot_ecdf_values2():
     data = np.random.randn(4, 1000)
     data2 = np.random.randn(4, 1000)
