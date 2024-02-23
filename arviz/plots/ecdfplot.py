@@ -3,6 +3,7 @@ import warnings
 
 import numpy as np
 from scipy.stats import uniform
+
 try:
     from scipy.stats import ecdf as scipy_ecdf
 except ImportError:
