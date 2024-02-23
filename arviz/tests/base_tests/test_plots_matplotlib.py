@@ -1273,6 +1273,18 @@ def test_plot_ecdf_basic():
     assert axes is not None
 
 
+def test_plot_ecdf_eval_points():
+    """Check that FutureWarning is raised if eval_points is not specified."""
+    data = np.random.randn(4, 1000)
+    eval_points = np.linspace(-3, 3, 100)
+    with pytest.warns(FutureWarning):
+        axes = plot_ecdf(data)
+    assert axes is not None
+    with does_not_warn(FutureWarning):
+        axes = plot_ecdf(data, eval_points=eval_points)
+    assert axes is not None
+
+
 def test_plot_ecdf_values2():
     data = np.random.randn(4, 1000)
     data2 = np.random.randn(4, 1000)
@@ -1288,6 +1300,7 @@ def test_plot_ecdf_cdf():
 
 
 def test_plot_ecdf_deprecations():
+    """Check that deprecations are raised correctly."""
     dist = norm(0, 1)
     data = dist.rvs(1000)
     # base case, no deprecations
