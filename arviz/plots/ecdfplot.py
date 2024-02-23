@@ -162,7 +162,7 @@ def plot_ecdf(
 
         >>> az.plot_ecdf(sample, cdf = distribution.cdf, eval_points = eval_points,
         >>>              confidence_bands = True, difference = True)
-        
+
     Plot an ECDF plot with confidence bands for the probability integral transform (PIT) of a continuous
     sample. If drawn from the reference distribution, the PIT values should be uniformly distributed.
 
@@ -185,7 +185,10 @@ def plot_ecdf(
     """
     if confidence_bands is True:
         if pointwise:
-            warnings.warn("pointwise keyword will be deprecated in a future release. Use `confidence_bands='pointwise'`", FutureWarning)
+            warnings.warn(
+                "pointwise keyword will be deprecated in a future release. Use `confidence_bands='pointwise'`",
+                FutureWarning,
+            )
             confidence_bands = "pointwise"
         else:
             confidence_bands = "simulated"
