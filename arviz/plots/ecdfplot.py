@@ -66,7 +66,7 @@ def plot_ecdf(
           band.
         For simultaneous confidence bands to be correctly calibrated, provide `eval_points` that
         are not dependent on the `values`.
-    band_prob : float, default 0.94
+    band_prob : float, default 0.95
         The probability that the true ECDF lies within the confidence band. If `confidence_bands`
         is "pointwise", this is the marginal probability instead of the joint probability.
     eval_points : array-like, optional

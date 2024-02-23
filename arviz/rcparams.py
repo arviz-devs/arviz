@@ -263,7 +263,7 @@ defaultParams = {  # pylint: disable=invalid-name
         "mean",
         _make_validate_choice({"mean", "median", "mode"}, allow_none=True),
     ),
-    "plot.band_prob": (0.94, _validate_probability),
+    "plot.band_prob": (0.95, _validate_probability),
     "plot.bokeh.bounds_x_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.bounds_y_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
