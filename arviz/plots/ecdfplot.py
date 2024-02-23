@@ -9,7 +9,7 @@ except ImportError:
     scipy_ecdf = None
 
 from ..rcparams import rcParams
-from ..stats.ecdf_utils import compute_ecdf, ecdf_confidence_band, _get_ecdf_points
+from ..stats.ecdf_utils import ecdf_confidence_band, _get_ecdf_points
 from .plot_utils import get_plotting_function
 
 
@@ -42,8 +42,8 @@ def plot_ecdf(
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
 
     Plots of the empirical cumulative distribution function (ECDF) of an array. Optionally, A `cdf`
-    argument representing a reference CDF may be provided for comparison using a difference ECDF plot
-    and/or confidence bands.
+    argument representing a reference CDF may be provided for comparison using a difference ECDF
+    plot and/or confidence bands.
 
     Alternatively, the PIT for a single dataset may be visualized.
 
@@ -167,8 +167,9 @@ def plot_ecdf(
         >>> az.plot_ecdf(sample, cdf = distribution.cdf, eval_points = eval_points,
         >>>              confidence_bands = True, difference = True)
 
-    Plot an ECDF plot with confidence bands for the probability integral transform (PIT) of a continuous
-    sample. If drawn from the reference distribution, the PIT values should be uniformly distributed.
+    Plot an ECDF plot with confidence bands for the probability integral transform (PIT) of a
+    continuous sample. If drawn from the reference distribution, the PIT values should be uniformly
+    distributed.
 
     .. plot::
         :context: close-figs
@@ -201,7 +202,8 @@ def plot_ecdf(
 
     if fpr is not None:
         warnings.warn(
-            "`fpr` has been deprecated. Use `band_prob=1-fpr` or set `rcParam['plot.band_prob']` to `1-fpr`.",
+            "`fpr` has been deprecated. Use `band_prob=1-fpr` or set `rcParam['plot.band_prob']` to"
+            "`1-fpr`.",
             DeprecationWarning,
         )
         if band_prob is not None:
@@ -214,13 +216,14 @@ def plot_ecdf(
     if values2 is not None:
         if cdf is not None:
             raise ValueError("You cannot specify both `values2` and `cdf`")
-        elif scipy_ecdf is None:
+        if scipy_ecdf is None:
             raise ValueError(
                 "The `values2` argument is deprecated and `scipy.stats.ecdf` is not available. "
                 "Please use `cdf` instead."
             )
         warnings.warn(
-            "`values2` has been deprecated. Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` instead.",
+            "`values2` has been deprecated. Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` "
+            "instead.",
             DeprecationWarning,
         )
         cdf = scipy_ecdf(np.ravel(values2)).cdf.evaluate
@@ -248,14 +251,15 @@ def plot_ecdf(
 
     if eval_points is None:
         warnings.warn(
-            "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated at the"
-            " unique values of the sample. To keep the current behavior, provide `eval_points` explicitly.",
+            "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated"
+            " at the unique values of the sample. To keep the current behavior, provide "
+            "`eval_points` explicitly.",
             FutureWarning,
         )
         if confidence_bands == "simulated":
             warnings.warn(
-                "For simultaneous bands to be correctly calibrated, specify `eval_points` independent of"
-                " the `values`"
+                "For simultaneous bands to be correctly calibrated, specify `eval_points` "
+                "independent of the `values`"
             )
         eval_points = np.linspace(values[0], values[-1], npoints)
     else:
