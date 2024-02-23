@@ -12,7 +12,6 @@ def plot_ecdf(
     x_bands,
     lower,
     higher,
-    confidence_bands,
     plot_kwargs,
     fill_kwargs,
     plot_outline_kwargs,
@@ -57,7 +56,7 @@ def plot_ecdf(
         plot_outline_kwargs.setdefault("color", to_hex("C0"))
         plot_outline_kwargs.setdefault("alpha", 0.2)
 
-    if confidence_bands:
+    if x_bands is not None:
         ax.step(x_coord, y_coord, **plot_kwargs)
 
         if fill_band:

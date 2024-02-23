@@ -90,7 +90,7 @@ def ecdf_confidence_band(
         A function that takes an integer `ndraws` and optionally the object passed to
         `random_state` and returns an array of `ndraws` samples from the same distribution
         as the original dataset. Required if `method` is "simulated" and variable is discrete.
-    num_trials : int, default 1000
+    num_trials : int, default 500
         The number of random ECDFs to generate for constructing simultaneous confidence bands
         (if `method` is "simulated").
     random_state : {None, int, `numpy.random.Generator`,
@@ -131,7 +131,7 @@ def _simulate_simultaneous_ecdf_band_probability(
     cdf_at_eval_points: np.ndarray,
     prob: float = 0.95,
     rvs: Optional[Callable[[int, Optional[Any]], np.ndarray]] = None,
-    num_trials: int = 1000,
+    num_trials: int = 500,
     random_state: Optional[Any] = None,
 ) -> float:
     """Estimate probability for simultaneous confidence band using simulation.

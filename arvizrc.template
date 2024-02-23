@@ -23,6 +23,7 @@ plot.backend                 : matplotlib  # One of "bokeh", "matplotlib"
 plot.density_kind            : kde         # One of "kde", "hist"
 plot.max_subplots            : 40          # Maximum number of subplots.
 plot.point_estimate          : mean        # One of "mean", "median", "mode" or "None"
+plot.band_prob                : 0.95       # Probability used for ECDF confidence bands
 
 # bokeh specific rcParams
 plot.bokeh.bounds_x_range    : auto        # either "auto", "None" or tuple of size 2

@@ -12,7 +12,6 @@ def plot_ecdf(
     x_bands,
     lower,
     higher,
-    confidence_bands,
     plot_kwargs,
     fill_kwargs,
     plot_outline_kwargs,
@@ -58,7 +57,7 @@ def plot_ecdf(
 
     ax.step(x_coord, y_coord, **plot_kwargs)
 
-    if confidence_bands:
+    if x_bands is not None:
         if fill_band:
             ax.fill_between(x_bands, lower, higher, **fill_kwargs)
         else:

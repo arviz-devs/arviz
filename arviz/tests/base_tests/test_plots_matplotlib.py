@@ -51,6 +51,7 @@ from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
     create_model,
     create_multidimensional_model,
+    does_not_warn,
     eight_schools_params,
     models,
     multidim_models,
@@ -1271,6 +1272,26 @@ def test_plot_ecdf_basic():
     assert axes is not None
 
 
+def test_plot_ecdf_eval_points():
+    """Check that FutureWarning is raised if eval_points is not specified."""
+    data = np.random.randn(4, 1000)
+    eval_points = np.linspace(-3, 3, 100)
+    with pytest.warns(FutureWarning):
+        axes = plot_ecdf(data)
+    assert axes is not None
+    with does_not_warn(FutureWarning):
+        axes = plot_ecdf(data, eval_points=eval_points)
+    assert axes is not None
+
+
+@pytest.mark.parametrize("confidence_bands", [True, "pointwise", "simulated"])
+def test_plot_ecdf_confidence_bands(confidence_bands):
+    """Check that all confidence_bands values correctly accepted"""
+    data = np.random.randn(4, 1000)
+    axes = plot_ecdf(data, confidence_bands=confidence_bands, cdf=norm(0, 1).cdf)
+    assert axes is not None
+
+
 def test_plot_ecdf_values2():
     data = np.random.randn(4, 1000)
     data2 = np.random.randn(4, 1000)
@@ -1283,6 +1304,75 @@ def test_plot_ecdf_cdf():
     cdf = norm(0, 1).cdf
     axes = plot_ecdf(data, cdf=cdf)
     assert axes is not None
+
+
+def test_plot_ecdf_error():
+    """Check that all error conditions are correctly raised."""
+    dist = norm(0, 1)
+    data = dist.rvs(1000)
+
+    # cdf not specified
+    with pytest.raises(ValueError):
+        plot_ecdf(data, confidence_bands=True)
+    plot_ecdf(data, confidence_bands=True, cdf=dist.cdf)
+    with pytest.raises(ValueError):
+        plot_ecdf(data, difference=True)
+    plot_ecdf(data, difference=True, cdf=dist.cdf)
+    with pytest.raises(ValueError):
+        plot_ecdf(data, pit=True)
+    plot_ecdf(data, pit=True, cdf=dist.cdf)
+
+    # contradictory confidence band types
+    with pytest.raises(ValueError):
+        plot_ecdf(data, cdf=dist.cdf, confidence_bands="simulated", pointwise=True)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, pointwise=True)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands="pointwise")
+
+    # contradictory band probabilities
+    with pytest.raises(ValueError):
+        plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, band_prob=0.9, fpr=0.1)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, band_prob=0.9)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, fpr=0.1)
+
+    # contradictory reference
+    data2 = dist.rvs(200)
+    with pytest.raises(ValueError):
+        plot_ecdf(data, data2, cdf=dist.cdf, difference=True)
+    plot_ecdf(data, data2, difference=True)
+    plot_ecdf(data, cdf=dist.cdf, difference=True)
+
+
+def test_plot_ecdf_deprecations():
+    """Check that deprecations are raised correctly."""
+    dist = norm(0, 1)
+    data = dist.rvs(1000)
+    # base case, no deprecations
+    with does_not_warn(DeprecationWarning):
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True)
+    assert axes is not None
+
+    # values2 is deprecated
+    data2 = dist.rvs(200)
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, values2=data2, difference=True)
+
+    # pit is deprecated
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, cdf=dist.cdf, pit=True)
+    assert axes is not None
+
+    # fpr is deprecated
+    with does_not_warn(DeprecationWarning):
+        axes = plot_ecdf(data, cdf=dist.cdf, band_prob=0.9)
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, fpr=0.1)
+    assert axes is not None
+
+    # pointwise is deprecated
+    with does_not_warn(DeprecationWarning):
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands="pointwise")
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, pointwise=True)
 
 
 @pytest.mark.parametrize(
