@@ -130,18 +130,18 @@ def plot_ecdf(
 
     Examples
     --------
-    Plot ecdf plot for a given sample
+    Plot an ECDF plot for a given sample evaluated at the sample points.
 
     .. plot::
         :context: close-figs
 
         >>> import arviz as az
-        >>> from scipy.stats import uniform, binom, norm
+        >>> from scipy.stats import uniform, norm
 
         >>> sample = norm(0,1).rvs(1000)
-        >>> az.plot_ecdf(sample)
+        >>> az.plot_ecdf(sample, eval_points = np.unique(sample))
 
-    Plot ecdf plot with confidence bands for comparing a given sample w.r.t a given distribution.
+    Plot an ECDF plot with confidence bands for comparing a given sample to a given distribution.
     We manually specify evaluation points independent of the values so that the confidence bands
     are correctly calibrated.
 
@@ -149,46 +149,38 @@ def plot_ecdf(
         :context: close-figs
 
         >>> distribution = norm(0,1)
-        >>> eval_points = distribution.ppf([0.001, 0.999])
-        >>> az.plot_ecdf(sample, eval_points=eval_points, cdf = distribution.cdf, confidence_bands = True)
+        >>> eval_points = np.linspace(*distribution.ppf([0.001, 0.999]), 500)
+        >>> az.plot_ecdf(sample, eval_points = eval_points, cdf = distribution.cdf,
+        >>>              confidence_bands = True)
 
-    Plot ecdf-difference plot with confidence bands for comparing a given sample
-    w.r.t a given distribution
+    Plot an ECDF-difference plot with confidence bands for comparing a given sample
+    to a given distribution.
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf, eval_points=eval_points,
+        >>> az.plot_ecdf(sample, cdf = distribution.cdf, eval_points = eval_points,
         >>>              confidence_bands = True, difference = True)
-
-    Plot ecdf plot with confidence bands for PIT of sample for comparing a given sample
-    w.r.t a given distribution
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-        >>>              confidence_bands = True, pit = True)
-
-    Plot ecdf-difference plot with confidence bands for PIT of sample for comparing a given
-    sample w.r.t a given distribution
+        
+    Plot an ECDF plot with confidence bands for the probability integral transform (PIT) of a continuous
+    sample. If drawn from the reference distribution, the PIT values should be uniformly distributed.
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-        >>>              confidence_bands = True, difference = True, pit = True)
+        >>> pit_vals = distribution.cdf(sample)
+        >>> eval_points = np.linspace(0, 1, 501)
+        >>> uniform_dist = uniform(0, 1)
+        >>> az.plot_ecdf(pit_vals, eval_points = eval_points, cdf = uniform_dist.cdf,
+        >>>              rvs = uniform_dist.rvs, confidence_bands = True)
 
-    You could also plot the above w.r.t another sample rather than a given distribution.
-    For eg: Plot ecdf-difference plot with confidence bands for PIT of sample for
-    comparing a given sample w.r.t a given sample
+    Plot an ECDF-difference plot of PIT values.
 
     .. plot::
         :context: close-figs
 
-        >>> sample2 = norm(0,1).rvs(5000)
-        >>> az.plot_ecdf(sample, sample2, confidence_bands = True, difference = True, pit = True)
-
+        >>> az.plot_ecdf(pit_vals, eval_points = eval_points, cdf = uniform_dist.cdf,
+        >>>              rvs = uniform_dist.rvs, confidence_bands = True, difference = True)
     """
     if confidence_bands is True:
         if pointwise:
