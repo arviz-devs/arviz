@@ -59,8 +59,6 @@ def plot_ecdf(
         The function must take as input a numpy array of draws from the distribution.
     difference : bool, default False
         If True then plot ECDF-difference plot otherwise ECDF plot.
-    pit : bool, default False
-        If True plots the ECDF or ECDF-diff of PIT of sample.
     confidence_bands : str or bool, optional
         - False: No confidence bands are plotted.
         - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
@@ -117,6 +115,9 @@ def plot_ecdf(
         deprecated: please see `confidence_bands`.
     fpr : float, optional
         deprecated: please see `band_prob`.
+    pit : bool, default False
+        deprecated: If True plots the ECDF or ECDF-diff of PIT of sample.
+        See below example instead.
 
     Returns
     -------
@@ -149,7 +150,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> distribution = norm(0,1)
-        >>> eval_points = np.linspace(*distribution.ppf([0.001, 0.999]), 500)
+        >>> eval_points = np.linspace(*distribution.ppf([0.001, 0.999]), 100)
         >>> az.plot_ecdf(sample, eval_points = eval_points, cdf = distribution.cdf,
         >>>              confidence_bands = True)
 
@@ -169,7 +170,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> pit_vals = distribution.cdf(sample)
-        >>> eval_points = np.linspace(0, 1, 501)
+        >>> eval_points = np.linspace(0, 1, 101)
         >>> uniform_dist = uniform(0, 1)
         >>> az.plot_ecdf(pit_vals, eval_points = eval_points, cdf = uniform_dist.cdf,
         >>>              rvs = uniform_dist.rvs, confidence_bands = True)
@@ -212,7 +213,6 @@ def plot_ecdf(
         )
         if cdf is not None:
             raise ValueError("You cannot specify both `values2` and `cdf`")
-        # use scipy.stats.ecdf if available
         try:
             from scipy.stats import ecdf as scipy_ecdf
 
@@ -228,38 +228,40 @@ def plot_ecdf(
             raise ValueError("For confidence bands you must specify cdf")
         if difference is True:
             raise ValueError("For ECDF difference plot you must specify cdf")
-    
-    if eval_points is None:
-        warnings.warn(
-            "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated at the"
-            " unique values of the sample. To keep the current behavior, provide `eval_points` explicitly."
-        )
-        if confidence_bands == "simulated" and not pit:
-            warnings.warn(
-                "For simultaneous bands to be correctly calibrated, specify `eval_points` independent of"
-                " the `values`"
-            )
-    else:
-        eval_points = np.asarray(eval_points)
 
     values = np.ravel(values)
     values.sort()
 
     if pit:
-        eval_points = np.linspace(1 / npoints, 1, npoints)
-        sample = cdf(values)
-        cdf_at_eval_points = eval_points
+        warnings.warn(
+            "The `pit` argument will be deprecated in a future release. Provide `values=cdf(values)` instead.",
+            FutureWarning,
+        )
+        values = cdf(values)
+        cdf = uniform(0, 1).cdf
         rvs = uniform(0, 1).rvs
-    else:
-        if eval_points is None:
-            eval_points = np.linspace(values[0], values[-1], npoints)
-        sample = values
-        if difference or confidence_bands:
-            cdf_at_eval_points = cdf(eval_points)
-        else:
-            cdf_at_eval_points = np.zeros_like(eval_points)
+        eval_points = np.linspace(1 / npoints, 1, npoints)
 
-    x_coord, y_coord = _get_ecdf_points(sample, eval_points, difference)
+    if eval_points is None:
+        warnings.warn(
+            "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated at the"
+            " unique values of the sample. To keep the current behavior, provide `eval_points` explicitly."
+        )
+        if confidence_bands == "simulated":
+            warnings.warn(
+                "For simultaneous bands to be correctly calibrated, specify `eval_points` independent of"
+                " the `values`"
+            )
+        eval_points = np.linspace(values[0], values[-1], npoints)
+    else:
+        eval_points = np.asarray(eval_points)
+
+    if difference or confidence_bands:
+        cdf_at_eval_points = cdf(eval_points)
+    else:
+        cdf_at_eval_points = np.zeros_like(eval_points)
+
+    x_coord, y_coord = _get_ecdf_points(values, eval_points, difference)
 
     if difference:
         y_coord -= cdf_at_eval_points
