@@ -186,8 +186,8 @@ def plot_ecdf(
     if confidence_bands is True:
         if pointwise:
             warnings.warn(
-                "pointwise keyword will be deprecated in a future release. Use `confidence_bands='pointwise'`",
-                FutureWarning,
+                "`pointwise` has been deprecated. Use `confidence_bands='pointwise'` instead.",
+                DeprecationWarning,
             )
             confidence_bands = "pointwise"
         else:
@@ -197,9 +197,8 @@ def plot_ecdf(
 
     if fpr is not None:
         warnings.warn(
-            "fpr keyword will be deprecated in a future release. Use `band_prob=1-fpr` "
-            "or set rcParam `plot.band_prob` to `1-fpr`",
-            FutureWarning,
+            "`fpr` has been deprecated. Use `band_prob=1-fpr` or set `rcParam['plot.band_prob']` to `1-fpr`.",
+            DeprecationWarning,
         )
         if band_prob is not None:
             raise ValueError("Cannot specify both `fpr` and `band_prob`")
@@ -210,9 +209,8 @@ def plot_ecdf(
 
     if values2 is not None:
         warnings.warn(
-            "The `values2` argument will be deprecated in a future release. "
-            "Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` instead.",
-            FutureWarning,
+            "`values2` has been deprecated. Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` instead.",
+            DeprecationWarning,
         )
         if cdf is not None:
             raise ValueError("You cannot specify both `values2` and `cdf`")
@@ -237,8 +235,8 @@ def plot_ecdf(
 
     if pit:
         warnings.warn(
-            "The `pit` argument will be deprecated in a future release. Provide `values=cdf(values)` instead.",
-            FutureWarning,
+            "`pit` has been deprecated. Specify `values=cdf(values)` instead.",
+            DeprecationWarning,
         )
         values = cdf(values)
         cdf = uniform(0, 1).cdf
@@ -248,7 +246,8 @@ def plot_ecdf(
     if eval_points is None:
         warnings.warn(
             "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated at the"
-            " unique values of the sample. To keep the current behavior, provide `eval_points` explicitly."
+            " unique values of the sample. To keep the current behavior, provide `eval_points` explicitly.",
+            FutureWarning,
         )
         if confidence_bands == "simulated":
             warnings.warn(
