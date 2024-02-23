@@ -5,6 +5,8 @@
 ### New features
 -  Use revised Pareto k threshold ([2349](https://github.com/arviz-devs/arviz/pull/2349))
 
+-   Added arguments `eval_points`, `rvs`, and `random_state` to `plot_ecdf` ([2316](https://github.com/arviz-devs/arviz/pull/2316))
+
 ### Maintenance and fixes
 - Ensure support with numpy 2.0 ([2321](https://github.com/arviz-devs/arviz/pull/2321))
 - Update testing strategy to include an environment without optional dependencies and
@@ -15,6 +17,8 @@
 ### Deprecation
 -  Support for arrays and DataArrays in plot_khat has been deprecated. Only ELPDdata will be supported in the future ([2349](https://github.com/arviz-devs/arviz/pull/2349))
 
+
+-   Removed arguments `values2`, `fpr`, `pointwise`, and `pit` in `plot_ecdf` ([2316](https://github.com/arviz-devs/arviz/pull/2316))
 
 ### Documentation
 
