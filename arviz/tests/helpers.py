@@ -656,7 +656,6 @@ def importorskip(
     # if set, missing optional dependencies trigger failed tests.
     if "ARVIZ_REQUIRE_ALL_DEPS" not in os.environ:
         return pytest.importorskip(modname=modname, minversion=minversion, reason=reason)
-    import warnings
 
     compile(modname, "", "eval")  # to catch syntaxerrors
 
