@@ -12,6 +12,7 @@ from .plot_utils import get_plotting_function
 def plot_ecdf(
     values,
     values2=None,
+    eval_points=None,
     cdf=None,
     difference=False,
     pit=False,
@@ -65,9 +66,14 @@ def plot_ecdf(
         - None: No confidence bands are plotted.
         - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
         - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence band.
+        For simultaneous confidence bands to be correctly calibrated, provide `eval_points` that
+        are not dependent on the `values`.
     band_prob : float, default 0.94
         The probability that the true ECDF lies within the confidence band. If `band_kind` is
         "pointwise", this is the marginal probability instead of the joint probability.
+    eval_points : array-like, optional
+        The points at which to evaluate the ECDF. If None, `npoints` uniformly spaced points
+        between the data bounds will be used.
     npoints : int, default 100
         This denotes the granularity size of our plot i.e the number of evaluation points
         for the ecdf or ecdf-difference plots.
@@ -238,6 +244,19 @@ def plot_ecdf(
             raise ValueError("For confidence bands you must specify cdf")
         if difference is True:
             raise ValueError("For ECDF difference plot you must specify cdf")
+    
+    if eval_points is None:
+        warnings.warn(
+            "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated at the"
+            " unique values of the sample. To keep the current behavior, provide `eval_points` explicitly."
+        )
+        if band_kind == "simulated" and not pit:
+            warnings.warn(
+                "For simultaneous bands to be correctly calibrated, specify `eval_points` independent of"
+                " the `values`"
+            )
+    else:
+        eval_points = np.asarray(eval_points)
 
     values = np.ravel(values)
     values.sort()
@@ -248,7 +267,8 @@ def plot_ecdf(
         cdf_at_eval_points = eval_points
         rvs = uniform(0, 1).rvs
     else:
-        eval_points = np.linspace(values[0], values[-1], npoints)
+        if eval_points is None:
+            eval_points = np.linspace(values[0], values[-1], npoints)
         sample = values
         if difference or band_kind is not None:
             cdf_at_eval_points = cdf(eval_points)
