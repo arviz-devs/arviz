@@ -141,13 +141,16 @@ def plot_ecdf(
         >>> sample = norm(0,1).rvs(1000)
         >>> az.plot_ecdf(sample)
 
-    Plot ecdf plot with confidence bands for comparing a given sample w.r.t a given distribution
+    Plot ecdf plot with confidence bands for comparing a given sample w.r.t a given distribution.
+    We manually specify evaluation points independent of the values so that the confidence bands
+    are correctly calibrated.
 
     .. plot::
         :context: close-figs
 
         >>> distribution = norm(0,1)
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf, confidence_bands = True)
+        >>> eval_points = distribution.ppf([0.001, 0.999])
+        >>> az.plot_ecdf(sample, eval_points=eval_points, cdf = distribution.cdf, confidence_bands = True)
 
     Plot ecdf-difference plot with confidence bands for comparing a given sample
     w.r.t a given distribution
@@ -155,7 +158,7 @@ def plot_ecdf(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf,
+        >>> az.plot_ecdf(sample, cdf = distribution.cdf, eval_points=eval_points,
         >>>              confidence_bands = True, difference = True)
 
     Plot ecdf plot with confidence bands for PIT of sample for comparing a given sample
