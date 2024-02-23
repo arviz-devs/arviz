@@ -52,6 +52,7 @@ from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
     create_model,
     create_multidimensional_model,
+    does_not_warn,
     eight_schools_params,
     models,
     multidim_models,
@@ -1284,6 +1285,38 @@ def test_plot_ecdf_cdf():
     cdf = norm(0, 1).cdf
     axes = plot_ecdf(data, cdf=cdf)
     assert axes is not None
+
+
+def test_plot_ecdf_deprecations():
+    dist = norm(0, 1)
+    data = dist.rvs(1000)
+    # base case, no deprecations
+    with does_not_warn(DeprecationWarning):
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True)
+    assert axes is not None
+
+    # values2 is deprecated
+    data2 = dist.rvs(200)
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, values2=data2, difference=True)
+
+    # pit is deprecated
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, cdf=dist.cdf, pit=True)
+    assert axes is not None
+
+    # fpr is deprecated
+    with does_not_warn(DeprecationWarning):
+        axes = plot_ecdf(data, cdf=dist.cdf, band_prob=0.9)
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, fpr=0.1)
+    assert axes is not None
+
+    # pointwise is deprecated
+    with does_not_warn(DeprecationWarning):
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands="pointwise")
+    with pytest.deprecated_call():
+        axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, pointwise=True)
 
 
 @pytest.mark.parametrize(

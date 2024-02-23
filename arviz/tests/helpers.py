@@ -6,6 +6,8 @@ import logging
 import os
 import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
+import warnings
+from contextlib import contextmanager
 
 import cloudpickle
 import numpy as np
@@ -27,6 +29,18 @@ class RandomVariableTestClass:
     def __repr__(self):
         """Return argument to constructor as string representation."""
         return self.name
+
+
+@contextmanager
+def does_not_warn(warning=Warning):
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
+        yield
+        for w in caught_warnings:
+            if issubclass(w.category, warning):
+                raise AssertionError(
+                    f"Expected no {warning.__name__} but caught warning with message: {w.message}"
+                )
 
 
 @pytest.fixture(scope="module")
