@@ -3,6 +3,10 @@ import warnings
 
 import numpy as np
 from scipy.stats import uniform
+try:
+    from scipy.stats import ecdf as scipy_ecdf
+except ImportError:
+    scipy_ecdf = None
 
 from ..rcparams import rcParams
 from ..stats.ecdf_utils import compute_ecdf, ecdf_confidence_band, _get_ecdf_points
@@ -208,21 +212,18 @@ def plot_ecdf(
         band_prob = rcParams["plot.band_prob"]
 
     if values2 is not None:
-        warnings.warn(
-            "`values2` has been deprecated. Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` instead.",
-            DeprecationWarning,
-        )
         if cdf is not None:
             raise ValueError("You cannot specify both `values2` and `cdf`")
-        try:
-            from scipy.stats import ecdf as scipy_ecdf
-
-            cdf = scipy_ecdf(np.ravel(values2)).cdf.evaluate
-        except ImportError:
+        elif scipy_ecdf is None:
             raise ValueError(
                 "The `values2` argument is deprecated and `scipy.stats.ecdf` is not available. "
                 "Please use `cdf` instead."
             )
+        warnings.warn(
+            "`values2` has been deprecated. Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` instead.",
+            DeprecationWarning,
+        )
+        cdf = scipy_ecdf(np.ravel(values2)).cdf.evaluate
 
     if cdf is None:
         if confidence_bands:
