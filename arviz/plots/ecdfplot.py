@@ -53,7 +53,7 @@ def plot_ecdf(
         Values to plot from an unknown continuous or discrete distribution.
     values2 : array-like, optional
         deprecated: values to compare to the original sample. Instead use
-        `cdf=scipy.stats.ecdf(values2).cdf`.
+        `cdf=scipy.stats.ecdf(values2).cdf.evaluate`.
     cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
         The function must take as input a numpy array of draws from the distribution.
@@ -212,7 +212,7 @@ def plot_ecdf(
     if values2 is not None:
         warnings.warn(
             "The `values2` argument will be deprecated in a future release. "
-            "Use `cdf=scipy.stats.ecdf(values2).cdf` instead.",
+            "Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` instead.",
             FutureWarning,
         )
         if cdf is not None:
@@ -221,7 +221,7 @@ def plot_ecdf(
         try:
             from scipy.stats import ecdf as scipy_ecdf
 
-            cdf = scipy_ecdf(values2).cdf
+            cdf = scipy_ecdf(values2).cdf.evaluate
         except ImportError:
             raise ValueError(
                 "The `values2` argument is deprecated and `scipy.stats.ecdf` is not available. "
