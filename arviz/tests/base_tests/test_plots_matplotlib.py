@@ -1307,6 +1307,42 @@ def test_plot_ecdf_cdf():
     assert axes is not None
 
 
+def test_plot_ecdf_error():
+    """Check that all error conditions are correctly raised."""
+    dist = norm(0, 1)
+    data = dist.rvs(1000)
+
+    # cdf not specified
+    with pytest.raises(ValueError):
+        plot_ecdf(data, confidence_bands=True)
+    plot_ecdf(data, confidence_bands=True, cdf=dist.cdf)
+    with pytest.raises(ValueError):
+        plot_ecdf(data, difference=True)
+    plot_ecdf(data, difference=True, cdf=dist.cdf)
+    with pytest.raises(ValueError):
+        plot_ecdf(data, pit=True)
+    plot_ecdf(data, pit=True, cdf=dist.cdf)
+
+    # contradictory confidence band types
+    with pytest.raises(ValueError):
+        plot_ecdf(data, cdf=dist.cdf, confidence_bands="simulated", pointwise=True)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, pointwise=True)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands="pointwise")
+
+    # contradictory band probabilities
+    with pytest.raises(ValueError):
+        plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, band_prob=0.9, fpr=0.1)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, band_prob=0.9)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, fpr=0.1)
+
+    # contradictory reference
+    data2 = dist.rvs(200)
+    with pytest.raises(ValueError):
+        plot_ecdf(data, data2, cdf=dist.cdf, difference=True)
+    plot_ecdf(data, data2, difference=True)
+    plot_ecdf(data, cdf=dist.cdf, difference=True)
+
+
 def test_plot_ecdf_deprecations():
     """Check that deprecations are raised correctly."""
     dist = norm(0, 1)

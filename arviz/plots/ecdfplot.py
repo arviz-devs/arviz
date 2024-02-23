@@ -229,6 +229,8 @@ def plot_ecdf(
             raise ValueError("For confidence bands you must specify cdf")
         if difference is True:
             raise ValueError("For ECDF difference plot you must specify cdf")
+        if pit:
+            raise ValueError("For PIT plot you must specify cdf")
 
     values = np.ravel(values)
     values.sort()
