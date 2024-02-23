@@ -216,7 +216,7 @@ def plot_ecdf(
         try:
             from scipy.stats import ecdf as scipy_ecdf
 
-            cdf = scipy_ecdf(values2).cdf.evaluate
+            cdf = scipy_ecdf(np.ravel(values2)).cdf.evaluate
         except ImportError:
             raise ValueError(
                 "The `values2` argument is deprecated and `scipy.stats.ecdf` is not available. "
