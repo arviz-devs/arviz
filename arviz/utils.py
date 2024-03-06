@@ -325,7 +325,7 @@ def numba_check():
 class Numba:
     """A class to toggle numba states."""
 
-    numba_flag = numba_check()
+    numba_flag = False
 
     @classmethod
     def disable_numba(cls):
