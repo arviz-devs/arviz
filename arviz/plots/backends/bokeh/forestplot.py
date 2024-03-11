@@ -15,7 +15,6 @@ from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
-from ....utils import conditional_jit
 from ...plot_utils import _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
@@ -277,7 +276,6 @@ class PlotHandler:
         """Collect labels and ticks from plotters."""
         val = self.plotters.values()
 
-        @conditional_jit(forceobj=True, nopython=False)
         def label_idxs():
             labels, idxs = [], []
             for plotter in val:
