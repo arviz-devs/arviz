@@ -254,8 +254,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
     def __iter__(self) -> Iterator[str]:
         """Iterate over groups in InferenceData object."""
-        for group in self._groups_all:
-            yield group
+        yield from self._groups_all
 
     def __contains__(self, key: object) -> bool:
         """Return True if the named item is present, and False otherwise."""
