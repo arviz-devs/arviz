@@ -29,7 +29,7 @@ jobs:
       python -m pip install wheel
       python -m pip install --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
-      python -m pip install asv!=0.6.2
+      python -m pip install asv==0.6.1
     displayName: 'Install requirements'
 
   - script: |

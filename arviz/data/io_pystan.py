@@ -676,8 +676,7 @@ def get_draws(fit, variables=None, ignore=None, warmup=False, dtypes=None):
         for item in par_keys:
             _, shape = item.replace("]", "").split("[")
             shape_idx_min = min(int(shape_value) for shape_value in shape.split(","))
-            if shape_idx_min < shift:
-                shift = shape_idx_min
+            shift = min(shift, shape_idx_min)
         # If shift is higher than 1, this will probably mean that Stan
         # has implemented sparse structure (saves only non-zero parts),
         # but let's hope that dims are still corresponding to the full shape
