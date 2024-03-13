@@ -1,5 +1,5 @@
 """Code for loading and manipulating data structures."""
-from .base import CoordSpec, DimSpec, dict_to_dataset, numpy_to_data_array
+from .base import CoordSpec, DimSpec, dict_to_dataset, numpy_to_data_array, pytree_to_dataset
 from .converters import convert_to_dataset, convert_to_inference_data
 from .datasets import clear_data_home, list_datasets, load_arviz_data
 from .inference_data import InferenceData, concat
@@ -43,6 +43,7 @@ __all__ = [
     "from_pyro",
     "from_numpyro",
     "from_netcdf",
+    "pytree_to_dataset",
     "to_datatree",
     "to_json",
     "to_netcdf",
