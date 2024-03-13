@@ -1,17 +1,11 @@
 # Change Log
 
-## v0.x.x Unreleased
-
-### New features
+## v0.17.1 (2024 Mar 13)
 
 ### Maintenance and fixes
 - Fix deprecations introduced in latest pandas and xarray versions, and prepare for numpy 2.0 ones ([2315](https://github.com/arviz-devs/arviz/pull/2315)))
 - Refactor ECDF code ([2311](https://github.com/arviz-devs/arviz/pull/2311))
 - Fix `plot_forest` when Numba is installed ([2319](https://github.com/arviz-devs/arviz/pull/2319))
-
-### Deprecation
-
-### Documentation
 
 ## v0.17.0 (2023 Dec 22)
 
