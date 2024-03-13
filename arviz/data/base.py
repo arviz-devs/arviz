@@ -352,7 +352,9 @@ def pytree_to_dataset(
 
     .. ipython::
 
-        dict_to_dataset({'x': np.random.randn(4, 100), 'y': np.random.rand(4, 100)})
+        In [1]: import arviz as az
+           ...: import numpy as np
+           ...: az.dict_to_dataset({'x': np.random.randn(4, 100), 'y': np.random.rand(4, 100)})
 
     Note that unlike the :class:`xarray.Dataset` constructor, ArviZ has added extra
     information to the generated Dataset such as default dimension names for sampled
@@ -362,7 +364,7 @@ def pytree_to_dataset(
 
     .. ipython::
 
-        pytree_to_dataset({'top': {'second': 1.}, 'top2': 1.})
+        In [1]: az.pytree_to_dataset({'top': {'second': 1.}, 'top2': 1.})
 
     which has two variables (as many as leafs) named ``('top', 'second')`` and ``top2``.
 
@@ -370,15 +372,15 @@ def pytree_to_dataset(
 
     .. ipython::
 
-        datadict = {
-            "top": {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)},
-            "d": np.random.randn(100),
-        }
-        dict_to_dataset(
-            datadict,
-            coords={"c": np.arange(10)},
-            dims={("top", "b"): ["c"]}
-        )
+        In [1]: datadict = {
+           ...:     "top": {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)},
+           ...:     "d": np.random.randn(100),
+           ...: }
+           ...: az.dict_to_dataset(
+           ...:     datadict,
+           ...:     coords={"c": np.arange(10)},
+           ...:     dims={("top", "b"): ["c"]}
+           ...: )
 
     """
     if dims is None:
