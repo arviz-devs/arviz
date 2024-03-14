@@ -8,6 +8,7 @@ from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
+import tree
 import xarray as xr
 
 try:
@@ -65,6 +66,48 @@ class requires:  # pylint: disable=invalid-name
             return func(cls)
 
         return wrapped
+
+
+def _yield_flat_up_to(shallow_tree, input_tree, path=()):
+    """Yields (path, value) pairs of input_tree flattened up to shallow_tree.
+
+    Adapted from dm-tree (https://github.com/google-deepmind/tree) to allow
+    lists as leaves.
+
+    Args:
+        shallow_tree: Nested structure. Traverse no further than its leaf nodes.
+        input_tree: Nested structure. Return the paths and values from this tree.
+            Must have the same upper structure as shallow_tree.
+        path: Tuple. Optional argument, only used when recursing. The path from the
+            root of the original shallow_tree, down to the root of the shallow_tree
+            arg of this recursive call.
+
+    Yields:
+        Pairs of (path, value), where path the tuple path of a leaf node in
+        shallow_tree, and value is the value of the corresponding node in
+        input_tree.
+    """
+    # pylint: disable=protected-access
+    if isinstance(shallow_tree, tree._TEXT_OR_BYTES) or not (
+        isinstance(shallow_tree, tree.collections_abc.Mapping)
+        or tree._is_namedtuple(shallow_tree)
+        or tree._is_attrs(shallow_tree)
+    ):
+        yield (path, input_tree)
+    else:
+        input_tree = dict(tree._yield_sorted_items(input_tree))
+        for shallow_key, shallow_subtree in tree._yield_sorted_items(shallow_tree):
+            subpath = path + (shallow_key,)
+            input_subtree = input_tree[shallow_key]
+            for leaf_path, leaf_value in _yield_flat_up_to(
+                shallow_subtree, input_subtree, path=subpath
+            ):
+                yield (leaf_path, leaf_value)
+    # pylint: enable=protected-access
+
+
+def _flatten_with_path(structure):
+    return list(_yield_flat_up_to(structure, structure))
 
 
 def generate_dims_coords(
@@ -255,7 +298,7 @@ def numpy_to_data_array(
     return xr.DataArray(ary, coords=coords, dims=dims)
 
 
-def dict_to_dataset(
+def pytree_to_dataset(
     data,
     *,
     attrs=None,
@@ -266,26 +309,29 @@ def dict_to_dataset(
     index_origin=None,
     skip_event_dims=None,
 ):
-    """Convert a dictionary of numpy arrays to an xarray.Dataset.
+    """Convert a dictionary or pytree of numpy arrays to an xarray.Dataset.
+
+    See https://jax.readthedocs.io/en/latest/pytrees.html for what a pytree is, but
+    this inclues at least dictionaries and tuple types.
 
     Parameters
     ----------
-    data : dict[str] -> ndarray
+    data : dict of {str : array_like or dict} or pytree
         Data to convert. Keys are variable names.
-    attrs : dict
+    attrs : dict, optional
         Json serializable metadata to attach to the dataset, in addition to defaults.
-    library : module
+    library : module, optional
         Library used for performing inference. Will be attached to the attrs metadata.
-    coords : dict[str] -> ndarray
+    coords : dict of {str : ndarray}, optional
         Coordinates for the dataset
-    dims : dict[str] -> list[str]
+    dims : dict of {str : list of str}, optional
         Dimensions of each variable. The keys are variable names, values are lists of
         coordinates.
     default_dims : list of str, optional
         Passed to :py:func:`numpy_to_data_array`
     index_origin : int, optional
         Passed to :py:func:`numpy_to_data_array`
-    skip_event_dims : bool
+    skip_event_dims : bool, optional
         If True, cut extra dims whenever present to match the shape of the data.
         Necessary for PPLs which have the same name in both observed data and log
         likelihood groups, to account for their different shapes when observations are
@@ -293,15 +339,56 @@ def dict_to_dataset(
 
     Returns
     -------
-    xr.Dataset
+    xarray.Dataset
+        In case of nested pytrees, the variable name will be a tuple of individual names.
+
+    Notes
+    -----
+    This function is available through two aliases: ``dict_to_dataset`` or ``pytree_to_dataset``.
 
     Examples
     --------
-    dict_to_dataset({'x': np.random.randn(4, 100), 'y': np.random.rand(4, 100)})
+    Convert a dictionary with two 2D variables to a Dataset.
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: import numpy as np
+           ...: az.dict_to_dataset({'x': np.random.randn(4, 100), 'y': np.random.rand(4, 100)})
+
+    Note that unlike the :class:`xarray.Dataset` constructor, ArviZ has added extra
+    information to the generated Dataset such as default dimension names for sampled
+    dimensions and some attributes.
+
+    The function is also general enough to work on pytrees such as nested dictionaries:
+
+    .. ipython::
+
+        In [1]: az.pytree_to_dataset({'top': {'second': 1.}, 'top2': 1.})
+
+    which has two variables (as many as leafs) named ``('top', 'second')`` and ``top2``.
+
+    Dimensions and co-ordinates can be defined as usual:
+
+    .. ipython::
+
+        In [1]: datadict = {
+           ...:     "top": {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)},
+           ...:     "d": np.random.randn(100),
+           ...: }
+           ...: az.dict_to_dataset(
+           ...:     datadict,
+           ...:     coords={"c": np.arange(10)},
+           ...:     dims={("top", "b"): ["c"]}
+           ...: )
 
     """
     if dims is None:
         dims = {}
+    try:
+        data = {k[0] if len(k) == 1 else k: v for k, v in _flatten_with_path(data)}
+    except TypeError:  # probably unsortable keys -- the function will still work if
+        pass  # it is an honest dictionary.
 
     data_vars = {
         key: numpy_to_data_array(
@@ -316,6 +403,9 @@ def dict_to_dataset(
         for key, values in data.items()
     }
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
+
+
+dict_to_dataset = pytree_to_dataset
 
 
 def make_attrs(attrs=None, library=None):

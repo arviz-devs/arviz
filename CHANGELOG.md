@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
+- Support for `pytree`s and robust to nested dictionaries. (2291)
 
 ### Maintenance and fixes
 
