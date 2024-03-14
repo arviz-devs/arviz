@@ -752,7 +752,7 @@ def test_plot_ppc_transposed():
     )
     x, y = ax.get_lines()[2].get_data()
     assert not np.isclose(y[0], 0)
-    assert np.all(np.array([40, 43, 10, 9]) == x)
+    assert np.all(np.array([47, 44, 15, 11]) == x)
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])

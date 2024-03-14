@@ -3,7 +3,11 @@
 ## v0.x.x Unreleased
 
 ### New features
+
+- Add new example data `rugby_field` and update `rugby` example data ([2322](https://github.com/arviz-devs/arviz/pull/2322))
+
 - Support for `pytree`s and robust to nested dictionaries. (2291)
+
 
 ### Maintenance and fixes
 

@@ -9,9 +9,16 @@
     {
         "name": "rugby",
         "filename": "rugby.nc",
-        "url": "http://ndownloader.figshare.com/files/16254359",
-        "checksum": "9eecd2c6317e45b0388dd97ae6326adecf94128b5a7d15a52c9fcfac0937e2a6",
-        "description": "The Six Nations Championship is a yearly rugby competition between Italy, Ireland, Scotland, England, France and Wales. Fifteen games are played each year, representing all combinations of the six teams.\n\nThis example uses and includes results from 2014 - 2017, comprising 60 total games. It models latent parameters for each team's attack and defense, as well as a parameter for home team advantage.\n\nSee https://docs.pymc.io/notebooks/rugby_analytics.html by Peader Coyle for more details and references."
+        "url": "http://figshare.com/ndownloader/files/44916469",
+        "checksum": "f4a5e699a8a4cc93f722eb97929dd7c4895c59a2183f05309f5082f3f81eb228",
+        "description": "The Six Nations Championship is a yearly rugby competition between Italy, Ireland, Scotland, England, France and Wales. Fifteen games are played each year, representing all combinations of the six teams.\n\nThis example uses and includes results from 2014 - 2017, comprising 60 total games. It models latent parameters for each team's attack and defense, as well as a global parameter for home team advantage.\n\nSee https://github.com/arviz-devs/arviz_example_data/blob/main/code/rugby/rugby.ipynb for the whole model specification."
+    },
+    {
+        "name": "rugby_field",
+        "filename": "rugby_field.nc",
+        "url": "http://figshare.com/ndownloader/files/44667112",
+        "checksum": "53a99da7ac40d82cd01bb0b089263b9633ee016f975700e941b4c6ea289a1fb0",
+        "description": "A variant of the 'rugby' example dataset. The Six Nations Championship is a yearly rugby competition between Italy, Ireland, Scotland, England, France and Wales. Fifteen games are played each year, representing all combinations of the six teams.\n\nThis example uses and includes results from 2014 - 2017, comprising 60 total games. It models latent parameters for each team's attack and defense, with each team having different values depending on them being home or away team.\n\nSee https://github.com/arviz-devs/arviz_example_data/blob/main/code/rugby_field/rugby_field.ipynb for the whole model specification."
     },
     {
         "name": "regression1d",

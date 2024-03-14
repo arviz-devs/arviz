@@ -1475,12 +1475,12 @@ class InferenceData(Mapping[str, xr.Dataset]):
         Examples
         --------
         Add a ``log_likelihood`` group to the "rugby" example InferenceData after loading.
-        It originally doesn't have the ``log_likelihood`` group:
 
         .. jupyter-execute::
 
             import arviz as az
             idata = az.load_arviz_data("rugby")
+            del idata.log_likelihood
             idata2 = idata.copy()
             post = idata.posterior
             obs = idata.observed_data
@@ -1609,13 +1609,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
         .. jupyter-execute::
 
             import arviz as az
-            idata = az.load_arviz_data("rugby")
+            idata = az.load_arviz_data("radon")
 
         Second InferenceData:
 
         .. jupyter-execute::
 
-            other_idata = az.load_arviz_data("radon")
+            other_idata = az.load_arviz_data("rugby")
 
         Call the ``extend`` method:
 
