@@ -458,3 +458,6 @@ def from_dict(
         attrs=attrs,
         **kwargs,
     ).to_inference_data()
+
+
+from_pytree = from_dict

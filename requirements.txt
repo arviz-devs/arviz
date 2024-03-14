@@ -4,6 +4,7 @@ numpy>=1.22.0,<2.0
 scipy>=1.8.0
 packaging
 pandas>=1.4.0
+dm-tree>=0.1.8
 xarray>=0.21.0
 h5netcdf>=1.0.2
 typing_extensions>=4.1.0
