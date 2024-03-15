@@ -1,6 +1,6 @@
 setuptools>=60.0.0
 matplotlib>=3.5
-numpy>=1.22.0,<2.0
+numpy>=2.0.0.dev0
 scipy>=1.8.0
 packaging
 pandas>=1.4.0
