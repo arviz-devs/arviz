@@ -6,5 +6,5 @@ pydocstyle
 pylint
 pytest
 pytest-cov
-black==23.11.0
+black==24.3.0
 cloudpickle<1.5.0
