@@ -10,7 +10,7 @@ import arviz as az
 az.style.use("arviz-doc")
 
 rugby_data = az.load_arviz_data("rugby")
-axes = az.plot_forest(
+axes = az.plot_forest_kwargs(
     rugby_data,
     kind="ridgeplot",
     var_names=["defs"],
@@ -18,6 +18,7 @@ axes = az.plot_forest(
     combined=True,
     ridgeplot_overlap=1.5,
     figsize=(11.5, 5),
+    alternate_row_shading=False
 )
 axes[0].set_title("Relative defensive strength\nof Six Nation rugby teams")
 

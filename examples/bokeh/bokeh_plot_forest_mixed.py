@@ -5,11 +5,12 @@ Forest Plot with ESS
 import arviz as az
 
 centered_data = az.load_arviz_data("centered_eight")
-ax = az.plot_forest(
+ax = az.plot_forest_kwargs(
     centered_data,
     var_names=["theta"],
     figsize=(11.5, 5),
     ess=True,
     # r_hat=True,
     backend="bokeh",
+    alternate_row_shading=False
 )

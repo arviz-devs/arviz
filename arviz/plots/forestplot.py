@@ -36,7 +36,6 @@ def plot_forest(
     ax=None,
     backend=None,
     backend_config=None,
-    backend_kwargs=None,
     show=None,
 ):
     r"""Forest plot to compare HDI intervals from a number of distributions.
@@ -158,12 +157,13 @@ def plot_forest(
 
         >>> import arviz as az
         >>> non_centered_data = az.load_arviz_data('non_centered_eight')
-        >>> axes = az.plot_forest(non_centered_data,
+        >>> axes = az.plot_forest_kwargs(non_centered_data,
         >>>                            kind='forestplot',
         >>>                            var_names=["^the"],
         >>>                            filter_vars="regex",
         >>>                            combined=True,
-        >>>                            figsize=(9, 7))
+        >>>                            figsize=(9, 7),
+        >>>                            alternate_row_shading=False)
         >>> axes[0].set_title('Estimated theta for 8 schools model')
 
     Forestplot with multiple datasets
@@ -172,13 +172,14 @@ def plot_forest(
         :context: close-figs
 
         >>> centered_data = az.load_arviz_data('centered_eight')
-        >>> axes = az.plot_forest([non_centered_data, centered_data],
+        >>> axes = az.plot_forest_kwargs([non_centered_data, centered_data],
         >>>                            model_names = ["non centered eight", "centered eight"],
         >>>                            kind='forestplot',
         >>>                            var_names=["^the"],
         >>>                            filter_vars="regex",
         >>>                            combined=True,
-        >>>                            figsize=(9, 7))
+        >>>                            figsize=(9, 7),
+        >>>                            alternate_row_shading=False)
         >>> axes[0].set_title('Estimated theta for 8 schools models')
 
     Ridgeplot
@@ -186,13 +187,14 @@ def plot_forest(
     .. plot::
         :context: close-figs
 
-        >>> axes = az.plot_forest(non_centered_data,
+        >>> axes = az.plot_forest_kwargs(non_centered_data,
         >>>                            kind='ridgeplot',
         >>>                            var_names=['theta'],
         >>>                            combined=True,
         >>>                            ridgeplot_overlap=3,
         >>>                            colors='white',
-        >>>                            figsize=(9, 7))
+        >>>                            figsize=(9, 7),
+        >>>                            alternate_row_shading=False)
         >>> axes[0].set_title('Estimated theta for 8 schools model')
 
     Ridgeplot non-truncated and with quantiles
@@ -200,7 +202,7 @@ def plot_forest(
     .. plot::
         :context: close-figs
 
-        >>> axes = az.plot_forest(non_centered_data,
+        >>> axes = az.plot_forest_kwargs(non_centered_data,
         >>>                            kind='ridgeplot',
         >>>                            var_names=['theta'],
         >>>                            combined=True,
@@ -208,7 +210,8 @@ def plot_forest(
         >>>                            ridgeplot_quantiles=[.25, .5, .75],
         >>>                            ridgeplot_overlap=0.7,
         >>>                            colors='white',
-        >>>                            figsize=(9, 7))
+        >>>                            figsize=(9, 7),
+        >>>                            alternate_row_shading=False)
         >>> axes[0].set_title('Estimated theta for 8 schools model')
     """
     if not isinstance(data, (list, tuple)):
@@ -276,16 +279,23 @@ def plot_forest(
         labeller=labeller,
         ess=ess,
         r_hat=r_hat,
-        backend_kwargs=backend_kwargs,
+        alternate_row_shading=alternate_row_shading,
         backend_config=backend_config,
         show=show,
+
     )
 
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    # TODO: Add backend kwargs
     plot = get_plotting_function("plot_forest", "forestplot", backend)
+    axes = plot(**plot_forest_kwargs)
+    return axes
+
+    if not backend_kwargs:
+        backend_kwargs = rcParams["plot.backend"]
+    backend_kwargs = backend_kwargs.lower()
+    patches,set_color('white')
+    plot = get_plotting_function("plot_forest", "forestplot", backend_kwargs)
     axes = plot(**plot_forest_kwargs)
     return axes

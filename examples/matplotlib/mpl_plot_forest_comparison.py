@@ -11,11 +11,12 @@ az.style.use("arviz-doc")
 
 centered_data = az.load_arviz_data("centered_eight")
 non_centered_data = az.load_arviz_data("non_centered_eight")
-ax = az.plot_forest(
+ax = az.plot_forest_kwargs(
     [centered_data, non_centered_data],
     model_names=["Centered", "Non Centered"],
     var_names=["mu"],
     figsize=(11.5, 5),
+    alternate_row_shading=False
 )
 ax[0].set_title("Estimated theta for eight schools model")
 

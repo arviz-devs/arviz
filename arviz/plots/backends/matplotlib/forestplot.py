@@ -50,7 +50,6 @@ def plot_forest(
     ess,
     r_hat,
     backend_kwargs,
-    backend_config,  # pylint: disable=unused-argument
     show,
 ):
     """Matplotlib forest plot."""
