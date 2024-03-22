@@ -9,7 +9,7 @@ from collections import OrderedDict, defaultdict
 from collections.abc import MutableMapping, Sequence
 from copy import copy as ccopy
 from copy import deepcopy
-from datetime import datetime
+import datetime
 from html import escape
 from typing import (
     TYPE_CHECKING,
@@ -2083,7 +2083,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
             else:
                 return args[0]
 
-    current_time = str(datetime.now())
+    current_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
     combined_attr = defaultdict(list)
     for idata in args:
         for key, val in idata.attrs.items():

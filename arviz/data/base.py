@@ -422,7 +422,7 @@ def make_attrs(attrs=None, library=None):
         attrs
     """
     default_attrs = {
-        "created_at": datetime.datetime.utcnow().isoformat(),
+        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "arviz_version": __version__,
     }
     if library is not None:
