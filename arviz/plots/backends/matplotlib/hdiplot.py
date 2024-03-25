@@ -1,4 +1,5 @@
 """Matplotlib hdiplot."""
+
 import matplotlib.pyplot as plt
 from matplotlib import _pylab_helpers
 

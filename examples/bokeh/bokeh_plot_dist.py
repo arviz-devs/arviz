@@ -2,6 +2,7 @@
 Dist Plot Bokeh
 ===============
 """
+
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import row

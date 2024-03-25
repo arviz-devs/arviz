@@ -2,6 +2,7 @@
 Dot Plot
 =========
 """
+
 import numpy as np
 import arviz as az
 

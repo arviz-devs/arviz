@@ -1,4 +1,5 @@
 """Stats-utility functions for ArviZ."""
+
 import warnings
 from collections.abc import Sequence
 from copy import copy as _copy

@@ -1,4 +1,5 @@
 """Bokeh linear regression plot."""
+
 import numpy as np
 from bokeh.models.annotations import Legend
 

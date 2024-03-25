@@ -1,4 +1,5 @@
 """Bayesian p-value Posterior/Prior predictive plot."""
+
 import numpy as np
 
 from ..labels import BaseLabeller

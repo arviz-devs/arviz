@@ -3,6 +3,7 @@ Hexbin PairPlot
 ===============
 _gallery_category: Distributions
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

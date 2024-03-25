@@ -1,4 +1,5 @@
 """Bokeh hdiplot."""
+
 import numpy as np
 
 from ...plot_utils import _scale_fig_size, vectorized_to_hex

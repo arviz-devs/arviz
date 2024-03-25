@@ -1,4 +1,5 @@
 """Tests for arviz.utils."""
+
 # pylint: disable=redefined-outer-name, no-member
 from unittest.mock import Mock
 

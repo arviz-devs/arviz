@@ -1,4 +1,5 @@
 """Matplotlib plot linear regression figure."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 

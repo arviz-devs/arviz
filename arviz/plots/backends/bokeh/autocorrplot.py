@@ -1,4 +1,5 @@
 """Bokeh Autocorrplot."""
+
 import numpy as np
 from bokeh.models import DataRange1d, BoxAnnotation
 from bokeh.models.annotations import Title

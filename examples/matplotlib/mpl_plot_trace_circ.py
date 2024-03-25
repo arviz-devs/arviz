@@ -3,6 +3,7 @@ Traceplot with Circular Variables
 =================================
 _gallery_category: Mixed Plots
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

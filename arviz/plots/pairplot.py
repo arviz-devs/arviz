@@ -1,4 +1,5 @@
 """Plot a scatter, kde and/or hexbin of sampled parameters."""
+
 import warnings
 from typing import List, Optional, Union
 

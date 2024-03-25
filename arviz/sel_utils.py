@@ -1,4 +1,5 @@
 """Utilities for selecting and iterating on xarray objects."""
+
 from itertools import product, tee
 
 import numpy as np

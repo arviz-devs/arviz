@@ -2,6 +2,7 @@
 LOO-PIT Overlay Plot
 ====================
 """
+
 import arviz as az
 
 idata = az.load_arviz_data("non_centered_eight")

@@ -1,4 +1,5 @@
 """Summary plot for model comparison."""
+
 import numpy as np
 
 from ..labels import BaseLabeller

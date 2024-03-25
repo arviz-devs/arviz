@@ -1,4 +1,5 @@
 """Matplotlib Posterior predictive plot."""
+
 import logging
 import platform
 

@@ -3,6 +3,7 @@ ESS Local Plot
 ==============
 _gallery_category: Inference Diagnostics
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

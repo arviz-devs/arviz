@@ -1,4 +1,5 @@
 """Matplotlib khatplot."""
+
 import warnings
 
 import matplotlib as mpl

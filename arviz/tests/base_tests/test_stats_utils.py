@@ -1,4 +1,5 @@
 """Tests for stats_utils."""
+
 #  pylint: disable=no-member
 import numpy as np
 import pytest

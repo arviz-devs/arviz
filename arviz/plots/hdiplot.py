@@ -1,4 +1,5 @@
 """Plot highest density intervals for regression data."""
+
 import warnings
 
 import numpy as np

@@ -1,4 +1,5 @@
 """Matplotlib traceplot."""
+
 import warnings
 from itertools import cycle
 
