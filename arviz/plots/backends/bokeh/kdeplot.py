@@ -225,7 +225,7 @@ def plot_kde(
         else:
             cmap = pcolormesh_kwargs.pop("cmap", "viridis")
             if isinstance(cmap, str):
-                cmap = get_cmap(cmap)
+                cmap = colormaps[cmap]
             if isinstance(cmap, Callable):
                 colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, 256))]
             else:
