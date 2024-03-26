@@ -18,7 +18,7 @@ from ..data import InferenceData, from_dict
 _log = logging.getLogger(__name__)
 
 
-class TestRandomVariable:
+class RandomVariableTestClass:
     """Example class for random variables."""
 
     def __init__(self, name):

@@ -89,25 +89,25 @@ def test_hdi_idata(centered_eight):
     data = centered_eight.posterior
     result = hdi(data)
     assert isinstance(result, Dataset)
-    assert dict(result.dims) == {"school": 8, "hdi": 2}
+    assert dict(result.sizes) == {"school": 8, "hdi": 2}
 
     result = hdi(data, input_core_dims=[["chain"]])
     assert isinstance(result, Dataset)
-    assert result.dims == {"draw": 500, "hdi": 2, "school": 8}
+    assert result.sizes == {"draw": 500, "hdi": 2, "school": 8}
 
 
 def test_hdi_idata_varnames(centered_eight):
     data = centered_eight.posterior
     result = hdi(data, var_names=["mu", "theta"])
     assert isinstance(result, Dataset)
-    assert result.dims == {"hdi": 2, "school": 8}
+    assert result.sizes == {"hdi": 2, "school": 8}
     assert list(result.data_vars.keys()) == ["mu", "theta"]
 
 
 def test_hdi_idata_group(centered_eight):
     result_posterior = hdi(centered_eight, group="posterior", var_names="mu")
     result_prior = hdi(centered_eight, group="prior", var_names="mu")
-    assert result_prior.dims == {"hdi": 2}
+    assert result_prior.sizes == {"hdi": 2}
     range_posterior = result_posterior.mu.values[1] - result_posterior.mu.values[0]
     range_prior = result_prior.mu.values[1] - result_prior.mu.values[0]
     assert range_posterior < range_prior

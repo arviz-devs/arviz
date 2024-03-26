@@ -61,7 +61,7 @@ def plot_violin(
             cols,
             backend_kwargs=backend_kwargs,
         )
-        fig.set_constrained_layout(False)
+        fig.set_layout_engine("none")
         fig.subplots_adjust(wspace=0)
 
     ax = np.atleast_1d(ax)
