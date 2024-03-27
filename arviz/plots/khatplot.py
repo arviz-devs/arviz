@@ -1,4 +1,5 @@
 """Pareto tail indices plot."""
+
 import logging
 
 import numpy as np

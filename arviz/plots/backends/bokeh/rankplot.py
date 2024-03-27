@@ -1,4 +1,5 @@
 """Bokeh rankplot."""
+
 import numpy as np
 
 from bokeh.models import Span

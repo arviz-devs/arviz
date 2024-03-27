@@ -1,4 +1,5 @@
 """Matplotlib pairplot."""
+
 import warnings
 from copy import deepcopy
 

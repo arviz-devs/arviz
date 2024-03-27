@@ -3,6 +3,7 @@ Density Plot (Comparison)
 =========================
 _gallery_category: Distribution Comparison
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

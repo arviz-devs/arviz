@@ -1,4 +1,5 @@
 """Bokeh Violinplot."""
+
 import numpy as np
 from bokeh.models.annotations import Title
 

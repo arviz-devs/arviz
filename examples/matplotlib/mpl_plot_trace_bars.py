@@ -3,6 +3,7 @@ Rank Bars Diagnostic with KDE
 =============================
 _gallery_category: Mixed Plots
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

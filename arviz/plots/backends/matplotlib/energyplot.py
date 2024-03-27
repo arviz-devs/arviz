@@ -1,4 +1,5 @@
 """Matplotlib energyplot."""
+
 from itertools import cycle
 
 import matplotlib.pyplot as plt

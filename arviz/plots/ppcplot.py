@@ -1,4 +1,5 @@
 """Posterior/Prior predictive plot."""
+
 import logging
 import warnings
 from numbers import Integral

@@ -2,6 +2,7 @@
 Traceplot with Circular Variables
 =================================
 """
+
 import arviz as az
 
 data = az.load_arviz_data("glycan_torsion_angles")

@@ -1,4 +1,5 @@
 """Matplotlib ecdfplot."""
+
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_hex
 

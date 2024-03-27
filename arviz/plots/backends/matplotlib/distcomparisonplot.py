@@ -1,4 +1,5 @@
 """Matplotlib Density Comparison plot."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -88,9 +89,7 @@ def plot_dist_comparison(
         kwargs = (
             prior_kwargs
             if group.startswith("prior")
-            else posterior_kwargs
-            if group.startswith("posterior")
-            else observed_kwargs
+            else posterior_kwargs if group.startswith("posterior") else observed_kwargs
         )
         for idx2, (
             var_name,

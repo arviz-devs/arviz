@@ -5,11 +5,12 @@
 ### New features
 
 - Add new example data `rugby_field` and update `rugby` example data ([2322](https://github.com/arviz-devs/arviz/pull/2322))
-
-- Support for `pytree`s and robust to nested dictionaries. (2291)
+- Support for `pytree`s and robust to nested dictionaries. ([2291](https://github.com/arviz-devs/arviz/pull/2291))
 
 
 ### Maintenance and fixes
+- Fix deprecation warnings in multiple dependencies ([2329](https://github.com/arviz-devs/arviz/pull/2329),
+  [2332](https://github.com/arviz-devs/arviz/pull/2332) and [2333](https://github.com/arviz-devs/arviz/pull/2333))
 
 ### Deprecation
 

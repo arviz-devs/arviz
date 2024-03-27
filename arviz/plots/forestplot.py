@@ -1,4 +1,5 @@
 """Forest plot."""
+
 from ..data import convert_to_dataset
 from ..labels import BaseLabeller, NoModelLabeller
 from ..rcparams import rcParams

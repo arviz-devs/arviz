@@ -1,4 +1,5 @@
 """Bokeh mcseplot."""
+
 import numpy as np
 from bokeh.models import ColumnDataSource, Span
 from bokeh.models.glyphs import Scatter

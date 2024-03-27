@@ -1,4 +1,5 @@
 """Bokeh Compareplot."""
+
 from bokeh.models import Span
 from bokeh.models.annotations import Title, Legend
 

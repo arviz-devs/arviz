@@ -1,4 +1,5 @@
 """ArviZ rcparams. Based on matplotlib's implementation."""
+
 import locale
 import logging
 import os

@@ -1,4 +1,5 @@
 """Utilities for plotting."""
+
 import importlib
 import warnings
 from typing import Any, Dict

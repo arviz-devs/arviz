@@ -3,6 +3,7 @@ Separation Plot
 ===============
 _gallery_category: Model Checking
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

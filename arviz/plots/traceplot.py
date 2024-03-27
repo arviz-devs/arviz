@@ -1,4 +1,5 @@
 """Plot kde or histograms and values from MCMC samples."""
+
 import warnings
 from typing import Any, Callable, List, Mapping, Optional, Tuple, Union, Sequence
 

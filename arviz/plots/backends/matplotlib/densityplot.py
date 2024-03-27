@@ -1,4 +1,5 @@
 """Matplotlib Densityplot."""
+
 from itertools import cycle
 
 import matplotlib.pyplot as plt

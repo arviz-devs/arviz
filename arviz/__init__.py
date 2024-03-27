@@ -315,7 +315,8 @@ _linear_grey_10_95_c0 = [
 
 def _mpl_cm(name, colorlist):
     cmap = LinearSegmentedColormap.from_list(name, colorlist, N=256)
-    mpl.colormaps.register(cmap, name="cet_" + name)
+    if "cet_" + name not in mpl.colormaps():
+        mpl.colormaps.register(cmap, name="cet_" + name)
 
 
 try:

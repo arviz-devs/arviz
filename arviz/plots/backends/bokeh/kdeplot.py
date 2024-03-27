@@ -6,7 +6,7 @@ from numbers import Integral
 import numpy as np
 from bokeh.models import ColumnDataSource
 from bokeh.models.glyphs import Scatter
-from matplotlib.cm import get_cmap
+from matplotlib import colormaps
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
@@ -188,7 +188,7 @@ def plot_kde(
 
             cmap = contourf_kwargs.pop("cmap", "viridis")
             if isinstance(cmap, str):
-                cmap = get_cmap(cmap)
+                cmap = colormaps[cmap]
             if isinstance(cmap, Callable):
                 colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, len(levels_scaled) + 1))]
             else:
@@ -225,7 +225,7 @@ def plot_kde(
         else:
             cmap = pcolormesh_kwargs.pop("cmap", "viridis")
             if isinstance(cmap, str):
-                cmap = get_cmap(cmap)
+                cmap = colormaps[cmap]
             if isinstance(cmap, Callable):
                 colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, 256))]
             else:

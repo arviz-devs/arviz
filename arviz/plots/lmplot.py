@@ -1,4 +1,5 @@
 """Plot regression figure."""
+
 import warnings
 from numbers import Integral
 from itertools import repeat

@@ -2,6 +2,7 @@
 Ridgeplot
 =========
 """
+
 import arviz as az
 
 rugby_data = az.load_arviz_data("rugby")

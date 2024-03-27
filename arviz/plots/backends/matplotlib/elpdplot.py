@@ -1,4 +1,5 @@
 """Matplotlib ELPDPlot."""
+
 import warnings
 
 from matplotlib import cm

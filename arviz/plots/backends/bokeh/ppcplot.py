@@ -1,4 +1,5 @@
 """Bokeh Posterior predictive plot."""
+
 import numpy as np
 from bokeh.models.annotations import Legend
 from bokeh.models.glyphs import Scatter
