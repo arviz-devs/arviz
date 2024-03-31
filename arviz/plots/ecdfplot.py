@@ -118,11 +118,11 @@ def plot_ecdf(
     pointwise : bool, default False
 
         .. deprecated:: 0.18.0
-           Instead use `confidence_bands`.
+           Instead use `confidence_bands="pointwise"`.
     fpr : float, optional
 
         .. deprecated:: 0.18.0
-           Instead use `band_prob`.
+           Instead use `band_prob=1-fpr`.
     pit : bool, default False
         If True plots the ECDF or ECDF-diff of PIT of sample.
 
