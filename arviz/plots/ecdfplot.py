@@ -82,9 +82,6 @@ def plot_ecdf(
     eval_points : array-like, optional
         The points at which to evaluate the ECDF. If None, `npoints` uniformly spaced points
         between the data bounds will be used.
-    npoints : int, default 100
-        This denotes the granularity size of our plot i.e the number of evaluation points
-        for the ecdf or ecdf-difference plots.
     rvs: callable, optional
         A function that takes an integer `ndraws` and optionally the object passed to
     random_state : int, numpy.random.Generator or numpy.random.RandomState, optional
@@ -115,6 +112,13 @@ def plot_ecdf(
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
+    npoints : int, default 100
+        The number of evaluation points for the ecdf or ecdf-difference plots, if `eval_points` is
+        not provided or `pit` is `True`.
+
+        .. deprecated:: 0.18.0
+           Instead specify ``eval_points=np.linspace(np.min(values), np.max(values), npoints)``
+           unless `pit` is `True`.
     pointwise : bool, default False
 
         .. deprecated:: 0.18.0
