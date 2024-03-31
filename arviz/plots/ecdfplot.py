@@ -57,8 +57,10 @@ def plot_ecdf(
     values : array-like
         Values to plot from an unknown continuous or discrete distribution.
     values2 : array-like, optional
-        deprecated: values to compare to the original sample. Instead use
-        `cdf=scipy.stats.ecdf(values2).cdf.evaluate`.
+        values to compare to the original sample.
+
+        .. deprecated:: 0.18.0
+           Instead use ``cdf=scipy.stats.ecdf(values2).cdf.evaluate``.
     cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
         The function must take as input a numpy array of draws from the distribution.
