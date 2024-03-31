@@ -116,12 +116,18 @@ def plot_ecdf(
         :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
     pointwise : bool, default False
-        deprecated: please see `confidence_bands`.
+
+        .. deprecated:: 0.18.0
+           Instead use `confidence_bands`.
     fpr : float, optional
-        deprecated: please see `band_prob`.
+
+        .. deprecated:: 0.18.0
+           Instead use `band_prob`.
     pit : bool, default False
-        deprecated: If True plots the ECDF or ECDF-diff of PIT of sample.
-        See below example instead.
+        If True plots the ECDF or ECDF-diff of PIT of sample.
+
+        .. deprecated:: 0.18.0
+           See below example instead.
 
     Returns
     -------
