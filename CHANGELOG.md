@@ -35,6 +35,12 @@
 - Fix deprecation warnings in multiple dependencies ([2329](https://github.com/arviz-devs/arviz/pull/2329),
   [2332](https://github.com/arviz-devs/arviz/pull/2332) and [2333](https://github.com/arviz-devs/arviz/pull/2333))
 
+### Deprecation
+
+-   Removed arguments `values2`, `fpr`, `pointwise`, `npoints`, and `pit` in `plot_ecdf` ([2316](https://github.com/arviz-devs/arviz/pull/2316))
+
+### Documentation
+
 ## v0.17.1 (2024 Mar 13)
 
 ### Maintenance and fixes
