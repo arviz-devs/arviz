@@ -66,11 +66,14 @@ def plot_ecdf(
         The function must take as input a numpy array of draws from the distribution.
     difference : bool, default False
         If True then plot ECDF-difference plot otherwise ECDF plot.
-    confidence_bands : str or bool, optional
-        - False: No confidence bands are plotted.
+    confidence_bands : str or bool
+
+        - False: No confidence bands are plotted (default).
+        - True: Plot bands computed with the default algorithm (subject to change)
         - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
-        - True or "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence
+        - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence
           band.
+
         For simultaneous confidence bands to be correctly calibrated, provide `eval_points` that
         are not dependent on the `values`.
     band_prob : float, default 0.95
