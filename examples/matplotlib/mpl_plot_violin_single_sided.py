@@ -3,6 +3,7 @@ Single-Sided Violin Plot
 ========================
 _gallery_category: Distribution Comparison
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

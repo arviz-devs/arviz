@@ -1,4 +1,5 @@
 """Separation plot for discrete outcome models."""
+
 import warnings
 
 import numpy as np

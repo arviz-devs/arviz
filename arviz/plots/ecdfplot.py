@@ -1,4 +1,5 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
+
 import numpy as np
 from scipy.stats import uniform
 

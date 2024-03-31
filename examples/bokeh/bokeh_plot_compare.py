@@ -2,6 +2,7 @@
 Compare Plot
 ============
 """
+
 import arviz as az
 
 model_compare = az.compare(

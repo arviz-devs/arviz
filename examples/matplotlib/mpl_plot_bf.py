@@ -3,6 +3,7 @@ Bayes Factor Plot
 =================
 _gallery_category: Model Comparison
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 import arviz as az

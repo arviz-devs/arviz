@@ -1,4 +1,5 @@
 """Matplotlib mcseplot."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
@@ -94,22 +95,22 @@ def plot_mcse(
                 ax_.annotate(
                     "mean",
                     (text_x, mean_mcse_i),
-                    va=text_va
-                    if text_va is not None
-                    else "bottom"
-                    if mean_mcse_i > sd_mcse_i
-                    else "top",
+                    va=(
+                        text_va
+                        if text_va is not None
+                        else "bottom" if mean_mcse_i > sd_mcse_i else "top"
+                    ),
                     **text_kwargs,
                 )
                 ax_.axhline(sd_mcse_i, **extra_kwargs)
                 ax_.annotate(
                     "sd",
                     (text_x, sd_mcse_i),
-                    va=text_va
-                    if text_va is not None
-                    else "bottom"
-                    if sd_mcse_i >= mean_mcse_i
-                    else "top",
+                    va=(
+                        text_va
+                        if text_va is not None
+                        else "bottom" if sd_mcse_i >= mean_mcse_i else "top"
+                    ),
                     **text_kwargs,
                 )
         if rug:

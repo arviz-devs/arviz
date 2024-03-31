@@ -4,6 +4,7 @@ Single sided Violinplot
 
 _thumb: .2, .8
 """
+
 import arviz as az
 
 data = az.load_arviz_data("rugby")

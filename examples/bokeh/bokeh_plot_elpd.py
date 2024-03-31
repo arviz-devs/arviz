@@ -2,6 +2,7 @@
 ELPD Plot
 =========
 """
+
 import arviz as az
 
 d1 = az.load_arviz_data("centered_eight")

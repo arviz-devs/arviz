@@ -2,6 +2,7 @@
 Traceplot rank_bars Bokeh
 =========================
 """
+
 import arviz as az
 
 data = az.load_arviz_data("non_centered_eight")

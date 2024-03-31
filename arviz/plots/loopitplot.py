@@ -1,4 +1,5 @@
 """Plot LOO-PIT predictive checks of inference data."""
+
 import numpy as np
 from scipy import stats
 

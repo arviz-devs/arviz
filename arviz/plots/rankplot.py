@@ -1,4 +1,5 @@
 """Histograms of ranked posterior draws, plotted for each chain."""
+
 from itertools import cycle
 
 import matplotlib.pyplot as plt

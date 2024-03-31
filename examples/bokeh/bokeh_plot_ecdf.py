@@ -2,6 +2,7 @@
 ECDF Plot
 =========
 """
+
 from scipy.stats import norm
 
 import arviz as az

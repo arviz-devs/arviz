@@ -1,4 +1,5 @@
 """Tests for labeller classes."""
+
 import pytest
 
 from ...labels import (

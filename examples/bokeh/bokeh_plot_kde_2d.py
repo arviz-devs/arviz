@@ -2,6 +2,7 @@
 2D KDE
 ======
 """
+
 import numpy as np
 
 import arviz as az

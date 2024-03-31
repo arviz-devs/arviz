@@ -1,4 +1,5 @@
 """Functions for evaluating ECDFs and their confidence bands."""
+
 from typing import Any, Callable, Optional, Tuple
 import warnings
 

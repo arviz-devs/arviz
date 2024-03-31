@@ -3,6 +3,7 @@ Pareto Shape Plot
 =================
 _gallery_category: Model Comparison
 """
+
 import matplotlib.pyplot as plt
 
 import arviz as az

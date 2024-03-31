@@ -2,6 +2,7 @@
 Pareto Shape Plot
 =================
 """
+
 import arviz as az
 
 idata = az.load_arviz_data("radon")

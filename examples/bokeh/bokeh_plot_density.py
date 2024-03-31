@@ -2,6 +2,7 @@
 Density Plot (Comparison)
 =========================
 """
+
 import arviz as az
 
 centered_data = az.load_arviz_data("centered_eight")

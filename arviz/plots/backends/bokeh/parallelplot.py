@@ -1,4 +1,5 @@
 """Bokeh Parallel coordinates plot."""
+
 import numpy as np
 from bokeh.models import DataRange1d
 from bokeh.models.tickers import FixedTicker

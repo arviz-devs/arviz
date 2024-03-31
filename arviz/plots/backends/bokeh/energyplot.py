@@ -1,4 +1,5 @@
 """Bokeh energyplot."""
+
 from itertools import cycle
 
 import numpy as np

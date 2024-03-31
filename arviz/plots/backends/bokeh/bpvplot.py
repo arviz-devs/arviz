@@ -1,4 +1,5 @@
 """Bokeh Bayesian p-value Posterior predictive plot."""
+
 import numpy as np
 from bokeh.models import BoxAnnotation
 from bokeh.models.annotations import Title

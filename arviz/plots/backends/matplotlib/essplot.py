@@ -1,4 +1,5 @@
 """Matplotlib energyplot."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
@@ -127,11 +128,11 @@ def plot_ess(
             ax_.annotate(
                 "mean",
                 (text_x, mean_ess_i),
-                va=text_va
-                if text_va is not None
-                else "bottom"
-                if mean_ess_i >= sd_ess_i
-                else "top",
+                va=(
+                    text_va
+                    if text_va is not None
+                    else "bottom" if mean_ess_i >= sd_ess_i else "top"
+                ),
                 **text_kwargs,
             )
             ax_.axhline(sd_ess_i, **extra_kwargs)

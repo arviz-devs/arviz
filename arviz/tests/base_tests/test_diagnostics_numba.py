@@ -1,4 +1,5 @@
 """Test Diagnostic methods"""
+
 import importlib
 
 # pylint: disable=redefined-outer-name, no-member, too-many-public-methods

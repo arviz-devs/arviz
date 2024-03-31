@@ -1,4 +1,5 @@
 """Bokeh pareto shape plot."""
+
 from collections.abc import Iterable
 
 from matplotlib import cm

@@ -3,6 +3,7 @@ KDE Plot
 ========
 _gallery_category: Distributions
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 

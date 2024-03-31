@@ -1,4 +1,5 @@
 """Plot energy transition distribution in HMC inference."""
+
 import warnings
 
 from ..data import convert_to_dataset

@@ -732,9 +732,7 @@ def _process_configuration(comments):
             key = (
                 "warmup_time_seconds"
                 if "(Warm-up)" in comment
-                else "sampling_time_seconds"
-                if "(Sampling)" in comment
-                else "total_time_seconds"
+                else "sampling_time_seconds" if "(Sampling)" in comment else "total_time_seconds"
             )
             results[key] = float(value)
         elif "=" in comment:

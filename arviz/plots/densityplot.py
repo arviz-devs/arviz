@@ -1,4 +1,5 @@
 """KDE and histogram plots for multiple variables."""
+
 import warnings
 
 from ..data import convert_to_dataset

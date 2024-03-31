@@ -1,4 +1,5 @@
 """emcee-specific conversion code."""
+
 import warnings
 from collections import OrderedDict
 
