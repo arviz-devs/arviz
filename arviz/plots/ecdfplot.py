@@ -20,8 +20,6 @@ def plot_ecdf(
     eval_points=None,
     cdf=None,
     difference=False,
-    pit=False,
-    npoints=100,
     confidence_bands=False,
     band_prob=None,
     num_trials=500,
@@ -36,8 +34,10 @@ def plot_ecdf(
     show=None,
     backend=None,
     backend_kwargs=None,
+    npoints=100,
     pointwise=False,
     fpr=None,
+    pit=False,
     **kwargs,
 ):
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
