@@ -1,4 +1,5 @@
 """Bokeh Traceplot."""
+
 import warnings
 from collections.abc import Iterable
 from itertools import cycle

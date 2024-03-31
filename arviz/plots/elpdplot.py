@@ -1,4 +1,5 @@
 """Plot pointwise elpd estimations of inference data."""
+
 import numpy as np
 
 from ..rcparams import rcParams

@@ -2,6 +2,7 @@
 2D KDE with HDI Contours
 ========================
 """
+
 import numpy as np
 
 import arviz as az

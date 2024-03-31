@@ -1,4 +1,5 @@
 """Matplotlib Plot posterior densities."""
+
 from numbers import Number
 
 import matplotlib.pyplot as plt

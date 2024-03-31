@@ -1,4 +1,5 @@
 """Plot distribution as dot plot or quantile dot plot."""
+
 import numpy as np
 
 from ..rcparams import rcParams

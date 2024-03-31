@@ -3,6 +3,7 @@ Regression Plot
 ===============
 _gallery_category: Regression or Time Series
 """
+
 import matplotlib.pyplot as plt
 import xarray as xr
 import numpy as np

@@ -2,6 +2,7 @@
 Rank plot
 =========
 """
+
 import arviz as az
 
 data = az.load_arviz_data("centered_eight")

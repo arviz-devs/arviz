@@ -394,8 +394,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
             )
 
         try:
-            with h5netcdf.File(filename, mode="r") if engine == "h5netcdf" else nc.Dataset(
-                filename, mode="r"
+            with (
+                h5netcdf.File(filename, mode="r")
+                if engine == "h5netcdf"
+                else nc.Dataset(filename, mode="r")
             ) as file_handle:
                 if base_group == "/":
                     data = file_handle
@@ -744,11 +746,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if len(dfs) > 1:
             for group, df in dfs.items():
                 df.columns = [
-                    col
-                    if col in ("draw", "chain")
-                    else (group, *col)
-                    if isinstance(col, tuple)
-                    else (group, col)
+                    (
+                        col
+                        if col in ("draw", "chain")
+                        else (group, *col) if isinstance(col, tuple) else (group, col)
+                    )
                     for col in df.columns
                 ]
             dfs, *dfs_tail = list(dfs.values())
@@ -1918,8 +1920,7 @@ def concat(
     copy: bool = True,
     inplace: "Literal[True]",
     reset_dim: bool = True,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -1929,8 +1930,7 @@ def concat(
     copy: bool = True,
     inplace: "Literal[False]",
     reset_dim: bool = True,
-) -> InferenceData:
-    ...
+) -> InferenceData: ...
 
 
 @overload
@@ -1941,8 +1941,7 @@ def concat(
     copy: bool = True,
     inplace: "Literal[False]",
     reset_dim: bool = True,
-) -> InferenceData:
-    ...
+) -> InferenceData: ...
 
 
 @overload
@@ -1953,8 +1952,7 @@ def concat(
     copy: bool = True,
     inplace: "Literal[True]",
     reset_dim: bool = True,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -1965,8 +1963,7 @@ def concat(
     copy: bool = True,
     inplace: bool = False,
     reset_dim: bool = True,
-) -> Optional[InferenceData]:
-    ...
+) -> Optional[InferenceData]: ...
 
 
 # pylint: disable=protected-access, inconsistent-return-statements

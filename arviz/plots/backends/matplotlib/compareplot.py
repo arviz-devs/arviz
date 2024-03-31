@@ -1,4 +1,5 @@
 """Matplotlib Compareplot."""
+
 import matplotlib.pyplot as plt
 
 from ...plot_utils import _scale_fig_size

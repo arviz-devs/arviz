@@ -2,6 +2,7 @@
 Forest Plot with ESS
 ====================
 """
+
 import arviz as az
 
 centered_data = az.load_arviz_data("centered_eight")

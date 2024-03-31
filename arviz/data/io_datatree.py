@@ -1,4 +1,5 @@
 """Conversion between InferenceData and DataTree."""
+
 from .inference_data import InferenceData
 
 

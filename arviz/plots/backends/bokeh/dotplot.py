@@ -1,4 +1,5 @@
 """Bokeh dotplot."""
+
 import math
 import warnings
 import numpy as np

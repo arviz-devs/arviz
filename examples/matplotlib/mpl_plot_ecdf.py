@@ -3,6 +3,7 @@ ECDF Plot
 =========
 _gallery_category: Distributions
 """
+
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 

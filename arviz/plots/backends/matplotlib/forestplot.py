@@ -1,4 +1,5 @@
 """Matplotlib forestplot."""
+
 from collections import OrderedDict, defaultdict
 from itertools import tee
 

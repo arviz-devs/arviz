@@ -1,4 +1,5 @@
 """Tests use the default backend."""
+
 # pylint: disable=redefined-outer-name,too-many-lines
 import os
 from copy import deepcopy
@@ -54,7 +55,7 @@ from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     multidim_models,
-    TestRandomVariable,
+    RandomVariableTestClass,
 )
 
 rcParams["data.load"] = "eager"
@@ -168,9 +169,9 @@ def test_plot_density_no_subset():
 
 def test_plot_density_nonstring_varnames():
     """Test plot_density works when variables are not strings."""
-    rv1 = TestRandomVariable("a")
-    rv2 = TestRandomVariable("b")
-    rv3 = TestRandomVariable("c")
+    rv1 = RandomVariableTestClass("a")
+    rv2 = RandomVariableTestClass("b")
+    rv3 = RandomVariableTestClass("c")
     model_ab = from_dict(
         {
             rv1: np.random.normal(size=200),

@@ -2,6 +2,7 @@
 KDE quantiles Bokeh
 ===================
 """
+
 import numpy as np
 
 import arviz as az

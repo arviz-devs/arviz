@@ -2,6 +2,7 @@
 Hexbin PairPlot
 ===============
 """
+
 import arviz as az
 
 centered = az.load_arviz_data("centered_eight")

@@ -1,4 +1,5 @@
 """Plot timeseries data."""
+
 import warnings
 import numpy as np
 

@@ -1,4 +1,5 @@
 """Matplotlib kdeplot."""
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import _pylab_helpers
@@ -162,10 +163,11 @@ def plot_kde(
         ax.grid(False)
         if contour:
             qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
-            qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
+            ax.contour(x_x, y_y, density, **contour_kwargs)
             if not fill_last:
-                qcfs.collections[0].set_alpha(0)
-                qcs.collections[0].set_alpha(0)
+                alpha = np.ones(len(qcfs.allsegs), dtype=float)
+                alpha[0] = 0
+                qcfs.set_alpha(alpha)
         else:
             ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
 

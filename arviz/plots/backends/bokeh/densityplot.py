@@ -1,4 +1,5 @@
 """Bokeh Densityplot."""
+
 from collections import defaultdict
 from itertools import cycle
 

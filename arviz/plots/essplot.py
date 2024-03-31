@@ -1,4 +1,5 @@
 """Plot quantile or local effective sample sizes."""
+
 import numpy as np
 import xarray as xr
 

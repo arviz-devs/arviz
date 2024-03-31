@@ -2,6 +2,7 @@
 Separation Plot
 ===============
 """
+
 import arviz as az
 
 idata = az.load_arviz_data("classification10d")

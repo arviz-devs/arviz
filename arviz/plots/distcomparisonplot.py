@@ -1,4 +1,5 @@
 """Density Comparison plot."""
+
 import warnings
 from ..labels import BaseLabeller
 from ..rcparams import rcParams
