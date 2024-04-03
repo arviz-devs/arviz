@@ -26,6 +26,8 @@ _log = logging.getLogger(__name__)
 ScaleKeyword = Literal["log", "negative_log", "deviance"]
 ICKeyword = Literal["loo", "waic"]
 
+_identity = lambda x: x
+
 
 def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     """Validate value is in accepted_values.
@@ -301,7 +303,6 @@ defaultParams = {  # pylint: disable=invalid-name
     ),
     "plot.matplotlib.show": (False, _validate_boolean),
     "stats.ci_prob": (0.94, _validate_probability),
-    "stats.hdi_prob": (0.94, _validate_probability),
     "stats.information_criterion": (
         "loo",
         _make_validate_choice({"loo", "waic"} if NO_GET_ARGS else set(get_args(ICKeyword))),
@@ -318,6 +319,9 @@ defaultParams = {  # pylint: disable=invalid-name
         _make_validate_choice({"stacking", "bb-pseudo-bma", "pseudo-bma"}),
     ),
 }
+
+# map from deprecated params to (version, new_param, fold2new, fnew2old)
+deprecated_map = {"stats.hdi_prob": ("0.18.0", "stats.ci_prob", _identity, _identity)}
 
 
 class RcParams(MutableMapping):
@@ -336,6 +340,15 @@ class RcParams(MutableMapping):
 
     def __setitem__(self, key, val):
         """Add validation to __setitem__ function."""
+        if key in deprecated_map:
+            version, key_new, fold2new, _ = deprecated_map[key]
+            warnings.warn(
+                f"{key} is deprecated since {version}, use {key_new} instead",
+                DeprecationWarning,
+            )
+            key = key_new
+            val = fold2new(val)
+
         try:
             try:
                 cval = self.validate[key](val)
@@ -350,7 +363,18 @@ class RcParams(MutableMapping):
 
     def __getitem__(self, key):
         """Use underlying dict's getitem method."""
-        return self._underlying_storage[key]
+        if key in deprecated_map:
+            version, key_new, _, fnew2old = deprecated_map[key]
+            warnings.warn(
+                f"{key} is deprecated since {version}, use {key_new} instead",
+                DeprecationWarning,
+            )
+            if key not in self._underlying_storage:
+                key = key_new
+        else:
+            fnew2old = _identity
+
+        return fnew2old(self._underlying_storage[key])
 
     def __delitem__(self, key):
         """Raise TypeError if someone ever tries to delete a key from RcParams."""
