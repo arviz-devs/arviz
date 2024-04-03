@@ -1,4 +1,5 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
+
 import warnings
 
 import numpy as np
