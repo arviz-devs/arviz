@@ -25,6 +25,13 @@ def _get_ecdf_points(
     return x, y
 
 
+def _call_rvs(rvs, ndraws, random_state):
+    if random_state is None:
+        return rvs(ndraws)
+    else:
+        return rvs(ndraws, random_state=random_state)
+
+
 def _simulate_ecdf(
     ndraws: int,
     eval_points: np.ndarray,
@@ -32,7 +39,7 @@ def _simulate_ecdf(
     random_state: Optional[Any] = None,
 ) -> np.ndarray:
     """Simulate ECDF at the `eval_points` using the given random variable sampler"""
-    sample = rvs(ndraws, random_state=random_state)
+    sample = _call_rvs(rvs, ndraws, random_state)
     sample.sort()
     return compute_ecdf(sample, eval_points)
 
