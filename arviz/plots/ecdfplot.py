@@ -85,6 +85,8 @@ def plot_ecdf(
         between the data bounds will be used.
     rvs: callable, optional
         A function that takes an integer `ndraws` and optionally the object passed to
+        `random_state` and returns an array of `ndraws` samples from the same distribution
+        as the original dataset. Required if `method` is "simulated" and variable is discrete.
     random_state : int, numpy.random.Generator or numpy.random.RandomState, optional
     num_trials : int, default 500
         The number of random ECDFs to generate for constructing simultaneous confidence bands

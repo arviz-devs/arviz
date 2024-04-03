@@ -101,11 +101,7 @@ def ecdf_confidence_band(
     num_trials : int, default 500
         The number of random ECDFs to generate for constructing simultaneous confidence bands
         (if `method` is "simulated").
-    random_state : {None, int, `numpy.random.Generator`,
-                    `numpy.random.RandomState`}, optional
-        If `None`, the `numpy.random.RandomState` singleton is used. If an `int`, a new
-        ``numpy.random.RandomState`` instance is used, seeded with seed. If a `RandomState` or
-        `Generator` instance, the instance is used.
+    random_state : int, numpy.random.Generator or numpy.random.RandomState, optional
 
     Returns
     -------
