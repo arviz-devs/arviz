@@ -1331,8 +1331,8 @@ def test_plot_ecdf_error():
 
     # contradictory band probabilities
     with pytest.raises(ValueError):
-        plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, band_prob=0.9, fpr=0.1)
-    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, band_prob=0.9)
+        plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, ci_prob=0.9, fpr=0.1)
+    plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, ci_prob=0.9)
     plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, fpr=0.1)
 
     # contradictory reference
@@ -1364,7 +1364,7 @@ def test_plot_ecdf_deprecations():
 
     # fpr is deprecated
     with does_not_warn(DeprecationWarning):
-        axes = plot_ecdf(data, cdf=dist.cdf, band_prob=0.9)
+        axes = plot_ecdf(data, cdf=dist.cdf, ci_prob=0.9)
     with pytest.deprecated_call():
         axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, fpr=0.1)
     assert axes is not None

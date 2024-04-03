@@ -22,7 +22,7 @@ def plot_ecdf(
     cdf=None,
     difference=False,
     confidence_bands=False,
-    band_prob=None,
+    ci_prob=None,
     num_trials=500,
     rvs=None,
     random_state=None,
@@ -77,7 +77,7 @@ def plot_ecdf(
 
         For simultaneous confidence bands to be correctly calibrated, provide `eval_points` that
         are not dependent on the `values`.
-    band_prob : float, default 0.95
+    ci_prob : float, default 0.95
         The probability that the true ECDF lies within the confidence band. If `confidence_bands`
         is "pointwise", this is the marginal probability instead of the joint probability.
     eval_points : array-like, optional
@@ -127,7 +127,7 @@ def plot_ecdf(
     fpr : float, optional
 
         .. deprecated:: 0.18.0
-           Instead use `band_prob=1-fpr`.
+           Instead use `ci_prob=1-fpr`.
     pit : bool, default False
         If True plots the ECDF or ECDF-diff of PIT of sample.
 
@@ -213,16 +213,16 @@ def plot_ecdf(
 
     if fpr is not None:
         warnings.warn(
-            "`fpr` has been deprecated. Use `band_prob=1-fpr` or set `rcParam['plot.band_prob']` to"
+            "`fpr` has been deprecated. Use `ci_prob=1-fpr` or set `rcParam['stats.ci_prob']` to"
             "`1-fpr`.",
             DeprecationWarning,
         )
-        if band_prob is not None:
-            raise ValueError("Cannot specify both `fpr` and `band_prob`")
-        band_prob = 1 - fpr
+        if ci_prob is not None:
+            raise ValueError("Cannot specify both `fpr` and `ci_prob`")
+        ci_prob = 1 - fpr
 
-    if band_prob is None:
-        band_prob = rcParams["plot.band_prob"]
+    if ci_prob is None:
+        ci_prob = rcParams["stats.ci_prob"]
 
     if values2 is not None:
         if cdf is not None:
@@ -294,7 +294,7 @@ def plot_ecdf(
             eval_points,
             cdf_at_eval_points,
             method=confidence_bands,
-            prob=band_prob,
+            prob=ci_prob,
             num_trials=num_trials,
             rvs=rvs,
             random_state=random_state,
