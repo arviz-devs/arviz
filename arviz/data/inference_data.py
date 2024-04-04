@@ -1689,6 +1689,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
     compute = _extend_xr_method(xr.Dataset.compute)
     persist = _extend_xr_method(xr.Dataset.persist)
     quantile = _extend_xr_method(xr.Dataset.quantile)
+    close = _extend_xr_method(xr.Dataset.close)
 
     # The following lines use methods on xr.Dataset that are dynamically defined and attached.
     # As a result mypy cannot see them, so we have to suppress the resulting mypy errors.
