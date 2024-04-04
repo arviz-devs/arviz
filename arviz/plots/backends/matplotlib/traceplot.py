@@ -441,7 +441,7 @@ def plot_trace(
                 ),
             )
         ax.figure.axes[1].legend(handles=handles, title="chain", loc="upper right")
-        
+
     if axes is None:
         axes = np.array(ax.figure.axes).reshape(-1, 2)
 
