@@ -344,7 +344,7 @@ class RcParams(MutableMapping):
             version, key_new, fold2new, _ = deprecated_map[key]
             warnings.warn(
                 f"{key} is deprecated since {version}, use {key_new} instead",
-                DeprecationWarning,
+                FutureWarning,
             )
             key = key_new
             val = fold2new(val)
@@ -367,7 +367,7 @@ class RcParams(MutableMapping):
             version, key_new, _, fnew2old = deprecated_map[key]
             warnings.warn(
                 f"{key} is deprecated since {version}, use {key_new} instead",
-                DeprecationWarning,
+                FutureWarning,
             )
             if key not in self._underlying_storage:
                 key = key_new
