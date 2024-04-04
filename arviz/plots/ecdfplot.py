@@ -205,7 +205,7 @@ def plot_ecdf(
         if pointwise:
             warnings.warn(
                 "`pointwise` has been deprecated. Use `confidence_bands='pointwise'` instead.",
-                DeprecationWarning,
+                FutureWarning,
             )
             confidence_bands = "pointwise"
         else:
@@ -217,7 +217,7 @@ def plot_ecdf(
         warnings.warn(
             "`fpr` has been deprecated. Use `ci_prob=1-fpr` or set `rcParam['stats.ci_prob']` to"
             "`1-fpr`.",
-            DeprecationWarning,
+            FutureWarning,
         )
         if ci_prob is not None:
             raise ValueError("Cannot specify both `fpr` and `ci_prob`")
@@ -237,7 +237,7 @@ def plot_ecdf(
         warnings.warn(
             "`values2` has been deprecated. Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` "
             "instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         cdf = scipy_ecdf(np.ravel(values2)).cdf.evaluate
 
@@ -255,7 +255,7 @@ def plot_ecdf(
     if pit:
         warnings.warn(
             "`pit` has been deprecated. Specify `values=cdf(values)` instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         values = cdf(values)
         cdf = uniform(0, 1).cdf

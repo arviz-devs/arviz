@@ -1348,31 +1348,31 @@ def test_plot_ecdf_deprecations():
     dist = norm(0, 1)
     data = dist.rvs(1000)
     # base case, no deprecations
-    with does_not_warn(DeprecationWarning):
+    with does_not_warn(FutureWarning):
         axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True)
     assert axes is not None
 
     # values2 is deprecated
     data2 = dist.rvs(200)
-    with pytest.deprecated_call():
+    with pytest.warns(FutureWarning):
         axes = plot_ecdf(data, values2=data2, difference=True)
 
     # pit is deprecated
-    with pytest.deprecated_call():
+    with pytest.warns(FutureWarning):
         axes = plot_ecdf(data, cdf=dist.cdf, pit=True)
     assert axes is not None
 
     # fpr is deprecated
-    with does_not_warn(DeprecationWarning):
+    with does_not_warn(FutureWarning):
         axes = plot_ecdf(data, cdf=dist.cdf, ci_prob=0.9)
-    with pytest.deprecated_call():
+    with pytest.warns(FutureWarning):
         axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, fpr=0.1)
     assert axes is not None
 
     # pointwise is deprecated
-    with does_not_warn(DeprecationWarning):
+    with does_not_warn(FutureWarning):
         axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands="pointwise")
-    with pytest.deprecated_call():
+    with pytest.warns(FutureWarning):
         axes = plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, pointwise=True)
 
 
