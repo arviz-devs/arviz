@@ -64,7 +64,7 @@ and
 
 .. code::
 
-    python>=3.8
+    python>=3.10
 
 ArviZ follows `NEP 29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_
 and `SPEC 0 <https://scientific-python.org/specs/spec-0000/>`_ to choose the minimum

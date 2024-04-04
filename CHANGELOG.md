@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.x.x Unreleased
+## v0.18.0 (2024 Apr 4)
 
 ### New features
 
@@ -12,10 +12,6 @@
 ### Maintenance and fixes
 - Fix deprecation warnings in multiple dependencies ([2329](https://github.com/arviz-devs/arviz/pull/2329),
   [2332](https://github.com/arviz-devs/arviz/pull/2332) and [2333](https://github.com/arviz-devs/arviz/pull/2333))
-
-### Deprecation
-
-### Documentation
 
 ## v0.17.1 (2024 Mar 13)
 
