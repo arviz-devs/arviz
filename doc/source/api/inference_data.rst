@@ -36,6 +36,7 @@ IO / Conversion
   InferenceData.from_zarr
   InferenceData.to_zarr
   InferenceData.chunk
+  InferenceData.close
   InferenceData.compute
   InferenceData.load
   InferenceData.persist

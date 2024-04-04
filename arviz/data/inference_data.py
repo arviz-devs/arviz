@@ -266,9 +266,6 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise KeyError(key)
         return getattr(self, key)
 
-    def __del__(self) -> None:
-        self.close()
-
     def groups(self) -> List[str]:
         """Return all groups present in InferenceData object."""
         return self._groups_all
