@@ -63,7 +63,7 @@ jobs:
       python -m pip install --no-cache-dir --pre -r requirements.txt
       python -m pip install --no-cache-dir --pre -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install --upgrade git+https://github.com/pydata/xarray.git
+      python -m pip install --upgrade --pre xarray -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
       python -m pip install pytest-azurepipelines
     condition: and(succeeded(), eq(variables.PyPIGithub, true))
     displayName: 'Install requirements (pypi preview / github)'
