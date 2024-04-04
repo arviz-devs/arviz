@@ -80,7 +80,7 @@ def plot_bpv(
     hdi_prob : float, optional
         Probability for the highest density interval for the analytical reference distribution when
         ``kind=u_values``. Should be in the interval (0, 1]. Defaults to the
-        rcParam ``stats.hdi_prob``. See :ref:`this section <common_hdi_prob>` for usage examples.
+        rcParam ``stats.ci_prob``. See :ref:`this section <common_hdi_prob>` for usage examples.
     color : str, optional
         Matplotlib color
     grid : tuple, optional
@@ -202,7 +202,7 @@ def plot_bpv(
         raise TypeError("`reference` argument must be either `analytical`, `samples`, or `None`")
 
     if hdi_prob is None:
-        hdi_prob = rcParams["stats.hdi_prob"]
+        hdi_prob = rcParams["stats.ci_prob"]
     elif not 1 >= hdi_prob > 0:
         raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 

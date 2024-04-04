@@ -67,7 +67,7 @@ def plot_dot(
         The shape of the marker. Valid for matplotlib backend.
     hdi_prob : float, optional
         Valid only when point_interval is True. Plots HDI for chosen percentage of density.
-        Defaults to ``stats.hdi_prob`` rcParam. See :ref:`this section <common_hdi_prob>`
+        Defaults to ``stats.ci_prob`` rcParam. See :ref:`this section <common_hdi_prob>`
         for usage examples.
     rotated : bool, default False
         Whether to rotate the dot plot by 90 degrees.
@@ -151,7 +151,7 @@ def plot_dot(
     values.sort()
 
     if hdi_prob is None:
-        hdi_prob = rcParams["stats.hdi_prob"]
+        hdi_prob = rcParams["stats.ci_prob"]
     elif not 1 >= hdi_prob > 0:
         raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 

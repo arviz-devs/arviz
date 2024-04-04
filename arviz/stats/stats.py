@@ -471,7 +471,7 @@ def hdi(
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
     hdi_prob: float, optional
         Prob for which the highest density interval will be computed. Defaults to
-        ``stats.hdi_prob`` rcParam.
+        ``stats.ci_prob`` rcParam.
     circular: bool, optional
         Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
@@ -553,7 +553,7 @@ def hdi(
 
     """
     if hdi_prob is None:
-        hdi_prob = rcParams["stats.hdi_prob"]
+        hdi_prob = rcParams["stats.ci_prob"]
     elif not 1 >= hdi_prob > 0:
         raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
@@ -1337,7 +1337,7 @@ def summary(
     if labeller is None:
         labeller = BaseLabeller()
     if hdi_prob is None:
-        hdi_prob = rcParams["stats.hdi_prob"]
+        hdi_prob = rcParams["stats.ci_prob"]
     elif not 1 >= hdi_prob > 0:
         raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
