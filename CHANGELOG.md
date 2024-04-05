@@ -5,6 +5,9 @@
 ### New features
 
 ### Maintenance and fixes
+- Ensure support with numpy 2.0 ([2321](https://github.com/arviz-devs/arviz/pull/2321))
+- Update testing strategy to include an environment without optional dependencies and
+  an environment with [scientific python nightlies](https://anaconda.org/scientific-python-nightly-wheels) ([2321](https://github.com/arviz-devs/arviz/pull/2321))
 
 - Fix legend overwriting issue in `plot_trace` ([2334](https://github.com/arviz-devs/arviz/pull/2334))
 
@@ -15,8 +18,6 @@
 ## v0.18.0 (2024 Apr 4)
 
 ### New features
-- Ensure support with numpy 2.0
-
 - Add new example data `rugby_field` and update `rugby` example data ([2322](https://github.com/arviz-devs/arviz/pull/2322))
 - Support for `pytree`s and robust to nested dictionaries. ([2291](https://github.com/arviz-devs/arviz/pull/2291))
 - Add `.close` method to `InferenceData` ([2338](https://github.com/arviz-devs/arviz/pull/2338))
