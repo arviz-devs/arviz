@@ -68,7 +68,8 @@ jobs:
     displayName: 'Install optional requirements'
 
   - script: |
-      python -m pip install --no-cache-dir --upgrade -r requirements.txt --pre --extra-index https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+      python -m pip install --no-cache-dir --upgrade --pre -r requirements.txt
+      python -m pip install --no-cache-dir --upgrade --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple contourpy h5py matplotlib numpy pandas scipy xarray
     condition: and(succeeded(), eq(variables.Nightlies, true))
     displayName: 'Update with nightlies'
 
