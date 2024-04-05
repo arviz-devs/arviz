@@ -69,7 +69,7 @@ jobs:
 
   - script: |
       python -m pip install --no-cache-dir --upgrade --pre -r requirements.txt
-      python -m pip install --no-cache-dir --upgrade --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple contourpy h5py matplotlib numpy pandas scipy xarray
+      python -m pip install --no-cache-dir --force-reinstall --no-deps --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple contourpy h5py matplotlib numpy pandas scipy xarray
     condition: and(succeeded(), eq(variables.Nightlies, true))
     displayName: 'Update with nightlies'
 
