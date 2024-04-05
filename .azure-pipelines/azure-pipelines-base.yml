@@ -10,21 +10,30 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
+      Python_312_optionals:
+        python.version: "3.12"
+        Nightlies: false
+        OptionalRequirements: true
+        name: "Python 3.12"
       Python_312:
         python.version: "3.12"
-        PyPIGithub: false
+        Nightlies: false
+        OptionalRequirements: false
         name: "Python 3.12"
-      Python_311:
+      Python_311_optionals:
         python.version: "3.11"
-        PyPIGithub: false
+        Nightlies: false
+        OptionalRequirements: true
         name: "Python 3.11"
       Python_311_preview:
         python.version: "3.11"
-        PyPIGithub: true
+        Nightlies: true
+        OptionalRequirements: false
         name: "Python 3.11"
-      Python_310:
+      Python_310_optionals:
         python.version: "3.10"
-        PyPIGithub: false
+        Nightlies: false
+        OptionalRequirements: true
         name: "Python 3.10"
 
 
@@ -51,22 +60,19 @@ jobs:
       python -m pip install --upgrade pip
       python -m pip install wheel
       python -m pip install --no-cache-dir -r requirements.txt
-      python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install pytest-azurepipelines
-    condition: and(succeeded(), eq(variables.PyPIGithub, false))
-    displayName: 'Install requirements'
+    displayName: 'Install base requirements'
 
   - script: |
-      python -m pip install --upgrade pip
-      python -m pip install wheel
-      python -m pip install --no-cache-dir --pre -r requirements.txt
       python -m pip install --no-cache-dir --pre -r requirements-optional.txt
-      python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install --upgrade --pre xarray -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
-      python -m pip install pytest-azurepipelines
-    condition: and(succeeded(), eq(variables.PyPIGithub, true))
-    displayName: 'Install requirements (pypi preview / github)'
+    condition: and(succeeded(), eq(variables.OptionalRequirements, true))
+    displayName: 'Install optional requirements'
+
+  - script: |
+      python -m pip install --no-cache-dir --upgrade -r requirements.txt --pre --extra-index https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    condition: and(succeeded(), eq(variables.Nightlies, true))
+    displayName: 'Update with nightlies'
 
   - script: |
       python -m pip install .
