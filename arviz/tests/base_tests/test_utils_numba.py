@@ -13,6 +13,7 @@ from .test_utils import utils_with_numba_import_fail  # pylint: disable=unused-i
 
 importorskip("numba")
 
+
 def test_utils_fixture(utils_with_numba_import_fail):
     """Test of utils fixture to ensure mock is applied correctly"""
 

@@ -27,7 +27,7 @@ pystan_installed = (importlib.util.find_spec("pystan") is not None) or (
 
 @pytest.mark.skipif(
     not (pystan_installed or "ARVIZ_REQUIRE_ALL_DEPS" in os.environ),
-    reason="test requires pystan/pystan3 which is not installed"
+    reason="test requires pystan/pystan3 which is not installed",
 )
 class TestDataPyStan:
     @pytest.fixture(scope="class")
