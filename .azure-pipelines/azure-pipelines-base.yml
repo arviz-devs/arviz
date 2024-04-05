@@ -5,8 +5,6 @@ jobs:
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
-    - name: ARVIZ_CI_MACHINE
-      value: 1
   timeoutInMinutes: 360
   strategy:
     matrix:
@@ -83,8 +81,14 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
+      ARVIZ_REQUIRE_ALL_DEPS=TRUE python -m pytest arviz/tests/base_tests --cov arviz --cov-report=xml
+    condition: and(succeeded(), eq(variables.OptionalRequirements, true))
+    displayName: 'pytest (require all dependencies)'
+
+  - script: |
       python -m pytest arviz/tests/base_tests --cov arviz --cov-report=xml
-    displayName: 'pytest'
+    condition: and(succeeded(), eq(variables.OptionalRequirements, false))
+    displayName: 'pytest (skip if dependency missing)'
 
   - script: |
       ls -ahl

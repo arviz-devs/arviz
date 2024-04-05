@@ -8,14 +8,10 @@ import pytest
 
 from ...stats.stats_utils import stats_variance_2d as svar
 from ...utils import Numba, _numba_var, numba_check
-from ..helpers import running_on_ci
+from ..helpers import importorskip
 from .test_utils import utils_with_numba_import_fail  # pylint: disable=unused-import
 
-pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("numba") is None) and not running_on_ci(),
-    reason="test requires numba which is not installed",
-)
-
+importorskip("numba")
 
 def test_utils_fixture(utils_with_numba_import_fail):
     """Test of utils fixture to ensure mock is applied correctly"""
