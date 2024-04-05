@@ -245,10 +245,8 @@ def format_coords_as_labels(dataarray, skip_dims=None):
     coord_labels = coord_labels.values
     if isinstance(coord_labels[0], tuple):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])
-        coord_labels[:] = [fmt.format(*x) for x in coord_labels]
-    else:
-        coord_labels[:] = [f"{s}" for s in coord_labels]
-    return coord_labels
+        return np.array([fmt.format(*x) for x in coord_labels])
+    return np.array([f"{s}" for s in coord_labels])
 
 
 def set_xticklabels(ax, coord_labels):
