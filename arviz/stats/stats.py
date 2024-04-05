@@ -806,17 +806,19 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
     kwargs = {"input_core_dims": [["__sample__"]]}
     logsumexp_dask = dask_kwargs.copy()
     logsumexp_dask["output_dtypes"] = [float]
+    logsumexp_out = xr.zeros_like(log_weights.isel(__sample__=0, drop=True)).data
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
-        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, dask_kwargs=logsumexp_dask, **kwargs
+            _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs={"out": logsumexp_out}, dask_kwargs=logsumexp_dask, **kwargs
     )
     loo_lppd = loo_lppd_i.sum().compute().item()
     loo_lppd_se = (n_data_points * loo_lppd_i.var().compute().item()) ** 0.5
 
+    lppd_out = xr.zeros_like(log_weights.isel(__sample__=0, drop=True)).data
     lppd = (
         _wrap_xarray_ufunc(
             _logsumexp,
             log_likelihood,
-            func_kwargs={"b_inv": n_samples},
+            func_kwargs={"b_inv": n_samples, "out": lppd_out},
             ufunc_kwargs=ufunc_kwargs,
             dask_kwargs=logsumexp_dask,
             **kwargs,
@@ -930,12 +932,13 @@ def psislw(log_weights, reff=1.0, dask_kwargs=None):
 
     # create output array with proper dimensions
     if dask_kwargs.get("dask", "forbidden") in {"allowed", "parallelized"}:
-        out = xr.zeros_like(log_weights).data, np.empty(shape)
+        out = xr.zeros_like(log_weights).data, xr.zeros_like(log_weights.isel(__sample__=0, drop=True)).data
+        dask_kwargs["output_dtypes"] = (float, float)
     else:
         out = np.empty_like(log_weights), np.empty(shape)
 
     # define kwargs
-    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin}
+    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "out": out}
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
     kwargs = {"input_core_dims": [["__sample__"]], "output_core_dims": [["__sample__"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
