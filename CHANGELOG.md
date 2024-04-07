@@ -6,6 +6,8 @@
 
 ### Maintenance and fixes
 
+- Move chain legend in `trace_plot` to first trace plot instead of density plot to avoid overwriting density plot legend and modify test for checking chain legend in `trace_plot` appropriately ([2334](https://github.com/arviz-devs/arviz/pull/2334))
+
 ### Deprecation
 
 ### Documentation
