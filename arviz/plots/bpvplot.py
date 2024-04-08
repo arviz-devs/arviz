@@ -36,6 +36,7 @@ def plot_bpv(
     backend_kwargs=None,
     group="posterior",
     show=None,
+    smoothing=True,
 ):
     r"""Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
@@ -148,6 +149,8 @@ def plot_bpv(
         the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional
         Call backend show function.
+    smoothing : bool, optional
+        If True(as default), smooth the discrete variables.
 
     Returns
     -------
@@ -188,6 +191,7 @@ def plot_bpv(
         >>> data = az.load_arviz_data("regression1d")
         >>> az.plot_bpv(data, kind="t_stat", t_stat=lambda x:np.percentile(x, q=50, axis=-1))
     """
+
     if group not in ("posterior", "prior"):
         raise TypeError("`group` argument must be either `posterior` or `prior`")
 
@@ -291,6 +295,7 @@ def plot_bpv(
         plot_ref_kwargs=plot_ref_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
+        smoothing=smoothing,
     )
 
     # TODO: Add backend kwargs

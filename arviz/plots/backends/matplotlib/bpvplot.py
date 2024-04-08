@@ -38,8 +38,10 @@ def plot_bpv(
     plot_ref_kwargs,
     backend_kwargs,
     show,
-    smoothing = True
+    smoothing,
 ):
+
+    print("Call backend plot_bpv.")
     """Matplotlib bpv plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
