@@ -5,6 +5,7 @@ Modified from the seaborn project, which modified the mpld3 project.
 
 Also inspired in bokeh's bokeh_gallery sphinxext.
 """
+
 import glob
 import os
 import os.path as op
@@ -222,7 +223,7 @@ class ExampleGenerator:
         elif self.apitext != "":
             return "{title} using `{apitext}`".format(title=self.title, apitext=self.apitext)
         return self.title
-    
+
     @property
     def alt_text(self):
         if self._alt_text != "":

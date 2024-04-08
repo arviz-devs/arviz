@@ -440,7 +440,7 @@ def plot_trace(
                     [], [], label="combined", **dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
                 ),
             )
-        ax.figure.axes[0].legend(handles=handles, title="chain", loc="upper right")
+        ax.figure.axes[1].legend(handles=handles, title="chain", loc="upper right")
 
     if axes is None:
         axes = np.array(ax.figure.axes).reshape(-1, 2)

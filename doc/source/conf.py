@@ -99,7 +99,18 @@ copybutton_prompt_is_regexp = True
 autodoc_typehints = "none"
 numpydoc_xref_param_type = True
 numpydoc_xref_ignore = {
-    "of", "or", "optional", "default", "1D", "2D", "3D", "n-dimensional", "K", "M", "N", "S",
+    "of",
+    "or",
+    "optional",
+    "default",
+    "1D",
+    "2D",
+    "3D",
+    "n-dimensional",
+    "K",
+    "M",
+    "N",
+    "S",
 }
 numpydoc_xref_aliases = {
     "DataArray": ":class:`~xarray.DataArray`",

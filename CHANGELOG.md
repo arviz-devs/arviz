@@ -6,6 +6,8 @@
 
 ### Maintenance and fixes
 
+- Fix legend overwriting issue in `plot_trace` ([2334](https://github.com/arviz-devs/arviz/pull/2334))
+
 ### Deprecation
 
 ### Documentation
