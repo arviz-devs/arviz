@@ -149,6 +149,8 @@ def plot_bpv(
         the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional
         Call backend show function.
+    smoothing : bool, default True
+        If True, smooth the data before computing the p-values or u-values.
 
     Returns
     -------
