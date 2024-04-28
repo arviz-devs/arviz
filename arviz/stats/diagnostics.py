@@ -135,10 +135,11 @@ def ess(
 
     References
     ----------
-    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
-      Section 15.4.2
-    * Gelman et al. BDA (2014) Formula 11.8
+    * Vehtari et al. (2021). Rank-normalization, folding, and
+        localization: An improved Rhat for assessing convergence of
+        MCMC. Bayesian analysis, 16(2):667-718.
+    * https://mc-stan.org/docs/reference-manual/analysis.html#effective-sample-size.section
+    * Gelman et al. BDA3 (2013) Formula 11.8
 
     See Also
     --------
@@ -246,7 +247,7 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
         Names of variables to include in the rhat report
     method : str
         Select R-hat method. Valid methods are:
-        - "rank"        # recommended by Vehtari et al. (2019)
+        - "rank"        # recommended by Vehtari et al. (2021)
         - "split"
         - "folded"
         - "z_scale"
@@ -277,12 +278,15 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     greater than one indicate that one or more chains have not yet converged.
 
     Rank values are calculated over all the chains with ``scipy.stats.rankdata``.
-    Each chain is split in two and normalized with the z-transform following Vehtari et al. (2019).
+    Each chain is split in two and normalized with the z-transform following
+    Vehtari et al. (2021).
 
     References
     ----------
-    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    * Gelman et al. BDA (2014)
+    * Vehtari et al. (2021).  Rank-normalization, folding, and
+      localization: An improved Rhat for assessing convergence of
+      MCMC. Bayesian analysis, 16(2):667-718.
+    * Gelman et al. BDA3 (2013)
     * Brooks and Gelman (1998)
     * Gelman and Rubin (1992)
 

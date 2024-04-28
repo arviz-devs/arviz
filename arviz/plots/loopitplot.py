@@ -55,7 +55,7 @@ def plot_loo_pit(
         In this case, instead of overlaying uniform distributions, the beta ``hdi_prob``
         around the theoretical uniform CDF is shown. This approximation only holds
         for large S and ECDF values not very close to 0 nor 1. For more information, see
-        `Vehtari et al. (2019)`, `Appendix G <https://avehtari.github.io/rhat_ess/rhat_ess.html>`_.
+        `Vehtari et al. (2021)`, `Appendix G <https://avehtari.github.io/rhat_ess/rhat_ess.html>`_.
     ecdf_fill : bool, optional
         Use :meth:`matplotlib.axes.Axes.fill_between` to mark the area
         inside the credible interval. Otherwise, plot the

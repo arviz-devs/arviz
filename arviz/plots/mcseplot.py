@@ -109,7 +109,9 @@ def plot_mcse(
 
     References
     ----------
-    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    .. [1] Vehtari et al. (2021). Rank-normalization, folding, and
+        localization: An improved Rhat for assessing convergence of
+        MCMC. Bayesian analysis, 16(2):667-718.
 
     Examples
     --------

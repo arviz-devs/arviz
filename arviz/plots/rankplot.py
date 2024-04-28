@@ -46,8 +46,8 @@ def plot_rank(
     indicates good mixing of the chains.
 
     This plot was introduced by Aki Vehtari, Andrew Gelman, Daniel Simpson, Bob Carpenter,
-    Paul-Christian Burkner (2019): Rank-normalization, folding, and localization: An improved R-hat
-    for assessing convergence of MCMC. arXiv preprint https://arxiv.org/abs/1903.08008
+    Paul-Christian Burkner (2021): Rank-normalization, folding, and localization:
+    An improved R-hat for assessing convergence of MCMC. Bayesian analysis, 16(2):667-718.
 
 
     Parameters
