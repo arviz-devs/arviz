@@ -879,7 +879,8 @@ def psislw(log_weights, reff=1.0):
 
     References
     ----------
-    * Vehtari et al. (2015) see https://arxiv.org/abs/1507.02646
+    * Vehtari et al. (2024). Pareto smoothed importance sampling. Journal of Machine
+      Learning Research, 25(72):1-58.
 
     See Also
     --------

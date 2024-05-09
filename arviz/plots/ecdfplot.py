@@ -98,9 +98,9 @@ def plot_ecdf(
 
     References
     ----------
-    .. [1] Säilynoja, T., Bürkner, P.C. and Vehtari, A., 2021. Graphical Test for
+    .. [1] Säilynoja, T., Bürkner, P.C. and Vehtari, A. (2022). Graphical Test for
         Discrete Uniformity and its Applications in Goodness of Fit Evaluation and
-        Multiple Sample Comparison. arXiv preprint arXiv:2103.10522.
+        Multiple Sample Comparison. Statistics and Computing, 32(32).
 
     Examples
     --------
