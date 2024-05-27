@@ -40,10 +40,8 @@ def plot_khat(
 
     Parameters
     ----------
-    khats : ELPDData or array-like
-        The input Pareto tail indices to be plotted. It can be an ``ELPDData`` object containing
-        Pareto shapes or an array. In this second case, all the values in the array are interpreted
-        as Pareto tail indices.
+    khats : ELPDData
+        The input Pareto tail indices to be plotted.
     color : str or array_like, default "C0"
         Colors of the scatter plot, if color is a str all dots will have the same color,
         if it is the size of the observations, each dot will have the specified color,
@@ -165,12 +163,19 @@ def plot_khat(
         color = "C0"
 
     if isinstance(khats, np.ndarray):
+        _log.warning(
+            "support for arrays will be deprecated, please use ELPDData."
+            "The reason for this, is that we need to know the numbers of draws"
+            "sampled from the posterior"
+        )
         khats = khats.flatten()
         xlabels = False
         legend = False
         dims = []
+        sample_size = None
     else:
         if isinstance(khats, ELPDData):
+            sample_size = khats.n_samples
             khats = khats.pareto_k
         if not isinstance(khats, DataArray):
             raise ValueError("Incorrect khat data input. Check the documentation")
@@ -192,6 +197,7 @@ def plot_khat(
         figsize=figsize,
         xdata=xdata,
         khats=khats,
+        sample_size=sample_size,
         kwargs=kwargs,
         threshold=threshold,
         coord_labels=coord_labels,

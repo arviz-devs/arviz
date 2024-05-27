@@ -20,6 +20,7 @@ def plot_khat(
     figsize,
     xdata,
     khats,
+    sample_size,
     kwargs,
     threshold,
     coord_labels,
@@ -61,8 +62,13 @@ def plot_khat(
     backend_kwargs.setdefault("figsize", figsize)
     backend_kwargs["squeeze"] = True
 
+    if sample_size is None:
+        good_k = 0.7
+    else:
+        good_k = min(1 - 1 / np.log10(sample_size), 0.7)
+
     hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
-    hlines_kwargs.setdefault("hlines", [0, 0.5, 0.7, 1])
+    hlines_kwargs.setdefault("hlines", [0, good_k, 1])
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
@@ -102,7 +108,7 @@ def plot_khat(
                 rgba_c = cmap(norm_fun(color))
 
         khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
-        alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
+        alphas = 0.5 + 0.2 * (khats > good_k) + 0.3 * (khats > 1)
         rgba_c[:, 3] = alphas
         rgba_c = vectorized_to_hex(rgba_c)
         kwargs["c"] = rgba_c
