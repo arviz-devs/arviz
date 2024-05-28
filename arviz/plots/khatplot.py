@@ -1,6 +1,7 @@
 """Pareto tail indices plot."""
 
 import logging
+import warnings
 
 import numpy as np
 from xarray import DataArray
@@ -163,19 +164,20 @@ def plot_khat(
         color = "C0"
 
     if isinstance(khats, np.ndarray):
-        _log.warning(
+        warnings.warn(
             "support for arrays will be deprecated, please use ELPDData."
             "The reason for this, is that we need to know the numbers of draws"
-            "sampled from the posterior"
+            "sampled from the posterior",
+            FutureWarning,
         )
         khats = khats.flatten()
         xlabels = False
         legend = False
         dims = []
-        sample_size = None
+        good_k = None
     else:
         if isinstance(khats, ELPDData):
-            sample_size = khats.n_samples
+            good_k = khats.good_k
             khats = khats.pareto_k
         if not isinstance(khats, DataArray):
             raise ValueError("Incorrect khat data input. Check the documentation")
@@ -197,7 +199,7 @@ def plot_khat(
         figsize=figsize,
         xdata=xdata,
         khats=khats,
-        sample_size=sample_size,
+        good_k=good_k,
         kwargs=kwargs,
         threshold=threshold,
         coord_labels=coord_labels,

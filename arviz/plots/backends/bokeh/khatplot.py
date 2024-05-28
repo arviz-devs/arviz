@@ -21,7 +21,7 @@ def plot_khat(
     figsize,
     xdata,
     khats,
-    sample_size,
+    good_k,
     kwargs,
     threshold,
     coord_labels,
@@ -55,10 +55,8 @@ def plot_khat(
     if hlines_kwargs is None:
         hlines_kwargs = {}
 
-    if sample_size is None:
+    if good_k is None:
         good_k = 0.7
-    else:
-        good_k = min(1 - 1 / np.log10(sample_size), 0.7)
 
     hlines_kwargs.setdefault("hlines", [0, good_k, 1])
 
@@ -137,7 +135,7 @@ def plot_khat(
     xmax = len(khats)
 
     if show_bins:
-        bin_edges = np.array([ymin, threshold, 1, ymax])
+        bin_edges = np.array([ymin, good_k, 1, ymax])
         bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
         hist, _, _ = histogram(khats, bin_edges)
         for idx, count in enumerate(hist):

@@ -819,8 +819,17 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
     if not pointwise:
         return ELPDData(
-            data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale],
-            index=["elpd_loo", "se", "p_loo", "n_samples", "n_data_points", "warning", "scale"],
+            data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale, good_k],
+            index=[
+                "elpd_loo",
+                "se",
+                "p_loo",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "scale",
+                "good_k",
+            ],
         )
     if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
         warnings.warn(
@@ -838,6 +847,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
             loo_lppd_i.rename("loo_i"),
             pareto_shape,
             scale,
+            good_k,
         ],
         index=[
             "elpd_loo",
@@ -849,6 +859,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
             "loo_i",
             "pareto_k",
             "scale",
+            "good_k",
         ],
     )
 
