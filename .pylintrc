@@ -77,7 +77,10 @@ disable=missing-docstring,
         # TODO: Remove this once update the code base.
         unnecessary-lambda-assignment,
         use-dict-literal,
-        possibly-used-before-assignment
+        possibly-used-before-assignment,
+        # TODO (maybe): Remove this if the exess of issues related to that are fixed
+        # https://github.com/pylint-dev/pylint/issues?q=is%3Aissue+is%3Aopen+used-before-assignment+label%3A%22C%3A+used-before-assignment%22
+        used-before-assignment
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
