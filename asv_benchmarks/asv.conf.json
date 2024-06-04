@@ -50,7 +50,7 @@
 
     // The list of conda channel names to be searched for benchmark
     // dependency packages in the specified order
-    "conda_channels": ["conda-forge", "defaults",],
+    // "conda_channels": ["conda-forge", "defaults",],
 
     // The matrix of dependencies to test.  Each key is the name of a
     // package (in PyPI) and the values are version numbers.  An empty
