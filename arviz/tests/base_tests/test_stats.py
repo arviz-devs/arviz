@@ -179,7 +179,7 @@ def test_compare_same(centered_eight, multidim_models, method, multidim):
     else:
         data_dict = {"first": centered_eight, "second": centered_eight}
 
-    weight = compare(data_dict, method=method)["weight"]
+    weight = compare(data_dict, method=method)["weight"].to_numpy()
     assert_allclose(weight[0], weight[1])
     assert_allclose(np.sum(weight), 1.0)
 
@@ -197,7 +197,7 @@ def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
 @pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_compare_different(centered_eight, non_centered_eight, ic, method, scale):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
-    weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"]
+    weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"].to_numpy()
     assert weight["non_centered"] > weight["centered"]
     assert_allclose(np.sum(weight), 1.0)
 
@@ -206,7 +206,7 @@ def test_compare_different(centered_eight, non_centered_eight, ic, method, scale
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
 def test_compare_different_multidim(multidim_models, ic, method):
     model_dict = {"model_1": multidim_models.model_1, "model_2": multidim_models.model_2}
-    weight = compare(model_dict, ic=ic, method=method)["weight"]
+    weight = compare(model_dict, ic=ic, method=method)["weight"].to_numpy()
 
     # this should hold because the same seed is always used
     assert weight["model_1"] > weight["model_2"]

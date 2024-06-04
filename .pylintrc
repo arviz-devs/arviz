@@ -76,7 +76,8 @@ disable=missing-docstring,
         consider-using-f-string,
         # TODO: Remove this once update the code base.
         unnecessary-lambda-assignment,
-        use-dict-literal
+        use-dict-literal,
+        possibly-used-before-assignment
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
