@@ -16,7 +16,6 @@ from ..helpers import (  # pylint: disable=unused-import
     draws,
     eight_schools_params,
     importorskip,
-    running_on_ci,
 )
 
 zarr = importorskip("zarr")  # pylint: disable=invalid-name

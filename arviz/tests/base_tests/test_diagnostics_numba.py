@@ -1,7 +1,5 @@
 """Test Diagnostic methods"""
 
-import importlib
-
 # pylint: disable=redefined-outer-name, no-member, too-many-public-methods
 import numpy as np
 import pytest
@@ -11,13 +9,10 @@ from ...rcparams import rcParams
 from ...stats import bfmi, mcse, rhat
 from ...stats.diagnostics import _mc_error, ks_summary
 from ...utils import Numba
-from ..helpers import running_on_ci
+from ..helpers import importorskip
 from .test_diagnostics import data  # pylint: disable=unused-import
 
-pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("numba") is None) and not running_on_ci(),
-    reason="test requires numba which is not installed",
-)
+importorskip("numba")
 
 rcParams["data.load"] = "eager"
 

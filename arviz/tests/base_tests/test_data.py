@@ -42,7 +42,6 @@ from ..helpers import (  # pylint: disable=unused-import
     draws,
     eight_schools_params,
     models,
-    running_on_ci,
 )
 
 
@@ -1469,7 +1468,7 @@ class TestJSON:
 
 
 @pytest.mark.skipif(
-    not (importlib.util.find_spec("datatree") or running_on_ci()),
+    not (importlib.util.find_spec("datatree") or "ARVIZ_REQUIRE_ALL_DEPS" in os.environ),
     reason="test requires xarray-datatree library",
 )
 class TestDataTree:

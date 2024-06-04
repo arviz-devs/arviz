@@ -1,6 +1,4 @@
 # pylint: disable=redefined-outer-name, no-member
-import importlib
-
 import numpy as np
 import pytest
 
@@ -9,15 +7,12 @@ from ...stats import r2_score, summary
 from ...utils import Numba
 from ..helpers import (  # pylint: disable=unused-import
     check_multiple_attrs,
+    importorskip,
     multidim_models,
-    running_on_ci,
 )
 from .test_stats import centered_eight, non_centered_eight  # pylint: disable=unused-import
 
-pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("numba") is None) and not running_on_ci(),
-    reason="test requires numba which is not installed",
-)
+numba = importorskip("numba")
 
 rcParams["data.load"] = "eager"
 

@@ -1,5 +1,6 @@
 # pylint: disable=redefined-outer-name
 import importlib
+import os
 
 import numpy as np
 import pytest
@@ -20,10 +21,10 @@ from ...rcparams import rc_context
 from ...sel_utils import xarray_sel_iter, xarray_to_ndarray
 from ...stats.density_utils import get_bins
 from ...utils import get_coords
-from ..helpers import running_on_ci
 
 # Check if Bokeh is installed
 bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
+skip_tests = (not bokeh_installed) and ("ARVIZ_REQUIRE_ALL_DEPS" not in os.environ)
 
 
 @pytest.mark.parametrize(
@@ -212,10 +213,7 @@ def test_filter_plotter_list_warning():
     assert len(plotters_filtered) == 5
 
 
-@pytest.mark.skipif(
-    not (bokeh_installed or running_on_ci()),
-    reason="test requires bokeh which is not installed",
-)
+@pytest.mark.skipif(skip_tests, reason="test requires bokeh which is not installed")
 def test_bokeh_import():
     """Tests that correct method is returned on bokeh import"""
     plot = get_plotting_function("plot_dist", "distplot", "bokeh")
@@ -290,10 +288,7 @@ def test_mpl_dealiase_sel_kwargs():
     assert res["line_color"] == "red"
 
 
-@pytest.mark.skipif(
-    not (bokeh_installed or running_on_ci()),
-    reason="test requires bokeh which is not installed",
-)
+@pytest.mark.skipif(skip_tests, reason="test requires bokeh which is not installed")
 def test_bokeh_dealiase_sel_kwargs():
     """Check bokeh dealiase_sel_kwargs behaviour.
 
@@ -315,10 +310,7 @@ def test_bokeh_dealiase_sel_kwargs():
     assert res["line_color"] == "red"
 
 
-@pytest.mark.skipif(
-    not (bokeh_installed or running_on_ci()),
-    reason="test requires bokeh which is not installed",
-)
+@pytest.mark.skipif(skip_tests, reason="test requires bokeh which is not installed")
 def test_set_bokeh_circular_ticks_labels():
     """Assert the axes returned after placing ticks and tick labels for circular plots."""
     import bokeh.plotting as bkp

@@ -5,26 +5,33 @@ jobs:
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
-    - name: ARVIZ_CI_MACHINE
-      value: 1
   timeoutInMinutes: 360
   strategy:
     matrix:
+      Python_312_optionals:
+        python.version: "3.12"
+        Nightlies: false
+        OptionalRequirements: true
+        name: "Python 3.12"
       Python_312:
         python.version: "3.12"
-        PyPIGithub: false
+        Nightlies: false
+        OptionalRequirements: false
         name: "Python 3.12"
-      Python_311:
+      Python_311_optionals:
         python.version: "3.11"
-        PyPIGithub: false
+        Nightlies: false
+        OptionalRequirements: true
         name: "Python 3.11"
       Python_311_preview:
         python.version: "3.11"
-        PyPIGithub: true
+        Nightlies: true
+        OptionalRequirements: false
         name: "Python 3.11"
-      Python_310:
+      Python_310_optionals:
         python.version: "3.10"
-        PyPIGithub: false
+        Nightlies: false
+        OptionalRequirements: true
         name: "Python 3.10"
 
 
@@ -51,22 +58,20 @@ jobs:
       python -m pip install --upgrade pip
       python -m pip install wheel
       python -m pip install --no-cache-dir -r requirements.txt
-      python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install pytest-azurepipelines
-    condition: and(succeeded(), eq(variables.PyPIGithub, false))
-    displayName: 'Install requirements'
+    displayName: 'Install base requirements'
 
   - script: |
-      python -m pip install --upgrade pip
-      python -m pip install wheel
-      python -m pip install --no-cache-dir --pre -r requirements.txt
       python -m pip install --no-cache-dir --pre -r requirements-optional.txt
-      python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install --upgrade git+https://github.com/pydata/xarray.git
-      python -m pip install pytest-azurepipelines
-    condition: and(succeeded(), eq(variables.PyPIGithub, true))
-    displayName: 'Install requirements (pypi preview / github)'
+    condition: and(succeeded(), eq(variables.OptionalRequirements, true))
+    displayName: 'Install optional requirements'
+
+  - script: |
+      python -m pip install --no-cache-dir --upgrade --pre -r requirements.txt
+      python -m pip install --no-cache-dir --force-reinstall --no-deps --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple contourpy h5py matplotlib numpy pandas scipy xarray
+    condition: and(succeeded(), eq(variables.Nightlies, true))
+    displayName: 'Update with nightlies'
 
   - script: |
       python -m pip install .
@@ -77,8 +82,14 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
+      ARVIZ_REQUIRE_ALL_DEPS=TRUE python -m pytest arviz/tests/base_tests --cov arviz --cov-report=xml
+    condition: and(succeeded(), eq(variables.OptionalRequirements, true))
+    displayName: 'pytest (require all dependencies)'
+
+  - script: |
       python -m pytest arviz/tests/base_tests --cov arviz --cov-report=xml
-    displayName: 'pytest'
+    condition: and(succeeded(), eq(variables.OptionalRequirements, false))
+    displayName: 'pytest (skip if dependency missing)'
 
   - script: |
       ls -ahl
