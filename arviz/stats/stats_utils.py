@@ -454,8 +454,8 @@ POINTWISE_LOO_FMT = """------
 
 Pareto k diagnostic values:
                          {{0:>{0}}} {{1:>6}}
-(-Inf, {{8:.1f}}]   (good)     {{2:{0}d}} {{5:6.1f}}%
-   ({{8:.1f}}, 1]   (bad)      {{3:{0}d}} {{6:6.1f}}%
+(-Inf, {{8:.2f}}]   (good)     {{2:{0}d}} {{5:6.1f}}%
+   ({{8:.2f}}, 1]   (bad)      {{3:{0}d}} {{6:6.1f}}%
    (1, Inf)   (very bad) {{4:{0}d}} {{7:6.1f}}%
 """
 SCALE_DICT = {"deviance": "deviance", "log": "elpd", "negative_log": "-elpd"}

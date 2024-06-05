@@ -180,7 +180,13 @@ def plot_khat(
             good_k = khats.good_k
             khats = khats.pareto_k
         if not isinstance(khats, DataArray):
-            raise ValueError("Incorrect khat data input. Check the documentation")
+            good_k = None
+            warnings.warn(
+                "support for DataArrays will be deprecated, please use ELPDData."
+                "The reason for this, is that we need to know the numbers of draws"
+                "sampled from the posterior",
+                FutureWarning,
+            )
 
         khats = get_coords(khats, coords)
         dims = khats.dims

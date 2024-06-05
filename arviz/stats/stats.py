@@ -790,7 +790,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
     if np.any(pareto_shape > good_k):
         warnings.warn(
-            f"Estimated shape parameter of Pareto distribution is greater than {good_k:.1f} "
+            f"Estimated shape parameter of Pareto distribution is greater than {good_k:.2f} "
             "for one or more samples. You should consider using a more robust model, this is "
             "because importance sampling is less likely to work well if the marginal posterior "
             "and LOO posterior are very different. This is more likely to happen with a "
