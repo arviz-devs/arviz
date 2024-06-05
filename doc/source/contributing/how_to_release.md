@@ -59,9 +59,13 @@ ArviZ uses the following process to cut a new release of the library.
     * repodata patch: If there is a new release for one of the dependencies with breaking changes
       for example, a repodata patch should be submitted to conda forge to prevent users
       from installing a broken environment.
+
+      Repodata patches are submitted to [conda-forge/conda-forge-repodata-patches-feedstock](https://github.com/conda-forge/conda-forge-repodata-patches-feedstock)
     * mark a build as broken: If the dependencies were incorrect in the recipe, then the existing
       build should be marked as broken and a PR (completely manual) should be submitted
       to the arviz-feedstock to fix the recipe. Note that if this is being done for a release
       different than the latest, changes should not be merged into `main` but on a dedicated
       branch, the conda-forge package build is generated all the same but the history is kept
       tidier and prevents issues when a new release is published.
+
+      Requests to mark packages as broken are submitted to [conda-forge/admin-requests](https://github.com/conda-forge/admin-requests/)
