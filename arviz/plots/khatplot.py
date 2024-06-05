@@ -179,7 +179,7 @@ def plot_khat(
         if isinstance(khats, ELPDData):
             good_k = khats.good_k
             khats = khats.pareto_k
-        if not isinstance(khats, DataArray):
+        else:
             good_k = None
             warnings.warn(
                 "support for DataArrays will be deprecated, please use ELPDData."
@@ -187,6 +187,8 @@ def plot_khat(
                 "sampled from the posterior",
                 FutureWarning,
             )
+        if not isinstance(khats, DataArray):
+            raise ValueError("Incorrect khat data input. Check the documentation")
 
         khats = get_coords(khats, coords)
         dims = khats.dims
