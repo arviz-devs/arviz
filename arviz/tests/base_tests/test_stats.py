@@ -179,7 +179,7 @@ def test_compare_same(centered_eight, multidim_models, method, multidim):
     else:
         data_dict = {"first": centered_eight, "second": centered_eight}
 
-    weight = compare(data_dict, method=method)["weight"]
+    weight = compare(data_dict, method=method)["weight"].to_numpy()
     assert_allclose(weight[0], weight[1])
     assert_allclose(np.sum(weight), 1.0)
 

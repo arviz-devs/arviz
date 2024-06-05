@@ -270,12 +270,12 @@ def compare(
             weights[i] = u_weights / np.sum(u_weights)
 
         weights = weights.mean(axis=0)
-        ses = pd.Series(z_bs.std(axis=0), index=names)  # pylint: disable=no-member
+        ses = pd.Series(z_bs.std(axis=0), index=ics.index)  # pylint: disable=no-member
 
     elif method.lower() == "pseudo-bma":
         min_ic = ics.iloc[0][f"elpd_{ic}"]
         z_rv = np.exp((ics[f"elpd_{ic}"] - min_ic) / scale_value)
-        weights = z_rv / np.sum(z_rv)
+        weights = (z_rv / np.sum(z_rv)).to_numpy()
         ses = ics["se"]
 
     if np.any(weights):
