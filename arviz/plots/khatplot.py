@@ -1,6 +1,7 @@
 """Pareto tail indices plot."""
 
 import logging
+import warnings
 
 import numpy as np
 from xarray import DataArray
@@ -40,10 +41,8 @@ def plot_khat(
 
     Parameters
     ----------
-    khats : ELPDData or array-like
-        The input Pareto tail indices to be plotted. It can be an ``ELPDData`` object containing
-        Pareto shapes or an array. In this second case, all the values in the array are interpreted
-        as Pareto tail indices.
+    khats : ELPDData
+        The input Pareto tail indices to be plotted.
     color : str or array_like, default "C0"
         Colors of the scatter plot, if color is a str all dots will have the same color,
         if it is the size of the observations, each dot will have the specified color,
@@ -165,13 +164,29 @@ def plot_khat(
         color = "C0"
 
     if isinstance(khats, np.ndarray):
+        warnings.warn(
+            "support for arrays will be deprecated, please use ELPDData."
+            "The reason for this, is that we need to know the numbers of draws"
+            "sampled from the posterior",
+            FutureWarning,
+        )
         khats = khats.flatten()
         xlabels = False
         legend = False
         dims = []
+        good_k = None
     else:
         if isinstance(khats, ELPDData):
+            good_k = khats.good_k
             khats = khats.pareto_k
+        else:
+            good_k = None
+            warnings.warn(
+                "support for DataArrays will be deprecated, please use ELPDData."
+                "The reason for this, is that we need to know the numbers of draws"
+                "sampled from the posterior",
+                FutureWarning,
+            )
         if not isinstance(khats, DataArray):
             raise ValueError("Incorrect khat data input. Check the documentation")
 
@@ -192,6 +207,7 @@ def plot_khat(
         figsize=figsize,
         xdata=xdata,
         khats=khats,
+        good_k=good_k,
         kwargs=kwargs,
         threshold=threshold,
         coord_labels=coord_labels,

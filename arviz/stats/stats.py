@@ -715,8 +715,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     se: standard error of the elpd
     p_loo: effective number of parameters
     shape_warn: bool
-        True if the estimated shape parameter of
-        Pareto distribution is greater than 0.7 for one or more samples
+        True if the estimated shape parameter of Pareto distribution is greater than a thresold
+        value  for one or more samples. For a sample size S, the thresold is compute as
+        min(1 - 1/log10(S), 0.7)
     loo_i: array of pointwise predictive accuracy, only if pointwise True
     pareto_k: array of Pareto shape values, only if pointwise True
     scale: scale of the elpd
@@ -785,13 +786,15 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     log_weights += log_likelihood
 
     warn_mg = False
-    if np.any(pareto_shape > 0.7):
+    good_k = min(1 - 1 / np.log10(n_samples), 0.7)
+
+    if np.any(pareto_shape > good_k):
         warnings.warn(
-            "Estimated shape parameter of Pareto distribution is greater than 0.7 for "
-            "one or more samples. You should consider using a more robust model, this is because "
-            "importance sampling is less likely to work well if the marginal posterior and "
-            "LOO posterior are very different. This is more likely to happen with a non-robust "
-            "model and highly influential observations."
+            f"Estimated shape parameter of Pareto distribution is greater than {good_k:.2f} "
+            "for one or more samples. You should consider using a more robust model, this is "
+            "because importance sampling is less likely to work well if the marginal posterior "
+            "and LOO posterior are very different. This is more likely to happen with a "
+            "non-robust model and highly influential observations."
         )
         warn_mg = True
 
@@ -816,8 +819,17 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
     if not pointwise:
         return ELPDData(
-            data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale],
-            index=["elpd_loo", "se", "p_loo", "n_samples", "n_data_points", "warning", "scale"],
+            data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale, good_k],
+            index=[
+                "elpd_loo",
+                "se",
+                "p_loo",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "scale",
+                "good_k",
+            ],
         )
     if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
         warnings.warn(
@@ -835,6 +847,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
             loo_lppd_i.rename("loo_i"),
             pareto_shape,
             scale,
+            good_k,
         ],
         index=[
             "elpd_loo",
@@ -846,6 +859,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
             "loo_i",
             "pareto_k",
             "scale",
+            "good_k",
         ],
     )
 

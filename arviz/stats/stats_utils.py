@@ -454,10 +454,9 @@ POINTWISE_LOO_FMT = """------
 
 Pareto k diagnostic values:
                          {{0:>{0}}} {{1:>6}}
-(-Inf, 0.5]   (good)     {{2:{0}d}} {{6:6.1f}}%
- (0.5, 0.7]   (ok)       {{3:{0}d}} {{7:6.1f}}%
-   (0.7, 1]   (bad)      {{4:{0}d}} {{8:6.1f}}%
-   (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
+(-Inf, {{8:.2f}}]   (good)     {{2:{0}d}} {{5:6.1f}}%
+   ({{8:.2f}}, 1]   (bad)      {{3:{0}d}} {{6:6.1f}}%
+   (1, Inf)   (very bad) {{4:{0}d}} {{7:6.1f}}%
 """
 SCALE_DICT = {"deviance": "deviance", "log": "elpd", "negative_log": "-elpd"}
 
@@ -488,11 +487,14 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
             base += "\n\nThere has been a warning during the calculation. Please check the results."
 
         if kind == "loo" and "pareto_k" in self:
-            bins = np.asarray([-np.inf, 0.5, 0.7, 1, np.inf])
+            bins = np.asarray([-np.inf, self.good_k, 1, np.inf])
             counts, *_ = _histogram(self.pareto_k.values, bins)
             extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
             extended = extended.format(
-                "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
+                "Count",
+                "Pct.",
+                *[*counts, *(counts / np.sum(counts) * 100)],
+                self.good_k,
             )
             base = "\n".join([base, extended])
         return base

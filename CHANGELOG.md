@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
+-  Use revised Pareto k threshold ([2349](https://github.com/arviz-devs/arviz/pull/2349))
 
 ### Maintenance and fixes
 - Ensure support with numpy 2.0 ([2321](https://github.com/arviz-devs/arviz/pull/2321))
@@ -12,6 +13,8 @@
 - Fix legend overwriting issue in `plot_trace` ([2334](https://github.com/arviz-devs/arviz/pull/2334))
 
 ### Deprecation
+-  Support for arrays and DataArrays in plot_khat has been deprecated. Only ELPDdata will be supported in the future ([2349](https://github.com/arviz-devs/arviz/pull/2349))
+
 
 ### Documentation
 
