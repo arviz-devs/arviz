@@ -16,6 +16,8 @@ from .rcparams import rcParams
 
 STATIC_FILES = ("static/html/icons-svg-inline.html", "static/css/style.css")
 
+class BehaviourChangeWarning(Warning):
+    """Custom warning to ease filtering it."""
 
 def _check_tilde_start(x):
     return bool(isinstance(x, str) and x.startswith("~"))

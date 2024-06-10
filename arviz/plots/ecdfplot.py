@@ -12,7 +12,9 @@ except ImportError:
 
 from ..rcparams import rcParams
 from ..stats.ecdf_utils import ecdf_confidence_band, _get_ecdf_points
+from ..utils import BehaviourChangeWarning
 from .plot_utils import get_plotting_function
+
 
 
 def plot_ecdf(
@@ -148,15 +150,33 @@ def plot_ecdf(
 
     Examples
     --------
-    Plot an ECDF plot for a given sample evaluated at the sample points.
+    In a future release, the default behaviour of ``plot_ecdf`` will change.
+    To maintain the original behaviour you should do:
 
-    .. plot::
-        :context: close-figs
+    .. plot:: close-figs
 
         >>> import arviz as az
         >>> from scipy.stats import uniform, norm
 
         >>> sample = norm(0,1).rvs(1000)
+        >>> az.plot_ecdf(sample, eval_points = np.linspace(sample.min(), sample.max(), npoints))
+
+    However, seeing this warning isn't an indicator of anything being wrong,
+    if you are happy to get different behaviour as ArviZ improves and adds
+    new algorithms you can ignore it like so:
+
+    .. plot::
+        :context: close-figs
+
+        >>> import warnings
+        >>> warnings.filterwarnings("ignore", category=az.utils.BehaviourChangeWarning)
+
+    Plot an ECDF plot for a given sample evaluated at the sample points. This will become
+    the new behaviour when `eval_points` is not provided:
+
+    .. plot::
+        :context: close-figs
+
         >>> az.plot_ecdf(sample, eval_points = np.unique(sample))
 
     Plot an ECDF plot with confidence bands for comparing a given sample to a given distribution.
@@ -167,9 +187,7 @@ def plot_ecdf(
         :context: close-figs
 
         >>> distribution = norm(0,1)
-        >>> eval_points = np.linspace(*distribution.ppf([0.001, 0.999]), 100)
-        >>> az.plot_ecdf(sample, eval_points = eval_points, cdf = distribution.cdf,
-        >>>              confidence_bands = True)
+        >>> az.plot_ecdf(sample, cdf = distribution.cdf, confidence_bands = True)
 
     Plot an ECDF-difference plot with confidence bands for comparing a given sample
     to a given distribution.
@@ -177,8 +195,10 @@ def plot_ecdf(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf, eval_points = eval_points,
-        >>>              confidence_bands = True, difference = True)
+        >>> az.plot_ecdf(
+        >>>     sample, cdf = distribution.cdf,
+        >>>     confidence_bands = True, difference = True
+        >>> )
 
     Plot an ECDF plot with confidence bands for the probability integral transform (PIT) of a
     continuous sample. If drawn from the reference distribution, the PIT values should be uniformly
@@ -190,16 +210,20 @@ def plot_ecdf(
         >>> pit_vals = distribution.cdf(sample)
         >>> eval_points = np.linspace(0, 1, 101)
         >>> uniform_dist = uniform(0, 1)
-        >>> az.plot_ecdf(pit_vals, eval_points = eval_points, cdf = uniform_dist.cdf,
-        >>>              rvs = uniform_dist.rvs, confidence_bands = True)
+        >>> az.plot_ecdf(
+        >>>     pit_vals, cdf = uniform_dist.cdf,
+        >>>     rvs = uniform_dist.rvs, confidence_bands = True
+        >>> )
 
     Plot an ECDF-difference plot of PIT values.
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_ecdf(pit_vals, eval_points = eval_points, cdf = uniform_dist.cdf,
-        >>>              rvs = uniform_dist.rvs, confidence_bands = True, difference = True)
+        >>> az.plot_ecdf(
+        >>>     pit_vals, cdf = uniform_dist.cdf, rvs = uniform_dist.rvs,
+        >>>     confidence_bands = True, difference = True
+        >>> )
     """
     if confidence_bands is True:
         if pointwise:
@@ -267,7 +291,7 @@ def plot_ecdf(
             "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated"
             " at the unique values of the sample. To keep the current behavior, provide "
             "`eval_points` explicitly.",
-            FutureWarning,
+            BehaviourChangeWarning,
         )
         if confidence_bands == "simulated":
             warnings.warn(

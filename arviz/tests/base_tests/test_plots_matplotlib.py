@@ -46,7 +46,7 @@ from ...plots import (
 from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...stats.density_utils import kde as _kde
-from ...utils import _cov
+from ...utils import _cov, BehaviourChangeWarning
 from ...plots.plot_utils import plot_point_interval
 from ...plots.dotplot import wilkinson_algorithm
 from ..helpers import (  # pylint: disable=unused-import
@@ -1274,13 +1274,13 @@ def test_plot_ecdf_basic():
 
 
 def test_plot_ecdf_eval_points():
-    """Check that FutureWarning is raised if eval_points is not specified."""
+    """Check that BehaviourChangeWarning is raised if eval_points is not specified."""
     data = np.random.randn(4, 1000)
     eval_points = np.linspace(-3, 3, 100)
-    with pytest.warns(FutureWarning):
+    with pytest.warns(BehaviourChangeWarning):
         axes = plot_ecdf(data)
     assert axes is not None
-    with does_not_warn(FutureWarning):
+    with does_not_warn(BehaviourChangeWarning):
         axes = plot_ecdf(data, eval_points=eval_points)
     assert axes is not None
 
