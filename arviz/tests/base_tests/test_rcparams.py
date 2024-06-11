@@ -127,6 +127,18 @@ def test_choice_bad_values(param):
         rcParams[param] = "bad_value"
 
 
+@pytest.mark.parametrize("args", [("stats.hdi_prob", "stats.ci_prob", 0.7, 0.7)])
+def test_deprecated_param(args):
+    """Test value and warning message correctly set for deprecated rcparams."""
+    param_old, param_new, val_old, val_new = args
+    assert param_new in rcParams
+    assert not np.isclose(rcParams[param_new], val_new)
+    msg = f"{param_old} is deprecated since .*, use {param_new} instead"
+    with pytest.warns(FutureWarning, match=msg):
+        with rc_context(rc={param_old: val_old}):
+            assert np.isclose(rcParams[param_new], val_new)
+
+
 @pytest.mark.parametrize("allow_none", (True, False))
 @pytest.mark.parametrize("typeof", (str, int))
 @pytest.mark.parametrize("args", [("not one", 10), (False, None), (False, 4)])

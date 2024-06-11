@@ -1,24 +1,32 @@
 """Plot ecdf or ecdf-difference plot with confidence bands."""
 
+import warnings
+
 import numpy as np
 from scipy.stats import uniform
 
+try:
+    from scipy.stats import ecdf as scipy_ecdf
+except ImportError:
+    scipy_ecdf = None
+
 from ..rcparams import rcParams
-from ..stats.ecdf_utils import compute_ecdf, ecdf_confidence_band, _get_ecdf_points
+from ..stats.ecdf_utils import ecdf_confidence_band, _get_ecdf_points
+from ..utils import BehaviourChangeWarning
 from .plot_utils import get_plotting_function
 
 
 def plot_ecdf(
     values,
     values2=None,
+    eval_points=None,
     cdf=None,
     difference=False,
-    pit=False,
-    confidence_bands=None,
-    pointwise=False,
-    npoints=100,
+    confidence_bands=False,
+    ci_prob=None,
     num_trials=500,
-    fpr=0.05,
+    rvs=None,
+    random_state=None,
     figsize=None,
     fill_band=True,
     plot_kwargs=None,
@@ -28,15 +36,19 @@ def plot_ecdf(
     show=None,
     backend=None,
     backend_kwargs=None,
+    npoints=100,
+    pointwise=False,
+    fpr=None,
+    pit=False,
     **kwargs,
 ):
     r"""Plot ECDF or ECDF-Difference Plot with Confidence bands.
 
-    Plots of the empirical CDF estimates of an array. When `values2` argument is provided,
-    the two empirical CDFs are overlaid with the distribution of `values` on top
-    (in a darker shade) and confidence bands in a more transparent shade. Optionally, the difference
-    between the two empirical CDFs can be computed, and the PIT for a single dataset or a comparison
-    between two samples.
+    Plots of the empirical cumulative distribution function (ECDF) of an array. Optionally, A `cdf`
+    argument representing a reference CDF may be provided for comparison using a difference ECDF
+    plot and/or confidence bands.
+
+    Alternatively, the PIT for a single dataset may be visualized.
 
     Notes
     -----
@@ -47,26 +59,39 @@ def plot_ecdf(
     values : array-like
         Values to plot from an unknown continuous or discrete distribution.
     values2 : array-like, optional
-        Values to compare to the original sample.
+        values to compare to the original sample.
+
+        .. deprecated:: 0.18.0
+           Instead use ``cdf=scipy.stats.ecdf(values2).cdf.evaluate``.
     cdf : callable, optional
         Cumulative distribution function of the distribution to compare the original sample.
         The function must take as input a numpy array of draws from the distribution.
     difference : bool, default False
         If True then plot ECDF-difference plot otherwise ECDF plot.
-    pit : bool, default False
-        If True plots the ECDF or ECDF-diff of PIT of sample.
-    confidence_bands : bool, default None
-        If True plots the simultaneous or pointwise confidence bands with `1 - fpr`
-        confidence level.
-    pointwise : bool, default False
-        If True plots pointwise confidence bands otherwise simultaneous bands.
-    npoints : int, default 100
-        This denotes the granularity size of our plot i.e the number of evaluation points
-        for the ecdf or ecdf-difference plots.
+    confidence_bands : str or bool
+
+        - False: No confidence bands are plotted (default).
+        - True: Plot bands computed with the default algorithm (subject to change)
+        - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
+        - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence
+          band.
+
+        For simultaneous confidence bands to be correctly calibrated, provide `eval_points` that
+        are not dependent on the `values`.
+    ci_prob : float, default 0.94
+        The probability that the true ECDF lies within the confidence band. If `confidence_bands`
+        is "pointwise", this is the marginal probability instead of the joint probability.
+    eval_points : array-like, optional
+        The points at which to evaluate the ECDF. If None, `npoints` uniformly spaced points
+        between the data bounds will be used.
+    rvs: callable, optional
+        A function that takes an integer `ndraws` and optionally the object passed to
+        `random_state` and returns an array of `ndraws` samples from the same distribution
+        as the original dataset. Required if `method` is "simulated" and variable is discrete.
+    random_state : int, numpy.random.Generator or numpy.random.RandomState, optional
     num_trials : int, default 500
-        The number of random ECDFs to generate for constructing simultaneous confidence bands.
-    fpr : float, default 0.05
-        The type I error rate s.t `1 - fpr` denotes the confidence level of bands.
+        The number of random ECDFs to generate for constructing simultaneous confidence bands
+        (if `confidence_bands` is "simulated").
     figsize : (float,float), optional
         Figure size. If `None` it will be defined automatically.
     fill_band : bool, default True
@@ -91,6 +116,26 @@ def plot_ecdf(
         These are kwargs specific to the backend being used, passed to
         :func:`matplotlib.pyplot.subplots` or :class:`bokeh.plotting.figure`.
         For additional documentation check the plotting method of the backend.
+    npoints : int, default 100
+        The number of evaluation points for the ecdf or ecdf-difference plots, if `eval_points` is
+        not provided or `pit` is `True`.
+
+        .. deprecated:: 0.18.0
+           Instead specify ``eval_points=np.linspace(np.min(values), np.max(values), npoints)``
+           unless `pit` is `True`.
+    pointwise : bool, default False
+
+        .. deprecated:: 0.18.0
+           Instead use `confidence_bands="pointwise"`.
+    fpr : float, optional
+
+        .. deprecated:: 0.18.0
+           Instead use `ci_prob=1-fpr`.
+    pit : bool, default False
+        If True plots the ECDF or ECDF-diff of PIT of sample.
+
+        .. deprecated:: 0.18.0
+           See below example instead.
 
     Returns
     -------
@@ -104,129 +149,200 @@ def plot_ecdf(
 
     Examples
     --------
-    Plot ecdf plot for a given sample
+    In a future release, the default behaviour of ``plot_ecdf`` will change.
+    To maintain the original behaviour you should do:
 
     .. plot::
         :context: close-figs
 
         >>> import arviz as az
-        >>> from scipy.stats import uniform, binom, norm
-
+        >>> import numpy as np
+        >>> from scipy.stats import uniform, norm
+        >>>
         >>> sample = norm(0,1).rvs(1000)
-        >>> az.plot_ecdf(sample)
+        >>> npoints = 100
+        >>> az.plot_ecdf(sample, eval_points=np.linspace(sample.min(), sample.max(), npoints))
 
-    Plot ecdf plot with confidence bands for comparing a given sample w.r.t a given distribution
+    However, seeing this warning isn't an indicator of anything being wrong,
+    if you are happy to get different behaviour as ArviZ improves and adds
+    new algorithms you can ignore it like so:
+
+    .. plot::
+        :context: close-figs
+
+        >>> import warnings
+        >>> warnings.filterwarnings("ignore", category=az.utils.BehaviourChangeWarning)
+
+    Plot an ECDF plot for a given sample evaluated at the sample points. This will become
+    the new behaviour when `eval_points` is not provided:
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_ecdf(sample, eval_points=np.unique(sample))
+
+    Plot an ECDF plot with confidence bands for comparing a given sample to a given distribution.
+    We manually specify evaluation points independent of the values so that the confidence bands
+    are correctly calibrated.
 
     .. plot::
         :context: close-figs
 
         >>> distribution = norm(0,1)
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf, confidence_bands = True)
+        >>> eval_points = np.linspace(*distribution.ppf([0.001, 0.999]), 100)
+        >>> az.plot_ecdf(
+        >>>     sample, eval_points=eval_points,
+        >>>     cdf=distribution.cdf, confidence_bands=True
+        >>> )
 
-    Plot ecdf-difference plot with confidence bands for comparing a given sample
-    w.r.t a given distribution
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-        >>>              confidence_bands = True, difference = True)
-
-    Plot ecdf plot with confidence bands for PIT of sample for comparing a given sample
-    w.r.t a given distribution
+    Plot an ECDF-difference plot with confidence bands for comparing a given sample
+    to a given distribution.
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-        >>>              confidence_bands = True, pit = True)
+        >>> az.plot_ecdf(
+        >>>     sample, cdf=distribution.cdf,
+        >>>     confidence_bands=True, difference=True
+        >>> )
 
-    Plot ecdf-difference plot with confidence bands for PIT of sample for comparing a given
-    sample w.r.t a given distribution
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_ecdf(sample, cdf = distribution.cdf,
-        >>>              confidence_bands = True, difference = True, pit = True)
-
-    You could also plot the above w.r.t another sample rather than a given distribution.
-    For eg: Plot ecdf-difference plot with confidence bands for PIT of sample for
-    comparing a given sample w.r.t a given sample
+    Plot an ECDF plot with confidence bands for the probability integral transform (PIT) of a
+    continuous sample. If drawn from the reference distribution, the PIT values should be uniformly
+    distributed.
 
     .. plot::
         :context: close-figs
 
-        >>> sample2 = norm(0,1).rvs(5000)
-        >>> az.plot_ecdf(sample, sample2, confidence_bands = True, difference = True, pit = True)
+        >>> pit_vals = distribution.cdf(sample)
+        >>> uniform_dist = uniform(0, 1)
+        >>> az.plot_ecdf(
+        >>>     pit_vals, cdf=uniform_dist.cdf,
+        >>>     rvs=uniform_dist.rvs, confidence_bands=True
+        >>> )
 
+    Plot an ECDF-difference plot of PIT values.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_ecdf(
+        >>>     pit_vals, cdf = uniform_dist.cdf, rvs = uniform_dist.rvs,
+        >>>     confidence_bands = True, difference = True
+        >>> )
     """
-    if confidence_bands is None:
-        confidence_bands = (values2 is not None) or (cdf is not None)
+    if confidence_bands is True:
+        if pointwise:
+            warnings.warn(
+                "`pointwise` has been deprecated. Use `confidence_bands='pointwise'` instead.",
+                FutureWarning,
+            )
+            confidence_bands = "pointwise"
+        else:
+            confidence_bands = "simulated"
+    elif confidence_bands == "simulated" and pointwise:
+        raise ValueError("Cannot specify both `confidence_bands='simulated'` and `pointwise=True`")
 
-    if values2 is None and cdf is None and confidence_bands is True:
-        raise ValueError("For confidence bands you need to specify values2 or the cdf")
+    if fpr is not None:
+        warnings.warn(
+            "`fpr` has been deprecated. Use `ci_prob=1-fpr` or set `rcParam['stats.ci_prob']` to"
+            "`1-fpr`.",
+            FutureWarning,
+        )
+        if ci_prob is not None:
+            raise ValueError("Cannot specify both `fpr` and `ci_prob`")
+        ci_prob = 1 - fpr
 
-    if cdf is not None and values2 is not None:
-        raise ValueError("To compare sample you need either cdf or values2 and not both")
-
-    if values2 is None and cdf is None and pit is True:
-        raise ValueError("For PIT specify either cdf or values2")
-
-    if values2 is None and cdf is None and difference is True:
-        raise ValueError("For ECDF difference plot need either cdf or values2")
+    if ci_prob is None:
+        ci_prob = rcParams["stats.ci_prob"]
 
     if values2 is not None:
-        values2 = np.ravel(values2)
-        values2.sort()
+        if cdf is not None:
+            raise ValueError("You cannot specify both `values2` and `cdf`")
+        if scipy_ecdf is None:
+            raise ValueError(
+                "The `values2` argument is deprecated and `scipy.stats.ecdf` is not available. "
+                "Please use `cdf` instead."
+            )
+        warnings.warn(
+            "`values2` has been deprecated. Use `cdf=scipy.stats.ecdf(values2).cdf.evaluate` "
+            "instead.",
+            FutureWarning,
+        )
+        cdf = scipy_ecdf(np.ravel(values2)).cdf.evaluate
+
+    if cdf is None:
+        if confidence_bands:
+            raise ValueError("For confidence bands you must specify cdf")
+        if difference is True:
+            raise ValueError("For ECDF difference plot you must specify cdf")
+        if pit:
+            raise ValueError("For PIT plot you must specify cdf")
 
     values = np.ravel(values)
     values.sort()
 
     if pit:
-        eval_points = np.linspace(1 / npoints, 1, npoints)
-        if cdf:
-            sample = cdf(values)
-        else:
-            sample = compute_ecdf(values2, values) / len(values2)
-        cdf_at_eval_points = eval_points
+        warnings.warn(
+            "`pit` has been deprecated. Specify `values=cdf(values)` instead.",
+            FutureWarning,
+        )
+        values = cdf(values)
+        cdf = uniform(0, 1).cdf
         rvs = uniform(0, 1).rvs
-    else:
-        eval_points = np.linspace(values[0], values[-1], npoints)
-        sample = values
-        if confidence_bands or difference:
-            if cdf:
-                cdf_at_eval_points = cdf(eval_points)
-            else:
-                cdf_at_eval_points = compute_ecdf(values2, eval_points)
-        else:
-            cdf_at_eval_points = np.zeros_like(eval_points)
-        rvs = None
+        eval_points = np.linspace(1 / npoints, 1, npoints)
 
-    x_coord, y_coord = _get_ecdf_points(sample, eval_points, difference)
+    if eval_points is None:
+        warnings.warn(
+            "In future versions, if `eval_points` is not provided, then the ECDF will be evaluated"
+            " at the unique values of the sample. To keep the current behavior, provide "
+            "`eval_points` explicitly.",
+            BehaviourChangeWarning,
+        )
+        if confidence_bands == "simulated":
+            warnings.warn(
+                "For simultaneous bands to be correctly calibrated, specify `eval_points` "
+                "independent of the `values`"
+            )
+        eval_points = np.linspace(values[0], values[-1], npoints)
+    else:
+        eval_points = np.asarray(eval_points)
+
+    if difference or confidence_bands:
+        cdf_at_eval_points = cdf(eval_points)
+    else:
+        cdf_at_eval_points = np.zeros_like(eval_points)
+
+    x_coord, y_coord = _get_ecdf_points(values, eval_points, difference)
 
     if difference:
         y_coord -= cdf_at_eval_points
 
     if confidence_bands:
         ndraws = len(values)
-        band_kwargs = {"prob": 1 - fpr, "num_trials": num_trials, "rvs": rvs, "random_state": None}
-        band_kwargs["method"] = "pointwise" if pointwise else "simulated"
-        lower, higher = ecdf_confidence_band(ndraws, eval_points, cdf_at_eval_points, **band_kwargs)
+        x_bands = eval_points
+        lower, higher = ecdf_confidence_band(
+            ndraws,
+            eval_points,
+            cdf_at_eval_points,
+            method=confidence_bands,
+            prob=ci_prob,
+            num_trials=num_trials,
+            rvs=rvs,
+            random_state=random_state,
+        )
 
         if difference:
             lower -= cdf_at_eval_points
             higher -= cdf_at_eval_points
     else:
-        lower, higher = None, None
+        x_bands, lower, higher = None, None, None
 
     ecdf_plot_args = dict(
         x_coord=x_coord,
         y_coord=y_coord,
-        x_bands=eval_points,
+        x_bands=x_bands,
         lower=lower,
         higher=higher,
-        confidence_bands=confidence_bands,
         figsize=figsize,
         fill_band=fill_band,
         plot_kwargs=plot_kwargs,

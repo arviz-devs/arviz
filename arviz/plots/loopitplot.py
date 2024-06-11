@@ -159,7 +159,7 @@ def plot_loo_pit(
     x_vals = None
 
     if hdi_prob is None:
-        hdi_prob = rcParams["stats.hdi_prob"]
+        hdi_prob = rcParams["stats.ci_prob"]
     elif not 1 >= hdi_prob > 0:
         raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 

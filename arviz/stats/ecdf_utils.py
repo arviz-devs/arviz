@@ -25,6 +25,13 @@ def _get_ecdf_points(
     return x, y
 
 
+def _call_rvs(rvs, ndraws, random_state):
+    if random_state is None:
+        return rvs(ndraws)
+    else:
+        return rvs(ndraws, random_state=random_state)
+
+
 def _simulate_ecdf(
     ndraws: int,
     eval_points: np.ndarray,
@@ -32,7 +39,7 @@ def _simulate_ecdf(
     random_state: Optional[Any] = None,
 ) -> np.ndarray:
     """Simulate ECDF at the `eval_points` using the given random variable sampler"""
-    sample = rvs(ndraws, random_state=random_state)
+    sample = _call_rvs(rvs, ndraws, random_state)
     sample.sort()
     return compute_ecdf(sample, eval_points)
 
@@ -91,14 +98,10 @@ def ecdf_confidence_band(
         A function that takes an integer `ndraws` and optionally the object passed to
         `random_state` and returns an array of `ndraws` samples from the same distribution
         as the original dataset. Required if `method` is "simulated" and variable is discrete.
-    num_trials : int, default 1000
+    num_trials : int, default 500
         The number of random ECDFs to generate for constructing simultaneous confidence bands
         (if `method` is "simulated").
-    random_state : {None, int, `numpy.random.Generator`,
-                    `numpy.random.RandomState`}, optional
-        If `None`, the `numpy.random.RandomState` singleton is used. If an `int`, a new
-        ``numpy.random.RandomState`` instance is used, seeded with seed. If a `RandomState` or
-        `Generator` instance, the instance is used.
+    random_state : int, numpy.random.Generator or numpy.random.RandomState, optional
 
     Returns
     -------
@@ -132,7 +135,7 @@ def _simulate_simultaneous_ecdf_band_probability(
     cdf_at_eval_points: np.ndarray,
     prob: float = 0.95,
     rvs: Optional[Callable[[int, Optional[Any]], np.ndarray]] = None,
-    num_trials: int = 1000,
+    num_trials: int = 500,
     random_state: Optional[Any] = None,
 ) -> float:
     """Estimate probability for simultaneous confidence band using simulation.

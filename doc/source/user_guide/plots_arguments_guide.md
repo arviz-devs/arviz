@@ -226,7 +226,7 @@ az.plot_forest(
 ## `hdi_prob`
 
 Probability for the highest density interval (HDI).
-Defaults to ``stats.hdi_prob`` rcParam.
+Defaults to ``stats.ci_prob`` rcParam.
 
 Plot the 80% HDI interval of simulated regression data using `y` argument:
 

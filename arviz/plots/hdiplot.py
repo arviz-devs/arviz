@@ -42,7 +42,7 @@ def plot_hdi(
     hdi_data : array_like, optional
         Precomputed HDI values to use. Assumed shape is ``(*x.shape, 2)``.
     hdi_prob : float, optional
-        Probability for the highest density interval. Defaults to ``stats.hdi_prob`` rcParam.
+        Probability for the highest density interval. Defaults to ``stats.ci_prob`` rcParam.
         See :ref:`this section <common_ hdi_prob>` for usage examples.
     color : str, default "C1"
         Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
@@ -155,7 +155,7 @@ def plot_hdi(
     else:
         y = np.asarray(y)
         if hdi_prob is None:
-            hdi_prob = rcParams["stats.hdi_prob"]
+            hdi_prob = rcParams["stats.ci_prob"]
         elif not 1 >= hdi_prob > 0:
             raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
         hdi_data = hdi(y, hdi_prob=hdi_prob, circular=circular, multimodal=False, **hdi_kwargs)
