@@ -36,6 +36,7 @@ def plot_bpv(
     backend_kwargs=None,
     group="posterior",
     show=None,
+    smoothing=True,
 ):
     r"""Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
@@ -148,6 +149,8 @@ def plot_bpv(
         the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional
         Call backend show function.
+    smoothing : bool, default True
+        If True, smooth the data before computing the p-values or u-values.
 
     Returns
     -------
@@ -166,7 +169,7 @@ def plot_bpv(
     Notes
     -----
     Discrete data is smoothed before computing either p-values or u-values using the
-    function :func:`~arviz.smooth_data`
+    function :func:`~arviz.smooth_data` if the data is integer type and the smoothing parameter is True(by default).
 
     Examples
     --------
@@ -291,6 +294,7 @@ def plot_bpv(
         plot_ref_kwargs=plot_ref_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
+        smoothing=smoothing,
     )
 
     # TODO: Add backend kwargs
