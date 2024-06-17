@@ -804,7 +804,7 @@ def _read_output(path):
 
     # split dataframe to warmup and draws
     saved_warmup = (
-        int(pconf.get("save_warmup", False))
+        int(pconf.get("save_warmup", 0))
         * int(pconf.get("num_warmup", 0))
         // int(pconf.get("thin", 1))
     )
