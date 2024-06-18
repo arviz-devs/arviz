@@ -738,6 +738,7 @@ def _process_configuration(comments):
         elif "=" in comment:
             match_int = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+)$", comment)
             match_float = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+\.[0-9]+)$", comment)
+            match_str_bool = re.search(r"^(\S+)\s*=\s*(true|false)$", comment)
             match_str = re.search(r"^(\S+)\s*=\s*(\S+)$", comment)
             match_empty = re.search(r"^(\S+)\s*=\s*$", comment)
             if match_int:
@@ -746,6 +747,9 @@ def _process_configuration(comments):
             elif match_float:
                 key, value = match_float.group(1), match_float.group(2)
                 results[key] = float(value)
+            elif match_str_bool:
+                key, value = match_str_bool.group(1), match_str_bool.group(2)
+                results[key] = int(value == "true")
             elif match_str:
                 key, value = match_str.group(1), match_str.group(2)
                 results[key] = value
