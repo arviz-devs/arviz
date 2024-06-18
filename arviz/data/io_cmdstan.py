@@ -749,7 +749,7 @@ def _process_configuration(comments):
                 results[key] = float(value)
             elif match_str_bool:
                 key, value = match_str_bool.group(1), match_str_bool.group(2)
-                results[key] = value == "true"
+                results[key] = int(value == "true")
             elif match_str:
                 key, value = match_str.group(1), match_str.group(2)
                 results[key] = value
