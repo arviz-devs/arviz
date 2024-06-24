@@ -175,10 +175,10 @@ def plot_pair(
 
     if divergences:
         source_nondiv = CDSView(
-            source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
+            filters=[GroupFilter(column_name=divergenve_name, group="0")]
         )
         source_div = CDSView(
-            source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
+            filters=[GroupFilter(column_name=divergenve_name, group="1")]
         )
 
     def get_width_and_height(jointplot, rotate):
