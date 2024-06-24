@@ -1,8 +1,8 @@
 numba
 netcdf4
-bokeh>=1.4.0,<3.0
+bokeh>=3
 contourpy
 ujson
 dask[distributed]
-zarr>=2.5.0
+zarr>=2.5.0,<3
 xarray-datatree

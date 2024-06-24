@@ -63,7 +63,7 @@ jobs:
     displayName: 'Install base requirements'
 
   - script: |
-      python -m pip install --no-cache-dir --pre -r requirements-optional.txt
+      python -m pip install --no-cache-dir -r requirements-optional.txt
     condition: and(succeeded(), eq(variables.OptionalRequirements, true))
     displayName: 'Install optional requirements'
 
