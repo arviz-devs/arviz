@@ -270,7 +270,7 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     -----
     The diagnostic is computed by:
 
-      .. math:: \hat{R} = \frac{\hat{V}}{W}
+      .. math:: \hat{R} = \sqrt{\frac{\hat{V}}{W}}
 
     where :math:`W` is the within-chain variance and :math:`\hat{V}` is the posterior variance
     estimate for the pooled rank-traces. This is the potential scale reduction factor, which
