@@ -2,6 +2,8 @@
 
 ## v0.x.x Unreleased
 
+## v0.18.1 (2024 Jul 19)
+
 ### New features
 -  Use revised Pareto k threshold ([2349](https://github.com/arviz-devs/arviz/pull/2349))
 -   Added arguments `ci_prob`, `eval_points`, `rvs`, and `random_state` to `plot_ecdf` ([2316](https://github.com/arviz-devs/arviz/pull/2316))
@@ -19,11 +21,7 @@
 
 ### Deprecation
 -  Support for arrays and DataArrays in plot_khat has been deprecated. Only ELPDdata will be supported in the future ([2349](https://github.com/arviz-devs/arviz/pull/2349))
-
-
 -   Removed arguments `values2`, `fpr`, `pointwise`, and `pit` in `plot_ecdf` ([2316](https://github.com/arviz-devs/arviz/pull/2316))
-
-### Documentation
 
 ## v0.18.0 (2024 Apr 4)
 
