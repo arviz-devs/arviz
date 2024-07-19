@@ -12,6 +12,7 @@
 - Ensure support with numpy 2.0 ([2321](https://github.com/arviz-devs/arviz/pull/2321))
 - Update testing strategy to include an environment without optional dependencies and
   an environment with [scientific python nightlies](https://anaconda.org/scientific-python-nightly-wheels) ([2321](https://github.com/arviz-devs/arviz/pull/2321))
+- Address bokeh related deprecations ([2362](https://github.com/arviz-devs/arviz/pull/2362))
 
 - Fix legend overwriting issue in `plot_trace` ([2334](https://github.com/arviz-devs/arviz/pull/2334))
 
