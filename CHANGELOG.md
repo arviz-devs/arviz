@@ -1,5 +1,15 @@
 # Change Log
 
+## v0.x.x Unreleased
+
+### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
 ## v0.19.0 (2024 Jul 19)
 
 ### New features
