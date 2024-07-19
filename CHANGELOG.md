@@ -1,8 +1,6 @@
 # Change Log
 
-## v0.x.x Unreleased
-
-## v0.18.1 (2024 Jul 19)
+## v0.19.0 (2024 Jul 19)
 
 ### New features
 -  Use revised Pareto k threshold ([2349](https://github.com/arviz-devs/arviz/pull/2349))
