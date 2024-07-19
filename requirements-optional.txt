@@ -1,6 +1,6 @@
 numba
 netcdf4
-bokeh>=3
+bokeh>=3,<3.5
 contourpy
 ujson
 dask[distributed]
