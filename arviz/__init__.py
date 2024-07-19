@@ -37,6 +37,7 @@ from .stats import *
 from .rcparams import rc_context, rcParams
 from .utils import Numba, Dask, interactive_backend
 from .wrappers import *
+from . import preview
 
 # add ArviZ's styles to matplotlib's styles
 _arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")

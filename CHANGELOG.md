@@ -4,9 +4,10 @@
 
 ### New features
 -  Use revised Pareto k threshold ([2349](https://github.com/arviz-devs/arviz/pull/2349))
-
 -   Added arguments `ci_prob`, `eval_points`, `rvs`, and `random_state` to `plot_ecdf` ([2316](https://github.com/arviz-devs/arviz/pull/2316))
 -   Deprecated rcParam `stats.hdi_prob` and replaced with `stats.ci_prob` ([2316](https://github.com/arviz-devs/arviz/pull/2316))
+- Expose features from [arviz-base](https://arviz-base.readthedocs.io), [arviz-stats](https://arviz-stats.readthedocs.io) and [arviz-plots](https://arviz-plots.readthedocs.io) as `arviz.preview`
+  submodule ([2361](https://github.com/arviz-devs/arviz/pull/2361))
 
 ### Maintenance and fixes
 - Ensure support with numpy 2.0 ([2321](https://github.com/arviz-devs/arviz/pull/2321))
