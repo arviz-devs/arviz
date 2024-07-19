@@ -174,8 +174,8 @@ def plot_pair(
     source = ColumnDataSource(data=source_dict)
 
     if divergences:
-        source_nondiv = CDSView(filters=[GroupFilter(column_name=divergenve_name, group="0")])
-        source_div = CDSView(filters=[GroupFilter(column_name=divergenve_name, group="1")])
+        source_nondiv = CDSView(filter=GroupFilter(column_name=divergenve_name, group="0"))
+        source_div = CDSView(filter=GroupFilter(column_name=divergenve_name, group="1"))
 
     def get_width_and_height(jointplot, rotate):
         """Compute subplots dimensions for two or more variables."""
