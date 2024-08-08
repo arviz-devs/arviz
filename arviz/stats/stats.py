@@ -711,16 +711,19 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     Returns
     -------
     ELPDData object (inherits from :class:`pandas.Series`) with the following row/attributes:
-    elpd: approximated expected log pointwise predictive density (elpd)
+    elpd_loo: approximated expected log pointwise predictive density (elpd)
     se: standard error of the elpd
     p_loo: effective number of parameters
-    shape_warn: bool
-        True if the estimated shape parameter of Pareto distribution is greater than a thresold
-        value  for one or more samples. For a sample size S, the thresold is compute as
-        min(1 - 1/log10(S), 0.7)
-    loo_i: array of pointwise predictive accuracy, only if pointwise True
+    n_samples: number of samples
+    n_data_points: number of data points
+    warning: bool
+        True if the estimated shape parameter of Pareto distribution is greater than
+        ``good_k``.
+    loo_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy,
+            only if pointwise=True
     pareto_k: array of Pareto shape values, only if pointwise True
     scale: scale of the elpd
+    good_k: For a sample size S, the thresold is compute as min(1 - 1/log10(S), 0.7)
 
         The returned object has a custom print method that overrides pd.Series method.
 
@@ -1580,7 +1583,9 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     elpd_waic: approximated expected log pointwise predictive density (elpd)
     se: standard error of the elpd
     p_waic: effective number parameters
-    var_warn: bool
+    n_samples: number of samples
+    n_data_points: number of data points
+    warning: bool
         True if posterior variance of the log predictive densities exceeds 0.4
     waic_i: :class:`~xarray.DataArray` with the pointwise predictive accuracy,
             only if pointwise=True
