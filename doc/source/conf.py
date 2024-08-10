@@ -324,8 +324,6 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {
     "xarray": ("https://docs.xarray.dev/en/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
-    # Oriol: I am lazy and didn't want to update any references we might have using the pymc3 key
-    "pymc3": ("https://www.pymc.io/projects/docs/en/stable", None),
     "pymc": ("https://www.pymc.io/projects/docs/en/stable", None),
     "mpl": ("https://matplotlib.org/stable", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
