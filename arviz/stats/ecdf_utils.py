@@ -5,6 +5,7 @@ import warnings
 
 import numpy as np
 from scipy.stats import uniform, binom
+from scipy.optimize import minimize_scalar
 
 
 def compute_ecdf(sample: np.ndarray, eval_points: np.ndarray) -> np.ndarray:
@@ -92,6 +93,7 @@ def ecdf_confidence_band(
     method : string, default "simulated"
         The method used to compute the confidence band. Valid options are:
         - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
+        - "optimized": Use optimization to estimate a simultaneous confidence band.
         - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence band.
           `rvs` must be provided.
     rvs: callable, optional
@@ -115,18 +117,107 @@ def ecdf_confidence_band(
 
     if method == "pointwise":
         prob_pointwise = prob
+    elif method == "optimized":
+        prob_pointwise = _optimize_simultaneous_ecdf_band_probability(
+            ndraws, eval_points, cdf_at_eval_points, prob=prob, **kwargs
+        )
     elif method == "simulated":
         prob_pointwise = _simulate_simultaneous_ecdf_band_probability(
             ndraws, eval_points, cdf_at_eval_points, prob=prob, **kwargs
         )
     else:
-        raise ValueError(f"Unknown method {method}. Valid options are 'pointwise' or 'simulated'.")
+        raise ValueError(f"Unknown method {method}. Valid options are 'pointwise', 'optimized', or 'simulated'.")
 
     prob_lower, prob_upper = _get_pointwise_confidence_band(
         prob_pointwise, ndraws, cdf_at_eval_points
     )
 
     return prob_lower, prob_upper
+
+
+def _update_interior_probabilities(
+    prob_left: np.ndarray,
+    interval_left: np.ndarray,
+    interval_right: np.ndarray,
+    cdf_left: float,
+    cdf_right: float,
+    ndraws: int,
+) -> np.ndarray:
+    """Update the probability that an ECDF has been within the envelope including at the current point.
+
+    Arguments
+    ---------
+    prob_left : np.ndarray
+        For each point in the interior at the previous point, the joint probability that it and all
+        points before are in the interior.
+    interval_left : np.ndarray 
+        The set of points in the interior at the previous point.
+    interval_right : np.ndarray 
+        The set of points in the interior at the current point.
+    cdf_left : float
+        The CDF at the previous point.
+    cdf_right : float
+        The CDF at the current point.
+    ndraws : int
+        Number of draws in the original dataset.
+
+    Returns
+    -------
+    prob_right : np.ndarray
+        For each point in the interior at the current point, the joint probability that it and all
+        previous points are in the interior.
+    """
+    z_tilde = (cdf_right - cdf_left) / (1 - cdf_left)
+    interval_left = interval_left[:, np.newaxis]
+    prob_conditional = binom.pmf(
+        interval_right, ndraws - interval_left, z_tilde, loc=interval_left
+    )
+    prob_right = prob_left.dot(prob_conditional)
+    return prob_right
+
+
+def _band_optimization_objective(
+    prob_pointwise: float,
+    cdf_at_eval_points: np.ndarray,
+    ndraws: int,
+    prob_target: float,
+) -> float:
+    """Objective function for optimizing the simultaneous confidence band probability."""
+    lower, upper = _get_pointwise_confidence_band(prob_pointwise, ndraws, cdf_at_eval_points)
+    lower = (lower * ndraws).astype(int)
+    upper = (upper * ndraws).astype(int)
+
+    interval_left = np.zeros(1)
+    cdf_left = 0
+    prob_interior = np.ones(1)
+    for i in range(cdf_at_eval_points.shape[0]):
+        interval_right = np.arange(lower[i], upper[i] + 1)
+        cdf_right = cdf_at_eval_points[i]
+        prob_interior = _update_interior_probabilities(
+            prob_interior, interval_left, interval_right, cdf_left, cdf_right, ndraws
+        )
+        interval_left = interval_right
+        cdf_left = cdf_right
+    prob_interior = prob_interior.sum()
+    return abs(prob_interior - prob_target)
+
+
+def _optimize_simultaneous_ecdf_band_probability(
+    ndraws: int,
+    eval_points: np.ndarray,
+    cdf_at_eval_points: np.ndarray,
+    prob: float = 0.95,
+    **kwargs,
+):
+    """Estimate probability for simultaneous confidence band using optimization.
+
+    This function simulates the pointwise probability needed to construct pointwise confidence bands
+    that form a `prob`-level confidence envelope for the ECDF of a sample.
+    """
+    cdf_at_eval_points = np.unique(cdf_at_eval_points)
+    objective = lambda p: _band_optimization_objective(p, cdf_at_eval_points, ndraws, prob)
+    prob_pointwise = minimize_scalar(objective, bounds=(prob, 1), method="bounded").x
+    return prob_pointwise
 
 
 def _simulate_simultaneous_ecdf_band_probability(
