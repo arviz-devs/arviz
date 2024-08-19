@@ -109,7 +109,7 @@ def test_get_pointwise_confidence_band(dist, prob, ndraws, num_trials=1_000, see
     ids=["continuous", "continuous default rvs", "discrete"],
 )
 @pytest.mark.parametrize("ndraws", [10_000])
-@pytest.mark.parametrize("method", ["pointwise", "simulated"])
+@pytest.mark.parametrize("method", ["pointwise", "optimized", "simulated"])
 def test_ecdf_confidence_band(dist, rvs, prob, ndraws, method, num_trials=1_000, seed=57):
     """Test test_ecdf_confidence_band."""
     eval_points = np.linspace(*dist.interval(0.99), 10)
