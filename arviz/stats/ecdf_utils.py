@@ -135,7 +135,7 @@ def ecdf_confidence_band(
     return prob_lower, prob_upper
 
 
-def _update_interior_probabilities(
+def _update_ecdf_band_interior_probabilities(
     prob_left: np.ndarray,
     interval_left: np.ndarray,
     interval_right: np.ndarray,
@@ -176,7 +176,7 @@ def _update_interior_probabilities(
     return prob_right
 
 
-def _band_optimization_objective(
+def _ecdf_band_optimization_objective(
     prob_pointwise: float,
     cdf_at_eval_points: np.ndarray,
     ndraws: int,
@@ -184,16 +184,16 @@ def _band_optimization_objective(
 ) -> float:
     """Objective function for optimizing the simultaneous confidence band probability."""
     lower, upper = _get_pointwise_confidence_band(prob_pointwise, ndraws, cdf_at_eval_points)
-    lower = (lower * ndraws).astype(int)
-    upper = (upper * ndraws).astype(int)
+    lower_count = (lower * ndraws).astype(int)
+    upper_count = (upper * ndraws).astype(int) + 1
 
     interval_left = np.zeros(1)
     cdf_left = 0
     prob_interior = np.ones(1)
     for i in range(cdf_at_eval_points.shape[0]):
-        interval_right = np.arange(lower[i], upper[i] + 1)
+        interval_right = np.arange(lower_count[i], upper_count[i])
         cdf_right = cdf_at_eval_points[i]
-        prob_interior = _update_interior_probabilities(
+        prob_interior = _update_ecdf_band_interior_probabilities(
             prob_interior, interval_left, interval_right, cdf_left, cdf_right, ndraws
         )
         interval_left = interval_right
@@ -215,7 +215,7 @@ def _optimize_simultaneous_ecdf_band_probability(
     that form a `prob`-level confidence envelope for the ECDF of a sample.
     """
     cdf_at_eval_points = np.unique(cdf_at_eval_points)
-    objective = lambda p: _band_optimization_objective(p, cdf_at_eval_points, ndraws, prob)
+    objective = lambda p: _ecdf_band_optimization_objective(p, cdf_at_eval_points, ndraws, prob)
     prob_pointwise = minimize_scalar(objective, bounds=(prob, 1), method="bounded").x
     return prob_pointwise
 
