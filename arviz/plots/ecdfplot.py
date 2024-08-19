@@ -73,6 +73,7 @@ def plot_ecdf(
         - False: No confidence bands are plotted (default).
         - True: Plot bands computed with the default algorithm (subject to change)
         - "pointwise": Compute the pointwise (i.e. marginal) confidence band.
+        - "optimized": Use optimization to estimate a simultaneous confidence band.
         - "simulated": Use Monte Carlo simulation to estimate a simultaneous confidence
           band.
 
@@ -238,9 +239,10 @@ def plot_ecdf(
             )
             confidence_bands = "pointwise"
         else:
-            confidence_bands = "simulated"
-    elif confidence_bands == "simulated" and pointwise:
-        raise ValueError("Cannot specify both `confidence_bands='simulated'` and `pointwise=True`")
+            confidence_bands = "optimized"
+        # if pointwise especified, confidence_bands must be a bool or 'pointwise'
+    elif confidence_bands not in [False, "pointwise"] and pointwise:
+        raise ValueError(f"Cannot specify both `confidence_bands='{confidence_bands}'` and `pointwise=True`")
 
     if fpr is not None:
         warnings.warn(
@@ -298,7 +300,7 @@ def plot_ecdf(
             "`eval_points` explicitly.",
             BehaviourChangeWarning,
         )
-        if confidence_bands == "simulated":
+        if confidence_bands in ["optimized", "simulated"]:
             warnings.warn(
                 "For simultaneous bands to be correctly calibrated, specify `eval_points` "
                 "independent of the `values`"
