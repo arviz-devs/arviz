@@ -1285,7 +1285,7 @@ def test_plot_ecdf_eval_points():
     assert axes is not None
 
 
-@pytest.mark.parametrize("confidence_bands", [True, "pointwise", "simulated"])
+@pytest.mark.parametrize("confidence_bands", [True, "pointwise", "optimized", "simulated"])
 def test_plot_ecdf_confidence_bands(confidence_bands):
     """Check that all confidence_bands values correctly accepted"""
     data = np.random.randn(4, 1000)
@@ -1326,6 +1326,8 @@ def test_plot_ecdf_error():
     # contradictory confidence band types
     with pytest.raises(ValueError):
         plot_ecdf(data, cdf=dist.cdf, confidence_bands="simulated", pointwise=True)
+    with pytest.raises(ValueError):
+        plot_ecdf(data, cdf=dist.cdf, confidence_bands="optimized", pointwise=True)
     plot_ecdf(data, cdf=dist.cdf, confidence_bands=True, pointwise=True)
     plot_ecdf(data, cdf=dist.cdf, confidence_bands="pointwise")
 
