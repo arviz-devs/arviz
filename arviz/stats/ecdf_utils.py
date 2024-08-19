@@ -126,7 +126,9 @@ def ecdf_confidence_band(
             ndraws, eval_points, cdf_at_eval_points, prob=prob, **kwargs
         )
     else:
-        raise ValueError(f"Unknown method {method}. Valid options are 'pointwise', 'optimized', or 'simulated'.")
+        raise ValueError(
+            f"Unknown method {method}. Valid options are 'pointwise', 'optimized', or 'simulated'."
+        )
 
     prob_lower, prob_upper = _get_pointwise_confidence_band(
         prob_pointwise, ndraws, cdf_at_eval_points
@@ -150,9 +152,9 @@ def _update_ecdf_band_interior_probabilities(
     prob_left : np.ndarray
         For each point in the interior at the previous point, the joint probability that it and all
         points before are in the interior.
-    interval_left : np.ndarray 
+    interval_left : np.ndarray
         The set of points in the interior at the previous point.
-    interval_right : np.ndarray 
+    interval_right : np.ndarray
         The set of points in the interior at the current point.
     cdf_left : float
         The CDF at the previous point.
@@ -169,9 +171,7 @@ def _update_ecdf_band_interior_probabilities(
     """
     z_tilde = (cdf_right - cdf_left) / (1 - cdf_left)
     interval_left = interval_left[:, np.newaxis]
-    prob_conditional = binom.pmf(
-        interval_right, ndraws - interval_left, z_tilde, loc=interval_left
-    )
+    prob_conditional = binom.pmf(interval_right, ndraws - interval_left, z_tilde, loc=interval_left)
     prob_right = prob_left.dot(prob_conditional)
     return prob_right
 

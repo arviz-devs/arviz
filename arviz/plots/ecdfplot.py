@@ -242,7 +242,9 @@ def plot_ecdf(
             confidence_bands = "optimized"
         # if pointwise especified, confidence_bands must be a bool or 'pointwise'
     elif confidence_bands not in [False, "pointwise"] and pointwise:
-        raise ValueError(f"Cannot specify both `confidence_bands='{confidence_bands}'` and `pointwise=True`")
+        raise ValueError(
+            f"Cannot specify both `confidence_bands='{confidence_bands}'` and `pointwise=True`"
+        )
 
     if fpr is not None:
         warnings.warn(
