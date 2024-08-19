@@ -74,7 +74,7 @@ def ecdf_confidence_band(
     eval_points: np.ndarray,
     cdf_at_eval_points: np.ndarray,
     prob: float = 0.95,
-    method="simulated",
+    method="optimized",
     **kwargs,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Compute the `prob`-level confidence band for the ECDF.
