@@ -217,8 +217,7 @@ def plot_ecdf(
         >>> pit_vals = distribution.cdf(sample)
         >>> uniform_dist = uniform(0, 1)
         >>> az.plot_ecdf(
-        >>>     pit_vals, cdf=uniform_dist.cdf,
-        >>>     rvs=uniform_dist.rvs, confidence_bands=True
+        >>>     pit_vals, cdf=uniform_dist.cdf, confidence_bands=True,
         >>> )
 
     Plot an ECDF-difference plot of PIT values.
@@ -227,8 +226,8 @@ def plot_ecdf(
         :context: close-figs
 
         >>> az.plot_ecdf(
-        >>>     pit_vals, cdf = uniform_dist.cdf, rvs = uniform_dist.rvs,
-        >>>     confidence_bands = True, difference = True
+        >>>     pit_vals, cdf = uniform_dist.cdf, confidence_bands = True,
+        >>>     difference = True
         >>> )
     """
     if confidence_bands is True:
