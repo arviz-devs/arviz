@@ -145,7 +145,8 @@ def _update_ecdf_band_interior_probabilities(
     cdf_right: float,
     ndraws: int,
 ) -> np.ndarray:
-    """Update the probability that an ECDF has been within the envelope including at the current point.
+    """Update the probability that an ECDF has been within the envelope including at the current
+    point.
 
     Arguments
     ---------
@@ -204,10 +205,10 @@ def _ecdf_band_optimization_objective(
 
 def _optimize_simultaneous_ecdf_band_probability(
     ndraws: int,
-    eval_points: np.ndarray,
+    eval_points: np.ndarray,  # pylint: disable=unused-argument
     cdf_at_eval_points: np.ndarray,
     prob: float = 0.95,
-    **kwargs,
+    **kwargs,  # pylint: disable=unused-argument
 ):
     """Estimate probability for simultaneous confidence band using optimization.
 
