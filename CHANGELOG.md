@@ -9,6 +9,7 @@
 ### Deprecation
 
 ### Documentation
+- Fixed the issue in the [Contribution References Documentation](https://python.arviz.org/en/latest/contributing/index.html) ([2369](https://github.com/arviz-devs/arviz/issues/2369))
 
 ## v0.19.0 (2024 Jul 19)
 
