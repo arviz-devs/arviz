@@ -1,7 +1,7 @@
 (contributing_guide)=
 # Contributing to ArviZ
 ## Welcome
-Welcome to the [ArviZ](https://www.arviz.org/en/latest/index.html) project!
+Welcome to the {doc}`ArviZ <arviz_org:index>` project!
 If you’re reading this guide, that probably means you’d like to get involved
 and start contributing to the project.
 ArviZ is a  multi-language open-source project that provides tools for exploratory analysis of Bayesian models.
@@ -17,7 +17,7 @@ and maximize the probability of such contributions being merged as quickly and a
 All kinds of contributions to ArviZ, either on its codebase, its documentation,
 or its community are valuable and we appreciate your help.
 We constantly encourage non-code contributors to become core contributors
-and participate in [ArviZ governance](https://www.arviz.org/en/latest/governance/index.html#governance).
+and participate in {ref}`ArviZ governance <arviz_org:governance>`.
 
 ## Before you begin
 Before contributing to ArviZ, please make sure to read and observe the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/main/CODE_OF_CONDUCT.md).
@@ -33,46 +33,46 @@ but there are many other ways to help the project.
 
 Each subsection within this section gives an overview of common contribution types
 to ArviZ. If you prefer video instead of written form, jump to the next section:
-[Contributing to ArviZ Webinar](https://python.arviz.org/en/latest/contributing/index.html#contributing-webinar) for a recording of an ArviZ core contributor
+{ref}`contributing_webinar` for a recording of an ArviZ core contributor
 on both technical and social aspects of contributing to the library.
 
 You can contribute to ArviZ in the following ways:
 
 ### Create an issue
-[Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check  [Issue reports](https://python.arviz.org/en/latest/contributing/issue_reports.html#issue-reports) for details on how to write an issue.
+[Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check  {ref}`issue_reports` for details on how to write an issue.
 
 ### Translate ArviZ website
-You can [translate](https://python.arviz.org/en/latest/contributing/translate.html#translate) our website to languages other than English.
+You can {ref}`translate <translate>` our website to languages other than English.
 
 ### Review PRs
-[Review pull requests](https://python.arviz.org/en/latest/contributing/review_prs.html#review-prs) to ensure that the contributions are well tested and documented.
+{ref}`Review pull requests <review_prs>` to ensure that the contributions are well tested and documented.
 For example, you can check if the documentation renders correctly and has no typos or mistakes.
 
 ### Manage issues
 Helping to manage or triage the open issues can be a great contribution and
 a great opportunity to learn about the various areas of the project.
-You can [triage existing issues](https://python.arviz.org/en/latest/contributing/issue_triaging.html#issue-triaging) to make them clear and/or provide temporary workarounds for them.
+You can {ref}`triage existing issues <issue_triaging>` to make them clear and/or provide temporary workarounds for them.
 
 ### Write documentation
 You can contribute to ArviZ’s documentation by either creating new content or editing existing content.
 For instance, you can add new ArviZ examples.
 To get involved with the documentation:
-1. Familiarize yourself with the [documentation content structure](https://python.arviz.org/en/latest/contributing/content_structure.html#content-structure) and the [tool chain](https://python.arviz.org/en/latest/contributing/doc_toolchain.html#doc-toolchain) involved in creating the website.
-2. Understand the basic workflow for opening a [pull request](https://python.arviz.org/en/latest/contributing/pr_tutorial.html#pr-tutorial) and [reviewing changes](https://python.arviz.org/en/latest/contributing/review_prs.html#review-prs).
+1. Familiarize yourself with the  {ref}`documentation content structure <content_structure>` and the {ref}`tool chain <doc_toolchain>` involved in creating the website.
+2. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing changes <review_prs>`.
 3. Work on your content.
-4. [Build](https://python.arviz.org/en/latest/contributing/sphinx_doc_build.html#sphinx-doc-build) your documentation and preview the doc changes.
+4. {ref}`Build <sphinx_doc_build>` your documentation and preview the doc changes.
 
 ### Support outreach initiatives
-Support ArviZ [outreach initiatives](https://python.arviz.org/en/latest/contributing/outreach.html#oureach-contrib) such as writing blog posts, case studies, getting people to use ArviZ at your company or university, etc.
+Support ArviZ {ref}`outreach initiatives <oureach_contrib>` such as writing blog posts, case studies, getting people to use ArviZ at your company or university, etc.
 
 ### Make changes in the code
 Fix outstanding issues (bugs) in the existing codebase.
 The issue can range from low-level software bugs to high-level design problems.
 You can also add new features to the codebase or improve the existing functionality.
 To fix bugs or add new features, do the following:
-1. Familiarize yourself with the [guidelines](https://python.arviz.org/en/latest/contributing/contributing_prs.html#steps-before-working) before starting your work.
-2. Understand the [development process](https://python.arviz.org/en/latest/contributing/contributing_prs.html#dev-summary) and code conventions.
-3. Understand the basic workflow for opening a [pull request](https://python.arviz.org/en/latest/contributing/pr_tutorial.html#pr-tutorial) and [reviewing](https://python.arviz.org/en/latest/contributing/review_prs.html#review-prs) changes.
+1. Familiarize yourself with the {ref}`guidelines <steps_before_working>` before starting your work.
+2. Understand the {ref}`development process <dev_summary>` and code conventions.
+3. Understand the basic workflow for opening a {ref}`pull request <pr_tutorial>` and {ref}`reviewing <review_prs>` changes.
 4. Review and test your code.
 
 (contributing_webinar)=

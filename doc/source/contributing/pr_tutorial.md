@@ -1,3 +1,4 @@
+(pr_tutorial)=
 # Pull request step-by-step
 
 The preferred workflow for contributing to ArviZ is to fork
