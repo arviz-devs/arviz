@@ -187,28 +187,21 @@ def _update_ecdf_band_interior_probabilities(
     return prob_right
 
 
-@jit(nopython=True)
-def _lbinom(n, k):
-    k = min(k, n - k)  # Take advantage of symmetry
-    if k < 0:
-        return 0.0
-    if k == 0:
-        return 1.0
-    return math.lgamma(n + 1) - math.lgamma(k + 1) - math.lgamma(n - k + 1)
-
-
 @vectorize(["float64(int64, int64, float64, int64)"])
 def _binom_pmf(k, n, p, loc):
     k -= loc
-    if k == 0:
-        return (1 - p) ** n
-    if k == n:
-        return p**k
+    if k < 0 or k > n:
+        return 0.0
     if p == 0:
         return 1.0 if k == 0 else 0.0
     if p == 1:
         return 1.0 if k == n else 0.0
-    return np.exp(_lbinom(n, k) + k * np.log(p) + (n - k) * np.log1p(-p))
+    if k == 0:
+        return (1 - p) ** n
+    if k == n:
+        return p**n
+    lbinom = math.lgamma(n + 1) - math.lgamma(k + 1) - math.lgamma(n - k + 1)
+    return np.exp(lbinom + k * np.log(p) + (n - k) * np.log1p(-p))
 
 
 @jit(nopython=True)
