@@ -12,10 +12,10 @@ try:
     from numba import jit, vectorize
 except ImportError:
 
-    def jit(*args, **kwargs):
+    def jit(*args, **kwargs):  # pylint: disable=unused-argument
         return lambda f: f
 
-    def vectorize(*args, **kwargs):
+    def vectorize(*args, **kwargs):  # pylint: disable=unused-argument
         return lambda f: f
 
 
