@@ -10,6 +10,13 @@ from ...stats.ecdf_utils import (
     _get_pointwise_confidence_band,
 )
 
+try:
+    import numba
+
+    numba_options = [True, False]
+except ImportError:
+    numba_options = [False]
+
 
 def test_compute_ecdf():
     """Test compute_ecdf function."""
@@ -110,8 +117,14 @@ def test_get_pointwise_confidence_band(dist, prob, ndraws, num_trials=1_000, see
 )
 @pytest.mark.parametrize("ndraws", [10_000])
 @pytest.mark.parametrize("method", ["pointwise", "optimized", "simulated"])
-def test_ecdf_confidence_band(dist, rvs, prob, ndraws, method, num_trials=1_000, seed=57):
+@pytest.mark.parametrize("use_numba", numba_options)
+def test_ecdf_confidence_band(
+    dist, rvs, prob, ndraws, method, use_numba, num_trials=1_000, seed=57
+):
     """Test test_ecdf_confidence_band."""
+    if use_numba and method != "optimized":
+        pytest.skip("Numba only used in optimized method")
+
     eval_points = np.linspace(*dist.interval(0.99), 10)
     cdf_at_eval_points = dist.cdf(eval_points)
     random_state = np.random.default_rng(seed)

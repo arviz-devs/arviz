@@ -1,11 +1,25 @@
 """Functions for evaluating ECDFs and their confidence bands."""
 
+import math
 from typing import Any, Callable, Optional, Tuple
 import warnings
 
 import numpy as np
 from scipy.stats import uniform, binom
 from scipy.optimize import minimize_scalar
+
+try:
+    from numba import jit, vectorize
+except ImportError:
+
+    def jit(*args, **kwargs):
+        return lambda f: f
+
+    def vectorize(*args, **kwargs):
+        return lambda f: f
+
+
+from ..utils import Numba
 
 
 def compute_ecdf(sample: np.ndarray, eval_points: np.ndarray) -> np.ndarray:
@@ -141,8 +155,7 @@ def _update_ecdf_band_interior_probabilities(
     prob_left: np.ndarray,
     interval_left: np.ndarray,
     interval_right: np.ndarray,
-    cdf_left: float,
-    cdf_right: float,
+    p: float,
     ndraws: int,
 ) -> np.ndarray:
     """Update the probability that an ECDF has been within the envelope including at the current
@@ -157,10 +170,8 @@ def _update_ecdf_band_interior_probabilities(
         The set of points in the interior at the previous point.
     interval_right : np.ndarray
         The set of points in the interior at the current point.
-    cdf_left : float
-        The CDF at the previous point.
-    cdf_right : float
-        The CDF at the current point.
+    p : float
+        The probability of any given point found between the previous point and the current one.
     ndraws : int
         Number of draws in the original dataset.
 
@@ -170,11 +181,73 @@ def _update_ecdf_band_interior_probabilities(
         For each point in the interior at the current point, the joint probability that it and all
         previous points are in the interior.
     """
-    z_tilde = (cdf_right - cdf_left) / (1 - cdf_left)
     interval_left = interval_left[:, np.newaxis]
-    prob_conditional = binom.pmf(interval_right, ndraws - interval_left, z_tilde, loc=interval_left)
+    prob_conditional = binom.pmf(interval_right, ndraws - interval_left, p, loc=interval_left)
     prob_right = prob_left.dot(prob_conditional)
     return prob_right
+
+
+@jit(nopython=True)
+def _lbinom(n, k):
+    k = min(k, n - k)  # Take advantage of symmetry
+    if k < 0:
+        return 0.0
+    if k == 0:
+        return 1.0
+    return math.lgamma(n + 1) - math.lgamma(k + 1) - math.lgamma(n - k + 1)
+
+
+@vectorize(["float64(int64, int64, float64, int64)"])
+def _binom_pmf(k, n, p, loc):
+    k -= loc
+    if k == 0:
+        return (1 - p) ** n
+    if k == n:
+        return p**k
+    if p == 0:
+        return 1.0 if k == 0 else 0.0
+    if p == 1:
+        return 1.0 if k == n else 0.0
+    return np.exp(_lbinom(n, k) + k * np.log(p) + (n - k) * np.log1p(-p))
+
+
+@jit(nopython=True)
+def _update_ecdf_band_interior_probabilities_numba(
+    prob_left: np.ndarray,
+    interval_left: np.ndarray,
+    interval_right: np.ndarray,
+    p: float,
+    ndraws: int,
+) -> np.ndarray:
+    interval_left = interval_left[:, np.newaxis]
+    prob_conditional = _binom_pmf(interval_right, ndraws - interval_left, p, interval_left)
+    prob_right = prob_left.dot(prob_conditional)
+    return prob_right
+
+
+def _ecdf_band_interior_probability(prob_between_points, ndraws, lower_count, upper_count):
+    interval_left = np.arange(1)
+    prob_interior = np.ones(1)
+    for i in range(prob_between_points.shape[0]):
+        interval_right = np.arange(lower_count[i], upper_count[i])
+        prob_interior = _update_ecdf_band_interior_probabilities(
+            prob_interior, interval_left, interval_right, prob_between_points[i], ndraws
+        )
+        interval_left = interval_right
+    return prob_interior.sum()
+
+
+@jit(nopython=True)
+def _ecdf_band_interior_probability_numba(prob_between_points, ndraws, lower_count, upper_count):
+    interval_left = np.arange(1)
+    prob_interior = np.ones(1)
+    for i in range(prob_between_points.shape[0]):
+        interval_right = np.arange(lower_count[i], upper_count[i])
+        prob_interior = _update_ecdf_band_interior_probabilities_numba(
+            prob_interior, interval_left, interval_right, prob_between_points[i], ndraws
+        )
+        interval_left = interval_right
+    return prob_interior.sum()
 
 
 def _ecdf_band_optimization_objective(
@@ -187,19 +260,16 @@ def _ecdf_band_optimization_objective(
     lower, upper = _get_pointwise_confidence_band(prob_pointwise, ndraws, cdf_at_eval_points)
     lower_count = (lower * ndraws).astype(int)
     upper_count = (upper * ndraws).astype(int) + 1
-
-    interval_left = np.zeros(1)
-    cdf_left = 0
-    prob_interior = np.ones(1)
-    for i in range(cdf_at_eval_points.shape[0]):
-        interval_right = np.arange(lower_count[i], upper_count[i])
-        cdf_right = cdf_at_eval_points[i]
-        prob_interior = _update_ecdf_band_interior_probabilities(
-            prob_interior, interval_left, interval_right, cdf_left, cdf_right, ndraws
+    cdf_with_zero = np.insert(cdf_at_eval_points[:-1], 0, 0)
+    prob_between_points = (cdf_at_eval_points - cdf_with_zero) / (1 - cdf_with_zero)
+    if Numba.numba_flag:
+        prob_interior = _ecdf_band_interior_probability_numba(
+            prob_between_points, ndraws, lower_count, upper_count
         )
-        interval_left = interval_right
-        cdf_left = cdf_right
-    prob_interior = prob_interior.sum()
+    else:
+        prob_interior = _ecdf_band_interior_probability(
+            prob_between_points, ndraws, lower_count, upper_count
+        )
     return abs(prob_interior - prob_target)
 
 
