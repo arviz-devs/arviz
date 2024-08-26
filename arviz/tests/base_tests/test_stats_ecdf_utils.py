@@ -11,7 +11,7 @@ from ...stats.ecdf_utils import (
 )
 
 try:
-    import numba
+    import numba   # pylint: disable=unused-import
 
     numba_options = [True, False]
 except ImportError:
