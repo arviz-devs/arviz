@@ -238,8 +238,8 @@ def plot_ecdf(
             )
             confidence_bands = "pointwise"
         else:
-            confidence_bands = "optimized"
-        # if pointwise especified, confidence_bands must be a bool or 'pointwise'
+            confidence_bands = "auto"
+        # if pointwise specified, confidence_bands must be a bool or 'pointwise'
     elif confidence_bands not in [False, "pointwise"] and pointwise:
         raise ValueError(
             f"Cannot specify both `confidence_bands='{confidence_bands}'` and `pointwise=True`"
@@ -322,6 +322,11 @@ def plot_ecdf(
 
     if confidence_bands:
         ndraws = len(values)
+        if confidence_bands == "auto":
+            if ndraws < 200 or num_trials >= 250 * np.sqrt(ndraws):
+                confidence_bands = "optimized"
+            else:
+                confidence_bands = "simulated"
         x_bands = eval_points
         lower, higher = ecdf_confidence_band(
             ndraws,
