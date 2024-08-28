@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
+- Add optimized simultaneous ECDF confidence bands ([2368](https://github.com/arviz-devs/arviz/pull/2368))
 
 ### Maintenance and fixes
 
