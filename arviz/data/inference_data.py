@@ -274,7 +274,6 @@ class InferenceData(Mapping[str, xr.Dataset]):
             self._groups.append(key)
         setattr(self, key, value)
 
-
     def groups(self) -> List[str]:
         """Return all groups present in InferenceData object."""
         return self._groups_all
