@@ -4,6 +4,7 @@
 
 ### New features
 - Add optimized simultaneous ECDF confidence bands ([2368](https://github.com/arviz-devs/arviz/pull/2368))
+- Add support for setting groups with `idata[group]` ([2374](https://github.com/arviz-devs/arviz/pull/2374))
 
 ### Maintenance and fixes
 
