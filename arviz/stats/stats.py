@@ -675,7 +675,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     return np.array(hdi_intervals)
 
 
-def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
+def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=None):
     """Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
     Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
@@ -685,20 +685,20 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
     Parameters
     ----------
-    data: obj
+    data : obj
         Any object that can be converted to an :class:`arviz.InferenceData` object.
         Refer to documentation of
         :func:`arviz.convert_to_dataset` for details.
-    pointwise: bool, optional
+    pointwise : bool, optional
         If True the pointwise predictive accuracy will be returned. Defaults to
         ``stats.ic_pointwise`` rcParam.
     var_name : str, optional
         The name of the variable in log_likelihood groups storing the pointwise log
         likelihood data to use for loo computation.
-    reff: float, optional
+    reff : float, optional
         Relative MCMC efficiency, ``ess / n`` i.e. number of effective samples divided by the number
         of actual samples. Computed from trace by default.
-    scale: str
+    scale : {"log", "negative_log", "deviance"}, optional
         Output scale for loo. Available options are:
 
         - ``log`` : (default) log-score
@@ -707,6 +707,8 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -756,6 +758,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
     pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
 
+    if dask_kwargs is None:
+        dask_kwargs = {}
+
     log_likelihood = log_likelihood.stack(__sample__=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
@@ -785,7 +790,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
                 np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
             )
 
-    log_weights, pareto_shape = psislw(-log_likelihood, reff)
+    psis_dask = dask_kwargs.copy()
+    psis_dask["output_dtypes"] = (float, float)
+    log_weights, pareto_shape = psislw(-log_likelihood, reff, dask_kwargs=psis_dask)
     log_weights += log_likelihood
 
     warn_mg = False
@@ -803,20 +810,28 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
     kwargs = {"input_core_dims": [["__sample__"]]}
+    logsumexp_dask = dask_kwargs.copy()
+    logsumexp_dask["output_dtypes"] = [float]
+    logsumexp_out = xr.zeros_like(log_weights.isel(__sample__=0, drop=True)).data
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
-        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
+            _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs={"out": logsumexp_out}, dask_kwargs=logsumexp_dask, **kwargs
     )
-    loo_lppd = loo_lppd_i.values.sum()
-    loo_lppd_se = (n_data_points * np.var(loo_lppd_i.values)) ** 0.5
+    loo_lppd = loo_lppd_i.sum().compute().item()
+    loo_lppd_se = (n_data_points * loo_lppd_i.var().compute().item()) ** 0.5
 
-    lppd = np.sum(
+    lppd_out = xr.zeros_like(log_weights.isel(__sample__=0, drop=True)).data
+    lppd = (
         _wrap_xarray_ufunc(
             _logsumexp,
             log_likelihood,
-            func_kwargs={"b_inv": n_samples},
+            func_kwargs={"b_inv": n_samples, "out": lppd_out},
             ufunc_kwargs=ufunc_kwargs,
+            dask_kwargs=logsumexp_dask,
             **kwargs,
-        ).values
+        )
+        .sum()
+        .compute()
+        .item()
     )
     p_loo = lppd - loo_lppd / scale_value
 
@@ -867,7 +882,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     )
 
 
-def psislw(log_weights, reff=1.0):
+def psislw(log_weights, reff=1.0, dask_kwargs=None):
     """
     Pareto smoothed importance sampling (PSIS).
 
@@ -882,9 +897,11 @@ def psislw(log_weights, reff=1.0):
     Parameters
     ----------
     log_weights : DataArray or (..., N) array-like
-        Array of size (n_observations, n_samples)
+        Array of shape (*observation_shape, n_samples)
     reff : float, default 1
         relative MCMC efficiency, ``ess / n``
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -917,6 +934,8 @@ def psislw(log_weights, reff=1.0):
            ...: az.psislw(-log_likelihood, reff=0.8)
 
     """
+    if dask_kwargs is None:
+        dask_kwargs = {}
     if hasattr(log_weights, "__sample__"):
         n_samples = len(log_weights.__sample__)
         shape = [
@@ -930,7 +949,11 @@ def psislw(log_weights, reff=1.0):
     cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member, assignment-from-no-return
 
     # create output array with proper dimensions
-    out = np.empty_like(log_weights), np.empty(shape)
+    if dask_kwargs.get("dask", "forbidden") in {"allowed", "parallelized"}:
+        out = xr.zeros_like(log_weights).data, xr.zeros_like(log_weights.isel(__sample__=0, drop=True)).data
+        dask_kwargs["output_dtypes"] = (float, float)
+    else:
+        out = np.empty_like(log_weights), np.empty(shape)
 
     # define kwargs
     func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "out": out}
@@ -941,6 +964,7 @@ def psislw(log_weights, reff=1.0):
         log_weights,
         ufunc_kwargs=ufunc_kwargs,
         func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
         **kwargs,
     )
     if isinstance(log_weights, xr.DataArray):
