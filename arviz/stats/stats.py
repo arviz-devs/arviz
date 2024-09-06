@@ -917,6 +917,7 @@ def psislw(log_weights, reff=1.0):
            ...: az.psislw(-log_likelihood, reff=0.8)
 
     """
+    log_weights = deepcopy(log_weights)
     if hasattr(log_weights, "__sample__"):
         n_samples = len(log_weights.__sample__)
         shape = [
