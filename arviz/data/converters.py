@@ -2,6 +2,7 @@
 
 import numpy as np
 import xarray as xr
+
 try:
     from tree import is_nested
 except ImportError:
