@@ -266,6 +266,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise KeyError(key)
         return getattr(self, key)
 
+    def __setitem__(self, key: str, value: xr.Dataset):
+        """Set item by key and update group list accordingly."""
+        if key.startswith(WARMUP_TAG):
+            self._groups_warmup.append(key)
+        else:
+            self._groups.append(key)
+        setattr(self, key, value)
+
     def groups(self) -> List[str]:
         """Return all groups present in InferenceData object."""
         return self._groups_all

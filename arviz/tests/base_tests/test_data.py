@@ -895,6 +895,11 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         assert escape(repr(idata)) in html
         xr.set_options(display_style=display_style)
 
+    def test_setitem(self, data_random):
+        data_random["new_group"] = data_random.posterior
+        assert "new_group" in data_random.groups()
+        assert hasattr(data_random, "new_group")
+
     def test_add_groups(self, data_random):
         data = np.random.normal(size=(4, 500, 8))
         idata = data_random
