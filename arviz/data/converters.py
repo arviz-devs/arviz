@@ -1,8 +1,11 @@
 """High level conversion functions."""
 
 import numpy as np
-import tree
 import xarray as xr
+try:
+    from tree import is_nested
+except ImportError:
+    is_nested = lambda obj: False
 
 from .base import dict_to_dataset
 from .inference_data import InferenceData
@@ -107,7 +110,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         dataset = obj.to_dataset()
     elif isinstance(obj, dict):
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
-    elif tree.is_nested(obj) and not isinstance(obj, (list, tuple)):
+    elif is_nested(obj) and not isinstance(obj, (list, tuple)):
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
         dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
@@ -122,7 +125,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             "xarray dataarray",
             "xarray dataset",
             "dict",
-            "pytree",
+            "pytree (if 'dm-tree' is installed)",
             "netcdf filename",
             "numpy array",
             "pystan fit",

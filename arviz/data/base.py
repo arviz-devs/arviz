@@ -9,8 +9,12 @@ from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
-import tree
 import xarray as xr
+
+try:
+    import tree
+except ImportError:
+    tree = None
 
 try:
     import ujson as json
@@ -89,6 +93,9 @@ def _yield_flat_up_to(shallow_tree, input_tree, path=()):
         input_tree.
     """
     # pylint: disable=protected-access
+    if tree is None:
+        raise ImportError("Missing optional dependency 'dm-tree'. Use pip or conda to install it")
+
     if isinstance(shallow_tree, tree._TEXT_OR_BYTES) or not (
         isinstance(shallow_tree, tree.collections_abc.Mapping)
         or tree._is_namedtuple(shallow_tree)
@@ -299,7 +306,7 @@ def numpy_to_data_array(
     return xr.DataArray(ary, coords=coords, dims=dims)
 
 
-def pytree_to_dataset(
+def dict_to_dataset(
     data,
     *,
     attrs=None,
@@ -312,6 +319,8 @@ def pytree_to_dataset(
 ):
     """Convert a dictionary or pytree of numpy arrays to an xarray.Dataset.
 
+    ArviZ itself supports conversion of flat dictionaries.
+    Suport for pytrees requires ``dm-tree`` which is an optional dependency.
     See https://jax.readthedocs.io/en/latest/pytrees.html for what a pytree is, but
     this inclues at least dictionaries and tuple types.
 
@@ -386,10 +395,12 @@ def pytree_to_dataset(
     """
     if dims is None:
         dims = {}
-    try:
-        data = {k[0] if len(k) == 1 else k: v for k, v in _flatten_with_path(data)}
-    except TypeError:  # probably unsortable keys -- the function will still work if
-        pass  # it is an honest dictionary.
+
+    if tree is not None:
+        try:
+            data = {k[0] if len(k) == 1 else k: v for k, v in _flatten_with_path(data)}
+        except TypeError:  # probably unsortable keys -- the function will still work if
+            pass  # it is an honest dictionary.
 
     data_vars = {
         key: numpy_to_data_array(
@@ -406,7 +417,7 @@ def pytree_to_dataset(
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
 
 
-dict_to_dataset = pytree_to_dataset
+pytree_to_dataset = dict_to_dataset
 
 
 def make_attrs(attrs=None, library=None):
