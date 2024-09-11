@@ -44,6 +44,10 @@ from ..helpers import (  # pylint: disable=unused-import
     models,
 )
 
+# Check if dm-tree is installed
+dm_tree_installed = importlib.util.find_spec("tree") is not None  # pylint: disable=invalid-name
+skip_tests = (not dm_tree_installed) and ("ARVIZ_REQUIRE_ALL_DEPS" not in os.environ)
+
 
 @pytest.fixture(autouse=True)
 def no_remote_data(monkeypatch, tmpdir):
@@ -1081,6 +1085,7 @@ def test_dict_to_dataset():
     assert set(dataset.b.coords) == {"chain", "draw", "c"}
 
 
+@pytest.mark.skipif(skip_tests, reason="test requires dm-tree which is not installed")
 def test_nested_dict_to_dataset():
     datadict = {
         "top": {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)},
