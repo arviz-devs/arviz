@@ -1,5 +1,4 @@
 """Matplotlib kdeplot."""
-
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import _pylab_helpers
