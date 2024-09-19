@@ -632,7 +632,7 @@ def _kde_linear(
     bw: int, float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be one of "scott",
-        "silverman", "isj" or "experimental". Defaults to "experimental".
+        "silverman", "isj", "experimental", "ucv", or "bcv". Defaults to "experimental".
     adaptive: boolean, optional
         Indicates if the bandwidth is adaptive or not.
         It is the recommended approach when there are multiple modes with different spread.
