@@ -546,6 +546,17 @@ def kde(x, circular=False, **kwargs):
         >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 11))
         >>> plt.plot(grid, pdf)
 
+    Density estimation for well-separated modes with bandwidth chosen using unbiased
+    cross-validation
+
+    .. plot::
+        :context: close-figs
+
+        >>> rvs = np.concatenate([np.random.normal(0, 1, 500), np.random.normal(30, 1, 500)])
+        >>> grid, pdf = kde(rvs, bw='ucv')
+        >>> plt.plot(grid, pdf)
+
+
     Default density estimation for circular data
 
     .. plot::
