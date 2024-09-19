@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 from scipy.fftpack import fft
-from scipy.optimize import brentq
+from scipy.optimize import brentq, minimize_scalar
 from scipy.signal import convolve, convolve2d
 from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
@@ -32,6 +32,66 @@ def _bw_silverman(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
     a = min(x_std, x_iqr / 1.34)
     bw = 0.9 * a * len(x) ** (-0.2)
     return bw
+
+
+def _bw_oversmoothed(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
+    """Oversmoothed bandwidth estimation."""
+    if x_std is None:
+        x_std = np.std(x)
+    bw = 1.144 * x_std * len(x) ** (-0.2)
+    return bw
+
+
+def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwargs):
+    """Cross-validation bandwidth estimation."""
+    if x_std is None:
+        x_std = np.std(x)
+
+    if bin_width is None or grid_counts is None:
+        x_min = x.min()
+        x_max = x.max()
+        grid_len = 256
+        grid_min = x_min - 0.5 * x_std
+        grid_max = x_max + 0.5 * x_std
+        grid_counts, _, grid_edges = histogram(x, grid_len, (grid_min, grid_max))
+        bin_width = grid_edges[1] - grid_edges[0]
+
+    x_len = len(x)
+    grid_len = len(grid_counts)
+    ks = np.arange(1, grid_len)
+
+    # entry j is the sum over i of grid_counts[i] * grid_counts[i + j + 1]
+    grid_counts_comb = convolve(grid_counts[:-1], grid_counts[:0:-1], mode="full")[grid_len-2::-1]
+
+    def _compute_cv_score(bw):
+        if unbiased:
+            summand = np.exp(ks * -((0.5 * bin_width / bw) ** 2))
+            summand -= np.sqrt(8) * summand**2
+        else:
+            deltas = ks * (bin_width / bw)
+            summand = (deltas**4 - 12 * deltas**2 + 12) * np.exp(-0.25 * deltas**2) / 64
+        score = (0.5 / x_len + bin_width**2 * np.inner(grid_counts_comb, summand)) / (
+            bw * np.sqrt(np.pi)
+        )
+        return score
+
+    bw_max = _bw_oversmoothed(x, x_std=x_std)
+    bw_min = bin_width / (2 * np.pi)
+
+    result = minimize_scalar(_compute_cv_score, bounds=(bw_min, bw_max), method="bounded")
+    if not result.success:
+        warnings.warn("Optimizing the bandwidth using cross-validation did not converge.")
+    bw_opt = result.x
+
+    return bw_opt
+
+
+def _bw_ucv(x, **kwargs):
+    return _bw_cv(x, unbiased=True, **kwargs)
+
+
+def _bw_bcv(x, **kwargs):
+    return _bw_cv(x, unbiased=False, **kwargs)
 
 
 def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
@@ -111,6 +171,8 @@ _BW_METHODS_LINEAR = {
     "silverman": _bw_silverman,
     "isj": _bw_isj,
     "experimental": _bw_experimental,
+    "ucv": _bw_ucv,
+    "bcv": _bw_bcv,
 }
 
 
