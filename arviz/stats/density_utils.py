@@ -57,33 +57,41 @@ def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwa
         bin_width = grid_edges[1] - grid_edges[0]
 
     x_len = len(x)
-    grid_len = len(grid_counts)
-    ks = np.arange(1, grid_len)
-
-    # entry j is the sum over i of grid_counts[i] * grid_counts[i + j + 1]
-    grid_counts_comb = convolve(grid_counts[:-1], grid_counts[:0:-1], mode="full")[grid_len-2::-1]
-
-    def _compute_cv_score(bw):
-        if unbiased:
-            summand = np.exp(ks * -((0.5 * bin_width / bw) ** 2))
-            summand -= np.sqrt(8) * summand**2
-        else:
-            deltas = ks * (bin_width / bw)
-            summand = (deltas**4 - 12 * deltas**2 + 12) * np.exp(-0.25 * deltas**2) / 64
-        score = (0.5 / x_len + bin_width**2 * np.inner(grid_counts_comb, summand)) / (
-            bw * np.sqrt(np.pi)
-        )
-        return score
+    grid_counts_comb, ks = _prepare_cv_score_inputs(grid_counts)
 
     bw_max = _bw_oversmoothed(x, x_std=x_std)
     bw_min = bin_width / (2 * np.pi)
 
-    result = minimize_scalar(_compute_cv_score, bounds=(bw_min, bw_max), method="bounded")
+    def _compute_score(bw):
+        return _compute_cv_score(bw, x_len, grid_counts_comb, bin_width, ks, unbiased)
+
+    result = minimize_scalar(_compute_score, bounds=(bw_min, bw_max), method="bounded")
     if not result.success:
         warnings.warn("Optimizing the bandwidth using cross-validation did not converge.")
     bw_opt = result.x
 
     return bw_opt
+
+
+def _prepare_cv_score_inputs(grid_counts):
+    grid_len = len(grid_counts)
+    # entry j is the sum over i of grid_counts[i] * grid_counts[i + j + 1]
+    grid_counts_comb = convolve(grid_counts[:-1], grid_counts[:0:-1], mode="full")[grid_len-2::-1]
+    ks = np.arange(1, grid_len)
+    return grid_counts_comb, ks
+
+
+def _compute_cv_score(bw, x_len, grid_counts_comb, bin_width, ks, unbiased):
+    if unbiased:
+        summand = np.exp(ks * -((0.5 * bin_width / bw) ** 2))
+        summand -= np.sqrt(8) * summand**2
+    else:
+        deltas = ks * (bin_width / bw)
+        summand = (deltas**4 - 12 * deltas**2 + 12) * np.exp(-0.25 * deltas**2) / 64
+    score = (0.5 / x_len + bin_width**2 * np.inner(grid_counts_comb, summand)) / (
+        bw * np.sqrt(np.pi)
+    )
+    return score
 
 
 def _bw_ucv(x, **kwargs):
