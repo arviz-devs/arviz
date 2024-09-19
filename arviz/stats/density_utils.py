@@ -94,7 +94,7 @@ def _bw_bcv(x, **kwargs):
     return _bw_cv(x, unbiased=False, **kwargs)
 
 
-def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
+def _bw_isj(x, grid_counts=None, x_std=None, x_range=None, **kwargs):  # pylint: disable=unused-argument
     """Improved Sheather-Jones bandwidth estimation.
 
     Improved Sheather and Jones method as explained in [1]_. This method is used internally by the
@@ -136,7 +136,7 @@ def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
     return h
 
 
-def _bw_experimental(x, grid_counts=None, x_std=None, x_range=None):
+def _bw_experimental(x, grid_counts=None, x_std=None, x_range=None, **kwargs):  # pylint: disable=unused-argument
     """Experimental bandwidth estimator."""
     bw_silverman = _bw_silverman(x, x_std=x_std)
     bw_isj = _bw_isj(x, grid_counts=grid_counts, x_range=x_range)
@@ -176,7 +176,7 @@ _BW_METHODS_LINEAR = {
 }
 
 
-def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
+def _get_bw(x, bw, grid_counts=None, bin_width=None, x_std=None, x_range=None):
     """Compute bandwidth for a given data `x` and `bw`.
 
     Also checks `bw` is correctly specified.
@@ -217,7 +217,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
             )
 
         bw_fun = _BW_METHODS_LINEAR[bw_lower]
-        bw = bw_fun(x, grid_counts=grid_counts, x_std=x_std, x_range=x_range)
+        bw = bw_fun(x, grid_counts=grid_counts, bin_width=bin_width, x_std=x_std, x_range=x_range)
     else:
         raise ValueError(
             "Unrecognized `bw` argument.\n"
@@ -642,9 +642,10 @@ def _kde_linear(
         x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend, bound_correction
     )
     grid_counts, _, grid_edges = histogram(x, grid_len, (grid_min, grid_max))
+    bin_width = grid_edges[1] - grid_edges[0]
 
     # Bandwidth estimation
-    bw = bw_fct * _get_bw(x, bw, grid_counts, x_std, x_range)
+    bw = bw_fct * _get_bw(x, bw, grid_counts, bin_width, x_std, x_range)
 
     # Density estimation
     if adaptive:
