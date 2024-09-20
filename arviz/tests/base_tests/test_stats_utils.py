@@ -8,7 +8,6 @@ from scipy.special import logsumexp
 from scipy.stats import circstd
 
 from ...data import from_dict, load_arviz_data
-from ...stats.density_utils import histogram
 from ...stats.stats_utils import (
     ELPDData,
     _angle,
@@ -341,15 +340,6 @@ def test_variance_bad_data():
     assert np.allclose(stats_variance_2d(data), np.var(data))
     assert np.allclose(stats_variance_2d(data, ddof=1), np.var(data, ddof=1))
     assert not np.allclose(stats_variance_2d(data), np.var(data, ddof=1))
-
-
-def test_histogram():
-    school = load_arviz_data("non_centered_eight").posterior["mu"].values
-    k_count_az, k_dens_az, _ = histogram(school, bins=np.asarray([-np.inf, 0.5, 0.7, 1, np.inf]))
-    k_dens_np, *_ = np.histogram(school, bins=[-np.inf, 0.5, 0.7, 1, np.inf], density=True)
-    k_count_np, *_ = np.histogram(school, bins=[-np.inf, 0.5, 0.7, 1, np.inf], density=False)
-    assert np.allclose(k_count_az, k_count_np)
-    assert np.allclose(k_dens_az, k_dens_np)
 
 
 def test_sqrt():

@@ -30,6 +30,15 @@ def compute_cv_score_explicit(bw, x, unbiased):
     return score
 
 
+def test_histogram():
+    school = load_arviz_data("non_centered_eight").posterior["mu"].values
+    k_count_az, k_dens_az, _ = histogram(school, bins=np.asarray([-np.inf, 0.5, 0.7, 1, np.inf]))
+    k_dens_np, *_ = np.histogram(school, bins=[-np.inf, 0.5, 0.7, 1, np.inf], density=True)
+    k_count_np, *_ = np.histogram(school, bins=[-np.inf, 0.5, 0.7, 1, np.inf], density=False)
+    assert np.allclose(k_count_az, k_count_np)
+    assert np.allclose(k_dens_az, k_dens_np)
+
+
 @pytest.mark.parametrize("unbiased", [True, False])
 @pytest.mark.parametrize("bw", [0.1, 0.5, 2.0])
 @pytest.mark.parametrize("n", [100, 1_000])
