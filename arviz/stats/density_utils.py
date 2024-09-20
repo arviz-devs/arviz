@@ -53,17 +53,17 @@ def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwa
         grid_len = 256
         grid_min = x_min - 0.5 * x_std
         grid_max = x_max + 0.5 * x_std
-        grid_counts, _, grid_edges = histogram(x, grid_len, (grid_min, grid_max))
+        grid_counts, grid_edges = np.histogram(x, bins=grid_len, range=(grid_min, grid_max))
         bin_width = grid_edges[1] - grid_edges[0]
 
     x_len = len(x)
-    grid_counts_comb, ks = _prepare_cv_score_inputs(grid_counts)
+    grid_counts_comb, ks = _prepare_cv_score_inputs(grid_counts, x_len)
 
     bw_max = _bw_oversmoothed(x, x_std=x_std)
     bw_min = bin_width / (2 * np.pi)
 
     def _compute_score(bw):
-        return _compute_cv_score(bw, x_len, grid_counts_comb, bin_width, ks, unbiased)
+        return _compute_cv_score(bw, x_len, bin_width, unbiased, grid_counts_comb, ks)
 
     result = minimize_scalar(_compute_score, bounds=(bw_min, bw_max), method="bounded")
     if not result.success:
@@ -73,23 +73,24 @@ def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwa
     return bw_opt
 
 
-def _prepare_cv_score_inputs(grid_counts):
+def _prepare_cv_score_inputs(grid_counts, x_len):
     grid_len = len(grid_counts)
-    # entry j is the sum over i of grid_counts[i] * grid_counts[i + j + 1]
-    grid_counts_comb = convolve(grid_counts[:-1], grid_counts[:0:-1], mode="full")[grid_len-2::-1]
-    ks = np.arange(1, grid_len)
+    # entry j is the sum over i of grid_counts[i] * grid_counts[i + j]
+    grid_counts_comb = convolve(grid_counts[:-1], grid_counts[:0:-1], mode="full")[grid_len-1::-1]
+    # correct for within-bin counts
+    grid_counts_comb[0] = 0.5 * (grid_counts_comb[0] - x_len)
+    ks = np.arange(0, grid_len)
     return grid_counts_comb, ks
 
 
-def _compute_cv_score(bw, x_len, grid_counts_comb, bin_width, ks, unbiased):
+def _compute_cv_score(bw, x_len, bin_width, unbiased, grid_counts_comb, ks):
+    deltas = ks * (bin_width / bw)
     if unbiased:
-        summand = np.exp(ks * -((0.5 * bin_width / bw) ** 2))
-        summand -= np.sqrt(8) * summand**2
+        summand = np.exp(-0.25 * deltas**2) - np.sqrt(8) * np.exp(-0.5 * deltas**2)
     else:
-        deltas = ks * (bin_width / bw)
         summand = (deltas**4 - 12 * deltas**2 + 12) * np.exp(-0.25 * deltas**2) / 64
-    score = (0.5 / x_len + bin_width**2 * np.inner(grid_counts_comb, summand)) / (
-        bw * np.sqrt(np.pi)
+    score = (0.5 + np.inner(grid_counts_comb, summand) / x_len) / (
+        x_len * bw * np.sqrt(np.pi)
     )
     return score
 
