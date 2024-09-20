@@ -53,7 +53,7 @@ def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwa
         grid_len = 256
         grid_min = x_min - 0.5 * x_std
         grid_max = x_max + 0.5 * x_std
-        grid_counts, grid_edges = np.histogram(x, bins=grid_len, range=(grid_min, grid_max))
+        grid_counts, _, grid_edges = histogram(x, grid_len, (grid_min, grid_max))
         bin_width = grid_edges[1] - grid_edges[0]
 
     x_len = len(x)
