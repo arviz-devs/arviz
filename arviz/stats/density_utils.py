@@ -42,7 +42,7 @@ def _bw_oversmoothed(x, x_std=None, **kwargs):  # pylint: disable=unused-argumen
     return bw
 
 
-def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwargs):
+def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwargs):  # pylint: disable=unused-argument
     """Cross-validation bandwidth estimation."""
     if x_std is None:
         x_std = np.std(x)
