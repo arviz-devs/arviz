@@ -98,7 +98,7 @@ def _compute_cv_score(bw, x_len, bin_width, unbiased, grid_counts_comb, ks):
 def _bw_ucv(x, **kwargs):
     """Unbiased cross-validation bandwidth estimation.
     
-    This method optimizes the bandwidth to minimize the integrated squared error of the kernel
+    This method optimizes the bandwidth to minimize the mean integrated squared error of the kernel
     density estimate as explained in [1]_. This implementation has been modified to operate on
     binned data, which is more efficient.
 
@@ -115,7 +115,7 @@ def _bw_ucv(x, **kwargs):
 def _bw_bcv(x, **kwargs):
     """Biased cross-validation bandwidth estimation.
     
-    This method optimizes the bandwidth to minimize the adjusted mean integrated squared error of
+    This method optimizes the bandwidth to minimize the asymptotic mean integrated squared error of
     the kernel density estimate as explained in [1]_. This implementation has been modified to
     operate on binned data, which is more efficient.
 
