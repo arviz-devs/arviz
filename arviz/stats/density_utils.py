@@ -83,7 +83,7 @@ def _prepare_cv_score_inputs(grid_counts, x_len):
     return grid_counts_comb, ks
 
 
-def _compute_cv_score(bw, x_len, bin_width, unbiased, grid_counts_comb, ks):
+def _compute_cv_score(bw, x_len, bin_width, unbiased, grid_counts_comb, ks):  # pylint: disable=too-many-positional-arguments
     deltas = ks * (bin_width / bw)
     if unbiased:
         summand = np.exp(-0.25 * deltas**2) - np.sqrt(8) * np.exp(-0.5 * deltas**2)
@@ -211,7 +211,7 @@ _BW_METHODS_LINEAR = {
 }
 
 
-def _get_bw(x, bw, grid_counts=None, bin_width=None, x_std=None, x_range=None):
+def _get_bw(x, bw, grid_counts=None, bin_width=None, x_std=None, x_range=None):  # pylint: disable=too-many-positional-arguments
     """Compute bandwidth for a given data `x` and `bw`.
 
     Also checks `bw` is correctly specified.
@@ -418,7 +418,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
 
 def _get_grid(
     x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=True, bound_correction=False
-):
+):  # pylint: disable=too-many-positional-arguments
     """Compute the grid that bins the data used to estimate the density function.
 
     Parameters
@@ -607,7 +607,7 @@ def kde(x, circular=False, **kwargs):
     return kde_fun(x, **kwargs)
 
 
-def _kde_linear(
+def _kde_linear(  # pylint: disable=too-many-positional-arguments
     x,
     bw="experimental",
     adaptive=False,
@@ -708,7 +708,7 @@ def _kde_linear(
         return grid, pdf
 
 
-def _kde_circular(
+def _kde_circular(  # pylint: disable=too-many-positional-arguments
     x,
     bw="taylor",
     bw_fct=1,
@@ -798,7 +798,7 @@ def _kde_circular(
 
 
 # pylint: disable=unused-argument
-def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):
+def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):  # pylint: disable=too-many-positional-arguments
     """Kernel density with convolution.
 
     One dimensional Gaussian kernel density estimation via convolution of the binned relative
@@ -832,7 +832,7 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction,
     return grid, pdf
 
 
-def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):
+def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):  # pylint: disable=too-many-positional-arguments
     """Compute Adaptive Kernel Density Estimation.
 
     One dimensional adaptive Gaussian kernel density estimation. The implementation uses the binning
