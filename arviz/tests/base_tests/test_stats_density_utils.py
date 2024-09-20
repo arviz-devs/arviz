@@ -1,7 +1,6 @@
 import pytest
 
 import numpy as np
-import scipy.stats
 from ...data import load_arviz_data
 from ...stats.density_utils import (
     _prepare_cv_score_inputs,
@@ -10,7 +9,6 @@ from ...stats.density_utils import (
     _bw_oversmoothed,
     _bw_scott,
     histogram,
-    kde,
 )
 
 
