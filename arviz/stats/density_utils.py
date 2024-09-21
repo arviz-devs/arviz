@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from scipy.fftpack import fft
 from scipy.optimize import brentq, minimize_scalar
-from scipy.signal import convolve, convolve2d
+from scipy.signal import convolve, convolve2d, correlate
 from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
 from scipy.special import ive  # pylint: disable=no-name-in-module
@@ -76,7 +76,7 @@ def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwa
 def _prepare_cv_score_inputs(grid_counts, x_len):
     grid_len = len(grid_counts)
     # entry j is the sum over i of grid_counts[i] * grid_counts[i + j]
-    grid_counts_comb = convolve(grid_counts[:-1], grid_counts[:0:-1], mode="full")[grid_len-1::-1]
+    grid_counts_comb = correlate(grid_counts[1:], grid_counts[:-1], mode="full")[-grid_len:]
     # correct for within-bin counts
     grid_counts_comb[0] = 0.5 * (grid_counts_comb[0] - x_len)
     ks = np.arange(0, grid_len)
