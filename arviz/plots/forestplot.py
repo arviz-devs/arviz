@@ -55,8 +55,8 @@ def plot_forest(
         Specify the kind of plot:
 
         * The ``kind="forestplot"`` generates credible intervals, where the central points are the
-          estimated posterior means, the thick lines are the central quartiles, and the thin lines
-          represent the :math:`100\times`(`hdi_prob`)% highest density intervals.
+          estimated posterior median, the thick lines are the central quartiles, and the thin lines
+          represent the :math:`100\times(hdi\_prob)\%` highest density intervals.
         * The ``kind="ridgeplot"`` option generates density plots (kernel density estimate or
           histograms) in the same graph. Ridge plots can be configured to have different overlap,
           truncation bounds and quantile markers.
