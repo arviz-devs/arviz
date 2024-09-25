@@ -11,9 +11,9 @@ def plot_compare(
     comp_df,
     insample_dev=False,
     plot_standard_error=True,
-    plot_ic_diff=True,
+    plot_ic_diff=False,
     order_by_rank=True,
-    legend=True,
+    legend=False,
     title=True,
     figsize=None,
     textsize=None,
@@ -45,12 +45,12 @@ def plot_compare(
         penalization given by the effective number of parameters (p_loo or p_waic).
     plot_standard_error : bool, default True
         Plot the standard error of the ELPD.
-    plot_ic_diff : bool, default True
+    plot_ic_diff : bool, default False
         Plot standard error of the difference in ELPD between each model
         and the top-ranked model.
     order_by_rank : bool, default True
         If True ensure the best model is used as reference.
-    legend : bool, default True
+    legend : bool, default False
         Add legend to figure.
     figsize : (float, float), optional
         If `None`, size is (6, num of models) inches.
