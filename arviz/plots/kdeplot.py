@@ -72,7 +72,7 @@ def plot_kde(
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
     hdi_probs : list, optional
         Plots highest density credibility regions for the provided probabilities for a 2D KDE.
-        Defaults to matplotlib chosen levels with no fixed probability associated.
+        Defaults to [0.5, 0.8, 0.94].
     fill_last : bool, default False
         If True fill the last contour of the 2D KDE plot.
     figsize : (float, float), optional
@@ -270,6 +270,9 @@ def plot_kde(
         gridsize = (128, 128) if contour else (256, 256)
         density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
 
+        if hdi_probs is None:
+            hdi_probs = [0.5, 0.8, 0.94]
+
         if hdi_probs is not None:
             # Check hdi probs are within bounds (0, 1)
             if min(hdi_probs) <= 0 or max(hdi_probs) >= 1:
@@ -289,7 +292,11 @@ def plot_kde(
                     "Using 'hdi_probs' in favor of 'levels'.",
                     UserWarning,
                 )
-            contour_kwargs["levels"] = contour_level_list
+
+            if backend == "bokeh":
+                contour_kwargs["levels"] = contour_level_list
+            elif backend == "matplotlib":
+                contour_kwargs["levels"] = contour_level_list[1:]
 
             contourf_kwargs = _init_kwargs_dict(contourf_kwargs)
             if "levels" in contourf_kwargs:
