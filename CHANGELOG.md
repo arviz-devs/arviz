@@ -1,18 +1,21 @@
 # Change Log
 
-## v0.x.x Unreleased
+## v0.20.0 (2024 Sep 28)
 
 ### New features
 - Add optimized simultaneous ECDF confidence bands ([2368](https://github.com/arviz-devs/arviz/pull/2368))
 - Add support for setting groups with `idata[group]` ([2374](https://github.com/arviz-devs/arviz/pull/2374))
 
 ### Maintenance and fixes
-
-### Deprecation
+- Make `dm-tree` and optional dependency ([2379](https://github.com/arviz-devs/arviz/pull/2379))
+- Fix bug in `psislw` modifying input inplace  ([2377](https://github.com/arviz-devs/arviz/pull/2377))
+- Fix behaviour of two dimensional KDE plot with recent matplotlib releases ([2383](https://github.com/arviz-devs/arviz/pull/2383))
+- Make defaults in `plot_compare` more intuitive ([2388](https://github.com/arviz-devs/arviz/pull/2388))
 
 ### Documentation
 - Added extensions of virtual environments in [.gitignore](https://github.com/arviz-devs/arviz/blob/main/.gitignore) ([2371](https://github.com/arviz-devs/arviz/issues/2371))
 - Fixed the issue in the [Contribution References Documentation](https://python.arviz.org/en/latest/contributing/index.html) ([2369](https://github.com/arviz-devs/arviz/issues/2369))
+- Improve docstrings for `loo` and `waic`  ([2366](https://github.com/arviz-devs/arviz/pull/2366))
 
 ## v0.19.0 (2024 Jul 19)
 
