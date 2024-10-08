@@ -4,8 +4,8 @@ import warnings
 
 import numpy as np
 from scipy.fftpack import fft
-from scipy.optimize import brentq
-from scipy.signal import convolve, convolve2d
+from scipy.optimize import brentq, minimize_scalar
+from scipy.signal import convolve, convolve2d, correlate
 from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
 from scipy.special import ive  # pylint: disable=no-name-in-module
@@ -34,7 +34,102 @@ def _bw_silverman(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
     return bw
 
 
-def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
+def _bw_oversmoothed(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
+    """Oversmoothed bandwidth estimation."""
+    if x_std is None:
+        x_std = np.std(x)
+    bw = 1.144 * x_std * len(x) ** (-0.2)
+    return bw
+
+
+def _bw_cv(x, unbiased=True, bin_width=None, grid_counts=None, x_std=None, **kwargs):  # pylint: disable=unused-argument
+    """Cross-validation bandwidth estimation."""
+    if x_std is None:
+        x_std = np.std(x)
+
+    if bin_width is None or grid_counts is None:
+        x_min = x.min()
+        x_max = x.max()
+        grid_len = 256
+        grid_min = x_min - 0.5 * x_std
+        grid_max = x_max + 0.5 * x_std
+        grid_counts, _, grid_edges = histogram(x, grid_len, (grid_min, grid_max))
+        bin_width = grid_edges[1] - grid_edges[0]
+
+    x_len = len(x)
+    grid_counts_comb, ks = _prepare_cv_score_inputs(grid_counts, x_len)
+
+    bw_max = _bw_oversmoothed(x, x_std=x_std)
+    bw_min = bin_width / (2 * np.pi)
+
+    def _compute_score(bw):
+        return _compute_cv_score(bw, x_len, bin_width, unbiased, grid_counts_comb, ks)
+
+    result = minimize_scalar(_compute_score, bounds=(bw_min, bw_max), method="bounded")
+    if not result.success:
+        warnings.warn("Optimizing the bandwidth using cross-validation did not converge.")
+    bw_opt = result.x
+
+    return bw_opt
+
+
+def _prepare_cv_score_inputs(grid_counts, x_len):
+    grid_len = len(grid_counts)
+    # entry j is the sum over i of grid_counts[i] * grid_counts[i + j]
+    grid_counts_comb = correlate(grid_counts[1:], grid_counts[:-1], mode="full")[-grid_len:]
+    # correct for within-bin counts
+    grid_counts_comb[0] = 0.5 * (grid_counts_comb[0] - x_len)
+    ks = np.arange(0, grid_len)
+    return grid_counts_comb, ks
+
+
+def _compute_cv_score(bw, x_len, bin_width, unbiased, grid_counts_comb, ks):  # pylint: disable=too-many-positional-arguments
+    deltas = ks * (bin_width / bw)
+    if unbiased:
+        summand = np.exp(-0.25 * deltas**2) - np.sqrt(8) * np.exp(-0.5 * deltas**2)
+    else:
+        summand = (deltas**4 - 12 * deltas**2 + 12) * np.exp(-0.25 * deltas**2) / 64
+    score = (0.5 + np.inner(grid_counts_comb, summand) / x_len) / (
+        x_len * bw * np.sqrt(np.pi)
+    )
+    return score
+
+
+def _bw_ucv(x, **kwargs):
+    """Unbiased cross-validation bandwidth estimation.
+    
+    This method optimizes the bandwidth to minimize the mean integrated squared error of the kernel
+    density estimate as explained in [1]_. This implementation has been modified to operate on
+    binned data, which is more efficient.
+
+    References
+    ----------
+    .. [1] Multivariate Density Estimation: Theory, Practice, and Visualization.
+           D. Scott.
+           Wiley, 2015.
+           Section 6.5.1.3
+    """
+    return _bw_cv(x, unbiased=True, **kwargs)
+
+
+def _bw_bcv(x, **kwargs):
+    """Biased cross-validation bandwidth estimation.
+    
+    This method optimizes the bandwidth to minimize the asymptotic mean integrated squared error of
+    the kernel density estimate as explained in [1]_. This implementation has been modified to
+    operate on binned data, which is more efficient.
+
+    References
+    ----------
+    .. [1] Multivariate Density Estimation: Theory, Practice, and Visualization.
+           D. Scott.
+           Wiley, 2015.
+           Section 6.5.1.3
+    """
+    return _bw_cv(x, unbiased=False, **kwargs)
+
+
+def _bw_isj(x, grid_counts=None, x_std=None, x_range=None, **kwargs):  # pylint: disable=unused-argument
     """Improved Sheather-Jones bandwidth estimation.
 
     Improved Sheather and Jones method as explained in [1]_. This method is used internally by the
@@ -76,7 +171,7 @@ def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
     return h
 
 
-def _bw_experimental(x, grid_counts=None, x_std=None, x_range=None):
+def _bw_experimental(x, grid_counts=None, x_std=None, x_range=None, **kwargs):  # pylint: disable=unused-argument
     """Experimental bandwidth estimator."""
     bw_silverman = _bw_silverman(x, x_std=x_std)
     bw_isj = _bw_isj(x, grid_counts=grid_counts, x_range=x_range)
@@ -111,10 +206,12 @@ _BW_METHODS_LINEAR = {
     "silverman": _bw_silverman,
     "isj": _bw_isj,
     "experimental": _bw_experimental,
+    "ucv": _bw_ucv,
+    "bcv": _bw_bcv,
 }
 
 
-def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
+def _get_bw(x, bw, grid_counts=None, bin_width=None, x_std=None, x_range=None):  # pylint: disable=too-many-positional-arguments
     """Compute bandwidth for a given data `x` and `bw`.
 
     Also checks `bw` is correctly specified.
@@ -155,7 +252,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
             )
 
         bw_fun = _BW_METHODS_LINEAR[bw_lower]
-        bw = bw_fun(x, grid_counts=grid_counts, x_std=x_std, x_range=x_range)
+        bw = bw_fun(x, grid_counts=grid_counts, bin_width=bin_width, x_std=x_std, x_range=x_range)
     else:
         raise ValueError(
             "Unrecognized `bw` argument.\n"
@@ -321,7 +418,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
 
 def _get_grid(
     x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=True, bound_correction=False
-):
+):  # pylint: disable=too-many-positional-arguments
     """Compute the grid that bins the data used to estimate the density function.
 
     Parameters
@@ -450,6 +547,17 @@ def kde(x, circular=False, **kwargs):
         >>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 11))
         >>> plt.plot(grid, pdf)
 
+    Density estimation for well-separated modes with bandwidth chosen using unbiased
+    cross-validation
+
+    .. plot::
+        :context: close-figs
+
+        >>> rvs = np.concatenate([np.random.normal(0, 1, 500), np.random.normal(30, 1, 500)])
+        >>> grid, pdf = kde(rvs, bw='ucv')
+        >>> plt.plot(grid, pdf)
+
+
     Default density estimation for circular data
 
     .. plot::
@@ -499,7 +607,7 @@ def kde(x, circular=False, **kwargs):
     return kde_fun(x, **kwargs)
 
 
-def _kde_linear(
+def _kde_linear(  # pylint: disable=too-many-positional-arguments
     x,
     bw="experimental",
     adaptive=False,
@@ -525,7 +633,7 @@ def _kde_linear(
     bw: int, float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be one of "scott",
-        "silverman", "isj" or "experimental". Defaults to "experimental".
+        "silverman", "isj", "experimental", "ucv", or "bcv". Defaults to "experimental".
     adaptive: boolean, optional
         Indicates if the bandwidth is adaptive or not.
         It is the recommended approach when there are multiple modes with different spread.
@@ -580,9 +688,10 @@ def _kde_linear(
         x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend, bound_correction
     )
     grid_counts, _, grid_edges = histogram(x, grid_len, (grid_min, grid_max))
+    bin_width = grid_edges[1] - grid_edges[0]
 
     # Bandwidth estimation
-    bw = bw_fct * _get_bw(x, bw, grid_counts, x_std, x_range)
+    bw = bw_fct * _get_bw(x, bw, grid_counts, bin_width, x_std, x_range)
 
     # Density estimation
     if adaptive:
@@ -599,7 +708,7 @@ def _kde_linear(
         return grid, pdf
 
 
-def _kde_circular(
+def _kde_circular(  # pylint: disable=too-many-positional-arguments
     x,
     bw="taylor",
     bw_fct=1,
@@ -689,7 +798,7 @@ def _kde_circular(
 
 
 # pylint: disable=unused-argument
-def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):
+def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):  # pylint: disable=too-many-positional-arguments
     """Kernel density with convolution.
 
     One dimensional Gaussian kernel density estimation via convolution of the binned relative
@@ -723,7 +832,7 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction,
     return grid, pdf
 
 
-def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):
+def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):  # pylint: disable=too-many-positional-arguments
     """Compute Adaptive Kernel Density Estimation.
 
     One dimensional adaptive Gaussian kernel density estimation. The implementation uses the binning
