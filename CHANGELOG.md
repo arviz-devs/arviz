@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+### Maintenance and fixes
+- Make `arviz.data.generate_dims_coords` handle `dims` and `default_dims` consistently ([2395](https://github.com/arviz-devs/arviz/pull/2395))
+
 ## v0.20.0 (2024 Sep 28)
 
 ### New features
