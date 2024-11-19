@@ -10,6 +10,7 @@
 ### New features
 - Add optimized simultaneous ECDF confidence bands ([2368](https://github.com/arviz-devs/arviz/pull/2368))
 - Add support for setting groups with `idata[group]` ([2374](https://github.com/arviz-devs/arviz/pull/2374))
+- Add cross-validation-based KDE bandwidth selection methods. ([2384](https://github.com/arviz-devs/arviz/pull/2384))
 
 ### Maintenance and fixes
 - Make `dm-tree` and optional dependency ([2379](https://github.com/arviz-devs/arviz/pull/2379))
