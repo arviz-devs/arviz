@@ -201,10 +201,10 @@ def generate_dims_coords(
     for i, dim_len in enumerate(shape):
         idx = i + len([dim for dim in default_dims if dim in dims])
         if len(dims) < idx + 1:
-            dim_name = f"{var_name}_dim_{idx}"
+            dim_name = f"{var_name}_dim_{i}"
             dims.append(dim_name)
         elif dims[idx] is None:
-            dim_name = f"{var_name}_dim_{idx}"
+            dim_name = f"{var_name}_dim_{i}"
             dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:

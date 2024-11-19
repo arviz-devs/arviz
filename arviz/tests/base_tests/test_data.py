@@ -32,7 +32,13 @@ from ... import (
     extract,
 )
 
-from ...data.base import dict_to_dataset, generate_dims_coords, infer_stan_dtypes, make_attrs
+from ...data.base import (
+    dict_to_dataset,
+    generate_dims_coords,
+    infer_stan_dtypes,
+    make_attrs,
+    numpy_to_data_array,
+)
 from ...data.datasets import LOCAL_DATASETS, REMOTE_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -229,6 +235,17 @@ def test_dims_coords_skip_event_dims(shape):
     assert len(coords["x"]) == 4
     assert len(coords["y"]) == 20
     assert "z" not in coords
+
+
+@pytest.mark.parametrize("dims", [None, ["chain", "draw"], ["chain", "draw", None]])
+def test_numpy_to_data_array_with_dims(dims):
+    da = numpy_to_data_array(
+        np.empty((4, 500, 7)),
+        var_name="a",
+        dims=dims,
+        default_dims=["chain", "draw"],
+    )
+    assert list(da.dims) == ["chain", "draw", "a_dim_0"]
 
 
 def test_make_attrs():
