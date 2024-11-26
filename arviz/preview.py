@@ -3,15 +3,15 @@
 
 try:
     from arviz_base import *
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     pass
 
 try:
     import arviz_stats
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     pass
 
 try:
     from arviz_plots import *
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     pass
