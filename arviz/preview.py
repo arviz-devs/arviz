@@ -1,4 +1,4 @@
-# pylint: disable=unused-import,unused-wildcard-import,wildcard-import
+# pylint: disable=unused-import,unused-wildcard-import,wildcard-import,invalid-name
 """Expose features from arviz-xyz refactored packages inside ``arviz.preview`` namespace."""
 import logging
 
@@ -8,6 +8,7 @@ info = ""
 
 try:
     from arviz_base import *
+
     status = "arviz_base available, exposing its functions as part of arviz.preview"
     _log.info(status)
 except ModuleNotFoundError:
@@ -21,6 +22,7 @@ info += status + "\n"
 
 try:
     from arviz_stats import *
+
     status = "arviz_stats available, exposing its functions as part of arviz.preview"
     _log.info(status)
 except ModuleNotFoundError:
@@ -33,6 +35,7 @@ info += status + "\n"
 
 try:
     from arviz_plots import *
+
     status = "arviz_plots available, exposing its functions as part of arviz.preview"
     _log.info(status)
 except ModuleNotFoundError:
@@ -41,4 +44,5 @@ except ModuleNotFoundError:
 except ImportError:
     status = "Unable to import arviz_plots"
     _log.info(status, exc_info=True)
+
 info += status + "\n"
