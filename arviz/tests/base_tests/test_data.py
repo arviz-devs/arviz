@@ -938,7 +938,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         data = np.random.normal(size=(4, 500, 8))
         idata = data_random
         with pytest.warns(UserWarning, match="The group.+not defined in the InferenceData scheme"):
-            idata.add_groups({"new_group": idata.posterior})
+            idata.add_groups({"new_group": idata.posterior}, warn_on_custom_groups=True)
         with pytest.warns(UserWarning, match="the default dims.+will be added automatically"):
             idata.add_groups(constant_data={"a": data[..., 0], "b": data})
         assert idata.new_group.equals(idata.posterior)
