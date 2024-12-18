@@ -2176,5 +2176,21 @@ def test_plot_autocorr_coords(coords, expected_vars):
     idata = load_arviz_data("centered_eight")
 
     axes = plot_autocorr(idata, var_names=expected_vars, coords=coords, show=False)
+    assert axes is not None
 
+def test_plot_forest_with_transform():
+    """Test if plot_forest runs successfully with a transform dictionary."""
+    data = xr.Dataset(
+        {
+            "var1": (["chain", "draw"], np.array([[1, 2, 3], [4, 5, 6]])),
+            "var2": (["chain", "draw"], np.array([[7, 8, 9], [10, 11, 12]])),
+        },
+        coords={"chain": [0, 1], "draw": [0, 1, 2]},
+    )
+    transform_dict = {
+        "var1": lambda x: x + 1,
+        "var2": lambda x: x * 2,
+    }
+
+    axes = plot_forest(data, transform=transform_dict, show=False)
     assert axes is not None
