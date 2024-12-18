@@ -75,8 +75,8 @@ def plot_forest(
         interpret `var_names` as substrings of the real variables names. If "regex",
         interpret `var_names` as regular expressions on the real variables names. See
         :ref:`this section <common_filter_vars>` for usage examples.
-    transform : callable, optional
-        Function to transform data (defaults to None i.e.the identity function).
+    transform : callable or dict, optional
+        Function to transform the data. Defaults to None, i.e., the identity function.
     coords : dict, optional
         Coordinates of ``var_names`` to be plotted. Passed to :meth:`xarray.Dataset.sel`.
         See :ref:`this section <common_coords>` for usage examples.
@@ -228,7 +228,19 @@ def plot_forest(
 
     datasets = [convert_to_dataset(datum) for datum in reversed(data)]
     if transform is not None:
-        datasets = [transform(dataset) for dataset in datasets]
+        if callable(transform):
+            datasets = [transform(dataset) for dataset in datasets]
+        elif isinstance(transform, dict):
+            transformed_datasets = []
+            for dataset in datasets:
+                new_dataset = dataset.copy()
+                for var_name, func in transform.items():
+                    if var_name in new_dataset:
+                        new_dataset[var_name] = func(new_dataset[var_name])
+                transformed_datasets.append(new_dataset)
+            datasets = transformed_datasets
+        else:
+            raise ValueError("transform must be either a callable or a dict {var_name: callable}")
     datasets = get_coords(
         datasets, list(reversed(coords)) if isinstance(coords, (list, tuple)) else coords
     )
