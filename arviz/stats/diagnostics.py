@@ -838,7 +838,7 @@ def _mcse_sd(ary):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    sims_c2 = (ary - ary.mean())**2
+    sims_c2 = (ary - ary.mean()) ** 2
     ess = _ess_mean(sims_c2)
     evar = (sims_c2).mean()
     varvar = ((sims_c2**2).mean() - evar**2) / ess
