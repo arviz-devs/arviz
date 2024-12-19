@@ -975,19 +975,21 @@ def _multichain_statistics(ary, focus="mean"):
         # ess mean
         ess_mean_value = _ess_mean(ary)
 
-        # ess sd
-        ess_sd_value = _ess_sd(ary)
-
         # mcse_mean
-        sd = np.std(ary, ddof=1)
-        mcse_mean_value = sd / np.sqrt(ess_mean_value)
+        sims_c2 = (ary - ary.mean()) ** 2
+        sims_c2_sum = sims_c2.sum()
+        var = sims_c2_sum / (sims_c2.size - 1)
+        mcse_mean_value = np.sqrt(var / ess_mean_value)
 
         # ess bulk
         ess_bulk_value = _ess(z_split)
 
         # mcse_sd
-        fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess_sd_value) ** (ess_sd_value - 1) - 1)
-        mcse_sd_value = sd * fac_mcse_sd
+        evar = sims_c2_sum / sims_c2.size
+        ess_mean_sims = _ess_mean(sims_c2)
+        varvar = ((sims_c2**2).mean() - evar**2) / ess_mean_sims
+        varsd = varvar / evar / 4
+        mcse_sd_value = np.sqrt(varsd)
 
         return (
             mcse_mean_value,
