@@ -18,5 +18,6 @@ API Reference
     plot_utils
     utils
     rcparams
+    preview
     wrappers
     stats_refitting
