@@ -744,7 +744,7 @@ def _ess_sd(ary, relative=False):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    ary = (ary - ary.mean())**2
+    ary = (ary - ary.mean()) ** 2
     return _ess(_split_chains(ary), relative=relative)
 
 
