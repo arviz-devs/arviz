@@ -744,7 +744,7 @@ def _ess_sd(ary, relative=False):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    ary = (ary - ary.mean()) ** 2
+    ary = np.absolute(ary - ary.mean())
     return _ess(_split_chains(ary), relative=relative)
 
 
@@ -838,10 +838,10 @@ def _mcse_sd(ary):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    ary = ary - ary.mean()
-    ess = _ess_mean(abs(ary))
-    evar = (ary**2).mean()
-    varvar = ((ary**4).mean() - evar**2) / ess
+    sims_c2 = (ary - ary.mean())**2
+    ess = _ess_mean(sims_c2)
+    evar = (sims_c2).mean()
+    varvar = ((sims_c2**2).mean() - evar**2) / ess
     varsd = varvar / evar / 4
     if _numba_flag:
         mcse_sd_value = float(_sqrt(np.ravel(varsd), np.zeros(1)))
