@@ -2,6 +2,7 @@
 ECDF Plot (Comparison)
 ======================
 """
+
 import matplotlib.pyplot as plt
 from scipy.stats import norm, ecdf
 
@@ -17,6 +18,6 @@ az.plot_ecdf(
     cdf=ecdf(sample2).cdf.evaluate,
     difference=True,
     confidence_bands=True,
-    ci_prob=.9,
+    ci_prob=0.9,
     backend="bokeh",
 )
