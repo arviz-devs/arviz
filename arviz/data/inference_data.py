@@ -102,6 +102,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
     def __init__(
         self,
         attrs: Union[None, Mapping[Any, Any]] = None,
+        warn_on_custom_groups: bool = False,
         **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]],
     ) -> None:
         """Initialize InferenceData object from keyword xarray datasets.
@@ -110,6 +111,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         attrs : dict
             sets global attribute for InferenceData object.
+        warn_on_custom_groups : bool, default False
+            Emit a warning when custom groups are present in the InferenceData.
+            "custom group" means any group whose name isn't defined in :ref:`schema`
         kwargs :
             Keyword arguments of xarray datasets
 
@@ -154,9 +158,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
         for key in kwargs:
             if key not in SUPPORTED_GROUPS_ALL:
                 key_list.append(key)
-                warnings.warn(
-                    f"{key} group is not defined in the InferenceData scheme", UserWarning
-                )
+                if warn_on_custom_groups:
+                    warnings.warn(
+                        f"{key} group is not defined in the InferenceData scheme", UserWarning
+                    )
         for key in key_list:
             dataset = kwargs[key]
             dataset_warmup = None
@@ -1467,7 +1472,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         else:
             return out
 
-    def add_groups(self, group_dict=None, coords=None, dims=None, **kwargs):
+    def add_groups(
+        self, group_dict=None, coords=None, dims=None, warn_on_custom_groups=False, **kwargs
+    ):
         """Add new groups to InferenceData object.
 
         Parameters
@@ -1479,6 +1486,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         dims : dict of {str : list of str}, optional
             Dimensions of each variable. The keys are variable names, values are lists of
             coordinates.
+        warn_on_custom_groups : bool, default False
+            Emit a warning when custom groups are present in the InferenceData.
+            "custom group" means any group whose name isn't defined in :ref:`schema`
         kwargs : dict, optional
             The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
 
@@ -1542,7 +1552,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         if repeated_groups:
             raise ValueError(f"{repeated_groups} group(s) already exists.")
         for group, dataset in group_dict.items():
-            if group not in SUPPORTED_GROUPS_ALL:
+            if warn_on_custom_groups and group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
                     f"The group {group} is not defined in the InferenceData scheme",
                     UserWarning,
@@ -1597,7 +1607,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     else:
                         self._groups.append(group)
 
-    def extend(self, other, join="left"):
+    def extend(self, other, join="left", warn_on_custom_groups=False):
         """Extend InferenceData with groups from another InferenceData.
 
         Parameters
@@ -1608,6 +1618,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
             Defines how the two decide which group to keep when the same group is
             present in both objects. 'left' will discard the group in ``other`` whereas 'right'
             will keep the group in ``other`` and discard the one in ``self``.
+        warn_on_custom_groups : bool, default False
+            Emit a warning when custom groups are present in the InferenceData.
+            "custom group" means any group whose name isn't defined in :ref:`schema`
 
         Examples
         --------
@@ -1651,7 +1664,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         for group in other._groups_all:  # pylint: disable=protected-access
             if hasattr(self, group) and join == "left":
                 continue
-            if group not in SUPPORTED_GROUPS_ALL:
+            if warn_on_custom_groups and group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
                     f"{group} group is not defined in the InferenceData scheme", UserWarning
                 )

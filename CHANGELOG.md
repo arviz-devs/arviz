@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+### New features
+
 ### Maintenance and fixes
 - Make `arviz.data.generate_dims_coords` handle `dims` and `default_dims` consistently ([2395](https://github.com/arviz-devs/arviz/pull/2395))
+- Only emit a warning for custom groups in `InferenceData` when explicitly requested ([2401](https://github.com/arviz-devs/arviz/pull/2401))
+
+### Documentation
 
 ## v0.20.0 (2024 Sep 28)
 

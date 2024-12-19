@@ -3,6 +3,7 @@
 
 import importlib
 import os
+import warnings
 from collections import namedtuple
 from copy import deepcopy
 from html import escape
@@ -938,7 +939,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         data = np.random.normal(size=(4, 500, 8))
         idata = data_random
         with pytest.warns(UserWarning, match="The group.+not defined in the InferenceData scheme"):
-            idata.add_groups({"new_group": idata.posterior})
+            idata.add_groups({"new_group": idata.posterior}, warn_on_custom_groups=True)
         with pytest.warns(UserWarning, match="the default dims.+will be added automatically"):
             idata.add_groups(constant_data={"a": data[..., 0], "b": data})
         assert idata.new_group.equals(idata.posterior)
@@ -979,8 +980,8 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         with pytest.raises(ValueError, match="join must be either"):
             idata.extend(idata2, join="outer")
         idata2.add_groups(new_group=idata2.prior)
-        with pytest.warns(UserWarning):
-            idata.extend(idata2)
+        with pytest.warns(UserWarning, match="new_group"):
+            idata.extend(idata2, warn_on_custom_groups=True)
 
 
 class TestNumpyToDataArray:
@@ -1173,11 +1174,17 @@ def test_bad_inference_data():
         InferenceData(posterior=[1, 2, 3])
 
 
-def test_inference_data_other_groups():
+@pytest.mark.parametrize("warn", [True, False])
+def test_inference_data_other_groups(warn):
     datadict = {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)}
     dataset = convert_to_dataset(datadict, coords={"c": np.arange(10)}, dims={"b": ["c"]})
-    with pytest.warns(UserWarning, match="not.+in.+InferenceData scheme"):
-        idata = InferenceData(other_group=dataset)
+    if warn:
+        with pytest.warns(UserWarning, match="not.+in.+InferenceData scheme"):
+            idata = InferenceData(other_group=dataset, warn_on_custom_groups=True)
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            idata = InferenceData(other_group=dataset, warn_on_custom_groups=False)
     fails = check_multiple_attrs({"other_group": ["a", "b"]}, idata)
     assert not fails
 
