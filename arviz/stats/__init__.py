@@ -9,6 +9,7 @@ from .stats_utils import *
 
 __all__ = [
     "apply_test_function",
+    "bayes_factor",
     "bfmi",
     "compare",
     "hdi",
