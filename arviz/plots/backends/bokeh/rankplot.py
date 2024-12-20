@@ -49,6 +49,7 @@ def plot_rank(
 
     if marker_vlines_kwargs is None:
         marker_vlines_kwargs = {}
+    marker_vlines_kwargs.setdefault("marker", "circle")
 
     if backend_kwargs is None:
         backend_kwargs = {}
@@ -109,7 +110,7 @@ def plot_rank(
         elif kind == "vlines":
             ymin = np.full(len(all_counts), all_counts.mean())
             for idx, counts in enumerate(all_counts):
-                ax.circle(
+                ax.scatter(
                     bin_ary,
                     counts,
                     fill_color=colors[idx],

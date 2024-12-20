@@ -51,12 +51,18 @@ def plot_lm(
 
     if y_kwargs is None:
         y_kwargs = {}
+    else:
+        y_kwargs = y_kwargs.copy()
+    y_kwargs.setdefault("marker", "circle")
     y_kwargs.setdefault("fill_color", "red")
     y_kwargs.setdefault("line_width", 0)
     y_kwargs.setdefault("size", 3)
 
     if y_hat_plot_kwargs is None:
         y_hat_plot_kwargs = {}
+    else:
+        y_hat_plot_kwargs = y_hat_plot_kwargs.copy()
+    y_hat_plot_kwargs.setdefault("marker", "circle")
     y_hat_plot_kwargs.setdefault("fill_color", "orange")
     y_hat_plot_kwargs.setdefault("line_width", 0)
 
@@ -84,7 +90,7 @@ def plot_lm(
         _, _, _, y_plotters = y[i]
         _, _, _, x_plotters = x[i]
         legend_it = []
-        observed_legend = ax_i.circle(x_plotters, y_plotters, **y_kwargs)
+        observed_legend = ax_i.scatter(x_plotters, y_plotters, **y_kwargs)
         legend_it.append(("Observed", [observed_legend]))
 
         if y_hat is not None:
@@ -98,14 +104,14 @@ def plot_lm(
                         x_plotters_jitter = x_plotters + np.random.uniform(
                             low=-scale_high, high=scale_high, size=len(x_plotters)
                         )
-                        posterior_circle = ax_i.circle(
+                        posterior_circle = ax_i.scatter(
                             x_plotters_jitter,
                             y_hat_plotters[..., j],
                             alpha=0.2,
                             **y_hat_plot_kwargs,
                         )
                     else:
-                        posterior_circle = ax_i.circle(
+                        posterior_circle = ax_i.scatter(
                             x_plotters, y_hat_plotters[..., j], alpha=0.2, **y_hat_plot_kwargs
                         )
                     posterior_legend.append(posterior_circle)

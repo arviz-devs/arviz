@@ -71,13 +71,13 @@ def plot_mcse(
             values = data[var_name].sel(**selection).values.flatten()
         if errorbar:
             quantile_values = _quantile(values, probs)
-            ax_.dash(probs, quantile_values)
+            ax_.scatter(probs, quantile_values, marker="dash")
             ax_.multi_line(
                 list(zip(probs, probs)),
                 [(quant - err, quant + err) for quant, err in zip(quantile_values, x)],
             )
         else:
-            ax_.circle(probs, x)
+            ax_.scatter(probs, x, marker="circle")
             if extra_methods:
                 mean_mcse_i = mean_mcse[var_name].sel(**selection).values.item()
                 sd_mcse_i = sd_mcse[var_name].sel(**selection).values.item()

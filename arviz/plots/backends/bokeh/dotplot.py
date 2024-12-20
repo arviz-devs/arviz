@@ -47,7 +47,10 @@ def plot_dot(
 
     if plot_kwargs is None:
         plot_kwargs = {}
-        plot_kwargs.setdefault("color", dotcolor)
+    else:
+        plot_kwargs = plot_kwargs.copy()
+    plot_kwargs.setdefault("color", dotcolor)
+    plot_kwargs.setdefault("marker", "circle")
 
     if linewidth is None:
         linewidth = auto_linewidth
@@ -95,7 +98,7 @@ def plot_dot(
     stack_locs, stack_count = wilkinson_algorithm(values, binwidth)
     x, y = layout_stacks(stack_locs, stack_count, binwidth, stackratio, rotated)
 
-    ax.circle(x, y, radius=dotsize * (binwidth / 2), **plot_kwargs, radius_dimension="y")
+    ax.scatter(x, y, radius=dotsize * (binwidth / 2), **plot_kwargs, radius_dimension="y")
     if rotated:
         ax.xaxis.major_tick_line_color = None
         ax.xaxis.minor_tick_line_color = None

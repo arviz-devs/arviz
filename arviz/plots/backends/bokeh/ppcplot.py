@@ -313,9 +313,10 @@ def plot_ppc(
                     obs_yvals += np.random.uniform(
                         low=scale_low, high=scale_high, size=len(obs_vals)
                     )
-                glyph = ax_i.circle(
+                glyph = ax_i.scatter(
                     obs_vals,
                     obs_yvals,
+                    marker="circle",
                     line_color=colors[1],
                     fill_color=colors[1],
                     size=markersize,
