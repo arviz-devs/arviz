@@ -16,6 +16,7 @@ def plot_bpv(
     bpv=True,
     plot_mean=True,
     reference="analytical",
+    smoothing=None,
     mse=False,
     n_ref=100,
     hdi_prob=0.94,
@@ -36,7 +37,6 @@ def plot_bpv(
     backend_kwargs=None,
     group="posterior",
     show=None,
-    smoothing=True,
 ):
     r"""Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
@@ -73,6 +73,9 @@ def plot_bpv(
     reference : {"analytical", "samples", None}, default "analytical"
         How to compute the distributions used as reference for ``kind=u_values``
         or ``kind=p_values``. Use `None` to not plot any reference.
+    smoothing : bool, optional
+        If True and the data has integer dtype, smooth the data before computing the p-values,
+        u-values or tstat. By default, True when `kind` is "u_value" and False otherwise.
     mse : bool, default False
         Show scaled mean square error between uniform distribution and marginal p_value
         distribution.
@@ -149,8 +152,6 @@ def plot_bpv(
         the same comparison happens, but with the values in `prior_predictive` group.
     show : bool, optional
         Call backend show function.
-    smoothing : bool, default True
-        If True, smooth the data before computing the p-values or u-values.
 
     Returns
     -------
@@ -208,6 +209,9 @@ def plot_bpv(
         hdi_prob = rcParams["stats.ci_prob"]
     elif not 1 >= hdi_prob > 0:
         raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+
+    if smoothing is None:
+        smoothing = kind.lower() == "u_value"
 
     if data_pairs is None:
         data_pairs = {}
