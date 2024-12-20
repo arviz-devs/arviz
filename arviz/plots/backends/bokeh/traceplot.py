@@ -385,9 +385,10 @@ def _plot_chains_bokeh(
                 **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx),
             )
             if marker:
-                ax_trace.circle(
+                ax_trace.scatter(
                     x=x_name,
                     y=y_name,
+                    marker="circle",
                     source=cds,
                     radius=0.30,
                     alpha=0.5,

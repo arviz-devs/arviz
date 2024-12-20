@@ -535,9 +535,10 @@ class PlotHandler:
                         )
                     )
                 plotted[model_name].append(
-                    ax.circle(
+                    ax.scatter(
                         x=values[mid],
                         y=y,
+                        marker="circle",
                         size=markersize * 0.75,
                         fill_color=color,
                     )
@@ -555,9 +556,10 @@ class PlotHandler:
             for y, ess, color, model_name in plotter.ess():
                 if ess is not None:
                     plotted[model_name].append(
-                        ax.circle(
+                        ax.scatter(
                             x=ess,
                             y=y,
+                            marker="circle",
                             fill_color=color,
                             size=markersize,
                             line_color="black",
@@ -582,8 +584,13 @@ class PlotHandler:
             for y, r_hat, color, model_name in plotter.r_hat():
                 if r_hat is not None:
                     plotted[model_name].append(
-                        ax.circle(
-                            x=r_hat, y=y, fill_color=color, size=markersize, line_color="black"
+                        ax.scatter(
+                            x=r_hat,
+                            y=y,
+                            marker="circle",
+                            fill_color=color,
+                            size=markersize,
+                            line_color="black",
                         )
                     )
         ax.x_range._property_values["start"] = 0.9  # pylint: disable=protected-access

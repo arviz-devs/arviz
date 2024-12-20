@@ -205,7 +205,7 @@ html_theme_options = {
     "navbar_start": ["navbar-logo", "navbar-version"],
     "navbar_align": "content",
     "header_links_before_dropdown": 5,
-    "secondary_sidebar_items": ["page-toc", "searchbox", "edit-this-page", "sourcelink", "donate"],
+    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "donate"],
     "use_edit_page_button": True,
     "analytics": {"google_analytics_id": "G-W1G68W77YV"},
     "external_links": [
@@ -219,10 +219,7 @@ html_context = {
     "doc_path": "doc/source/",
     "default_mode": "light",
 }
-html_sidebars: Dict[str, Any] = {
-    "index": [],
-    "community": ["search-field.html", "sidebar-nav-bs.html", "twitter.html"],
-}
+html_sidebars: Dict[str, Any] = {"index": []}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

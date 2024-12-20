@@ -121,12 +121,14 @@ def plot_pair(
             )
 
     reference_values_kwargs = _init_kwargs_dict(reference_values_kwargs)
+    reference_values_kwargs.setdefault("marker", "circle")
     reference_values_kwargs.setdefault("line_color", "black")
     reference_values_kwargs.setdefault("fill_color", vectorized_to_hex("C2"))
     reference_values_kwargs.setdefault("line_width", 1)
     reference_values_kwargs.setdefault("size", 10)
 
     divergences_kwargs = _init_kwargs_dict(divergences_kwargs)
+    divergences_kwargs.setdefault("marker", "circle")
     divergences_kwargs.setdefault("line_color", "black")
     divergences_kwargs.setdefault("fill_color", vectorized_to_hex("C1"))
     divergences_kwargs.setdefault("line_width", 1)
@@ -155,6 +157,7 @@ def plot_pair(
     )
 
     point_estimate_marker_kwargs = _init_kwargs_dict(point_estimate_marker_kwargs)
+    point_estimate_marker_kwargs.setdefault("marker", "square")
     point_estimate_marker_kwargs.setdefault("size", markersize)
     point_estimate_marker_kwargs.setdefault("color", "black")
     point_estimate_kwargs.setdefault("line_color", "black")
@@ -265,9 +268,11 @@ def plot_pair(
             elif j + marginals_offset > i:
                 if "scatter" in kind:
                     if divergences:
-                        ax[j, i].circle(var1, var2, source=source, view=source_nondiv)
+                        ax[j, i].scatter(
+                            var1, var2, marker="circle", source=source, view=source_nondiv
+                        )
                     else:
-                        ax[j, i].circle(var1, var2, source=source)
+                        ax[j, i].scatter(var1, var2, marker="circle", source=source)
 
                 if "kde" in kind:
                     var1_kde = plotters[i][-1].flatten()
@@ -293,7 +298,7 @@ def plot_pair(
                     )
 
                 if divergences:
-                    ax[j, i].circle(
+                    ax[j, i].scatter(
                         var1,
                         var2,
                         source=source,
@@ -306,7 +311,7 @@ def plot_pair(
                     var2_pe = plotters[j][-1].flatten()
                     pe_x = calculate_point_estimate(point_estimate, var1_pe)
                     pe_y = calculate_point_estimate(point_estimate, var2_pe)
-                    ax[j, i].square(pe_x, pe_y, **point_estimate_marker_kwargs)
+                    ax[j, i].scatter(pe_x, pe_y, **point_estimate_marker_kwargs)
 
                     ax_hline = Span(
                         location=pe_y,
@@ -344,7 +349,7 @@ def plot_pair(
                     x = reference_values_copy[flat_var_names[j + marginals_offset]]
                     y = reference_values_copy[flat_var_names[i]]
                     if x and y:
-                        ax[j, i].circle(y, x, **reference_values_kwargs)
+                        ax[j, i].scatter(y, x, **reference_values_kwargs)
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
 

@@ -225,7 +225,11 @@ def _d_helper(
 
     if point_estimate is not None:
         est = calculate_point_estimate(point_estimate, vec, bw, circular)
-        plotted.append(ax.circle(est, 0, fill_color=color, line_color="black", size=markersize))
+        plotted.append(
+            ax.scatter(
+                est, 0, marker="circle", fill_color=color, line_color="black", size=markersize
+            )
+        )
 
     _title = Title()
     _title.text = vname

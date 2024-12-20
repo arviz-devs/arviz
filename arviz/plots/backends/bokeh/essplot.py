@@ -73,12 +73,14 @@ def plot_ess(
     for (var_name, selection, isel, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
-        bulk_points = ax_.circle(np.asarray(xdata), np.asarray(x), size=6)
+        bulk_points = ax_.scatter(np.asarray(xdata), np.asarray(x), marker="circle", size=6)
         if kind == "evolution":
             bulk_line = ax_.line(np.asarray(xdata), np.asarray(x))
             ess_tail = ess_tail_dataset[var_name].sel(**selection)
             tail_points = ax_.line(np.asarray(xdata), np.asarray(ess_tail), color="orange")
-            tail_line = ax_.circle(np.asarray(xdata), np.asarray(ess_tail), size=6, color="orange")
+            tail_line = ax_.scatter(
+                np.asarray(xdata), np.asarray(ess_tail), marker="circle", size=6, color="orange"
+            )
         elif rug:
             if rug_kwargs is None:
                 rug_kwargs = {}

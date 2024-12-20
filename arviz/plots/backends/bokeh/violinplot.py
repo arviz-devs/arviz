@@ -81,9 +81,10 @@ def plot_violin(
                 [0, 0], per[:2], line_width=linewidth * 3, line_color="black", line_cap="round"
             )
         ax_.line([0, 0], hdi_probs, line_width=linewidth, line_color="black", line_cap="round")
-        ax_.circle(
+        ax_.scatter(
             0,
             per[-1],
+            marker="circle",
             line_color="white",
             fill_color="white",
             size=linewidth * 1.5,

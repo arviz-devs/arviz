@@ -94,9 +94,10 @@ def plot_khat(
 
     if not isinstance(rgba_c, str) and isinstance(rgba_c, Iterable):
         for idx, (alpha, rgba_c_) in enumerate(zip(alphas, rgba_c)):
-            ax.cross(
+            ax.scatter(
                 xdata[idx],
                 khats[idx],
+                marker="cross",
                 line_color=rgba_c_,
                 fill_color=rgba_c_,
                 line_alpha=alpha,
@@ -104,9 +105,10 @@ def plot_khat(
                 size=10,
             )
     else:
-        ax.cross(
+        ax.scatter(
             xdata,
             khats,
+            marker="cross",
             line_color=rgba_c,
             fill_color=rgba_c,
             size=10,

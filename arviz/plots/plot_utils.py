@@ -482,16 +482,18 @@ def plot_point_interval(
         if point_estimate:
             point_value = calculate_point_estimate(point_estimate, values)
             if rotated:
-                ax.circle(
+                ax.scatter(
                     x=0,
                     y=point_value,
+                    marker="circle",
                     size=markersize,
                     fill_color=markercolor,
                 )
             else:
-                ax.circle(
+                ax.scatter(
                     x=point_value,
                     y=0,
+                    marker="circle",
                     size=markersize,
                     fill_color=markercolor,
                 )
@@ -534,7 +536,7 @@ def set_bokeh_circular_ticks_labels(ax, hist, labels):
     )
 
     radii_circles = np.linspace(0, np.max(hist) * 1.1, 4)
-    ax.circle(0, 0, radius=radii_circles, fill_color=None, line_color="grey")
+    ax.scatter(0, 0, marker="circle", radius=radii_circles, fill_color=None, line_color="grey")
 
     offset = np.max(hist * 1.05) * 0.15
     ticks_labels_pos_1 = np.max(hist * 1.05)
