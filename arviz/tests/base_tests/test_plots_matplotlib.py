@@ -2151,19 +2151,6 @@ def test_plot_lm(data, kind, use_y_model):
     else:
         idata = generate_lm_2d_data()
 
-    # test_cases = [
-    #     # Single dimensional cases
-    #     (data_1d, None, "lines", True, 50),  # y_model with lines, default samples
-    #     (data_1d, None, "hdi", True, None),  # y_model with hdi, no samples needed
-    #     (data_1d, None, "lines", False, 50),  # without y_model, lines
-    #     (data_1d, None, "hdi", False, None),  # without y_model, hdi
-    #     # Multi-dimensional cases with plot_dim
-    #     (data_2d, "dim1", "lines", True, 20),  # y_model with lines, fewer samples
-    #     (data_2d, "dim1", "hdi", True, None),  # y_model with hdi
-    #     (data_2d, "dim1", "lines", False, 50),  # without y_model, lines
-    #     (data_2d, "dim1", "hdi", False, None),  # without y_model, hdi
-    # ]
-
     kwargs = {"idata": idata, "y": "y", "kind_model": kind}
     if data == "2d":
         kwargs["plot_dim"] = "dim1"
@@ -2174,3 +2161,20 @@ def test_plot_lm(data, kind, use_y_model):
 
     ax = plot_lm(**kwargs)
     assert ax is not None
+
+
+@pytest.mark.parametrize(
+    "coords, expected_vars",
+    [
+        ({"school": ["Choate"]}, ["theta"]),
+        ({"school": ["Lawrenceville"]}, ["theta"]),
+        ({}, ["theta"]),
+    ],
+)
+def test_plot_autocorr_coords(coords, expected_vars):
+    """Test plot_autocorr with coords kwarg."""
+    idata = load_arviz_data("centered_eight")
+
+    axes = plot_autocorr(idata, var_names=["theta"], coords=coords, show=False)
+
+    assert axes is not None
