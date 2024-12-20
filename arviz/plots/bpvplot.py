@@ -170,7 +170,8 @@ def plot_bpv(
     Notes
     -----
     Discrete data is smoothed before computing either p-values or u-values using the
-    function :func:`~arviz.smooth_data` if the data is integer type and the smoothing parameter is True(by default).
+    function :func:`~arviz.smooth_data` if the data is integer type
+    and the smoothing parameter is True.
 
     Examples
     --------

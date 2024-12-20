@@ -88,7 +88,7 @@ def plot_bpv(
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
-        if (obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i") and smoothing == True:
+        if (obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i") and smoothing is True:
             obs_vals, pp_vals = smooth_data(obs_vals, pp_vals)
 
         if kind == "p_value":
