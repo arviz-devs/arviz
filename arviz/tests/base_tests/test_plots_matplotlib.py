@@ -2175,6 +2175,6 @@ def test_plot_autocorr_coords(coords, expected_vars):
     """Test plot_autocorr with coords kwarg."""
     idata = load_arviz_data("centered_eight")
 
-    axes = plot_autocorr(idata, var_names=["theta"], coords=coords, show=False)
+    axes = plot_autocorr(idata, var_names=expected_vars, coords=coords, show=False)
 
     assert axes is not None
