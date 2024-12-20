@@ -120,10 +120,11 @@ class TestDiagnostics:
         ```
         Reference file:
 
-        Created: 2020-08-31
-        System: Ubuntu 18.04.5 LTS
-        R version 4.0.2 (2020-06-22)
-        posterior 0.1.2
+        Created: 2024-12-20
+        System: Ubuntu 24.04.1 LTS
+        R version 4.4.2 (2024-10-31)
+        posterior version from https://github.com/stan-dev/posterior/pull/388
+            (after release 1.6.0 but before the fixes in the PR were released).
         """
         # download input files
         here = os.path.dirname(os.path.abspath(__file__))

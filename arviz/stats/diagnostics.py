@@ -744,8 +744,8 @@ def _ess_sd(ary, relative=False):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    ary = _split_chains(ary)
-    return min(_ess(ary, relative=relative), _ess(ary**2, relative=relative))
+    ary = (ary - ary.mean()) ** 2
+    return _ess(_split_chains(ary), relative=relative)
 
 
 def _ess_quantile(ary, prob, relative=False):
@@ -838,13 +838,15 @@ def _mcse_sd(ary):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    ess = _ess_sd(ary)
+    sims_c2 = (ary - ary.mean()) ** 2
+    ess = _ess_mean(sims_c2)
+    evar = (sims_c2).mean()
+    varvar = ((sims_c2**2).mean() - evar**2) / ess
+    varsd = varvar / evar / 4
     if _numba_flag:
-        sd = float(_sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1)).item())
+        mcse_sd_value = float(_sqrt(np.ravel(varsd), np.zeros(1)))
     else:
-        sd = np.std(ary, ddof=1)
-    fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess) ** (ess - 1) - 1)
-    mcse_sd_value = sd * fac_mcse_sd
+        mcse_sd_value = np.sqrt(varsd)
     return mcse_sd_value
 
 
@@ -973,19 +975,21 @@ def _multichain_statistics(ary, focus="mean"):
         # ess mean
         ess_mean_value = _ess_mean(ary)
 
-        # ess sd
-        ess_sd_value = _ess_sd(ary)
-
         # mcse_mean
-        sd = np.std(ary, ddof=1)
-        mcse_mean_value = sd / np.sqrt(ess_mean_value)
+        sims_c2 = (ary - ary.mean()) ** 2
+        sims_c2_sum = sims_c2.sum()
+        var = sims_c2_sum / (sims_c2.size - 1)
+        mcse_mean_value = np.sqrt(var / ess_mean_value)
 
         # ess bulk
         ess_bulk_value = _ess(z_split)
 
         # mcse_sd
-        fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess_sd_value) ** (ess_sd_value - 1) - 1)
-        mcse_sd_value = sd * fac_mcse_sd
+        evar = sims_c2_sum / sims_c2.size
+        ess_mean_sims = _ess_mean(sims_c2)
+        varvar = ((sims_c2**2).mean() - evar**2) / ess_mean_sims
+        varsd = varvar / evar / 4
+        mcse_sd_value = np.sqrt(varsd)
 
         return (
             mcse_mean_value,
