@@ -41,6 +41,7 @@ def plot_bpv(
     plot_ref_kwargs,
     backend_kwargs,
     show,
+    smoothing,
 ):
     """Bokeh bpv plot."""
     if backend_kwargs is None:
@@ -90,6 +91,9 @@ def plot_bpv(
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
+        if (obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i") and smoothing is True:
+            obs_vals, pp_vals = smooth_data(obs_vals, pp_vals)
+
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
             x_s, tstat_pit_dens = kde(tstat_pit)
@@ -115,9 +119,6 @@ def plot_bpv(
                     )
 
         elif kind == "u_value":
-            if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
-                obs_vals, pp_vals = smooth_data(obs_vals, pp_vals)
-
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
             x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.line(x_s, tstat_pit_dens, color=color)
