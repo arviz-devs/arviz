@@ -2086,3 +2086,21 @@ def test_plot_bf():
     bf_dict1, _ = plot_bf(idata, prior=np.random.normal(0, 10, 5000), var_name="a", ref_val=0)
     assert bf_dict0["BF10"] > bf_dict0["BF01"]
     assert bf_dict1["BF10"] < bf_dict1["BF01"]
+
+
+def test_plot_forest_with_transform():
+    """Test if plot_forest runs successfully with a transform dictionary."""
+    data = xr.Dataset(
+        {
+            "var1": (["chain", "draw"], np.array([[1, 2, 3], [4, 5, 6]])),
+            "var2": (["chain", "draw"], np.array([[7, 8, 9], [10, 11, 12]])),
+        },
+        coords={"chain": [0, 1], "draw": [0, 1, 2]},
+    )
+    transform_dict = {
+        "var1": lambda x: x + 1,
+        "var2": lambda x: x * 2,
+    }
+
+    axes = plot_forest(data, transform=transform_dict, show=False)
+    assert axes is not None
