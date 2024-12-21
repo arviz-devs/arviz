@@ -2086,3 +2086,20 @@ def test_plot_bf():
     bf_dict1, _ = plot_bf(idata, prior=np.random.normal(0, 10, 5000), var_name="a", ref_val=0)
     assert bf_dict0["BF10"] > bf_dict0["BF01"]
     assert bf_dict1["BF10"] < bf_dict1["BF01"]
+
+
+@pytest.mark.parametrize(
+    "coords, expected_vars",
+    [
+        ({"school": ["Choate"]}, ["theta"]),
+        ({"school": ["Lawrenceville"]}, ["theta"]),
+        ({}, ["theta"]),
+    ],
+)
+def test_plot_autocorr_coords(coords, expected_vars):
+    """Test plot_autocorr with coords kwarg."""
+    idata = load_arviz_data("centered_eight")
+
+    axes = plot_autocorr(idata, var_names=expected_vars, coords=coords, show=False)
+
+    assert axes is not None
