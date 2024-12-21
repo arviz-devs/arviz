@@ -2341,13 +2341,7 @@ def _cjs_dist(draws, weights):
     return np.sqrt((cjs_pq + cjs_qp) / bound)
 
 
-def bayes_factor(
-    idata,
-    var_name,
-    ref_val=0,
-    prior=None,
-    return_ref_vals=False
-):
+def bayes_factor(idata, var_name, ref_val=0, prior=None, return_ref_vals=False):
     r"""Approximated Bayes Factor for comparing hypothesis of two nested models.
 
     The Bayes factor is estimated by comparing a model (H1) against a model in which the
@@ -2373,7 +2367,7 @@ def bayes_factor(
     return_ref_vals : bool, optional
         Whether to return the values of the prior and posterior at the reference value.
         Used by :func:`arviz.plot_bf` to display the distribution comparison.
-    
+
 
     Returns
     -------
@@ -2383,7 +2377,7 @@ def bayes_factor(
     ----------
     .. [1] Heck, D., 2019. A caveat on the Savage-Dickey density ratio:
        The case of computing Bayes factors for regression parameters.
-    
+
     Examples
     --------
     Moderate evidence indicating that the parameter "a" is different from zero.
@@ -2397,7 +2391,7 @@ def bayes_factor(
            ...: az.bayes_factor(idata, var_name="a", ref_val=0)
 
     """
-    
+
     posterior = extract(idata, var_names=var_name).values
 
     if ref_val > posterior.max() or ref_val < posterior.min():
@@ -2423,10 +2417,7 @@ def bayes_factor(
         prior_at_ref_val = (prior == ref_val).mean()
 
     bf_10 = prior_at_ref_val / posterior_at_ref_val
-    bf = {
-        "BF10": bf_10, 
-        "BF01": 1 / bf_10
-    }
+    bf = {"BF10": bf_10, "BF01": 1 / bf_10}
 
     if return_ref_vals:
         return (bf, {"prior": prior_at_ref_val, "posterior": posterior_at_ref_val})
