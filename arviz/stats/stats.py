@@ -42,6 +42,7 @@ from ..labels import BaseLabeller
 
 __all__ = [
     "apply_test_function",
+    "bayes_factor",
     "compare",
     "hdi",
     "loo",
@@ -2345,6 +2346,7 @@ def bayes_factor(
     var_name,
     ref_val=0,
     prior=None,
+    return_ref_vals=False
 ):
     r"""Approximated Bayes Factor for comparing hypothesis of two nested models.
 
@@ -2368,6 +2370,9 @@ def bayes_factor(
         Point-null for Bayes factor estimation.
     prior : numpy.array, optional
         In case we want to use different prior, for example for sensitivity analysis.
+    return_ref_vals : bool, optional
+        Whether to return the values of the prior and posterior at the reference value.
+        Used by :func:`arviz.plot_bf` to display the distribution comparison.
     
 
     Returns
@@ -2378,6 +2383,18 @@ def bayes_factor(
     ----------
     .. [1] Heck, D., 2019. A caveat on the Savage-Dickey density ratio:
        The case of computing Bayes factors for regression parameters.
+    
+    Examples
+    --------
+    Moderate evidence indicating that the parameter "a" is different from zero.
+
+    .. ipython::
+
+        In [1]: import numpy as np
+           ...: import arviz as az
+           ...: idata = az.from_dict(posterior={"a":np.random.normal(1, 0.5, 5000)},
+           ...: prior={"a":np.random.normal(0, 1, 5000)})
+           ...: az.bayes_factor(idata, var_name="a", ref_val=0)
 
     """
     
@@ -2406,6 +2423,12 @@ def bayes_factor(
         prior_at_ref_val = (prior == ref_val).mean()
 
     bf_10 = prior_at_ref_val / posterior_at_ref_val
-    bf_01 = 1 / bf_10
+    bf = {
+        "BF10": bf_10, 
+        "BF01": 1 / bf_10
+    }
 
-    return {"BF10": bf_10, "BF01": bf_01}
+    if return_ref_vals:
+        return (bf, {"prior": prior_at_ref_val, "posterior": posterior_at_ref_val})
+    else:
+        return bf
