@@ -16,6 +16,7 @@ def plot_bpv(
     bpv=True,
     plot_mean=True,
     reference="analytical",
+    smoothing=None,
     mse=False,
     n_ref=100,
     hdi_prob=0.94,
@@ -72,6 +73,9 @@ def plot_bpv(
     reference : {"analytical", "samples", None}, default "analytical"
         How to compute the distributions used as reference for ``kind=u_values``
         or ``kind=p_values``. Use `None` to not plot any reference.
+    smoothing : bool, optional
+        If True and the data has integer dtype, smooth the data before computing the p-values,
+        u-values or tstat. By default, True when `kind` is "u_value" and False otherwise.
     mse : bool, default False
         Show scaled mean square error between uniform distribution and marginal p_value
         distribution.
@@ -166,7 +170,8 @@ def plot_bpv(
     Notes
     -----
     Discrete data is smoothed before computing either p-values or u-values using the
-    function :func:`~arviz.smooth_data`
+    function :func:`~arviz.smooth_data` if the data is integer type
+    and the smoothing parameter is True.
 
     Examples
     --------
@@ -205,6 +210,9 @@ def plot_bpv(
         hdi_prob = rcParams["stats.ci_prob"]
     elif not 1 >= hdi_prob > 0:
         raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+
+    if smoothing is None:
+        smoothing = kind.lower() == "u_value"
 
     if data_pairs is None:
         data_pairs = {}
@@ -291,6 +299,7 @@ def plot_bpv(
         plot_ref_kwargs=plot_ref_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
+        smoothing=smoothing,
     )
 
     # TODO: Add backend kwargs
