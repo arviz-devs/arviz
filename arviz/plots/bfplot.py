@@ -93,12 +93,16 @@ def plot_bf(
 
     """
 
-    bf, p_at_ref_val = bayes_factor(idata, var_name, prior=None, ref_val=0, return_ref_vals=True)
+    if prior is None:
+        prior = extract(idata, var_names=var_name, group="prior").values
+
+    
+    bf, p_at_ref_val = bayes_factor(idata, var_name, prior=prior, ref_val=ref_val, return_ref_vals=True)
     bf_10 = bf["BF10"]
     bf_01 = bf["BF01"]
 
     posterior = extract(idata, var_names=var_name)
-
+    
     bfplot_kwargs = dict(
         ax=ax,
         bf_10=bf_10.item(),
