@@ -18,6 +18,7 @@ from ...data import concat, convert_to_inference_data, from_dict, load_arviz_dat
 from ...rcparams import rcParams
 from ...stats import (
     apply_test_function,
+    bayes_factor,
     compare,
     ess,
     hdi,
@@ -871,3 +872,13 @@ def test_priorsens_coords(psens_data):
     assert "mu" in result
     assert "theta" in result
     assert "school" in result.theta_t.dims
+
+
+def test_bayes_factor():
+    idata = from_dict(
+        posterior={"a": np.random.normal(1, 0.5, 5000)}, prior={"a": np.random.normal(0, 1, 5000)}
+    )
+    bf_dict0 = bayes_factor(idata, var_name="a", ref_val=0)
+    bf_dict1 = bayes_factor(idata, prior=np.random.normal(0, 10, 5000), var_name="a", ref_val=0)
+    assert bf_dict0["BF10"] > bf_dict0["BF01"]
+    assert bf_dict1["BF10"] < bf_dict1["BF01"]

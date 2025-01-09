@@ -2,11 +2,9 @@
 # pylint: disable=unbalanced-tuple-unpacking
 import logging
 
-from numpy import interp
-
 from ..data.utils import extract
 from .plot_utils import get_plotting_function
-from ..stats.density_utils import _kde_linear
+from ..stats import bayes_factor
 
 _log = logging.getLogger(__name__)
 
@@ -94,32 +92,17 @@ def plot_bf(
         >>> az.plot_bf(idata, var_name="a", ref_val=0)
 
     """
-    posterior = extract(idata, var_names=var_name).values
-
-    if ref_val > posterior.max() or ref_val < posterior.min():
-        _log.warning(
-            "The reference value is outside of the posterior. "
-            "This translate into infinite support for H1, which is most likely an overstatement."
-        )
-
-    if posterior.ndim > 1:
-        _log.warning("Posterior distribution has {posterior.ndim} dimensions")
 
     if prior is None:
         prior = extract(idata, var_names=var_name, group="prior").values
 
-    if posterior.dtype.kind == "f":
-        posterior_grid, posterior_pdf = _kde_linear(posterior)
-        prior_grid, prior_pdf = _kde_linear(prior)
-        posterior_at_ref_val = interp(ref_val, posterior_grid, posterior_pdf)
-        prior_at_ref_val = interp(ref_val, prior_grid, prior_pdf)
+    bf, p_at_ref_val = bayes_factor(
+        idata, var_name, prior=prior, ref_val=ref_val, return_ref_vals=True
+    )
+    bf_10 = bf["BF10"]
+    bf_01 = bf["BF01"]
 
-    elif posterior.dtype.kind == "i":
-        posterior_at_ref_val = (posterior == ref_val).mean()
-        prior_at_ref_val = (prior == ref_val).mean()
-
-    bf_10 = prior_at_ref_val / posterior_at_ref_val
-    bf_01 = 1 / bf_10
+    posterior = extract(idata, var_names=var_name)
 
     bfplot_kwargs = dict(
         ax=ax,
@@ -128,8 +111,8 @@ def plot_bf(
         prior=prior,
         posterior=posterior,
         ref_val=ref_val,
-        prior_at_ref_val=prior_at_ref_val,
-        posterior_at_ref_val=posterior_at_ref_val,
+        prior_at_ref_val=p_at_ref_val["prior"],
+        posterior_at_ref_val=p_at_ref_val["posterior"],
         var_name=var_name,
         colors=colors,
         figsize=figsize,

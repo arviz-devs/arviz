@@ -27,6 +27,7 @@ from ..utils import Numba, _numba_var, _var_names, get_coords
 from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
 from .density_utils import kde as _kde
+from .density_utils import _kde_linear
 from .diagnostics import _mc_error, _multichain_statistics, ess
 from .stats_utils import ELPDData, _circular_standard_deviation, smooth_data
 from .stats_utils import get_log_likelihood as _get_log_likelihood
@@ -41,6 +42,7 @@ from ..labels import BaseLabeller
 
 __all__ = [
     "apply_test_function",
+    "bayes_factor",
     "compare",
     "hdi",
     "loo",
@@ -2337,3 +2339,87 @@ def _cjs_dist(draws, weights):
     bound = cdf_p_int + cdf_q_int
 
     return np.sqrt((cjs_pq + cjs_qp) / bound)
+
+
+def bayes_factor(idata, var_name, ref_val=0, prior=None, return_ref_vals=False):
+    r"""Approximated Bayes Factor for comparing hypothesis of two nested models.
+
+    The Bayes factor is estimated by comparing a model (H1) against a model in which the
+    parameter of interest has been restricted to be a point-null (H0). This computation
+    assumes the models are nested and thus H0 is a special case of H1.
+
+    Notes
+    -----
+    The bayes Factor is approximated as the Savage-Dickey density ratio
+    algorithm presented in [1]_.
+
+    Parameters
+    ----------
+    idata : InferenceData
+        Any object that can be converted to an :class:`arviz.InferenceData` object
+        Refer to documentation of :func:`arviz.convert_to_dataset` for details.
+    var_name : str, optional
+        Name of variable we want to test.
+    ref_val : int, default 0
+        Point-null for Bayes factor estimation.
+    prior : numpy.array, optional
+        In case we want to use different prior, for example for sensitivity analysis.
+    return_ref_vals : bool, optional
+        Whether to return the values of the prior and posterior at the reference value.
+        Used by :func:`arviz.plot_bf` to display the distribution comparison.
+
+
+    Returns
+    -------
+    dict : A dictionary with BF10 (Bayes Factor 10 (H1/H0 ratio), and BF01 (H0/H1 ratio).
+
+    References
+    ----------
+    .. [1] Heck, D., 2019. A caveat on the Savage-Dickey density ratio:
+       The case of computing Bayes factors for regression parameters.
+
+    Examples
+    --------
+    Moderate evidence indicating that the parameter "a" is different from zero.
+
+    .. ipython::
+
+        In [1]: import numpy as np
+           ...: import arviz as az
+           ...: idata = az.from_dict(posterior={"a":np.random.normal(1, 0.5, 5000)},
+           ...: prior={"a":np.random.normal(0, 1, 5000)})
+           ...: az.bayes_factor(idata, var_name="a", ref_val=0)
+
+    """
+
+    posterior = extract(idata, var_names=var_name).values
+
+    if ref_val > posterior.max() or ref_val < posterior.min():
+        _log.warning(
+            "The reference value is outside of the posterior. "
+            "This translate into infinite support for H1, which is most likely an overstatement."
+        )
+
+    if posterior.ndim > 1:
+        _log.warning("Posterior distribution has {posterior.ndim} dimensions")
+
+    if prior is None:
+        prior = extract(idata, var_names=var_name, group="prior").values
+
+    if posterior.dtype.kind == "f":
+        posterior_grid, posterior_pdf, *_ = _kde_linear(posterior)
+        prior_grid, prior_pdf, *_ = _kde_linear(prior)
+        posterior_at_ref_val = np.interp(ref_val, posterior_grid, posterior_pdf)
+        prior_at_ref_val = np.interp(ref_val, prior_grid, prior_pdf)
+
+    elif posterior.dtype.kind == "i":
+        posterior_at_ref_val = (posterior == ref_val).mean()
+        prior_at_ref_val = (prior == ref_val).mean()
+
+    bf_10 = prior_at_ref_val / posterior_at_ref_val
+    bf = {"BF10": bf_10, "BF01": 1 / bf_10}
+
+    if return_ref_vals:
+        return (bf, {"prior": prior_at_ref_val, "posterior": posterior_at_ref_val})
+    else:
+        return bf
