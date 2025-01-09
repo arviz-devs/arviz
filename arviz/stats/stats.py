@@ -2407,8 +2407,8 @@ def bayes_factor(idata, var_name, ref_val=0, prior=None, return_ref_vals=False):
         prior = extract(idata, var_names=var_name, group="prior").values
 
     if posterior.dtype.kind == "f":
-        posterior_grid, posterior_pdf = _kde_linear(posterior)
-        prior_grid, prior_pdf = _kde_linear(prior)
+        posterior_grid, posterior_pdf, *_ = _kde_linear(posterior)
+        prior_grid, prior_pdf, *_ = _kde_linear(prior)
         posterior_at_ref_val = np.interp(ref_val, posterior_grid, posterior_pdf)
         prior_at_ref_val = np.interp(ref_val, prior_grid, prior_pdf)
 
