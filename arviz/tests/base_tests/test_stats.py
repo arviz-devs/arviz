@@ -883,7 +883,7 @@ def test_bayes_factor():
     assert bf_dict0["BF10"] > bf_dict0["BF01"]
     assert bf_dict1["BF10"] < bf_dict1["BF01"]
 
-def test_compare_sorting_consistency():    
+def test_compare_sorting_consistency():
     chains, draws = 4, 1000
 
     # Model 1 - good fit
