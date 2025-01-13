@@ -115,23 +115,29 @@ def plot_lm(
 
         if y_model is not None:
             _, _, _, y_model_plotters = y_model[i]
-            if kind_model == "lines":
-                for j in range(num_samples):
-                    ax_i.plot(x_plotters, y_model_plotters[..., j], **y_model_plot_kwargs)
-                ax_i.plot([], **y_model_plot_kwargs, label="Uncertainty in mean")
 
-                y_model_mean = np.mean(y_model_plotters, axis=1)
+            if kind_model == "lines":
+                # y_model_plotters should be (points, samples)
+                y_points = y_model_plotters.shape[0]
+                if x_plotters.shape[0] == y_points:
+                    for j in range(num_samples):
+                        ax_i.plot(x_plotters, y_model_plotters[:, j], **y_model_plot_kwargs)
+
+                    ax_i.plot([], **y_model_plot_kwargs, label="Uncertainty in mean")
+                    y_model_mean = np.mean(y_model_plotters, axis=1)
+                    ax_i.plot(x_plotters, y_model_mean, **y_model_mean_kwargs, label="Mean")
+
             else:
                 plot_hdi(
                     x_plotters,
-                    y_model_plotters,
+                    y_model_plotters,  
                     fill_kwargs=y_model_fill_kwargs,
                     ax=ax_i,
                 )
+                
                 ax_i.plot([], color=y_model_fill_kwargs["color"], label="Uncertainty in mean")
-
-                y_model_mean = np.mean(y_model_plotters, axis=(0, 1))
-            ax_i.plot(x_plotters, y_model_mean, **y_model_mean_kwargs, label="Mean")
+                y_model_mean = np.mean(y_model_plotters, axis=0)
+                ax_i.plot(x_plotters, y_model_mean, **y_model_mean_kwargs, label="Mean")
 
         if legend:
             ax_i.legend(fontsize=xt_labelsize, loc="upper left")
