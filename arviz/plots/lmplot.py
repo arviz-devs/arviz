@@ -245,14 +245,6 @@ def plot_lm(
     elif isinstance(plot_dim, tuple):
         skip_dims = list(plot_dim)
 
-    # Capture dimensions before y gets processed
-    if y_model is not None:
-        is_multidim = len(y.dims) > 1
-
-        if plot_dim is not None:
-            y_dims = y.dims
-            dim_idx = y_dims.index(plot_dim)
-
     # Generate x axis plotters.
     x = filter_plotters_list(
         plotters=list(
@@ -313,14 +305,14 @@ def plot_lm(
 
             total_samples = data.shape[0] * data.shape[1]
             data = data.reshape(total_samples, *data.shape[2:])
-            
+
             if pp_sample_ix is not None:
                 data = data[pp_sample_ix]
-                
+
             if plot_dim is not None:
                 # For plot_dim case, transpose to get dimension first
                 data = data.transpose(1, 0, 2)[..., 0]
-            
+
             # Create plotter tuple(s)
             if plot_dim is not None:
                 y_model = [(var_name, {}, {}, data) for _ in range(length_plotters)]
@@ -339,17 +331,17 @@ def plot_lm(
                 data = data[..., 0]
 
                 # Reshape to (samples, points)
-                data = data.transpose(1, 2, 0).reshape(-1, data.shape[0])  
+                data = data.transpose(1, 2, 0).reshape(-1, data.shape[0])
                 y_model = [(var_name, {}, {}, data) for _ in range(length_plotters)]
 
             else:
-                data = data.reshape(-1, data.shape[-1]) 
+                data = data.reshape(-1, data.shape[-1])
                 y_model = [(var_name, {}, {}, data)]
                 y_model = _repeat_flatten_list(y_model, len_x)
 
         if len(y_model) == 1:
             y_model = _repeat_flatten_list(y_model, len_x)
-                    
+
     rows, cols = default_grid(length_plotters)
 
     lmplot_kwargs = dict(
