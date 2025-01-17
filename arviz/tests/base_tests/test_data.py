@@ -1482,11 +1482,11 @@ class TestDataNetCDF:
         assert os.path.exists(filepath)
         os.remove(filepath)
         assert not os.path.exists(filepath)
-        
+
     def test_to_netcdf_kwargs(self):
         """Tests to verify that passing kwargs to `InferenceData.to_netcdf()`
         works as intended"""
-        pass # TODO
+        True # TODO
         # 1) define an InferenceData object (e.g. from file)
         # 2) define different sets of `**kwargs` to pass
         # 3) use inference_data.to_netcdf(filepath,**kwargs)

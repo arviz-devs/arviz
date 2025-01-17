@@ -505,10 +505,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 filename, mode=mode, engine=engine, group=base_group
             )
             mode = "a"
-        
+
         # add items to kwargs corresponding directly to parameters of this method
         kwargs["engine"] = engine
-        
+    
         # get encoding dict that may have been passed in
         try:
             encoding_kw2 = kwargs["encoding"]
@@ -523,7 +523,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             for group in groups:
                 data = getattr(self, group)
-                
+
                 # define encoding kwargs according to compress
                 # but only for compressible dtypes
                 if compress:
@@ -534,7 +534,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                     }
                 else:
                     encoding_kw1 = {}
-                
+
                 # merge the two dicts-of-dicts
                 encoding_kw_merged = {}
                 for var_name, kw1 in encoding_kw1.items():
