@@ -462,6 +462,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         engine: str = "h5netcdf",
         base_group: str = "/",
         overwrite_existing: bool = True,
+        **kwargs
     ) -> str:
         """Write InferenceData to netcdf4 file.
 
@@ -481,7 +482,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
             By default, will write to the root of the netCDF file
         overwrite_existing : bool, default True
             Whether to overwrite the existing file or append to it.
-
+        
+        Other keyword arguments will be passed to `xarray.Dataset.to_netcdf()`. If 
+        provided these will serve to override dict items that relate to `compress` and 
+        `engine` parameters described above.
+        
         Returns
         -------
         str
@@ -500,6 +505,15 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 filename, mode=mode, engine=engine, group=base_group
             )
             mode = "a"
+        
+        # add items to kwargs corresponding directly to parameters of this method
+        kwargs["engine"] = engine
+        
+        # get encoding dict that may have been passed in
+        try:
+            encoding_kw2 = kwargs["encoding"]
+        except KeyError:
+            encoding_kw2 = {}
 
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
@@ -509,13 +523,30 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             for group in groups:
                 data = getattr(self, group)
-                kwargs = {"engine": engine}
+                
+                # define encoding kwargs according to compress
+                # but only for compressible dtypes
                 if compress:
-                    kwargs["encoding"] = {
+                    encoding_kw1 = {
                         var_name: {"zlib": True}
                         for var_name, values in data.variables.items()
                         if _compressible_dtype(values.dtype)
                     }
+                else:
+                    encoding_kw1 = {}
+                
+                # merge the two dicts-of-dicts
+                encoding_kw_merged = {}
+                for var_name, kw1 in encoding_kw1.items():
+                    try:
+                        kw2 = encoding_kw2[var_name]
+                    except KeyError:
+                        kw2 = {}
+                    encoding_kw_merged[var_name] = {**kw1,**kw2}
+                    # note: entries passed in via kwargs will overwrite
+                    # those that may have been created due to other parameters
+                kwargs["encoding"] = encoding_kw_merged
+
                 data.to_netcdf(filename, mode=mode, group=f"{base_group}/{group}", **kwargs)
                 data.close()
                 mode = "a"
