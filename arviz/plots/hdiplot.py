@@ -135,7 +135,7 @@ def plot_hdi(
 
     x = np.asarray(x)
     x_shape = x.shape
-    
+
     if isinstance(x[0], str):
         raise TypeError("'x' type string not supported.")
     if y is None and hdi_data is None:
