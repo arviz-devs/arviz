@@ -1235,6 +1235,13 @@ def test_plot_hdi_dataset_error(models):
     with pytest.raises(ValueError, match="Only single variable Dataset"):
         plot_hdi(np.arange(8), hdi_data=hdi_data)
 
+def test_plot_hdi_string_error():
+    """Check x as type string raises an error."""
+    x_data = ["a", "b", "c", "d"]
+    y_data = np.random.normal(0, 5, (1, 200, len(x_data)))
+    hdi_data = hdi(y_data)
+    with pytest.raises(TypeError, match="'x' type string not supported."):
+        plot_hdi(x=x_data, y=y_data, hdi_data=hdi_data)
 
 def test_plot_hdi_datetime_error():
     """Check x as datetime raises an error."""
