@@ -1241,7 +1241,13 @@ def test_plot_hdi_string_error():
     x_data = ["a", "b", "c", "d"]
     y_data = np.random.normal(0, 5, (1, 200, len(x_data)))
     hdi_data = hdi(y_data)
-    with pytest.raises(TypeError, match="'x' type string not supported."):
+    with pytest.raises(
+        NotImplementedError,
+        match=(
+            "The `arviz.plot.hdi()` function does not support categorical data. "
+            "Consider using `arviz.plot_forest()`."
+        ),
+    ):
         plot_hdi(x=x_data, y=y_data, hdi_data=hdi_data)
 
 
