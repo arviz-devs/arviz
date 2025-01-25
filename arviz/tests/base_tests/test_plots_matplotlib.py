@@ -1244,7 +1244,7 @@ def test_plot_hdi_string_error():
     with pytest.raises(
         NotImplementedError,
         match=(
-            "The `arviz.plot.hdi()` function does not support categorical data. "
+            "The `arviz.plot_hdi()` function does not support categorical data. "
             "Consider using `arviz.plot_forest()`."
         ),
     ):
