@@ -40,8 +40,8 @@ between programming languages and encourage collaboration.
 ## Participate online
 There are many alternatives and channels available to interact with other ArviZ users.
 
-### Twitter
-To begin with, you may want to follow us on Twitter! We are [@arviz_devs](https://twitter.com/arviz_devs).
+### X
+To begin with, you may want to follow us on X! We are [@arviz_devs](https://x.com/arviz_devs).
 It is the best way to be up to date with the latest developments and events related
 to ArviZ.
 
