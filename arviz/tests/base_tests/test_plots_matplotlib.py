@@ -3,6 +3,7 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 import os
 from copy import deepcopy
+import re
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,6 +12,7 @@ from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde, norm
 import xarray as xr
+
 
 from ...data import from_dict, load_arviz_data
 from ...plots import (
@@ -1243,10 +1245,12 @@ def test_plot_hdi_string_error():
     hdi_data = hdi(y_data)
     with pytest.raises(
         NotImplementedError,
-        match=re.escape((
-            "The `arviz.plot_hdi()` function does not support categorical data. "
-            "Consider using `arviz.plot_forest()`."
-        )),
+        match=re.escape(
+            (
+                "The `arviz.plot_hdi()` function does not support categorical data. "
+                "Consider using `arviz.plot_forest()`."
+            )
+        ),
     ):
         plot_hdi(x=x_data, y=y_data, hdi_data=hdi_data)
 
