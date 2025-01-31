@@ -192,9 +192,9 @@ html_theme_options = {
             "icon": "fa-brands fa-github",
         },
         {
-            "name": "Twitter",
-            "url": "https://twitter.com/arviz_devs",
-            "icon": "fa-brands fa-twitter",
+            "name": "Bluesky",
+            "url": "https://bsky.app/profile/arviz.bsky.social",
+            "icon": "fa-brands fa-bluesky",
         },
         {
             "name": "Mastodon",
