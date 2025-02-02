@@ -2,23 +2,22 @@
 
 # pylint: disable=redefined-outer-name,too-many-lines
 import os
-from copy import deepcopy
 import re
+from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+import xarray as xr
 from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde, norm
-import xarray as xr
-
 
 from ...data import from_dict, load_arviz_data
 from ...plots import (
     plot_autocorr,
-    plot_bpv,
     plot_bf,
+    plot_bpv,
     plot_compare,
     plot_density,
     plot_dist,
@@ -45,20 +44,20 @@ from ...plots import (
     plot_ts,
     plot_violin,
 )
+from ...plots.dotplot import wilkinson_algorithm
+from ...plots.plot_utils import plot_point_interval
 from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...stats.density_utils import kde as _kde
-from ...utils import _cov, BehaviourChangeWarning
-from ...plots.plot_utils import plot_point_interval
-from ...plots.dotplot import wilkinson_algorithm
+from ...utils import BehaviourChangeWarning, _cov
 from ..helpers import (  # pylint: disable=unused-import
+    RandomVariableTestClass,
     create_model,
     create_multidimensional_model,
     does_not_warn,
     eight_schools_params,
     models,
     multidim_models,
-    RandomVariableTestClass,
 )
 
 rcParams["data.load"] = "eager"
