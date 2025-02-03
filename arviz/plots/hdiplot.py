@@ -136,6 +136,11 @@ def plot_hdi(
     x = np.asarray(x)
     x_shape = x.shape
 
+    if isinstance(x[0], str):
+        raise NotImplementedError(
+            "The `arviz.plot_hdi()` function does not support categorical data. "
+            "Consider using `arviz.plot_forest()`."
+        )
     if y is None and hdi_data is None:
         raise ValueError("One of {y, hdi_data} is required")
     if hdi_data is not None and y is not None:
