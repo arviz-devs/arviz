@@ -86,7 +86,7 @@ The list of optional dependencies to further enhance ArviZ is given below.
 - Numba
 
   Necessary to speed up the code computation. The installation details can be found
-  `here <https://numba.pydata.org/numba-doc/latest/user/installing.html>`_. Further details on enhanced functionality provided in ArviZ by Numba can be
+  `here <https://numba.readthedocs.io/en/stable/user/installing.html>`_. Further details on enhanced functionality provided in ArviZ by Numba can be
   :ref:`found here <numba_for_arviz>`.
 
 - Bokeh
