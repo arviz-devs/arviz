@@ -86,7 +86,7 @@ def plot_lm(
         y_model_fill_kwargs = {}
     else:
         y_model_fill_kwargs = y_model_fill_kwargs.copy()
-    # Convert matplotlib color to bokeh fill_color if needed  
+    # Convert matplotlib color to bokeh fill_color if needed
     if "color" in y_model_fill_kwargs and "fill_color" not in y_model_fill_kwargs:
         y_model_fill_kwargs["fill_color"] = y_model_fill_kwargs.pop("color")
     y_model_fill_kwargs.setdefault("fill_color", "black")
