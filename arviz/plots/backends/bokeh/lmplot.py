@@ -160,6 +160,11 @@ def plot_lm(
                 )
 
                 y_model_mean = np.mean(y_model_plotters, axis=(0, 1))
+                # Plot mean line across all x values instead of just edges
+                mean_legend = ax_i.line(x_plotters, y_model_mean, **y_model_mean_kwargs)
+                legend_it.append(("Mean", [mean_legend]))
+                continue  # Skip the edge plotting since we plotted full line
+
             x_plotters_edge = [min(x_plotters), max(x_plotters)]
             y_model_mean_edge = [min(y_model_mean), max(y_model_mean)]
             mean_legend = ax_i.line(x_plotters_edge, y_model_mean_edge, **y_model_mean_kwargs)
