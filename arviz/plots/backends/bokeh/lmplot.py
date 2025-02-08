@@ -68,7 +68,13 @@ def plot_lm(
 
     if y_hat_fill_kwargs is None:
         y_hat_fill_kwargs = {}
-    y_hat_fill_kwargs.setdefault("color", "orange")
+    else:
+        y_hat_fill_kwargs = y_hat_fill_kwargs.copy()
+    # Convert matplotlib color to bokeh fill_color if needed
+    if "color" in y_hat_fill_kwargs and "fill_color" not in y_hat_fill_kwargs:
+        y_hat_fill_kwargs["fill_color"] = y_hat_fill_kwargs.pop("color")
+    y_hat_fill_kwargs.setdefault("fill_color", "orange")
+    y_hat_fill_kwargs.setdefault("fill_alpha", 0.5)
 
     if y_model_plot_kwargs is None:
         y_model_plot_kwargs = {}
@@ -78,8 +84,13 @@ def plot_lm(
 
     if y_model_fill_kwargs is None:
         y_model_fill_kwargs = {}
-    y_model_fill_kwargs.setdefault("color", "black")
-    y_model_fill_kwargs.setdefault("alpha", 0.5)
+    else:
+        y_model_fill_kwargs = y_model_fill_kwargs.copy()
+    # Convert matplotlib color to bokeh fill_color if needed  
+    if "color" in y_model_fill_kwargs and "fill_color" not in y_model_fill_kwargs:
+        y_model_fill_kwargs["fill_color"] = y_model_fill_kwargs.pop("color")
+    y_model_fill_kwargs.setdefault("fill_color", "black")
+    y_model_fill_kwargs.setdefault("fill_alpha", 0.5)
 
     if y_model_mean_kwargs is None:
         y_model_mean_kwargs = {}
