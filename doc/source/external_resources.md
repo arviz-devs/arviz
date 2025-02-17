@@ -32,7 +32,7 @@ Examples authored by Stan developers and expert users.
 Bambi is a high-level Bayesian model-building interface written in Python,
 designed to make it extremely easy to fit mixed-effects models.
 +++
-Tutorials and book translations maintained by the Bambi team
+Tutorials and book translations maintained by the Bambi team.
 ::::
 
 ::::{grid-item-card}
@@ -45,7 +45,7 @@ Blog mostly on statistics, diversity and open source. I also use the blog as a p
 to test new pages for ArviZ docs.
 +++
 Oriol Abril Pla is an ArviZ core contributor pursuing his PhD
-at Helsinki University
+at Helsinki University.
 ::::
 :::::
 
