@@ -91,7 +91,7 @@ The list of optional dependencies to further enhance ArviZ is given below.
 
 - Bokeh
 
-  Necessary for creating advanced interactive visualisations. The Bokeh installation guide can be found `over here <http://docs.bokeh.org/en/dev/docs/first_steps/installation.html>`_.
+  Necessary for creating advanced interactive visualisations. The Bokeh installation guide can be found `over here <https://docs.bokeh.org/en/latest/docs/first_steps/installation.html>`_.
 
 - UltraJSON
 
