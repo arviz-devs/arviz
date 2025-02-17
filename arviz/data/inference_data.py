@@ -1988,6 +1988,9 @@ def concat(
 ) -> Optional[InferenceData]: ...
 
 
+branch_coverage = [-1] * 120
+
+
 # pylint: disable=protected-access, inconsistent-return-statements
 def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     """Concatenate InferenceData objects.
@@ -2073,34 +2076,62 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     """
     # pylint: disable=undefined-loop-variable, too-many-nested-blocks
     if len(args) == 0:
+        branch_coverage[0] = 1
         if inplace:
+            branch_coverage[1] = 1
             return
+        else:
+            branch_coverage[2] = 1
         return InferenceData()
+    else:
+        branch_coverage[3] = 1
 
     if len(args) == 1 and isinstance(args[0], Sequence):
+        branch_coverage[4] = 1
         args = args[0]
+    else:
+        branch_coverage[5] = 1
 
     # assert that all args are InferenceData
     for i, arg in enumerate(args):
         if not isinstance(arg, InferenceData):
+            branch_coverage[6] = 1
             raise TypeError(
                 "Concatenating is supported only"
                 "between InferenceData objects. Input arg {} is {}".format(i, type(arg))
             )
+        else:
+            branch_coverage[7] = 1
 
     if dim is not None and dim.lower() not in {"group", "chain", "draw"}:
+        branch_coverage[8] = 1
         msg = f'Invalid `dim`: {dim}. Valid `dim` are {{"group", "chain", "draw"}}'
         raise TypeError(msg)
-    dim = dim.lower() if dim is not None else dim
+    else:
+        branch_coverage[9] = 1
+    # dim = dim.lower() if dim is not None else dim
+    if dim is not None:
+        branch_coverage[10] = 1
+        dim = dim.lower()
+    else:
+        branch_coverage[11] = 1
+        dim = dim
 
     if len(args) == 1 and isinstance(args[0], InferenceData):
+        branch_coverage[12] = 1
         if inplace:
+            branch_coverage[13] = 1
             return None
         else:
+            branch_coverage[14] = 1
             if copy:
+                branch_coverage[15] = 1
                 return deepcopy(args[0])
             else:
+                branch_coverage[16] = 1
                 return args[0]
+    else:
+        branch_coverage[17] = 1
 
     current_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
     combined_attr = defaultdict(list)
@@ -2112,18 +2143,31 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
         all_same = True
         for indx in range(len(val) - 1):
             if val[indx] != val[indx + 1]:
+                branch_coverage[18] = 1
                 all_same = False
                 break
+            else:
+                branch_coverage[19] = 1
         if all_same:
+            branch_coverage[20] = 1
             combined_attr[key] = val[0]
+        else:
+            branch_coverage[21] = 1
     if inplace:
+        branch_coverage[22] = 1
         setattr(args[0], "_attrs", dict(combined_attr))
+    else:
+        branch_coverage[23] = 1
 
     if not inplace:
+        branch_coverage[24] = 1
         # Keep order for python 3.5
         inference_data_dict = OrderedDict()
+    else:
+        branch_coverage[25] = 1
 
     if dim is None:
+        branch_coverage[26] = 1
         arg0 = args[0]
         arg0_groups = ccopy(arg0._groups_all)
         args_groups = {}
@@ -2132,110 +2176,184 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
         for arg in args[1:]:
             for group in arg._groups_all:
                 if group in args_groups or group in arg0_groups:
+                    branch_coverage[27] = 1
                     msg = (
                         "Concatenating overlapping groups is not supported unless `dim` is defined."
                         " Valid dimensions are `chain` and `draw`. Alternatively, use extend to"
                         " combine InferenceData with overlapping groups"
                     )
                     raise TypeError(msg)
+                else:
+                    branch_coverage[28] = 1
                 group_data = getattr(arg, group)
-                args_groups[group] = deepcopy(group_data) if copy else group_data
+                # args_groups[group] = deepcopy(group_data) if copy else group_data
+                if copy:
+                    branch_coverage[29] = 1
+                    args_groups[group] = deepcopy(group_data)
+                else:
+                    branch_coverage[30] = 1
+                    args_groups[group] = group_data
         # add arg0 to args_groups if inplace is False
         # otherwise it will merge args_groups to arg0
         # inference data object
         if not inplace:
+            branch_coverage[20] = 1
             for group in arg0_groups:
                 group_data = getattr(arg0, group)
-                args_groups[group] = deepcopy(group_data) if copy else group_data
+                # args_groups[group] = deepcopy(group_data) if copy else group_data
+                if copy:
+                    branch_coverage[21] = 1
+                    args_groups[group] = deepcopy(group_data)
+                else:
+                    branch_coverage[22] = 1
+                    args_groups[group] = group_data
 
-        other_groups = [group for group in args_groups if group not in SUPPORTED_GROUPS_ALL]
+        # other_groups = [group for group in args_groups if group not in SUPPORTED_GROUPS_ALL]
+        other_groups = []
+        for group in args_groups:
+            if group not in SUPPORTED_GROUPS_ALL:
+                branch_coverage[23] = 1
+                other_groups.append(group)
+            else:
+                branch_coverage[24] = 1
 
         for group in SUPPORTED_GROUPS_ALL + other_groups:
             if group not in args_groups:
+                branch_coverage[25] = 1
                 continue
             if inplace:
+                branch_coverage[26] = 1
                 if group.startswith(WARMUP_TAG):
+                    branch_coverage[27] = 1
                     arg0._groups_warmup.append(group)
                 else:
+                    branch_coverage[28] = 1
                     arg0._groups.append(group)
                 setattr(arg0, group, args_groups[group])
             else:
+                branch_coverage[29] = 1
                 inference_data_dict[group] = args_groups[group]
         if inplace:
-            other_groups = [
-                group for group in arg0_groups if group not in SUPPORTED_GROUPS_ALL
-            ] + other_groups
-            sorted_groups = [
-                group for group in SUPPORTED_GROUPS + other_groups if group in arg0._groups
-            ]
+            branch_coverage[30] = 1
+            other_groups = []
+            for group in arg0_groups:
+                if group not in SUPPORTED_GROUPS_ALL:
+                    branch_coverage[31] = 1
+                    other_groups.append(group)
+                else:
+                    branch_coverage[32] = 1
+            other_groups += other_groups
+
+            sorted_groups = []
+            for group in SUPPORTED_GROUPS + other_groups:
+                if group in arg0._groups:
+                    branch_coverage[33] = 1
+                    sorted_groups.append(group)
+                else:
+                    branch_coverage[34] = 1
+
             setattr(arg0, "_groups", sorted_groups)
-            sorted_groups_warmup = [
-                group
-                for group in SUPPORTED_GROUPS_WARMUP + other_groups
-                if group in arg0._groups_warmup
-            ]
+            sorted_groups_warmup = []
+            for group in SUPPORTED_GROUPS_WARMUP + other_groups:
+                if group in arg0._groups_warmup:
+                    branch_coverage[35] = 1
+                    sorted_groups_warmup.append(group)
+                else:
+                    branch_coverage[36] = 1
             setattr(arg0, "_groups_warmup", sorted_groups_warmup)
     else:
+        branch_coverage[37] = 1
         arg0 = args[0]
         arg0_groups = arg0._groups_all
         for arg in args[1:]:
             for group0 in arg0_groups:
                 if group0 not in arg._groups_all:
+                    branch_coverage[38] = 1
                     if group0 == "observed_data":
+                        branch_coverage[39] = 1
                         continue
+                    else:
+                        branch_coverage[40] = 1
                     msg = "Mismatch between the groups."
                     raise TypeError(msg)
+                else:
+                    branch_coverage[41] = 1
             for group in arg._groups_all:
                 # handle data groups separately
                 if group not in ["observed_data", "constant_data", "predictions_constant_data"]:
+                    branch_coverage[42] = 1
                     # assert that groups are equal
                     if group not in arg0_groups:
+                        branch_coverage[43] = 1
                         msg = "Mismatch between the groups."
                         raise TypeError(msg)
+                    else:
+                        branch_coverage[44] = 1
 
                     # assert that variables are equal
                     group_data = getattr(arg, group)
                     group_vars = group_data.data_vars
 
                     if not inplace and group in inference_data_dict:
+                        branch_coverage[45] = 1
                         group0_data = inference_data_dict[group]
                     else:
+                        branch_coverage[46] = 1
                         group0_data = getattr(arg0, group)
                     group0_vars = group0_data.data_vars
 
                     for var in group0_vars:
                         if var not in group_vars:
+                            branch_coverage[47] = 1
                             msg = "Mismatch between the variables."
                             raise TypeError(msg)
+                        else:
+                            branch_coverage[48] = 1
 
                     for var in group_vars:
                         if var not in group0_vars:
+                            branch_coverage[49] = 1
                             msg = "Mismatch between the variables."
                             raise TypeError(msg)
+                        else:
+                            branch_coverage[50] = 1
                         var_dims = group_data[var].dims
                         var0_dims = group0_data[var].dims
                         if var_dims != var0_dims:
+                            branch_coverage[51] = 1
                             msg = "Mismatch between the dimensions."
                             raise TypeError(msg)
+                        else:
+                            branch_coverage[52] = 1
 
                         if dim not in var_dims or dim not in var0_dims:
+                            branch_coverage[53] = 1
                             msg = f"Dimension {dim} missing."
                             raise TypeError(msg)
+                        else:
+                            branch_coverage[54] = 1
 
                     # xr.concat
                     concatenated_group = xr.concat((group0_data, group_data), dim=dim)
                     if reset_dim:
+                        branch_coverage[55] = 1
                         concatenated_group[dim] = range(concatenated_group[dim].size)
+                    else:
+                        branch_coverage[56] = 1
 
                     # handle attrs
                     if hasattr(group0_data, "attrs"):
+                        branch_coverage[57] = 1
                         group0_attrs = deepcopy(getattr(group0_data, "attrs"))
                     else:
+                        branch_coverage[58] = 1
                         group0_attrs = OrderedDict()
 
                     if hasattr(group_data, "attrs"):
+                        branch_coverage[59] = 1
                         group_attrs = getattr(group_data, "attrs")
                     else:
+                        branch_coverage[60] = 1
                         group_attrs = {}
 
                     # gather attrs results to group0_attrs
@@ -2243,47 +2361,80 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         group0_attr_values = group0_attrs.get(attr_key, None)
                         equality = attr_values == group0_attr_values
                         if hasattr(equality, "__iter__"):
+                            branch_coverage[61] = 1
                             equality = np.all(equality)
+                        else:
+                            branch_coverage[62] = 1
                         if equality:
+                            branch_coverage[63] = 1
                             continue
+                        else:
+                            branch_coverage[64] = 1
                         # handle special cases:
                         if attr_key in ("created_at", "previous_created_at"):
+                            branch_coverage[65] = 1
                             # check the defaults
                             if not hasattr(group0_attrs, "previous_created_at"):
+                                branch_coverage[66] = 1
                                 group0_attrs["previous_created_at"] = []
                                 if group0_attr_values is not None:
+                                    branch_coverage[67] = 1
                                     group0_attrs["previous_created_at"].append(group0_attr_values)
+                                else:
+                                    branch_coverage[68] = 1
+                            else:
+                                branch_coverage[69] = 1
                             # check previous values
                             if attr_key == "previous_created_at":
+                                branch_coverage[70] = 1
                                 if not isinstance(attr_values, list):
+                                    branch_coverage[71] = 1
                                     attr_values = [attr_values]
+                                else:
+                                    branch_coverage[72] = 1
                                 group0_attrs["previous_created_at"].extend(attr_values)
                                 continue
+                            else:
+                                branch_coverage[73] = 1
                             # update "created_at"
                             if group0_attr_values != current_time:
+                                branch_coverage[74] = 1
                                 group0_attrs[attr_key] = current_time
+                            else:
+                                branch_coverage[75] = 1
                             group0_attrs["previous_created_at"].append(attr_values)
 
                         elif attr_key in group0_attrs:
+                            branch_coverage[76] = 1
                             combined_key = f"combined_{attr_key}"
                             if combined_key not in group0_attrs:
+                                branch_coverage[77] = 1
                                 group0_attrs[combined_key] = [group0_attr_values]
+                            else:
+                                branch_coverage[78] = 1
                             group0_attrs[combined_key].append(attr_values)
                         else:
+                            branch_coverage[79] = 1
                             group0_attrs[attr_key] = attr_values
                     # update attrs
                     setattr(concatenated_group, "attrs", group0_attrs)
 
                     if inplace:
+                        branch_coverage[80] = 1
                         setattr(arg0, group, concatenated_group)
                     else:
+                        branch_coverage[81] = 1
                         inference_data_dict[group] = concatenated_group
                 else:
+                    branch_coverage[82] = 1
                     # observed_data, "constant_data", "predictions_constant_data",
                     if group not in arg0_groups:
+                        branch_coverage[83] = 1
                         setattr(arg0, group, deepcopy(group_data) if copy else group_data)
                         arg0._groups.append(group)
                         continue
+                    else:
+                        branch_coverage[84] = 1
 
                     # assert that variables are equal
                     group_data = getattr(arg, group)
@@ -2291,29 +2442,41 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
                     group0_data = getattr(arg0, group)
                     if not inplace:
+                        branch_coverage[85] = 1
                         group0_data = deepcopy(group0_data)
+                    else:
+                        branch_coverage[86] = 1
                     group0_vars = group0_data.data_vars
 
                     for var in group_vars:
                         if var not in group0_vars:
+                            branch_coverage[87] = 1
                             var_data = group_data[var]
                             getattr(arg0, group)[var] = var_data
                         else:
+                            branch_coverage[88]
                             var_data = group_data[var]
                             var0_data = group0_data[var]
                             if dim in var_data.dims and dim in var0_data.dims:
+                                branch_coverage[89] = 1
                                 concatenated_var = xr.concat((group_data, group0_data), dim=dim)
                                 group0_data[var] = concatenated_var
+                            else:
+                                branch_coverage[90] = 1
 
                     # handle attrs
                     if hasattr(group0_data, "attrs"):
+                        branch_coverage[91] = 1
                         group0_attrs = getattr(group0_data, "attrs")
                     else:
+                        branch_coverage[92] = 1
                         group0_attrs = OrderedDict()
 
                     if hasattr(group_data, "attrs"):
+                        branch_coverage[93] = 1
                         group_attrs = getattr(group_data, "attrs")
                     else:
+                        branch_coverage[94] = 1
                         group_attrs = {}
 
                     # gather attrs results to group0_attrs
@@ -2321,44 +2484,82 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         group0_attr_values = group0_attrs.get(attr_key, None)
                         equality = attr_values == group0_attr_values
                         if hasattr(equality, "__iter__"):
+                            branch_coverage[95] = 1
                             equality = np.all(equality)
+                        else:
+                            branch_coverage[96] = 1
                         if equality:
+                            branch_coverage[97] = 1
                             continue
+                        else:
+                            branch_coverage[98] = 1
                         # handle special cases:
                         if attr_key in ("created_at", "previous_created_at"):
+                            branch_coverage[99] = 1
                             # check the defaults
                             if not hasattr(group0_attrs, "previous_created_at"):
+                                branch_coverage[100] = 1
                                 group0_attrs["previous_created_at"] = []
                                 if group0_attr_values is not None:
+                                    branch_coverage[101] = 1
                                     group0_attrs["previous_created_at"].append(group0_attr_values)
+                                else:
+                                    branch_coverage[102] = 1
+                            else:
+                                branch_coverage[103] = 1
                             # check previous values
                             if attr_key == "previous_created_at":
+                                branch_coverage[104] = 1
                                 if not isinstance(attr_values, list):
+                                    branch_coverage[105] = 1
                                     attr_values = [attr_values]
+                                else:
+                                    branch_coverage[106] = 1
                                 group0_attrs["previous_created_at"].extend(attr_values)
                                 continue
+                            else:
+                                branch_coverage[107] = 1
                             # update "created_at"
                             if group0_attr_values != current_time:
+                                branch_coverage[108] = 1
                                 group0_attrs[attr_key] = current_time
+                            else:
+                                branch_coverage[109] = 1
                             group0_attrs["previous_created_at"].append(attr_values)
 
                         elif attr_key in group0_attrs:
+                            branch_coverage[110] = 1
                             combined_key = f"combined_{attr_key}"
                             if combined_key not in group0_attrs:
+                                branch_coverage[111] = 1
                                 group0_attrs[combined_key] = [group0_attr_values]
+                            else:
+                                branch_coverage[112] = 1
                             group0_attrs[combined_key].append(attr_values)
 
                         else:
+                            branch_coverage[113] = 1
                             group0_attrs[attr_key] = attr_values
                     # update attrs
                     setattr(group0_data, "attrs", group0_attrs)
 
                     if inplace:
+                        branch_coverage[114] = 1
                         setattr(arg0, group, group0_data)
                     else:
+                        branch_coverage[115] = 1
                         inference_data_dict[group] = group0_data
 
     if not inplace:
+        branch_coverage[116] = 1
         inference_data_dict["attrs"] = combined_attr
+    else:
+        branch_coverage[117] = 1
 
-    return None if inplace else InferenceData(**inference_data_dict)
+    # return None if inplace else InferenceData(**inference_data_dict)
+    if inplace:
+        branch_coverage[118] = 1
+        return None
+    else:
+        branch_coverage[119] = 1
+        return InferenceData(**inference_data_dict)

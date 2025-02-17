@@ -375,6 +375,19 @@ def test_concat_bad():
     idata = from_dict(posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)})
     idata2 = from_dict(posterior={"A": np.random.randn(2, 10, 2)})
     idata3 = from_dict(prior={"A": np.random.randn(2, 10, 2)})
+    idata4 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2)},
+        posterior_predictive={"A": np.random.randn(2, 10, 2)},
+    )
+    data1 = {"a": np.random.randn(2, 2, 2)}
+    coords1 = {"chain": [0, 1], "draw": [0, 1], "x": [0, 1]}
+    dims1 = {"a": ["chain", "draw", "x"]}
+    idata5 = from_dict(posterior=data1, coords=coords1, dims=dims1)
+    data2 = {"a": np.random.randn(2, 2, 2)}
+    coords2 = {"chain": [0, 1], "draw": [0, 1], "z": [0, 1]}
+    dims2 = {"a": ["chain", "draw", "z"]}
+    idata6 = from_dict(posterior=data2, coords=coords2, dims=dims2)
+
     with pytest.raises(TypeError):
         concat(idata, np.array([1, 2, 3, 4, 5]))
     with pytest.raises(TypeError):
@@ -387,6 +400,18 @@ def test_concat_bad():
         concat(idata, idata3, dim="chain")
     with pytest.raises(TypeError):
         concat(idata3, idata, dim="chain")
+    # Test for Branch 8
+    # Invalid value passed for dim
+    with pytest.raises(TypeError):
+        concat(idata, idata2, dim="invalid_dim")
+    # Test for Branch 43
+    # First InferenceData does not have "posterior_predictive" group
+    with pytest.raises(TypeError):
+        concat(idata2, idata4, dim="chain")
+    # Test for Branch 51
+    # InferenceData objects have different dimensions
+    with pytest.raises(TypeError):
+        concat(idata5, idata6, dim="chain")
 
 
 def test_inference_concat_keeps_all_fields():
@@ -403,6 +428,27 @@ def test_inference_concat_keeps_all_fields():
     assert not fails_c1
     fails_c2 = check_multiple_attrs(test_dict, idata_c2)
     assert not fails_c2
+
+# Test for Branch 18, 20
+def test_concat_attrs_merging():
+    """
+    common attributes should be merged to a single value.
+    different attributes should remain a list.
+    """
+    data = {"a": np.random.randn(4, 100, 3), "b": np.random.randn(4, 100)}
+    coords = {"a_dim": ["x", "y", "z"]}
+    dims = {"a": ["a_dim"]}
+    idata1 = from_dict(posterior=data, coords=coords, dims=dims)
+    idata1.attrs = {"common_attr": "value", "diff_attr": "first"}
+    idata2 = from_dict(posterior=data, coords=coords, dims=dims)
+    idata2.attrs = {"common_attr": "value", "diff_attr": "second"}
+    concatenated = concat(idata1, idata2, dim="chain")
+
+    # Verify that the attribute with identical values is merged to a single value.
+    assert concatenated.attrs["common_attr"] == "value"
+
+    # Verify that the attribute with different values is kept as a list.
+    assert concatenated.attrs["diff_attr"] == ["first", "second"]
 
 
 @pytest.mark.parametrize(
@@ -1656,3 +1702,17 @@ class TestExtractDataset:
         post = extract(idata, num_samples=10)
         assert post.sizes["sample"] == 10
         assert post.attrs == idata.posterior.attrs
+
+from ...data.inference_data import concat, branch_coverage
+
+def test_concat_coverage():
+    # Output coverage information
+    with open("branch_coverage.txt", "w") as f:
+        for i, covered in enumerate(branch_coverage):
+            f.write(f"Branch {i}: {'Taken' if covered == 1 else 'Not Reached'}\n")
+    assert True
+
+
+if __name__ == "__main__":
+    pytest.main()
+    test_concat_coverage()
