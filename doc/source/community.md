@@ -12,9 +12,9 @@ We do this by:
 
 * Creating and maintaining the ArviZ library with functions for posterior analysis, data storage,
   sample diagnostics, model checking, and comparison.
-* Creating social infrastructure through a welcoming and diverse community
-* Making the right data, tools and best practices more discoverable
-* Promoting advocacy for a culture of principled iterative modeling based on the Bayesian Workflow
+* Creating social infrastructure through a welcoming and diverse community.
+* Making the right data, tools and best practices more discoverable.
+* Promoting advocacy for a culture of principled iterative modeling based on the Bayesian Workflow.
 
 This page aims to gather resources related to Bayesian modeling and ArviZ from a variety of
 sources to work towards the 2nd and 3rd bullet points.
@@ -105,7 +105,7 @@ let us know!
 
 ## Blogs and example compilations
 If you have a blog that has 2 or more posts tagged as "ArviZ", you can submit
-a pull request to add your blog to this list
+a pull request to add your blog to this list.
 
 ```{include} external_resources.md
 ```
