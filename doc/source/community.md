@@ -75,7 +75,7 @@ The PPLs that integrate with ArviZ are:
 * [TensorFlow Probability](https://www.tensorflow.org/probability)
 
 Moreover, there are other libraries that use ArviZ for visualization and diagnostics
-and/or that are compatible with `InfereceData` objects:
+and/or that are compatible with `InferenceData` objects:
 
 * [Bambi](https://bambinos.github.io/bambi/)
 * [corner.py](https://corner.readthedocs.io/en/latest/)
