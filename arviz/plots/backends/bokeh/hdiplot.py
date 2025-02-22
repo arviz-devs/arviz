@@ -21,9 +21,13 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
     plot_kwargs["color"] = vectorized_to_hex(plot_kwargs.get("color", color))
     plot_kwargs.setdefault("alpha", 0)
 
-    fill_kwargs = {} if fill_kwargs is None else fill_kwargs
-    fill_kwargs["color"] = vectorized_to_hex(fill_kwargs.get("color", color))
-    fill_kwargs.setdefault("alpha", 0.5)
+    fill_kwargs = {} if fill_kwargs is None else fill_kwargs.copy()
+    # Convert matplotlib color to bokeh fill_color if needed
+    if "color" in fill_kwargs and "fill_color" not in fill_kwargs:
+        fill_kwargs["fill_color"] = vectorized_to_hex(fill_kwargs.pop("color"))
+    else:
+        fill_kwargs["fill_color"] = vectorized_to_hex(fill_kwargs.get("fill_color", color))
+    fill_kwargs.setdefault("fill_alpha", fill_kwargs.pop("alpha", 0.5))
 
     figsize, *_ = _scale_fig_size(figsize, None)
 
@@ -37,9 +41,6 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
 
     plot_kwargs.setdefault("line_color", plot_kwargs.pop("color"))
     plot_kwargs.setdefault("line_alpha", plot_kwargs.pop("alpha", 0))
-
-    fill_kwargs.setdefault("fill_color", fill_kwargs.pop("color"))
-    fill_kwargs.setdefault("fill_alpha", fill_kwargs.pop("alpha", 0))
 
     ax.patch(
         np.concatenate((x_data, x_data[::-1])),
