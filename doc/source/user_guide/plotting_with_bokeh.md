@@ -128,7 +128,7 @@ show(row(f1, f2))
 :::{note}
 In Juptyer notebooks, Arviz offers {func}`arviz.output_notebook` which is a wrapper over {func}`bokeh.io.output.output_notebook`.
 
-To use Bokeh with JupyterLab, JupyterLab and widgets, please refer to this {ref}`user guide <bokeh:userguide_jupyter>`.
+To use Bokeh with JupyterLab, JupyterLab and widgets, please refer to this {ref}`user guide <bokeh:ug_output_jupyter>`.
 :::
 
 
@@ -136,5 +136,5 @@ To use Bokeh with JupyterLab, JupyterLab and widgets, please refer to this {ref}
 
 :::{note}
 In the examples above, bokeh is being used in `Standalone` mode.
-Bokeh can be also used to create interactive web applications. For more details see {ref}`Running a Bokeh server <bokeh:userguide_server>`.
+Bokeh can be also used to create interactive web applications. For more details see {ref}`Running a Bokeh server <bokeh:ug_server>`.
 :::
