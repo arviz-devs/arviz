@@ -735,7 +735,8 @@ class Dask:
     dask_flag = False
     """bool: Enables Dask parallelization when set to True. Defaults to False."""
     dask_kwargs = None
-    """dict: Additional keyword arguments for Dask configuration. Defaults to an empty dictionary."""
+    """dict: Additional keyword arguments for Dask configuration.
+    Defaults to an empty dictionary."""
 
     @classmethod
     def enable_dask(cls, dask_kwargs=None):
