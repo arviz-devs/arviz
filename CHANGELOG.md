@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## v0.21.0 (2025 Mar 06)
 
 ### New features
 
@@ -13,6 +13,10 @@
 
 ### Documentation
 - Add example of ECDF comparison plot to gallery ([2178](https://github.com/arviz-devs/arviz/pull/2178))
+- Change Twitter to X, including the icon ([2418](https://github.com/arviz-devs/arviz/pull/2418))
+- Update Bokeh link in Installation.rst ([2425](https://github.com/arviz-devs/arviz/pull/2425))
+- Add missing periods to the ArviZ community page ([2426](https://github.com/arviz-devs/arviz/pull/2426))
+- Fix missing docstring ([2430](https://github.com/arviz-devs/arviz/pull/2430))
 
 ## v0.20.0 (2024 Sep 28)
 
