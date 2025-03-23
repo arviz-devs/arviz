@@ -8,6 +8,7 @@ from pandas import DataFrame  # pylint: disable=wrong-import-position
 from scipy.stats import norm  # pylint: disable=wrong-import-position
 
 from ...data import from_dict, load_arviz_data  # pylint: disable=wrong-import-position
+from ...labels import MapLabeller  # pylint: disable=wrong-import-position
 from ...plots import (  # pylint: disable=wrong-import-position
     plot_autocorr,
     plot_bpv,
@@ -769,21 +770,49 @@ def test_plot_mcse_no_divergences(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"var_names": "theta", "divergences": True, "coords": {"school": [0, 1]}},
-        {"divergences": True, "var_names": ["theta", "mu"]},
+        {
+            "var_names": "theta",
+            "divergences": True,
+            "coords": {"school": [0, 1]},
+            "scatter_kwargs": {"marker": "x", "c": "C0"},
+            "divergences_kwargs": {"marker": "*", "c": "C0"},
+        },
+        {
+            "divergences": True,
+            "scatter_kwargs": {"marker": "x", "c": "C0"},
+            "divergences_kwargs": {"marker": "*", "c": "C0"},
+            "var_names": ["theta", "mu"],
+        },
         {"kind": "kde", "var_names": ["theta"]},
-        {"kind": "hexbin", "var_names": ["theta"]},
-        {"kind": "hexbin", "var_names": ["theta"]},
+        {"kind": "hexbin", "colorbar": False, "var_names": ["theta"]},
+        {"kind": "hexbin", "colorbar": True, "var_names": ["theta"]},
         {
             "kind": "hexbin",
             "var_names": ["theta"],
             "coords": {"school": [0, 1]},
+            "colorbar": True,
+            "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
         },
         {
             "point_estimate": "mean",
             "reference_values": {"mu": 0, "tau": 0},
-            "reference_values_kwargs": {"line_color": "blue"},
+            "reference_values_kwargs": {"c": "C0", "marker": "*"},
+        },
+        {
+            "var_names": ["mu", "tau"],
+            "reference_values": {"mu": 0, "tau": 0},
+            "labeller": MapLabeller({"mu": r"$\mu$", "theta": r"$\theta"}),
+        },
+        {
+            "var_names": ["theta"],
+            "reference_values": {"theta": [0.0] * 8},
+            "labeller": MapLabeller({"theta": r"$\theta$"}),
+        },
+        {
+            "var_names": ["theta"],
+            "reference_values": {"theta": np.zeros(8)},
+            "labeller": MapLabeller({"theta": r"$\theta$"}),
         },
     ],
 )
