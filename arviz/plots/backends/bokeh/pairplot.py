@@ -310,12 +310,16 @@ def plot_pair(
                             ax[-1, -1].add_layout(ax_pe_hline)
 
                 if reference_values:
-                    x = np.array(reference_values[flat_var_names[j + marginals_offset]])[
-                        flat_ref_slices[j + marginals_offset]
-                    ]
-                    y = np.array(reference_values[flat_var_names[i]])[flat_ref_slices[i]]
-                    if x and y:
-                        ax[j, i].scatter(y, x, **reference_values_kwargs)
+                    x_name = flat_var_names[j + marginals_offset]
+                    y_name = flat_var_names[i]
+                    if (x_name not in difference) and (y_name not in difference):
+                        ax[j, i].scatter(
+                            np.array(reference_values[y_name])[flat_ref_slices[i]],
+                            np.array(reference_values[x_name])[
+                                flat_ref_slices[j + marginals_offset]
+                            ],
+                            **reference_values_kwargs,
+                        )
                 ax[j, i].xaxis.axis_label = flat_var_labels[i]
                 ax[j, i].yaxis.axis_label = flat_var_labels[j + marginals_offset]
 
