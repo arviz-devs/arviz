@@ -14,6 +14,7 @@ from pandas import DataFrame
 from scipy.stats import gaussian_kde, norm
 
 from ...data import from_dict, load_arviz_data
+from ...labels import MapLabeller
 from ...plots import (
     plot_autocorr,
     plot_bf,
@@ -598,6 +599,21 @@ def test_plot_kde_inference_data(models):
             "point_estimate": "mean",
             "reference_values": {"mu": 0, "tau": 0},
             "reference_values_kwargs": {"c": "C0", "marker": "*"},
+        },
+        {
+            "var_names": ["mu", "tau"],
+            "reference_values": {"mu": 0, "tau": 0},
+            "labeller": MapLabeller({"mu": r"$\mu$", "theta": r"$\theta"}),
+        },
+        {
+            "var_names": ["theta"],
+            "reference_values": {"theta": [0.0] * 8},
+            "labeller": MapLabeller({"theta": r"$\theta$"}),
+        },
+        {
+            "var_names": ["theta"],
+            "reference_values": {"theta": np.zeros(8)},
+            "labeller": MapLabeller({"theta": r"$\theta$"}),
         },
     ],
 )
