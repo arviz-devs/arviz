@@ -196,7 +196,8 @@ def plot_pair(
             get_coords(dataset, coords), var_names=var_names, skip_dims=combine_dims, combined=True
         )
     )
-    flat_var_names = [
+    flat_var_names = [var_name for var_name, _, _, _ in plotters]
+    flat_var_labels = [
         labeller.make_label_vert(var_name, sel, isel) for var_name, sel, isel, _ in plotters
     ]
 
@@ -253,6 +254,7 @@ def plot_pair(
         diverging_mask=diverging_mask,
         divergences_kwargs=divergences_kwargs,
         flat_var_names=flat_var_names,
+        flat_var_labels=flat_var_labels,
         backend_kwargs=backend_kwargs,
         marginal_kwargs=marginal_kwargs,
         show=show,

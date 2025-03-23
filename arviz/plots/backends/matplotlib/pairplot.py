@@ -30,6 +30,7 @@ def plot_pair(
     diverging_mask,
     divergences_kwargs,
     flat_var_names,
+    flat_var_labels,
     backend_kwargs,
     marginal_kwargs,
     show,
@@ -215,8 +216,8 @@ def plot_pair(
                 reference_values_copy[flat_var_names[1]],
                 **reference_values_kwargs,
             )
-        ax.set_xlabel(f"{flat_var_names[0]}", fontsize=ax_labelsize, wrap=True)
-        ax.set_ylabel(f"{flat_var_names[1]}", fontsize=ax_labelsize, wrap=True)
+        ax.set_xlabel(f"{flat_var_labels[0]}", fontsize=ax_labelsize, wrap=True)
+        ax.set_ylabel(f"{flat_var_labels[1]}", fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
 
     else:
@@ -344,12 +345,12 @@ def plot_pair(
                 if j != vars_to_plot - 1:
                     plt.setp(ax[j, i].get_xticklabels(), visible=False)
                 else:
-                    ax[j, i].set_xlabel(f"{flat_var_names[i]}", fontsize=ax_labelsize, wrap=True)
+                    ax[j, i].set_xlabel(f"{flat_var_labels[i]}", fontsize=ax_labelsize, wrap=True)
                 if i != 0:
                     plt.setp(ax[j, i].get_yticklabels(), visible=False)
                 else:
                     ax[j, i].set_ylabel(
-                        f"{flat_var_names[j + not_marginals]}",
+                        f"{flat_var_labels[j + not_marginals]}",
                         fontsize=ax_labelsize,
                         wrap=True,
                     )

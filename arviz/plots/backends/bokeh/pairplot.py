@@ -37,6 +37,7 @@ def plot_pair(
     diverging_mask,
     divergences_kwargs,
     flat_var_names,
+    flat_var_labels,
     backend_kwargs,
     marginal_kwargs,
     show,
@@ -262,8 +263,8 @@ def plot_pair(
                     **marginal_kwargs,
                 )
 
-                ax[j, i].xaxis.axis_label = flat_var_names[i]
-                ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
+                ax[j, i].xaxis.axis_label = flat_var_labels[i]
+                ax[j, i].yaxis.axis_label = flat_var_labels[j + marginals_offset]
 
             elif j + marginals_offset > i:
                 if "scatter" in kind:
@@ -350,8 +351,8 @@ def plot_pair(
                     y = reference_values_copy[flat_var_names[i]]
                     if x and y:
                         ax[j, i].scatter(y, x, **reference_values_kwargs)
-                ax[j, i].xaxis.axis_label = flat_var_names[i]
-                ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
+                ax[j, i].xaxis.axis_label = flat_var_labels[i]
+                ax[j, i].yaxis.axis_label = flat_var_labels[j + marginals_offset]
 
     show_layout(ax, show)
 
