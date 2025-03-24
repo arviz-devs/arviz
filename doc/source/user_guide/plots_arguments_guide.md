@@ -393,7 +393,7 @@ Call backend show function.
 
 (common_reference_values)=
 ## `reference_values`
-`plot_pair` accepts `reference_values` to highlight specific values on the probability distributions. The keys of `reference_values` are the associated variable names in `var-names`. The values are the reference values, which must have the same shape as the coordinates selected for plotting, and it is indexed as such.
+`plot_pair` accepts `reference_values` to highlight specific values on the probability distributions. The keys of `reference_values` are the associated variable names in `var_names`. The values are the reference values, which must have the same shape as the coordinates selected for plotting since it is indexed as such. For example, here `theta` must have shape `(2,)` since that is the shape of the selected coordinates on `theta`.
 
 ```{code-cell} ipython3
 coords = {"school": ["Choate", "Deerfield"]}
@@ -413,3 +413,5 @@ reference_values = {
 }
 az.plot_pair(non_centered_eight, var_names=["theta", "theta_t"], coords=coords, reference_values=reference_values, combine_dims={"school"});
 ```
+
+The values of the `reference_values` dictionary can be scalars (e.g., `0`) or zero-dimensional `numpy` arrays (e.g., `np.array(0)`) for scalar variables, or anything that can be cast to `np.array` (e.g., `[0.0, 0.0]` or `np.array([0.0, 0.0])`) for multi-dimensional variables.
