@@ -770,22 +770,13 @@ def test_plot_mcse_no_divergences(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {
-            "var_names": "theta",
-            "divergences": True,
-            "coords": {"school": [0, 1]},
-            "scatter_kwargs": {"marker": "x", "c": "C0"},
-            "divergences_kwargs": {"marker": "*", "c": "C0"},
-        },
+        {"var_names": "theta", "divergences": True, "coords": {"school": [0, 1]}},
         {
             "divergences": True,
-            "scatter_kwargs": {"marker": "x", "c": "C0"},
-            "divergences_kwargs": {"marker": "*", "c": "C0"},
             "var_names": ["theta", "mu"],
         },
         {"kind": "kde", "var_names": ["theta"]},
-        {"kind": "hexbin", "colorbar": False, "var_names": ["theta"]},
-        {"kind": "hexbin", "colorbar": True, "var_names": ["theta"]},
+        {"kind": "hexbin", "var_names": ["theta"]},
         {
             "kind": "hexbin",
             "var_names": ["theta"],
@@ -797,7 +788,7 @@ def test_plot_mcse_no_divergences(models):
         {
             "point_estimate": "mean",
             "reference_values": {"mu": 0, "tau": 0},
-            "reference_values_kwargs": {"c": "C0", "marker": "*"},
+            "reference_values_kwargs": {"line_color": "blue"},
         },
         {
             "var_names": ["mu", "tau"],
