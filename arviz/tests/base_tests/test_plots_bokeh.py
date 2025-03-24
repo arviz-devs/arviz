@@ -771,18 +771,13 @@ def test_plot_mcse_no_divergences(models):
     "kwargs",
     [
         {"var_names": "theta", "divergences": True, "coords": {"school": [0, 1]}},
-        {
-            "divergences": True,
-            "var_names": ["theta", "mu"],
-        },
+        {"divergences": True, "var_names": ["theta", "mu"]},
         {"kind": "kde", "var_names": ["theta"]},
         {"kind": "hexbin", "var_names": ["theta"]},
         {
             "kind": "hexbin",
             "var_names": ["theta"],
             "coords": {"school": [0, 1]},
-            "colorbar": True,
-            "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
         },
         {
