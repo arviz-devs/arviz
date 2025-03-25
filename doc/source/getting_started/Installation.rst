@@ -26,7 +26,7 @@ Use the below pip command to install ArviZ with all of its :ref:`Optional-depend
 
     pip install "arviz[all]"
 
-It is also possible to use ``pip install "arviz[preview]"` to access
+It is also possible to use ``pip install "arviz[preview]"`` to access
 :ref:`upcoming refactored features <preview_api>`.
 
 Using conda-forge
