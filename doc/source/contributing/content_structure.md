@@ -49,7 +49,7 @@ of the core team.
 It follows Diátaxis quite closely by using multiple captioned toctrees.
 
 Contribution types overview
-: Diátaxis explanation content. Contributing to ArviZ can be loosely undestood
+: Diátaxis explanation content. Contributing to ArviZ can be loosely understood
   as a single practical craft, but it is more of multiple practical crafts
   coming together.
 
