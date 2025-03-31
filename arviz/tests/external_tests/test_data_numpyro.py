@@ -3,7 +3,7 @@ from collections import namedtuple
 import numpy as np
 import pytest
 
-from ...data.io_numpyro import from_numpyro, infer_dims  # pylint: disable=wrong-import-position
+from ...data.io_numpyro import from_numpyro  # pylint: disable=wrong-import-position
 from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
@@ -297,7 +297,7 @@ class TestDataNumPyro:
         from numpyro.infer import MCMC, NUTS
 
         def model():
-            gamma = numpyro.sample(
+            _ = numpyro.sample(
                 "gamma", dist.ZeroSumNormal(1, event_shape=(10,)), infer={"event_dims": ["groups"]}
             )
 
@@ -318,7 +318,7 @@ class TestDataNumPyro:
             with numpyro.plate("obs_idx", 3):
                 # mu is plated by obs_idx, but isnt broadcasted to the plate shape
                 mu = numpyro.deterministic("mu", alpha)
-                y = numpyro.sample("y", dist.Normal(mu, sigma), obs=jnp.array([-1, 0, 1]))
+                return numpyro.sample("y", dist.Normal(mu, sigma), obs=jnp.array([-1, 0, 1]))
 
         mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
         mcmc.run(PRNGKey(0))
@@ -332,7 +332,7 @@ class TestDataNumPyro:
 
         def model():
             gamma = numpyro.sample("gamma", dist.ZeroSumNormal(1, event_shape=(10,)))
-            gamma_plus1 = numpyro.deterministic("gamma_plus1", gamma + 1)
+            _ = numpyro.deterministic("gamma_plus1", gamma + 1)
 
         mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
         mcmc.run(PRNGKey(0))

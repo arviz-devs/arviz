@@ -14,25 +14,28 @@ from .inference_data import InferenceData
 _log = logging.getLogger(__name__)
 
 
-def _add_dims(dimsA: Dict[str, List[str]], dimsB: Dict[str, List[str]]):
+def _add_dims(dims_a: Dict[str, List[str]], dims_b: Dict[str, List[str]]):
     merged = defaultdict(list)
 
-    for k, v in dimsA.items():
+    for k, v in dims_a.items():
         merged[k].extend(v)
 
-    for k, v in dimsB.items():
+    for k, v in dims_b.items():
         merged[k].extend(v)
 
     # Convert back to a regular dict
     return dict(merged)
 
 
-def infer_dims(model, model_args=(), model_kwargs={}):
+def infer_dims(model, model_args=None, model_kwargs=None):
 
     from numpyro import handlers, distributions as dist
     from numpyro.ops.pytree import PytreeTrace
     from numpyro.infer.initialization import init_to_sample
     import jax
+
+    model_args = tuple() if model_args is None else model_args
+    model_kwargs = dict() if model_args is None else model_kwargs
 
     def _get_dist_name(fn):
         if isinstance(fn, (dist.Independent, dist.ExpandedDistribution, dist.MaskedDistribution)):
