@@ -3,7 +3,7 @@ from collections import namedtuple
 import numpy as np
 import pytest
 
-from ...data.io_numpyro import from_numpyro  # pylint: disable=wrong-import-position
+from ...data.io_numpyro import from_numpyro, infer_dims  # pylint: disable=wrong-import-position
 from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
@@ -46,7 +46,9 @@ class TestDataNumPyro:
         )
         return predictions
 
-    def get_inference_data(self, data, eight_schools_params, predictions_data, predictions_params):
+    def get_inference_data(
+        self, data, eight_schools_params, predictions_data, predictions_params, infer_dims=False
+    ):
         posterior_samples = data.obj.get_samples()
         model = data.obj.sampler.model
         posterior_predictive = Predictive(model, posterior_samples)(
@@ -55,6 +57,12 @@ class TestDataNumPyro:
         prior = Predictive(model, num_samples=500)(
             PRNGKey(2), eight_schools_params["J"], eight_schools_params["sigma"]
         )
+        dims = {"theta": ["school"], "eta": ["school"], "obs": ["school"]}
+        pred_dims = {"theta": ["school_pred"], "eta": ["school_pred"], "obs": ["school_pred"]}
+        if infer_dims:
+            dims = None
+            pred_dims = None
+
         predictions = predictions_data
         return from_numpyro(
             posterior=data.obj,
@@ -65,8 +73,8 @@ class TestDataNumPyro:
                 "school": np.arange(eight_schools_params["J"]),
                 "school_pred": np.arange(predictions_params["J"]),
             },
-            dims={"theta": ["school"], "eta": ["school"], "obs": ["school"]},
-            pred_dims={"theta": ["school_pred"], "eta": ["school_pred"], "obs": ["school_pred"]},
+            dims=dims,
+            pred_dims=pred_dims,
         )
 
     def test_inference_data_namedtuple(self, data):
@@ -282,3 +290,61 @@ class TestDataNumPyro:
         mcmc.run(PRNGKey(0))
         inference_data = from_numpyro(mcmc)
         assert inference_data.observed_data
+
+    def test_mcmc_event_dims(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            gamma = numpyro.sample(
+                "gamma", dist.ZeroSumNormal(1, event_shape=(10,)), infer={"event_dims": ["groups"]}
+            )
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(mcmc, coords={"groups": np.arange(10)})
+        assert "groups" in inference_data.posterior.gamma.coords
+
+    def test_mcmc_inferred_dims_univariate(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+        import jax.numpy as jnp
+
+        def model():
+            alpha = numpyro.sample("alpha", dist.Normal(0, 1))
+            sigma = numpyro.sample("sigma", dist.HalfNormal(1))
+            with numpyro.plate("obs_idx", 3):
+                # mu is plated by obs_idx, but isnt broadcasted to the plate shape
+                mu = numpyro.deterministic("mu", alpha)
+                y = numpyro.sample("y", dist.Normal(mu, sigma), obs=jnp.array([-1, 0, 1]))
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(mcmc, coords={"obs_idx": np.arange(3)})
+        assert "obs_idx" in inference_data.posterior.mu.coords
+
+    def test_mcmc_extra_event_dims(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            gamma = numpyro.sample("gamma", dist.ZeroSumNormal(1, event_shape=(10,)))
+            gamma_plus1 = numpyro.deterministic("gamma_plus1", gamma + 1)
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(
+            mcmc, coords={"groups": np.arange(10)}, extra_event_dims={"gamma_plus1": ["groups"]}
+        )
+        assert "groups" in inference_data.posterior.gamma_plus1.coords
+
+    def test_mcmc_predictions_infer_dims(
+        self, data, eight_schools_params, predictions_data, predictions_params
+    ):
+        inference_data = self.get_inference_data(
+            data, eight_schools_params, predictions_data, predictions_params, infer_dims=True
+        )
+        assert "J" in inference_data.predictions.obs.coords
