@@ -414,10 +414,8 @@ class NumPyroConverter:
         else:
             dims = infer_dims(self.model, self._args, self._kwargs)
 
-        print(dims)
         if self.extra_event_dims:
             dims = _add_dims(dims, self.extra_event_dims)
-        print(dims)
         return dims
 
 
