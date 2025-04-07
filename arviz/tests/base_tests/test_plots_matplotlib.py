@@ -2102,3 +2102,20 @@ def test_plot_bf():
     )
     _, bf_plot = plot_bf(idata, var_name="a", ref_val=0)
     assert bf_plot is not None
+
+
+@pytest.mark.parametrize(
+    "coords, expected_vars",
+    [
+        ({"school": ["Choate"]}, ["theta"]),
+        ({"school": ["Lawrenceville"]}, ["theta"]),
+        ({}, ["theta"]),
+    ],
+)
+def test_plot_autocorr_coords(coords, expected_vars):
+    """Test plot_autocorr with coords kwarg."""
+    idata = load_arviz_data("centered_eight")
+
+    axes = plot_autocorr(idata, var_names=expected_vars, coords=coords, show=False)
+
+    assert axes is not None
