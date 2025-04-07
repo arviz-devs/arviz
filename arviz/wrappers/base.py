@@ -2,7 +2,6 @@
 """Base class for sampling wrappers."""
 from xarray import apply_ufunc
 
-# from ..data import InferenceData
 from ..stats import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
 
@@ -13,7 +12,7 @@ class SamplingWrapper:
     functions requiring refitting like Leave Future Out or Simulation Based Calibration can be
     performed from ArviZ.
 
-    For usage examples see user guide pages on :ref:`wrapper_guide`.See other
+    For usage examples see user guide pages on :ref:`wrapper_guide`. See other
     SamplingWrapper classes at :ref:`wrappers api section <wrappers_api>`.
 
     Parameters
@@ -25,7 +24,7 @@ class SamplingWrapper:
     log_lik_fun : callable, optional
         For simple cases where the pointwise log likelihood is a Python function, this
         function will be used to calculate the log likelihood. Otherwise,
-        ``point_log_likelihood`` method must be implemented. It's callback must be
+        ``point_log_likelihood`` method must be implemented. Its callback must be
         ``log_lik_fun(*args, **log_lik_kwargs)`` and will be called using
         :func:`wrap_xarray_ufunc` or :func:`xarray:xarray.apply_ufunc` depending
         on the value of `is_ufunc`.
@@ -48,7 +47,6 @@ class SamplingWrapper:
         Keyword arguments passed to ``log_lik_fun``.
     apply_ufunc_kwargs : dict, optional
         Passed to :func:`xarray:xarray.apply_ufunc` or :func:`wrap_xarray_ufunc`.
-
 
     Warnings
     --------
@@ -73,9 +71,6 @@ class SamplingWrapper:
         apply_ufunc_kwargs=None,
     ):
         self.model = model
-
-        # if not isinstance(idata_orig, InferenceData) or idata_orig is not None:
-        #     raise TypeError("idata_orig must be of InferenceData type or None")
         self.idata_orig = idata_orig
 
         if log_lik_fun is None or callable(log_lik_fun):
@@ -85,16 +80,15 @@ class SamplingWrapper:
         else:
             raise TypeError("log_like_fun must be a callable object or None")
 
-        self.sample_kwargs = {} if sample_kwargs is None else sample_kwargs
-        self.idata_kwargs = {} if idata_kwargs is None else idata_kwargs
-        self.log_lik_kwargs = {} if log_lik_kwargs is None else log_lik_kwargs
-        self.apply_ufunc_kwargs = {} if apply_ufunc_kwargs is None else apply_ufunc_kwargs
+        self.sample_kwargs = sample_kwargs or {}
+        self.idata_kwargs = idata_kwargs or {}
+        self.log_lik_kwargs = log_lik_kwargs or {}
+        self.apply_ufunc_kwargs = apply_ufunc_kwargs or {}
 
     def sel_observations(self, idx):
         """Select a subset of the observations in idata_orig.
 
         **Not implemented**: This method must be implemented by the SamplingWrapper subclasses.
-        It is documented here to show its format and call signature.
 
         Parameters
         ----------
@@ -114,7 +108,6 @@ class SamplingWrapper:
         """Sample ``self.model`` on the ``modified_observed_data`` subset.
 
         **Not implemented**: This method must be implemented by the SamplingWrapper subclasses.
-        It is documented here to show its format and call signature.
 
         Parameters
         ----------
@@ -132,7 +125,6 @@ class SamplingWrapper:
         """Convert the ``fitted_model`` to an InferenceData object.
 
         **Not implemented**: This method must be implemented by the SamplingWrapper subclasses.
-        It is documented here to show its format and call signature.
 
         Parameters
         ----------
@@ -147,7 +139,7 @@ class SamplingWrapper:
         raise NotImplementedError("get_inference_data method must be implemented for each subclass")
 
     def log_likelihood__i(self, excluded_obs, idata__i):
-        r"""Get the log likelilhood samples :math:`\log p_{post(-i)}(y_i)`.
+        r"""Get the log likelihood samples :math:`\log p_{post(-i)}(y_i)`.
 
         Calculate the log likelihood of the data contained in excluded_obs using the
         model fitted with this data excluded, the results of which are stored in ``idata__i``.
@@ -163,74 +155,65 @@ class SamplingWrapper:
 
         Returns
         -------
-        log_likelihood: xr.Dataarray
+        log_likelihood: xr.DataArray
             Log likelihood of ``excluded_obs`` evaluated at each of the posterior samples
             stored in ``idata__i``.
         """
         if self.log_lik_fun is None:
             raise NotImplementedError(
-                "When `log_like_fun` is not set during class initialization "
+                "When `log_like_fun` is not set during class initialization, "
                 "log_likelihood__i method must be overwritten"
             )
         posterior = idata__i.posterior
-        arys = (*excluded_obs, *[posterior[var_name] for var_name in self.posterior_vars])
+        args = (*excluded_obs, *[posterior[var_name] for var_name in self.posterior_vars])
         ufunc_applier = apply_ufunc if self.is_ufunc else _wrap_xarray_ufunc
-        log_lik_idx = ufunc_applier(
+        return ufunc_applier(
             self.log_lik_fun,
-            *arys,
+            *args,
             kwargs=self.log_lik_kwargs,
             **self.apply_ufunc_kwargs,
         )
-        return log_lik_idx
 
     def _check_method_is_implemented(self, method, *args):
-        """Check a given method is implemented."""
+        """Check if a given method is implemented."""
         try:
             getattr(self, method)(*args)
         except NotImplementedError:
             return False
-        except:  # pylint: disable=bare-except
+        except Exception:
             return True
         return True
 
     def check_implemented_methods(self, methods):
         """Check that all methods listed are implemented.
 
-        Not all functions that require refitting need to have all the methods implemented in
-        order to work properly. This function shoulg be used before using the SamplingWrapper and
-        its subclasses to get informative error messages.
-
         Parameters
         ----------
         methods: list
-            Check all elements in methods are implemented.
+            List of method names to check.
 
         Returns
         -------
-            List with all non implemented methods
+        list
+            List with all non-implemented methods.
         """
-        supported_methods_1arg = (
-            "sel_observations",
-            "sample",
-            "get_inference_data",
-        )
+        supported_methods_1arg = ("sel_observations", "sample", "get_inference_data")
         supported_methods_2args = ("log_likelihood__i",)
         supported_methods = [*supported_methods_1arg, *supported_methods_2args]
-        bad_methods = [method for method in methods if method not in supported_methods]
-        if bad_methods:
+
+        invalid_methods = [method for method in methods if method not in supported_methods]
+        if invalid_methods:
             raise ValueError(
-                f"Not all method(s) in {bad_methods} supported. "
-                f"Supported methods in SamplingWrapper subclasses are:{supported_methods}"
+                f"Not all method(s) in {invalid_methods} supported. "
+                f"Supported methods in SamplingWrapper subclasses are: {supported_methods}"
             )
 
         not_implemented = []
         for method in methods:
             if method in supported_methods_1arg:
-                if self._check_method_is_implemented(method, 1):
-                    continue
-                not_implemented.append(method)
+                if not self._check_method_is_implemented(method, 1):
+                    not_implemented.append(method)
             elif method in supported_methods_2args:
-                if self._check_method_is_implemented(method, 1, 1):
-                    continue
-                not_implemented.append(method)
+                if not self._check_method_is_implemented(method, 1, 1):
+                    not_implemented.append(method)
         return not_implemented
