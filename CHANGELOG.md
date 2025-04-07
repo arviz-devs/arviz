@@ -3,10 +3,13 @@
 ## Unreleased
 
 ### New features
+- `plot_pair` now has more flexible support for `reference_values` ([2438](https://github.com/arviz-devs/arviz/pull/2438))
 
 ### Maintenance and fixes
+- `reference_values` and `labeller` now work together in `plot_pair` ([2437](https://github.com/arviz-devs/arviz/issues/2437))
 
 ### Documentation
+- Added documentation for `reference_values` ([2438](https://github.com/arviz-devs/arviz/pull/2438))
 
 ## v0.21.0 (2025 Mar 06)
 
