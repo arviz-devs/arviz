@@ -197,7 +197,7 @@ class SamplingWrapper:
         """Check that all methods listed are implemented.
 
         Not all functions that require refitting need to have all the methods implemented in
-        order to work properly. This function shoulg be used before using the SamplingWrapper and
+        order to work properly. This function should be used before using the SamplingWrapper and
         its subclasses to get informative error messages.
 
         Parameters
