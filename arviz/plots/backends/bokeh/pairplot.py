@@ -37,6 +37,8 @@ def plot_pair(
     diverging_mask,
     divergences_kwargs,
     flat_var_names,
+    flat_ref_slices,
+    flat_var_labels,
     backend_kwargs,
     marginal_kwargs,
     show,
@@ -72,50 +74,12 @@ def plot_pair(
         kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
 
     if reference_values:
-        reference_values_copy = {}
-        label = []
-        for variable in list(reference_values.keys()):
-            if " " in variable:
-                variable_copy = variable.replace(" ", "\n", 1)
-            else:
-                variable_copy = variable
-
-            label.append(variable_copy)
-            reference_values_copy[variable_copy] = reference_values[variable]
-
-        difference = set(flat_var_names).difference(set(label))
+        difference = set(flat_var_names).difference(set(reference_values.keys()))
 
         if difference:
-            warn = [diff.replace("\n", " ", 1) for diff in difference]
             warnings.warn(
                 "Argument reference_values does not include reference value for: {}".format(
-                    ", ".join(warn)
-                ),
-                UserWarning,
-            )
-
-    if reference_values:
-        reference_values_copy = {}
-        label = []
-        for variable in list(reference_values.keys()):
-            if " " in variable:
-                variable_copy = variable.replace(" ", "\n", 1)
-            else:
-                variable_copy = variable
-
-            label.append(variable_copy)
-            reference_values_copy[variable_copy] = reference_values[variable]
-
-        difference = set(flat_var_names).difference(set(label))
-
-        for dif in difference:
-            reference_values_copy[dif] = None
-
-        if difference:
-            warn = [dif.replace("\n", " ", 1) for dif in difference]
-            warnings.warn(
-                "Argument reference_values does not include reference value for: {}".format(
-                    ", ".join(warn)
+                    ", ".join(difference)
                 ),
                 UserWarning,
             )
@@ -262,8 +226,8 @@ def plot_pair(
                     **marginal_kwargs,
                 )
 
-                ax[j, i].xaxis.axis_label = flat_var_names[i]
-                ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
+                ax[j, i].xaxis.axis_label = flat_var_labels[i]
+                ax[j, i].yaxis.axis_label = flat_var_labels[j + marginals_offset]
 
             elif j + marginals_offset > i:
                 if "scatter" in kind:
@@ -346,12 +310,18 @@ def plot_pair(
                             ax[-1, -1].add_layout(ax_pe_hline)
 
                 if reference_values:
-                    x = reference_values_copy[flat_var_names[j + marginals_offset]]
-                    y = reference_values_copy[flat_var_names[i]]
-                    if x and y:
-                        ax[j, i].scatter(y, x, **reference_values_kwargs)
-                ax[j, i].xaxis.axis_label = flat_var_names[i]
-                ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
+                    x_name = flat_var_names[j + marginals_offset]
+                    y_name = flat_var_names[i]
+                    if (x_name not in difference) and (y_name not in difference):
+                        ax[j, i].scatter(
+                            np.array(reference_values[y_name])[flat_ref_slices[i]],
+                            np.array(reference_values[x_name])[
+                                flat_ref_slices[j + marginals_offset]
+                            ],
+                            **reference_values_kwargs,
+                        )
+                ax[j, i].xaxis.axis_label = flat_var_labels[i]
+                ax[j, i].yaxis.axis_label = flat_var_labels[j + marginals_offset]
 
     show_layout(ax, show)
 
