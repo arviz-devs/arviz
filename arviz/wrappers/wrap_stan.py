@@ -44,7 +44,7 @@ class StanSamplingWrapper(SamplingWrapper):
         excluded_observed_data : str
             Variable name containing the pointwise log likelihood data of the excluded
             data. As PyStan cannot call C++ functions and log_likelihood__i is already
-            calculated *during* the simultion, instead of the value on which to evaluate
+            calculated *during* the simulation, instead of the value on which to evaluate
             the likelihood, ``log_likelihood__i`` expects a string so it can extract the
             corresponding data from the InferenceData object.
         """
