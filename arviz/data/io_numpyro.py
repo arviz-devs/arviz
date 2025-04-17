@@ -437,13 +437,14 @@ def from_numpyro(
 ):
     """Convert NumPyro data into an InferenceData object.
 
-    This will infer batch dim names from NumPyro model plates. For event dim names, such as with the
-    ZeroSumNormal, `infer={"event_dims":dim_names}` can be provided in numpyro.sample, i.e.::
+    If no dims are provided, this will infer batch dim names from NumPyro model plates.
+    For event dim names, such as with the ZeroSumNormal, `infer={"event_dims":dim_names}`
+    can be provided in numpyro.sample, i.e.::
 
-        # adds dims entry, {"gamma": ["groups"]}
+        # equivalent to dims entry, {"gamma": ["groups"]}
         gamma = numpyro.sample(
             "gamma",
-            dist.ZeroSumNormal(1, event_shape=(n_groups)),
+            dist.ZeroSumNormal(1, event_shape=(n_groups,)),
             infer={"event_dims":["groups"]}
         )
 
