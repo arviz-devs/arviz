@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 import logging
-from typing import Callable, Optional, Dict, List
+from typing import Any, Callable, Optional, Dict, List, Tuple
 
 import numpy as np
 
@@ -14,7 +14,7 @@ from .inference_data import InferenceData
 _log = logging.getLogger(__name__)
 
 
-def _add_dims(dims_a: Dict[str, List[str]], dims_b: Dict[str, List[str]]):
+def _add_dims(dims_a: Dict[str, List[str]], dims_b: Dict[str, List[str]]) -> Dict[str, List[str]]:
     merged = defaultdict(list)
 
     for k, v in dims_a.items():
@@ -27,7 +27,11 @@ def _add_dims(dims_a: Dict[str, List[str]], dims_b: Dict[str, List[str]]):
     return dict(merged)
 
 
-def infer_dims(model, model_args=None, model_kwargs=None):
+def infer_dims(
+    model: Callable,
+    model_args: Optional[Tuple[Any, ...]] = None,
+    model_kwargs: Optional[Dict[str, Any]] = None,
+) -> Dict[str, List[str]]:
 
     from numpyro import handlers, distributions as dist
     from numpyro.ops.pytree import PytreeTrace
@@ -398,7 +402,7 @@ class NumPyroConverter:
     @requires("posterior")
     @requires("model")
     @requires("coords")
-    def infer_dims(self):
+    def infer_dims(self) -> Dict[str, List[str]]:
         dims = infer_dims(self.model, self._args, self._kwargs)
         if self.extra_event_dims:
             dims = _add_dims(dims, self.extra_event_dims)
@@ -408,7 +412,7 @@ class NumPyroConverter:
     @requires("model")
     @requires("coords")
     @requires("predictions")
-    def infer_pred_dims(self):
+    def infer_pred_dims(self) -> Dict[str, List[str]]:
         if self.predictions_constant_data is not None:
             dims = infer_dims(self.model, model_kwargs=self.predictions_constant_data)
         else:
