@@ -66,7 +66,7 @@ def infer_dims(model, model_args=None, model_kwargs=None):
     named_dims = {}
 
     for name, site in trace.items():
-        batch_dims = [frame.name for frame in site["cond_indep_stack"]]
+        batch_dims = [frame.name for frame in sorted(site["cond_indep_stack"], key=lambda x: x.dim)]
         event_dims = list(site.get("infer", {}).get("event_dims", []))
         if site["type"] in ["sample", "deterministic"] and (batch_dims or event_dims):
             named_dims[name] = batch_dims + event_dims

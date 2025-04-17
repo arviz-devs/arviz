@@ -306,6 +306,7 @@ class TestDataNumPyro:
         inference_data = from_numpyro(mcmc, coords={"groups": np.arange(10)})
         assert "groups" in inference_data.posterior.gamma.coords
 
+    @pytest.mark.xfail
     def test_mcmc_inferred_dims_univariate(self):
         import numpyro
         import numpyro.distributions as dist
@@ -317,6 +318,7 @@ class TestDataNumPyro:
             sigma = numpyro.sample("sigma", dist.HalfNormal(1))
             with numpyro.plate("obs_idx", 3):
                 # mu is plated by obs_idx, but isnt broadcasted to the plate shape
+                # the expected behavior is that this should cause a failure
                 mu = numpyro.deterministic("mu", alpha)
                 return numpyro.sample("y", dist.Normal(mu, sigma), obs=jnp.array([-1, 0, 1]))
 
@@ -340,6 +342,27 @@ class TestDataNumPyro:
             mcmc, coords={"groups": np.arange(10)}, extra_event_dims={"gamma_plus1": ["groups"]}
         )
         assert "groups" in inference_data.posterior.gamma_plus1.coords
+
+    def test_mcmc_infer_unsorted_dims(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            group1_plate = numpyro.plate("group1", 10, dim=-1)
+            group2_plate = numpyro.plate("group2", 5, dim=-2)
+
+            # the plate contexts are entered in a different order than the pre-defined dims
+            # we should make sure this still works because the trace has all of the info it needs
+            with group2_plate, group1_plate:
+                _ = numpyro.sample("param", dist.Normal(0, 1))
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(
+            mcmc, coords={"group1": np.arange(10), "group2": np.arange(5)}
+        )
+        assert inference_data.posterior.param.dims == ("chain", "draw", "group2", "group1")
 
     def test_mcmc_predictions_infer_dims(
         self, data, eight_schools_params, predictions_data, predictions_params
