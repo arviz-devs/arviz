@@ -401,7 +401,6 @@ class NumPyroConverter:
 
     @requires("posterior")
     @requires("model")
-    @requires("coords")
     def infer_dims(self) -> Dict[str, List[str]]:
         dims = infer_dims(self.model, self._args, self._kwargs)
         if self.extra_event_dims:
@@ -410,14 +409,9 @@ class NumPyroConverter:
 
     @requires("posterior")
     @requires("model")
-    @requires("coords")
     @requires("predictions")
     def infer_pred_dims(self) -> Dict[str, List[str]]:
-        if self.predictions_constant_data is not None:
-            dims = infer_dims(self.model, model_kwargs=self.predictions_constant_data)
-        else:
-            dims = infer_dims(self.model, self._args, self._kwargs)
-
+        dims = infer_dims(self.model, self._args, self._kwargs)
         if self.extra_event_dims:
             dims = _add_dims(dims, self.extra_event_dims)
         return dims
