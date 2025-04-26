@@ -1424,7 +1424,7 @@ def summary(
             hdi_higher = hdi_post.sel(hdi="higher", drop=True)
             metrics.extend((mean, sd, hdi_lower, hdi_higher))
             metric_names.extend(
-                ("mean", "sd", f"hdi_{100 * alpha / 2:g}%", f"hdi_{100 * (1 - alpha / 2):g}%")
+                ("mean", "sd", f"hdi_{100 * alpha / 2:g}_lb%", f"hdi_{100 * (1 - alpha / 2):g}_ub%")
             )
         elif stat_focus == "median":
             median = dataset.median(dim=("chain", "draw"), skipna=skipna)
@@ -1548,6 +1548,7 @@ def summary(
         summary_df = summary_df.round(decimals)
 
     return summary_df
+
 
 
 def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
