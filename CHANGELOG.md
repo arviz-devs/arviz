@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### New features
+- Make `arviz.from_numpyro(..., dims=None)` automatically infer dims from the numpyro model based on its numpyro.plate structure
 
 ### Maintenance and fixes
 

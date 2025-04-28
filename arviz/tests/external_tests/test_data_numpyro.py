@@ -46,7 +46,9 @@ class TestDataNumPyro:
         )
         return predictions
 
-    def get_inference_data(self, data, eight_schools_params, predictions_data, predictions_params):
+    def get_inference_data(
+        self, data, eight_schools_params, predictions_data, predictions_params, infer_dims=False
+    ):
         posterior_samples = data.obj.get_samples()
         model = data.obj.sampler.model
         posterior_predictive = Predictive(model, posterior_samples)(
@@ -55,6 +57,12 @@ class TestDataNumPyro:
         prior = Predictive(model, num_samples=500)(
             PRNGKey(2), eight_schools_params["J"], eight_schools_params["sigma"]
         )
+        dims = {"theta": ["school"], "eta": ["school"], "obs": ["school"]}
+        pred_dims = {"theta": ["school_pred"], "eta": ["school_pred"], "obs": ["school_pred"]}
+        if infer_dims:
+            dims = None
+            pred_dims = None
+
         predictions = predictions_data
         return from_numpyro(
             posterior=data.obj,
@@ -65,8 +73,8 @@ class TestDataNumPyro:
                 "school": np.arange(eight_schools_params["J"]),
                 "school_pred": np.arange(predictions_params["J"]),
             },
-            dims={"theta": ["school"], "eta": ["school"], "obs": ["school"]},
-            pred_dims={"theta": ["school_pred"], "eta": ["school_pred"], "obs": ["school_pred"]},
+            dims=dims,
+            pred_dims=pred_dims,
         )
 
     def test_inference_data_namedtuple(self, data):
@@ -77,6 +85,7 @@ class TestDataNumPyro:
         data.obj.get_samples = lambda *args, **kwargs: data_namedtuple
         inference_data = from_numpyro(
             posterior=data.obj,
+            dims={},  # This mock test needs to turn off autodims like so or mock group_by_chain
         )
         assert isinstance(data.obj.get_samples(), Samples)
         data.obj.get_samples = _old_fn
@@ -282,3 +291,121 @@ class TestDataNumPyro:
         mcmc.run(PRNGKey(0))
         inference_data = from_numpyro(mcmc)
         assert inference_data.observed_data
+
+    def test_mcmc_infer_dims(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            # note: group2 gets assigned dim=-1 and group1 is assigned dim=-2
+            with numpyro.plate("group2", 5), numpyro.plate("group1", 10):
+                _ = numpyro.sample("param", dist.Normal(0, 1))
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(
+            mcmc, coords={"group1": np.arange(10), "group2": np.arange(5)}
+        )
+        assert inference_data.posterior.param.dims == ("chain", "draw", "group1", "group2")
+        assert all(dim in inference_data.posterior.param.coords for dim in ("group1", "group2"))
+
+    def test_mcmc_infer_unsorted_dims(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            group1_plate = numpyro.plate("group1", 10, dim=-1)
+            group2_plate = numpyro.plate("group2", 5, dim=-2)
+
+            # the plate contexts are entered in a different order than the pre-defined dims
+            # we should make sure this still works because the trace has all of the info it needs
+            with group2_plate, group1_plate:
+                _ = numpyro.sample("param", dist.Normal(0, 1))
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(
+            mcmc, coords={"group1": np.arange(10), "group2": np.arange(5)}
+        )
+        assert inference_data.posterior.param.dims == ("chain", "draw", "group2", "group1")
+        assert all(dim in inference_data.posterior.param.coords for dim in ("group1", "group2"))
+
+    def test_mcmc_infer_dims_no_coords(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            with numpyro.plate("group", 5):
+                _ = numpyro.sample("param", dist.Normal(0, 1))
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(mcmc)
+        assert inference_data.posterior.param.dims == ("chain", "draw", "group")
+
+    def test_mcmc_event_dims(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            _ = numpyro.sample(
+                "gamma", dist.ZeroSumNormal(1, event_shape=(10,)), infer={"event_dims": ["groups"]}
+            )
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(mcmc, coords={"groups": np.arange(10)})
+        assert inference_data.posterior.gamma.dims == ("chain", "draw", "groups")
+        assert "groups" in inference_data.posterior.gamma.coords
+
+    @pytest.mark.xfail
+    def test_mcmc_inferred_dims_univariate(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+        import jax.numpy as jnp
+
+        def model():
+            alpha = numpyro.sample("alpha", dist.Normal(0, 1))
+            sigma = numpyro.sample("sigma", dist.HalfNormal(1))
+            with numpyro.plate("obs_idx", 3):
+                # mu is plated by obs_idx, but isnt broadcasted to the plate shape
+                # the expected behavior is that this should cause a failure
+                mu = numpyro.deterministic("mu", alpha)
+                return numpyro.sample("y", dist.Normal(mu, sigma), obs=jnp.array([-1, 0, 1]))
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(mcmc, coords={"obs_idx": np.arange(3)})
+        assert inference_data.posterior.mu.dims == ("chain", "draw", "obs_idx")
+        assert "obs_idx" in inference_data.posterior.mu.coords
+
+    def test_mcmc_extra_event_dims(self):
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        def model():
+            gamma = numpyro.sample("gamma", dist.ZeroSumNormal(1, event_shape=(10,)))
+            _ = numpyro.deterministic("gamma_plus1", gamma + 1)
+
+        mcmc = MCMC(NUTS(model), num_warmup=10, num_samples=10)
+        mcmc.run(PRNGKey(0))
+        inference_data = from_numpyro(
+            mcmc, coords={"groups": np.arange(10)}, extra_event_dims={"gamma_plus1": ["groups"]}
+        )
+        assert inference_data.posterior.gamma_plus1.dims == ("chain", "draw", "groups")
+        assert "groups" in inference_data.posterior.gamma_plus1.coords
+
+    def test_mcmc_predictions_infer_dims(
+        self, data, eight_schools_params, predictions_data, predictions_params
+    ):
+        inference_data = self.get_inference_data(
+            data, eight_schools_params, predictions_data, predictions_params, infer_dims=True
+        )
+        assert inference_data.predictions.obs.dims == ("chain", "draw", "J")
+        assert "J" in inference_data.predictions.obs.coords
