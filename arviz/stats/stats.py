@@ -869,7 +869,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     )
 
 
-def psislw(log_weights, reff=1.0):
+def psislw(log_weights, reff=1.0, normalize=True):
     """
     Pareto smoothed importance sampling (PSIS).
 
@@ -887,11 +887,13 @@ def psislw(log_weights, reff=1.0):
         Array of size (n_observations, n_samples)
     reff : float, default 1
         relative MCMC efficiency, ``ess / n``
+    normalize : bool, default True
+        return normalized log weights
 
     Returns
     -------
     lw_out : DataArray or (..., N) ndarray
-        Smoothed, truncated and normalized log weights.
+        Smoothed, truncated and possibly normalized log weights.
     kss : DataArray or (...) ndarray
         Estimates of the shape parameter *k* of the generalized Pareto
         distribution.
@@ -936,7 +938,12 @@ def psislw(log_weights, reff=1.0):
     out = np.empty_like(log_weights), np.empty(shape)
 
     # define kwargs
-    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "out": out}
+    func_kwargs = {
+        "cutoff_ind": cutoff_ind,
+        "cutoffmin": cutoffmin,
+        "out": out,
+        "normalize": normalize,
+    }
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
     kwargs = {"input_core_dims": [["__sample__"]], "output_core_dims": [["__sample__"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
@@ -953,7 +960,7 @@ def psislw(log_weights, reff=1.0):
     return log_weights, pareto_shape
 
 
-def _psislw(log_weights, cutoff_ind, cutoffmin):
+def _psislw(log_weights, cutoff_ind, cutoffmin, normalize):
     """
     Pareto smoothed importance sampling (PSIS) for a 1D vector.
 
@@ -963,7 +970,7 @@ def _psislw(log_weights, cutoff_ind, cutoffmin):
         Array of length n_observations
     cutoff_ind: int
     cutoffmin: float
-    k_min: float
+    normalize: bool
 
     Returns
     -------
@@ -975,7 +982,8 @@ def _psislw(log_weights, cutoff_ind, cutoffmin):
     x = np.asarray(log_weights)
 
     # improve numerical accuracy
-    x -= np.max(x)
+    max_x = np.max(x)
+    x -= max_x
     # sort the array
     x_sort_ind = np.argsort(x)
     # divide log weights into body and right tail
@@ -1007,8 +1015,12 @@ def _psislw(log_weights, cutoff_ind, cutoffmin):
             x[tailinds[x_tail_si]] = smoothed_tail
             # truncate smoothed values to the largest raw weight 0
             x[x > 0] = 0
+
     # renormalize weights
-    x -= _logsumexp(x)
+    if normalize:
+        x -= _logsumexp(x)
+    else:
+        x += max_x
 
     return x, k
 
