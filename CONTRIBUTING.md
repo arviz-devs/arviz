@@ -1,8 +1,9 @@
 # Contributing to ArviZ
 This document outlines only the most common contributions.
 Please see the [Contributing guide](https://python.arviz.org/en/latest/contributing/index.html)
-on our documentation for a better view of how can you contribute to ArviZ.
+on our documentation for a better view of how you can contribute to ArviZ.
 We welcome a wide range of contributions, not only code!
+Even improving documentation or fixing typos is a valuable contribution to ArviZ.
 
 ## Reporting issues
 If you encounter any bug or incorrect behaviour while using ArviZ,

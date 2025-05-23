@@ -635,7 +635,7 @@ def _kde_circular(
     cumulative: bool, optional
         Whether return the PDF or the cumulative PDF. Defaults to False.
     grid_len: int, optional
-        The number of intervals used to bin the data pointa i.e. the length of the grid used in the
+        The number of intervals used to bin the data point i.e. the length of the grid used in the
         estimation. Defaults to 512.
     """
     # All values between -pi and pi
