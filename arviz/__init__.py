@@ -330,3 +330,12 @@ except ModuleNotFoundError:
 # clean namespace
 del os, logging, LinearSegmentedColormap, Logger, mpl
 from . import labels
+
+mix_labellers = mix_labellers
+BaseLabeller = BaseLabeller
+DimCoordLabeller = DimCoordLabeller
+DimIdxLabeller = DimIdxLabeller
+IdxLabeller = IdxLabeller
+MapLabeller = MapLabeller
+NoVarLabeller = NoVarLabeller
+NoModelLabeller = NoModelLabeller
