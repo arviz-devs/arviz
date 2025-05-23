@@ -390,3 +390,28 @@ These are kwargs specific to the backend being used, passed to `matplotlib.pyplo
 ## `show`
 
 Call backend show function.
+
+(common_reference_values)=
+## `reference_values`
+`plot_pair` accepts `reference_values` to highlight specific values on the probability distributions. The keys of `reference_values` are the associated variable names in `var_names`. The values are the reference values, which must have the same shape as the coordinates selected for plotting since it is indexed as such. For example, here `theta` must have shape `(2,)` since that is the shape of the selected coordinates on `theta`.
+
+```{code-cell} ipython3
+coords = {"school": ["Choate", "Deerfield"]}
+reference_values = {
+    "mu": 0.0,
+    "theta": np.zeros(2),
+}
+az.plot_pair(centered_eight, var_names=["mu", "theta"], coords=coords, reference_values=reference_values);
+```
+
+When used with `combine_dims`, each reference value along the combined dimension is plotted on the same axis.
+```{code-cell} ipython3
+coords = {"school": ["Choate", "Deerfield"]}
+reference_values = {
+    "theta": [-5.0, 5.0],
+    "theta_t": [-2.0, 2.0],
+}
+az.plot_pair(non_centered_eight, var_names=["theta", "theta_t"], coords=coords, reference_values=reference_values, combine_dims={"school"});
+```
+
+The values of the `reference_values` dictionary can be scalars (e.g., `0`) or zero-dimensional `numpy` arrays (e.g., `np.array(0)`) for scalar variables, or anything that can be cast to `np.array` (e.g., `[0.0, 0.0]` or `np.array([0.0, 0.0])`) for multi-dimensional variables.

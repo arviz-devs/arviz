@@ -3,13 +3,17 @@
 ## Unreleased
 
 ### New features
+- `plot_pair` now has more flexible support for `reference_values` ([2438](https://github.com/arviz-devs/arviz/pull/2438))
 - Make `arviz.from_numpyro(..., dims=None)` automatically infer dims from the numpyro model based on its numpyro.plate structure
 
+
 ### Maintenance and fixes
+- `reference_values` and `labeller` now work together in `plot_pair` ([2437](https://github.com/arviz-devs/arviz/issues/2437))
 
 - Add [`scipy-stubs`](https://github.com/scipy/scipy-stubs) as a development dependency ([2445](https://github.com/arviz-devs/arviz/pull/2445))
 
 ### Documentation
+- Added documentation for `reference_values` ([2438](https://github.com/arviz-devs/arviz/pull/2438))
 
 ## v0.21.0 (2025 Mar 06)
 

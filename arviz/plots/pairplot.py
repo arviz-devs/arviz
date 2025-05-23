@@ -196,9 +196,14 @@ def plot_pair(
             get_coords(dataset, coords), var_names=var_names, skip_dims=combine_dims, combined=True
         )
     )
-    flat_var_names = [
-        labeller.make_label_vert(var_name, sel, isel) for var_name, sel, isel, _ in plotters
-    ]
+    flat_var_names = []
+    flat_ref_slices = []
+    flat_var_labels = []
+    for var_name, sel, isel, _ in plotters:
+        dims = [dim for dim in dataset[var_name].dims if dim not in ["chain", "draw"]]
+        flat_var_names.append(var_name)
+        flat_ref_slices.append(tuple(isel[dim] if dim in isel else slice(None) for dim in dims))
+        flat_var_labels.append(labeller.make_label_vert(var_name, sel, isel))
 
     divergent_data = None
     diverging_mask = None
@@ -253,6 +258,8 @@ def plot_pair(
         diverging_mask=diverging_mask,
         divergences_kwargs=divergences_kwargs,
         flat_var_names=flat_var_names,
+        flat_ref_slices=flat_ref_slices,
+        flat_var_labels=flat_var_labels,
         backend_kwargs=backend_kwargs,
         marginal_kwargs=marginal_kwargs,
         show=show,
