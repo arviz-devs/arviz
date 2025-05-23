@@ -330,3 +330,4 @@ except ModuleNotFoundError:
 # clean namespace
 del os, logging, LinearSegmentedColormap, Logger, mpl
 from . import labels
+# Minor tweak to trigger Git commit.
