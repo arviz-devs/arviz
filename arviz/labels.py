@@ -32,9 +32,12 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
     type
         Dynamically created class combining provided labeller classes.
 
-    Notes
-    -----
-    The returned class is *not* initialized.
+    Examples
+    --------
+    >>> class A(BaseLabeller): ...
+    >>> class B(BaseLabeller): ...
+    >>> Mixed = mix_labellers([A, B])
+
     """
     return type(class_name, labellers, {})
 
@@ -284,16 +287,16 @@ class MapLabeller(BaseLabeller):
         self.coord_map = {} if coord_map is None else coord_map
         self.model_name_map = {} if model_name_map is None else model_name_map
 
-    def dim_coord_to_str(self, dim, coord_val, coord_idx):
+    def dim_coord_to_str(self, dim: str, coord_val, coord_idx: int) -> str:
         dim_str = self.dim_map.get(dim, dim)
         coord_str = self.coord_map.get(dim, {}).get(coord_val, coord_val)
         return super().dim_coord_to_str(dim_str, coord_str, coord_idx)
 
-    def var_name_to_str(self, var_name):
+    def var_name_to_str(self, var_name: Union[str, None]) -> Union[str, None]:
         var_name_str = self.var_name_map.get(var_name, var_name)
         return super().var_name_to_str(var_name_str)
 
-    def model_name_to_str(self, model_name):
+    def model_name_to_str(self, model_name: str) -> str:
         model_name_str = self.model_name_map.get(model_name, model_name)
         return super().model_name_to_str(model_name_str)
 
@@ -303,7 +306,7 @@ class NoVarLabeller(BaseLabeller):
     Labeller that omits variable names.
     """
 
-    def var_name_to_str(self, var_name):
+    def var_name_to_str(self, var_name: Union[str, None]) -> Union[str, None]:
         return None
 
 
@@ -312,5 +315,5 @@ class NoModelLabeller(BaseLabeller):
     Labeller that omits model labels entirely.
     """
 
-    def make_model_label(self, model_name, label):
+    def make_model_label(self, model_name: str, label: str) -> str:
         return label
