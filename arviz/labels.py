@@ -314,11 +314,3 @@ class NoModelLabeller(BaseLabeller):
 
     def make_model_label(self, model_name, label):
         return label
-    
-BaseLabeller = BaseLabeller
-DimCoordLabeller = DimCoordLabeller
-DimIdxLabeller = DimIdxLabeller
-IdxLabeller = IdxLabeller
-MapLabeller = MapLabeller
-NoVarLabeller = NoVarLabeller
-NoModelLabeller = NoModelLabeller
