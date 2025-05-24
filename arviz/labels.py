@@ -7,6 +7,7 @@ __all__ = [
     "BaseLabeller",
     "DimCoordLabeller",
     "DimIdxLabeller",
+    "IdxLabeller",
     "MapLabeller",
     "NoVarLabeller",
     "NoModelLabeller",
@@ -31,12 +32,17 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
     type
         Dynamically created class combining provided labeller classes.
 
+    Examples
+    --------
+    >>> class A(BaseLabeller): ...
+    >>> class B(BaseLabeller): ...
+    >>> Mixed = mix_labellers([A, B])
+
     Notes
     -----
     The returned class is *not* initialized.
     """
     return type(class_name, labellers, {})
-
 
 class BaseLabeller:
     """
@@ -47,7 +53,7 @@ class BaseLabeller:
     stored in InferenceData objects.
     """
 
-    def dim_coord_to_str(self, dim, coord_val, coord_idx):
+    def dim_coord_to_str(self, dim: str, coord_val, coord_idx: int) -> str:
         """
         Generate a label string for a single dimension/coordinate pair.
 
@@ -67,7 +73,7 @@ class BaseLabeller:
         """
         return f"{coord_val}"
 
-    def sel_to_str(self, sel: dict, isel: dict):
+    def sel_to_str(self, sel: dict, isel: dict) -> str:
         """
         Convert selection dictionaries to a formatted string.
 
@@ -92,7 +98,7 @@ class BaseLabeller:
             )
         return ""
 
-    def var_name_to_str(self, var_name: Union[str, None]):
+    def var_name_to_str(self, var_name: Union[str, None]) -> Union[str, None]:
         """
         Convert a variable name to a display label.
 
@@ -108,7 +114,7 @@ class BaseLabeller:
         """
         return var_name
 
-    def var_pp_to_str(self, var_name, pp_var_name):
+    def var_pp_to_str(self, var_name, pp_var_name) -> str:
         """
         Convert a pair of variable names (e.g., prior and posterior) to a combined label.
 
@@ -130,7 +136,7 @@ class BaseLabeller:
             return f"{var_name_str}"
         return f"{var_name_str} / {pp_var_name_str}"
 
-    def model_name_to_str(self, model_name):
+    def model_name_to_str(self, model_name: str) -> str:
         """
         Convert a model name to a display label.
 
@@ -146,9 +152,18 @@ class BaseLabeller:
         """
         return model_name
 
-    def make_label_vert(self, var_name: Union[str, None], sel: dict, isel: dict):
+    def make_label_vert(self, var_name: Union[str, None], sel: dict, isel: dict) -> str:
         """
         Create a multiline (vertical) label for a variable and its selection.
+
+        Parameters
+        ----------
+        var_name : str or None
+            The variable name to label.
+        sel : dict
+            Mapping from dimension names to coordinate values.
+        isel : dict
+            Mapping from dimension names to index values.
 
         Returns
         -------
@@ -163,9 +178,18 @@ class BaseLabeller:
             return sel_str
         return f"{var_name_str}\n{sel_str}"
 
-    def make_label_flat(self, var_name: str, sel: dict, isel: dict):
+    def make_label_flat(self, var_name: str, sel: dict, isel: dict) -> str:
         """
         Create a flat (single-line) label with indexing format.
+
+        Parameters
+        ----------
+        var_name : str
+            The variable name to label.
+        sel : dict
+            Mapping from dimension names to coordinate values.
+        isel : dict
+            Mapping from dimension names to index values.
 
         Returns
         -------
@@ -180,9 +204,20 @@ class BaseLabeller:
             return sel_str
         return f"{var_name_str}[{sel_str}]"
 
-    def make_pp_label(self, var_name, pp_var_name, sel, isel):
+    def make_pp_label(self, var_name, pp_var_name, sel, isel) -> str:
         """
         Create label for a prior-posterior pair.
+
+        Parameters
+        ----------
+        var_name : str
+            The name of the posterior variable.
+        pp_var_name : str
+            The name of the prior predictive variable.
+        sel : dict
+            Mapping from dimension names to coordinate values.
+        isel : dict
+            Mapping from dimension names to index values.
 
         Returns
         -------
@@ -192,9 +227,16 @@ class BaseLabeller:
         names = self.var_pp_to_str(var_name, pp_var_name)
         return self.make_label_vert(names, sel, isel)
 
-    def make_model_label(self, model_name, label):
+    def make_model_label(self, model_name: str, label: str) -> str:
         """
         Create a model label combined with a component label.
+
+        Parameters
+        ----------
+        model_name : str
+            The name of the model.
+        label : str
+            The label of the component (e.g., variable or selection).
 
         Returns
         -------
@@ -210,71 +252,52 @@ class BaseLabeller:
 
 
 class DimCoordLabeller(BaseLabeller):
-    """
-    Labeller that includes dimension names with coordinate values.
-    """
-
-    def dim_coord_to_str(self, dim, coord_val, coord_idx):
+    """Labeller that includes dimension names with coordinate values."""
+    def dim_coord_to_str(self, dim: str, coord_val, coord_idx: int) -> str:
         return f"{dim}: {coord_val}"
 
 
 class IdxLabeller(BaseLabeller):
-    """
-    Labeller that uses only coordinate indices.
-    """
-
-    def dim_coord_to_str(self, dim, coord_val, coord_idx):
+    """Labeller that uses only coordinate indices."""
+    def dim_coord_to_str(self, dim: str, coord_val, coord_idx: int) -> str:
         return f"{coord_idx}"
 
 
 class DimIdxLabeller(BaseLabeller):
-    """
-    Labeller that combines dimension name with index.
-    """
-
-    def dim_coord_to_str(self, dim, coord_val, coord_idx):
+    """Labeller that combines dimension name with index."""
+    def dim_coord_to_str(self, dim: str, coord_val, coord_idx: int) -> str:
         return f"{dim}#{coord_idx}"
 
 
 class MapLabeller(BaseLabeller):
-    """
-    Labeller that maps names and values using user-provided dictionaries.
-    """
-
+    """Labeller that maps names and values using user-provided dictionaries."""
     def __init__(self, var_name_map=None, dim_map=None, coord_map=None, model_name_map=None):
         self.var_name_map = {} if var_name_map is None else var_name_map
         self.dim_map = {} if dim_map is None else dim_map
         self.coord_map = {} if coord_map is None else coord_map
         self.model_name_map = {} if model_name_map is None else model_name_map
 
-    def dim_coord_to_str(self, dim, coord_val, coord_idx):
+    def dim_coord_to_str(self, dim: str, coord_val, coord_idx: int) -> str:
         dim_str = self.dim_map.get(dim, dim)
         coord_str = self.coord_map.get(dim, {}).get(coord_val, coord_val)
         return super().dim_coord_to_str(dim_str, coord_str, coord_idx)
 
-    def var_name_to_str(self, var_name):
+    def var_name_to_str(self, var_name: Union[str, None]) -> Union[str, None]:
         var_name_str = self.var_name_map.get(var_name, var_name)
         return super().var_name_to_str(var_name_str)
 
-    def model_name_to_str(self, model_name):
+    def model_name_to_str(self, model_name: str) -> str:
         model_name_str = self.model_name_map.get(model_name, model_name)
         return super().model_name_to_str(model_name_str)
 
 
 class NoVarLabeller(BaseLabeller):
-    """
-    Labeller that omits variable names.
-    """
-
-    def var_name_to_str(self, var_name):
+    """Labeller that omits variable names."""
+    def var_name_to_str(self, var_name: Union[str, None]) -> Union[str, None]:
         return None
 
 
 class NoModelLabeller(BaseLabeller):
-    """
-    Labeller that omits model labels entirely.
-    """
-
-    def make_model_label(self, model_name, label):
+    """Labeller that omits model labels entirely."""
+    def make_model_label(self, model_name: str, label: str) -> str:
         return label
-
