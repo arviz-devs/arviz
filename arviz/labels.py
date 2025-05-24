@@ -14,7 +14,8 @@ __all__ = [
 ]
 
 def mix_labellers(labellers, class_name="MixtureLabeller"):
-    """Combine Labeller classes dynamically.
+    """
+    Combine Labeller classes dynamically.
 
     Allows dynamic creation of new labeller classes by combining multiple
     subclasses of BaseLabeller. Used to customize labeling behavior by stacking
@@ -34,13 +35,30 @@ def mix_labellers(labellers, class_name="MixtureLabeller"):
 
     Examples
     --------
-    >>> class A(BaseLabeller): ...
-    >>> class B(BaseLabeller): ...
-    >>> Mixed = mix_labellers([A, B])
+    .. code-block:: python
+
+        from arviz.labels import mix_labellers, DimCoordLabeller, MapLabeller
+
+        sel = {"dim1": "a", "dim2": "top"}
+
+        l1 = DimCoordLabeller()
+        print(f"DimCoordLabeller > {l1.sel_to_str(sel, sel)}")
+
+        l2 = MapLabeller(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
+        print(f"MapLabeller > {l2.sel_to_str(sel, sel)}")
+
+        Mixed1 = mix_labellers([MapLabeller, DimCoordLabeller])
+        l3 = Mixed1(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
+        print(f"Mixed Map+DimCoord > {l3.sel_to_str(sel, sel)}")
+
+        Mixed2 = mix_labellers([DimCoordLabeller, MapLabeller])
+        l4 = Mixed2(dim_map={"dim1": "$d_1$", "dim2": r"$d_2$"})
+        print(f"Mixed DimCoord+Map > {l4.sel_to_str(sel, sel)}")
 
     Notes
     -----
     The returned class is *not* initialized.
+    The order of labellers matters when combining methods with overlapping overrides.
     """
     return type(class_name, labellers, {})
 
