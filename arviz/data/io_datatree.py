@@ -4,7 +4,7 @@ from .inference_data import InferenceData
 
 
 def to_datatree(data):
-    """Convert InferenceData object to a :class:`~datatree.DataTree`.
+    """Convert InferenceData object to a :class:`~xarray.DataTree`.
 
     Parameters
     ----------
@@ -14,7 +14,7 @@ def to_datatree(data):
 
 
 def from_datatree(datatree):
-    """Create an InferenceData object from a :class:`~datatree.DataTree`.
+    """Create an InferenceData object from a :class:`~xarray.DataTree`.
 
     Parameters
     ----------
