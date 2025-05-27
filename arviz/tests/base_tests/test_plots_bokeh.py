@@ -1238,6 +1238,7 @@ def test_plot_lm_multidim(multidim_models):
     axes = plot_lm(idata=idata, y="y", plot_dim="dim1", show=False, backend="bokeh")
     assert np.any(axes)
 
+
 def test_plot_lm_list():
     """Test the plots when input data is list or ndarray."""
     y = [1, 2, 3, 4, 5]
@@ -1254,6 +1255,7 @@ def generate_lm_1d_data():
         coords={"dim1": range(7)},
     )
 
+
 def generate_lm_2d_data():
     rng = np.random.default_rng()
     return from_dict(
@@ -1264,6 +1266,7 @@ def generate_lm_2d_data():
         coords={"dim1": range(5), "dim2": range(7)},
     )
 
+
 @pytest.mark.parametrize("data", ("1d", "2d"))
 @pytest.mark.parametrize("kind", ("lines", "hdi"))
 @pytest.mark.parametrize("use_y_model", (True, False))
@@ -1272,7 +1275,6 @@ def test_plot_lm(data, kind, use_y_model):
         idata = generate_lm_1d_data()
     else:
         idata = generate_lm_2d_data()
-
 
     kwargs = {"idata": idata, "y": "y", "kind_model": kind, "backend": "bokeh", "show": False}
     if data == "2d":

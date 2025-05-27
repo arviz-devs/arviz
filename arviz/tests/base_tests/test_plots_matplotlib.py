@@ -2119,6 +2119,7 @@ def test_plot_bf():
     _, bf_plot = plot_bf(idata, var_name="a", ref_val=0)
     assert bf_plot is not None
 
+
 def generate_lm_1d_data():
     rng = np.random.default_rng()
     return from_dict(
@@ -2128,6 +2129,7 @@ def generate_lm_1d_data():
         dims={"y": ["dim1"]},
         coords={"dim1": range(7)},
     )
+
 
 def generate_lm_2d_data():
     rng = np.random.default_rng()
@@ -2139,6 +2141,7 @@ def generate_lm_2d_data():
         coords={"dim1": range(5), "dim2": range(7)},
     )
 
+
 @pytest.mark.parametrize("data", ("1d", "2d"))
 @pytest.mark.parametrize("kind", ("lines", "hdi"))
 @pytest.mark.parametrize("use_y_model", (True, False))
@@ -2147,7 +2150,6 @@ def test_plot_lm(data, kind, use_y_model):
         idata = generate_lm_1d_data()
     else:
         idata = generate_lm_2d_data()
-
 
     # test_cases = [
     #     # Single dimensional cases
