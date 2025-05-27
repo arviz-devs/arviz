@@ -5,5 +5,5 @@ contourpy
 ujson
 dask[distributed]
 zarr>=2.5.0,<3
-xarray-datatree
+xarray>=2024.11.0
 dm-tree>=0.1.8

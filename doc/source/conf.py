@@ -115,6 +115,7 @@ numpydoc_xref_ignore = {
 numpydoc_xref_aliases = {
     "DataArray": ":class:`~xarray.DataArray`",
     "Dataset": ":class:`~xarray.Dataset`",
+    "DataTree": ":class:`~xarray.DataTree`",
     "Labeller": ":ref:`Labeller <labeller_api>`",
     "ndarray": ":class:`~numpy.ndarray`",
     "InferenceData": ":class:`~arviz.InferenceData`",

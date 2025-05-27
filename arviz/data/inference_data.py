@@ -532,24 +532,27 @@ class InferenceData(Mapping[str, xr.Dataset]):
         return filename
 
     def to_datatree(self):
-        """Convert InferenceData object to a :class:`~datatree.DataTree`."""
+        """Convert InferenceData object to a :class:`~xarray.DataTree`."""
         try:
-            from datatree import DataTree
-        except ModuleNotFoundError as err:
-            raise ModuleNotFoundError(
-                "datatree must be installed in order to use InferenceData.to_datatree"
+            from xarray import DataTree
+        except ImportError as err:
+            raise ImportError(
+                "xarray must be have DataTree in order to use InferenceData.to_datatree. "
+                "Update to xarray>=2024.11.0"
             ) from err
         return DataTree.from_dict({group: ds for group, ds in self.items()})
 
     @staticmethod
     def from_datatree(datatree):
-        """Create an InferenceData object from a :class:`~datatree.DataTree`.
+        """Create an InferenceData object from a :class:`~xarray.DataTree`.
 
         Parameters
         ----------
         datatree : DataTree
         """
-        return InferenceData(**{group: sub_dt.to_dataset() for group, sub_dt in datatree.items()})
+        return InferenceData(
+            **{group: child.to_dataset() for group, child in datatree.children.items()}
+        )
 
     def to_dict(self, groups=None, filter_groups=None):
         """Convert InferenceData to a dictionary following xarray naming conventions.
@@ -1531,9 +1534,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
             import xarray as xr
             from xarray_einstats.stats import XrDiscreteRV
             from scipy.stats import poisson
-            dist = XrDiscreteRV(poisson)
-            log_lik = xr.Dataset()
-            log_lik["home_points"] = dist.logpmf(obs["home_points"], np.exp(post["atts"]))
+            dist = XrDiscreteRV(poisson, np.exp(post["atts"]))
+            log_lik = dist.logpmf(obs["home_points"]).to_dataset(name="home_points")
             idata2.add_groups({"log_likelihood": log_lik})
             idata2
 
