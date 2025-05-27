@@ -550,7 +550,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         datatree : DataTree
         """
-        return InferenceData(**{group: child.to_dataset() for group, child in datatree.children.items()})
+        return InferenceData(
+            **{group: child.to_dataset() for group, child in datatree.children.items()}
+        )
 
     def to_dict(self, groups=None, filter_groups=None):
         """Convert InferenceData to a dictionary following xarray naming conventions.
