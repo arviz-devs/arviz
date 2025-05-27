@@ -1501,10 +1501,6 @@ class TestJSON:
         assert not os.path.exists(filepath)
 
 
-@pytest.mark.skipif(
-    not (importlib.util.find_spec("datatree") or "ARVIZ_REQUIRE_ALL_DEPS" in os.environ),
-    reason="test requires xarray-datatree library",
-)
 class TestDataTree:
     def test_datatree(self):
         idata = load_arviz_data("centered_eight")
