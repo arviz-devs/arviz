@@ -16,9 +16,9 @@ dependencies to further enhance the library. This guide will cover both basic an
       pip install "arviz[preview]"
 
    And using the library through the {mod}`arviz.preview` module.
-   There are still some features present in ``arviz.`` not available
-   in ``arviz.preview.``, but most already are and there are also
-   some new ones that are not available in ``arviz.`` (and won't ever be).
+   While some features in ``arviz.`` are not available
+   in ``arviz.preview.``,  most have been included. Additionally, ``arviz.preview.``
+   include many new ones that are not available in ``arviz.`` and never will be.
 
 
 ******
