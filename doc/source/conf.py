@@ -333,6 +333,8 @@ intersphinx_mapping = {
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
     "diataxis": ("https://diataxis.fr/", None),
     "arviz_org": ("https://www.arviz.org/en/latest/", None),
+    "arviz_base": ("https://arviz-base.readthedocs.io/en/latest/", None),
+    "arviz_stats": ("https://arviz-stats.readthedocs.io/en/latest/", None),
     "arviz_plots": ("https://arviz-plots.readthedocs.io/en/latest/", None),
     "python": ("https://docs.python.org/3/", None),
 }
