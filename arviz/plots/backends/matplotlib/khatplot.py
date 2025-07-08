@@ -7,6 +7,7 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import to_rgba_array
+from packaging import version
 
 from ....stats.density_utils import histogram
 from ...plot_utils import _scale_fig_size, color_from_dim, set_xticklabels, vectorized_to_hex
@@ -39,7 +40,13 @@ def plot_khat(
     show,
 ):
     """Matplotlib khat plot."""
-    if hover_label and mpl.get_backend() not in mpl.rcsetup.interactive_bk:
+    if version.parse(mpl.__version__) >= version.parse(3.9.0.dev0):
+        interactive_backends = mpl.backends.backend_registry.list_builtin(
+            mpl.backends.BackendFilter.INTERACTIVE
+        )
+    else:
+        interactive_backends = mpl.rcsetup.interactive_bk
+    if hover_label and mpl.get_backend() not in interactive_backends:
         hover_label = False
         warnings.warn(
             "hover labels are only available with interactive backends. To switch to an "
