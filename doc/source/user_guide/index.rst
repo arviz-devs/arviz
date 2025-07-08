@@ -6,6 +6,7 @@ User Guide
 .. toctree::
   :maxdepth: 2
 
+  migration_guide
   plotting
   data_structures
   computation

@@ -7,6 +7,21 @@ functionality is available with the basic requirements, but ArviZ also has optio
 dependencies to further enhance the library. This guide will cover both basic and fully-fledged ArviZ installs and several installation methods.
 
 
+.. tip::
+
+   If you are installing ArviZ for the first time, consider installing with
+
+   .. code:: bash
+
+      pip install "arviz[preview]"
+
+   And using the library through the {mod}`arviz.preview` module.
+   While some features in ``arviz.`` are not available
+   in ``arviz.preview.``,  most have already been included.
+   Additionally, ``arviz.preview.`` include many new ones that
+   are not available in ``arviz.`` and never will be.
+
+
 ******
 Stable
 ******
