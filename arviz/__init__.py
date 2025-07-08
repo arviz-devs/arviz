@@ -41,8 +41,13 @@ from . import preview
 
 # add ArviZ's styles to matplotlib's styles
 _arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
-style.core.USER_LIBRARY_PATHS.append(_arviz_style_path)
-style.core.reload_library()
+if hasattr("style", "USER_LIBRARY_PATHS"):
+    style.USER_LIBRARY_PATHS.append(_arviz_style_path)
+    style.reload_library()
+else:
+    style.core.USER_LIBRARY_PATHS.append(_arviz_style_path)
+    style.core.reload_library()
+    
 
 
 if not logging.root.handlers:
