@@ -42,7 +42,7 @@ from . import preview
 
 # add ArviZ's styles to matplotlib's styles
 _arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
-if version.parse(mpl.__version__) >= version.parse("3.11.0"):
+if version.parse(mpl.__version__) >= version.parse("3.11.0.dev0"):
     style.USER_LIBRARY_PATHS.append(_arviz_style_path)
     style.reload_library()
 else:
