@@ -17,8 +17,9 @@ dependencies to further enhance the library. This guide will cover both basic an
 
    And using the library through the {mod}`arviz.preview` module.
    While some features in ``arviz.`` are not available
-   in ``arviz.preview.``,  most have been included. Additionally, ``arviz.preview.``
-   include many new ones that are not available in ``arviz.`` and never will be.
+   in ``arviz.preview.``,  most have already been included.
+   Additionally, ``arviz.preview.`` include many new ones that
+   are not available in ``arviz.`` and never will be.
 
 
 ******
