@@ -1,5 +1,15 @@
 # Change Log
 
+## v0.x.x Unreleased
+
+### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
 ## v0.22.0 (2025 Jul 9)
 
 ### New features
