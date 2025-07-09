@@ -255,6 +255,10 @@ def plot_kde(
             "or plot_pair instead of plot_kde"
         )
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if values2 is None:
         if bw == "default":
             bw = "taylor" if is_circular else "experimental"
@@ -345,10 +349,6 @@ def plot_kde(
         return_glyph=return_glyph,
         **kwargs,
     )
-
-    if backend is None:
-        backend = rcParams["plot.backend"]
-    backend = backend.lower()
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_kde", "kdeplot", backend)

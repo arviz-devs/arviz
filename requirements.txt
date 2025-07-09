@@ -1,10 +1,10 @@
 setuptools>=60.0.0
-matplotlib>=3.5
-numpy>=1.23.0
-scipy>=1.9.0
+matplotlib>=3.8
+numpy>=1.26.0
+scipy>=1.11.0
 packaging
-pandas>=1.5.0
-xarray>=2022.6.0
+pandas>=2.1.0
+xarray>=2023.7.0
 h5netcdf>=1.0.2
 typing_extensions>=4.1.0
 xarray-einstats>=0.3

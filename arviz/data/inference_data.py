@@ -800,12 +800,20 @@ class InferenceData(Mapping[str, xr.Dataset]):
         ----------
         https://zarr.readthedocs.io/
         """
-        try:  # Check zarr
+        try:
             import zarr
-
-            assert version.parse(zarr.__version__) >= version.parse("2.5.0")
-        except (ImportError, AssertionError) as err:
-            raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
+        except ImportError as err:
+            raise ImportError("'to_zarr' method needs Zarr (>=2.5.0,<3) installed.") from err
+        if version.parse(zarr.__version__) < version.parse("2.5.0"):
+            raise ImportError(
+                "Found zarr<2.5.0, please upgrade to a zarr (>=2.5.0,<3) to use 'to_zarr'"
+            )
+        if version.parse(zarr.__version__) >= version.parse("3.0.0.dev0"):
+            raise ImportError(
+                "Found zarr>=3, which is not supported by ArviZ. Instead, you can use "
+                "'dt = InfereceData.to_datatree' followed by 'dt.to_zarr()' "
+                "(needs xarray>=2024.11.0)"
+            )
 
         # Check store type and create store if necessary
         if store is None:
@@ -854,10 +862,18 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         try:
             import zarr
-
-            assert version.parse(zarr.__version__) >= version.parse("2.5.0")
-        except (ImportError, AssertionError) as err:
-            raise ImportError("'to_zarr' method needs Zarr (2.5.0+) installed.") from err
+        except ImportError as err:
+            raise ImportError("'from_zarr' method needs Zarr (>=2.5.0,<3) installed.") from err
+        if version.parse(zarr.__version__) < version.parse("2.5.0"):
+            raise ImportError(
+                "Found zarr<2.5.0, please upgrade to a zarr (>=2.5.0,<3) to use 'from_zarr'"
+            )
+        if version.parse(zarr.__version__) >= version.parse("3.0.0.dev0"):
+            raise ImportError(
+                "Found zarr>=3, which is not supported by ArviZ. Instead, you can use "
+                "'xarray.open_datatree' followed by 'arviz.InferenceData.from_datatree' "
+                "(needs xarray>=2024.11.0)"
+            )
 
         # Check store type and create store if necessary
         if isinstance(store, str):
