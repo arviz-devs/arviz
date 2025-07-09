@@ -40,7 +40,7 @@ def plot_khat(
     show,
 ):
     """Matplotlib khat plot."""
-    if version.parse(mpl.__version__) >= version.parse(3.9.0.dev0):
+    if version.parse(mpl.__version__) >= version.parse("3.9.0.dev0"):
         interactive_backends = mpl.backends.backend_registry.list_builtin(
             mpl.backends.BackendFilter.INTERACTIVE
         )
