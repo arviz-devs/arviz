@@ -5,7 +5,7 @@
 ### New features
 
 ### Maintenance and fixes
-- Fix numpyro jax incompatibility. ([2438](https://github.com/arviz-devs/arviz/pull/2465))
+- Fix numpyro jax incompatibility. ([2465](https://github.com/arviz-devs/arviz/pull/2465))
 
 ### Deprecation
 
