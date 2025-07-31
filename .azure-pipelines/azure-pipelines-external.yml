@@ -59,7 +59,7 @@ jobs:
           python -m pip --no-cache-dir install "emcee<3"
       fi
 
-      grep -Ev '^cmdstanpy|^emcee' requirements-external.txt | xargs python -m pip install
+      grep -Ev '^cmdstanpy|^emcee' requirements-external.txt | xargs python -m pip install "jax<0.7"
 
     displayName: 'Install packages'
 
