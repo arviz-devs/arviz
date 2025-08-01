@@ -5,6 +5,7 @@
 ### New features
 
 ### Maintenance and fixes
+- Fix numpyro jax incompatibility. ([2465](https://github.com/arviz-devs/arviz/pull/2465))
 - Avoid closing unloaded files in `from_netcdf()` ([2463](https://github.com/arviz-devs/arviz/issues/2463))
 
 ### Deprecation
