@@ -430,11 +430,12 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         if re.search(key, group):
                             group_kws = kws
                 group_kws.setdefault("engine", engine)
-                with xr.open_dataset(filename, group=f"{base_group}/{group}", **group_kws) as data:
-                    if rcParams["data.load"] == "eager":
+                data = xr.open_dataset(filename, group=f"{base_group}/{group}", **group_kws)
+                if rcParams["data.load"] == "eager":
+                    with data:
                         groups[group] = data.load()
-                    else:
-                        groups[group] = data
+                else:
+                    groups[group] = data
 
             with xr.open_dataset(filename, engine=engine, group=base_group) as data:
                 attrs.update(data.load().attrs)
