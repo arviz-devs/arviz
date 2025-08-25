@@ -1,4 +1,4 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name
+# pylint: disable=no-member, invalid-name, redefined-outer-name, too-many-public-methods
 from collections import namedtuple
 import numpy as np
 import pytest
