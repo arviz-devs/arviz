@@ -1,4 +1,4 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name
+# pylint: disable=no-member, invalid-name, redefined-outer-name, too-many-public-methods
 from collections import namedtuple
 import numpy as np
 import pytest
@@ -409,3 +409,26 @@ class TestDataNumPyro:
         )
         assert inference_data.predictions.obs.dims == ("chain", "draw", "J")
         assert "J" in inference_data.predictions.obs.coords
+
+    def test_potential_energy_sign_conversion(self):
+        """Test that potential energy is converted to log probability (lp) with correct sign."""
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        num_samples = 10
+
+        def simple_model():
+            numpyro.sample("x", dist.Normal(0, 1))
+
+        nuts_kernel = NUTS(simple_model)
+        mcmc = MCMC(nuts_kernel, num_samples=num_samples, num_warmup=5)
+        mcmc.run(PRNGKey(0), extra_fields=["potential_energy"])
+
+        # Get the raw extra fields from NumPyro
+        extra_fields = mcmc.get_extra_fields(group_by_chain=True)
+        # Convert to ArviZ InferenceData
+        inference_data = from_numpyro(mcmc)
+        arviz_lp = inference_data["sample_stats"]["lp"].values
+
+        np.testing.assert_array_equal(arviz_lp, -extra_fields["potential_energy"])
