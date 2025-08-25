@@ -241,9 +241,14 @@ class NumPyroConverter:
                 continue
             name = rename_key.get(stat, stat)
             value = value.copy()
-            data[name] = value
+            if stat == "potential_energy":
+                data[name] = -value
+            else:
+                data[name] = value
             if stat == "num_steps":
                 data["tree_depth"] = np.log2(value).astype(int) + 1
+            if stat == "potential_energy":
+                data[name] = -value
         return dict_to_dataset(
             data,
             library=self.numpyro,
