@@ -47,12 +47,7 @@ class TestDataNumPyro:
         return predictions
 
     def get_inference_data(
-        self,
-        data,
-        eight_schools_params,
-        predictions_data,
-        predictions_params,
-        infer_dims=False,
+        self, data, eight_schools_params, predictions_data, predictions_params, infer_dims=False
     ):
         posterior_samples = data.obj.get_samples()
         model = data.obj.sampler.model
@@ -63,11 +58,7 @@ class TestDataNumPyro:
             PRNGKey(2), eight_schools_params["J"], eight_schools_params["sigma"]
         )
         dims = {"theta": ["school"], "eta": ["school"], "obs": ["school"]}
-        pred_dims = {
-            "theta": ["school_pred"],
-            "eta": ["school_pred"],
-            "obs": ["school_pred"],
-        }
+        pred_dims = {"theta": ["school_pred"], "eta": ["school_pred"], "obs": ["school_pred"]}
         if infer_dims:
             dims = None
             pred_dims = None
@@ -170,10 +161,7 @@ class TestDataNumPyro:
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "eta": ["school"]},
         )
-        test_dict = {
-            "posterior_predictive": ["obs"],
-            "prior": ["mu", "tau", "eta", "obs"],
-        }
+        test_dict = {"posterior_predictive": ["obs"], "prior": ["mu", "tau", "eta", "obs"]}
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails, f"prior and posterior_predictive: {fails}"
 
