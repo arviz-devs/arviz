@@ -47,7 +47,12 @@ class TestDataNumPyro:
         return predictions
 
     def get_inference_data(
-        self, data, eight_schools_params, predictions_data, predictions_params, infer_dims=False
+        self,
+        data,
+        eight_schools_params,
+        predictions_data,
+        predictions_params,
+        infer_dims=False,
     ):
         posterior_samples = data.obj.get_samples()
         model = data.obj.sampler.model
@@ -58,7 +63,11 @@ class TestDataNumPyro:
             PRNGKey(2), eight_schools_params["J"], eight_schools_params["sigma"]
         )
         dims = {"theta": ["school"], "eta": ["school"], "obs": ["school"]}
-        pred_dims = {"theta": ["school_pred"], "eta": ["school_pred"], "obs": ["school_pred"]}
+        pred_dims = {
+            "theta": ["school_pred"],
+            "eta": ["school_pred"],
+            "obs": ["school_pred"],
+        }
         if infer_dims:
             dims = None
             pred_dims = None
@@ -161,7 +170,10 @@ class TestDataNumPyro:
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "eta": ["school"]},
         )
-        test_dict = {"posterior_predictive": ["obs"], "prior": ["mu", "tau", "eta", "obs"]}
+        test_dict = {
+            "posterior_predictive": ["obs"],
+            "prior": ["mu", "tau", "eta", "obs"],
+        }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails, f"prior and posterior_predictive: {fails}"
 
@@ -409,3 +421,26 @@ class TestDataNumPyro:
         )
         assert inference_data.predictions.obs.dims == ("chain", "draw", "J")
         assert "J" in inference_data.predictions.obs.coords
+
+    def test_potential_energy_sign_conversion(self):
+        """Test that potential energy is converted to log probability (lp) with correct sign."""
+        import numpyro
+        import numpyro.distributions as dist
+        from numpyro.infer import MCMC, NUTS
+
+        num_samples = 10
+
+        def simple_model():
+            numpyro.sample("x", dist.Normal(0, 1))
+
+        nuts_kernel = NUTS(simple_model)
+        mcmc = MCMC(nuts_kernel, num_samples=num_samples, num_warmup=5)
+        mcmc.run(PRNGKey(0), extra_fields=["potential_energy"])
+
+        # Get the raw extra fields from NumPyro
+        extra_fields = mcmc.get_extra_fields(group_by_chain=True)
+        # Convert to ArviZ InferenceData
+        inference_data = from_numpyro(mcmc)
+        arviz_lp = inference_data["sample_stats"]["lp"].values
+
+        np.testing.assert_array_equal(arviz_lp, -extra_fields["potential_energy"])
