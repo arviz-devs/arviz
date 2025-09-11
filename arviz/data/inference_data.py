@@ -541,7 +541,9 @@ class InferenceData(Mapping[str, xr.Dataset]):
                 "xarray must be have DataTree in order to use InferenceData.to_datatree. "
                 "Update to xarray>=2024.11.0"
             ) from err
-        return DataTree.from_dict({group: ds for group, ds in self.items()})
+        dt = DataTree.from_dict({group: ds for group, ds in self.items()})
+        dt.attrs = self.attrs
+        return dt
 
     @staticmethod
     def from_datatree(datatree):
@@ -552,6 +554,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         datatree : DataTree
         """
         return InferenceData(
+            attrs=datatree.attrs,
             **{group: child.to_dataset() for group, child in datatree.children.items()}
         )
 

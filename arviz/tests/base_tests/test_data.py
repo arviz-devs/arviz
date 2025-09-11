@@ -1510,6 +1510,15 @@ class TestDataTree:
             assert_identical(ds, idata_back[group])
         assert all(group in dt.children for group in idata.groups())
 
+    def test_datatree_attrs(self):
+        idata = load_arviz_data("centered_eight")
+        idata.attrs = {"not": "empty"}
+        assert idata.attrs
+        dt = idata.to_datatree()
+        idata_back = from_datatree(dt)
+        assert dt.attrs == idata.attrs
+        assert idata_back.attrs == idata.attrs
+
 
 class TestConversions:
     def test_id_conversion_idempotent(self):
