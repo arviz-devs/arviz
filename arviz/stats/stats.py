@@ -251,11 +251,11 @@ def compare(
             {"type": "ineq", "fun": np.sum},
         ]
 
-        weights = minimize(
+        minimize_result = minimize(
             fun=log_score, x0=theta, jac=gradient, bounds=bounds, constraints=constraints
         )
 
-        weights = w_fuller(weights["x"])
+        weights = w_fuller(minimize_result["x"])
         ses = ics["se"]
 
     elif method.lower() == "bb-pseudo-bma":
