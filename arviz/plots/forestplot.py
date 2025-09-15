@@ -51,7 +51,7 @@ def plot_forest(
     data : InferenceData
         Any object that can be converted to an :class:`arviz.InferenceData` object
         Refer to documentation of :func:`arviz.convert_to_dataset` for details.
-    kind : {"foresplot", "ridgeplot"}, default "forestplot"
+    kind : {"forestplot", "ridgeplot"}, default "forestplot"
         Specify the kind of plot:
 
         * The ``kind="forestplot"`` generates credible intervals, where the central points are the
