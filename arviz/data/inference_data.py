@@ -555,7 +555,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         """
         return InferenceData(
             attrs=datatree.attrs,
-            **{group: child.to_dataset() for group, child in datatree.children.items()}
+            **{group: child.to_dataset() for group, child in datatree.children.items()},
         )
 
     def to_dict(self, groups=None, filter_groups=None):
