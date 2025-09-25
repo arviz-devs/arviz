@@ -2,6 +2,7 @@
 
 import numpy as np
 import xarray as xr
+import pandas as pd
 
 try:
     from tree import is_nested
@@ -115,6 +116,9 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
         dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
+    elif hasattr(obj, "__array__") and callable(getattr(obj, "__array__")) and (not isinstance(obj, pd.DataFrame)):
+        obj = obj.__array__()
+        dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims) 
     elif isinstance(obj, (list, tuple)) and isinstance(obj[0], str) and obj[0].endswith(".csv"):
         if group == "sample_stats":
             kwargs["posterior"] = kwargs.pop(group)
