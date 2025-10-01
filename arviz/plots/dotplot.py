@@ -1,7 +1,7 @@
 """Plot distribution as dot plot or quantile dot plot."""
-
-import numpy as np
 import warnings
+import numpy as np
+
 
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
