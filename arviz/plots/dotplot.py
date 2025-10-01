@@ -195,7 +195,7 @@ def plot_dot(
 
     plot = get_plotting_function("plot_dot", "dotplot", backend)
     # Check for NaN values in the values array
-    if(np.any(np.isnan(values))):
+    if np.any(np.isnan(values)):
         values = values[~np.isnan(values)]
         dot_plot_args["values"] = values
         warnings.warn("NaN values detected. Only graphing non NaN values")
