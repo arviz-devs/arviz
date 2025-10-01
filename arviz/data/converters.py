@@ -45,6 +45,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             | dict: creates an xarray dataset as the only group
             | numpy array: creates an xarray dataset as the only group, gives the
                          array an arbitrary name
+            | object with __array__: converts to numpy array, then creates an xarray dataset as 
+                         the only group, gives the array an arbitrary name
     group : str
         If `obj` is a dict or numpy array, assigns the resulting xarray
         dataset to this group. Default: "posterior".
@@ -137,6 +139,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             "pytree (if 'dm-tree' is installed)",
             "netcdf filename",
             "numpy array",
+            "object with __array__",
             "pystan fit",
             "emcee fit",
             "pyro mcmc fit",
