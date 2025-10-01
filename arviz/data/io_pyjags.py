@@ -277,7 +277,7 @@ def _extract_arviz_dict_from_inference_data(
 
 
 def _convert_arviz_dict_to_pyjags_dict(
-    samples: tp.Mapping[str, np.ndarray]
+    samples: tp.Mapping[str, np.ndarray],
 ) -> tp.Mapping[str, np.ndarray]:
     """
     Convert and ArviZ dictionary to a PyJAGS dictionary.
