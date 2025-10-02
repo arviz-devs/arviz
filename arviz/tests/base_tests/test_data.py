@@ -1652,3 +1652,19 @@ class TestExtractDataset:
         post = extract(idata, num_samples=10)
         assert post.sizes["sample"] == 10
         assert post.attrs == idata.posterior.attrs
+
+
+def test_convert_to_inference_data_with_array_like():
+    class ArrayLike:
+        def __init__(self, data):
+            self._data = np.asarray(data)
+
+        def __array__(self):
+            return self._data
+
+    array_like = ArrayLike(np.random.randn(4, 100))
+    idata = convert_to_inference_data(array_like, group="posterior")
+
+    assert hasattr(idata, "posterior")
+    assert "x" in idata.posterior.data_vars
+    assert idata.posterior["x"].shape == (4, 100)
