@@ -2,6 +2,7 @@
 
 import numpy as np
 import xarray as xr
+import pandas as pd
 
 try:
     from tree import is_nested
@@ -44,6 +45,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             | dict: creates an xarray dataset as the only group
             | numpy array: creates an xarray dataset as the only group, gives the
                          array an arbitrary name
+            | object with __array__: converts to numpy array, then creates an xarray dataset as
+                         the only group, gives the array an arbitrary name
     group : str
         If `obj` is a dict or numpy array, assigns the resulting xarray
         dataset to this group. Default: "posterior".
@@ -115,6 +118,13 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
         dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
+    elif (
+        hasattr(obj, "__array__")
+        and callable(getattr(obj, "__array__"))
+        and (not isinstance(obj, pd.DataFrame))
+    ):
+        obj = obj.__array__()
+        dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
     elif isinstance(obj, (list, tuple)) and isinstance(obj[0], str) and obj[0].endswith(".csv"):
         if group == "sample_stats":
             kwargs["posterior"] = kwargs.pop(group)
@@ -129,6 +139,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             "pytree (if 'dm-tree' is installed)",
             "netcdf filename",
             "numpy array",
+            "object with __array__",
             "pystan fit",
             "emcee fit",
             "pyro mcmc fit",
