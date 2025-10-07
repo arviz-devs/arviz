@@ -28,13 +28,14 @@ def warn_once_per_day():
 
     if last_date != today:
         warnings.warn(
-        "\nWe are working on refactoring ArviZ to allow more flexibility and extensibility "
-        "while keeping a friendly user-interface. " 
-        "\nYou can already try it out. "
-        "Please check https://python.arviz.org/en/stable/user_guide/migration_guide.html for more information.",
-        FutureWarning,
+            "\nArviZ is undergoing a major refactor to improve flexibility and extensibility "
+            "while maintaining a user-friendly interface."
+            "\nSome upcoming changes may be backward incompatible."
+            "\nFor details and migration guidance, visit: "
+            "https://python.arviz.org/en/stable/user_guide/migration_guide.html",
+            FutureWarning,
         )
-        
+
         stamp_file.write_text(today.isoformat())
 
 warn_once_per_day()
