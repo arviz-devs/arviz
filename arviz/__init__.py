@@ -4,11 +4,40 @@ __version__ = "0.23.0.dev0"
 
 import logging
 import os
+import warnings
+import datetime
+from pathlib import Path
 
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.pyplot import style
 import matplotlib as mpl
 from packaging import version
+
+
+def warn_once_per_day():
+    warning_dir = Path.home() / "arviz_data"
+    warning_dir.mkdir(exist_ok=True)
+
+    stamp_file = warning_dir / f"daily_warning"
+    today = datetime.date.today()
+
+    if stamp_file.exists():
+        last_date = datetime.date.fromisoformat(stamp_file.read_text().strip())
+    else:
+        last_date = None
+
+    if last_date != today:
+        warnings.warn(
+        "\nWe are working on refactoring ArviZ to allow more flexibility and extensibility "
+        "while keeping a friendly user-interface. " 
+        "\nYou can already try it out. "
+        "Please check https://python.arviz.org/en/stable/user_guide/migration_guide.html for more information.",
+        FutureWarning,
+        )
+        
+        stamp_file.write_text(today.isoformat())
+
+warn_once_per_day()
 
 
 class Logger(logging.Logger):
