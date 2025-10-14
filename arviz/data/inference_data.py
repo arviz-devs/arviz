@@ -870,10 +870,11 @@ class InferenceData(Mapping[str, xr.Dataset]):
             raise ImportError(
                 "Found zarr<2.5.0, please upgrade to a zarr (>=2.5.0,<3) to use 'from_zarr'"
             )
-        if version.parse(zarr.__version__) >= version.parse("3.0.0.dev0"):
+        if version.parse(zarr.__version__) >= version.parse("3.0.0"):
             raise ImportError(
-                "Found zarr>=3, which is not supported by ArviZ. Instead, you can use "
-                "'xarray.open_datatree' followed by 'arviz.InferenceData.from_datatree' "
+                "Found zarr>=3, which is not supported by ArviZ. "
+                "As a workaround, you can use: "
+                "'dt = InfereceData.to_datatree' followed by 'dt.to_zarr()' "
                 "(needs xarray>=2024.11.0)"
             )
 
