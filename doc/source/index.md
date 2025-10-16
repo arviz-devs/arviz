@@ -235,13 +235,10 @@ We thank these institutions for generously supporting the development and mainte
 
 ::::{grid} 1 3 3 3
 :::{grid-item}
-[![helsinki_uni_logo](_static/sponsor_university_helsinki.png)](https://www.helsinki.fi/en)
+[![aalto_uni_logo](_static/Aalto-black-text.png)](https://www.aalto.fi/en)
 :::
 :::{grid-item}
 [![fcai_logo](_static/sponsor_fcai.png)](https://fcai.fi/)
-:::
-:::{grid-item}
-[![czi_logo](_static/sponsor_czi.png)](https://chanzuckerberg.com/)
 :::
 ::::
 
