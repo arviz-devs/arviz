@@ -12,11 +12,11 @@ from pathlib import Path
 from typing import Any, Dict
 from typing_extensions import Literal
 
-NO_GET_ARGS: bool = False
+NO_GET_ARGS: bool = False  # pylint: disable=invalid-name
 try:
     from typing_extensions import get_args
 except ImportError:
-    NO_GET_ARGS = True
+    NO_GET_ARGS = True  # pylint: disable=invalid-name
 
 
 import numpy as np
