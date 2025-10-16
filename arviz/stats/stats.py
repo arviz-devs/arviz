@@ -14,11 +14,11 @@ import xarray as xr
 from scipy.optimize import minimize
 from typing_extensions import Literal
 
-NO_GET_ARGS: bool = False
+NO_GET_ARGS: bool = False  # pylint: disable=invalid-name
 try:
     from typing_extensions import get_args
 except ImportError:
-    NO_GET_ARGS = True
+    NO_GET_ARGS = True  # pylint: disable=invalid-name
 
 from .. import _log
 from ..data import InferenceData, convert_to_dataset, convert_to_inference_data, extract

@@ -13,9 +13,9 @@ from ...stats.ecdf_utils import (
 try:
     import numba  # pylint: disable=unused-import
 
-    numba_options = [True, False]
+    numba_options = [True, False]  # pylint: disable=invalid-name
 except ImportError:
-    numba_options = [False]
+    numba_options = [False]  # pylint: disable=invalid-name
 
 
 def test_compute_ecdf():
