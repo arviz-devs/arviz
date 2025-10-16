@@ -2178,6 +2178,7 @@ def test_plot_autocorr_coords(coords, expected_vars):
     axes = plot_autocorr(idata, var_names=expected_vars, coords=coords, show=False)
     assert axes is not None
 
+
 def test_plot_forest_with_transform():
     """Test if plot_forest runs successfully with a transform dictionary."""
     data = xr.Dataset(
