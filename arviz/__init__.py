@@ -18,7 +18,7 @@ def warn_once_per_day():
     warning_dir = Path.home() / "arviz_data"
     warning_dir.mkdir(exist_ok=True)
 
-    stamp_file = warning_dir / f"daily_warning"
+    stamp_file = warning_dir / "daily_warning"
     today = datetime.date.today()
 
     if stamp_file.exists():
