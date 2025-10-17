@@ -227,16 +227,11 @@ def compare(
         exp_ic_i = np.exp(ic_i_val / scale_value)
 
         def log_score(weights):
-            score = 0.0
-            for i in range(rows):
-                score += np.log(np.dot(exp_ic_i[i], weights))
-            return -score
+            return -np.sum(np.log(exp_ic_i @ weights))
 
         def gradient(weights):
-            grad = np.zeros(cols)
-            for k, i in itertools.product(range(cols), range(rows)):
-                grad[k] += exp_ic_i[i, k] / np.dot(exp_ic_i[i], weights)
-            return -grad
+            denominator = exp_ic_i @ weights
+            return -np.sum(exp_ic_i / denominator[:, np.newaxis], axis=0)
 
         theta = np.full(cols, 1.0 / cols)
         bounds = Bounds(lb=np.zeros(cols), ub=np.ones(cols))
