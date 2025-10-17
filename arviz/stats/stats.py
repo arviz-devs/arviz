@@ -11,7 +11,7 @@ import pandas as pd
 import scipy.stats as st
 from xarray_einstats import stats
 import xarray as xr
-from scipy.optimize import minimize
+from scipy.optimize import minimize, LinearConstraint, Bounds
 from typing_extensions import Literal
 
 NO_GET_ARGS: bool = False  # pylint: disable=invalid-name
@@ -225,37 +225,28 @@ def compare(
     if method.lower() == "stacking":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         exp_ic_i = np.exp(ic_i_val / scale_value)
-        km1 = cols - 1
-
-        def w_fuller(weights):
-            return np.concatenate((weights, [max(1.0 - np.sum(weights), 0.0)]))
 
         def log_score(weights):
-            w_full = w_fuller(weights)
             score = 0.0
             for i in range(rows):
-                score += np.log(np.dot(exp_ic_i[i], w_full))
+                score += np.log(np.dot(exp_ic_i[i], weights))
             return -score
 
         def gradient(weights):
-            w_full = w_fuller(weights)
-            grad = np.zeros(km1)
-            for k, i in itertools.product(range(km1), range(rows)):
-                grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, km1]) / np.dot(exp_ic_i[i], w_full)
+            grad = np.zeros(cols)
+            for k, i in itertools.product(range(cols), range(rows)):
+                grad[k] += exp_ic_i[i, k] / np.dot(exp_ic_i[i], weights)
             return -grad
 
-        theta = np.full(km1, 1.0 / cols)
-        bounds = [(0.0, 1.0) for _ in range(km1)]
-        constraints = [
-            {"type": "ineq", "fun": lambda x: -np.sum(x) + 1.0},
-            {"type": "ineq", "fun": np.sum},
-        ]
+        theta = np.full(cols, 1.0 / cols)
+        bounds = Bounds(lb=np.zeros(cols), ub=np.ones(cols))
+        constraints = LinearConstraint(np.ones(cols), lb=1.0, ub=1.0)
 
         minimize_result = minimize(
             fun=log_score, x0=theta, jac=gradient, bounds=bounds, constraints=constraints
         )
 
-        weights = w_fuller(minimize_result["x"])
+        weights = minimize_result["x"]
         ses = ics["se"]
 
     elif method.lower() == "bb-pseudo-bma":
