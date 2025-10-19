@@ -1,7 +1,6 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
 
-import itertools
 import warnings
 from copy import deepcopy
 from typing import List, Optional, Tuple, Union, Mapping, cast, Callable
