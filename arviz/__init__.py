@@ -14,7 +14,7 @@ import matplotlib as mpl
 from packaging import version
 
 
-def warn_once_per_day():
+def _warn_once_per_day():
     warning_dir = Path.home() / "arviz_data"
     warning_dir.mkdir(exist_ok=True)
 
@@ -32,13 +32,14 @@ def warn_once_per_day():
             "while maintaining a user-friendly interface."
             "\nSome upcoming changes may be backward incompatible."
             "\nFor details and migration guidance, visit: "
-            "https://python.arviz.org/en/stable/user_guide/migration_guide.html",
+            "https://python.arviz.org/en/latest/user_guide/migration_guide.html",
             FutureWarning,
         )
 
         stamp_file.write_text(today.isoformat())
 
-warn_once_per_day()
+
+_warn_once_per_day()
 
 
 class Logger(logging.Logger):
