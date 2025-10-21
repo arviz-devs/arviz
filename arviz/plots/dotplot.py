@@ -1,5 +1,5 @@
 """Plot distribution as dot plot or quantile dot plot."""
-import warnings
+
 import numpy as np
 
 
@@ -149,6 +149,7 @@ def plot_dot(
         raise ValueError("marker argument is valid only for matplotlib backend")
 
     values = np.ravel(values)
+    values = values[np.isfinite(values)]
     values.sort()
 
     if hdi_prob is None:
@@ -194,11 +195,6 @@ def plot_dot(
     backend = backend.lower()
 
     plot = get_plotting_function("plot_dot", "dotplot", backend)
-    # Check for NaN values in the values array
-    if np.any(np.isnan(values)):
-        values = values[~np.isnan(values)]
-        dot_plot_args["values"] = values
-        warnings.warn("NaN values detected. Only graphing non NaN values")
     ax = plot(**dot_plot_args)
 
     return ax
