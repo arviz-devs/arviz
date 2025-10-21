@@ -251,7 +251,7 @@ def plot_bpv(
     total_pp_samples = predictive_dataset.sizes["chain"] * predictive_dataset.sizes["draw"]
 
     for key in coords.keys():
-        coords[key] = np.where(np.in1d(observed[key], coords[key]))[0]
+        coords[key] = np.where(np.isin(observed[key], coords[key]))[0]
 
     obs_plotters = filter_plotters_list(
         list(

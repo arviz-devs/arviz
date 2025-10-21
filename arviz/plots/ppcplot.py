@@ -304,7 +304,7 @@ def plot_ppc(
     pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples, replace=False)
 
     for key in coords.keys():
-        coords[key] = np.where(np.in1d(observed_data[key], coords[key]))[0]
+        coords[key] = np.where(np.isin(observed_data[key], coords[key]))[0]
 
     obs_plotters = filter_plotters_list(
         list(
