@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
 
@@ -148,6 +149,7 @@ def plot_dot(
         raise ValueError("marker argument is valid only for matplotlib backend")
 
     values = np.ravel(values)
+    values = values[np.isfinite(values)]
     values.sort()
 
     if hdi_prob is None:
