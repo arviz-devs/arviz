@@ -2,8 +2,3 @@ include *.md
 include *.txt
 include *.toml
 include LICENSE
-include arviz/py.typed
-
-recursive-include arviz *.mplstyle
-recursive-include arviz/static *
-recursive-include arviz/data/example_data *.nc *.json

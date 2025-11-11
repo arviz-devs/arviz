@@ -1,6 +1,0 @@
-# Computation
-
-```{toctree}
-Numba
-Dask
-```
