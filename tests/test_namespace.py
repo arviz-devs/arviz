@@ -1,5 +1,7 @@
 import re
+
 import arviz as az
+
 
 def test_info_attr():
     info_message = az.info
@@ -18,8 +20,6 @@ def test_aliases():
             elif hasattr(obj, "__package__"):
                 orig_lib = obj.__package__
             else:
-                print(obj_name)
-                print(obj)
-                assert False
+                assert False, obj_name
             assert orig_lib.startswith("arviz"), obj_name
             assert orig_lib != "arviz", obj_name

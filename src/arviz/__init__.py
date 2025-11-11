@@ -1,15 +1,15 @@
 # pylint: disable=unused-import,unused-wildcard-import,wildcard-import,invalid-name
 """Expose features from _ArviZverse_ refactored packages together in the ``arviz`` namespace."""
-import logging
 
+import logging
 
 _log = logging.getLogger(__name__)
 
 info = ""
 
 try:
-    from arviz_base import *
     import arviz_base as base
+    from arviz_base import *
 
     _status = (
         f"arviz_base {base.__version__} available, "
@@ -26,11 +26,11 @@ except ImportError:
 info += _status + "\n"
 
 try:
-    from arviz_stats import *
     import arviz_stats as stats
+    from arviz_stats import *
 
     _status = (
-        f"arviz_stats {getattr(stats, "__version__", "0.0")} available, "
+        f"arviz_stats {getattr(stats, '__version__', '0.0')} available, "
         "exposing its functions as part of the `arviz` namespace"
     )
     _log.info(_status)
@@ -43,8 +43,8 @@ except ImportError:
 info += _status + "\n"
 
 try:
-    from arviz_plots import *
     import arviz_plots as plots
+    from arviz_plots import *
 
     _status = (
         f"arviz_plots {plots.__version__} available, "

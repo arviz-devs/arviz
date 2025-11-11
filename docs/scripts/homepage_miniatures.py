@@ -3,18 +3,31 @@
 Due to the html structure of the page, the 6 figures below should aim for a 2/1 ratio.
 Their width should be roughtly twice their height.
 """
+
 from pathlib import Path
-import arviz as az
-from cycler import cycler
+
 import matplotlib.pyplot as plt
 import numpy as np
+from cycler import cycler
 
+import arviz as az
 
 az.rcParams["plot.backend"] = "matplotlib"
 az.style.use("arviz-variat")
 # modiry color cycle to match doc website colorscheme
 plt.rcParams["axes.prop_cycle"] = cycler(
-    color=['#107591','#00c0bf','#f69a48','#fdcd49','#8da798','#a19368','#525252','#a6761d','#7035b7','#cf166e']
+    color=[
+        "#107591",
+        "#00c0bf",
+        "#f69a48",
+        "#fdcd49",
+        "#8da798",
+        "#a19368",
+        "#525252",
+        "#a6761d",
+        "#7035b7",
+        "#cf166e",
+    ]
 )
 
 doc_source_dir = Path(__file__).parent.parent / "source" / "_miniatures"
@@ -24,7 +37,9 @@ idata = az.load_arviz_data("non_centered_eight")
 idata_centered = az.load_arviz_data("centered_eight")
 
 # 1 - plot rank dist
-pc = az.plot_rank_dist(idata, var_names=["tau", "mu"], compact=False, figure_kwargs={"figsize": (10, 5)})
+pc = az.plot_rank_dist(
+    idata, var_names=["tau", "mu"], compact=False, figure_kwargs={"figsize": (10, 5)}
+)
 pc.savefig(doc_source_dir / "plot_rank_dist.png")
 
 # 2 - plot forest with ESS
@@ -62,7 +77,7 @@ pc.savefig(doc_source_dir / "plot_dist_models.png")
 pc = az.plot_pair(
     idata_centered,
     var_names=["theta", "tau"],
-    coords= {"school": ["Choate", "Deerfield"]},
+    coords={"school": ["Choate", "Deerfield"]},
     visuals={"divergence": {"color": "C3"}},
     figure_kwargs={"figsize": (15, 7)},
 )
@@ -93,8 +108,18 @@ pc = az.plot_dist(
     visuals={"dist": False},
     figure_kwargs={"figsize": (13, 6)},
 )
-alloff = {"credible_interval": False, "point_estimate": False, "point_estimate_text": False, "title": False}
-az.plot_dist(ds[["Poisson"]], kind="hist", visuals={"dist": False, "face": True, **alloff}, plot_collection=pc)
+alloff = {
+    "credible_interval": False,
+    "point_estimate": False,
+    "point_estimate_text": False,
+    "title": False,
+}
+az.plot_dist(
+    ds[["Poisson"]],
+    kind="hist",
+    visuals={"dist": False, "face": True, **alloff},
+    plot_collection=pc,
+)
 az.plot_dist(ds[["Gaussian"]], kind="kde", visuals={"dist": True, **alloff}, plot_collection=pc)
 pc.add_legend("__variable__")
 pc.savefig(doc_source_dir / "plot_dist_hist_kde.png")

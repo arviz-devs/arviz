@@ -63,7 +63,7 @@ doc = [
     "sphinxcontrib-youtube",
 ]
 test = ["pytest"]
-check = ["pre-commit"]
+check = ["build", "pre-commit"]
 
 [tool.ruff]
 line-length = 100
@@ -80,6 +80,12 @@ select = [
     "PL",  # Pylint
     "TID",  # Absolute imports
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"src/arviz/__init__.py*" = ["I", "F401", "E402", "F403"]
+"docs/source/**/*.ipynb" = ["D", "E", "F", "I", "NPY", "PL", "TID", "UP", "W"]
+"docs/source/conf.py" = ["D"]
+"tests/**/*" = ["D", "PLR2004", "TID252"]
 
 [tool.pytest.ini_options]
 filterwarnings = ["error"]

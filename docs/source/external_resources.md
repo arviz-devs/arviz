@@ -48,4 +48,3 @@ Oriol Abril Pla is an ArviZ core contributor pursuing his PhD
 at Helsinki University.
 ::::
 :::::
-

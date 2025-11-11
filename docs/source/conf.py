@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # ArviZ documentation build configuration file, created by
 # sphinx-quickstart on Wed Apr 11 18:33:59 2018.
@@ -66,7 +65,6 @@ numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates"]
-#
 
 # MyST related params
 nb_execution_mode = "auto"
@@ -93,14 +91,9 @@ author = "ArviZ devs"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 version = arviz.__version__
-if os.environ.get("READTHEDOCS", False):
-    rtd_version = os.environ.get("READTHEDOCS_VERSION", "")
-    if "." not in rtd_version and rtd_version.lower() != "stable":
-        version = "dev"
-else:
-    branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
-    if branch_name == "main":
-        version = "dev"
+rtd_version = os.environ.get("READTHEDOCS_VERSION", "")
+if rtd_version.lower() == "latest":
+    version = "dev"
 
 # The full version, including alpha/beta/rc tags.
 release = version
