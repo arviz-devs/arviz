@@ -23,3 +23,21 @@ def test_aliases():
                 assert False, obj_name
             assert orig_lib.startswith("arviz"), obj_name
             assert orig_lib != "arviz", obj_name
+
+
+def test_base_alias():
+    import arviz_base
+
+    assert az.base is arviz_base
+
+
+def test_stats_alias():
+    import arviz_stats
+
+    assert az.stats is arviz_stats
+
+
+def test_plots_alias():
+    import arviz_plots
+
+    assert az.plots is arviz_plots

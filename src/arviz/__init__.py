@@ -8,8 +8,8 @@ _log = logging.getLogger(__name__)
 info = ""
 
 try:
-    import arviz_base as base
     from arviz_base import *
+    import arviz_base as base
 
     _status = (
         f"arviz_base {base.__version__} available, "
@@ -26,8 +26,12 @@ except ImportError:
 info += _status + "\n"
 
 try:
-    import arviz_stats as stats
     from arviz_stats import *
+
+    # the base computational module fron arviz_stats will override the alias to arviz-base
+    # arviz.stats.base will still be available
+    import arviz_base as base
+    import arviz_stats as stats
 
     _status = (
         f"arviz_stats {getattr(stats, '__version__', '0.0')} available, "
@@ -43,8 +47,8 @@ except ImportError:
 info += _status + "\n"
 
 try:
-    import arviz_plots as plots
     from arviz_plots import *
+    import arviz_plots as plots
 
     _status = (
         f"arviz_plots {plots.__version__} available, "
