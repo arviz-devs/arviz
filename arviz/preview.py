@@ -55,4 +55,4 @@ except ImportError:
 info += _status + "\n"
 
 # clean namespace
-del logging, _status
+del logging, _status, _log

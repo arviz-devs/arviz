@@ -5,9 +5,6 @@ __version__ = "0.23.0"
 import logging
 import os
 import re
-import warnings
-import datetime
-from pathlib import Path
 
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.pyplot import style
@@ -22,6 +19,10 @@ def _warn_once_per_day():
     pat = re.compile(r"arviz_(base|stats|plots) available")
     if len(pat.findall(info)) == 3:
         return
+
+    import warnings
+    import datetime
+    from pathlib import Path
 
     warning_dir = Path.home() / "arviz_data"
     warning_dir.mkdir(exist_ok=True)
@@ -372,4 +373,4 @@ except ModuleNotFoundError:
 
 
 # clean namespace
-del os, logging, LinearSegmentedColormap, Logger, mpl
+del os, re, logging, version, LinearSegmentedColormap, Logger, mpl
