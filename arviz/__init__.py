@@ -20,8 +20,8 @@ def _warn_once_per_day():
     if len(pat.findall(info)) == 3:
         return
 
-    import warnings
     import datetime
+    from warnings import warn
     from pathlib import Path
 
     warning_dir = Path.home() / "arviz_data"
@@ -36,7 +36,7 @@ def _warn_once_per_day():
         last_date = None
 
     if last_date != today:
-        warnings.warn(
+        warn(
             "\nArviZ is undergoing a major refactor to improve flexibility and extensibility "
             "while maintaining a user-friendly interface."
             "\nSome upcoming changes may be backward incompatible."
