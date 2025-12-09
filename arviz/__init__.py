@@ -1,9 +1,10 @@
 # pylint: disable=wildcard-import,invalid-name,wrong-import-position
 """ArviZ is a library for exploratory analysis of Bayesian models."""
-__version__ = "0.23.0.dev0"
+__version__ = "0.23.0"
 
 import logging
 import os
+import re
 import warnings
 import datetime
 from pathlib import Path
@@ -15,6 +16,13 @@ from packaging import version
 
 
 def _warn_once_per_day():
+    from .preview import info
+
+    # skip warning if all 3 arviz subpackages are already installed
+    pat = re.compile(r"arviz_(base|stats|plots) available")
+    if len(pat.findall(info)) == 3:
+        return
+
     warning_dir = Path.home() / "arviz_data"
     warning_dir.mkdir(exist_ok=True)
 
