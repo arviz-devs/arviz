@@ -161,7 +161,7 @@ release = version
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ["_build", "build", "Thumbs.db", ".DS_Store", "notebooks/.ipynb_checkpoints"]
 # configure notfound extension to not add any prefix to the urls
-notfound_urls_prefix = "/en/latest/"
+notfound_urls_prefix = "/en/stable/"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -220,7 +220,7 @@ html_context = {
     "doc_path": "doc/source/",
     "default_mode": "light",
 }
-html_sidebars: Dict[str, Any] = {"index": []}
+html_sidebars: Dict[str, Any] = {"index": [], "404": [], "community": []}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -228,11 +228,6 @@ html_sidebars: Dict[str, Any] = {"index": []}
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
-
-# use additional pages to add a 404 page
-html_additional_pages = {
-    "404": "404.html",
-}
 
 # -- Options for HTMLHelp output ------------------------------------------
 

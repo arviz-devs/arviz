@@ -1,18 +1,12 @@
 # Change Log
 
-## v0.x.x Unreleased
-
-### New features
+## v0.23.0 (2025 Des 9)
 
 ### Maintenance and fixes
 - Fix numpyro jax incompatibility. ([2465](https://github.com/arviz-devs/arviz/pull/2465))
 - Avoid closing unloaded files in `from_netcdf()` ([2463](https://github.com/arviz-devs/arviz/issues/2463))
 - Fix sign error in lp parsed in from_numpyro ([2468](https://github.com/arviz-devs/arviz/issues/2468))
 - Fix attrs persistance in idata-datatree conversions ([2476](https://github.com/arviz-devs/arviz/issues/2476))
-
-### Deprecation
-
-### Documentation
 
 ## v0.22.0 (2025 Jul 9)
 
