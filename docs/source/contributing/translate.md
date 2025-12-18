@@ -22,10 +22,11 @@ after you provide a translation on Transifex.
 * Project website [www.arviz.org](https://www.arviz.org/en/latest/)
   - [Catalan translation](https://www.arviz.org/ca/latest/)
   - [Spanish translation](https://www.arviz.org/es/latest/)
-  - _more translations coming?_
-* Python documentation: _coming soon_
+  - _more translations coming?_ If you are interested in the ArviZ project website hosting another
+    language please open an issue at [arviz-project](https://github.com/arviz-devs/arviz-project/issues)
+* Python documentation: _coming if time and resources allow it_
 
 ## Manage translations
 If you would like to be involved further with the translation process,
 adding new languages, reviewing translations suggested by other people...
-reach out on [Gitter](https://gitter.im/arviz-devs/community).
+reach out via issue on [arviz-project](https://github.com/arviz-devs/arviz-project/issues).

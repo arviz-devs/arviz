@@ -16,8 +16,10 @@ and maximize the probability of such contributions being merged as quickly and a
 
 All kinds of contributions to ArviZ, either on its codebase, its documentation,
 or its community are valuable and we appreciate your help.
-We constantly encourage non-code contributors to become core contributors
+We constantly encourage contributors (not only those contributing code) to become core contributors
 and participate in {ref}`ArviZ governance <arviz_org:governance>`.
+This [repository](https://github.com/arviz-devs/arviz-project/issues?q=is%3Aissue%20label%3Agovernance)
+has a historical log of contributor nominations.
 
 ## Before you begin
 Before contributing to ArviZ, please make sure to read and observe the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/main/CODE_OF_CONDUCT.md).
@@ -26,13 +28,14 @@ Before contributing to ArviZ, please make sure to read and observe the [Code of 
 Contact us on [Gitter](https://gitter.im/arviz-devs/community)
 if you want to contribute to the project but you are not sure where you can contribute or how to start.
 
-## Contributing to ArviZ
+## Choosing a contribution type
 Historically, the most common way of contributing to the project is
 sending pull requests on the main [ArviZ Github repository](https://github.com/arviz-devs/arviz),
 but there are many other ways to help the project.
 
-Each subsection within this section gives an overview of common contribution types
-to ArviZ. If you prefer video instead of written form, jump to the next section:
+This section provides an overview of common contribution types to ArviZ along with reasons why
+different contributors choose them and how that benefits both them and the project.
+If you prefer video instead of written form, jump to the next section:
 {ref}`contributing_webinar` for a recording of an ArviZ core contributor
 on both technical and social aspects of contributing to the library.
 
@@ -41,17 +44,52 @@ You can contribute to ArviZ in the following ways:
 ### Create an issue
 [Submit issues](https://github.com/arviz-devs/arviz/issues/new/choose) for existing bugs or desired enhancements. Check  {ref}`issue_reports` for details on how to write an issue.
 
+By submitting an issue, you alert the ArviZ team about problems you are facing.
+One of the main tenets of open source is giving the users the freedom to use the software
+as they like, without restrictions.
+This means that open source projects always end up having uses the developers couldn't have imagined.
+Issue reports can therefore let the team know about uses of ArviZ we hadn't initially considered and
+also for things that were already taken into account signal how much use the different parts
+of the codebase are getting, informing prioritization of work.
+
+Issue reports also serve as a register of tasks to work on for people interested in contributing
+to ArviZ who know they want to contribute code but don't know where to start.
+
+### Issue triaging
+Helping to manage or triage the open issues can be a great contribution and
+a great opportunity to learn about the various areas of the project.
+You can {ref}`triage existing issues <issue_triaging>` to make them clear and/or provide temporary workarounds for them.
+
+Issue triaging brings submitting issues to the next level. Issues by themselves are hard to keep
+track of, and sometimes they even increase faster than we can fix them. All while some of these end
+up outdated but are still kept open because we don't have the capacity to check all of them
+regularly.
+For work on an issue to actually happen the issue needs to be clear and easily reproduceable.
+Going over issues and trying to reproduce them is a great way to become more familiar with the library.
+
+In addition, categorizing the issues also makes the issue list much easier to work with, both for developers and new contributors.
+We can indicate issues that can't be worked on yet because more discussion is needed,
+issues that can be a good first code related contribution, or issues that can't be reproduced.
+
 ### Translate ArviZ website
 You can {ref}`translate <translate>` our website to languages other than English.
+
+Being able to contribute and interact with project resources in one's native language
+reduces the barriers to participation and helps feel a sense of belonging on that community.
+Moreover, people reading in their native language are faster and less prone to errors.
 
 ### Review PRs
 {ref}`Review pull requests <review_prs>` to ensure that the contributions are well tested and documented.
 For example, you can check if the documentation renders correctly and has no typos or mistakes.
 
-### Manage issues
-Helping to manage or triage the open issues can be a great contribution and
-a great opportunity to learn about the various areas of the project.
-You can {ref}`triage existing issues <issue_triaging>` to make them clear and/or provide temporary workarounds for them.
+We believe reviewing PRs is one of the best ways to learn about the codebase in depth.
+Core contributors are also expected to review the work of the rest of contributors,
+so it can also be a way to get a head start on joining the team and preparing for the core contributor role.
+
+Moreover, developer time is usually one of the most scarce assets of a project.
+Especially for PRs submitted by newish contributors, having a first review pass by a recurrent
+contributor or even an experienced user who tests their changes can be extremely helpful;
+they get feedback faster and more extensive.
 
 ### Write documentation
 You can contribute to ArviZ’s documentation by either creating new content or editing existing content.
@@ -81,7 +119,13 @@ To fix bugs or add new features, do the following:
 :::{youtube} 457ZTes4xOI
 :::
 
-```{toctree}
+:::{toctree}
+:hidden:
+
+self
+:::
+
+:::{toctree}
 :hidden:
 :caption: Contribution types
 
@@ -91,7 +135,7 @@ issue_triaging
 outreach
 review_prs
 contributing_prs
-```
+:::
 
 :::{toctree}
 :hidden:
