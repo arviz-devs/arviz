@@ -169,7 +169,7 @@ html_context = {
     "doc_path": "doc/source/",
     "default_mode": "light",
 }
-html_sidebars: Dict[str, Any] = {"index": [], "404": [], "community": []}
+html_sidebars: dict[str, Any] = {"index": [], "404": [], "community": []}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
