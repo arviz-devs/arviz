@@ -1,0 +1,4 @@
+contact_links:
+  - name: Community Support
+    url: https://github.com/arviz-devs/arviz/discussions
+    about: The place for the ArviZ community to talk about usage questions.

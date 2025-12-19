@@ -1,0 +1,25 @@
+name: Feature Request
+description: Suggest an idea for this project.
+labels: ["Discussion", "Feature Request"]
+body:
+  - type: textarea
+    attributes:
+      label: Tell us about your idea
+      description: The more specific you can be the better.
+      placeholder: The next feature to be added to ArviZ
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Thoughts on implementation
+      description: Let us know any thoughts regarding implementation details you might have
+      placeholder: |
+        When considering an implementation, keep in mind that
+          - models in ArviZ can have one, or lots, of random variables,
+          - each random variable can have very few or millions of draws,
+          - each random variable can have 0 or many dimensions.
+  - type: textarea
+    attributes:
+      label: References
+      description: References to published papers related to the feature
+      placeholder: Title, Authors, DOI
