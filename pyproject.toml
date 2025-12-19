@@ -1,15 +1,92 @@
-[tool.black]
-line-length = 100
-extend_exclude = 'example_data'
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 100
-skip = [
-    "arviz/plots/backends/bokeh/__init__.py",
-    "arviz/plots/backends/matplotlib/__init__.py", 
-    "arviz/__init__.py"
+[project]
+name = "arviz"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {file = "LICENSE"}
+authors = [
+    {name = "ArviZ team", email = "arvizdevs@gmail.com"}
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dynamic = ["version", "description"]
+dependencies = [
+  "arviz_base >=0.7.0",
+  "arviz_stats[xarray] >=0.7.0",
+  "arviz_plots >=0.7.0",
+]
+
+[tool.flit.module]
+name = "arviz"
+
+[project.urls]
+source = "https://github.com/arviz-devs/arviz"
+tracker = "https://github.com/arviz-devs/arviz/issues"
+documentation = "https://python.arviz.org"
+funding = "https://opencollective.com/arviz"
+
+[project.optional-dependencies]
+# user facing optional blocks
+netcdf4 = ["arviz_base[netcdf4]"]
+h5netcdf = ["arviz_base[h5netcdf]"]
+zarr = ["arviz_base[zarr]"]
+matplotlib = ["arviz_plots[matplotlib]"]
+bokeh = ["arviz_plots[bokeh]"]
+plotly = ["arviz_plots[plotly]"]
+
+# dev related blocks
+doc = [
+    "h5netcdf",
+    "jupyter-sphinx",
+    "matplotlib",
+    "myst-parser[linkify]",
+    "myst-nb",
+    "pydata-sphinx-theme>=0.13",
+    "sphinx>=5",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-notfound-page",
+    "sphinxcontrib-youtube",
+]
+test = ["pytest"]
+check = ["build", "pre-commit"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "F",  # Pyflakes
+    "E",  # Pycodestyle
+    "W",  # Pycodestyle
+    "D",  # pydocstyle
+    "NPY", # numpy specific rules
+    "UP",  # pyupgrade
+    "I",  # isort
+    "PL",  # Pylint
+    "TID",  # Absolute imports
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/arviz/__init__.py*" = ["I", "F401", "E402", "F403"]
+"docs/source/**/*.ipynb" = ["D", "E", "F", "I", "NPY", "PL", "TID", "UP", "W"]
+"docs/source/conf.py" = ["D"]
+"tests/**/*" = ["D", "PLR2004", "TID252"]
+
+[tool.pytest.ini_options]
+filterwarnings = ["error"]
+testpaths = ["tests"]

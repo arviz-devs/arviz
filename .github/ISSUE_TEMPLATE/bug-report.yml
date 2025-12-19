@@ -1,0 +1,24 @@
+name: Bug Report
+description: Create a report to help us improve
+labels: ["Bug"]
+body:
+- type: textarea
+  attributes:
+    label: Describe the bug
+    description: A clear and concise description of what the bug is.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Expected behaviour
+    description: A clear and concise description of what you expected to happen.
+- type: textarea
+  attributes:
+    label: Steps to reproduce
+    description: |
+      Steps to reproduce the behavior. Ideally a self-contained snippet of code, or link to a notebook or external code. Please include screenshots/images produced with ArviZ here, or the stacktrace including `arviz` code to help.
+- type: textarea
+  attributes:
+    label: Additional context
+    description: |
+      Versions of `arviz`, `arviz-base`, `arviz-stats`, `arviz-plots`, and other libraries used, operating system used, and anything else that may be useful.

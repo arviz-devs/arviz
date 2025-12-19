@@ -3,16 +3,19 @@
 version: 2
 
 build:
-  os: ubuntu-22.04
+  os: ubuntu-lts-latest
   tools:
-    python: "3.11"
+    python: "3.12"
+  jobs:
+    pre_build:
+      - python docs/scripts/homepage_miniatures.py
 
 sphinx:
-  configuration: doc/source/conf.py
+  configuration: docs/source/conf.py
 
 python:
    install:
-   - requirements: requirements.txt
-   - requirements: requirements-docs.txt
    - method: pip
      path: .
+     extra_requirements:
+       - doc

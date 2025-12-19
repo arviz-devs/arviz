@@ -1,6 +1,0 @@
-torch
-emcee
-pystan
-cmdstanpy
-pyro-ppl>=1.0.0
-numpyro>=0.2.1

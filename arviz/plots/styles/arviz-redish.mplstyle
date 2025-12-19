@@ -1,1 +1,0 @@
-axes.prop_cycle: cycler('color', ['bf0700ff', 'bf0700aa', 'bf070066', 'bf070033', '000000'])
