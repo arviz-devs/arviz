@@ -36,7 +36,7 @@ h3:not(#hero h3) {
   <h3 style="font-weight: bold; margin-top: 0;">Exploratory analysis of Bayesian models</h3>
   <p>ArviZ is a modular and flexible Python library implementing methods grounded in well-established statistical principles and providing robust, interpretable diagnostics and visualizations for Bayesian workflow.</p>
 
-ArviZ: 
+ArviZ:
 
 <div class="homepage-button-container">
   <div class="homepage-button-container-row">
