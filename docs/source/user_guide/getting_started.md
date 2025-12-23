@@ -12,7 +12,7 @@ kernelspec:
 (getting_started)=
 # Getting started
 
-## Have you already used <1.0 ArviZ versions?
+## Have you used ArviZ versions earlier than 1.0?
 
 We recommend reading the {ref}`migration_guide` instead.
 
@@ -23,23 +23,26 @@ We recommend reading the {ref}`migration_guide` instead.
 pip install "arviz[<I/O>, <plotting>]"
 ```
 
-ArviZ is a meta library that pulls together smaller components.
-Depending on the libraries you have installed the plotting or I/O functionality
-might not be available so we recommend indicating which ones you want to use
-whenever you install ArviZ. The options are:
+ArviZ brings together several smaller components into one library. Some features, like plotting or reading and writing files, may not be included by default, depending on what you have installed. To make sure you get the features you need, we recommend choosing them when you install ArviZ. You can select from the following options:
 
 * I/O: `zarr`, `netcdf4` and `h5netcdf`
 * Plotting: `matplotlib`, `bokeh` and `plotly`
 
-Some example install commands for ArviZ:
+
+For example, if you want to install Zarr and Matplotlib
+
 
 ```{code-block} bash
 pip install "arviz[zarr, matplotlib]"
+```
+
+If instead you want to use NetCDF and interactive plotting with Plotly and Bokeh then you would run:
+
+```{code-block} bash
 pip install "arviz[h5netcdf, plotly, bokeh]"
 ```
 
-Note you can use any combination of the available options, it is not restricted
-to one I/O and one plotting library.
+Note that you can mix and match any of the available options. You’re not limited to choosing just one file format or one plotting library.
 
 ### Verifying the installation
 
@@ -54,9 +57,9 @@ It should look like:
 ```{code-block} none
 Status information for ArviZ 1.0.0
 
-arviz_base 0.7.0 available, exposing its functions as part of the `arviz` namespace
-arviz_stats 0.7.0 available, exposing its functions as part of the `arviz` namespace
-arviz_plots 0.7.0 available, exposing its functions as part of the `arviz` namespace
+arviz_base 1.0.0 available, exposing its functions as part of the `arviz` namespace
+arviz_stats 1.0.0 available, exposing its functions as part of the `arviz` namespace
+arviz_plots 1.0.0 available, exposing its functions as part of the `arviz` namespace
 ```
 
 If any of the 3 libraries is missing or can't be imported, the first step for troubleshooting
