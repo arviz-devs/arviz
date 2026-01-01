@@ -66,11 +66,15 @@ versions = {name: version for name, version in matches}
 unique_versions = set(versions.values())
 
 if len(unique_versions) > 1:
-    raise ImportError(
-        "Incompatible ArviZ subpackage versions detected. "
-        "All arviz-* packages must share the same minor version. "
-        f"Found versions: {versions}"
-    )
+    lines = ["Incompatible ArviZ subpackage versions detected:"]
+
+    for package in sorted(versions):
+        lines.append(f"- arviz_{package}: {versions[package]}")
+
+    lines.append("All ArviZ subpackages must share the same minor version.")
+
+    raise ImportError("\n".join(lines))
+
 
 # clean namespace
 del logging, matches, pat, re, _status, versions, unique_versions
