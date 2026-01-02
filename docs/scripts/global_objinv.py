@@ -4,9 +4,12 @@ Having a global objects.inv allows downstream docs and examples to use
 :func:`arviz.plot_dist` or :func:`arviz.ess` and get the correct cross-references
 pointing to base/stats/plots respective API page.
 """
+
 import os
 from pathlib import Path
+
 import sphobjinv as soi
+
 
 def update_inv_entries(partial_inv, target_version="stable"):
     """Extract a list of sphobjinv objects from the partial inventory and update it.
@@ -20,7 +23,7 @@ def update_inv_entries(partial_inv, target_version="stable"):
     updated_entries = [
         entry.evolve(
             name=entry.name.replace(partial_modname, "arviz"),
-            uri=f"projects/{partial_alias}/en/{version_str}/{entry.uri}"
+            uri=f"projects/{partial_alias}/en/{version_str}/{entry.uri}",
         )
         for entry in partial_inv.objects
         if (
@@ -33,20 +36,20 @@ def update_inv_entries(partial_inv, target_version="stable"):
     ]
     return updated_entries
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     version = os.environ.get("READTHEDOCS_VERSION", "stable")
+    if version != "latest":
+        version = "stable"
     output_dir = Path(os.environ.get("READTHEDOCS_OUTPUT", "docs/build"))
 
-    base_inv = soi.Inventory(
-        url=f"https://python.arviz.org/projects/base/en/{version}/objects.inv"
-    )
+    base_inv = soi.Inventory(url=f"https://python.arviz.org/projects/base/en/{version}/objects.inv")
     stats_inv = soi.Inventory(
         url=f"https://python.arviz.org/projects/stats/en/{version}/objects.inv"
     )
     plots_inv = soi.Inventory(
         url=f"https://python.arviz.org/projects/plots/en/{version}/objects.inv"
     )
-
 
     arviz_inv = soi.Inventory(output_dir / "html" / "objects.inv")
     for entry in arviz_inv.objects:
