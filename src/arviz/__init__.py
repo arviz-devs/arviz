@@ -61,11 +61,20 @@ info = f"Status information for ArviZ {__version__}\n\n{info}"
 
 pat = re.compile(r"arviz_(base|stats|plots)\s([0-9]+\.[0-9]+)")
 matches = pat.findall(info)
-if any(matches[0][1] != match[1] for match in matches[1:]):
-    raise ImportError(
-        "Versions of arviz-xyz packages don't match to the minor version. "
-        f"The versions found are: {matches}"
-    )
+
+versions = dict(pat.findall(info))
+unique_versions = set(versions.values())
+
+if len(unique_versions) > 1:
+    lines = ["Incompatible ArviZ subpackage versions detected:"]
+
+    for package, version in sorted(versions.items()):
+        lines.append(f"- arviz_{package}: {version}")
+
+    lines.append("All ArviZ subpackages must share the same minor version.")
+
+    raise ImportError("\n".join(lines))
+
 
 # clean namespace
-del logging, matches, pat, re, _status
+del logging, matches, pat, re, _status, versions, unique_versions
