@@ -49,6 +49,7 @@ def test_incompatible_subpackage_versions(monkeypatch):
     assert "- arviz_stats: 0.6" in message
     assert "- arviz_plots: 0.7" in message
     assert "must share the same minor version" in message
+<<<<<<< HEAD
 
 
 def test_compatible_subpackage_versions(monkeypatch):
@@ -61,3 +62,5 @@ def test_compatible_subpackage_versions(monkeypatch):
 
     # Should not raise
     importlib.reload(az)
+=======
+>>>>>>> upstream/main

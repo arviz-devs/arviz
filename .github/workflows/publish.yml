@@ -17,7 +17,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -39,7 +39,7 @@ jobs:
       id-token: write
     steps:
       - name: Download Distribution Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           # The build-and-inspect-python-package action invokes upload-artifact.
           # These are the correct arguments from that action.
