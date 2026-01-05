@@ -13,7 +13,7 @@ authors:
   - name: Oriol Abril-Pla
     orcid: 0000-0002-1847-9481
     equal-contrib: true
-    corresponding: true 
+    corresponding: true
     affiliation: 2
   - name: Jordan Deklerk
     affiliation: 3
@@ -38,7 +38,6 @@ bibliography: references.bib
 ---
 
 # Summary
-
 
 `ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019. It's goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, and NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
 
@@ -89,7 +88,7 @@ We now contrast the array interface with the xarray interface, as we see there i
     az.ess(dt_samples)
 
 The only required argument for battery-included plots is the input data, typically a `DataTree` (`dt`), but in the following example we also apply optional customizations.
-    
+
     az.style.use('arviz-variat')
     dt = az.load_arviz_data("centered_eight")
     pc = az.plot_dist(
