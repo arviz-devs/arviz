@@ -34,7 +34,9 @@ h3:not(#hero h3) {
 <div id="hero-left">  <!-- Start Hero Left -->
   <h2 style="font-size: 60px; font-weight: bold; margin: 2rem auto 0;">ArviZ</h2>
   <h3 style="font-weight: bold; margin-top: 0;">Exploratory analysis of Bayesian models</h3>
-  <p>ArviZ is a Python package for exploratory analysis of Bayesian models. It serves as a backend-agnostic tool for diagnosing and visualizing Bayesian inference.</p>
+  <p>ArviZ is a modular and flexible Python library implementing methods grounded in well-established statistical principles and providing robust, interpretable diagnostics and visualizations for Bayesian workflow.</p>
+
+ArviZ:
 
 <div class="homepage-button-container">
   <div class="homepage-button-container-row">
@@ -152,7 +154,7 @@ Posterior Predictive Check of discrete data using `plot_ppc_rootogram`
 
 :::{div} key-features-text
 <strong>Interoperability</strong><br/>
-Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, PyStan, Pyro, NumPyro, and emcee.
+Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, Pyro, NumPyro, and emcee.
 :::
 ::::
 
@@ -165,7 +167,7 @@ Integrates with all major probabilistic programming libraries: PyMC, CmdStanPy, 
 
 :::{div} key-features-text
 <strong>Large Suite of Visualizations</strong><br/>
-Provides over 25 plotting functions for all parts of Bayesian workflow: visualizing distributions, diagnostics, and model checking. See the gallery for examples.
+Provides over 30 plotting functions for visualizing distributions, MCMC diagnostics, model checking, model comparison. See the gallery for examples.
 :::
 ::::
 
@@ -178,7 +180,7 @@ Provides over 25 plotting functions for all parts of Bayesian workflow: visualiz
 
 :::{div} key-features-text
 <strong>State of the Art Diagnostics</strong><br/>
-Latest published diagnostics and statistics are implemented, tested and distributed with ArviZ.
+Modern, theory-grounded diagnostics and statistical tools are implemented, tested and distributed through ArviZ.
 :::
 ::::
 
@@ -191,7 +193,7 @@ Latest published diagnostics and statistics are implemented, tested and distribu
 
 :::{div} key-features-text
 <strong>Flexible Model Comparison</strong><br/>
-Includes functions for comparing models with information criteria, and cross validation (both approximate and brute force).
+Includes functions for comparing models using fast approximate cross validation and brute force methods.
 :::
 ::::
 
