@@ -1,8 +1,13 @@
 # pylint: disable=unused-import,unused-wildcard-import,wildcard-import,invalid-name
 """Expose features from _ArviZverse_ refactored packages together in the ``arviz`` namespace."""
 
+import functools
 import logging
 import re
+
+from xarray import open_datatree as from_netcdf
+
+from_zarr = functools.partial(from_netcdf, engine="zarr")
 
 _log = logging.getLogger(__name__)
 
@@ -77,4 +82,4 @@ if len(unique_versions) > 1:
 
 
 # clean namespace
-del logging, matches, pat, re, _status, versions, unique_versions
+del functools, logging, matches, pat, re, _status, versions, unique_versions

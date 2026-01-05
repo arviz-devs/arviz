@@ -19,9 +19,16 @@ def test_info_attr():
 
 
 def test_aliases():
+    # These are xarray aliases exposed for user convenience
+    xarray_aliases = {"from_netcdf", "from_zarr"}
+
     for obj_name in dir(az):
         if not obj_name.startswith("_") and obj_name != "info":
             obj = getattr(az, obj_name)
+
+            if obj_name in xarray_aliases:
+                # from_netcdf and from_zarr are xarray.open_datatree aliases
+                continue
 
             if hasattr(obj, "__module__"):
                 orig_lib = obj.__module__.split(".")[0]
@@ -32,6 +39,21 @@ def test_aliases():
 
             assert orig_lib.startswith("arviz"), obj_name
             assert orig_lib != "arviz", obj_name
+
+
+def test_from_netcdf_alias():
+    """Test that from_netcdf is an alias for xarray.open_datatree."""
+    import xarray
+
+    assert az.from_netcdf is xarray.open_datatree
+
+
+def test_from_zarr_alias():
+    """Test that from_zarr is a partial of xarray.open_datatree with engine='zarr'."""
+    import xarray
+
+    assert az.from_zarr.func is xarray.open_datatree
+    assert az.from_zarr.keywords == {"engine": "zarr"}
 
 
 def test_incompatible_subpackage_versions(monkeypatch):
