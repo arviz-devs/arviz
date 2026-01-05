@@ -52,7 +52,10 @@ def test_incompatible_subpackage_versions(monkeypatch):
 
 
 def test_compatible_subpackage_versions(monkeypatch):
-    """Compatible minor versions should not raise an ImportError."""
+    """
+    Compatible minor versions should not raise an ImportError and should be
+    reported correctly.
+    """
 
     # Same minor version (0.7.x) → should be allowed
     monkeypatch.setattr(arviz_base, "__version__", "0.7.0", raising=False)
@@ -61,3 +64,10 @@ def test_compatible_subpackage_versions(monkeypatch):
 
     # Should not raise
     importlib.reload(az)
+
+    # Assert info reports the patched versions correctly
+    info = az.info
+
+    assert "arviz_base 0.7.0 available" in info
+    assert "arviz_stats 0.7.1 available" in info
+    assert "arviz_plots 0.7.2 available" in info
