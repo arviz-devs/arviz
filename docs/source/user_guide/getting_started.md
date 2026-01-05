@@ -57,9 +57,9 @@ It should look like:
 ```{code-block} none
 Status information for ArviZ 1.0.0
 
-arviz_base 1.0.0 available, exposing its functions as part of the `arviz` namespace
-arviz_stats 1.0.0 available, exposing its functions as part of the `arviz` namespace
-arviz_plots 1.0.0 available, exposing its functions as part of the `arviz` namespace
+arviz_base 0.7.0 available, exposing its functions as part of the `arviz` namespace
+arviz_stats 0.7.0 available, exposing its functions as part of the `arviz` namespace
+arviz_plots 0.7.0 available, exposing its functions as part of the `arviz` namespace
 ```
 
 If any of the 3 libraries is missing or can't be imported, the first step for troubleshooting
