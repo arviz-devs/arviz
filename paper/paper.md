@@ -39,7 +39,6 @@ bibliography: references.bib
 
 # Summary
 
-
 `ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019. It's goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, and NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
 
 `ArviZ` is part of the broader ArviZ-project, which develops tools for Exploratory Analysis of Bayesian Models. The organization also maintains other initiatives, including arviz.jl (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
@@ -58,21 +57,22 @@ We present a redesigned version of `ArviZ` emphasizing greater user control and 
 
 General functionality, data processing, and data input/output have been streamlined and enhanced for greater versatility. Previously, `ArviZ` used the custom `InferenceData` class to organize and store the high-dimensional outputs of Bayesian inference in a structured, labeled format, enabling efficient analysis, metadata persistence, and serialization. These have been replaced with the `DataTree` class from xarray [@Hoyer_2017]. Additionally, converters allow more flexibility in dimensionality, naming, and indexing of their generated outputs.
 
-Statistical functions are now accessible through two distinct interfaces: 
+Statistical functions are now accessible through two distinct interfaces:
 
-* A low-level array interface with minimal dependencies, intended for advanced users and developers of third-party libraries.
-* A higher-level xarray interface designed for end users, which simplifies usage by automating common tasks and handling metadata. 
+* A low-level array interface with minimal dependencies, intended for advanced users
+and developers of third-party libraries.
+* A higher-level xarray interface designed for end users, which simplifies usage by automating common tasks and handling metadata.
 
 Plotting functions have also been redesigned to support modularity at multiple levels:
 
 * At a high level, `ArviZ` offers a collection of “batteries-included” plots. These are built-in plotting functions providing sensible defaults for common tasks like MCMC sampling diagnostics, predictive checks, and model comparison.
-* At an intermediate level, the API enables easier customization of batteries-included plots and simplifies the creation of new plots. This is achieved through the `PlotCollection` class, which enables developers and advanced users to focus solely on the plotting logic, without needing to handle faceting or aesthetics. 
+* At an intermediate level, the API enables easier customization of batteries-included plots and simplifies the creation of new plots. This is achieved through the `PlotCollection` class, which enables developers and advanced users to focus solely on the plotting logic, without needing to handle faceting or aesthetics.
 * At a lower level, we have improved the separation between computational and plotting logic, reducing code duplication and enhancing modular design. These changes also facilitate support for multiple plotting backends, improving extensibility and maintainability. Currently, `ArviZ` supports three plotting backends: matplotlib [@Hunter_2007], Bokeh [@Bokeh_2018], and plotly [@plotly_2015].
 
 
 ## Examples
 
-For the first example, we construct an array resembling data from MCMC sampling. We have 4 chains and 1000 draws for two posterior variables. We can compute the effective sample size for this array using the stats interface. For this, we need to specify which axes represent the chains and which the draws
+For the first example, we construct an array resembling data from MCMC sampling. We have 4 chains and 1000 draws for two posterior variables. We can compute the effective sample size for this array using the stats interface. For this, we need to specify which axes represent the chains and which the draws.
 
     import numpy as np
     from arviz import array_stats
@@ -87,7 +87,7 @@ We now contrast the array interface with the xarray interface, as we see there i
     dt_samples = az.convert_to_datatree(samples)
     az.ess(dt_samples)
 
-The only required argument for battery-included plots is the input data, typically a `DataTree` (`dt`), but in the following example we also apply optional customizations. 
+The only required argument for battery-included plots is the input data, typically a `DataTree` (`dt`), but in the following example we also apply optional customizations.
     
     az.style.use('arviz-variat')
     dt = az.load_arviz_data("centered_eight")
@@ -103,10 +103,9 @@ The only required argument for battery-included plots is the input data, typical
 
 We have shown two small examples. For a more comprehensive overview, see the [`ArviZ` documentation](https://python.arviz.org/en/latest/) and the [EABM guide](https://arviz-devs.github.io/EABM/) [@eabm_2025]. These resources include a wide range of examples designed for all types of users, from casual users to advanced analysts and developers looking to use `ArviZ` in their projects or libraries.
 
-
 ## Acknowledgements
 
-We thank our fiscal sponsor, NumFOCUS, a nonprofit 501(c)(3) public charity, for their operational and financial support.
+We thank our fiscal sponsor, NumFOCUS, a nonprofit 501(c)(3) public charity, for their operational and financial support. We also thank all the contributors to `arviz`, `arviz-base`, `arviz-stats` and `arviz-plots` repositories, including code contributors, documentation writers, issue reporters, and users who have provided feedback and suggestions.
 
 This research was supported by:
 
