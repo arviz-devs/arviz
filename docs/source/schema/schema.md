@@ -1,7 +1,7 @@
 (schema)=
-# DataTree schema specification for ArviZ
+# InferenceData schema specification for ArviZ
 
-ArviZ uses `DataTree` [@xarray:datatree] objects from the xarray library [@Hoyer_2017] to store and organize the outputs of Bayesian inference in a structured, labeled format.
+ArviZ uses `DataTree` objects from the [xarray](https://docs.xarray.dev/en/stable/) library to store and organize the outputs of Bayesian inference in a structured, labeled format.
 
 Its purpose is to serve the following three goals:
 
