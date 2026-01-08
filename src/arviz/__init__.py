@@ -4,7 +4,7 @@
 import functools
 import logging
 import re
-
+from ._versioning import import_arviz_subpackage
 from xarray import open_datatree as from_netcdf
 
 from_zarr = functools.partial(from_netcdf, engine="zarr")
@@ -28,21 +28,16 @@ except ModuleNotFoundError as err:
 
 info += _status + "\n"
 
-try:
-    from arviz_stats import *
-    import arviz_stats as stats
+from arviz_stats import *
 
-    # TODO: remove patch. 0.7 version of arviz-stats didn't expose the __version__ attribute
-    _status = (
-        f"arviz_stats {getattr(stats, '__version__', '0.7.0')} available, "
-        "exposing its functions as part of the `arviz` namespace"
-    )
-    _log.info(_status)
-    del stats
-except ModuleNotFoundError as err:
-    raise ImportError("arviz's dependency arviz_stats is not installed", name="arviz") from err
+version = import_arviz_subpackage("arviz_stats", version_fallback="0.7.0")
+
+_status = (
+    f"arviz_stats {version} available, exposing its functions as part of the `arviz` namespace"
+)
 
 info += _status + "\n"
+
 
 try:
     from arviz_plots import *
@@ -82,4 +77,15 @@ if len(unique_versions) > 1:
 
 
 # clean namespace
-del functools, logging, matches, pat, re, _status, versions, unique_versions
+del (
+    functools,
+    import_arviz_subpackage,
+    version,
+    logging,
+    matches,
+    pat,
+    re,
+    _status,
+    versions,
+    unique_versions,
+)
