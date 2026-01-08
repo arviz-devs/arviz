@@ -1,4 +1,5 @@
 import pytest
+
 from arviz._versioning import import_arviz_subpackage
 
 
