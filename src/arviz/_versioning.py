@@ -1,11 +1,13 @@
 import logging
+from importlib import import_module
 
 _log = logging.getLogger(__name__)
 
 
 def import_arviz_subpackage(module_name: str, *, version_fallback: str | None = None):
     try:
-        module = __import__(module_name)
+        module = import_module(module_name)
+
     except ModuleNotFoundError as err:
         raise ImportError(
             f"arviz's dependency {module_name} is not installed",
