@@ -25,7 +25,7 @@ authors:
     affiliation: 2
   - name: Aki Vehtari
     orcid: 0000-0003-2164-9469
-    affiliation: 1
+    affiliation: 4,1
 affiliations:
  - name:  Aalto University, Espoo, Finland
    index: 1
@@ -33,6 +33,8 @@ affiliations:
    index: 2
  - name: DICK's Sporting Goods, Coraopolis, Pennsylvania
    index: 3
+ - name: ELLIS Institute Finland
+   index: 4
 date: 22 December 2025
 bibliography: references.bib
 ---
@@ -47,7 +49,7 @@ In this work, we present a redesigned version of `ArviZ` that emphasizes greater
 
 # Statement of need
 
-Probabilistic programming has emerged as a powerful paradigm for statistical modeling, accompanied by a growing ecosystem of tools for model specification and inference. However, effective modeling requires robust support for sampling diagnostics, model comparison, and model checking [@Gelman_2020; @Martin_2024; @Guo_2024]. `ArviZ` addresses this gap by providing a unified, backend-agnostic library to perform these tasks.
+Probabilistic programming has emerged as a powerful paradigm for statistical modeling, accompanied by a growing ecosystem of tools for model specification and inference. Effective modeling requires robust support for sampling diagnostics, model comparison, and model checking [@Gelman_2020; @Martin_2024; @Guo_2024]. `ArviZ` addresses this gap by providing a unified, backend-agnostic library to perform these tasks.
 
 The methods implemented in `ArviZ` are grounded in well-established statistical principles and provide robust, interpretable diagnostics and visualizations [@Vehtari_2017; @Gelman_2019; @Paananen_2020; @Vehtari_2021; @Dimitriadis_2021; @Sailynoja_2022; @Kallioinen_2023; @Sailynoja_2025]. The redesigned version furthers these goals by introducing an easier-to-use interface for regular users and more powerful tooling for power users and developers of Bayesian tools. These updates align with recent developments in the probabilistic programming field. Additionally, the new design facilitates the use of components as modular building blocks for custom analyses. This frequent user request was difficult to accommodate under the old framework.
 
@@ -72,7 +74,7 @@ Plotting functions have also been redesigned to support modularity at multiple l
 
 ## Examples
 
-For the first example, we construct an array resembling data from MCMC sampling. We have 4 chains and 1000 draws for two posterior variables. We can compute the effective sample size for this array using the stats interface. For this, we need to specify which axes represent the chains and which the draws.
+For the first example, we construct an array resembling data from MCMC sampling. We have 4 chains and 1000 draws for two posterior variables. We can compute the effective sample sizes for this array using the stats interface. For this, we need to specify which axes represent the chains and which the draws.
 
     import numpy as np
     from arviz import array_stats
