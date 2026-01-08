@@ -41,9 +41,9 @@ bibliography: references.bib
 
 # Summary
 
-`ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019. It's goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, and NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
+`ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
 
-`ArviZ` is part of the broader ArviZ-project, which develops tools for Exploratory Analysis of Bayesian Models. The organization also maintains other initiatives, including arviz.jl (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
+`ArviZ` is part of the broader ArviZ project, which develops tools for exploratory analysis of Bayesian models. The organization also maintains other initiatives, including ArviZ.jl (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
 
 In this work, we present a redesigned version of `ArviZ` that emphasizes greater user control and modularity. This redesign delivers a more flexible and efficient toolkit for exploratory analysis of Bayesian models. With its renewed focus on modularity and usability, `ArviZ` is well-positioned to remain an essential tool for Bayesian modelers in both research and applied settings.
 
@@ -107,7 +107,7 @@ We have shown two small examples. For a more comprehensive overview, see the [`A
 
 ## Acknowledgements
 
-We thank our fiscal sponsor, NumFOCUS, a nonprofit 501(c)(3) public charity, for their operational and financial support. We also thank all the contributors to `arviz`, `arviz-base`, `arviz-stats` and `arviz-plots` repositories, including code contributors, documentation writers, issue reporters, and users who have provided feedback and suggestions.
+We thank our fiscal sponsor, NumFOCUS, a nonprofit 501(c)(3) public charity, for their operational and financial support. We also thank all the contributors to `arviz`, `arviz-base`, `arviz-stats`, and `arviz-plots` repositories, including code contributors, documentation writers, issue reporters, and users who have provided feedback and suggestions.
 
 This research was supported by:
 
