@@ -112,7 +112,7 @@ We thank our fiscal sponsor, NumFOCUS, a nonprofit 501(c)(3) public charity, for
 This research was supported by:
 
 * The Research Council of Finland Flagship Program "Finnish Center for Artificial Intelligence" (FCAI)
+* Research Council of Finland grant 340721
 * Essential Open Source Software Round 4 grant by the Chan Zuckerberg Initiative (CZI)
-* ...
 
 # References
