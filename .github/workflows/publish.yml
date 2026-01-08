@@ -1,5 +1,7 @@
 name: Publish library
 
+permissions: {}
+
 on:
   push:
     branches:
