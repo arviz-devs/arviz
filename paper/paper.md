@@ -85,10 +85,10 @@ For the first example, we construct an array resembling data from MCMC sampling.
     from arviz import array_stats
 
     rng = np.random.default_rng()
-    samples = rng.normal(size=(4, 1000, 2))
+    samples = rng.normal(size=(4, 1000, 2))  # (chain, draw, variable)
     array_stats.ess(samples, chain_axis=0, draw_axis=1)
 
-We now contrast the array interface with the xarray interface, as we see there is no need to specify the chain and draw information, as this information is already encoded in the `DataTree` object.
+We now contrast the array interface with the xarray interface. When converting the NumPy array to a DataTree, ArviZ assigns `chain` and `draw` as named dimensions based on the assumed dimension order, so this information is already encoded in the resulting object and does not need to be specified explicitly when calling other functions.
 
     import arviz as az
     dt_samples = az.convert_to_datatree(samples)
