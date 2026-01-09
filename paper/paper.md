@@ -17,6 +17,9 @@ authors:
     affiliation: 2
   - name: Jordan Deklerk
     affiliation: 3
+  - name: Seth D. Axen
+    orcid: 0000-0003-3933-8247
+    affiliation: 4
   - name: Colin Carroll
     orcid: 0000-0001-6977-0861
     affiliation: 2
@@ -25,7 +28,7 @@ authors:
     affiliation: 2
   - name: Aki Vehtari
     orcid: 0000-0003-2164-9469
-    affiliation: 4,1
+    affiliation: 5,1
 affiliations:
  - name:  Aalto University, Espoo, Finland
    index: 1
@@ -33,8 +36,10 @@ affiliations:
    index: 2
  - name: DICK's Sporting Goods, Coraopolis, Pennsylvania
    index: 3
- - name: ELLIS Institute Finland
+ - name: University of Tübingen
    index: 4
+ - name: ELLIS Institute Finland
+   index: 5
 date: 22 December 2025
 bibliography: references.bib
 ---
@@ -114,5 +119,6 @@ This research was supported by:
 * The Research Council of Finland Flagship Program "Finnish Center for Artificial Intelligence" (FCAI)
 * Research Council of Finland grant 340721
 * Essential Open Source Software Round 4 grant by the Chan Zuckerberg Initiative (CZI)
+* Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Excellence Strategy – EXC number 2064/1 – Project number 390727645
 
 # References
