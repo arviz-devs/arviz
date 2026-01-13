@@ -46,7 +46,7 @@ bibliography: references.bib
 
 # Summary
 
-`ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
+`ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019, with over 700 citations and 75 million downloads. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
 
 `ArviZ` is part of the broader ArviZ project, which develops tools for exploratory analysis of Bayesian models. The organization also maintains other initiatives, including ArviZ.jl (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
 
@@ -54,7 +54,7 @@ In this work, we present a redesigned version of `ArviZ` that emphasizes greater
 
 # Statement of need
 
-Probabilistic programming has emerged as a powerful paradigm for statistical modeling, accompanied by a growing ecosystem of tools for model specification and inference. Effective modeling requires robust support for sampling diagnostics, model comparison, and model checking [@Gelman_2020; @Martin_2024; @Guo_2024]. `ArviZ` addresses this gap by providing a unified, backend-agnostic library to perform these tasks.
+Probabilistic programming has emerged as a powerful paradigm for statistical modeling, accompanied by a growing ecosystem of tools for model specification and inference. Effective modeling requires robust support for sampling diagnostics, model comparison, and model checking [@Gelman_2020; @Martin_2024; @Guo_2024]. `ArviZ` addresses this gap by providing a unified, backend-agnostic library to perform these tasks. The original `ArviZ` paper [@Kumar_2019] describes the landscape of probabilistic programming tools at the time and the need for a unified, backend-agnostic library for exploratory analysis - a need that has only grown as the ecosystem has expanded.
 
 The methods implemented in `ArviZ` are grounded in well-established statistical principles and provide robust, interpretable diagnostics and visualizations [@Vehtari_2017; @Gelman_2019; @Paananen_2021; @Vehtari_2021; @Dimitriadis_2021; @Sailynoja_2022; @Kallioinen_2023; @Sailynoja_2025]. The redesigned version furthers these goals by introducing an easier-to-use interface for regular users and more powerful tooling for power users and developers of Bayesian tools. These updates align with recent developments in the probabilistic programming field. Additionally, the new design facilitates the use of components as modular building blocks for custom analyses. This frequent user request was difficult to accommodate under the old framework.
 
