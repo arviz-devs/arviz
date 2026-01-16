@@ -6,5 +6,6 @@ packaging
 pandas>=2.1.0
 xarray>=2023.7.0
 h5netcdf>=1.0.2
+h5py
 typing_extensions>=4.1.0
 xarray-einstats>=0.3
