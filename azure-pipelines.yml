@@ -6,7 +6,7 @@
 trigger:
   branches:
     include:
-    - main
+    - v0.x
   tags:
     include:
     - '*'
@@ -14,10 +14,8 @@ trigger:
 pr:
   branches:
     include:
-    - main
+    - v0.x
 
 jobs:
   - template: .azure-pipelines/azure-pipelines-base.yml
   - template: .azure-pipelines/azure-pipelines-external.yml
-  - template: .azure-pipelines/azure-pipelines-benchmarks.yml
-  - template: .azure-pipelines/azure-pipelines-wheel.yml
