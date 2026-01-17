@@ -28,7 +28,7 @@ authors:
     affiliation: 2
   - name: Aki Vehtari
     orcid: 0000-0003-2164-9469
-    affiliation: 5,1
+    affiliation: "1, 5"
 affiliations:
  - name:  Aalto University, Espoo, Finland
    index: 1
@@ -40,17 +40,13 @@ affiliations:
    index: 4
  - name: ELLIS Institute Finland
    index: 5
-date: 22 December 2025
+date: 17 January 2026
 bibliography: references.bib
 ---
 
 # Summary
 
-`ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019, with over 700 citations and 75 million downloads. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
-
-`ArviZ` is part of the broader ArviZ project, which develops tools for exploratory analysis of Bayesian models. The organization also maintains other initiatives, including ArviZ.jl (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
-
-In this work, we present a redesigned version of `ArviZ` that emphasizes greater user control and modularity. This redesign delivers a more flexible and efficient toolkit for exploratory analysis of Bayesian models. With its renewed focus on modularity and usability, `ArviZ` is well-positioned to remain an essential tool for Bayesian modelers in both research and applied settings.
+In this work, we present a redesigned version of `ArviZ`, a Python package for exploratory analysis of Bayesian models. The redesign emphasizes greater user control and modularity. This redesign delivers a more flexible and efficient toolkit for exploratory analysis of Bayesian models. With its renewed focus on modularity and usability, `ArviZ` is well-positioned to remain an essential tool for Bayesian modelers in both research and applied settings.
 
 # Statement of need
 
@@ -58,7 +54,17 @@ Probabilistic programming has emerged as a powerful paradigm for statistical mod
 
 The methods implemented in `ArviZ` are grounded in well-established statistical principles and provide robust, interpretable diagnostics and visualizations [@Vehtari_2017; @Gelman_2019; @Paananen_2021; @Vehtari_2021; @Dimitriadis_2021; @Sailynoja_2022; @Kallioinen_2023; @Sailynoja_2025]. The redesigned version furthers these goals by introducing an easier-to-use interface for regular users and more powerful tooling for power users and developers of Bayesian tools. These updates align with recent developments in the probabilistic programming field. Additionally, the new design facilitates the use of components as modular building blocks for custom analyses. This frequent user request was difficult to accommodate under the old framework.
 
-# Description
+# Research Impact Statement
+
+`ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019, with over 700 citations and 75 million downloads. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others. 
+
+ArviZ` is part of the broader ArviZ project, which develops tools for exploratory analysis of Bayesian models. The organization also maintains other initiatives, including ArviZ.jl (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
+
+# AI usage disclosure
+
+Generative AI tools were used during software development and documentation, to assist with drafting text, suggesting code patterns, and improving clarity. All AI-generated contributions were critically reviewed by the authors. Code was tested and validated against expected behavior, and all technical and scientific claims were manually verified to ensure correctness.
+
+# Software design
 
 We present a redesigned version of `ArviZ` emphasizing greater user control and modularity. The new architecture enables users to customize the installation and use of specific components. The previous `ArviZ` design divided the package into three submodules, which are now available as three independent installable packages with improved design as described next.
 
