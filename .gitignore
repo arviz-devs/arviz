@@ -63,8 +63,12 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-doc/build/
-doc/source/savefig
+docs/build/
+docs/_build/
+
+# MyST related
+docs/jupyter_execute
+
 
 # PyBuilder
 target/
@@ -80,26 +84,6 @@ saved_animations/
 
 # MacOS generated files
 .DS_Store
-
-# examples
-examples/**/*.html
-
-# Stan file
-doc/getting_started/*.stan
-doc/source/user_guide/wrappers/*
-!doc/source/user_guide/wrappers/*.stan
-!doc/source/user_guide/wrappers/*.ipynb
-!doc/source/user_guide/wrappers/*.md
-
-# eight-schools files
-doc/source/getting_started/schools*
-!doc/source/user_guide/wrappers/schools.stan
-!doc/source/user_guide/wrappers/schools.json
-doc/source/getting_started/eight_school*
-doc/source/getting_started/sample_data/
-
-# MyST related
-doc/jupyter_execute
 
 # Dask related
 mydask.png
