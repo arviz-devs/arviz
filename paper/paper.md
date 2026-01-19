@@ -60,10 +60,6 @@ The methods implemented in `ArviZ` are grounded in well-established statistical 
 
 ArviZ` is part of the broader ArviZ project, which develops tools for exploratory analysis of Bayesian models. The organization also maintains other initiatives, including ArviZ.jl (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
 
-# AI usage disclosure
-
-Generative AI tools were used during software development and documentation, to assist with drafting text, suggesting code patterns, and improving clarity. All AI-generated contributions were critically reviewed by the authors. Code was tested and validated against expected behavior, and all technical and scientific claims were manually verified to ensure correctness.
-
 # Software design
 
 We present a redesigned version of `ArviZ` emphasizing greater user control and modularity. The new architecture enables users to customize the installation and use of specific components. The previous `ArviZ` design divided the package into three submodules, which are now available as three independent installable packages with improved design as described next.
@@ -115,6 +111,10 @@ The only required argument for battery-included plots is the input data, typical
 ![plot_dist with color mapped to school dimension.](figures/figure_0.png "`plot_dist` is a built-in plot. Here we show an example of further customization. The color is mapped to the school dimension. A neutral color is automatically assigned to the variables without the school dimension (mu and tau). The histograms have been made translucent"){width=4.5in}
 
 We have shown two small examples. For a more comprehensive overview, see the [`ArviZ` documentation](https://python.arviz.org/en/latest/) and the [EABM guide](https://arviz-devs.github.io/EABM/) [@eabm_2025]. These resources include a wide range of examples designed for all types of users, from casual users to advanced analysts and developers looking to use `ArviZ` in their projects or libraries.
+
+## AI usage disclosure
+
+Generative AI tools were used during software development and documentation in a limited capacity, primarily to assist with rewording and minor code suggestions. All AI-assisted contributions were reviewed and edited by the authors. Core design decisions, feature development, and scientific or technical judgment were carried out by the authors, and all code and claims were tested and manually verified to ensure correctness.
 
 ## Acknowledgements
 
