@@ -24,33 +24,45 @@ The reasons for the local build to be preferred over the readthedocs preview are
 If you are using Docker, see {ref}`building_doc_with_docker`.
 
 ## Using sphinx locally
-ArviZ provides a `Makefile` to manage all doc building tasks.
+ArviZ uses sphinx directly to manage all doc building tasks.
 
-### Base workflow: `make html`
-To build the documentation you will need to execute `make html` on the command line.
+### Base workflow: `sphinx-build`
+To build the documentation you will need to execute the following command from the
+repository root on the command line:
 
-Once the command finishes, you can use `make preview` to open the generated documentation
-on your browser.
+```bash
+sphinx-build -b html docs/source docs/build/html
+```
+Once the command finishes, you can open the generated documentation by opening
+docs/build/html/index.html in your browser.
 
-Every time you make changes to the documentation you will need to run `make html` again.
-However, if you haven't closed the documentation page that was open in the browser, you
-will be able to skip the `make preview` command.
+Every time you make changes to the documentation you will need to run the command again.
 
-### Live preview workflow: `make livehtml`
-As calling `make html` every time you make changes can be annoying, it is also possible
-to install [sphinx-autobuild](https://github.com/executablebooks/sphinx-autobuild)
-with `pip install sphinx-autobuild` and then execute
-`make livehtml` on the command line. With that, the documentation will be rebuilt every
+### Live preview workflow:
+
+As rebuilding the documentation every time you make changes can be annoying, it is also
+possible to install [sphinx-autobuild](https://github.com/executablebooks/sphinx-autobuild)
+with `pip install sphinx-autobuild` and then execute the following command from the
+repository root on the command line. With that, the documentation will be rebuilt every
 time you save a doc related file.
+```bash
+sphinx-autobuild docs/source docs/build/html
+```
 
-### Rebuild the docs from scratch: `make cleandocs`
-In some cases, nor `make livehtml` nor re-executing `make html` multiple times will
-serve to correctly update the documentation. This is common for example if working
+### Rebuild the docs from scratch:
+
+In some cases, nor re-running the documentation build command nor using a live preview
+will serve to correctly update the documentation. This is common for example if working
 on `conf.py` or making changes to the API docs.
 
-When that happens, you will need to run `make cleandocs`. This will clean all the cache
-and intermediate files so the next time you run `make html` or `make livehtml`
-the documentation will be built from scratch (which will therefore be slower than usual).
+When that happens, you will need to remove the build directory and rebuild the
+documentation from scratch so the next build starts from a clean state
+:
+
+```
+rm -rf docs/build
+sphinx-build -b html docs/source docs/build/html
+```
 
 (preview_change)=
 ## Previewing doc changes
