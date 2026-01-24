@@ -69,12 +69,12 @@ clone it to your local machine, and develop on a feature branch.
    in the ``feature`` branch. It's good practice to never routinely work on the ``main`` branch of any repository.
    ```
 
-5. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
+5. Project requirements are defined in pyproject.toml. Libraries used for development and       documentation are provided as optional dependency groups. To set up a development environment, you may (probably in a [virtual environment](https://docs.python-guide.org/dev/virtualenvs/)) run:
 
    ```bash
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt
-   pip install -r requirements-docs.txt  # to generate docs locally
+   pip install -e .
+   pip install -e .[test,check]
+   pip install -e .[doc]  # to generate docs locally
    ```
 
    Alternatively, for developing the project in [Docker](https://docs.docker.com/), there is a script to setup the Docker environment for development. See {ref}`developing_in_docker`.
