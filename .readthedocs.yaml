@@ -9,6 +9,8 @@ build:
   jobs:
     pre_build:
       - python docs/scripts/homepage_miniatures.py
+    post_build:
+      - python docs/scripts/global_objinv.py
 
 sphinx:
   configuration: docs/source/conf.py
