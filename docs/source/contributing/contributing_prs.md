@@ -13,7 +13,7 @@ functionality and open a "Feature Request" issue before starting to work
 on the new feature.
 
 :::{note}
-Since version 1.0.0, ArviZ is organized as a metapackage that brings together functionality
+Since version 1.0, ArviZ is organized as a metapackage that brings together functionality
 from three subpackages: [`arviz-base`](https://github.com/arviz-devs/arviz-base),
 [`arviz-stats`](https://github.com/arviz-devs/arviz-stats), and
 [`arviz-plots`](https://github.com/arviz-devs/arviz-plots).
