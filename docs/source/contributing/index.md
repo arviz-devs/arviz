@@ -160,11 +160,9 @@ how_to_add_to_example_gallery
 :caption: Reference
 
 pr_checklist
-architecture
 content_structure
 docstrings
 syntax_guide
-developing_in_docker
 :::
 
 :::{toctree}
