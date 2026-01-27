@@ -57,8 +57,6 @@ def _warn_once_per_day():
         )
         _atomic_write_text(stamp_file, today.isoformat())
 
-        stamp_file.write_text(today.isoformat())
-
 
 _warn_once_per_day()
 
