@@ -25,7 +25,6 @@ corresponding package repositories.
 :::
 
 (steps_before_working)=
-
 ## Steps before starting work
 Before starting work on a pull request, double-check that no one else
 is working on the ticket in both issue tickets and pull requests.
@@ -56,15 +55,13 @@ However, if there has been no activity for 2 weeks from the assignment date,
 the ticket is open for all again and can be unassigned.
 
 (dev_summary)=
-## Development process - summary
+## Development process
 
-TBD?
-NOTE: Both `dev_summary` and `docstring_formatting` have references elsewhere.
+TODO: Details and sections to be added...
 
-Final formatting is done with [black](https://github.com/psf/black).
 
 (docstring_formatting)=
-# Docstring formatting
+## Docstring formatting
 
 Docstrings should follow the [numpy docstring guide](https://numpydoc.readthedocs.io/).
 Extra guidance can also be found in
@@ -79,9 +76,12 @@ as they are used to generate type information for third-party tools such as type
 
 
 ## Documentation for user facing methods
+
 If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
 please consider adding inline documentation examples.
 You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
 
-### Tests
-Section in construction
+## Tests
+
+:::{caution} Section in construction
+:::
