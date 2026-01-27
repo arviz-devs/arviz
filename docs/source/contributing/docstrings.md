@@ -25,18 +25,18 @@ For adding the _See Also_ docstring section, you just need to add the function n
 Sphinx will automatically add links to other ArviZ objects and functions listed in the _See Also_
 section.
 
-For example, let's add {func}`~arviz_stats.hdi` and {func}`~arviz_plots.plot_ppc` in the _See Also_ section.
+For example, let's add {func}`~arviz_stats.hdi` and {func}`~arviz_plots.plot_ppc_dist` in the _See Also_ section.
 
 ```
     See Also
     --------
     arviz_stats.hdi : Calculate highest density interval (HDI) of array for given probability.
-    arviz_plots.plot_ppc : plot for posterior/prior predictive checks.
+    arviz_plots.plot_ppc_dist : plot for posterior/prior predictive checks.
 ```
 
 ## Kwargs parameters
 
-All the kwargs parameters in {ref}`arviz_plots:api` modules are passed to the
+All the kwargs parameters in the {doc}`arviz_plots:api/index` modules are passed to the
 Matplotlib or Bbokeh functions. While writing their description, the functions to which they are
 being passed must be mentioned. In order to check or add those functions, the process is the same
 for all the kwargs arguments.
