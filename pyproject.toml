@@ -51,6 +51,7 @@ plotly = ["arviz_plots[plotly]"]
 # dev related blocks
 doc = [
     "h5netcdf",
+    "h5py",
     "jupyter-sphinx",
     "matplotlib",
     "myst-parser[linkify]",
