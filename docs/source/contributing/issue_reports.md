@@ -3,7 +3,10 @@
 
 We appreciate being notified of problems with the existing ArviZ code.
 We prefer that issues be filed on the
-[Github Issue Tracker](https://github.com/arviz-devs/arviz/issues),
+Github Issue Tracker of the corresponding sub-package repository
+([`arviz-base`](https://github.com/arviz-devs/arviz-base/issues),
+[`arviz-stats`](https://github.com/arviz-devs/arviz-stats/issues),
+[`arviz-plots`](https://github.com/arviz-devs/arviz-stats/issues))
 rather than on social media or by direct email to the developers.
 
 Please verify that your issue is not being currently addressed by other
