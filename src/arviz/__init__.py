@@ -71,12 +71,12 @@ versions = dict(pat.findall(info))
 unique_versions = set(versions.values())
 
 if len(unique_versions) > 1:
-    lines = ["Incompatible ArviZ subpackage versions detected:"]
+    lines = ["Incompatible ArviZ packages versions detected:"]
 
     for package, version in sorted(versions.items()):
         lines.append(f"- arviz_{package}: {version}")
 
-    lines.append("All ArviZ subpackages must share the same minor version.")
+    lines.append("All ArviZ packages must share the same minor version.")
 
     raise ImportError("\n".join(lines))
 

@@ -1,10 +1,13 @@
 (doc_toolchain)=
 # Documentation toolchain
 
+:::{caution} Some content in this page may be outdated.
+:::
+
 ArviZ documentation is built using a Python documentation tool, [Sphinx](https://www.sphinx-doc.org/en/master/).
 Sphinx converts `rst`(restructured text) files into HTML websites.
 There are different extensions available for converting other types of files
-like markdown, jupyter notebooks, etc. into HTML websites.
+like markdown, Jupyter notebooks, etc. into HTML websites.
 
 ArviZ [docs](https://github.com/arviz-devs/arviz/tree/main/doc/source) consist of `.rst`, `.md` and `.ipynb` files.
 It uses `myst-parser` and `myst-nb` for `.md` and `.ipynb` files.

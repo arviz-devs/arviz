@@ -1,6 +1,9 @@
 (content_structure)=
 # Documentation content structure
 
+:::{caution} Some content in this page may be outdated.
+:::
+
 ArviZ documentation has the {doc}`diataxis:index` as a North Star.
 This page assumes basic familiarity with Diátaxis.
 

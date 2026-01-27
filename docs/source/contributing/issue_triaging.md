@@ -2,7 +2,9 @@
 # Issue Triaging
 
 
-As a community-driven, open source collective, we value all user contributions at ArviZ. While most users often tend to look for ways to contribute code via PRs, we welcome and encourage help with issue triaging.
+As a community-driven, open source collective, we value all user contributions at ArviZ.
+While most users often tend to look for ways to contribute code via PRs,
+we welcome and encourage help with issue triaging.
 
 We consider issue triaging an integral part of the library development. It is the main communication
 channel between contributors and users of ArviZ. Moreover, it is a task that gives contributors
@@ -16,16 +18,26 @@ Even if it is often ignored, issue triaging is generally regarded as an importan
 and it is getting more traction lately. A clear example of that is the
 [Labelathon](https://ropensci.org/commcalls/apr2021-pkg-community/) recently hosted by
 the rOpenSci community. The [Labelathon was recorded](https://ropensci.org/commcalls/apr2021-pkg-community/)
-and has also had a couple of [follow-up blogpost](https://ropensci.org/tags/labelathon/) which are great resources related to
-issue triaging.
+and has also had a couple of [follow-up blogpost](https://ropensci.org/tags/labelathon/)
+which are great resources related to issue triaging.
 :::
 
 ## How to subscribe to ArviZ issues
 
-The first step for you to get started would be to make sure you subscribe and get notifications of any new issue published on ArviZ's GitHub repo. You can then chose to work on it at the moment or come back to it later. Staying subscribed will ensure you are notified whenever issues are created or updated and therefore, see where your help might be needed.
+The first step for you to get started would be to make sure you subscribe and get notifications
+of any new issue published on ArviZ's GitHub repositories, such as
+[`arviz-base`](https://github.com/arviz-devs/arviz-base/issues),
+[`arviz-stats`](https://github.com/arviz-devs/arviz-stats/issues), and
+[`arviz-plots`](https://github.com/arviz-devs/arviz-stats/issues).
+You can then chose to work on it at the moment or come back to it later.
+Staying subscribed will ensure you are notified whenever issues are created or updated and therefore,
+see where your help might be needed.
 
-If you are not familiar on how to set up notifications on GitHub, please check the following - [Setting Up Notifications on GitHub](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository).
-Once you are set up, you can [view your subscriptions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/viewing-your-subscriptions) and [manage your subscriptions](https://docs.github.com/en/github/managing-subscriptions-and-notifications-on-github/managing-subscriptions-for-activity-on-github/managing-your-subscriptions) to ensure you are not being inundated with the volume and are getting notifications only to issues of your interest.
+If you are not familiar on how to set up notifications on GitHub,
+please check the following - [Setting Up Notifications on GitHub](https://docs.github.com/en/subscriptions-and-notifications/get-started/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository).
+Once you are set up, you can [view your subscriptions](https://docs.github.com/en/subscriptions-and-notifications/how-tos/managing-subscriptions-for-activity-on-github/viewing-your-subscriptions)
+and [manage your subscriptions](https://docs.github.com/en/subscriptions-and-notifications/how-tos/managing-subscriptions-for-activity-on-github/managing-your-subscriptions) to ensure you are not
+being inundated with the volume and are getting notifications only to issues of your interest.
 
 ## Triage guidelines and suggestions
 
@@ -33,7 +45,11 @@ Similar to contributing code via PRs, most issue triaging tasks don't require an
 specific permissions. Anyone with a GitHub account can help with issue triaging.
 
 :::{important}
-The list below provides ideas and examples of issue triaging entails. However, it is not a comprehensive compilation. Often users encounter issues not foreseen or experienced by developers. We encourage users go ahead and take ownership and bring these to the attention of the person who have posted or the contributors working on it.
+The list below provides ideas and examples of issue triaging entails.
+However, it is not a comprehensive compilation.
+Often users encounter issues not foreseen or experienced by developers.
+We encourage users go ahead and take ownership and bring these to the attention
+of the person who have posted or the contributors working on it.
 :::
 
 Make sure the issue contains a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example), if relevant.
@@ -65,8 +81,8 @@ Guide newcomers
 
 :::{note}
 If you regularly help with issue triaging you'll probably be asked to join the team and be given
-some triaging or write permissions on the ArviZ GitHub repo. This would allow you to label and
-assign issues in the ArviZ repo.
+some triaging or write permissions on the ArviZ's GitHub repositories.
+This would allow you to label and assign issues in ArviZ's GitHub repositories.
 
 You can read more about our team and how to join in the {ref}`arviz_org:our_team` page.
 :::

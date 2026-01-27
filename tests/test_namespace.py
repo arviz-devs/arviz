@@ -56,7 +56,7 @@ def test_from_zarr_alias():
     assert az.from_zarr.keywords == {"engine": "zarr"}
 
 
-def test_incompatible_subpackage_versions(monkeypatch):
+def test_incompatible_package_versions(monkeypatch):
     monkeypatch.setattr(arviz_base, "__version__", "0.7.0")
     monkeypatch.setattr(arviz_stats, "__version__", "0.6.0", raising=False)
     monkeypatch.setattr(arviz_plots, "__version__", "0.7.0")
@@ -66,14 +66,14 @@ def test_incompatible_subpackage_versions(monkeypatch):
 
     message = str(excinfo.value)
 
-    assert "Incompatible ArviZ subpackage versions detected" in message
+    assert "Incompatible ArviZ packages versions detected" in message
     assert "- arviz_base: 0.7" in message
     assert "- arviz_stats: 0.6" in message
     assert "- arviz_plots: 0.7" in message
     assert "must share the same minor version" in message
 
 
-def test_compatible_subpackage_versions(monkeypatch):
+def test_compatible_package_versions(monkeypatch):
     """
     Compatible minor versions should not raise an ImportError and should be
     reported correctly.
