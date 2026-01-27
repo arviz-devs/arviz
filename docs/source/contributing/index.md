@@ -171,5 +171,4 @@ syntax_guide
 
 doc_toolchain
 diataxis_for_arviz
-plotting_backends
 :::
