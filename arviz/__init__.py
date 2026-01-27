@@ -23,8 +23,9 @@ def _warn_once_per_day():
     import datetime
     from warnings import warn
     from pathlib import Path
+    from platformdirs import user_cache_dir
 
-    warning_dir = Path.home() / "arviz_data"
+    warning_dir = Path(user_cache_dir("arviz", "arviz"))
     warning_dir.mkdir(exist_ok=True)
 
     stamp_file = warning_dir / "daily_warning"
