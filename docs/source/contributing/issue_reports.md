@@ -2,7 +2,7 @@
 # Issue reports
 
 We appreciate being notified of problems with the existing ArviZ code.
-We prefer that issues be filed on the
+We prefer that issues be filled on the
 Github Issue Tracker of the corresponding package repository
 ([`arviz-base`](https://github.com/arviz-devs/arviz-base/issues),
 [`arviz-stats`](https://github.com/arviz-devs/arviz-stats/issues),
