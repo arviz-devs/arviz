@@ -46,6 +46,8 @@ bibliography: references.bib
 
 # Summary
 
+When working with Bayesian models, a range of related tasks must be addressed beyond inference itself. These include tasks such as diagnosing the quality of MCMC samples, model criticism and model comparison. We collectively refer to these activities as exploratory analysis of Bayesian models.
+
 In this work, we present a redesigned version of `ArviZ`, a Python package for exploratory analysis of Bayesian models. The redesign emphasizes greater user control and modularity. This redesign delivers a more flexible and efficient toolkit for exploratory analysis of Bayesian models. With its renewed focus on modularity and usability, `ArviZ` is well-positioned to remain an essential tool for Bayesian modelers in both research and applied settings.
 
 # Statement of need
@@ -54,17 +56,21 @@ Probabilistic programming has emerged as a powerful paradigm for statistical mod
 
 The methods implemented in `ArviZ` are grounded in well-established statistical principles and provide robust, interpretable diagnostics and visualizations [@Vehtari_2017; @Gelman_2019; @Paananen_2021; @Vehtari_2021; @Dimitriadis_2021; @Sailynoja_2022; @Kallioinen_2023; @Sailynoja_2025]. The redesigned version furthers these goals by introducing an easier-to-use interface for regular users and more powerful tooling for power users and developers of Bayesian tools. These updates align with recent developments in the probabilistic programming field. Additionally, the new design facilitates the use of components as modular building blocks for custom analyses. This frequent user request was difficult to accommodate under the old framework.
 
+# State of the field
+
+In the Python Bayesian ecosystem, ArviZ occupies a niche comparable to tools in the R/Stan community such as posterior [@gelman_2013;@Vehtari_2021], loo [@Vehtari_2017;@loo], bayesplot [@bayesplot0;@bayesplot1], and priorsense [@Kallioinen_2023], sharing similar goals while reflecting different language ecosystems and workflows.
+
 # Research Impact Statement
 
 `ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019, with over 700 citations and 75 million downloads. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others. 
 
-`ArviZ` is part of the broader ArviZ project, which develops tools for exploratory analysis of Bayesian models. The organization also maintains other initiatives, including ArviZ.jl [@arvizjl_2025] (for Julia), PreliZ [@icazatti_2023], educational resources [@eabm_2025], and additional packages that are still in an experimental phase.
+The maturity of `ArviZ` has also led to other initiatives such including ArviZ.jl [@arvizjl_2025] (for Julia), PreliZ [@icazatti_2023] and the development of educational resources [@eabm_2025].
 
 # Software design
 
-We present a redesigned version of `ArviZ` emphasizing greater user control and modularity. The new architecture enables users to customize the installation and use of specific components. The previous `ArviZ` design divided the package into three submodules, which are now available as three independent installable packages with improved design as described next.
+The previous `ArviZ` design divided the package into three submodules, which are now available as three independent installable packages this redesign emphasizes greater user control and modularity. The new architecture enables users to customize the installation and use of specific components. Key design changes include: 
 
-General functionality, data processing, and data input/output have been streamlined and enhanced for greater versatility. Previously, `ArviZ` used the custom `InferenceData` class to organize and store the high-dimensional outputs of Bayesian inference in a structured, labeled format, enabling efficient analysis, metadata persistence, and serialization. These have been replaced with the `DataTree` class from xarray [@Hoyer_2017]. Additionally, converters allow more flexibility in dimensionality, naming, and indexing of their generated outputs.
+General functionality, data processing, and data input/output have been streamlined and enhanced for greater versatility. Previously, `ArviZ` used the custom `InferenceData` class to organize and store the high-dimensional outputs of Bayesian inference in a structured, labeled format, enabling efficient analysis, metadata persistence, and serialization. These have been replaced with the `DataTree` class from xarray [@Hoyer_2017], which, like the original `InferenceData`, supports grouping but is more flexible, enabling richer nesting and automatic support for all xarray I/O formats. Additionally, converters allow more flexibility in dimensionality, naming, and indexing of their generated outputs.
 
 Statistical functions are now accessible through two distinct interfaces:
 
@@ -81,7 +87,7 @@ Plotting functions have also been redesigned to support modularity at multiple l
 
 ## Examples
 
-For the first example, we construct an array resembling data from MCMC sampling. We have 4 chains and 1000 draws for two posterior variables. We can compute the effective sample sizes for this array using the stats interface. For this, we need to specify which axes represent the chains and which the draws.
+For the first example, we use the low-level array interface. We construct an array resembling data from MCMC sampling. We have 4 chains and 1000 draws for two posterior variables. We can compute the effective sample sizes for this array using the stats interface. For this, we need to specify which axes represent the chains and which the draws.
 
     import numpy as np
     from arviz import array_stats
@@ -90,7 +96,7 @@ For the first example, we construct an array resembling data from MCMC sampling.
     samples = rng.normal(size=(4, 1000, 2))  # (chain, draw, variable)
     array_stats.ess(samples, chain_axis=0, draw_axis=1)
 
-We now contrast the array interface with the xarray interface. When converting the NumPy array to a `DataTree`, ArviZ assigns `chain` and `draw` as named dimensions based on the assumed dimension order, so this information is already encoded in the resulting object and does not need to be specified explicitly when calling other functions.
+We now contrast the low-level array interface with the xarray interface. When converting the NumPy array to a `DataTree`, ArviZ assigns `chain` and `draw` as named dimensions based on the assumed dimension order, so this information is already encoded in the resulting object and does not need to be specified explicitly when calling other functions.
 
     import arviz as az
     dt_samples = az.convert_to_datatree(samples)
