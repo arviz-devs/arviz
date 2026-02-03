@@ -42,6 +42,7 @@ extensions = [
     "sphinx_copybutton",
     "jupyter_sphinx",
     "sphinxcontrib.youtube",
+    "sphinx_togglebutton",
 ]
 
 # codeautolink

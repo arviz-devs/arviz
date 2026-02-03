@@ -62,6 +62,7 @@ doc = [
     "sphinx-design",
     "sphinx-notfound-page",
     "sphinxcontrib-youtube",
+    "sphinx-togglebutton",
 ]
 test = ["pytest"]
 check = ["build", "pre-commit"]
