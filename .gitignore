@@ -65,6 +65,8 @@ coverage.xml
 # Sphinx documentation
 docs/build/
 docs/_build/
+# auto generated when running migration guide notebook
+docs/source/user_guide/example.nc
 
 # MyST related
 docs/jupyter_execute
