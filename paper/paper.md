@@ -46,25 +46,27 @@ bibliography: references.bib
 
 # Summary
 
-When working with Bayesian models, a range of related tasks must be addressed beyond inference itself. These include tasks such as visualizing the model results along with their uncertainty, diagnosing the quality of MCMC samples, model criticism or model comparison. We collectively refer to these activities as exploratory analysis of Bayesian models.
+When working with Bayesian models, a range of related tasks must be addressed beyond inference itself. These include diagnosing the quality of MCMC samples, model criticism, model comparison, etc. We collectively refer to these activities as exploratory analysis of Bayesian models.
 
 In this work, we present a redesigned version of `ArviZ`, a Python package for exploratory analysis of Bayesian models. The redesign emphasizes greater user control and modularity. This redesign delivers a more flexible and efficient toolkit for exploratory analysis of Bayesian models. With its renewed focus on modularity and usability, `ArviZ` is well-positioned to remain an essential tool for Bayesian modelers in both research and applied settings.
+
 
 # Statement of need
 
 Probabilistic programming has emerged as a powerful paradigm for statistical modeling, accompanied by a growing ecosystem of tools for model specification and inference. Effective modeling requires robust support for uncertainty visualization, sampling diagnostics, model comparison, and model checking [@Gelman_2020; @Martin_2024; @Guo_2024]. `ArviZ` addresses this gap by providing a unified, backend-agnostic library to perform these tasks. The original `ArviZ` paper [@Kumar_2019] described the landscape of probabilistic programming tools at the time and the need for a unified, backend-agnostic library for exploratory analysis - a need that has only grown as the ecosystem has expanded.
 
-The methods implemented in `ArviZ` are grounded in well-established statistical principles and provide robust, interpretable diagnostics and visualizations [@Vehtari_2017; @Gelman_2019; @Dimitriadis_2021; @Paananen_2021; @Padilla_2021; @Vehtari_2021; @Sailynoja_2022; @Kallioinen_2023; @Sailynoja_2025]. The redesigned version furthers these goals by keeping the easy-to-use interface for regular users and introducing more powerful tooling for power users and developers of Bayesian tools. These updates align with recent developments in the probabilistic programming field. Additionally, the new design facilitates the use of components as modular building blocks for custom analyses. This frequent user request was difficult to accommodate under the old framework.
+The methods implemented in `ArviZ` are grounded in well-established statistical principles and provide robust, interpretable diagnostics and visualizations [@Vehtari_2017; @Gelman_2019; @Dimitriadis_2021; @Paananen_2021; @Padilla_2021; @Vehtari_2021; @Sailynoja_2022; @Kallioinen_2023; @Sailynoja_2025]. As modern Bayesian practice has increasingly emphasized iterative, simulation-based workflows for model building, checking, validation, and comparison, the original ArviZ design became harder to adapt to these emerging needs. The redesigned version furthers ArviZ’s goals by introducing an easier-to-use interface for routine analyses alongside more powerful, flexible tooling for advanced users and developers of Bayesian software. These updates align ArviZ with the current demands of Bayesian modeling and workflow development
+
 
 # State of the field
 
-In the Python Bayesian ecosystem, ArviZ occupies a niche comparable to tools in the R/Stan community such as posterior [@gelman_2013;@Vehtari_2021], loo [@Vehtari_2017;@loo], bayesplot [@bayesplot0;@bayesplot1], and priorsense [@Kallioinen_2023], sharing similar goals while reflecting different language ecosystems and workflows.
+In the Python Bayesian ecosystem, ArviZ occupies a niche comparable to tools in the R/Stan community such as posterior [@gelman_2013;@Vehtari_2021], loo [@Vehtari_2017;@loo], bayesplot [@bayesplot0;@bayesplot1], priorsense [@Kallioinen_2023], and ggdist [@kay_2024] sharing similar goals while reflecting different language ecosystems and workflows.
 
 # Research Impact Statement
 
 `ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019, with over 700 citations and 75 million downloads. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
 
-The maturity of `ArviZ` has also led to other initiatives such including ArviZ.jl [@arvizjl_2025] (for Julia), PreliZ [@icazatti_2023] and the development of educational resources [@eabm_2025].
+The maturity of `ArviZ` has also led to other initiatives, including ArviZ.jl [@arvizjl_2025] for Julia, PreliZ [@icazatti_2023] for prior elicitation and the development of educational resources [@eabm_2025].
 
 # Software design
 
@@ -74,7 +76,7 @@ General functionality, data processing, and data input/output have been streamli
 
 Statistical functions are now accessible through two distinct interfaces:
 
-* A low-level array interface with minimal dependencies, intended for advanced users
+* A low-level array interface with only `numpy` [@harris_2020] and `scipy` [@virtanen_2020] as dependencies, intended for advanced users
 and developers of third-party libraries.
 * A higher-level xarray interface designed for end users, which simplifies usage by automating common tasks and handling metadata.
 
@@ -88,7 +90,7 @@ Thanks to this new design, the cost of adding "batteries-included" plots has red
 
 ## Examples
 
-For the first example, we use the low-level array interface. We construct an array resembling data from MCMC sampling. We have 4 chains and 1000 draws for two posterior variables. We can compute the effective sample sizes for this array using the array interface. For this, we need to specify which axes represent the chains and which the draws. On the flip side, this array interface is available installing only `arviz-stats`, `numpy` and `scipy`.
+For the first example, we use the low-level array interface to compute the effective sample sizes for some fake data. We construct an array resembling data from MCMC sampling with 4 chains and 1000 draws for two posterior variables. When using the array interface we need to specify which axes represent the chains and which the draws.
 
     import numpy as np
     from arviz_stats.base import array_stats
@@ -97,25 +99,26 @@ For the first example, we use the low-level array interface. We construct an arr
     samples = rng.normal(size=(4, 1000, 2))  # (chain, draw, variable)
     array_stats.ess(samples, chain_axis=0, draw_axis=1)
 
-We now contrast the low-level array interface with the recommended xarray interface. When converting the NumPy array to a `DataTree`, ArviZ assigns `chain` and `draw` as named dimensions based on the assumed dimension order, so this information is already encoded in the resulting object and does not need to be specified explicitly when calling other functions.
+The array interface is lightweight and intended for advanced users and library developers. For most users, we instead recommend the xarray interface, as it is more user-friendly and automates many tasks. When converting the NumPy array to a `DataTree`, ArviZ assigns `chain` and `draw` as named dimensions based on the assumed dimension order, so this information is already encoded in the resulting object and does not need to be specified explicitly when calling other functions.
 
     import arviz as az
     dt_samples = az.convert_to_datatree(samples)
     az.ess(dt_samples)
 
-The only required argument for battery-included plots is the input data, typically a `DataTree` (`dt`), but in the following example we also apply optional customizations.
+The only required argument for battery-included plots is the input data, typically a `DataTree` (`dt`). In this example we also apply optional customizations.
 
     az.style.use('arviz-variat')
     dt = az.load_arviz_data("centered_eight")
     pc = az.plot_dist(
         dt,
-        kind="hist",
-        visuals={"hist":{"alpha": 0.3}},
+        kind="dot",
+        visuals={"dist":{"marker": "C6"},
+                "point_estimate_text":False},
         aes={"color": ["school"]}
     );
     pc.add_legend("school", loc="outside right upper")
 
-![plot_dist with color mapped to school dimension.](figures/figure_0.png "`plot_dist` is a built-in plot. Here we show an example of further customization. The color is mapped to the school dimension. A neutral color is automatically assigned to the variables without the school dimension (mu and tau). The histograms have been made translucent"){width=4.5in}
+![plot_dist with color mapped to school dimension.](figures/figure_0.png "`plot_dist` is one of the batteries-included plots in `ArviZ`. In this example we demonstrate how it can be further customized. We change the default kind from "kde" to "dot" to produce quantile dot plots [@kay_2016], and map the school dimension to color so that each school is shown in a different hue. Variables that do not have a school dimension (such as mu and tau) are automatically assigned a neutral color. We also disable the point-estimate text and set a custom marker style for the dots, and finally add a legend for the school"){width=4.5in}
 
 We have shown two small examples. For a more comprehensive overview, see the [`ArviZ` documentation](https://python.arviz.org/en/latest/) and the [EABM guide](https://arviz-devs.github.io/EABM/) [@eabm_2025]. These resources include a wide range of examples designed for all types of users, from casual users to advanced analysts and developers looking to use `ArviZ` in their projects or libraries.
 
