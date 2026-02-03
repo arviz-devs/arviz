@@ -105,7 +105,7 @@ The array interface is lightweight and intended for advanced users and library d
     dt_samples = az.convert_to_datatree(samples)
     az.ess(dt_samples)
 
-The only required argument for battery-included plots is the input data, typically a `DataTree` (`dt`). In this example we also apply optional customizations.
+The only required argument for battery-included plots, like `plot_dist`, is the input data, typically a `DataTree` (`dt`). In this example we also apply optional customizations.
 
     az.style.use('arviz-variat')
     dt = az.load_arviz_data("centered_eight")
@@ -118,9 +118,11 @@ The only required argument for battery-included plots is the input data, typical
     );
     pc.add_legend("school", loc="outside right upper")
 
-![plot_dist with color mapped to school dimension.](figures/figure_0.png "`plot_dist` is one of the batteries-included plots in `ArviZ`. In this example we demonstrate how it can be further customized. We change the default kind from "kde" to "dot" to produce quantile dot plots [@kay_2016], and map the school dimension to color so that each school is shown in a different hue. Variables that do not have a school dimension (such as mu and tau) are automatically assigned a neutral color. We also disable the point-estimate text and set a custom marker style for the dots, and finally add a legend for the school"){width=4.5in}
+![plot_dist with color mapped to school dimension.\label{fig:plot_dist}](figures/figure_0.png){width=4.5in}
 
-We have shown two small examples. For a more comprehensive overview, see the [`ArviZ` documentation](https://python.arviz.org/en/latest/) and the [EABM guide](https://arviz-devs.github.io/EABM/) [@eabm_2025]. These resources include a wide range of examples designed for all types of users, from casual users to advanced analysts and developers looking to use `ArviZ` in their projects or libraries.
+To create \autoref{fig:plot_dist} we change the default kind argument in `plot_dist` from "kde" to "dot" to produce quantile dot plots [@kay_2016], and map the school dimension to color so that each school is shown in a different hue. Variables that do not have a school dimension (such as mu and tau) are automatically assigned a neutral color. We also disable the point-estimate text and set a custom marker style for the dots, and finally add a legend for the school.
+
+For more examples and a more comprehensive overview, see the [`ArviZ` documentation](https://python.arviz.org/en/latest/) and the [EABM guide](https://arviz-devs.github.io/EABM/) [@eabm_2025]. These resources include a wide range of examples designed for all types of users, from casual users to advanced analysts and developers looking to use `ArviZ` in their projects or libraries.
 
 ## AI usage disclosure
 
