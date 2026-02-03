@@ -66,7 +66,7 @@ to create your feature branch from the up-to-date `main`
    :sync: ssh
 
    ```
-   cd arviz
+   cd <arviz repo>
    git remote add upstream git@github.com:arviz-devs/<arviz repo>.git
    ```
    :::
@@ -75,7 +75,7 @@ to create your feature branch from the up-to-date `main`
    :sync: https
 
    ```
-   cd arviz
+   cd <arviz repo>
    git remote add upstream https://github.com/arviz-devs/<arviz repo>.git
    ```
    :::
