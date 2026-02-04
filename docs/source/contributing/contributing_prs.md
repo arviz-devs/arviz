@@ -85,3 +85,11 @@ You can refer to {func}`~arviz_plots.plot_dist` and {func}`~arviz_plots.plot_for
 
 :::{caution} Section in construction
 :::
+
+Tests are run through dedicated tox tasks, however, due to differences in architecture, combinations of optional dependencies we might want to test and scope differences between libraries, each library defines their own testing tasks.
+
+Moreover, we also have package specific test organization and some extra pytest customization available in some cases. Consequently, each library has its own contributing page on how to run the test suite or contribute to it:
+
+* arviz-base coming soon
+* {ref}`ArviZ-stats <arviz_stats:contributing_testing>`
+* {ref}`ArviZ-plots <arviz_plots:contributing_testing>`
