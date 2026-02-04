@@ -51,6 +51,8 @@ plotly = ["arviz_plots[plotly]"]
 # dev related blocks
 doc = [
     "h5netcdf[h5py]",
+    "h5netcdf",
+    "h5py",
     "jupyter-sphinx",
     "matplotlib",
     "myst-parser[linkify]",
@@ -61,6 +63,7 @@ doc = [
     "sphinx-design",
     "sphinx-notfound-page",
     "sphinxcontrib-youtube",
+    "sphobjinv",
 ]
 test = ["pytest"]
 check = ["build", "pre-commit"]
