@@ -178,6 +178,7 @@ html_sidebars: dict[str, Any] = {"index": [], "404": [], "community": []}
 # html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+html_extra_path = ["api/generated/*"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 

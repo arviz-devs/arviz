@@ -4,14 +4,14 @@ You can contribute to ArviZ by helping with translations of our website and
 documentation.
 
 :::{important}
-Collaboration on translations happens on [Transifex](https://www.transifex.com/arviz/public/).
+Collaboration on translations happens on [Transifex](https://explore.transifex.com/arviz/arviz-project-website/).
 That means that to contribute to ArviZ translations:
 
 * NO coding experience is required
 * NO GitHub account is needed
 :::
 
-To help with translations you will need to go to [Transifex](https://www.transifex.com/arviz/public/)
+To help with translations you will need to go to [Transifex](https://explore.transifex.com/arviz/arviz-project-website/)
 and sign up. After that you will be able to translate strings.
 
 We will regularly review the suggested translations and update the website.
