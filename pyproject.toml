@@ -27,7 +27,7 @@ dynamic = ["version", "description"]
 dependencies = [
   "arviz_base >=0.7.0",
   "arviz_stats[xarray] >=0.7.0",
-  "arviz_plots >=0.7.0",
+  "arviz-plots @ git+https://github.com/arviz-devs/arviz-plots",
 ]
 
 [tool.flit.module]
@@ -51,6 +51,7 @@ plotly = ["arviz_plots[plotly]"]
 # dev related blocks
 doc = [
     "h5netcdf",
+    "h5py",
     "jupyter-sphinx",
     "matplotlib",
     "myst-parser[linkify]",
@@ -61,6 +62,7 @@ doc = [
     "sphinx-design",
     "sphinx-notfound-page",
     "sphinxcontrib-youtube",
+    "sphobjinv",
 ]
 test = ["pytest"]
 check = ["build", "pre-commit"]
