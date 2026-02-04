@@ -25,9 +25,9 @@ classifiers = [
 ]
 dynamic = ["version", "description"]
 dependencies = [
-  "arviz_base >=0.7.0",
-  "arviz_stats[xarray] >=0.7.0",
-  "arviz-plots @ git+https://github.com/arviz-devs/arviz-plots",
+  "arviz_base @ git+https://github.com/arviz-devs/arviz-base",
+  "arviz_stats[xarray] @ git+https://github.com/arviz-devs/arviz-stats",
+  "arviz_plots @ git+https://github.com/arviz-devs/arviz-plots",
 ]
 
 [tool.flit.module]
@@ -50,6 +50,7 @@ plotly = ["arviz_plots[plotly]"]
 
 # dev related blocks
 doc = [
+    "h5netcdf[h5py]",
     "h5netcdf",
     "h5py",
     "jupyter-sphinx",
