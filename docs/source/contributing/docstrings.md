@@ -40,5 +40,3 @@ All the kwargs parameters in the {doc}`arviz_plots:api/index` modules are passed
 Matplotlib or Bbokeh functions. While writing their description, the functions to which they are
 being passed must be mentioned. In order to check or add those functions, the process is the same
 for all the kwargs arguments.
-Let's read the step-by-step guide for `backend_kwargs` as an example,
-[here](https://github.com/arviz-devs/arviz/wiki/ArviZ-Hacktoberfest-2021).
