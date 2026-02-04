@@ -36,7 +36,7 @@ def _warn_once_per_day():
         tmp.replace(path)
 
     warning_dir = Path(user_cache_dir("arviz", "arviz"))
-    warning_dir.mkdir(exist_ok=True)
+    warning_dir.mkdir(exist_ok=True, parents=True)
 
     stamp_file = warning_dir / "daily_warning"
     today = datetime.date.today()
