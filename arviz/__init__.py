@@ -1,6 +1,6 @@
 # pylint: disable=wildcard-import,invalid-name,wrong-import-position
 """ArviZ is a library for exploratory analysis of Bayesian models."""
-__version__ = "0.23.3"
+__version__ = "0.23.4"
 
 import logging
 import os
@@ -36,7 +36,7 @@ def _warn_once_per_day():
         tmp.replace(path)
 
     warning_dir = Path(user_cache_dir("arviz", "arviz"))
-    warning_dir.mkdir(exist_ok=True)
+    warning_dir.mkdir(exist_ok=True, parents=True)
 
     stamp_file = warning_dir / "daily_warning"
     today = datetime.date.today()
