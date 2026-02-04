@@ -23,16 +23,27 @@ def _warn_once_per_day():
     import datetime
     from warnings import warn
     from pathlib import Path
+    from platformdirs import user_cache_dir
 
-    warning_dir = Path.home() / "arviz_data"
+    def _atomic_write_text(path: Path, text: str) -> None:
+        """
+        Write text to a file atomically.
+
+        Write to a temporary file in the same directory and replace the target.
+        """
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(text)
+        tmp.replace(path)
+
+    warning_dir = Path(user_cache_dir("arviz", "arviz"))
     warning_dir.mkdir(exist_ok=True)
 
     stamp_file = warning_dir / "daily_warning"
     today = datetime.date.today()
 
-    if stamp_file.exists():
+    try:
         last_date = datetime.date.fromisoformat(stamp_file.read_text().strip())
-    else:
+    except (FileNotFoundError, ValueError):
         last_date = None
 
     if last_date != today:
@@ -44,8 +55,7 @@ def _warn_once_per_day():
             "https://python.arviz.org/en/latest/user_guide/migration_guide.html",
             FutureWarning,
         )
-
-        stamp_file.write_text(today.isoformat())
+        _atomic_write_text(stamp_file, today.isoformat())
 
 
 _warn_once_per_day()
