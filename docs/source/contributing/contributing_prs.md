@@ -79,7 +79,7 @@ as they are used to generate type information for third-party tools such as type
 
 If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
 please consider adding inline documentation examples.
-You can refer to {func}`az.plot_posterior <arviz.plot_posterior>` for a good example.
+You can refer to {func}`~arviz_plots.plot_dist` and {func}`~arviz_plots.plot_forest` for a good examples.
 
 ## Tests
 
