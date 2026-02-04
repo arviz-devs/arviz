@@ -33,7 +33,7 @@ which can nor should follow the Diátaxis framework.
 ArviZ is a library with a strong visualization component.
 This translates for example into some duplicity when it comes to reference content.
 
-Both the {ref}`arviz_plots:example_gallery` and the {doc}`arviz_plots:api/index` pages are reference content.
+Both the {ref}`arviz_plots:example_gallery` and the {ref}`arviz_plots:api_reference` pages are reference content.
 The API reference indexes by name and contains the description of each object,
 whereas the Example Gallery indexes by image and to avoid excessive duplication,
 links to the respective API page.
