@@ -2,12 +2,15 @@
 # Issue reports
 
 We appreciate being notified of problems with the existing ArviZ code.
-We prefer that issues be filled on the
-Github Issue Tracker of the corresponding package repository
-([`arviz-base`](https://github.com/arviz-devs/arviz-base/issues),
-[`arviz-stats`](https://github.com/arviz-devs/arviz-stats/issues),
-[`arviz-plots`](https://github.com/arviz-devs/arviz-stats/issues))
-rather than on social media or by direct email to the developers.
+We prefer that issues be shared on a Github Issue Tracker rather than on social media or by direct email to the developers.
+If you are unsure if your issue corresponds to a specific package of the ArviZverse,
+you can open an issue in the [main ArviZ repository issue tracker](https://github.com/arviz-devs/arviz/issues).
+On the other hand, if you are certain the issue corresponds to a specific pacakge, use the relevant issue tracker: of the corresponding package repository:
+
+* [ArviZ-base](https://github.com/arviz-devs/arviz-base/issues)
+* [ArviZ-stats](https://github.com/arviz-devs/arviz-stats/issues)
+* [ArviZ-plots](https://github.com/arviz-devs/arviz-stats/issues)
+
 
 Please verify that your issue is not being currently addressed by other
 issues or pull requests by using the GitHub search tool to look for keywords

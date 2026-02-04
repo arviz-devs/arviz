@@ -77,19 +77,25 @@ as they are used to generate type information for third-party tools such as type
 
 ## Documentation for user facing methods
 
-If changes are made to a method documented in the {ref}`ArviZ API Guide <api>`
-please consider adding inline documentation examples.
-You can refer to {func}`~arviz_plots.plot_dist` and {func}`~arviz_plots.plot_forest` for a good examples.
+If changes are made to a method documented in {ref}`ArviZ-base API <arviz_base:api_reference>`,
+{ref}`ArviZ-stats API <arviz_stats:api_reference>`, or {ref}`ArviZ-plots API <arviz_plots:api_reference>`;
+please consider adding inline examples, See Also links,
+References when relevant (e.g., if it implements a published method),
+and Notes with implementation details that might be relevant to users.
+You can refer to {func}`~arviz_plots.plot_dist` and {func}`~arviz_plots.plot_forest` for  good examples.
 
 ## Tests
 
 :::{caution} Section in construction
 :::
 
-Tests are run through dedicated tox tasks, however, due to differences in architecture, combinations of optional dependencies we might want to test and scope differences between libraries, each library defines their own testing tasks.
+Tests are run through dedicated tox tasks, however, due to differences in architecture,
+combinations of optional dependencies we might want to test and scope differences between libraries,
+each library defines their own testing tasks.
 
-Moreover, we also have package specific test organization and some extra pytest customization available in some cases. Consequently, each library has its own contributing page on how to run the test suite or contribute to it:
+Moreover, we also have package specific test organization and some extra pytest customization available in some cases.
+Consequently, each library has its own contributing page on how to run the test suite or contribute to it:
 
-* arviz-base coming soon
+* ArviZ-base: coming soon
 * {ref}`ArviZ-stats <arviz_stats:contributing_testing>`
 * {ref}`ArviZ-plots <arviz_plots:contributing_testing>`
