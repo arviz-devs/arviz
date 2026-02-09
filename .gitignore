@@ -67,6 +67,8 @@ docs/build/
 docs/_build/
 # auto generated when running migration guide notebook
 docs/source/user_guide/example.nc
+docs/source/_miniatures
+docs/source/savefig
 
 # MyST related
 docs/jupyter_execute
