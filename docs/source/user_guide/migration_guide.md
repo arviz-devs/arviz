@@ -3,7 +3,7 @@ jupyter:
   jupytext:
     text_representation:
       extension: .md
-      format_name: markdown
+      format_name: myst
       format_version: '1.3'
       jupytext_version: 1.19.1
   kernelspec:
@@ -23,54 +23,57 @@ ArviZ is now split into three libraries (`arviz-base`, `arviz-stats`, `arviz-plo
 import arviz as az
 ```
 
-Optional: confirm all three libraries are exposed:
+## Plot names and signatures
 
-```python
-print(az.info)
-```
+Some plot functions were renamed or split; others kept the same name but have updated arguments and defaults. Use the following as a quick reference; see {ref}`whats_new_1_0` for the full inventory and new/removed functions.
 
+**Renamed or restructured:**
 
-### Credible intervals and rcParams
+| ArviZ &lt;1 | ArviZ ≥1 |
+|-------------|----------|
+| `plot_bpv` | `plot_ppc_pit`, `plot_ppc_tstat` |
+| `plot_dist_comparison` | `plot_prior_posterior` |
+| `plot_ecdf` | `plot_dist`, `plot_ecdf_pit` |
+| `plot_ess` | `plot_ess`, `plot_ess_evolution` |
+| `plot_forest` | `plot_forest`, `plot_ridge` |
+| `plot_ppc` | `plot_ppc_dist` |
+| `plot_posterior`, `plot_density` | `plot_dist` |
+| `plot_trace` | `plot_trace_dist`, `plot_trace_rank` |
 
-1. **Interval type (`ci_kind`):** In previous versions, summaries and interval-based functions used the highest-density interval (HDI) by default. In 1.0 the default is the equal-tailed interval (ETI), which tends to give more stable summaries. 
+**Same name, updated implementation/arguments:** `plot_autocorr`, `plot_bf`, `plot_compare`, `plot_energy`, `plot_khat`, `plot_lm`, `plot_loo_pit`, `plot_mcse`, `plot_pair`, `plot_parallel`, `plot_rank`.
 
-Functions that accept `ci_kind` include {func}`~arviz.summary`, {func}`~arviz.bayesian_r2`, {func}`~arviz.ci_in_rope`, {func}`~arviz.loo_r2`, {func}`~arviz.residual_r2`, {func}`~arviz_plots.plot_convergence_dist`, {func}`~arviz_plots.plot_dist`, {func}`~arviz_plots.plot_forest`, {func}`~arviz_plots.plot_lm`, {func}`~arviz_plots.plot_ppc_interval`, {func}`~arviz_plots.plot_ppc_tstat`, and {func}`~arviz_plots.plot_psense_dist`.
+**Removed:** Legacy `plot_dist`, `plot_kde` (functionality is in the new `plot_dist`), `plot_violin`. Some functions (e.g. `plot_elpd`, `plot_ppc_residuals`, `plot_ts`) are planned but not yet available.
 
-   **What to do:** If you're fine with ETI, you don't need to change anything (results may differ). If you want HDI, add `ci_kind="hdi"` to your calls or set `az.rcParams["stats.ci_kind"] = "hdi"` once.
+## Plot return type and kwargs
 
+1. **Return type:** Plot functions now return a {class}`~arviz_plots.PlotCollection` (or similar) instead of raw axes or figures. That gives consistent layout, faceting, and control over how plots are combined.
 
-2. **Parameter name (`hdi_prob` → `ci_prob`):** The argument for credible-interval probability was renamed from `hdi_prob` to `ci_prob`, because "ci" (credible interval) is the general term for either HDI or ETI. In 1.0 the old name is **removed** (it raises an error). 
+   **What's affected:** All `plot_*` functions. Code that used the return value (e.g. to get axes or save a figure).
 
-Functions that accept `ci_prob` include: {func}`~arviz.summary`, {func}`~arviz.bayesian_r2`, {func}`~arviz.ci_in_rope`, {func}`~arviz.loo_r2`, {func}`~arviz.residual_r2`, {func}`~arviz_plots.plot_convergence_dist`, {func}`~arviz_plots.plot_dist`, {func}`~arviz_plots.plot_lm`, {func}`~arviz_plots.plot_ppc_pava`, {func}`~arviz_plots.plot_ppc_pava_residuals`, {func}`~arviz_plots.plot_ppc_rootogram`, {func}`~arviz_plots.plot_ppc_tstat`, {func}`~arviz_plots.plot_psense_dist`.
+   **What to do:** If you only display the plot, you often need no change (the backend still shows it). If you need the figure or axes, use the PlotCollection API (e.g. `.show()`, or the methods that expose figures). See {ref}`whats_new_1_0` and the plotting docs.
 
-   **What to do:** In functions that use the keyword argument `hdi_prob`, replace it with `ci_prob`. If you use an `rcParam` that includes `hdi_prob`, as in `az.rcParams["stats.hdi_prob"]`, replace it with `ci_prob`. 
-   
-   
-3. **Default value (0.94 → 0.89):** The default interval probability is now 0.89 instead of 0.94, for more stable summaries.
-
-   **What to do:** If you're fine with 0.89, no change needed, but be aware that results will change. If you want the old behavior, set `az.rcParams["stats.ci_prob"] = 0.94` or pass `ci_prob=0.94` to the relevant functions.
-
-
-Examples:
+Example:
 
 ```python
 dt = az.load_arviz_data("centered_eight")
-
-# 1. New defaults (no args): ETI, 89% probability
-az.summary(dt, var_names=["mu"], kind="stats")
+pc = az.plot_rank(dt, var_names=["mu", "tau"])
+pc.show()   # PlotCollection controls layout; use pc for figure/axes access
 ```
 
-```python
-# 2. New args explicit: same result as above
-az.summary(dt, var_names=["mu"], kind="stats", ci_kind="eti", ci_prob=0.89)
-```
 
-```python
-# 3. Restore old behavior: HDI, 94% probability
-az.summary(dt, var_names=["mu"], kind="stats", ci_kind="hdi", ci_prob=0.94)
-```
+2. **Kwargs:** Backend-specific options are no longer passed via many separate `*_kwargs` arguments (e.g. `plot_kwargs`, `ax_kwargs`). They are now passed via `visuals`, `stats`, and `**pc_kwargs`.
 
-### DataTree (replaces InferenceData)
+   **What's affected:** Code that passed backend or layout options into plot functions using the old keyword arguments.
+
+   **What to do:** Use the `visuals`, `stats`, and `**pc_kwargs` arguments instead. See {ref}`whats_new_1_0` and the plotting docs for the mapping and examples.
+
+   Example — before (legacy) vs after (1.0):
+
+   ```python
+   # TODO: We need an example that shows before and after
+   ```
+
+## DataTree (replaces InferenceData)
 
 **What changed and why:** `arviz.InferenceData` is gone. ArviZ now uses {class}`xarray.DataTree` for the same groups (`posterior`, `observed_data`, etc.). DataTree is an xarray structure, so I/O is more flexible (any format xarray supports works) and groups can be nested.
 
@@ -104,25 +107,38 @@ list(dt.children)
 dt["posterior"].to_dataset()
 ```
 
-### I/O (netcdf/zarr)
+## Credible intervals
 
-**What changed and why:** Existing netcdf/zarr files are unchanged and still valid. The only API change is where write lives: there are no top-level `to_netcdf`/`to_zarr`; you call them on the DataTree, so any format xarray supports is available without ArviZ adding wrappers.
+Three things changed for credible intervals and related defaults:
 
-**What's affected:** Code that called `idata.to_netcdf(...)` or `idata.to_zarr(...)` (or the old top-level write helpers). Reading is still {func}`arviz.from_netcdf` and {func}`arviz.from_zarr`; they now return a DataTree.
+1. **Interval type (`ci_kind`):** Default is now equal-tailed interval (ETI) instead of highest-density interval (HDI). Many functions accept `ci_kind` (e.g. {func}`~arviz.summary`, {func}`~arviz_plots.plot_forest`).
+2. **Parameter name (`hdi_prob` → `ci_prob`):** Renamed for consistency; the old name is removed in 1.0. Replace `hdi_prob` with `ci_prob` in code and in any rcParam keys.
+3. **Default probability (0.94 → 0.89):** The default interval probability is now 0.89.
 
-**What to do:** For reading, keep using `az.from_netcdf(...)` or `az.from_zarr(...)`. For writing, call methods on the tree: `dt.to_netcdf(...)` or `dt.to_zarr(...)` (e.g. `dt.to_netcdf("out.nc", engine="h5netcdf")`). No change to file format or to read paths.
+To override any of these (or other defaults), use a per-call argument, set `az.rcParams` at the start of your code, or use a user or project config file. See **rcParams and defaults** at the end of this page.
 
-Example:
+Examples:
 
 ```python
 dt = az.load_arviz_data("centered_eight")
-dt.to_netcdf("out.nc", engine="h5netcdf")
-az.from_netcdf("out.nc")
+
+# 1. New defaults (no args): ETI, 89% probability
+az.summary(dt, var_names=["mu"], kind="stats")
 ```
 
-### Model comparison
+```python
+# 2. New args explicit: same result as above
+az.summary(dt, var_names=["mu"], kind="stats", ci_kind="eti", ci_prob=0.89)
+```
 
-1. **WAIC removed:** We use PSIS-LOO-CV only; WAIC is no longer available. PSIS-LOO-CV is more robust, has better diagnostics, and we’ve added features around it (e.g. LOO-R2, predictive metrics).
+```python
+# 3. Restore old behavior: HDI, 94% probability
+az.summary(dt, var_names=["mu"], kind="stats", ci_kind="hdi", ci_prob=0.94)
+```
+
+## Model comparison
+
+1. **WAIC removed:** We use PSIS-LOO-CV only; WAIC is no longer available. PSIS-LOO-CV is more robust, has better diagnostics, and we've added features around it (e.g. LOO-R2, predictive metrics).
 
    **What's affected:** Code that called `waic` or relied on WAIC for model comparison or weights.
 
@@ -131,9 +147,9 @@ az.from_netcdf("out.nc")
 
 2. **Compare default (`ic_compare_method`):** The method used to compute model weights when you call {func}`~arviz.compare` (and related behavior) is controlled by `ic_compare_method`. The default is now **stacking** (weights chosen to optimize predictive performance) instead of the previous default (e.g. pseudo-BMA).
 
-   **What's affected:** Code that uses {func}`~arviz.compare` (or depends on the default method for combining/ranking models). Reported weights and rankings can change even if you didn’t pass a method explicitly.
+   **What's affected:** Code that uses {func}`~arviz.compare` (or depends on the default method for combining/ranking models). Reported weights and rankings can change even if you didn't call a method explicitly.
 
-   **What to do:** If you’re fine with stacking, no change needed. To use a different weighting method, call `compare(..., ic_compare_method="pseudo-bma")` (or another supported value) or set the corresponding rcParam. See {ref}`whats_new_1_0` for details.
+   **What to do:** If you're fine with stacking, no change needed. To use a different weighting method, call `compare(..., ic_compare_method="pseudo-bma")` (or another supported value) or set the corresponding rcParam. See {ref}`whats_new_1_0` for details.
 
 Examples:
 
@@ -147,8 +163,8 @@ az.compare({"model A": az.loo(dt), "model B": az.loo(dt_2)})
 ```
 
 ```python
-# 2. New call explicit: same as above (in 1.0 pass ic_compare_method="stacking")
-az.compare({"model A": az.loo(dt), "model B": az.loo(dt_2)})
+# 2. New call explicit: same as above
+az.compare({"model A": az.loo(dt), "model B": az.loo(dt_2)}, ic_compare_method="stacking")
 ```
 
 ```python
@@ -156,74 +172,43 @@ az.compare({"model A": az.loo(dt), "model B": az.loo(dt_2)})
 az.compare({"model A": az.loo(dt), "model B": az.loo(dt_2)}, method="pseudo-bma")
 ```
 
-### Dimensions (dim and sample_dims)
+## I/O (netcdf/zarr)
 
-**What changed and why:** Stats and diagnostics now use either `dim` or `sample_dims` depending on the operation, to align with xarray and to distinguish “reduce over these sample dimensions” (e.g. `ess`, `rhat`) from “reduce over these dimensions per variable” (e.g. `hdi`, `eti`). The default sample dims are still `(chain, draw)`.
+**What changed and why:** Existing netcdf/zarr files are unchanged and still valid. The only API change is where write lives: there are no top-level `to_netcdf`/`to_zarr`; you call them on the DataTree, so any format xarray supports is available without ArviZ adding wrappers.
 
-**What's affected:** Functions that reduce dimensions: e.g. `ess`, `rhat`, `mcse` use `sample_dims`; `hdi`, `eti`, `kde` and many accessor methods use `dim`. See {ref}`whats_new_1_0` for the full list and when to use which.
+**What's affected:** Code that called `idata.to_netcdf(...)` or `idata.to_zarr(...)` (or the old top-level write helpers). Reading is still {func}`arviz.from_netcdf` and {func}`arviz.from_zarr`; they now return a DataTree.
 
-**What to do:** If you don’t pass dimensions, behavior is unchanged (default `(chain, draw)`). If you do pass dimensions, use the argument that matches the function: `sample_dims` for functions that require the same dims on all variables, `dim` for functions that can reduce different dims per variable.
-
-Example:
-
-```python
-dt = az.load_arviz_data("centered_eight")
-az.ess(dt, sample_dims=["chain", "draw"])   # sample_dims for ess, rhat, mcse
-dt.azstats.hdi(dim=["chain", "draw"])      # dim for hdi, eti, kde
-```
-
-### Plot return type and kwargs
-
-1. **Return type:** Plot functions now return a {class}`~arviz_plots.PlotCollection` (or similar) instead of raw axes or figures. That gives consistent layout, faceting, and control over how plots are combined.
-
-   **What's affected:** All `plot_*` functions. Code that used the return value (e.g. to get axes or save a figure).
-
-   **What to do:** If you only display the plot, you often need no change (the backend still shows it). If you need the figure or axes, use the PlotCollection API (e.g. `.show()`, or the methods that expose figures). See {ref}`whats_new_1_0` and the plotting docs.
+**What to do:** For reading, keep using `az.from_netcdf(...)` or `az.from_zarr(...)`. For writing, call methods on the tree: `dt.to_netcdf(...)` or `dt.to_zarr(...)` (e.g. `dt.to_netcdf("out.nc", engine="h5netcdf")`). No change to file format or to read paths. The main impact for many users will be ensuring the right dependencies are installed for the format they use.
 
 Example:
 
 ```python
 dt = az.load_arviz_data("centered_eight")
-pc = az.plot_rank(dt, var_names=["mu", "tau"])
-pc.show()   # PlotCollection controls layout; use pc for figure/axes access
+
+# Before (legacy): write on the object or top-level; from_netcdf returned InferenceData
+# idata.to_netcdf("out.nc")   # or arviz.to_netcdf(idata, "out.nc")
+# idata = az.from_netcdf("out.nc")
+
+# After (1.0): write on the DataTree; from_netcdf returns a DataTree
+dt.to_netcdf("out.nc", engine="h5netcdf")
+az.from_netcdf("out.nc")
 ```
 
+## Dimensions (dim and sample_dims)
 
-2. **Kwargs:** Backend-specific options are no longer passed via many separate `*_kwargs` arguments (e.g. `plot_kwargs`, `ax_kwargs`). They are now passed via `visuals`, `stats`, and `**pc_kwargs`.
+The default sample dimensions are still `(chain, draw)`; most users need no change. In 0.x, only a few entry points (e.g. `hdi` via a kwarg, or some plots with `skip_dims`) could reduce over other dimensions. In 1.0 we use `dim` or `sample_dims` depending on the function. If you relied on custom dimensions, see {ref}`whats_new_1_0` for the full explanation and which functions use which argument.
 
-   **What's affected:** Code that passed backend or layout options into plot functions using the old keyword arguments.
+## rcParams and defaults
 
-   **What to do:** Use the `visuals`, `stats`, and `**pc_kwargs` arguments instead. See {ref}`whats_new_1_0` and the plotting docs for the mapping and examples.
+You can control ArviZ behavior in three ways:
 
-   Example:
+- **User-level or project templates:** Put options in an `arvizrc` file (e.g. in your home directory or project root). See the template for available keys.
+- **`rcParams` at the start of your code:** Set `az.rcParams["group.key"] = value` once after importing ArviZ; it applies for the rest of the session.
+- **Per-call arguments:** Pass the option (e.g. `ci_kind="hdi"`, `ci_prob=0.94`) to each function that supports it.
 
-   ```python
-   # Backend/layout options: pass via visuals, stats, or **pc_kwargs (not the old *_kwargs)
-   # TODO: show an example of the old and new formats
-   pc = az.plot_rank(dt, var_names=["mu", "tau"], figsize=(8, 4))
-   pc.show()
-   ```
+We do not consider changing an rcParam *default* to be a breaking change. Defaults may change in minor releases. If you care strongly about particular defaults, use a user-level template or set `rcParams` at the start of your script.
 
-### Plot names and signatures
-
-Some plot functions were renamed or split; others kept the same name but have updated arguments and defaults. Use the following as a quick reference; see {ref}`whats_new_1_0` for the full inventory and new/removed functions.
-
-**Renamed or restructured:**
-
-| ArviZ &lt;1 | ArviZ ≥1 |
-|-------------|----------|
-| `plot_bpv` | `plot_ppc_pit`, `plot_ppc_tstat` |
-| `plot_dist_comparison` | `plot_prior_posterior` |
-| `plot_ecdf` | `plot_dist`, `plot_ecdf_pit` |
-| `plot_ess` | `plot_ess`, `plot_ess_evolution` |
-| `plot_forest` | `plot_forest`, `plot_ridge` |
-| `plot_ppc` | `plot_ppc_dist` |
-| `plot_posterior`, `plot_density` | `plot_dist` |
-| `plot_trace` | `plot_trace_dist`, `plot_trace_rank` |
-
-**Same name, updated implementation/arguments:** `plot_autocorr`, `plot_bf`, `plot_compare`, `plot_energy`, `plot_khat`, `plot_lm`, `plot_loo_pit`, `plot_mcse`, `plot_pair`, `plot_parallel`, `plot_rank`.
-
-**Removed:** Legacy `plot_dist`, `plot_kde` (functionality is in the new `plot_dist`), `plot_violin`. Some functions (e.g. `plot_elpd`, `plot_ppc_residuals`, `plot_ts`) are planned but not yet available.
+**Note:** The `hdi_prob` → `ci_prob` *rename* was a breaking change but was done in preparation; existing arvizrc templates already use `ci_prob`. The default method for model-comparison weights was changed to stacking a while ago, so that is unchanged in 1.0. For 0.x default values, see [arvizrc.template (v0.x)](https://github.com/arviz-devs/arviz/blob/v0.x/arvizrc.template).
 
 ---
 
