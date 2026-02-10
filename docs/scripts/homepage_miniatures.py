@@ -1,7 +1,7 @@
 """Script to generate the miniatures used for the website homepage grid.
 
 Due to the html structure of the page, the 6 figures below should aim for a 2/1 ratio.
-Their width should be roughtly twice their height.
+Their width should be roughly twice their height.
 """
 
 from pathlib import Path

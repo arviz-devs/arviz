@@ -33,7 +33,7 @@ ArviZ uses the following process to cut a new release of the ArviZverse packages
 
    :::{important}
    There is a bot that opens a PR automatically to update the conda forge recipe.
-   There is a second bot that also attempts to update dependecies automatically from `pyproject.toml`,
+   There is a second bot that also attempts to update dependencies automatically from `pyproject.toml`,
    however, at the time of writing it is experimental, so we always need to double check dependencies.
    :::
 

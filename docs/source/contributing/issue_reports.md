@@ -5,7 +5,7 @@ We appreciate being notified of problems with the existing ArviZ code.
 We prefer that issues be shared on a Github Issue Tracker rather than on social media or by direct email to the developers.
 If you are unsure if your issue corresponds to a specific package of the ArviZverse,
 you can open an issue in the [main ArviZ repository issue tracker](https://github.com/arviz-devs/arviz/issues).
-On the other hand, if you are certain the issue corresponds to a specific pacakge, use the relevant issue tracker: of the corresponding package repository:
+On the other hand, if you are certain the issue corresponds to a specific package, use the relevant issue tracker: of the corresponding package repository:
 
 * [ArviZ-base](https://github.com/arviz-devs/arviz-base/issues)
 * [ArviZ-stats](https://github.com/arviz-devs/arviz-stats/issues)
