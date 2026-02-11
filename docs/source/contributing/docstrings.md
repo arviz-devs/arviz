@@ -37,6 +37,6 @@ For example, let's add {func}`~arviz_stats.hdi` and {func}`~arviz_plots.plot_ppc
 ## Kwargs parameters
 
 All the kwargs parameters in the {doc}`arviz_plots:api/index` modules are passed to the
-Matplotlib or Bbokeh functions. While writing their description, the functions to which they are
+Matplotlib or Bokeh functions. While writing their description, the functions to which they are
 being passed must be mentioned. In order to check or add those functions, the process is the same
 for all the kwargs arguments.
