@@ -92,3 +92,4 @@ saved_animations/
 # Dask related
 mydask.png
 **/dask-worker-space/*
+.aider*
