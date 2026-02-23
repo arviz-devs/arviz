@@ -46,9 +46,9 @@ bibliography: references.bib
 
 # Summary
 
-When working with Bayesian models, a range of related tasks must be addressed beyond inference itself. These include diagnosing the quality of MCMC samples, model criticism, model comparison, etc. We collectively refer to these activities as exploratory analysis of Bayesian models.
+When working with Bayesian models, a range of related tasks must be addressed beyond inference itself. These include diagnosing the quality of Markov chain Monte Carlo (MCMC) samples, model criticism, model comparison, etc. We collectively refer to these activities as exploratory analysis of Bayesian models.
 
-In this work, we present a redesigned version of `ArviZ`, a Python package for exploratory analysis of Bayesian models. The redesign emphasizes greater user control and modularity. This redesign delivers a more flexible and efficient toolkit for exploratory analysis of Bayesian models. With its renewed focus on modularity and usability, `ArviZ` is well-positioned to remain an essential tool for Bayesian modelers in both research and applied settings.
+In this work, we present a redesigned version of `ArviZ`, a Python package for exploratory analysis of Bayesian models (EABM). The redesign emphasizes greater user control and modularity. This redesign delivers a more flexible and efficient toolkit for exploratory analysis of Bayesian models. With its renewed focus on modularity and usability, `ArviZ` is well-positioned to remain an essential tool for Bayesian modelers in both research and applied settings.
 
 
 # Statement of need
@@ -72,7 +72,7 @@ The maturity of `ArviZ` has also led to other initiatives, including ArviZ.jl [@
 
 The previous `ArviZ` design divided the package into three submodules, which are now available as three independent installable packages. This redesign emphasizes greater user control and modularity. The new architecture enables users to customize the installation and use of specific components. Key design changes include: 
 
-General functionality, data processing, and data input/output have been streamlined and enhanced for greater versatility. Previously, `ArviZ` used the custom `InferenceData` class to organize and store the high-dimensional outputs of Bayesian inference in a structured, labeled format, enabling efficient analysis, metadata persistence, and serialization. These have been replaced with the `DataTree` class from xarray [@Hoyer_2017], which, like the original `InferenceData`, supports grouping but is more flexible, enabling richer nesting and automatic support for all xarray I/O formats. Additionally, converters allow more flexibility in dimensionality, naming, and indexing of their generated outputs.
+General functionality, data processing, and data input/output (I/O) have been streamlined and enhanced for greater versatility. Previously, `ArviZ` used the custom `InferenceData` class to organize and store the high-dimensional outputs of Bayesian inference in a structured, labeled format, enabling efficient analysis, metadata persistence, and serialization. These have been replaced with the `DataTree` class from xarray [@Hoyer_2017], which, like the original `InferenceData`, supports grouping but is more flexible, enabling richer nesting and automatic support for all xarray I/O formats. Additionally, converters allow more flexibility in dimensionality, naming, and indexing of their generated outputs.
 
 Statistical functions are now accessible through two distinct interfaces:
 
@@ -83,7 +83,7 @@ and developers of third-party libraries.
 Plotting functions have also been redesigned to support modularity at multiple levels:
 
 * At a high level, `ArviZ` offers a collection of “batteries-included” plots. These are built-in plotting functions providing sensible defaults for common tasks like MCMC sampling diagnostics, predictive checks, and model comparison.
-* At an intermediate level, the API enables easier customization of batteries-included plots and simplifies the creation of new plots. This is achieved through the `PlotCollection` class, which enables developers and advanced users to focus solely on the plotting logic, delegating any faceting or aesthetic mappings to `PlotCollection`.
+* At an intermediate level, the application programming interface enables easier customization of batteries-included plots and simplifies the creation of new plots. This is achieved through the `PlotCollection` class, which enables developers and advanced users to focus solely on the plotting logic, delegating any faceting or aesthetic mappings to `PlotCollection`.
 * At a lower level, we have improved the separation between computational and plotting logic, reducing code duplication and enhancing modular design. These changes also facilitate support for multiple plotting backends, improving extensibility and maintainability. Currently, `ArviZ` supports three plotting backends: matplotlib [@Hunter_2007], Bokeh [@Bokeh_2018], and plotly [@plotly_2015].
 
 Thanks to this new design, the cost of adding "batteries-included" plots has reduced in more than half even though `ArviZ` now supports one extra backend. Consequently, redesigned `ArviZ` already has 37 "batteries-included", 10 more than the 0.x versions.
