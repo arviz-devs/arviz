@@ -62,7 +62,7 @@ The methods implemented in `ArviZ` are grounded in well-established statistical 
 
 In the Python Bayesian ecosystem, ArviZ occupies a niche comparable to tools in the R/Stan community such as posterior [@gelman_2013;@Vehtari_2021], loo [@Vehtari_2017;@loo], bayesplot [@bayesplot0;@bayesplot1], priorsense [@Kallioinen_2023], and ggdist [@kay_2024] sharing similar goals while reflecting different language ecosystems and workflows.
 
-# Research Impact Statement
+# Research impact statement
 
 `ArviZ` [@Kumar_2019] is a Python package for exploratory analysis of Bayesian models that has been widely used in academia and industry since its introduction in 2019, with over 700 citations and 75 million downloads. Its goal is to integrate seamlessly with established probabilistic programming languages and statistical interfaces, such as PyMC [@Abril-pla_2023], Stan (via the cmdstanpy interface) [@stan], Pyro, NumPyro [@Phan_2019; @Bingham_2019], emcee [@emcee], and Bambi [@Capretto_2022], among others.
 
