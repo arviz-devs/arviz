@@ -11,7 +11,7 @@ authors = [
     {name = "ArviZ team", email = "arvizdevs@gmail.com"}
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
@@ -25,9 +25,9 @@ classifiers = [
 ]
 dynamic = ["version", "description"]
 dependencies = [
-  "arviz_base @ git+https://github.com/arviz-devs/arviz-base",
-  "arviz_stats[xarray] @ git+https://github.com/arviz-devs/arviz-stats",
-  "arviz_plots @ git+https://github.com/arviz-devs/arviz-plots",
+  "arviz_base>=1.0.0,<1.1.0",
+  "arviz_stats[xarray]>=1.0.0,<1.1.0",
+  "arviz_plots>=1.0.0,<1.1.0",
 ]
 
 [tool.flit.module]
