@@ -1,6 +1,6 @@
 # pylint: disable=wildcard-import,invalid-name,wrong-import-position
 """ArviZ is a library for exploratory analysis of Bayesian models."""
-__version__ = "0.23.4"
+__version__ = "0.23.3"
 
 import logging
 import os
@@ -50,9 +50,8 @@ def _warn_once_per_day():
         try:
             # Use a 'lock' file with today's date to ensure only one process warns
             lock_file = stamp_file.with_suffix(f".{today}.lock")
-            with open(lock_file, "x") as f:
+            with open(lock_file, "x", encoding="utf-8") as f:
                 f.write("1")
-            
             # If we get here, this process is the "winner"
             warn(
                 "\nArviZ is undergoing a major refactor to improve flexibility and extensibility "
