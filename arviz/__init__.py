@@ -47,15 +47,25 @@ def _warn_once_per_day():
         last_date = None
 
     if last_date != today:
-        warn(
-            "\nArviZ is undergoing a major refactor to improve flexibility and extensibility "
-            "while maintaining a user-friendly interface."
-            "\nSome upcoming changes may be backward incompatible."
-            "\nFor details and migration guidance, visit: "
-            "https://python.arviz.org/en/latest/user_guide/migration_guide.html",
-            FutureWarning,
-        )
-        _atomic_write_text(stamp_file, today.isoformat())
+        try:
+            # Use a 'lock' file with today's date to ensure only one process warns
+            lock_file = stamp_file.with_suffix(f".{today}.lock")
+            with open(lock_file, "x") as f:
+                f.write("1")
+            
+            # If we get here, this process is the "winner"
+            warn(
+                "\nArviZ is undergoing a major refactor to improve flexibility and extensibility "
+                "while maintaining a user-friendly interface."
+                "\nSome upcoming changes may be backward incompatible."
+                "\nFor details and migration guidance, visit: "
+                "https://python.arviz.org/en/latest/user_guide/migration_guide.html",
+                FutureWarning,
+            )
+            _atomic_write_text(stamp_file, today.isoformat())
+        except FileExistsError:
+            # Another process already caught it and is warning/updating
+            pass
 
 
 _warn_once_per_day()
