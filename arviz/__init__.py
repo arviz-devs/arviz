@@ -50,8 +50,7 @@ def _warn_once_per_day():
         try:
             # Use a 'lock' file with today's date to ensure only one process warns
             lock_file = stamp_file.with_suffix(f".{today}.lock")
-            with open(lock_file, "x", encoding="utf-8") as f:
-                f.write("1")
+            open(lock_file, "x", encoding="utf-8").close()
             # If we get here, this process is the "winner"
             warn(
                 "\nArviZ is undergoing a major refactor to improve flexibility and extensibility "
