@@ -85,23 +85,22 @@ python setup.py install
 ## Citation
 
 
-If you use ArviZ and want to cite it please use [![DOI](http://joss.theoj.org/papers/10.21105/joss.01143/status.svg)](https://doi.org/10.21105/joss.01143)
+If you use ArviZ and want to cite it please use [![DOI](https://joss.theoj.org/papers/10.21105/joss.09889/status.svg)](https://doi.org/10.21105/joss.09889)
 
 Here is the citation in BibTeX format
 
 ```
-@article{arviz_2019,
-  doi = {10.21105/joss.01143},
-  url = {https://doi.org/10.21105/joss.01143},
-  year = {2019},
-  publisher = {The Open Journal},
-  volume = {4},
-  number = {33},
-  pages = {1143},
-  author = {Ravin Kumar and Colin Carroll and Ari Hartikainen and Osvaldo Martin},
-  title = {ArviZ a unified library for exploratory analysis of Bayesian models in Python},
-  journal = {Journal of Open Source Software}
-}
+@article{Martin2026,
+doi = {10.21105/joss.09889},
+url = {https://doi.org/10.21105/joss.09889},
+year = {2026},
+publisher = {The Open Journal},
+volume = {11},
+number = {119},
+pages = {9889},
+author = {Martin, Osvaldo A. and Abril-Pla, Oriol and Deklerk, Jordan and Axen, Seth D. and Carroll, Colin and Hartikainen, Ari and Vehtari, Aki},
+title = {ArviZ: a modular and flexible library for exploratory analysis of Bayesian models},
+journal = {Journal of Open Source Software}}
 ```
 
 
