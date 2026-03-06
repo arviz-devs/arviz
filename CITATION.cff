@@ -1,26 +1,69 @@
-cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
-title: "ArviZ"
-url: "https://github.com/arviz-devs/arviz"
+cff-version: "1.2.0"
+authors:
+- family-names: Martin
+  given-names: Osvaldo A
+  orcid: "https://orcid.org/0000-0001-7419-8978"
+- family-names: Abril-Pla
+  given-names: Oriol
+  orcid: "https://orcid.org/0000-0002-1847-9481"
+- family-names: Deklerk
+  given-names: Jordan
+- family-names: Axen
+  given-names: Seth D.
+  orcid: "https://orcid.org/0000-0003-3933-8247"
+- family-names: Carroll
+  given-names: Colin
+  orcid: "https://orcid.org/0000-0001-6977-0861"
+- family-names: Hartikainen
+  given-names: Ari
+  orcid: "https://orcid.org/0000-0002-4569-569X"
+- family-names: Vehtari
+  given-names: Aki
+  orcid: "https://orcid.org/0000-0003-2164-9469"
+contact:
+- family-names: Martin
+  given-names: Osvaldo A
+  orcid: "https://orcid.org/0000-0001-7419-8978"
+- family-names: Abril-Pla
+  given-names: Oriol
+  orcid: "https://orcid.org/0000-0002-1847-9481"
+doi: 10.5281/zenodo.18837209
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
 preferred-citation:
-  type: article
   authors:
-    -
-      family-names: Kumar
-      given-names: Ravin
-      orcid: "https://orcid.org/0000-0003-0501-6098"
-    -
-      family-names: Carroll
-      given-names: Colin
-      orcid: "https://orcid.org/0000-0001-6977-0861"
-    -
-      family-names: Hartikainen
-      given-names: Ari
-      orcid: "https://orcid.org/0000-0002-4569-569X"
-    -
-      family-names: Osvaldo
-      given-names: Martin
-      orcid: "https://orcid.org/0000-0001-7419-8978"
-  doi: "10.21105/joss.01143"
-  journal: "Journal of Open Source Software"
-  title: "ArviZ a unified library for exploratory analysis of Bayesian models in Python"
+  - family-names: Martin
+    given-names: Osvaldo A
+    orcid: "https://orcid.org/0000-0001-7419-8978"
+  - family-names: Abril-Pla
+    given-names: Oriol
+    orcid: "https://orcid.org/0000-0002-1847-9481"
+  - family-names: Deklerk
+    given-names: Jordan
+  - family-names: Axen
+    given-names: Seth D.
+    orcid: "https://orcid.org/0000-0003-3933-8247"
+  - family-names: Carroll
+    given-names: Colin
+    orcid: "https://orcid.org/0000-0001-6977-0861"
+  - family-names: Hartikainen
+    given-names: Ari
+    orcid: "https://orcid.org/0000-0002-4569-569X"
+  - family-names: Vehtari
+    given-names: Aki
+    orcid: "https://orcid.org/0000-0003-2164-9469"
+  date-published: 2026-03-06
+  doi: 10.21105/joss.09889
+  issn: 2475-9066
+  issue: 119
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 9889
+  title: "ArviZ: a modular and flexible library for exploratory analysis
+    of Bayesian models"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.09889"
+  volume: 11
+title: "ArviZ: a modular and flexible library for exploratory analysis
+  of Bayesian models"
