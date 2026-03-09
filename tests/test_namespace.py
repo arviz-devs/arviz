@@ -33,7 +33,16 @@ def test_info_attr():
 
 def test_aliases():
     # These are xarray aliases exposed for user convenience
-    xarray_aliases = {"from_netcdf", "from_zarr"}
+    xarray_aliases = {
+    "from_netcdf",
+    "from_zarr",
+    "arviz_cetrino_template",
+    "arviz_tenui_template",
+    "arviz_tumma_template",
+    "arviz_variat_template",
+    "arviz_vibrant_template",
+    "pio",
+}
 
     for obj_name in dir(az):
         if not obj_name.startswith("_") and obj_name != "info":
