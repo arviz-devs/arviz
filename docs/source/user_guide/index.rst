@@ -9,4 +9,5 @@ User Guide
   getting_started
   migration_guide
   label_guide
+  numpyro_conversion
   ../schema/schema
