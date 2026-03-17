@@ -80,3 +80,53 @@ We have an [online book](https://arviz-devs.github.io/EABM/) covering these conc
 If you are already comfortable with the different tasks needed for Bayesian modeling
 and want to know how to use ArviZ to simplify your workflows, we recommend starting
 at the {ref}`arviz_plots:overview_plots` page or `arviz-plots`.
+
+## Basic ArviZ workflow
+
+A typical workflow in ArviZ consists of:
+
+1. Loading inference results
+2. Converting them into `InferenceData`
+3. Inspecting summary statistics
+4. Visualizing posterior samples
+
+### Example
+
+```python
+import arviz as az
+
+# Load example dataset
+idata = az.load_arviz_data("centered_eight")
+
+# Summary statistics
+print(az.summary(idata))
+
+# Trace plot
+az.plot_trace(idata)
+
+# Posterior distribution
+az.plot_posterior(idata)
+```
+### Recommended installation
+
+For most users, installing ArviZ with plotting support is recommended:
+
+```bash
+pip install "arviz[plotting]"
+```
+
+## What is InferenceData?
+
+`InferenceData` is the core data structure used in ArviZ.
+
+It stores:
+
+- posterior samples
+- prior samples
+- observed data
+- metadata
+
+This standardized format allows ArviZ to provide consistent diagnostics
+and visualizations across different probabilistic programming libraries.
+
+
