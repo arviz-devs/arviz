@@ -254,3 +254,34 @@ mixtures and the like.
 
 Custom labellers
 ----------------
+Example: Understanding labels with a simple dataset
+
+Here is a minimal example showing how ArviZ organizes posterior samples:
+
+.. code-block:: python
+
+    import arviz as az
+    import numpy as np
+
+    # Create fake posterior samples
+    data = {
+        "theta": np.random.randn(4, 100)  # 4 chains, 100 draws
+    }
+
+    idata = az.from_dict(posterior=data)
+
+    print(idata)
+
+In this example:
+
+- ``chain`` represents independent MCMC chains
+- ``draw`` represents samples within each chain
+- ``theta`` is the variable being inferred
+
+You can inspect dimensions using:
+
+.. code-block:: python
+
+    print(idata.posterior.dims)
+
+Understanding these labels helps when working with ArviZ plots and summaries.
