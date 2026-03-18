@@ -45,13 +45,9 @@ To begin with, you may want to follow us on Bluesky! We are [@arviz.bsky.social]
 It is the best way to be up to date with the latest developments and events related
 to ArviZ.
 
-### GitHub Discussions
-The [GitHub Discussions](https://github.com/arviz-devs/arviz/discussions) is a great space
-to ask quick questions about ArviZ and to chat with other users and contributors.
-For longer questions, the Discourse forums listed below are probably a better platform.
-
-### Affine forums
-Many ArviZ contributors are also active in one of [PyMC Discourse](https://discourse.pymc.io/)
+### GitHub Discussions and Affine forums
+For questions and discussions, you can use [GitHub Discussions](https://github.com/arviz-devs/arviz/discussions)
+or one of the affine forums: [PyMC Discourse](https://discourse.pymc.io/)
 or [Stan Discourse](https://discourse.mc-stan.org/) (and sometimes even in both!).
 
 ## Conferences
