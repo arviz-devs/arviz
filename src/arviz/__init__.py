@@ -93,6 +93,20 @@ if len(unique_versions) > 1:
 
     raise ImportError("\n".join(lines))
 
+_MIGRATION_GUIDE_URL = "https://python.arviz.org/en/latest/user_guide/migration_guide.html#datatree"
+
+
+def __getattr__(name):
+    """Guide users who expect legacy names on the ``arviz`` namespace."""
+    if name == "InferenceData":
+        msg = (
+            "arviz.InferenceData is no longer available on the top-level "
+            "arviz package; ArviZ now uses xarray's DataTree for the same "
+            "role. See the migration guide: " + _MIGRATION_GUIDE_URL
+        )
+        raise ImportError(msg)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 # clean namespace
 del functools, logging, matches, pat, re, _status, versions, unique_versions

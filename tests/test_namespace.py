@@ -86,6 +86,20 @@ def test_incompatible_package_versions(monkeypatch):
     assert "must share the same minor version" in message
 
 
+def test_inference_data_getattr_points_to_migration_guide():
+    """Legacy arviz.InferenceData should error with a link to the migration guide."""
+    with pytest.raises(ImportError) as excinfo:
+        getattr(az, "InferenceData")
+
+    assert "python.arviz.org" in str(excinfo.value)
+    assert "migration_guide" in str(excinfo.value)
+
+
+def test_getattr_unknown_attribute():
+    with pytest.raises(AttributeError, match="has no attribute"):
+        getattr(az, "totally_missing_arviz_name_xyz")
+
+
 def test_compatible_package_versions(monkeypatch):
     """
     Compatible minor versions should not raise an ImportError and should be
