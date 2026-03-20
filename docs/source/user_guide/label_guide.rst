@@ -43,6 +43,17 @@ You can generate this plot with the following command:
 
 Using the above command, you can now identify issues for low ``tau`` values.
 
+R-hat method options
+--------------------
+
+The ``method`` argument in ``arviz.rhat`` specifies the variant of the R-hat convergence diagnostic to compute. The available options are:
+
+- ``identity``: Original R-hat as proposed in Gelman (1992).
+- ``split``: Split R-hat as described in Gelman et al. (2013), which improves stability by splitting chains.
+- ``z_scale``: Rank-normalized split R-hat as described in Vehtari et al. (2019), Equation 14.
+- ``folded``: Rank-normalized split R-hat computed on folded values as described in Vehtari et al. (2019), Equation 15.
+- ``rank``: Recommended R-hat combining both ``z_scale`` and ``folded`` methods, computed as ``max(z_scale, folded)``.
+
 Example: Using the labeller argument
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
