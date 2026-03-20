@@ -54,6 +54,10 @@ Below are a few rules that should be followed:
 No metadata is _required_ to be present in order to be compliant with ArviZ's schema. However, it is recommended to store the following fields when relevant:
 * `name`: All the quantities stored in a DataTree are tied to a single model. The model identifier can be added as metadata
   to simplify the calls to model comparison functions.
+* `sample_dims`: list of dimensions that were generated through a sampling process. Common examples
+  are `chain`, `draw` or `sample`. It will generally be taken as the default value for arguments
+  like `dim` or `sample_dims`.
+* `sampled_variables`: list of variable names on which inference was performed.
 * `created_at`: the date of creation of the group.
 * `creation_library`: the library used to create the DataTree, does not necessary be ArviZ.
 * `creation_library_version`: the version of `creation_library` that generated the DataTree.
@@ -62,6 +66,8 @@ No metadata is _required_ to be present in order to be compliant with ArviZ's sc
 * `inference_library_version`: version of the inference library used.
 
 Metadata can be stored at the whole `DataTree` level but also at group level when needed.
+In particular, the `name` attribute is only taken into account at the `DataTree` level
+whereas `sample_dims` or `sampled_variables` are only taken into account at the group level.
 
 
 ## Relations between groups
@@ -115,6 +121,8 @@ process; these variables don't need to have any sampling dimensions.
 * `tree_depth`: The number of tree doublings in the balanced binary tree.
 * `n_steps`: The number of leapfrog steps computed. It is related to `tree_depth` with `n_steps <=
   2^tree_dept`.
+* `reached_max_treedepth`: (boolean) Indicates the sampler reached the maximum allowed tree depth
+  at this iteration.
 * `diverging`: (boolean) Indicates the presence of leapfrog transitions with large energy deviation
   from starting and subsequent termination of the trajectory. "large" is defined as `max_energy_error` going over a threshold.
 * `energy`: The value of the Hamiltonian energy for the accepted proposal (up to an
