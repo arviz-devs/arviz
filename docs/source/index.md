@@ -248,7 +248,7 @@ We thank these institutions for generously supporting the development and mainte
 Contributions and issue reports are very welcome at
 [the GitHub repository](https://github.com/arviz-devs/arviz).
 We have a {ref}`contributing guide <contributing_guide>` to help you through the process.
-If you have any doubts, please do not hesitate to contact us on [gitter](https://gitter.im/arviz-devs/community).
+If you have any doubts, please do not hesitate to contact us on [GitHub Discussions](https://github.com/arviz-devs/arviz/discussions).
 :::
 :::{grid-item}
 

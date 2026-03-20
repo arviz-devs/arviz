@@ -25,7 +25,7 @@ has a historical log of contributor nominations.
 Before contributing to ArviZ, please make sure to read and observe the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/main/CODE_OF_CONDUCT.md).
 
 ## Communication
-Contact us on [Gitter](https://gitter.im/arviz-devs/community)
+Contact us on [GitHub Discussions](https://github.com/arviz-devs/arviz/discussions)
 if you want to contribute to the project but you are not sure where you can contribute or how to start.
 
 ## Choosing a contribution type
