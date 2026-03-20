@@ -56,6 +56,13 @@ Issue reports also serve as a register of tasks to work on for people interested
 to ArviZ who know they want to contribute code but don't know where to start.
 
 ### Issue triaging
+Some additional ways to contribute to issue triaging include:
+
+- **Subscribe to issues** to stay updated on discussions and progress.
+- **Help identify outdated issues** that may no longer be relevant.
+- **Provide references or links** to related discussions or documentation.
+- **Assist in labeling issues** (if you have permissions) to categorize them properly.
+
 Helping to manage or triage the open issues can be a great contribution and
 a great opportunity to learn about the various areas of the project.
 You can {ref}`triage existing issues <issue_triaging>` to make them clear and/or provide temporary workarounds for them.
