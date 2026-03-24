@@ -26,6 +26,11 @@ _log = logging.getLogger(__name__)
 
 info = ""
 
+
+class MigrationError(RuntimeError):
+    """Error raised when a legacy name is accessed on the ``arviz`` namespace."""
+
+
 try:
     from arviz_base import *
     import arviz_base as base
@@ -37,7 +42,9 @@ try:
     _log.info(_status)
     del base
 except ModuleNotFoundError as err:
-    raise ImportError("arviz's dependency arviz_base is not installed", name="arviz") from err
+    raise ImportError(
+        "arviz's dependency arviz_base is not installed", name="arviz"
+    ) from err
 
 info += _status + "\n"
 
@@ -53,7 +60,9 @@ try:
     _log.info(_status)
     del stats
 except ModuleNotFoundError as err:
-    raise ImportError("arviz's dependency arviz_stats is not installed", name="arviz") from err
+    raise ImportError(
+        "arviz's dependency arviz_stats is not installed", name="arviz"
+    ) from err
 
 info += _status + "\n"
 
@@ -68,7 +77,9 @@ try:
     _log.info(_status)
     del plots
 except ModuleNotFoundError as err:
-    raise ImportError("arviz's dependency arviz_plots is not installed", name="arviz") from err
+    raise ImportError(
+        "arviz's dependency arviz_plots is not installed", name="arviz"
+    ) from err
 
 info += _status
 
@@ -93,18 +104,20 @@ if len(unique_versions) > 1:
 
     raise ImportError("\n".join(lines))
 
-_MIGRATION_GUIDE_URL = "https://python.arviz.org/en/latest/user_guide/migration_guide.html#datatree"
+_MIGRATION_GUIDE_URL = (
+    "https://python.arviz.org/en/latest/user_guide/migration_guide.html#datatree"
+)
 
 
 def __getattr__(name):
     """Guide users who expect legacy names on the ``arviz`` namespace."""
     if name == "InferenceData":
         msg = (
-            "arviz.InferenceData is no longer available on the top-level "
+            "arviz.InferenceData is no longer available on the "
             "arviz package; ArviZ now uses xarray's DataTree for the same "
             "role. See the migration guide: " + _MIGRATION_GUIDE_URL
         )
-        raise ImportError(msg)
+        raise MigrationError(msg)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
