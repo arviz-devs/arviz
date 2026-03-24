@@ -36,7 +36,7 @@ def test_aliases():
     xarray_aliases = {"from_netcdf", "from_zarr"}
 
     for obj_name in dir(az):
-        if not obj_name.startswith("_") and obj_name != "info":
+        if not obj_name.startswith("_") and obj_name not in ["info", "MigrationError"]:
             obj = getattr(az, obj_name)
 
             if obj_name in xarray_aliases:
@@ -86,10 +86,19 @@ def test_incompatible_package_versions(monkeypatch):
     assert "must share the same minor version" in message
 
 
+def test_inference_data_import_points_to_migration_guide():
+    """Legacy arviz.InferenceData should error with a link to the migration guide."""
+    with pytest.raises(az.MigrationError) as excinfo:
+        from arviz import InferenceData
+
+    assert "python.arviz.org" in str(excinfo.value)
+    assert "migration_guide" in str(excinfo.value)
+
+
 def test_inference_data_getattr_points_to_migration_guide():
     """Legacy arviz.InferenceData should error with a link to the migration guide."""
-    with pytest.raises(ImportError) as excinfo:
-        getattr(az, "InferenceData")
+    with pytest.raises(az.MigrationError) as excinfo:
+        az.InferenceData
 
     assert "python.arviz.org" in str(excinfo.value)
     assert "migration_guide" in str(excinfo.value)
@@ -97,7 +106,7 @@ def test_inference_data_getattr_points_to_migration_guide():
 
 def test_getattr_unknown_attribute():
     with pytest.raises(AttributeError, match="has no attribute"):
-        getattr(az, "totally_missing_arviz_name_xyz")
+        az.totally_missing_arviz_name_xyz
 
 
 def test_compatible_package_versions(monkeypatch):
