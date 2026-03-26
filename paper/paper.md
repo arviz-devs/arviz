@@ -70,7 +70,7 @@ The maturity of ArviZ has also led to other initiatives, including ArviZ.jl [@ar
 
 # Software design
 
-The previous ArviZ design divided the package into three submodules, which are now available as three independent installable packages. This redesign emphasizes greater user control and modularity. The new architecture enables users to customize the installation and use of specific components. Key design changes include: 
+The previous ArviZ design divided the package into three submodules, which are now available as three independent installable packages. This redesign emphasizes greater user control and modularity. The new architecture enables users to customize the installation and use of specific components. Key design changes include:
 
 General functionality, data processing, and data input/output (I/O) have been streamlined and enhanced for greater versatility. Previously, ArviZ used the custom `InferenceData` class to organize and store the high-dimensional outputs of Bayesian inference in a structured, labeled format, enabling efficient analysis, metadata persistence, and serialization. These have been replaced with the `DataTree` class from xarray [@Hoyer_2017], which, like the original `InferenceData`, supports grouping but is more flexible, enabling richer nesting and automatic support for all xarray I/O formats. Additionally, converters allow more flexibility in dimensionality, naming, and indexing of their generated outputs.
 
