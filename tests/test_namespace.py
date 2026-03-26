@@ -88,20 +88,16 @@ def test_incompatible_package_versions(monkeypatch):
 
 def test_inference_data_import_points_to_migration_guide():
     """Legacy arviz.InferenceData should error with a link to the migration guide."""
-    with pytest.raises(az.MigrationError) as excinfo:
+    with pytest.raises(az.MigrationError, match="https://python.arviz.org/.*/migration_guide.*"):
         from arviz import InferenceData
 
-    assert "python.arviz.org" in str(excinfo.value)
-    assert "migration_guide" in str(excinfo.value)
+        InferenceData
 
 
 def test_inference_data_getattr_points_to_migration_guide():
     """Legacy arviz.InferenceData should error with a link to the migration guide."""
-    with pytest.raises(az.MigrationError) as excinfo:
+    with pytest.raises(az.MigrationError, match="https://python.arviz.org/.*/migration_guide.*"):
         az.InferenceData
-
-    assert "python.arviz.org" in str(excinfo.value)
-    assert "migration_guide" in str(excinfo.value)
 
 
 def test_getattr_unknown_attribute():
