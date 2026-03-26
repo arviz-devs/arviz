@@ -14,12 +14,12 @@ Even improving documentation or fixing typos is a valuable contribution to ArviZ
 5. Commit and push
 6. Open a Pull Request
 
-## For beginners
+## For Beginners
 
 If you are new to open source:
-- Start with documentation improvements
-- Look for "User Documentation" issues
-- Ask questions before starting
+- Start with small documentation improvements
+- Look for issues labeled "User Documentation"
+- Ask questions before starting work
 
 ## Reporting issues
 If you encounter any bug or incorrect behaviour while using ArviZ,
