@@ -1,5 +1,5 @@
 # Contributing to ArviZ
-This document outlines only the most common contributions.
+This document outlines the most common ways to contribute to ArviZ.
 Please see the [Contributing guide](https://python.arviz.org/en/latest/contributing/index.html)
 on our documentation for a better view of how you can contribute to ArviZ.
 We welcome a wide range of contributions, not only code!
