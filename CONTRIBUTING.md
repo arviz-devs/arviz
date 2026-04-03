@@ -5,6 +5,22 @@ on our documentation for a better view of how you can contribute to ArviZ.
 We welcome a wide range of contributions, not only code!
 Even improving documentation or fixing typos is a valuable contribution to ArviZ.
 
+## How to contribute
+
+1. Fork the repository
+2. Clone your fork
+3. Create a new branch
+4. Make your changes
+5. Commit and push
+6. Open a Pull Request
+
+## For Beginners
+
+If you are new to open source:
+- Start with small documentation improvements
+- Look for issues labeled "User Documentation"
+- Ask questions before starting work
+
 ## Reporting issues
 If you encounter any bug or incorrect behaviour while using ArviZ,
 please report an issue to our [issue tracker](https://github.com/arviz-devs/arviz/issues).
