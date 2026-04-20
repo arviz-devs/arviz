@@ -27,8 +27,8 @@ _log = logging.getLogger(__name__)
 info = ""
 
 
-class MigrationError(RuntimeError):
-    """Error raised when a legacy name is accessed on the ``arviz`` namespace."""
+class MigrationWarning(DeprecationWarning):
+    """Warning raised when a legacy name is accessed on the ``arviz`` namespace."""
 
 
 try:
@@ -104,11 +104,17 @@ _MIGRATION_GUIDE_URL = "https://python.arviz.org/en/latest/user_guide/migration_
 def __getattr__(name):
     """Guide users who expect legacy names on the ``arviz`` namespace."""
     if name == "InferenceData":
-        raise MigrationError(
+        import warnings
+        from xarray import DataTree
+
+        warnings.warn(
             "arviz.InferenceData is no longer available on the "
             "arviz package; ArviZ now uses xarray's DataTree for the same "
-            f"role. See the migration guide: {_MIGRATION_GUIDE_URL}"
+            f"role. See the migration guide: {_MIGRATION_GUIDE_URL}",
+            MigrationWarning,
         )
+
+        return DataTree
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
