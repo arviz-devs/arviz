@@ -27,7 +27,7 @@ _log = logging.getLogger(__name__)
 info = ""
 
 
-class MigrationWarning(DeprecationWarning):
+class MigrationWarning(FutureWarning):
     """Warning raised when a legacy name is accessed on the ``arviz`` namespace."""
 
 
