@@ -78,7 +78,7 @@ except ModuleNotFoundError as err:
 info += _status
 
 # define version last so it isn't overwritten by the respective attribute in the imported libraries
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 info = f"Status information for ArviZ {__version__}\n\n{info}"
 
