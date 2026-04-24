@@ -18,6 +18,7 @@ import arviz_base
 import arviz_plots
 import arviz_stats
 import pytest
+from xarray import DataTree
 
 import arviz as az
 
@@ -33,10 +34,10 @@ def test_info_attr():
 
 def test_aliases():
     # These are xarray aliases exposed for user convenience
-    xarray_aliases = {"from_netcdf", "from_zarr"}
+    xarray_aliases = {"from_netcdf", "from_zarr", "InferenceData"}
 
     for obj_name in dir(az):
-        if not obj_name.startswith("_") and obj_name not in ["info", "MigrationError"]:
+        if not obj_name.startswith("_") and obj_name not in ["info", "MigrationWarning"]:
             obj = getattr(az, obj_name)
 
             if obj_name in xarray_aliases:
@@ -88,15 +89,15 @@ def test_incompatible_package_versions(monkeypatch):
 
 def test_inference_data_import_points_to_migration_guide():
     """Legacy arviz.InferenceData should error with a link to the migration guide."""
-    with pytest.raises(az.MigrationError, match="https://python.arviz.org/.*/migration_guide.*"):
+    with pytest.warns(az.MigrationWarning, match="https://python.arviz.org/.*/migration_guide.*"):
         from arviz import InferenceData
 
-        InferenceData
+        assert InferenceData is DataTree
 
 
 def test_inference_data_getattr_points_to_migration_guide():
     """Legacy arviz.InferenceData should error with a link to the migration guide."""
-    with pytest.raises(az.MigrationError, match="https://python.arviz.org/.*/migration_guide.*"):
+    with pytest.warns(az.MigrationWarning, match="https://python.arviz.org/.*/migration_guide.*"):
         az.InferenceData
 
 
