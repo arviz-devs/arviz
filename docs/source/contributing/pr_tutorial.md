@@ -103,6 +103,17 @@ to create your feature branch from the up-to-date `main`
    pip install tox
    pip install -e .
    ```
+   
+:::{note}
+Windows PowerShell users may encounter an execution policy error while activating
+a virtual environment. If this happens, run:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Then reactivate the environment.
+:::
 
 6. Work on your feature, bugfix, documentation improvement...
 
