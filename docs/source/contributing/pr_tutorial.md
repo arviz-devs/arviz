@@ -29,7 +29,7 @@ git rebase upstream/main
 ```
 
 This will make sure you are on the `main` branch of your local repository and sync it
-with the one on GitHub. After this you can continue with {ref}`step 4 <feature_branch_step_pr>`
+with the one on GitHub. After this you can continue with {ref}`step 4 `
 to create your feature branch from the up-to-date `main`
 :::
 
@@ -44,7 +44,7 @@ to create your feature branch from the up-to-date `main`
    :sync: ssh
 
    ```
-   git clone git@github.com:<your GitHub handle>/<arviz repo>.git
+   git clone git@github.com:/.git
    ```
    :::
 
@@ -52,7 +52,7 @@ to create your feature branch from the up-to-date `main`
    :sync: https
 
    ```
-   git clone https://github.com/<your GitHub handle>/<arviz repo>.git
+   git clone https://github.com//.git
    ```
    :::
 
@@ -66,8 +66,8 @@ to create your feature branch from the up-to-date `main`
    :sync: ssh
 
    ```
-   cd <arviz repo>
-   git remote add upstream git@github.com:arviz-devs/<arviz repo>.git
+   cd 
+   git remote add upstream git@github.com:arviz-devs/.git
    ```
    :::
 
@@ -75,8 +75,8 @@ to create your feature branch from the up-to-date `main`
    :sync: https
 
    ```
-   cd <arviz repo>
-   git remote add upstream https://github.com/arviz-devs/<arviz repo>.git
+   cd 
+   git remote add upstream https://github.com/arviz-devs/.git
    ```
    :::
 
@@ -105,14 +105,9 @@ to create your feature branch from the up-to-date `main`
    ```
 
 :::{note}
-Windows PowerShell users may encounter an execution policy error while activating
-a virtual environment. If this happens, run:
-
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-Then reactivate the environment.
+Windows users may encounter errors when activating virtual environments in PowerShell.
+For help, refer to the
+[PowerShell execution policy documentation](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy).
 :::
 
 
@@ -181,4 +176,4 @@ Then reactivate the environment.
 
 9. Address review comments. Some PRs can be merged directly, but the most common scenario
    if for further commits to be needed. To update your PR you only need to commit to the
-   same branch you were working on and push as shown in {ref}`step 6 <commit_push_step_pr>`.
+   same branch you were working on and push as shown in {ref}`step 6 `.
