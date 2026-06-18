@@ -223,7 +223,7 @@ Builds on top of [xarray](https://xarray.dev/) to work with labeled dimensions a
 :::::
 
 <!-- Keep in markdown to generate headerlink -->
-# Sponsors and Institutional Partners
+# Institutional Partners
 
 We thank these institutions for generously supporting the development and maintenance of ArviZ.
 
@@ -234,7 +234,12 @@ We thank these institutions for generously supporting the development and mainte
 :::{grid-item}
 [![fcai_logo](_static/sponsor_fcai.png)](https://fcai.fi/)
 :::
+:::{grid-item}
+[![ellis_finland_logo](_static/sponsor_ellis_finland.png)](https://www.ellisinstitute.fi/)
 ::::
+
+<!-- 
+# Sponsors -->
 
 <!-- Keep in markdown to generate headerlink -->
 # Support ArviZ

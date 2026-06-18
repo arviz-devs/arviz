@@ -114,11 +114,22 @@ ArviZ wishes to maintain a positive community. Additional details
 can be found in the [Code of Conduct](https://www.arviz.org/en/latest/CODE_OF_CONDUCT.html)
 
 ## Donations
-ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate [here](https://numfocus.org/donate-to-arviz).
+ArviZ is a non-profit project under [NumFOCUS](https://numfocus.org) umbrella. If you want to support ArviZ financially, you can donate [here](https://numfocus.org/donate-to-arviz).
 
 ## Sponsors and Institutional Partners
+
+[The ArviZ project website](https://www.arviz.org/en/latest/sponsors_partners.html) has more information about each sponsor and institutional partner and the support they provide.
+
+### Institutional partners
+
+ArviZ is currently supported by the following institutional partners:
+
 [![Aalto University](https://raw.githubusercontent.com/arviz-devs/arviz-project/refs/heads/main/cards/Aalto-black-text.png)](https://www.aalto.fi/en)
 [![FCAI](https://raw.githubusercontent.com/arviz-devs/arviz-project/refs/heads/main/cards/FCAI.png)](https://fcai.fi/)
-[![NumFOCUS](https://raw.githubusercontent.com/arviz-devs/arviz-project/refs/heads/main/sphinx/NumFocus.png)](https://numfocus.org)
+[![FCAI](https://raw.githubusercontent.com/arviz-devs/arviz-project/refs/heads/main/cards/FCAI.png)](https://fcai.fi/)
+[![ELLIS Finland](https://raw.githubusercontent.com/arviz-devs/arviz-project/refs/heads/main/cards/ellis_finland.png)](https://www.ellisinstitute.fi/)
 
-[The ArviZ project website](https://www.arviz.org/en/latest/sponsors_partners.html) has more information about each sponsor and the support they provide.
+### Sponsors
+ArviZ currently has no Sponsors.
+
+
