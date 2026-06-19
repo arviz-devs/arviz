@@ -231,13 +231,13 @@ Similarly, we can use the :meth:`~arviz.InferenceData.isel` method to select dat
 
 .. ipython:: python
 
-    az.summary(schools, labeller=azl.IdxLabeller())
+    az.plot_forest(schools, var_names="theta", labeller=azl.IdxLabeller())
 
-After seeing the above summary, let's use ``isel`` method to generate the summary of a subset only.
+After seeing the above plot, let's use ``isel`` method to generate the plot of a subset only.
 
 .. ipython:: python
 
-    az.summary(schools.isel(school=[2, 5, 7]), labeller=azl.IdxLabeller())
+    az.plot_forest(schools.isel(school=[2, 5, 7]), var_names="theta", labeller=azl.IdxLabeller())
 
 .. warning::
 
@@ -299,7 +299,7 @@ display all labels on one axis.
         def make_label_vert(self, var_name, sel, isel):
             return f"{var_name} ({', '.join(str(v) for v in sel.values())})"
 
-    az.summary(schools, var_names="theta", labeller=CustomLabeller())
+    az.plot_forest(schools, var_names="theta", labeller=CustomLabeller())
 
 This won't combine cleanly with other labellers, since it overrides the
 method directly rather than calling ``super()``, but it gives you complete
