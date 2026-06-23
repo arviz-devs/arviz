@@ -16,10 +16,10 @@ Example: Default labelling
 
 .. ipython::
 
-In [1]: import arviz as az
-     ...: import xarray as xr
-     ...: schools = az.load_arviz_data("centered_eight")
-     ...: az.summary(schools)
+    In [1]: import arviz as az
+       ...: import xarray as xr
+       ...: schools = az.load_arviz_data("centered_eight")
+       ...: az.summary(schools)
 
 ArviZ supports label based indexing powered by `xarray <http://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html>`_.
 Through label based indexing, you can use labels to plot a subset of selected variables.
@@ -50,15 +50,13 @@ Example: Using the labeller argument
 You can use the ``labeller`` argument to customize labels.
 Unlike the default labels that show ``theta``, not :math:`\theta` (generated from ``$\theta$`` using :math:`\LaTeX`), the ``labeller`` argument presents the labels with proper math notation.
 
-
-You can use :class:`~.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
+You can use :class:`~arviz_base.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
 
 .. ipython::
 
-In [1]: import arviz_base.labels as azl
+    In [1]: import arviz.labels as azl
        ...: labeller = azl.MapLabeller(var_name_map={"theta": r"$\theta$"})
        ...: coords = {"school": ["Deerfield", "Hotchkiss", "Lawrenceville"]}
-
 
     @savefig label_guide_plot_dist.png
     In [1]: az.plot_dist(
@@ -110,13 +108,11 @@ Sorting variable names
 
         ArviZ's ``posterior`` group is a :class:`~xarray.DataTree`. To reorder
         its variables, subset the underlying :class:`~xarray.Dataset` (via
-        ``.ds``) with a sorted list of variable names, then wrap the result
-        back into a ``DataTree``.
+        ``.dataset``) with a sorted list of variable names.
 
         .. ipython::
 
-            In [1]: schools.posterior = xr.DataTree(schools.posterior.ds[var_order])
-               ...: az.summary(schools)
+            In [1]: az.summary(schools.posterior.dataset[var_order])
 
 Sorting coordinate values
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -155,13 +151,11 @@ There are two ways of sorting:
     .. tab-item:: xarray
 
         ``DataTree`` does not implement :meth:`~xarray.Dataset.sortby` directly.
-        Apply it to the underlying ``Dataset`` (via ``.ds``) and wrap the
-        result back into a ``DataTree``.
+        Apply it to the underlying ``Dataset`` (via ``.dataset``).
 
         .. ipython::
 
-            In [1]: schools.posterior = xr.DataTree(schools.posterior.ds.sortby(school_means))
-               ...: az.summary(schools, var_names="theta")
+            In [1]: az.summary(schools.posterior.dataset.sortby(school_means), var_names="theta")
 
 Sorting dimensions
 ~~~~~~~~~~~~~~~~~~
@@ -206,23 +200,20 @@ Now, to get the desired result, we need to modify the underlying xarray object.
 .. ipython:: python
 
     dim_order = ("chain", "draw", "subject", "date", "experiment")
-    experiments.posterior = xr.DataTree(experiments.posterior.ds.transpose(*dim_order))
-    az.summary(experiments)
+    az.summary(experiments.posterior.dataset.transpose(*dim_order))
 
 .. note::
 
     ``DataTree`` does not implement :meth:`~xarray.Dataset.transpose` directly,
-    so it must be applied to the underlying ``Dataset`` via ``.ds`` and wrapped
-    back into a ``DataTree``.
-    We don't need to overwrite or store the modified xarray object either;
-    doing ``az.summary(xr.DataTree(experiments.posterior.ds.transpose(*dim_order)))``
-    would work just the same if we only want to use this order once.
+    so it must be applied to the underlying ``Dataset`` via ``.dataset``.
+    ArviZ functions accept a ``Dataset`` directly, so no re-wrapping into
+    a ``DataTree`` is needed.
 
 Labeling with indexes
 ---------------------
 
 As you may have seen, there are some labellers with ``Idx`` in their name:
-:class:`~.labels.IdxLabeller` and  :class:`~.labels.DimIdxLabeller`.
+:class:`~arviz_base.labels.IdxLabeller` and :class:`~arviz_base.labels.DimIdxLabeller`.
 They show the positional index of the values instead of their corresponding coordinate value.
 
 We have seen before that we can use the ``coords`` argument or
@@ -253,54 +244,22 @@ for ``isel`` to work it has to be called on
 ``original_idata.sel(**coords).isel(<desired positional idxs>)`` and
 not on ``original_idata.isel(<desired positional idxs>)``.
 
-
-
 Labeller mixtures
 -----------------
 
-Different labellers can be combined using :func:`~.labels.mix_labellers`, so
+.. TODO: Update this section to use ``plot_lm`` which benefits more directly
+   from labeller mixtures and custom labellers.
+
+Different labellers can be combined using :func:`~arviz_base.labels.mix_labellers`, so
 that each labeller in the mixture contributes the formatting it specializes
 in. This is generally more convenient than writing a labeller from scratch
 when you only want to tweak one part of the default behaviour.
 
-.. ipython:: python
-
-    from arviz_base.labels import mix_labellers, DimCoordLabeller, MapLabeller
-
-    sel = {"school": "Choate"}
-    l1 = DimCoordLabeller()
-    print(f"DimCoordLabeller alone: {l1.sel_to_str(sel, sel)}")
-
-    l2 = MapLabeller(dim_map={"school": "Cohort"})
-    print(f"MapLabeller alone: {l2.sel_to_str(sel, sel)}")
-
-    l3 = mix_labellers((MapLabeller, DimCoordLabeller))(dim_map={"school": "Cohort"})
-    print(f"Mixture: {l3.sel_to_str(sel, sel)}")
-
-.. note::
-
-    The order of labellers in the ``labellers`` argument matters — the first
-    labeller's overridden methods take priority, falling back to the next
-    labeller in the tuple for anything it doesn't override.
-
 Custom labellers
 ----------------
 
-For full control over label formatting, subclass :class:`~.labels.BaseLabeller`
-and override the relevant method(s). Most commonly, this means overriding
-:meth:`~.labels.BaseLabeller.make_label_vert` to control how an individual
-plot panel's label is generated, or :meth:`~.labels.BaseLabeller.make_label_flat`
-for functions like :func:`~arviz.plot_forest` or :func:`~arviz.summary` that
-display all labels on one axis.
+.. TODO: Update this section to use ``plot_lm`` and override
+   ``make_label_flat`` for ``plot_forest``/``summary`` use cases.
 
-.. ipython:: python
-
-    class CustomLabeller(azl.BaseLabeller):
-        def make_label_vert(self, var_name, sel, isel):
-            return f"{var_name} ({', '.join(str(v) for v in sel.values())})"
-
-    az.plot_forest(schools, var_names="theta", labeller=CustomLabeller())
-
-This won't combine cleanly with other labellers, since it overrides the
-method directly rather than calling ``super()``, but it gives you complete
-control over the label text when that's what you need.
+For full control over label formatting, subclass
+:class:`~arviz_base.labels.BaseLabeller` and override the relevant method(s).
