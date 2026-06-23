@@ -131,5 +131,3 @@ ArviZ is currently supported by the following institutional partners:
 
 ### Sponsors
 ArviZ currently has no Sponsors.
-
-

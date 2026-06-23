@@ -238,7 +238,7 @@ We thank these institutions for generously supporting the development and mainte
 [![ellis_finland_logo](_static/sponsor_ellis_finland.png)](https://www.ellisinstitute.fi/)
 ::::
 
-<!-- 
+<!--
 # Sponsors -->
 
 <!-- Keep in markdown to generate headerlink -->
