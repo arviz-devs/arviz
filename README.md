@@ -44,7 +44,7 @@ conda install -c conda-forge arviz arviz-plots
 The latest development version can be installed from the main branch using pip:
 
 ```
-pip install git+git://github.com/arviz-devs/arviz.git
+pip install git+https://github.com/arviz-devs/arviz.git
 ```
 
 Another option is to clone the repository and install using git and setuptools:
