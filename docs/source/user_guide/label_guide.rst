@@ -16,9 +16,10 @@ Example: Default labelling
 
 .. ipython::
 
-  In [1]: import arviz as az
-     ...: schools = az.load_arviz_data("centered_eight")
-     ...: az.summary(schools)
+    In [1]: import arviz as az
+       ...: import xarray as xr
+       ...: schools = az.load_arviz_data("centered_eight")
+       ...: az.summary(schools)
 
 ArviZ supports label based indexing powered by `xarray <http://xarray.pydata.org/en/stable/getting-started-guide/why-xarray.html>`_.
 Through label based indexing, you can use labels to plot a subset of selected variables.
@@ -49,8 +50,7 @@ Example: Using the labeller argument
 You can use the ``labeller`` argument to customize labels.
 Unlike the default labels that show ``theta``, not :math:`\theta` (generated from ``$\theta$`` using :math:`\LaTeX`), the ``labeller`` argument presents the labels with proper math notation.
 
-
-You can use :class:`~.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
+You can use :class:`~arviz_base.labels.MapLabeller` to rename the variable ``theta`` to ``$\theta$``, as shown in the following example:
 
 .. ipython::
 
@@ -106,12 +106,13 @@ Sorting variable names
 
     .. tab-item:: xarray
 
-        In xarray, subsetting the Dataset with a sorted list of variable names will order the Dataset.
+        ArviZ's ``posterior`` group is a :class:`~xarray.DataTree`. To reorder
+        its variables, subset the underlying :class:`~xarray.Dataset` (via
+        ``.dataset``) with a sorted list of variable names.
 
         .. ipython::
 
-            In [1]: schools.posterior = schools.posterior[var_order]
-               ...: az.summary(schools)
+            In [1]: az.summary(schools.posterior.dataset[var_order])
 
 Sorting coordinate values
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -149,12 +150,12 @@ There are two ways of sorting:
 
     .. tab-item:: xarray
 
-        You can use the :meth:`~xarray.Dataset.sortby` method to order our coordinate values directly at the source.
+        ``DataTree`` does not implement :meth:`~xarray.Dataset.sortby` directly.
+        Apply it to the underlying ``Dataset`` (via ``.dataset``).
 
         .. ipython::
 
-            In [1]: schools.posterior = schools.posterior.sortby(school_means)
-               ...: az.summary(schools, var_names="theta")
+            In [1]: az.summary(schools.posterior.dataset.sortby(school_means), var_names="theta")
 
 Sorting dimensions
 ~~~~~~~~~~~~~~~~~~
@@ -199,20 +200,20 @@ Now, to get the desired result, we need to modify the underlying xarray object.
 .. ipython:: python
 
     dim_order = ("chain", "draw", "subject", "date", "experiment")
-    experiments = experiments.posterior.transpose(*dim_order)
-    az.summary(experiments)
+    az.summary(experiments.posterior.dataset.transpose(*dim_order))
 
 .. note::
 
-    However, we don't need to overwrite or store the modified xarray object.
-    Doing ``az.summary(experiments.posterior.transpose(*dim_order))`` would work just the same
-    if we only want to use this order once.
+    ``DataTree`` does not implement :meth:`~xarray.Dataset.transpose` directly,
+    so it must be applied to the underlying ``Dataset`` via ``.dataset``.
+    ArviZ functions accept a ``Dataset`` directly, so no re-wrapping into
+    a ``DataTree`` is needed.
 
 Labeling with indexes
 ---------------------
 
 As you may have seen, there are some labellers with ``Idx`` in their name:
-:class:`~.labels.IdxLabeller` and  :class:`~.labels.DimIdxLabeller`.
+:class:`~arviz_base.labels.IdxLabeller` and :class:`~arviz_base.labels.DimIdxLabeller`.
 They show the positional index of the values instead of their corresponding coordinate value.
 
 We have seen before that we can use the ``coords`` argument or
@@ -221,13 +222,13 @@ Similarly, we can use the :meth:`~arviz.InferenceData.isel` method to select dat
 
 .. ipython:: python
 
-    az.summary(schools, labeller=azl.IdxLabeller())
+    az.plot_forest(schools, var_names="theta", labeller=azl.IdxLabeller())
 
-After seeing the above summary, let's use ``isel`` method to generate the summary of a subset only.
+After seeing the above plot, let's use ``isel`` method to generate the plot of a subset only.
 
 .. ipython:: python
 
-    az.summary(schools.isel(school=[2, 5, 7]), labeller=azl.IdxLabeller())
+    az.plot_forest(schools.isel(school=[2, 5, 7]), var_names="theta", labeller=azl.IdxLabeller())
 
 .. warning::
 
@@ -243,14 +244,22 @@ for ``isel`` to work it has to be called on
 ``original_idata.sel(**coords).isel(<desired positional idxs>)`` and
 not on ``original_idata.isel(<desired positional idxs>)``.
 
-
-
 Labeller mixtures
 -----------------
 
-TODO: Update the two sections below to use `plot_lm` instead which I think
-is now the one that benefits more directly from custom labellers,
-mixtures and the like.
+.. TODO: Update this section to use ``plot_lm`` which benefits more directly
+   from labeller mixtures and custom labellers.
+
+Different labellers can be combined using :func:`~arviz_base.labels.mix_labellers`, so
+that each labeller in the mixture contributes the formatting it specializes
+in. This is generally more convenient than writing a labeller from scratch
+when you only want to tweak one part of the default behaviour.
 
 Custom labellers
 ----------------
+
+.. TODO: Update this section to use ``plot_lm`` and override
+   ``make_label_flat`` for ``plot_forest``/``summary`` use cases.
+
+For full control over label formatting, subclass
+:class:`~arviz_base.labels.BaseLabeller` and override the relevant method(s).
