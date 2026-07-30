@@ -17,7 +17,7 @@ Example: Default labelling
 .. ipython::
 
     In [1]: import arviz as az
-       ...: import xarray as xr
+       ...: arviz.style.use("arviz-variat")
        ...: schools = az.load_arviz_data("centered_eight")
        ...: az.summary(schools)
 
