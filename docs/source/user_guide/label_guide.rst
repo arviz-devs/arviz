@@ -54,7 +54,7 @@ You can use :class:`~arviz_base.labels.MapLabeller` to rename the variable ``the
 
 .. ipython::
 
-    In [1]: import arviz.labels as azl
+    In [1]: from arviz import labels as azl
        ...: labeller = azl.MapLabeller(var_name_map={"theta": r"$\theta$"})
        ...: coords = {"school": ["Deerfield", "Hotchkiss", "Lawrenceville"]}
 
