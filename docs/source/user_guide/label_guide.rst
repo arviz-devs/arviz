@@ -222,13 +222,15 @@ Similarly, we can use the :meth:`~arviz.InferenceData.isel` method to select dat
 
 .. ipython:: python
 
-    az.plot_forest(schools, var_names="theta", labeller=azl.IdxLabeller())
+    @savefig label_guide_plot_forest_idx.png
+    az.plot_forest(schools, var_names="theta", labeller=azl.IdxLabeller());
 
 After seeing the above plot, let's use ``isel`` method to generate the plot of a subset only.
 
 .. ipython:: python
 
-    az.plot_forest(schools.isel(school=[2, 5, 7]), var_names="theta", labeller=azl.IdxLabeller())
+    @savefig label_guide_plot_forest_idx_subset.png
+    az.plot_forest(schools.isel(school=[2, 5, 7]), var_names="theta", labeller=azl.IdxLabeller());
 
 .. warning::
 
