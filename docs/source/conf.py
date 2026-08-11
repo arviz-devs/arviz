@@ -183,7 +183,7 @@ html_extra_path = ["redirects"]
 
 # -- Options for sphinxext-opengraph ---------------------------------------
 ogp_site_url = f"https://python.arviz.org/en/{rtd_version or 'stable'}/"
-ogp_image = "https://python.arviz.org/en/stable/_static/social_card.png"
+ogp_image = "https://raw.githubusercontent.com/arviz-devs/arviz/main/docs/source/_static/social_card.png"
 ogp_description = "A modular and flexible library for exploratory analysis of Bayesian models."
 ogp_type = "website"
 
