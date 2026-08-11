@@ -181,6 +181,12 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_extra_path = ["redirects"]
 
+# -- Options for sphinxext-opengraph ---------------------------------------
+ogp_site_url = "https://python.arviz.org/en/stable/"
+ogp_image = "https://python.arviz.org/en/stable/_static/logo.png"
+ogp_description_length = 200
+ogp_type = "website"
+
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
