@@ -43,6 +43,7 @@ extensions = [
     "jupyter_sphinx",
     "sphinxcontrib.youtube",
     "sphinx_togglebutton",
+    "sphinxext.opengraph",
 ]
 
 # codeautolink
@@ -179,6 +180,12 @@ html_sidebars: dict[str, Any] = {"index": [], "404": [], "community": []}
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_extra_path = ["redirects"]
+
+# -- Options for sphinxext-opengraph ---------------------------------------
+ogp_site_url = f"https://python.arviz.org/en/{rtd_version or 'stable'}/"
+ogp_image = "https://python.arviz.org/en/stable/_static/social_card.png"
+ogp_description = "A modular and flexible library for exploratory analysis of Bayesian models."
+ogp_type = "website"
 
 # -- Options for HTMLHelp output ------------------------------------------
 
