@@ -43,6 +43,7 @@ extensions = [
     "jupyter_sphinx",
     "sphinxcontrib.youtube",
     "sphinx_togglebutton",
+    "sphinxext.opengraph",
 ]
 
 # codeautolink
