@@ -10,3 +10,17 @@ updates:
     actions:
       patterns:
         - "*"
+
+- package-ecosystem: "pip"
+  directory: "/"
+  schedule:
+    interval: "monthly"
+  cooldown:
+    default-days: 14
+
+- package-ecosystem: "pre-commit"
+  directory: "/"
+  schedule:
+    interval: "monthly"
+  cooldown:
+    default-days: 14
