@@ -126,3 +126,23 @@ def test_compatible_package_versions(monkeypatch):
     assert "arviz_base 0.7.0 available" in info
     assert "arviz_stats 0.7.1 available" in info
     assert "arviz_plots 0.7.2 available" in info
+
+
+def test_compatible_package_versions_with_prerelease(monkeypatch):
+    """
+    Compatible minor versions with pre-releases should not raise an ImportError.
+    """
+
+    monkeypatch.setattr(arviz_base, "__version__", "1.3.0rc1", raising=False)
+    monkeypatch.setattr(arviz_stats, "__version__", "1.3.0", raising=False)
+    monkeypatch.setattr(arviz_plots, "__version__", "1.3.0.dev0", raising=False)
+
+    # Should not raise
+    importlib.reload(az)
+
+    # Assert info reports the patched versions correctly
+    info = az.info
+
+    assert "arviz_base 1.3.0rc1 available" in info
+    assert "arviz_stats 1.3.0 available" in info
+    assert "arviz_plots 1.3.0.dev0 available" in info
