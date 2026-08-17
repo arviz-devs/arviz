@@ -8,5 +8,6 @@ User Guide
 
   getting_started
   migration_guide
+  whats_new_1_0
   label_guide
   ../schema/schema
