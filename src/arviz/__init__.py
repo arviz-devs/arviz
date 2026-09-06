@@ -82,17 +82,21 @@ __version__ = "1.3.0"
 
 info = f"Status information for ArviZ {__version__}\n\n{info}"
 
-pat = re.compile(r"arviz_(base|stats|plots)\s([0-9]+\.[0-9]+)")
-matches = pat.findall(info)
+from packaging.version import parse as parse_version
+import sys
 
-versions = dict(pat.findall(info))
-unique_versions = set(versions.values())
+package_versions = {
+    "base": parse_version(sys.modules["arviz_base"].__version__).release[:2],
+    "stats": parse_version(getattr(sys.modules["arviz_stats"], "__version__", "0.7.0")).release[:2],
+    "plots": parse_version(sys.modules["arviz_plots"].__version__).release[:2],
+}
 
-if len(unique_versions) > 1:
+if len(set(package_versions.values())) > 1:
     lines = ["Incompatible ArviZ packages versions detected:"]
 
-    for package, version in sorted(versions.items()):
-        lines.append(f"- arviz_{package}: {version}")
+    for package, version_tuple in sorted(package_versions.items()):
+        version_str = ".".join(map(str, version_tuple))
+        lines.append(f"- arviz_{package}: {version_str}")
 
     lines.append("All ArviZ packages must share the same minor version.")
 
