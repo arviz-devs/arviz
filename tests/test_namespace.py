@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import builtins
 import importlib
 import re
 
@@ -99,6 +100,32 @@ def test_inference_data_getattr_points_to_migration_guide():
     """Legacy arviz.InferenceData should error with a link to the migration guide."""
     with pytest.warns(az.MigrationWarning, match="https://python.arviz.org/.*/migration_guide.*"):
         az.InferenceData
+
+
+def test_transitive_import_error_not_masked(monkeypatch):
+    """A ModuleNotFoundError raised for a transitive dependency of arviz_base should
+    propagate unchanged, rather than being reported as arviz_base itself missing."""
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "arviz_base":
+            raise ModuleNotFoundError(
+                "No module named 'some_transitive_dep'", name="some_transitive_dep"
+            )
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    with pytest.raises(ModuleNotFoundError) as excinfo:
+        importlib.reload(az)
+
+    # the original, unmasked exception should propagate
+    assert excinfo.value.name == "some_transitive_dep"
+    assert "arviz's dependency arviz_base is not installed" not in str(excinfo.value)
+
+    # restore the real import and reload arviz back to a working state
+    monkeypatch.undo()
+    importlib.reload(az)
 
 
 def test_getattr_unknown_attribute():
