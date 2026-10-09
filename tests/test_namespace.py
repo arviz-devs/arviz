@@ -102,30 +102,47 @@ def test_inference_data_getattr_points_to_migration_guide():
         az.InferenceData
 
 
-def test_transitive_import_error_not_masked(monkeypatch):
-    """A ModuleNotFoundError raised for a transitive dependency of arviz_base should
-    propagate unchanged, rather than being reported as arviz_base itself missing."""
+SUBPACKAGES = ["arviz_base", "arviz_stats", "arviz_plots"]
+
+
+def _patch_import(monkeypatch, target, missing_name):
+    """Make importing `target` raise ModuleNotFoundError for `missing_name`."""
     real_import = builtins.__import__
 
     def fake_import(name, *args, **kwargs):
-        if name == "arviz_base":
-            raise ModuleNotFoundError(
-                "No module named 'some_transitive_dep'", name="some_transitive_dep"
-            )
+        if name == target:
+            raise ModuleNotFoundError(f"No module named '{missing_name}'", name=missing_name)
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
 
-    with pytest.raises(ModuleNotFoundError) as excinfo:
+
+@pytest.mark.parametrize("subpackage", SUBPACKAGES)
+def test_transitive_import_error_not_masked(monkeypatch, subpackage):
+    """A missing transitive dependency of an ArviZ subpackage should propagate unchanged."""
+    _patch_import(monkeypatch, subpackage, "some_transitive_dep")
+    try:
+        with pytest.raises(ModuleNotFoundError) as excinfo:
+            importlib.reload(az)
+        assert excinfo.value.name == "some_transitive_dep"
+        assert f"arviz's dependency {subpackage} is not installed" not in str(excinfo.value)
+    finally:
+        monkeypatch.undo()
         importlib.reload(az)
 
-    # the original, unmasked exception should propagate
-    assert excinfo.value.name == "some_transitive_dep"
-    assert "arviz's dependency arviz_base is not installed" not in str(excinfo.value)
 
-    # restore the real import and reload arviz back to a working state
-    monkeypatch.undo()
-    importlib.reload(az)
+@pytest.mark.parametrize("subpackage", SUBPACKAGES)
+def test_missing_subpackage_raises_import_error(monkeypatch, subpackage):
+    """If the subpackage itself is missing, keep the friendly ImportError."""
+    _patch_import(monkeypatch, subpackage, subpackage)
+    message = f"arviz's dependency {subpackage} is not installed"
+    try:
+        with pytest.raises(ImportError, match=message) as excinfo:
+            importlib.reload(az)
+        assert isinstance(excinfo.value.__cause__, ModuleNotFoundError)
+    finally:
+        monkeypatch.undo()
+        importlib.reload(az)
 
 
 def test_getattr_unknown_attribute():
