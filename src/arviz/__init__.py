@@ -42,7 +42,9 @@ try:
     _log.info(_status)
     del base
 except ModuleNotFoundError as err:
-    raise ImportError("arviz's dependency arviz_base is not installed", name="arviz") from err
+    if err.name == "arviz_base":
+        raise ImportError("arviz's dependency arviz_base is not installed", name="arviz") from err
+    raise
 
 info += _status + "\n"
 
@@ -58,7 +60,9 @@ try:
     _log.info(_status)
     del stats
 except ModuleNotFoundError as err:
-    raise ImportError("arviz's dependency arviz_stats is not installed", name="arviz") from err
+    if err.name == "arviz_stats":
+        raise ImportError("arviz's dependency arviz_stats is not installed", name="arviz") from err
+    raise
 
 info += _status + "\n"
 
@@ -73,7 +77,9 @@ try:
     _log.info(_status)
     del plots
 except ModuleNotFoundError as err:
-    raise ImportError("arviz's dependency arviz_plots is not installed", name="arviz") from err
+    if err.name == "arviz_plots":
+        raise ImportError("arviz's dependency arviz_plots is not installed", name="arviz") from err
+    raise
 
 info += _status
 
