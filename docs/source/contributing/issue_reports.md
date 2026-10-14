@@ -9,7 +9,7 @@ On the other hand, if you are certain the issue corresponds to a specific packag
 
 * [ArviZ-base](https://github.com/arviz-devs/arviz-base/issues)
 * [ArviZ-stats](https://github.com/arviz-devs/arviz-stats/issues)
-* [ArviZ-plots](https://github.com/arviz-devs/arviz-stats/issues)
+* [ArviZ-plots](https://github.com/arviz-devs/arviz-plots/issues)
 
 
 Please verify that your issue is not being currently addressed by other
