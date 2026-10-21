@@ -1,2 +1,3 @@
 tox
 tox-gh-actions
+virtualenv>=21.14.12

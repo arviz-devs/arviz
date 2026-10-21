@@ -18,11 +18,32 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Bootstrap patched pip
+        run: |
+          python -m pip install "pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+          python -c "import pip; assert pip.__version__ == '26.2.2', pip.__version__"
+          python -m pip --version
+
       - name: Install dependencies
-        run: python -m pip install --require-hashes -r .github/workflows/requirements-ci.txt
+        run: |
+          python -m pip install --require-hashes -r .github/workflows/requirements-ci.txt
+          python -m pip --version
+
+      - name: Create tox environments
+        env:
+          VIRTUALENV_PIP: "26.2.2"
+        run: tox --notest
+
+      - name: Verify pip in tox environments
+        run: |
+          .tox/test-namespace/bin/python -c "import pip; assert pip.__version__ == '26.2.2', pip.__version__"
+          .tox/build/bin/python -c "import pip; assert pip.__version__ == '26.2.2', pip.__version__"
+
       - name: Test with tox
         run: SKIP=no-commit-to-branch tox
