@@ -57,7 +57,66 @@ the ticket is open for all again and can be unassigned.
 (dev_summary)=
 ## Development process
 
-TODO: Details and sections to be added...
+ArviZ follows a test-driven and quality-first development workflow across all repositories in the ArviZ-verse.
+The typical development loop involves the following steps:
+
+### 1. Set up an isolated environment
+Always develop within a dedicated virtual environment (via `venv`, `conda`, or `mamba`) with Python 3.12 or newer.
+Install the package in editable mode with development dependencies:
+
+```bash
+pip install -e ".[test,check]"
+```
+
+For repositories with optional dependencies (such as plotting backends in `arviz-plots` or I/O formats in `arviz-base`),
+include the relevant extras you are working with (e.g., `pip install -e ".[test,check,matplotlib,bokeh,plotly]"`).
+
+### 2. Configure linters and code formatting
+ArviZ enforces code formatting and style checks using [pre-commit](https://pre-commit.com/) and [Ruff](https://docs.astral.sh/ruff/).
+Configure the git hooks to run automatically before every commit:
+
+```bash
+pre-commit install
+```
+
+You can manually trigger style checks across all files at any time:
+
+```bash
+pre-commit run --all-files
+```
+
+Alternatively, run the automated checks via `tox`:
+
+```bash
+tox -e check
+```
+
+### 3. Write tests alongside your code
+- **Bug fixes**: Always write a minimal reproducing test case first that fails before your fix and passes after.
+- **New features / API changes**: Add unit tests verifying both standard usage and edge cases (such as improper inputs, dimension mismatches, or missing optional dependencies).
+- Place tests in the `tests/` directory following the pytest convention, utilizing existing fixtures where applicable.
+
+Execute tests using `pytest` directly or via `tox`:
+
+```bash
+pytest
+```
+
+### 4. Build and preview documentation
+Whenever you modify user-facing functions, add new guides, or update docstrings, build the documentation locally to ensure there are no broken links, syntax errors, or unrendered cross-references:
+
+```bash
+tox -e docs
+```
+
+You can also use `tox -e livedocs` for a live-reloading preview in your browser while editing documentation files.
+
+### 5. Verify the package build
+Ensure the distribution build succeeds without errors:
+
+```bash
+python -m build
+```
 
 
 (docstring_formatting)=
@@ -82,20 +141,19 @@ If changes are made to a method documented in {ref}`ArviZ-base API <arviz_base:a
 please consider adding inline examples, See Also links,
 References when relevant (e.g., if it implements a published method),
 and Notes with implementation details that might be relevant to users.
-You can refer to {func}`~arviz_plots.plot_dist` and {func}`~arviz_plots.plot_forest` for  good examples.
+You can refer to {func}`~arviz_plots.plot_dist` and {func}`~arviz_plots.plot_forest` for good examples.
 
 ## Tests
 
-:::{caution} Section in construction
-:::
+Tests are run through dedicated `tox` tasks and `pytest`. Due to differences in architecture,
+combinations of optional dependencies, and scope between libraries, each subpackage defines its own testing tasks:
 
-Tests are run through dedicated tox tasks, however, due to differences in architecture,
-combinations of optional dependencies we might want to test and scope differences between libraries,
-each library defines their own testing tasks.
-
-Moreover, we also have package specific test organization and some extra pytest customization available in some cases.
-Consequently, each library has its own contributing page on how to run the test suite or contribute to it:
-
-* ArviZ-base: coming soon
-* {ref}`ArviZ-stats <arviz_stats:contributing_testing>`
-* {ref}`ArviZ-plots <arviz_plots:contributing_testing>`
+* **ArviZ Metapackage (`arviz-devs/arviz`)**: Tests verify namespace consistency, version synchronization across installed ArviZ subpackages, backward-compatibility warnings (such as {class}`~arviz.MigrationWarning` when accessing legacy attributes like `InferenceData`), and alias bindings. Run with:
+  ```bash
+  tox -e test-namespace
+  # or directly:
+  pytest
+  ```
+* **ArviZ-base**: Tests data containers (based on `xarray.DataTree`), converters from PPL outputs (such as PyMC, CmdStanPy, NumPyro), and I/O backends (NetCDF, Zarr). See the [ArviZ-base documentation](https://python.arviz.org/projects/base/en/latest/).
+* **ArviZ-stats**: Tests mathematical diagnostics, convergence metrics, and posterior summary statistics against analytical results and reference datasets. See {ref}`ArviZ-stats testing guide <arviz_stats:contributing_testing>`.
+* **ArviZ-plots**: Tests plotting logic across Matplotlib, Bokeh, and Plotly backends. See {ref}`ArviZ-plots testing guide <arviz_plots:contributing_testing>`.
