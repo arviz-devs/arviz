@@ -6,7 +6,7 @@
 - Fix numpyro jax incompatibility. ([2465](https://github.com/arviz-devs/arviz/pull/2465))
 - Avoid closing unloaded files in `from_netcdf()` ([2463](https://github.com/arviz-devs/arviz/issues/2463))
 - Fix sign error in lp parsed in from_numpyro ([2468](https://github.com/arviz-devs/arviz/issues/2468))
-- Fix attrs persistance in idata-datatree conversions ([2476](https://github.com/arviz-devs/arviz/issues/2476))
+- Fix attrs persistence in idata-datatree conversions ([2476](https://github.com/arviz-devs/arviz/issues/2476))
 
 ## v0.22.0 (2025 Jul 9)
 
@@ -226,7 +226,7 @@
 -   Fix bug with the dimension order dependency ([2103](https://github.com/arviz-devs/arviz/pull/2103))
 -   Add testing module for labeller classes ([2095](https://github.com/arviz-devs/arviz/pull/2095))
 -   Skip compression for object dtype while creating a netcdf file ([2129](https://github.com/arviz-devs/arviz/pull/2129))
--   Fix issue in dim generation when default dims are present in user inputed dims ([2138](https://github.com/arviz-devs/arviz/pull/2138))
+-   Fix issue in dim generation when default dims are present in user inputted dims ([2138](https://github.com/arviz-devs/arviz/pull/2138))
 -   Save InferenceData level attrs to netcdf and zarr ([2131](https://github.com/arviz-devs/arviz/pull/2131))
 -   Update tests and docs for updated example data ([2137](https://github.com/arviz-devs/arviz/pull/2137))
 -   Copy coords before modifying in ppcplot ([2160](https://github.com/arviz-devs/arviz/pull/2160))
@@ -349,7 +349,7 @@
 -   Fixed plot_kde to take labels with kwargs. ([1710](https://github.com/arviz-devs/arviz/pull/1710))
 -   Fixed xarray related tests. ([1726](https://github.com/arviz-devs/arviz/pull/1726))
 -   Fix Bokeh deprecation warnings ([1657](https://github.com/arviz-devs/arviz/pull/1657))
--   Fix credible inteval percentage in legend in `plot_loo_pit` ([1745](https://github.com/arviz-devs/arviz/pull/1745))
+-   Fix credible interval percentage in legend in `plot_loo_pit` ([1745](https://github.com/arviz-devs/arviz/pull/1745))
 -   Arguments `filter_vars` and `filter_groups` now raise `ValueError` if illegal arguments are passed ([1772](https://github.com/arviz-devs/arviz/pull/1772))
 -   Remove constrained_layout from arviz rcparams ([1764](https://github.com/arviz-devs/arviz/pull/1764))
 -   Fix plot_elpd for a single outlier ([1787](https://github.com/arviz-devs/arviz/pull/1787))
@@ -398,7 +398,7 @@
 
 ### Maintenance and fixes
 
--   Fixed ovelapping titles and repeating warnings on circular traceplot ([1517](https://github.com/arviz-devs/arviz/pull/1517))
+-   Fixed overlapping titles and repeating warnings on circular traceplot ([1517](https://github.com/arviz-devs/arviz/pull/1517))
 -   Removed repetitive variable names from forest plots of multivariate variables ([1527](https://github.com/arviz-devs/arviz/pull/1527))
 -   Fixed regression in `plot_pair` labels that prevented coord names to be shown when necessary ([1533](https://github.com/arviz-devs/arviz/pull/1533))
 
