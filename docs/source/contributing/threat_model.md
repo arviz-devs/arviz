@@ -26,6 +26,6 @@ Inputs are usually users' own datasets, but downloaded files and external data s
 
 ArviZ's [security policy](https://github.com/arviz-devs/arviz/security/policy) directs vulnerability reports to Tidelift. The related [Develop an Incident Response Plan issue](https://github.com/arviz-devs/arviz/issues/2580) tracks further incident-response work.
 
-Remaining questions include report triage, remediation ownership, handling affected releases, and notifying downstream users. Repository branch and tag protections, publishing environment settings, and example-data integrity checks also warrant further verification. This threat model should be updated as these controls and response procedures are clarified.
+Remaining questions include report triage, remediation ownership, handling affected releases, and notifying downstream users. Repository branch and tag protections, publishing environment settings, and example-data integrity checks also warrant further verification, alongside the GitHub Actions hardening tracked in [issue #2582](https://github.com/arviz-devs/arviz/issues/2582).
 
 This is an initial assessment of plausible threats, not a statement that the scenarios described are confirmed vulnerabilities. Feedback on overlooked scenarios is welcome.
