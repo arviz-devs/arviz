@@ -3,6 +3,9 @@
 
 We recommend that your contribution complies with the following guidelines before you submit a pull request:
 
+* If AI tools helped with your contribution, make sure it follows our {ref}`AI usage policy <ai_policy>`,
+and mention in the pull request description which tools you used and what for.
+
 * If your pull request addresses an issue, please use the pull request title to describe the issue and mention the issue number in the pull request description. This will make sure a link back to the original issue is created.
 
 * Please use a Draft Pull Request to indicate an incomplete contribution or work in progress.
