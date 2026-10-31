@@ -13,13 +13,13 @@ Every change in your pull request is yours, whoever or whatever wrote it, so you
 
 We welcome agent-assisted pull requests, where you direct the work, review every change and run the tests yourself. We don't accept fully agentic ones, where an agent writes the code, the tests and the description and the result goes in without meaningful review. Agents may not open issues or pull requests, post comments or mention maintainers on their own.
 
-We may close fully agentic pull requests, and those whose authors can't explain them, without a detailed review, and block people who keep opening them.
+We reserve the right to close pull requests we believe are fully agentic, or whose authors can't explain them, without a detailed review, and to block people who keep opening them.
 
 ## Communication
 
 Please write pull request descriptions, issues and review replies yourself. Agent-written descriptions tend to be verbose and uninformative. An agent can help with a first draft or with polishing yours, and translation tools are fine, but the final text should reflect your own understanding. Keep descriptions brief, covering what changed, why, and how you verified it.
 
-Answer reviewers' questions yourself, not with the agent's replies. We may hide comments that are pasted agent output.
+Answer reviewers' questions yourself, not with the agent's replies. We may hide comments that look like pasted agent output.
 
 ## Disclosure
 
