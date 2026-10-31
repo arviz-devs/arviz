@@ -24,6 +24,11 @@ has a historical log of contributor nominations.
 ## Before you begin
 Before contributing to ArviZ, please make sure to read and observe the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/main/CODE_OF_CONDUCT.md).
 
+:::{important}
+We welcome agent-assisted contributions, but we don't accept fully agentic ones.
+If you use AI tools, please read our {ref}`AI usage policy <ai_policy>` before opening an issue or pull request.
+:::
+
 ## Communication
 Contact us on [GitHub Discussions](https://github.com/arviz-devs/arviz/discussions)
 if you want to contribute to the project but you are not sure where you can contribute or how to start.
@@ -123,6 +128,7 @@ To fix bugs or add new features, do the following:
 :hidden:
 
 self
+ai_policy
 :::
 
 :::{toctree}
