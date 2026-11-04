@@ -18,9 +18,9 @@ distlib==0.4.3 \
     --hash=sha256:4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b \
     --hash=sha256:f152097224a0ae24be5a0f6bae1b9359af82133bce63f98a95f86cae1aede9ed
     # via virtualenv
-filelock==4.0.8 \
-    --hash=sha256:325ff22f358c18443b1fcdfa0a7aa3faec4b500c2807c554719da4567b533d31 \
-    --hash=sha256:733d9b6b153fc63672f86104324186818b6bbe9dd7db84e9bb9887b6a04a2775
+filelock==4.2.1 \
+    --hash=sha256:7be2662e9e826b9bba28afc0f843a123280d799a2ea44bb5d35ccec67905ae44 \
+    --hash=sha256:c4c937ccac2a813cee448e662a56366cfb374c0f8702e75f295c412cc1c5d5a3
     # via
     #   python-discovery
     #   tox
@@ -60,12 +60,12 @@ tox==4.64.6 \
     --hash=sha256:012085b423d10577fa9214542618b99e97fc65398b61ca4524ef86283881ed5f \
     --hash=sha256:e232ae2f3af4968990c1809d789a71a8ac859f97ddb51a6ed1102522f65520ee
     # via
-    #   -r .github/workflows/requirements-ci.in
+    #   -r requirements-ci.in
     #   tox-gh-actions
 tox-gh-actions==3.5.0 \
     --hash=sha256:070790114c92f4c94337047515ca5e077ceb269a5cb9366e0a0b3440a024eca1 \
     --hash=sha256:cc8e148c4513042e5019973e5672594c3df241b035e7fb550f6f778588110051
-    # via -r .github/workflows/requirements-ci.in
+    # via -r requirements-ci.in
 typing-extensions==4.16.0 \
     --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8 \
     --hash=sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5
@@ -74,5 +74,5 @@ virtualenv==21.14.12 \
     --hash=sha256:7820aeaef23f1f59a96458edfc7f9d3deac937155718de15f1c9a64471e15551 \
     --hash=sha256:bbcfb78e36c22ad70c6917c4aecb5e63477d3c138e9f88c946f320e31859c76a
     # via
-    #   -r .github/workflows/requirements-ci.in
+    #   -r requirements-ci.in
     #   tox
