@@ -104,6 +104,12 @@ to create your feature branch from the up-to-date `main`
    pip install -e .
    ```
 
+:::{note}
+Windows users may encounter errors when activating virtual environments in PowerShell.
+For help, refer to the
+[PowerShell execution policy documentation](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy).
+:::
+
 6. Work on your feature, bugfix, documentation improvement...
 
 7. Execute the relevant development related tasks. Each repository has slightly different needs
