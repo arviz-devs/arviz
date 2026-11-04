@@ -38,7 +38,7 @@ You can refer to {func}`~arviz_plots.plot_dist` and {func}`~arviz_plots.plot_ene
   Moreover, given that libraries have their own testing tasks, it's recommended to check their specific
   testing guidelines:
 
-  * ArviZ-base: coming soon
+  * [ArviZ-base](https://python.arviz.org/projects/base/en/latest/)
   * {ref}`ArviZ-stats <arviz_stats:contributing_testing>`
   * {ref}`ArviZ-plots <arviz_plots:contributing_testing>`
 
