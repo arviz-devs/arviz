@@ -170,3 +170,49 @@ def test_compatible_package_versions(monkeypatch):
     assert "arviz_base 0.7.0 available" in info
     assert "arviz_stats 0.7.1 available" in info
     assert "arviz_plots 0.7.2 available" in info
+
+
+def test_compatible_package_versions_with_prerelease(monkeypatch):
+    """
+    Compatible minor versions with pre-releases should not raise an ImportError.
+
+    Only the major.minor part is compared, so pre-release and dev suffixes
+    are ignored on purpose.
+    """
+
+    monkeypatch.setattr(arviz_base, "__version__", "1.3.0rc1", raising=False)
+    monkeypatch.setattr(arviz_stats, "__version__", "1.3.0", raising=False)
+    monkeypatch.setattr(arviz_plots, "__version__", "1.3.0.dev0", raising=False)
+
+    # Should not raise
+    importlib.reload(az)
+
+    # Assert info reports the patched versions correctly
+    info = az.info
+
+    assert "arviz_base 1.3.0rc1 available" in info
+    assert "arviz_stats 1.3.0 available" in info
+    assert "arviz_plots 1.3.0.dev0 available" in info
+
+
+def test_incompatible_package_versions_with_prerelease(monkeypatch):
+    """
+    Different minor versions must still raise an ImportError even when
+    pre-release suffixes are present: suffixes must neither hide a real
+    mismatch nor create a false one.
+    """
+
+    monkeypatch.setattr(arviz_base, "__version__", "1.3.0rc1", raising=False)
+    monkeypatch.setattr(arviz_stats, "__version__", "1.4.0b1", raising=False)
+    monkeypatch.setattr(arviz_plots, "__version__", "1.3.0.dev0", raising=False)
+
+    with pytest.raises(ImportError) as excinfo:
+        importlib.reload(az)
+
+    message = str(excinfo.value)
+
+    assert "Incompatible ArviZ packages versions detected" in message
+    assert "- arviz_base: 1.3" in message
+    assert "- arviz_stats: 1.4" in message
+    assert "- arviz_plots: 1.3" in message
+    assert "must share the same minor version" in message
