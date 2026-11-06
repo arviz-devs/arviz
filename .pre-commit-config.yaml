@@ -35,3 +35,8 @@ repos:
         - "#"
         - --detect-license-in-X-top-lines=30
         - --no-extra-eol
+
+- repo: https://github.com/zizmorcore/zizmor-pre-commit
+  rev: v1.31.1
+  hooks:
+  - id: zizmor
