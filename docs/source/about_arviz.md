@@ -1,3 +1,4 @@
+#About Arviz Project
 The ArviZ project
 ArviZ is an open source project aiming to provide tools for Exploratory Analysis of Bayesian Models that do not depend on the inference library used. 
 ArviZ brings together people from several probabilistic programming libraries and from multiple programming languages.
