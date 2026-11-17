@@ -18,6 +18,7 @@ Thanks for your interest in contributing code to ArviZ!
 
 * If this is your first time contributing to a project on GitHub, please read through our [step by step](https://python.arviz.org/en/latest/contributing/pr_tutorial.html) guide to contributing to ArviZ
 * If you have contributed to other projects on GitHub you can go straight to our [pull request checklist](https://python.arviz.org/en/latest/contributing/pr_checklist.html)
+* If you use AI tools, please read our [AI usage policy](https://python.arviz.org/en/latest/contributing/ai_policy.html) first
 
 ### Adding new features
 If you are interested in adding a new feature to ArviZ,
