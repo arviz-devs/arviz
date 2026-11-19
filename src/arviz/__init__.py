@@ -16,7 +16,7 @@
 
 import functools
 import logging
-import re
+from packaging.version import Version
 
 from xarray import open_datatree as from_netcdf
 
@@ -35,6 +35,7 @@ try:
     from arviz_base import *
     import arviz_base as base
 
+    _arviz_base_version = base.__version__
     _status = (
         f"arviz_base {base.__version__} available, "
         "exposing its functions as part of the `arviz` namespace"
@@ -53,6 +54,7 @@ try:
     import arviz_stats as stats
 
     # TODO: remove patch. 0.7 version of arviz-stats didn't expose the __version__ attribute
+    _arviz_stats_version = getattr(stats, "__version__", "0.7.0")
     _status = (
         f"arviz_stats {getattr(stats, '__version__', '0.7.0')} available, "
         "exposing its functions as part of the `arviz` namespace"
@@ -70,6 +72,7 @@ try:
     from arviz_plots import *
     import arviz_plots as plots
 
+    _arviz_plots_version = plots.__version__
     _status = (
         f"arviz_plots {plots.__version__} available, "
         "exposing its functions as part of the `arviz` namespace"
@@ -88,17 +91,21 @@ __version__ = "1.3.0"
 
 info = f"Status information for ArviZ {__version__}\n\n{info}"
 
-pat = re.compile(r"arviz_(base|stats|plots)\s([0-9]+\.[0-9]+)")
-matches = pat.findall(info)
+_subpackage_versions = {
+    "base": _arviz_base_version,
+    "stats": _arviz_stats_version,
+    "plots": _arviz_plots_version,
+}
+_minor_versions = {
+    name: (Version(v).major, Version(v).minor) for name, v in _subpackage_versions.items()
+}
+_unique_versions = set(_minor_versions.values())
 
-versions = dict(pat.findall(info))
-unique_versions = set(versions.values())
-
-if len(unique_versions) > 1:
+if len(_unique_versions) > 1:
     lines = ["Incompatible ArviZ packages versions detected:"]
 
-    for package, version in sorted(versions.items()):
-        lines.append(f"- arviz_{package}: {version}")
+    for package, version_str in sorted(_subpackage_versions.items()):
+        lines.append(f"- arviz_{package}: {version_str}")
 
     lines.append("All ArviZ packages must share the same minor version.")
 
@@ -125,4 +132,4 @@ def __getattr__(name):
 
 
 # clean namespace
-del functools, logging, matches, pat, re, _status, versions, unique_versions
+del functools, logging, _status, _subpackage_versions, _minor_versions, _unique_versions, Version
